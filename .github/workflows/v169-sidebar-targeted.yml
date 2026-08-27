@@ -1,0 +1,37 @@
+name: Target V169 Panapass sidebar
+on:
+  push:
+    branches: [cleanup-v168]
+    paths: ['.github/workflows/v169-sidebar-targeted.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract exact sidebar selectors
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          lines=Path('index.html').read_text(encoding='utf-8',errors='ignore').splitlines()
+          pats=[r'v115',r'collapsed',r'collapse',r'sidebar',r'Volver al Portal',r'toggle.*side',r'side.*toggle']
+          hits=[]
+          for i,line in enumerate(lines,1):
+            lo=line.lower()
+            if any(re.search(p,lo,re.I) for p in pats): hits.append(i)
+          picked=[]
+          for i in hits:
+            if len(picked)>=35: break
+            if any(abs(i-j)<5 for j in picked): continue
+            picked.append(i)
+          for i in picked:
+            a=max(1,i-3); b=min(len(lines),i+5)
+            print(f'### {a}-{b}')
+            for n in range(a,b+1):
+              text=lines[n-1]
+              if len(text)>650: text=text[:650]+'...'
+              print(f'{n}: {text}')
+          PY
