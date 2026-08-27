@@ -2,7 +2,7 @@
 
 <html lang="es">
 <head>
-<script src="./v169-cleanup.js"></script><!-- PORTAL RYM BUILD V96 2026-08-21 | CONSOLIDADO FINAL: Cupos ATTT + eCarCheck + Bajas/Devoluciones + Pagos + Revisados -->
+<script src="./v169-cleanup.js"></script><script src="panapass-v169-final.js?v=169" defer></script><!-- PORTAL RYM BUILD V96 2026-08-21 | CONSOLIDADO FINAL: Cupos ATTT + eCarCheck + Bajas/Devoluciones + Pagos + Revisados -->
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Portal RYM</title>
 <style>
@@ -1386,7 +1386,6 @@ body.v60-revisados{background:#fff7ed!important}
 
 
 
-<script src="panapass-v169-final.js?v=169"></script>
 </body></html>`);w.document.close();return w
 }
 function rowsTable(rows,cols){return `<div class="mail"><table><thead><tr>${cols.map(c=>`<th>${esc(c.replaceAll('_',' '))}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${cols.map(c=>`<td>${esc(r[c]??'')}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${cols.length}">Sin datos.</td></tr>`}</tbody></table></div>`}
