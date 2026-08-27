@@ -1,4 +1,4 @@
-name: Deploy V169 preview
+name: Deploy and audit V169 preview
 
 on:
   push:
@@ -13,6 +13,7 @@ permissions:
 jobs:
   preview:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout V169 test branch
         uses: actions/checkout@v4
@@ -25,9 +26,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN is not configured in GitHub Secrets"; exit 2; }
-          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "CLOUDFLARE_ACCOUNT_ID is not configured in GitHub Secrets"; exit 3; }
-          echo "Cloudflare credentials are configured."
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CLOUDFLARE_API_TOKEN is not configured"; exit 2; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "CLOUDFLARE_ACCOUNT_ID is not configured"; exit 3; }
 
       - name: Upload V169 preview only
         shell: bash
@@ -36,3 +36,163 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
+
+      - name: Prepare audit
+        shell: bash
+        run: |
+          mkdir -p audit
+          cat > audit/security-probe.sh <<'SH'
+          #!/usr/bin/env bash
+          set -u
+          BASE="https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev"
+          : > audit/security.txt
+          probe(){
+            path="$1"; pattern="$2"
+            out="audit/probe$(echo "$path" | tr '/.' '__').txt"
+            code=$(curl -L -sS --max-time 20 -o "$out" -w '%{http_code}' "$BASE$path" || true)
+            ctype=$(curl -L -sSI --max-time 20 "$BASE$path" 2>/dev/null | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print $2; exit}')
+            bytes=$(wc -c < "$out" 2>/dev/null || echo 0)
+            exposed=no
+            if grep -Eiq "$pattern" "$out" 2>/dev/null; then exposed=yes; fi
+            printf '%-58s code=%-3s bytes=%-8s type=%-28s exposed=%s\n' "$path" "$code" "$bytes" "${ctype:-unknown}" "$exposed" | tee -a audit/security.txt
+          }
+          echo '--- static/security probes ---' | tee -a audit/security.txt
+          probe '/' 'v169-cleanup\.js|Portal RYM|Iniciar sesión|Iniciar sesion'
+          probe '/v169-cleanup.js' 'Portal RYM V169|v169|rym-v169-cleanup-css'
+          probe '/wrangler.jsonc' '"name"[[:space:]]*:[[:space:]]*"portal-ena-rym"'
+          probe '/.assetsignore' 'wrangler\.jsonc|\.github/'
+          probe '/.git/config' '^\[core\]|repositoryformatversion'
+          probe '/.github/workflows/deploy-v169-preview.yml' '^name:[[:space:]]*Deploy|CLOUDFLARE_API_TOKEN'
+          probe '/.wrangler/tmp/deploy-7IWWs7/no-op-worker.js' 'no-op-worker|export default|fetch'
+          SH
+          chmod +x audit/security-probe.sh
+          ./audit/security-probe.sh
+
+      - name: Install browser
+        shell: bash
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run Chromium audit
+        shell: bash
+        run: |
+          cat > audit/preview-audit.mjs <<'JS'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+
+          const base = 'https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev';
+          const report = { base, at: new Date().toISOString(), runs: [] };
+          const browser = await chromium.launch({headless:true});
+
+          async function runViewport(name, viewport, attemptLogin=false){
+            const context = await browser.newContext({viewport});
+            const page = await context.newPage();
+            const consoleErrors=[];
+            const consoleWarnings=[];
+            const pageErrors=[];
+            const failedRequests=[];
+            const httpErrors=[];
+            const authResponses=[];
+            page.on('console', m => {
+              if(m.type()==='error') consoleErrors.push(m.text());
+              if(m.type()==='warning') consoleWarnings.push(m.text());
+            });
+            page.on('pageerror', e => pageErrors.push(String(e)));
+            page.on('requestfailed', r => failedRequests.push({url:r.url(), error:r.failure()?.errorText||''}));
+            page.on('response', r => {
+              if(r.status()>=400) httpErrors.push({status:r.status(),url:r.url()});
+              if(/auth-username|functions\/v1/i.test(r.url())) authResponses.push({status:r.status(),url:r.url()});
+            });
+
+            const started=Date.now();
+            let mainStatus=null;
+            let gotoError=null;
+            try{
+              const res=await page.goto(base,{waitUntil:'networkidle',timeout:45000});
+              mainStatus=res?.status()??null;
+            }catch(e){ gotoError=String(e); }
+            const elapsed=Date.now()-started;
+            await page.waitForTimeout(800);
+
+            const metrics=await page.evaluate(() => {
+              const nav=performance.getEntriesByType('navigation')[0];
+              const resources=performance.getEntriesByType('resource')
+                .map(x=>({name:x.name,duration:Math.round(x.duration),transferSize:x.transferSize||0,initiatorType:x.initiatorType}))
+                .sort((a,b)=>b.duration-a.duration).slice(0,15);
+              const bodyText=(document.body?.innerText||'').replace(/\s+/g,' ').slice(0,1200);
+              return {
+                title:document.title,
+                href:location.href,
+                bodyText,
+                scrollWidth:document.documentElement.scrollWidth,
+                clientWidth:document.documentElement.clientWidth,
+                scrollHeight:document.documentElement.scrollHeight,
+                viewportHeight:innerHeight,
+                horizontalOverflow:document.documentElement.scrollWidth>innerWidth+2,
+                nav:nav?{
+                  domContentLoaded:Math.round(nav.domContentLoadedEventEnd),
+                  load:Math.round(nav.loadEventEnd),
+                  responseStart:Math.round(nav.responseStart),
+                  responseEnd:Math.round(nav.responseEnd),
+                  transferSize:nav.transferSize||0
+                }:null,
+                resources,
+                forms:document.forms.length,
+                inputs:[...document.querySelectorAll('input')].map(i=>({type:i.type,name:i.name,id:i.id,placeholder:i.placeholder})).slice(0,20),
+                buttons:[...document.querySelectorAll('button')].map(b=>(b.innerText||b.textContent||'').trim()).filter(Boolean).slice(0,20)
+              };
+            });
+
+            let loginTest=null;
+            if(attemptLogin){
+              const password=page.locator('input[type="password"]').first();
+              if(await password.count()){
+                const candidates=page.locator('input:not([type="password"]):not([type="hidden"]):not([type="submit"])');
+                const n=await candidates.count();
+                let userInput=null;
+                for(let i=0;i<n;i++){
+                  const c=candidates.nth(i);
+                  if(await c.isVisible()){userInput=c;break;}
+                }
+                if(userInput && await password.isVisible()){
+                  await userInput.fill('__v169_nonexistent_test__');
+                  await password.fill('invalid-v169-test-only');
+                  const submit=page.locator('button[type="submit"], input[type="submit"]').first();
+                  if(await submit.count() && await submit.isVisible()){
+                    await submit.click();
+                  }else{
+                    await password.press('Enter');
+                  }
+                  await page.waitForTimeout(3000);
+                  loginTest=await page.evaluate(()=>({
+                    href:location.href,
+                    bodyText:(document.body?.innerText||'').replace(/\s+/g,' ').slice(0,1000)
+                  }));
+                }
+              }
+            }
+
+            await page.screenshot({path:`audit/${name}.png`,fullPage:true});
+            const row={name,viewport,mainStatus,gotoError,elapsed,metrics,consoleErrors,consoleWarnings,pageErrors,failedRequests,httpErrors,authResponses,loginTest};
+            report.runs.push(row);
+            await context.close();
+          }
+
+          await runViewport('desktop',{width:1440,height:900},true);
+          await runViewport('mobile',{width:390,height:844},false);
+          await browser.close();
+          fs.writeFileSync('audit/report.json',JSON.stringify(report,null,2));
+          console.log(JSON.stringify(report,null,2));
+          JS
+          node audit/preview-audit.mjs | tee audit/browser-log.txt
+
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v169-preview-audit
+          path: audit/
+          if-no-files-found: warn
+          retention-days: 3
