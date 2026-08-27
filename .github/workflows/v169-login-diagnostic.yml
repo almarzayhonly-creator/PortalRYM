@@ -1,0 +1,45 @@
+name: V169 login diagnostic
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v169-login-diagnostic.yml']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+      - name: Install Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Diagnose preview boot
+        run: |
+          mkdir -p audit
+          cat > audit/diag.mjs <<'JS'
+          import {chromium} from 'playwright'; import fs from 'node:fs';
+          const base='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev';
+          const b=await chromium.launch({headless:true});
+          const c=await b.newContext({viewport:{width:1440,height:900}}); const p=await c.newPage();
+          const ce=[],pe=[],rf=[]; p.on('console',m=>ce.push({type:m.type(),text:m.text()})); p.on('pageerror',e=>pe.push(String(e))); p.on('requestfailed',r=>rf.push({url:r.url(),err:r.failure()?.errorText||''}));
+          const r=await p.goto(base,{waitUntil:'domcontentloaded',timeout:45000}); await p.waitForTimeout(4000);
+          const state=await p.evaluate(()=>({title:document.title,bodyClass:document.body?.className||'',bodyText:(document.body?.innerText||'').replace(/\s+/g,' ').slice(0,1200),appHTML:(document.querySelector('#app')?.innerHTML||'').slice(0,2000),hasUser:!!document.querySelector('input[name="usuario"]'),hasPass:!!document.querySelector('input[name="password"]'),hasLogin:!!document.querySelector('#loginBtn'),ready:document.readyState,diag:window.__RYM_V169_DIAGNOSTICS__||null,pan:window.__RYM_PANAPASS_V169_FINAL||false}));
+          await p.screenshot({path:'audit/prelogin.png',fullPage:true});
+          fs.writeFileSync('audit/diag.json',JSON.stringify({status:r?.status(),url:p.url(),state,console:ce,pageErrors:pe,failedRequests:rf},null,2));
+          console.log('BOOT_DIAG '+JSON.stringify({status:r?.status(),url:p.url(),state,consoleErrors:ce.filter(x=>x.type==='error').slice(0,10),pageErrors:pe,failedRequests:rf.slice(0,10)}));
+          await c.close(); await b.close();
+          if(!state.hasUser||!state.hasPass||!state.hasLogin) process.exit(2);
+          JS
+          node audit/diag.mjs
+      - name: Upload diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v169-login-diagnostic
+          path: audit/
+          retention-days: 3
