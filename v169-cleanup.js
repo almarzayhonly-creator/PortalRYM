@@ -66,8 +66,38 @@
     body.v66-revisados .v66-daily-sendbox{position:static!important}
   }
   @media(max-width:820px){
+    /* Keep all non-GPS content above the fixed V115 bottom navigation. */
+    body.v99-home,body.v66-revisados,body.v70-control,body.v70-admin{
+      padding-bottom:calc(96px + env(safe-area-inset-bottom))!important;
+    }
+    body.v99-home #app,body.v66-revisados #app,body.v70-control #app,body.v70-admin #app,
+    body.v66-revisados .v66-main,body.v70-control .main,body.v70-control #view,body.v70-admin .v70-admin-main{
+      padding-bottom:calc(20px + env(safe-area-inset-bottom))!important;
+    }
+
+    /* Horizontal internal navigation must be intentionally scrollable instead of clipped. */
+    body.v70-control .side{
+      overflow-x:auto!important;
+      overflow-y:hidden!important;
+      overscroll-behavior-inline:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    body.v70-control .side::-webkit-scrollbar{display:none}
+    body.v70-control .side button,body.v70-control .side a{flex:0 0 auto!important;white-space:nowrap!important}
+    body.v66-revisados .v66-tabs,body.v66-revisados .tabs,
+    body.v70-admin .v70-tabs{
+      overflow-x:auto!important;
+      overscroll-behavior-inline:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    body.v66-revisados .v66-tabs::-webkit-scrollbar,body.v66-revisados .tabs::-webkit-scrollbar,
+    body.v70-admin .v70-tabs::-webkit-scrollbar{display:none}
+
     body.v99-home .v99-grid{grid-template-columns:1fr!important}
     body.v99-home .v99-module{min-height:0!important}
+    body.v99-home .v99-module small{white-space:normal!important;line-height:1.4!important}
     body.v70-control .v75-control-kpis,body.v70-control .v147-kpis{grid-template-columns:1fr 1fr!important}
     body.v70-admin .v70-admin-top{flex-wrap:wrap!important}
     body.v70-admin .v70-admin-top .badge{max-width:100%;white-space:normal!important}
@@ -98,9 +128,29 @@
     });
   }
 
+  let centerControlTimer = 0;
+  function centerActiveControlTab() {
+    if (!document.body || !document.body.classList.contains('v70-control') || window.innerWidth > 820) return;
+    const side = document.querySelector('body.v70-control .side');
+    const active = side && side.querySelector('button.active,a.active,.active');
+    if (!side || !active) return;
+    try {
+      active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    } catch (_) {
+      const left = active.offsetLeft - Math.max(0, (side.clientWidth - active.clientWidth) / 2);
+      side.scrollLeft = Math.max(0, left);
+    }
+  }
+
+  function scheduleControlTabCenter() {
+    clearTimeout(centerControlTimer);
+    centerControlTimer = setTimeout(centerActiveControlTab, 80);
+  }
+
   function applyFinalCleanup() {
     installStyle();
     removeDuplicatePriority();
+    scheduleControlTabCenter();
   }
 
   /* The script is intentionally loaded early, but V169 must win after every legacy V168 style is parsed. */
@@ -110,6 +160,10 @@
     applyFinalCleanup();
   }
   window.addEventListener('pageshow', applyFinalCleanup);
+  document.addEventListener('click', (event) => {
+    if (window.innerWidth > 820 || !document.body?.classList.contains('v70-control')) return;
+    if (event.target?.closest?.('.side button,.side a')) scheduleControlTabCenter();
+  }, true);
 
   window.__RYM_V169_DIAGNOSTICS__ = {
     version: 'V169-SAFE',
@@ -118,6 +172,9 @@
     duplicatePriorityHidden: true,
     responsiveCleanup: true,
     finalCssAfterLegacy: true,
-    mobileLoginBottomGapFixed: true
+    mobileLoginBottomGapFixed: true,
+    mobileBottomNavReserved: true,
+    controlTabsScrollable: true,
+    controlActiveTabCentered: true
   };
 })();
