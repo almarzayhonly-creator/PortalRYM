@@ -1,0 +1,56 @@
+name: Inspect V169 Control tabs
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v169-control-inspect.yml']
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+      - name: Create temporary audit user
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          R=$(curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data '{"action":"create"}')
+          test "$(jq -r .ok <<<"$R")" = true
+          ID=$(jq -r .id <<<"$R"); U=$(jq -r .usuario <<<"$R"); P=$(jq -r .password <<<"$R")
+          echo "::add-mask::$U"; echo "::add-mask::$P"
+          echo "AUDIT_USER_ID=$ID" >> "$GITHUB_ENV"; echo "AUDIT_USERNAME=$U" >> "$GITHUB_ENV"; echo "AUDIT_PASSWORD=$P" >> "$GITHUB_ENV"
+      - name: Inspect DOM
+        env:
+          AUDIT_USERNAME: ${{ env.AUDIT_USERNAME }}
+          AUDIT_PASSWORD: ${{ env.AUDIT_PASSWORD }}
+        shell: bash
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+          cat > inspect.mjs <<'JS'
+          import {chromium} from 'playwright';
+          const b=await chromium.launch({headless:true}); const c=await b.newContext({viewport:{width:390,height:844}}); const p=await c.newPage();
+          await p.goto('https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev',{waitUntil:'networkidle',timeout:45000});
+          await p.locator('input[name=usuario]').fill(process.env.AUDIT_USERNAME); await p.locator('input[name=password]').fill(process.env.AUDIT_PASSWORD); await p.locator('button[type=submit],#loginBtn').first().click();
+          await p.waitForFunction(()=>!document.querySelector('main.login'),null,{timeout:30000}); await p.waitForTimeout(1500);
+          await p.evaluate(async()=>{await window.v70OpenControl()}); await p.waitForFunction(()=>document.body.classList.contains('v70-control'),null,{timeout:25000}); await p.waitForTimeout(2500);
+          const out=await p.evaluate(()=>{
+            const vis=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0};
+            const controls=[...document.querySelectorAll('button,a')].filter(vis).map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{text:(e.innerText||e.textContent||'').replace(/\s+/g,' ').trim(),id:e.id,cls:String(e.className||''),onclick:e.getAttribute('onclick'),position:s.position,x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width),h:Math.round(r.height)}}).filter(x=>/Dashboard|Unidades|Cupos|Auditor|Validador|Portal|Inicio|Panapass|Revisados|Flota|Salir/i.test(x.text));
+            const fixed=[...document.querySelectorAll('body *')].filter(vis).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return{s,e,r}}).filter(x=>['fixed','sticky'].includes(x.s.position)).map(x=>({tag:x.e.tagName,id:x.e.id,cls:String(x.e.className||''),text:(x.e.innerText||'').replace(/\s+/g,' ').trim().slice(0,120),position:x.s.position,bottom:x.s.bottom,top:x.s.top,x:Math.round(x.r.x),y:Math.round(x.r.y),w:Math.round(x.r.width),h:Math.round(x.r.height),z:x.s.zIndex}));
+            return {bodyClass:document.body.className,controls,fixed};
+          });
+          console.log('CONTROL_DOM '+JSON.stringify(out)); await c.close();await b.close();
+          JS
+          node inspect.mjs
+      - name: Delete temporary audit user
+        if: always() && env.AUDIT_USER_ID != ''
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data "{\"action\":\"delete\",\"id\":\"$AUDIT_USER_ID\"}" | jq -c .
