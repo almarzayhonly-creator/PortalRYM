@@ -13,22 +13,6 @@ css = r'''
       .v169-podium-step{width:100%;display:grid;place-items:center;font-weight:1000;color:#fff;border-radius:0 0 8px 8px;box-shadow:0 9px 18px rgba(11,55,111,.08)}
       .v169-place-1{order:2}.v169-place-2{order:3}.v169-place-3{order:1}.v169-place-1 .v169-podium-person{min-height:148px;border-color:#e3c85b;background:linear-gradient(180deg,#fffdf3,#fff8d7)}.v169-place-1 .v169-podium-step{height:82px;background:#9aac50;font-size:36px}.v169-place-2 .v169-podium-person{min-height:126px;border-color:#efb27a;background:linear-gradient(180deg,#fffaf5,#fff1e4)}.v169-place-2 .v169-podium-step{height:62px;background:#d36d00;font-size:29px}.v169-place-3 .v169-podium-person{min-height:118px;border-color:#9dd5ee;background:linear-gradient(180deg,#f8fdff,#eaf8ff)}.v169-place-3 .v169-podium-step{height:52px;background:#167aa6;font-size:25px}
       .v169-podium-icon{display:grid;place-items:center;margin-bottom:7px;font-size:34px;line-height:1}.v169-place-1 .v169-podium-icon{font-size:42px}.v169-rank-tables{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start;margin-top:10px}.v169-rank-group{min-width:0}.v169-rank-group h4{margin:0 0 6px;color:#174a8b;font-size:11px;font-weight:1000}.v169-rank-table{border:1px solid #d9e4f1;border-radius:14px;overflow:auto;background:#fff}.v169-rank-table table{width:100%;border-collapse:collapse;min-width:520px}.v169-rank-table th{position:sticky;top:0;background:#174a8b;color:#fff;font-size:9px;text-transform:uppercase;padding:9px 10px;text-align:left}.v169-rank-table td{padding:8px 10px;border-bottom:1px solid #e7edf4;font-size:10px;color:#294a72}.v169-rank-table tr:last-child td{border-bottom:0}.v169-rank-table tbody tr:hover td{background:#f7fbff}.v169-rank-pos{font-weight:1000;color:#174a8b}.v169-rank-name{font-weight:1000;color:#0b376f;cursor:pointer}.v169-rank-num{text-align:right;font-weight:900;white-space:nowrap}
-
-      /* V169 Panapass desktop sidebar: genuinely compact when collapsed. */
-      @media(min-width:821px){
-        .shell.side-collapsed{grid-template-columns:68px minmax(0,1fr)!important}
-        .shell.side-collapsed .side{width:68px!important;min-width:68px!important;max-width:68px!important;padding:10px 7px!important;gap:7px!important;overflow-x:hidden!important}
-        .shell.side-collapsed .brand-logo-app{width:54px!important;min-width:54px!important;min-height:48px!important;height:48px!important;padding:5px!important;margin:0 auto!important;border-radius:12px!important}
-        .shell.side-collapsed .brand-logo-app img{max-width:44px!important;max-height:36px!important}
-        .shell.side-collapsed .phase1-side-toggle{width:34px!important;height:31px!important;margin:0 auto 1px!important;border-radius:10px!important;font-size:17px!important}
-        .shell.side-collapsed .nav{gap:5px!important;width:100%!important}
-        .shell.side-collapsed .nav button,.shell.side-collapsed .v36-portal-home-btn{width:52px!important;min-width:52px!important;max-width:52px!important;height:42px!important;min-height:42px!important;padding:0!important;margin:0 auto!important;border-radius:11px!important;display:grid!important;place-items:center!important;overflow:hidden!important;box-shadow:none!important;transform:none!important}
-        .shell.side-collapsed .nav button:before,.shell.side-collapsed .v36-portal-home-btn:before{left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;font-size:17px!important}
-        .shell.side-collapsed .nav button.active:after{left:0!important;top:8px!important;bottom:8px!important;width:3px!important}
-        .shell.side-collapsed .portal-name-side,.shell.side-collapsed .nav-section-v14,.shell.side-collapsed .user strong,.shell.side-collapsed .user span{display:none!important}
-        .shell.side-collapsed .user{padding:5px!important;margin-top:auto!important;border-radius:10px!important}
-        .shell.side-collapsed .side .logout{width:52px!important;min-width:52px!important;max-width:52px!important;height:38px!important;min-height:38px!important;padding:0!important;margin:0 auto!important;display:grid!important;place-items:center!important;border-radius:10px!important}
-      }
       @media(max-width:820px){.v169-rank-tables{grid-template-columns:1fr}}
       @media(max-width:720px){.v169-podium{grid-template-columns:1fr 1fr;gap:8px;padding:8px 0 0}.v169-place-1{grid-column:1/-1;grid-row:1;order:1}.v169-place-2{order:2}.v169-place-3{order:3}.v169-place-1 .v169-podium-person{min-height:120px}.v169-place-1 .v169-podium-step{height:58px}.v169-place-2 .v169-podium-step,.v169-place-3 .v169-podium-step{height:46px}}
 '''
@@ -41,7 +25,7 @@ if css_marker not in s:
 
 render_marker = 'const renderRankGroup=(items,startRank,title)=>'
 if render_marker not in s:
-    start = s.find('      const med=[')
+    start = s.find("      const label=metric==='UNIDADES'?")
     end = s.find('      out.onclick=e=>', start)
     if start < 0 or end < 0:
         raise SystemExit('ranking render block not found')
