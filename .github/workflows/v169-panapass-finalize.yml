@@ -1,0 +1,42 @@
+name: Finalize V169 Panapass
+on:
+  push:
+    branches: [cleanup-v168]
+    paths:
+      - 'panapass-v169-final.js'
+      - '.github/workflows/v169-panapass-finalize.yml'
+permissions:
+  contents: write
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+          fetch-depth: 0
+      - name: Inject V169 Panapass final script
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="panapass-v169-final.js?v=169"></script>'
+          if tag not in s:
+              marker='</body>'
+              if marker not in s:
+                  raise SystemExit('missing </body>')
+              s=s.replace(marker, tag+'\n'+marker, 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+          grep -q 'panapass-v169-final.js?v=169' index.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet; then
+            echo 'Already injected'
+          else
+            git add index.html
+            git commit -m 'Finalize V169 Panapass UI'
+            git push origin HEAD:cleanup-v168
+          fi
