@@ -1,0 +1,43 @@
+name: Deploy latest V169 test preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-v169-preview-now.yml'
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+      - name: Deploy preview only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
+      - name: Verify published V169 markers
+        run: |
+          URL='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev'
+          for i in 1 2 3 4 5; do
+            HTML="$(curl -fsSL --max-time 20 "$URL/?v169check=$(date +%s)" || true)"
+            if printf '%s' "$HTML" | grep -q 'v169-session-expiry-guard' && printf '%s' "$HTML" | grep -q 'panapass-v169-final.js'; then
+              echo 'Preview HTML markers verified.'
+              JS="$(curl -fsSL --max-time 20 "$URL/panapass-v169-final.js?v=169check" || true)"
+              printf '%s' "$JS" | grep -q 'Posiciones 4–14'
+              printf '%s' "$JS" | grep -q 'Posiciones 15–25'
+              printf '%s' "$JS" | grep -q '🥇'
+              echo 'Preview ranking markers verified.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Preview markers were not visible after deployment.'
+          exit 1
