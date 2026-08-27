@@ -133,7 +133,7 @@
   document.addEventListener('DOMContentLoaded',scheduleRecurrentes,{once:true});
   scheduleRecurrentes();
 
-  const PDF_ENDPOINT='https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/panapass-baja-transferencia-pdf';
+  const PDF_ENDPOINT='https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/panapass-baja-transferencia-pdf-v2';
   const ENA_TEMPLATE='https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf';
 
   function authHeaders(){
