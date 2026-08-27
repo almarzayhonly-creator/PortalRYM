@@ -44,23 +44,33 @@ jobs:
               raise SystemExit('ERROR: V169 tag count is not exactly one')
           PY
 
-      - name: Verify only V169 tag was added
+      - name: Verify existing V168 is byte-for-byte unchanged
         shell: bash
         run: |
           python - <<'PY'
+          from pathlib import Path
           import subprocess
 
-          stat = subprocess.check_output(['git','diff','--numstat','--','index.html'], text=True).strip()
-          if stat and not stat.startswith('1\t0\t'):
-              raise SystemExit('ERROR: index.html changed beyond one inserted line: ' + stat)
+          original = subprocess.check_output(['git','show','HEAD:index.html'])
+          current = Path('index.html').read_bytes()
+          tag = b'<script src="./v169-cleanup.js"></script>'
 
-          diff = subprocess.check_output(['git','diff','--unified=0','--','index.html'], text=True)
-          added = [x for x in diff.splitlines() if x.startswith('+') and not x.startswith('+++')]
-          removed = [x for x in diff.splitlines() if x.startswith('-') and not x.startswith('---')]
-          if removed or (added and (len(added) != 1 or 'v169-cleanup.js' not in added[0])):
-              raise SystemExit('ERROR: injector changed existing application source')
+          if current.count(tag) != 1:
+              raise SystemExit('ERROR: expected one V169 tag')
 
-          print('Verified: exactly one script line added; existing V168 source and GPS are unchanged.')
+          # Injector added exactly one EOL immediately before the tag.
+          p = current.index(tag)
+          if p >= 2 and current[p-2:p] == b'\r\n':
+              cleaned = current[:p-2] + current[p+len(tag):]
+          elif p >= 1 and current[p-1:p] == b'\n':
+              cleaned = current[:p-1] + current[p+len(tag):]
+          else:
+              raise SystemExit('ERROR: V169 tag insertion format is unexpected')
+
+          if cleaned != original:
+              raise SystemExit('ERROR: existing V168 bytes changed; refusing commit')
+
+          print('Verified: removing the one V169 tag restores the exact original index.html bytes. GPS and all V168 source are unchanged.')
           PY
 
       - name: Commit to cleanup-v168
