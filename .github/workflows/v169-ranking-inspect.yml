@@ -1,0 +1,20 @@
+name: Inspect V169 ranking logic
+on:
+  push:
+    branches: [cleanup-v168]
+    paths: ['.github/workflows/v169-ranking-inspect.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find ranking implementation
+        shell: bash
+        run: |
+          echo '--- ranking matches ---'
+          grep -n -i -E 'Ruta al podio|Menos unidades pagadas|Menor monto pagado|ranking.*unidades|ranking.*monto|v[0-9]+.*ranking|ranking.*render' index.html | head -160 || true
+          echo '--- nearby contexts ---'
+          for n in $(grep -n -i -E 'Ruta al podio|Menos unidades pagadas|Menor monto pagado' index.html | cut -d: -f1 | head -12); do
+            s=$((n>35?n-35:1)); e=$((n+90)); echo "### lines $s-$e"; sed -n "${s},${e}p" index.html; done
