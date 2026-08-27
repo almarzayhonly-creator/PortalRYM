@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/v169-podium-sidebar-apply.yml'
       - '.github/scripts/apply_v169.py'
+      - '.github/scripts/apply_session_guard_v169.py'
 permissions:
   contents: write
 jobs:
@@ -15,21 +16,26 @@ jobs:
         with:
           ref: cleanup-v168
           fetch-depth: 0
-      - name: Apply V169 fixes
+      - name: Apply V169 ranking fixes
         run: python3 .github/scripts/apply_v169.py
-      - name: Validate JavaScript
+      - name: Apply V169 session guard
+        run: python3 .github/scripts/apply_session_guard_v169.py
+      - name: Validate generated code
         run: |
           node --check panapass-v169-final.js
           grep -q 'v169-podium' panapass-v169-final.js
-          grep -q 'grid-template-columns:68px' panapass-v169-final.js
+          grep -q 'Posiciones 4–14' panapass-v169-final.js
+          grep -q 'Posiciones 15–25' panapass-v169-final.js
+          grep -q 'v169-session-expiry-guard' index.html
+          grep -q "loginView('Tu sesión expiró. Ingresa nuevamente.')" index.html
       - name: Commit generated changes
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add panapass-v169-final.js
+          git add panapass-v169-final.js index.html
           if git diff --cached --quiet; then
             echo 'No generated changes to commit'
           else
-            git commit -m 'V169: true ranking podium and compact sidebar'
+            git commit -m 'V169: ranking tables and safe session expiry'
             git push origin HEAD:cleanup-v168
           fi
