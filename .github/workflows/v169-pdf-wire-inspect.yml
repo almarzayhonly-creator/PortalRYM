@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
       - name: Find PDF wiring
         shell: bash
         run: |
           echo '--- matches ---'
-          grep -n -i -E 'Formulario firmado|panapass-baja-transferencia-pdf|transferencia.?de.?saldo|baja.?transfer|generar.?formulario|formulario.?firmado' index.html | head -80 || true
+          grep -n -i -E 'Formulario firmado|panapass-baja-transferencia-pdf|transferencia.?de.?saldo|baja.?transfer|generar.?formulario|formulario.?firmado|certificado|pdf-lib|PDFDocument|download' index.html | head -140 || true
           echo '--- contexts ---'
-          for n in $(grep -n -i -E 'Formulario firmado|panapass-baja-transferencia-pdf|transferencia.?de.?saldo|generar.?formulario' index.html | cut -d: -f1 | head -20); do
-            s=$((n>8?n-8:1)); e=$((n+18)); echo "### lines $s-$e"; sed -n "${s},${e}p" index.html; done
+          for n in $(grep -n -i -E 'Formulario firmado|panapass-baja-transferencia-pdf|transferencia.?de.?saldo|generar.?formulario|certificado|PDFDocument' index.html | cut -d: -f1 | head -30); do
+            s=$((n>10?n-10:1)); e=$((n+24)); echo "### lines $s-$e"; sed -n "${s},${e}p" index.html; done
