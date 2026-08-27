@@ -24,27 +24,31 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
       - name: Verify published V169 markers
+        shell: bash
         run: |
           URL='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev'
+          ok=0
           for i in 1 2 3 4 5; do
-            HTML="$(curl -fsSL --max-time 20 "$URL/?v169check=$(date +%s)" || true)"
-            if printf '%s' "$HTML" | grep -q 'v169-session-expiry-guard' && printf '%s' "$HTML" | grep -q 'panapass-v169-final.js' && printf '%s' "$HTML" | grep -q 'v169-final-polish.js?v=169final'; then
-              echo 'Preview HTML markers verified.'
-              JS="$(curl -fsSL --max-time 20 "$URL/panapass-v169-final.js?v=169check" || true)"
-              FINAL="$(curl -fsSL --max-time 20 "$URL/v169-final-polish.js?v=169check" || true)"
-              printf '%s' "$JS" | grep -q 'Posiciones 4–14'
-              printf '%s' "$JS" | grep -q 'Posiciones 15–25'
-              printf '%s' "$FINAL" | grep -q 'ENA PDF robust download'
-              printf '%s' "$FINAL" | grep -q 'v169-rank-group h4{text-align:center'
-              printf '%s' "$FINAL" | grep -q 'https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf'
-              if printf '%s' "$FINAL" | grep -q 'https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf'; then
-                echo 'Broken www ENA fallback still present.'
-                exit 1
+            stamp="$(date +%s)"
+            rm -f /tmp/preview.html /tmp/final.js /tmp/panapass.js
+            if curl -fsSL --max-time 20 "$URL/?v169check=$stamp" -o /tmp/preview.html \
+              && curl -fsSL --max-time 20 "$URL/v169-final-polish.js?v169check=$stamp" -o /tmp/final.js \
+              && curl -fsSL --max-time 20 "$URL/panapass-v169-final.js?v169check=$stamp" -o /tmp/panapass.js; then
+              if grep -Fq 'v169-session-expiry-guard' /tmp/preview.html \
+                && grep -Fq 'v169-final-polish.js?v=169final' /tmp/preview.html \
+                && grep -Fq 'Posiciones 4–14' /tmp/panapass.js \
+                && grep -Fq 'Posiciones 15–25' /tmp/panapass.js \
+                && grep -Fq 'v169-rec-r2' /tmp/final.js \
+                && grep -Fq 'v169r2-head' /tmp/final.js \
+                && grep -Fq 'Pagos recurrentes' /tmp/final.js \
+                && grep -Fq 'panapass-baja-transferencia-pdf-v2' /tmp/final.js \
+                && grep -Fq 'https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf' /tmp/final.js \
+                && ! grep -Fq 'https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf' /tmp/final.js; then
+                  ok=1
+                  break
               fi
-              echo 'Preview ENA hostname fix verified.'
-              exit 0
             fi
             sleep 5
           done
-          echo 'Preview final markers were not visible after deployment.'
-          exit 1
+          test "$ok" -eq 1
+          echo 'Preview verified: recurrentes redesign + refined ENA PDF endpoint.'
