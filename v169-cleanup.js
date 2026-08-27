@@ -17,11 +17,10 @@
   body.v70-control .shell,body.v70-control .main,body.v70-control #view,
   body.v70-admin .v70-admin-app,body.v70-admin .v70-admin-main{min-width:0!important;max-width:100%!important}
 
-  /* Login: historical mobile padding belongs to the authenticated mobile nav, not to login. */
+  /* Login: V115 mobile bottom padding belongs to the authenticated nav, never to login. */
   @media(max-width:820px){
-    body:has(.login) {padding-bottom:0!important;background:#061A42!important}
-    body:has(.login) #app{min-height:100dvh!important}
-    body:has(.login) .login{min-height:100dvh!important;height:auto!important}
+    body:has(main.login){padding-bottom:0!important}
+    html:has(main.login),body:has(main.login),#app:has(main.login),main.login{min-height:100dvh!important}
   }
 
   /* Portal */
@@ -81,7 +80,8 @@
   }`;
 
   function installStyle() {
-    if (document.getElementById('rym-v169-safe-css')) return;
+    const old = document.getElementById('rym-v169-safe-css');
+    if (old) old.remove();
     const style = document.createElement('style');
     style.id = 'rym-v169-safe-css';
     style.textContent = css;
@@ -98,9 +98,18 @@
     });
   }
 
-  installStyle();
-  document.addEventListener('DOMContentLoaded', removeDuplicatePriority, { once: true });
-  window.addEventListener('pageshow', removeDuplicatePriority);
+  function applyFinalCleanup() {
+    installStyle();
+    removeDuplicatePriority();
+  }
+
+  /* The script is intentionally loaded early, but V169 must win after every legacy V168 style is parsed. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyFinalCleanup, { once: true });
+  } else {
+    applyFinalCleanup();
+  }
+  window.addEventListener('pageshow', applyFinalCleanup);
 
   window.__RYM_V169_DIAGNOSTICS__ = {
     version: 'V169-SAFE',
@@ -108,6 +117,7 @@
     globalObserversUntouched: true,
     duplicatePriorityHidden: true,
     responsiveCleanup: true,
+    finalCssAfterLegacy: true,
     mobileLoginBottomGapFixed: true
   };
 })();
