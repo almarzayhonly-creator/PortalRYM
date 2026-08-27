@@ -20,37 +20,47 @@ jobs:
           ref: cleanup-v168
           fetch-depth: 0
 
-      - name: Inject safe V169 cleanup
+      - name: Inject safe V169 cleanup without rewriting V168
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+
           path = Path('index.html')
-          text = path.read_text(encoding='utf-8')
-          tag = '<script src="./v169-cleanup.js"></script>'
-          if tag not in text:
-              marker = '<head>'
-              if marker not in text:
+          data = path.read_bytes()
+          tag = b'<script src="./v169-cleanup.js"></script>'
+          marker = b'<head>'
+
+          if tag not in data:
+              pos = data.find(marker)
+              if pos < 0:
                   raise SystemExit('ERROR: <head> not found')
-              text = text.replace(marker, marker + '\n' + tag, 1)
-              path.write_text(text, encoding='utf-8')
-          if text.count(tag) != 1:
+              eol = b'\r\n' if b'\r\n' in data[:4096] else b'\n'
+              insert_at = pos + len(marker)
+              data = data[:insert_at] + eol + tag + data[insert_at:]
+              path.write_bytes(data)
+
+          if data.count(tag) != 1:
               raise SystemExit('ERROR: V169 tag count is not exactly one')
           PY
 
-      - name: Verify injector changed only one index line
+      - name: Verify only V169 tag was added
         shell: bash
         run: |
           python - <<'PY'
           import subprocess
-          diff = subprocess.check_output(['git','diff','--','index.html'], text=True)
+
+          stat = subprocess.check_output(['git','diff','--numstat','--','index.html'], text=True).strip()
+          if stat and not stat.startswith('1\t0\t'):
+              raise SystemExit('ERROR: index.html changed beyond one inserted line: ' + stat)
+
+          diff = subprocess.check_output(['git','diff','--unified=0','--','index.html'], text=True)
           added = [x for x in diff.splitlines() if x.startswith('+') and not x.startswith('+++')]
           removed = [x for x in diff.splitlines() if x.startswith('-') and not x.startswith('---')]
-          if removed:
-              raise SystemExit('ERROR: existing application code was removed')
-          if added and (len(added) != 1 or 'v169-cleanup.js' not in added[0]):
-              raise SystemExit('ERROR: unexpected index.html changes')
-          print('Verified: existing app source, including GPS, was not edited.')
+          if removed or (added and (len(added) != 1 or 'v169-cleanup.js' not in added[0])):
+              raise SystemExit('ERROR: injector changed existing application source')
+
+          print('Verified: exactly one script line added; existing V168 source and GPS are unchanged.')
           PY
 
       - name: Commit to cleanup-v168
