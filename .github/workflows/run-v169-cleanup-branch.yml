@@ -1,0 +1,67 @@
+name: Run V169 cleanup branch
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/run-v169-cleanup-branch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-cleanup-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cleanup-v168
+        uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+          fetch-depth: 0
+
+      - name: Inject safe V169 cleanup
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          tag = '<script src="./v169-cleanup.js"></script>'
+          if tag not in text:
+              marker = '<head>'
+              if marker not in text:
+                  raise SystemExit('ERROR: <head> not found')
+              text = text.replace(marker, marker + '\n' + tag, 1)
+              path.write_text(text, encoding='utf-8')
+          if text.count(tag) != 1:
+              raise SystemExit('ERROR: V169 tag count is not exactly one')
+          PY
+
+      - name: Verify injector changed only one index line
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+          diff = subprocess.check_output(['git','diff','--','index.html'], text=True)
+          added = [x for x in diff.splitlines() if x.startswith('+') and not x.startswith('+++')]
+          removed = [x for x in diff.splitlines() if x.startswith('-') and not x.startswith('---')]
+          if removed:
+              raise SystemExit('ERROR: existing application code was removed')
+          if added and (len(added) != 1 or 'v169-cleanup.js' not in added[0]):
+              raise SystemExit('ERROR: unexpected index.html changes')
+          print('Verified: existing app source, including GPS, was not edited.')
+          PY
+
+      - name: Commit to cleanup-v168
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "V169 tag already present."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Inject V169 safe cleanup into test branch"
+          git push origin HEAD:cleanup-v168
