@@ -17,6 +17,13 @@
   body.v70-control .shell,body.v70-control .main,body.v70-control #view,
   body.v70-admin .v70-admin-app,body.v70-admin .v70-admin-main{min-width:0!important;max-width:100%!important}
 
+  /* Login: historical mobile padding belongs to the authenticated mobile nav, not to login. */
+  @media(max-width:820px){
+    body:has(.login) {padding-bottom:0!important;background:#061A42!important}
+    body:has(.login) #app{min-height:100dvh!important}
+    body:has(.login) .login{min-height:100dvh!important;height:auto!important}
+  }
+
   /* Portal */
   body.v99-home .v99-grid{align-items:stretch!important}
   body.v99-home .v99-module{min-width:0!important;display:flex!important;flex-direction:column!important}
@@ -100,6 +107,7 @@
     gpsUntouched: true,
     globalObserversUntouched: true,
     duplicatePriorityHidden: true,
-    responsiveCleanup: true
+    responsiveCleanup: true,
+    mobileLoginBottomGapFixed: true
   };
 })();
