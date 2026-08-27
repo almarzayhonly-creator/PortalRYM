@@ -6,6 +6,7 @@ on:
       - '.github/workflows/v169-podium-sidebar-apply.yml'
       - '.github/scripts/apply_v169.py'
       - '.github/scripts/apply_session_guard_v169.py'
+      - '.github/scripts/inject_v169_final_polish.py'
 permissions:
   contents: write
 jobs:
@@ -20,14 +21,20 @@ jobs:
         run: python3 .github/scripts/apply_v169.py
       - name: Apply V169 session guard
         run: python3 .github/scripts/apply_session_guard_v169.py
+      - name: Inject final ranking and ENA PDF polish
+        run: python3 .github/scripts/inject_v169_final_polish.py
       - name: Validate generated code
         run: |
           node --check panapass-v169-final.js
+          node --check v169-final-polish.js
           grep -q 'v169-podium' panapass-v169-final.js
           grep -q 'Posiciones 4–14' panapass-v169-final.js
           grep -q 'Posiciones 15–25' panapass-v169-final.js
           grep -q 'v169-session-expiry-guard' index.html
           grep -q "loginView('Tu sesión expiró. Ingresa nuevamente.')" index.html
+          grep -q 'v169-final-polish.js?v=169final' index.html
+          grep -q 'ENA PDF robust download' v169-final-polish.js
+          grep -q 'v169-rank-group h4{text-align:center' v169-final-polish.js
       - name: Commit generated changes
         run: |
           git config user.name 'github-actions[bot]'
@@ -36,6 +43,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No generated changes to commit'
           else
-            git commit -m 'V169: ranking tables and safe session expiry'
+            git commit -m 'V169: final ranking alignment and ENA PDF fallback'
             git push origin HEAD:cleanup-v168
           fi
