@@ -36,8 +36,12 @@ jobs:
               printf '%s' "$JS" | grep -q 'Posiciones 15–25'
               printf '%s' "$FINAL" | grep -q 'ENA PDF robust download'
               printf '%s' "$FINAL" | grep -q 'v169-rank-group h4{text-align:center'
-              printf '%s' "$FINAL" | grep -q 'TRANSFERENCIA-DE-SALDO-POSITIVO.pdf'
-              echo 'Preview final ranking and ENA PDF markers verified.'
+              printf '%s' "$FINAL" | grep -q 'https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf'
+              if printf '%s' "$FINAL" | grep -q 'https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf'; then
+                echo 'Broken www ENA fallback still present.'
+                exit 1
+              fi
+              echo 'Preview ENA hostname fix verified.'
               exit 0
             fi
             sleep 5
