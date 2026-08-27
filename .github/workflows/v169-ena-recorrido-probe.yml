@@ -1,0 +1,42 @@
+name: Probe ENA recorrido I015
+on:
+  push:
+    branches: [cleanup-v168]
+    paths: ['.github/workflows/v169-ena-recorrido-probe.yml']
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Create temporary audit user
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          R=$(curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data '{"action":"create"}')
+          test "$(jq -r .ok <<<"$R")" = true
+          ID=$(jq -r .id <<<"$R"); E=$(jq -r .email <<<"$R"); P=$(jq -r .password <<<"$R")
+          echo "::add-mask::$E"; echo "::add-mask::$P"
+          echo "AUDIT_USER_ID=$ID" >> "$GITHUB_ENV"; echo "AUDIT_EMAIL=$E" >> "$GITHUB_ENV"; echo "AUDIT_PASSWORD=$P" >> "$GITHUB_ENV"
+      - name: Query SALDOS PASES RECARGAS
+        shell: bash
+        env:
+          SB_KEY: sb_publishable_Xq9jQFfPrywG4kbmw1dOuQ_IyjsrlsQ
+        run: |
+          AUTH=$(curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/auth/v1/token?grant_type=password' -H "apikey: $SB_KEY" -H 'Content-Type: application/json' --data "{\"email\":\"$AUDIT_EMAIL\",\"password\":\"$AUDIT_PASSWORD\"}")
+          TOKEN=$(jq -r .access_token <<<"$AUTH")
+          test -n "$TOKEN" -a "$TOKEN" != null
+          for MODE in SALDOS PASES RECARGAS; do
+            echo "--- $MODE ---"
+            R=$(curl -sS -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/ena-recorrido' -H "apikey: $SB_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' --data "{\"panapass\":1080260,\"modo\":\"$MODE\",\"desde\":\"2026-08-01\",\"hasta\":\"2026-08-27\"}")
+            echo "$R" | jq '{ok,error,modo,total,empty_message,rows_preview:(.rows[0:5] // [])}'
+            sleep 4
+          done
+      - name: Delete temporary audit user
+        if: always() && env.AUDIT_USER_ID != ''
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data "{\"action\":\"delete\",\"id\":\"$AUDIT_USER_ID\"}" | jq -c .
