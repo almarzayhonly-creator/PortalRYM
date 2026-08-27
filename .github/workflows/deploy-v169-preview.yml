@@ -9,11 +9,12 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout V169 test branch
         uses: actions/checkout@v4
@@ -34,39 +35,31 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
+        run: npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
 
       - name: Prepare audit
         shell: bash
+        run: mkdir -p audit
+
+      - name: Create isolated audit user
+        id: audit_user
+        shell: bash
         run: |
-          mkdir -p audit
-          cat > audit/security-probe.sh <<'SH'
-          #!/usr/bin/env bash
-          set -u
-          BASE="https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev"
-          : > audit/security.txt
-          probe(){
-            path="$1"; pattern="$2"
-            out="audit/probe$(echo "$path" | tr '/.' '__').txt"
-            code=$(curl -L -sS --max-time 20 -o "$out" -w '%{http_code}' "$BASE$path" || true)
-            ctype=$(curl -L -sSI --max-time 20 "$BASE$path" 2>/dev/null | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print $2; exit}')
-            bytes=$(wc -c < "$out" 2>/dev/null || echo 0)
-            exposed=no
-            if grep -Eiq "$pattern" "$out" 2>/dev/null; then exposed=yes; fi
-            printf '%-58s code=%-3s bytes=%-8s type=%-28s exposed=%s\n' "$path" "$code" "$bytes" "${ctype:-unknown}" "$exposed" | tee -a audit/security.txt
-          }
-          echo '--- static/security probes ---' | tee -a audit/security.txt
-          probe '/' 'v169-cleanup\.js|Portal RYM|Iniciar sesión|Iniciar sesion'
-          probe '/v169-cleanup.js' 'Portal RYM V169|v169|rym-v169-cleanup-css'
-          probe '/wrangler.jsonc' '"name"[[:space:]]*:[[:space:]]*"portal-ena-rym"'
-          probe '/.assetsignore' 'wrangler\.jsonc|\.github/'
-          probe '/.git/config' '^\[core\]|repositoryformatversion'
-          probe '/.github/workflows/deploy-v169-preview.yml' '^name:[[:space:]]*Deploy|CLOUDFLARE_API_TOKEN'
-          probe '/.wrangler/tmp/deploy-7IWWs7/no-op-worker.js' 'no-op-worker|export default|fetch'
-          SH
-          chmod +x audit/security-probe.sh
-          ./audit/security-probe.sh
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' \
+            -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' \
+            --data '{"action":"create"}' > audit/audit-user.json
+          test "$(jq -r .ok audit/audit-user.json)" = "true"
+          ID=$(jq -r .id audit/audit-user.json)
+          USER=$(jq -r .usuario audit/audit-user.json)
+          PASS=$(jq -r .password audit/audit-user.json)
+          echo "::add-mask::$USER"
+          echo "::add-mask::$PASS"
+          echo "AUDIT_USER_ID=$ID" >> "$GITHUB_ENV"
+          echo "AUDIT_USERNAME=$USER" >> "$GITHUB_ENV"
+          echo "AUDIT_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          rm -f audit/audit-user.json
+          echo 'Temporary audit user created.'
 
       - name: Install browser
         shell: bash
@@ -75,124 +68,110 @@ jobs:
           npm install --silent playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Run Chromium audit
+      - name: Run authenticated Chromium audit
         shell: bash
+        env:
+          AUDIT_USERNAME: ${{ env.AUDIT_USERNAME }}
+          AUDIT_PASSWORD: ${{ env.AUDIT_PASSWORD }}
         run: |
-          cat > audit/preview-audit.mjs <<'JS'
+          cat > audit/authenticated-audit.mjs <<'JS'
           import { chromium } from 'playwright';
           import fs from 'node:fs';
 
-          const base = 'https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev';
-          const report = { base, at: new Date().toISOString(), runs: [] };
-          const browser = await chromium.launch({headless:true});
+          const base='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev';
+          const modules=[
+            ['revisados','v60OpenRevisados','v66-revisados'],
+            ['control-auto','v70OpenControl','v70-control'],
+            ['usuarios','v70OpenUsers','v70-admin'],
+            ['gps','v113OpenGps','v157-gps']
+          ];
+          const report={at:new Date().toISOString(),base,login:{},modules:[],globalErrors:[]};
+          const browser=await chromium.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:1440,height:900}});
+          const page=await context.newPage();
+          const consoleErrors=[],pageErrors=[],failed=[];
+          page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+          page.on('pageerror',e=>pageErrors.push(String(e)));
+          page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
 
-          async function runViewport(name, viewport, attemptLogin=false){
-            const context = await browser.newContext({viewport});
-            const page = await context.newPage();
-            const consoleErrors=[];
-            const consoleWarnings=[];
-            const pageErrors=[];
-            const failedRequests=[];
-            const httpErrors=[];
-            const authResponses=[];
-            page.on('console', m => {
-              if(m.type()==='error') consoleErrors.push(m.text());
-              if(m.type()==='warning') consoleWarnings.push(m.text());
-            });
-            page.on('pageerror', e => pageErrors.push(String(e)));
-            page.on('requestfailed', r => failedRequests.push({url:r.url(), error:r.failure()?.errorText||''}));
-            page.on('response', r => {
-              if(r.status()>=400) httpErrors.push({status:r.status(),url:r.url()});
-              if(/auth-username|functions\/v1/i.test(r.url())) authResponses.push({status:r.status(),url:r.url()});
-            });
-
-            const started=Date.now();
-            let mainStatus=null;
-            let gotoError=null;
-            try{
-              const res=await page.goto(base,{waitUntil:'networkidle',timeout:45000});
-              mainStatus=res?.status()??null;
-            }catch(e){ gotoError=String(e); }
-            const elapsed=Date.now()-started;
-            await page.waitForTimeout(800);
-
-            const metrics=await page.evaluate(() => {
-              const nav=performance.getEntriesByType('navigation')[0];
-              const resources=performance.getEntriesByType('resource')
-                .map(x=>({name:x.name,duration:Math.round(x.duration),transferSize:x.transferSize||0,initiatorType:x.initiatorType}))
-                .sort((a,b)=>b.duration-a.duration).slice(0,15);
-              const bodyText=(document.body?.innerText||'').replace(/\s+/g,' ').slice(0,1200);
-              return {
-                title:document.title,
-                href:location.href,
-                bodyText,
-                scrollWidth:document.documentElement.scrollWidth,
-                clientWidth:document.documentElement.clientWidth,
-                scrollHeight:document.documentElement.scrollHeight,
-                viewportHeight:innerHeight,
-                horizontalOverflow:document.documentElement.scrollWidth>innerWidth+2,
-                nav:nav?{
-                  domContentLoaded:Math.round(nav.domContentLoadedEventEnd),
-                  load:Math.round(nav.loadEventEnd),
-                  responseStart:Math.round(nav.responseStart),
-                  responseEnd:Math.round(nav.responseEnd),
-                  transferSize:nav.transferSize||0
-                }:null,
-                resources,
-                forms:document.forms.length,
-                inputs:[...document.querySelectorAll('input')].map(i=>({type:i.type,name:i.name,id:i.id,placeholder:i.placeholder})).slice(0,20),
-                buttons:[...document.querySelectorAll('button')].map(b=>(b.innerText||b.textContent||'').trim()).filter(Boolean).slice(0,20)
-              };
-            });
-
-            let loginTest=null;
-            if(attemptLogin){
-              const password=page.locator('input[type="password"]').first();
-              if(await password.count()){
-                const candidates=page.locator('input:not([type="password"]):not([type="hidden"]):not([type="submit"])');
-                const n=await candidates.count();
-                let userInput=null;
-                for(let i=0;i<n;i++){
-                  const c=candidates.nth(i);
-                  if(await c.isVisible()){userInput=c;break;}
-                }
-                if(userInput && await password.isVisible()){
-                  await userInput.fill('__v169_nonexistent_test__');
-                  await password.fill('invalid-v169-test-only');
-                  const submit=page.locator('button[type="submit"], input[type="submit"]').first();
-                  if(await submit.count() && await submit.isVisible()){
-                    await submit.click();
-                  }else{
-                    await password.press('Enter');
-                  }
-                  await page.waitForTimeout(3000);
-                  loginTest=await page.evaluate(()=>({
-                    href:location.href,
-                    bodyText:(document.body?.innerText||'').replace(/\s+/g,' ').slice(0,1000)
-                  }));
-                }
-              }
+          function rgb(s){const m=String(s||'').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);return m?[+m[1],+m[2],+m[3]]:null}
+          function lum(v){v=v/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}
+          function ratio(a,b){const L1=.2126*lum(a[0])+.7152*lum(a[1])+.0722*lum(a[2]),L2=.2126*lum(b[0])+.7152*lum(b[1])+.0722*lum(b[2]);return (Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05)}
+          async function visualAudit(){return await page.evaluate(({rgbSrc})=>{
+            const rgb=(s)=>{const m=String(s||'').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);return m?[+m[1],+m[2],+m[3]]:null};
+            const lum=v=>{v=v/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+            const ratio=(a,b)=>{const L1=.2126*lum(a[0])+.7152*lum(a[1])+.0722*lum(a[2]),L2=.2126*lum(b[0])+.7152*lum(b[1])+.0722*lum(b[2]);return (Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05)};
+            const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&+s.opacity>0&&r.width>0&&r.height>0};
+            const label=e=>(e.innerText||e.textContent||'').replace(/\s+/g,' ').trim().slice(0,100);
+            const issues=[];
+            for(const e of [...document.querySelectorAll('button,a,span,b,strong,small,p,h1,h2,h3,h4,th,td,label')]){
+              if(!visible(e)||!label(e))continue;
+              const s=getComputedStyle(e),fg=rgb(s.color);let p=e,bg=null;
+              for(let i=0;i<6&&p;i++,p=p.parentElement){const ps=getComputedStyle(p),c=rgb(ps.backgroundColor);if(c&&ps.backgroundColor!=='rgba(0, 0, 0, 0)'&&ps.backgroundColor!=='transparent'){bg=c;break}}
+              if(fg&&bg){const cr=ratio(fg,bg),size=parseFloat(s.fontSize)||16,bold=parseInt(s.fontWeight)>=700,need=(size>=24||(bold&&size>=18.66))?3:4.5;if(cr+0.05<need)issues.push({type:'contrast',text:label(e),ratio:+cr.toFixed(2),need,tag:e.tagName,cls:String(e.className||'').slice(0,80)})}
+              if((s.overflow==='hidden'||s.textOverflow==='ellipsis')&&(e.scrollWidth>e.clientWidth+4||e.scrollHeight>e.clientHeight+4))issues.push({type:'clipped',text:label(e),tag:e.tagName,sw:e.scrollWidth,cw:e.clientWidth,sh:e.scrollHeight,ch:e.clientHeight});
             }
+            const texts=new Map();
+            for(const e of [...document.querySelectorAll('article,.card,.kpi,.v99-alert,.v99-priority,.v100-priority')]){if(!visible(e))continue;const t=label(e).toUpperCase();if(t.length<18)continue;texts.set(t,(texts.get(t)||0)+1)}
+            const duplicates=[...texts].filter(([,n])=>n>1).slice(0,20).map(([text,count])=>({text,count}));
+            const touch=[...document.querySelectorAll('button,a,input,select')].filter(visible).map(e=>{const r=e.getBoundingClientRect();return{label:label(e),w:Math.round(r.width),h:Math.round(r.height),tag:e.tagName}}).filter(x=>x.w<40||x.h<36).slice(0,30);
+            return {bodyClass:document.body.className,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,horizontalOverflow:document.documentElement.scrollWidth>innerWidth+2,issues:issues.slice(0,80),duplicates,touch};
+          },{rgbSrc:''})}
 
-            await page.screenshot({path:`audit/${name}.png`,fullPage:true});
-            const row={name,viewport,mainStatus,gotoError,elapsed,metrics,consoleErrors,consoleWarnings,pageErrors,failedRequests,httpErrors,authResponses,loginTest};
-            report.runs.push(row);
-            await context.close();
+          const start=Date.now();
+          await page.goto(base,{waitUntil:'networkidle',timeout:45000});
+          await page.locator('input[name="usuario"]').fill(process.env.AUDIT_USERNAME);
+          await page.locator('input[name="password"]').fill(process.env.AUDIT_PASSWORD);
+          await page.locator('button[type="submit"],#loginBtn').first().click();
+          await page.waitForFunction(()=>!document.querySelector('main.login') && !!window.state?.token,{timeout:30000});
+          await page.waitForTimeout(2500);
+          report.login={elapsed:Date.now()-start,bodyClass:await page.evaluate(()=>document.body.className),title:await page.title(),text:(await page.locator('body').innerText()).replace(/\s+/g,' ').slice(0,600)};
+          await page.screenshot({path:'audit/auth-home-desktop.png',fullPage:true});
+          report.homeDesktop=await visualAudit();
+          await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);
+          await page.screenshot({path:'audit/auth-home-mobile.png',fullPage:true});
+          report.homeMobile=await visualAudit();
+
+          for(const [name,fn,cls] of modules){
+            await page.setViewportSize({width:1440,height:900});
+            const beforeCE=consoleErrors.length,beforePE=pageErrors.length,beforeFR=failed.length,t=Date.now();
+            let invokeError=null;
+            try{
+              await page.evaluate(async fn=>{const f=window[fn];if(typeof f!=='function')throw new Error(fn+' unavailable');await f()},fn);
+              await page.waitForFunction(cls=>document.body.classList.contains(cls),cls,{timeout:25000});
+              await page.waitForTimeout(3500);
+            }catch(e){invokeError=String(e)}
+            const desktop=await visualAudit();
+            await page.screenshot({path:`audit/${name}-desktop.png`,fullPage:true});
+            await page.setViewportSize({width:390,height:844});await page.waitForTimeout(700);
+            const mobile=await visualAudit();
+            await page.screenshot({path:`audit/${name}-mobile.png`,fullPage:true});
+            const text=(await page.locator('body').innerText()).replace(/\s+/g,' ').slice(0,2200);
+            report.modules.push({name,elapsed:Date.now()-t,invokeError,desktop,mobile,text,consoleErrors:consoleErrors.slice(beforeCE),pageErrors:pageErrors.slice(beforePE),failedRequests:failed.slice(beforeFR)});
+            try{await page.evaluate(async()=>{if(typeof window.v36PortalHome==='function')await window.v36PortalHome()});await page.waitForTimeout(1200)}catch{}
           }
-
-          await runViewport('desktop',{width:1440,height:900},true);
-          await runViewport('mobile',{width:390,height:844},false);
-          await browser.close();
-          fs.writeFileSync('audit/report.json',JSON.stringify(report,null,2));
-          console.log(JSON.stringify(report,null,2));
+          report.globalErrors={consoleErrors,pageErrors,failedRequests:failed};
+          fs.writeFileSync('audit/authenticated-report.json',JSON.stringify(report,null,2));
+          console.log('AUTH_AUDIT_SUMMARY');
+          console.log(JSON.stringify({login:report.login,modules:report.modules.map(x=>({name:x.name,elapsed:x.elapsed,invokeError:x.invokeError,body:x.desktop.bodyClass,desktopOverflow:x.desktop.horizontalOverflow,mobileOverflow:x.mobile.horizontalOverflow,contrast:x.desktop.issues.filter(i=>i.type==='contrast').length+'/'+x.mobile.issues.filter(i=>i.type==='contrast').length,clipped:x.desktop.issues.filter(i=>i.type==='clipped').length+'/'+x.mobile.issues.filter(i=>i.type==='clipped').length,duplicates:x.desktop.duplicates.length+'/'+x.mobile.duplicates.length,consoleErrors:x.consoleErrors.length,pageErrors:x.pageErrors.length,failed:x.failedRequests.length}))},null,2));
+          await context.close();await browser.close();
           JS
-          node audit/preview-audit.mjs | tee audit/browser-log.txt
+          node audit/authenticated-audit.mjs | tee audit/authenticated-log.txt
+
+      - name: Delete isolated audit user
+        if: always() && env.AUDIT_USER_ID != ''
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' \
+            -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' \
+            --data "{\"action\":\"delete\",\"id\":\"$AUDIT_USER_ID\"}" | jq -c .
 
       - name: Upload audit evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v169-preview-audit
+          name: v169-authenticated-audit
           path: audit/
           if-no-files-found: warn
           retention-days: 3
