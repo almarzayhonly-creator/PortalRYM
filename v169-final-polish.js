@@ -27,7 +27,7 @@
   }
 
   const PDF_ENDPOINT='https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/panapass-baja-transferencia-pdf';
-  const ENA_TEMPLATE='https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf';
+  const ENA_TEMPLATE='https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf';
 
   function authHeaders(){
     try{
@@ -72,7 +72,7 @@
     const w=window.open(ENA_TEMPLATE,'_blank','noopener');
     const text=(message&&String(message).trim())||'No se pudo generar el PDF firmado.';
     if(w){
-      alert(text+'\n\nSe abrió como respaldo el formulario oficial de ENA.');
+      alert(text+'\n\nSe abrió como respaldo el formulario oficial de ENA usando el dominio válido.');
     }else{
       alert(text+'\n\nEl navegador bloqueó la ventana de respaldo. Habilita ventanas emergentes para abrir el formulario oficial ENA.');
     }
