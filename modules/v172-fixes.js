@@ -1,12 +1,20 @@
 /* Portal RYM V172 - consolidated recovery fixes */
 (function(w,d){'use strict';if(w.__RYM_V172_FIXES__)return;w.__RYM_V172_FIXES__=true;
-let homeData=null,hookedReq=false;
+let homeData=null,hookedReq=false,rankingTaken=false,recurrentesTaken=false;
 const warn='<span class="v103-state-icon">!</span>';
 function patchPanapassHome(){const p=homeData?.panapass;if(!p||!d.body.classList.contains('v99-home'))return;const card=d.querySelector('.v99-module.pan,.v99-module.panapass,[data-module="panapass"]');if(!card)return;const badge=card.querySelector('.v99-badge,.v103-state-badge');if(!badge)return;const pending=Number(p.pendiente_cobra);if(!Number.isFinite(pending))return;badge.classList.remove('good','medal','warn');badge.classList.add('v103-state-badge',pending>0?'warn':'good');badge.dataset.v172Pm='1';badge.innerHTML=pending>0?warn+'<span class="v103-state-copy"><b>'+pending+' por revisar</b><small>Pendientes reales después de pagos PM</small></span>':'<span class="v103-state-copy"><b>Al día</b><small>Pagos PM conciliados</small></span>'}
 function hookReq(){if(hookedReq||typeof w.req!=='function')return false;const base=w.req;if(base.__v172){hookedReq=true;return true}const wrapped=async function(path,opt={}){const r=await base(path,opt);if(String(path)==='/functions/v1/portal-home-resumen'&&r?.data?.ok!==false){homeData=r.data;setTimeout(patchPanapassHome,0)}return r};Object.assign(wrapped,base);wrapped.__v172=true;w.req=wrapped;try{req=wrapped}catch(_){}hookedReq=true;return true}
+function activatePanapassModules(){
+  if(!rankingTaken&&w.RYM_PANAPASS_RANKING&&typeof w.ranking==='function'){
+    const modern=async function(v){const host=v||d.querySelector('#view');return w.RYM_PANAPASS_RANKING.open({target:host,role:w.state?.profile?.rol,profile:w.state?.profile})};modern.__v172=true;w.ranking=modern;try{ranking=modern}catch(_){}rankingTaken=true;
+  }
+  if(!recurrentesTaken&&w.RYM_PANAPASS_RECURRENTES&&typeof w.recurrentes==='function'){
+    const modern=async function(v){const host=v||d.querySelector('#view');return w.RYM_PANAPASS_RECURRENTES.render(host,{})};modern.__v172=true;w.recurrentes=modern;try{recurrentes=modern}catch(_){}recurrentesTaken=true;
+  }
+}
 function controlStable(){if(!d.body.classList.contains('v70-control'))return;d.querySelectorAll('.side .nav,.v75-control-nav,.ca6-tabs').forEach(nav=>{nav.querySelectorAll('button').forEach(b=>{if(!b.hasAttribute('type'))b.type='button'});if(nav.dataset.v172Stable)return;nav.dataset.v172Stable='1';nav.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const t=(b.textContent||'').trim().toUpperCase();if(!/PORTAL|SALIR|CERRAR SESI/.test(t))e.stopPropagation()},false)})}
 function wrap(name,after){const base=w[name];if(typeof base!=='function'||base.__v172)return false;const fn=async function(){const out=await base.apply(this,arguments);setTimeout(after,0);setTimeout(after,120);return out};Object.assign(fn,base);fn.__v172=true;w[name]=fn;try{if(name==='v36PortalHome')v36PortalHome=fn;if(name==='v70OpenControl')v70OpenControl=fn;if(name==='v75ControlUnits')v75ControlUnits=fn;if(name==='v75ControlAudit')v75ControlAudit=fn;if(name==='v75ControlDashboard')v75ControlDashboard=fn}catch(_){}return true}
-function install(){hookReq();wrap('v36PortalHome',()=>{patchPanapassHome()});['v70OpenControl','v75ControlUnits','v75ControlAudit','v75ControlDashboard','v80OpenEcarValidator'].forEach(n=>wrap(n,controlStable));patchPanapassHome();controlStable()}
-let tries=0;const timer=setInterval(()=>{install();if(++tries>80)clearInterval(timer)},250);d.addEventListener('click',()=>setTimeout(()=>{patchPanapassHome();controlStable()},60),true);if(d.readyState!=='loading')install();else d.addEventListener('DOMContentLoaded',install,{once:true});
-w.RYM_V172_READY=Promise.resolve(w.RYM_V171_READY).then(()=>({version:'172',recovered:['ranking','recurrentes','panapass-pm','control-tabs']}));
+function install(){hookReq();activatePanapassModules();wrap('v36PortalHome',()=>{patchPanapassHome()});['v70OpenControl','v75ControlUnits','v75ControlAudit','v75ControlDashboard','v80OpenEcarValidator'].forEach(n=>wrap(n,controlStable));patchPanapassHome();controlStable()}
+let tries=0;const timer=setInterval(()=>{install();if(++tries>120)clearInterval(timer)},250);d.addEventListener('click',()=>setTimeout(()=>{activatePanapassModules();patchPanapassHome();controlStable()},60),true);if(d.readyState!=='loading')install();else d.addEventListener('DOMContentLoaded',install,{once:true});
+w.RYM_V172_READY=Promise.resolve(w.RYM_V171_READY).then(()=>({version:'172',recovered:['ranking-active','recurrentes-active','panapass-pm','control-tabs']}));
 })(window,document);
