@@ -1,0 +1,82 @@
+name: V171 modular preview
+on:
+  push:
+    branches: [v171-modular]
+permissions:
+  contents: read
+concurrency:
+  group: v171-modular-preview
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Inventory Panapass monolith
+        run: node qa/v171-panapass-inventory.js
+      - name: Map Panapass Ranking only
+        run: node qa/v171-panapass-ranking-map.js
+      - name: Map ENA signer and form rules
+        run: node qa/v171-ena-source-map.js
+      - name: Ranking contract QA
+        run: node qa/v171-ranking-contract.js
+      - name: Recurrentes contract QA
+        run: node qa/v171-recurrentes-contract.js
+      - name: Bajas contract QA
+        run: node qa/v171-bajas-contract.js
+      - name: Inject V171 loader into preview build only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          marker='<script id="rym-v171-loader" src="/modules/v171-loader.js?v=171"></script>\n'
+          if 'id="rym-v171-loader"' not in s:
+              m=re.search(r'<head\b[^>]*>', s, re.I)
+              if not m: raise SystemExit('head start not found')
+              s=s[:m.end()]+'\n'+marker+s[m.end():]
+              p.write_text(s)
+          head=p.read_text()[:12000]
+          if 'id="rym-v171-loader"' not in head:
+              raise SystemExit('V171 loader not injected near document head')
+          PY
+      - name: Deploy isolated preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest versions upload --preview-alias v171-modular 2>&1 | tee /tmp/wrangler.out
+          U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$U"
+          echo "url=$U" >> "$GITHUB_OUTPUT"
+          echo "Exact preview: $U"
+      - name: Verify modular assets
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          U="$QA_URL"
+          test -n "$U"
+          for i in 1 2 3 4 5; do
+            ok=1
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/?x=$(date +%s)" -o /tmp/i || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/v171-loader.js?x=$(date +%s)" -o /tmp/l || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/panapass/ranking/index.js?x=$(date +%s)" -o /tmp/ranking || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/panapass/recurrentes/index.js?x=$(date +%s)" -o /tmp/recurrentes || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/panapass/bajas/index.js?x=$(date +%s)" -o /tmp/bajas || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/css/panapass-bajas.css?x=$(date +%s)" -o /tmp/panapass-bajas.css || ok=0
+            for f in core panapass revisados control-auto gps usuarios; do curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/css/$f.css?x=$(date +%s)" -o "/tmp/$f.css" || ok=0; done
+            if [ "$ok" = 1 ] && grep -Fq 'rym-v171-loader' /tmp/i && grep -Fq 'RYM_V171_READY' /tmp/l && grep -Fq 'RYM_PANAPASS_RANKING' /tmp/ranking && grep -Fq 'RYM_PANAPASS_RECURRENTES' /tmp/recurrentes && grep -Fq 'RYM_PANAPASS_BAJAS' /tmp/bajas && grep -Fq 'v171-bajas' /tmp/panapass-bajas.css && grep -Fq -- '--rym-panapass' /tmp/core.css; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+      - name: Install Playwright
+        run: npm install playwright && npx playwright install --with-deps chromium
+      - name: Module smoke test
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: node qa/v171-module-smoke.js

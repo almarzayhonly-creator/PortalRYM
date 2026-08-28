@@ -1,0 +1,3 @@
+body[data-rym-module="control-auto"]{--rym-accent:var(--rym-control)}
+body[data-rym-module="control-auto"] .rym-module-accent{color:var(--rym-accent)}
+body[data-rym-module="control-auto"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}

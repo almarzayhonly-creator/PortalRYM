@@ -1,0 +1,3 @@
+body[data-rym-module="revisados"]{--rym-accent:var(--rym-revisados)}
+body[data-rym-module="revisados"] .rym-module-accent{color:var(--rym-accent)}
+body[data-rym-module="revisados"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}

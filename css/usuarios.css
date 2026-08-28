@@ -1,0 +1,3 @@
+body[data-rym-module="usuarios"]{--rym-accent:#7c3aed}
+body[data-rym-module="usuarios"] .rym-module-accent{color:var(--rym-accent)}
+body[data-rym-module="usuarios"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
