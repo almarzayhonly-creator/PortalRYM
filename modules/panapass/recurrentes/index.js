@@ -80,7 +80,7 @@
     const filtered=filterRows(rows,{...opts,mode});
     const size=Math.max(1,Math.floor(num(opts.pageSize)||PAGE_SIZE));
     const pages=Math.max(1,Math.ceil(filtered.length/size));
-    const page=Math.min(pages,Math.max(1,Math.floor(num(opts.page)||1));
+    const page=Math.min(pages,Math.max(1,Math.floor(num(opts.page)||1)));
     const pageRows=filtered.slice((page-1)*size,page*size);
     const critical=filtered.filter(x=>norm(x.nivel)==='CRITICO').length;
     const total=filtered.reduce((a,x)=>a+x.total,0);
