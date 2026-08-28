@@ -1,0 +1,42 @@
+name: V172 clean Users split
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_split_users.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-clean-users-split
+  cancel-in-progress: true
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Split Users from V70 portal
+        run: python3 tools/v172_split_users.py
+      - name: Validate Users module
+        run: |
+          node --check modules/core/portal-v70.js
+          node --check modules/usuarios/app.js
+          node --check modules/usuarios/index.js
+          node --check modules/v172-clean-loader.js
+          grep -Fq 'RYM_USERS_APP' modules/usuarios/app.js
+          grep -Fq 'RYM_USERS_APP.open' modules/usuarios/index.js
+          grep -Fq '/modules/usuarios/app.js' modules/v172-clean-loader.js
+          ! grep -Fq 'let AD=null' modules/core/portal-v70.js
+      - name: Commit Users split
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add modules tools
+          git commit -m 'V172 clean: split Users from V70 portal'
+          git push origin HEAD:v172-clean
