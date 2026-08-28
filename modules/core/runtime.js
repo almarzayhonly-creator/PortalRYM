@@ -97,40 +97,6 @@ function fmtDT(v){if(!v)return '-';try{return new Date(v).toLocaleString('es-PA'
 function dlBase64(name,b64,mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){const a=document.createElement('a');a.href=`data:${mime};base64,${b64}`;a.download=name;document.body.appendChild(a);a.click();a.remove()}
 function fileB64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||'').split(',').pop()||'');r.onerror=reject;r.readAsDataURL(file)})}
 
-async function dashboard(v){
-  let d,dia=[],mes=[],diaError=null,mesError=null;try{
-    const all=await Promise.allSettled([
-      rpc('dashboard_resumen'),
-      rpc('panapass_ranking_pagos',{p_periodo:'DIA'}),
-      rpc('panapass_ranking_pagos',{p_periodo:'MES'})
-    ]);
-    if(all[0].status!=='fulfilled')throw all[0].reason||Error('Dashboard sin respuesta');
-    d=all[0].value?.[0];
-    if(all[1].status==='fulfilled')dia=all[1].value||[];else diaError=all[1].reason||Error('Ranking diario no disponible');
-    if(all[2].status==='fulfilled')mes=all[2].value||[];else mesError=all[2].reason||Error('Ranking mensual no disponible');
-    if(!d)throw Error('Dashboard sin respuesta');
-  }catch(x){v.innerHTML=`<div class="alert">No se pudo cargar el Dashboard: ${esc(x.message)}</div>`;return}
-  state.today=d.fecha;
-  const meId=state.profile?.supervisora_id;
-  const meD=dia.find(x=>x.supervisora_id===meId),meM=mes.find(x=>x.supervisora_id===meId);
-  const medal=p=>Number(p)===1?'🥇':Number(p)===2?'🥈':Number(p)===3?'🥉':'🏅';
-  const rankBlock=meId?`<div class="medal-grid">
-    <div class="medal-card"><div class="medal-icon">${medal(meD?.posicion_galera)}</div><span>${dia?.[0]?.fecha_desde===d.fecha?'Hoy':('Último cierre · '+(dia?.[0]?.fecha_desde||'-'))} · tu galera</span><strong>#${meD?.posicion_galera||'-'} / ${meD?.total_galera||'-'}</strong><small>${diaError?'Ranking diario no disponible':(meD?`${meD.unidades_pagadas} unidades pagadas · ${money(meD.monto_pagado)}`:'Sin pagos registrados hoy')}</small></div>
-    <div class="medal-card"><div class="medal-icon">${medal(meM?.posicion_galera)}</div><span>Mes · tu galera</span><strong>#${meM?.posicion_galera||'-'} / ${meM?.total_galera||'-'}</strong><small>${mesError?'Ranking mensual no disponible':(meM?`${meM.unidades_pagadas} unidades pagadas · ${money(meM.monto_pagado)}`:'Sin pagos registrados este mes')}</small></div>
-    <div class="medal-card global"><div class="medal-icon">${medal(meM?.posicion_global)}</div><span>Mes · 4 galeras</span><strong>#${meM?.posicion_global||'-'} / ${meM?.total_global||'-'}</strong><small>El ranking premia menos unidades que requirieron pago.</small></div>
-  </div>`:'';
-  v.innerHTML=`<div class="kpis">
-    <div class="kpi hero clickable" data-kpi-go="unidades"><span class="kpi-icon">🚗</span><span>Unidades visibles</span><strong>${d.unidades_visibles}</strong><small class="kpi-note">Flota bajo tu alcance</small></div>
-    <div class="kpi hero red clickable" data-kpi-go="negativos_hoy"><span class="kpi-icon">!</span><span>Negativos AM</span><strong>${d.negativos_hoy}</strong><small class="kpi-note">Punto de partida de cobranza</small></div>
-    <div class="kpi hero green clickable" data-kpi-go="pagos_hoy"><span class="kpi-icon">$</span><span>Pagos hoy</span><strong>${d.pagos_hoy}</strong><small class="kpi-note">Resultado real del trabajo</small></div>
-    <div class="kpi hero orange clickable" data-kpi-go="recurrentes"><span class="kpi-icon">↻</span><span>Recurrentes mes</span><strong>${Number(d.recurrentes_mes||0)}</strong><small class="kpi-note">5+ pagos en el mes</small></div>
-  </div>
-  <div class="dashboard-welcome"><div class="welcome-card"><small>Portal RYM</small><h2>Hola, ${esc(state.profile.nombre||'')}</h2><p>Negativos muestra cómo inicia la deuda. El desempeño se mide por lo que realmente termina pagándose.</p></div><div class="quick-card"><small>PAGADO ESTE MES</small><strong>${money(d.monto_pagos_mes||0)}</strong><span class="muted">Monto visible según tu alcance.</span></div></div>
-  ${rankBlock}
-  <div style="margin:12px 0;text-align:right"><button class="soft-btn" onclick="state.active='ranking';shell();render()">Ver ranking de pagos</button></div><div id="rotationFeed"></div>`;
-  document.querySelectorAll('[data-kpi-go]').forEach(el=>el.onclick=()=>{const m=el.dataset.kpiGo;if(m==='unidades'){v11UnitList();return}if(state.modules.includes(m)||m==='dashboard'){state.active=m;shell();render()}});
-  if(['ADMIN_TOTAL','ADMIN','SISTEMA','PAGADOR','GERENTE_GALERA'].includes(role())){try{const ch=await rpc('panapass_cambios_supervisoras_hoy');if(ch.length)document.querySelector('#rotationFeed').innerHTML=`<div class="card"><span class="card-title">Cambios de supervisoras hoy</span><div class="rotation-feed">${ch.slice(0,12).map(x=>`<div class="rotation-item"><b>${esc(x.supervisora_nueva||'')}</b>${x.unidad?' · '+esc(x.unidad):''}<br><small>${esc(x.galera_anterior||'-')} → ${esc(x.galera_nueva||'-')} · ${fmtDT(x.cambio_en)}</small></div>`).join('')}</div></div>`}catch(_){}}
-}
 function toggleCapture(btn,selector){
   const on=document.body.classList.toggle('capture-mode');
   document.querySelector(selector+' .table-wrap')?.classList.toggle('capture',on);
@@ -150,48 +116,6 @@ async function ranking(v){
   function draw(){const g=document.querySelector('#rankGalera').value,per=document.querySelector('#rankPeriodo').value;let rows=(per==='DIA'?dia:mes).slice();if(g!=='TODAS')rows=rows.filter(x=>x.galera===g).sort((a,b)=>a.posicion_galera-b.posicion_galera);else rows.sort((a,b)=>a.posicion_global-b.posicion_global);const pos=x=>g==='TODAS'?x.posicion_global:x.posicion_galera;const total=x=>g==='TODAS'?x.total_global:x.total_galera;document.querySelector('#rankOut').innerHTML=`<div class="rank-podium">${rows.slice(0,3).map((x,i)=>`<div class="rank-pod r${i+1}"><div class="rank-medal">${medals[i]}</div><span class="rank-name profile-link" data-sup-id="${esc(x.supervisora_id||'')}">${esc(x.supervisora_nombre)}</span><div class="rank-stat">${esc(x.galera)} · ${x.unidades_pagadas} unidades pagadas</div><div class="rank-stat">Monto ${money(x.monto_pagado)}</div></div>`).join('')}</div><div class="panel mobile-cards" style="margin-top:14px"><div class="rank-table-title"><h3>${per==='DIA'?(esHoy?'Cierre de hoy':`Último día con pagos · ${esc(diaFecha)}`):'Acumulado del mes'}</h3><span>${g==='TODAS'?'General · 4 galeras':esc(g)}</span></div><div class="table-wrap"><table class="pretty"><thead><tr><th>Pos.</th><th>Galera</th><th>Supervisora</th><th>Unidades pagadas</th><th>Monto pagado</th></tr></thead><tbody>${rows.map(x=>`<tr class="${x.supervisora_id===state.profile?.supervisora_id?'rank-me':''}"><td data-label="Posición"><b>#${pos(x)} / ${total(x)}</b></td><td data-label="Galera">${esc(x.galera)}</td><td data-label="Supervisora"><b class="profile-link" data-sup-id="${esc(x.supervisora_id||'')}">${esc(x.supervisora_nombre)}</b></td><td data-label="Unidades pagadas">${x.unidades_pagadas}</td><td data-label="Monto">${money(x.monto_pagado)}</td></tr>`).join('')}</tbody></table></div></div>`}
   document.querySelector('#rankGalera').value=initial;document.querySelector('#rankGalera').onchange=draw;document.querySelector('#rankPeriodo').onchange=draw;draw();
   document.querySelector('#rankOut').onclick=e=>{const el=e.target.closest('[data-sup-id]');if(el?.dataset.supId)openSupervisoraProfile(el.dataset.supId)};
-}
-async function openSupervisoraProfile(id){
-  let modal=document.querySelector('#supProfileModal');if(!modal){modal=document.createElement('div');modal.id='supProfileModal';modal.className='modal';document.body.appendChild(modal)}
-  modal.style.display='flex';modal.innerHTML='<div class="modal-card" style="max-width:1100px;width:94vw"><div class="table-summary"><h2>Perfil operativo</h2><button class="soft-btn" id="supClose">Cerrar</button></div><div class="card">Cargando información...</div></div>';document.querySelector('#supClose').onclick=()=>modal.style.display='none';
-  try{const d=await rpc('panapass_supervisora_perfil',{p_supervisora_id:id}),s=d.supervisora||{},k=d.kpis||{},rows=d.unidades||[];modal.innerHTML=`<div class="modal-card" style="max-width:1100px;width:94vw;max-height:90vh;overflow:auto"><div class="table-summary"><div><h2 style="margin:0">${esc(s.nombre||'Supervisora')}</h2><span class="muted">${esc(s.galera||'')} · ${esc(s.email||'')}</span></div><button class="soft-btn" id="supClose">Cerrar</button></div><div class="kpis"><div class="kpi"><span>Unidades</span><strong>${k.unidades||0}</strong></div><div class="kpi"><span>Negativas ahora</span><strong>${k.negativas_ahora||0}</strong></div><div class="kpi"><span>Pagadas mes</span><strong>${k.unidades_pagadas_mes||0}</strong></div><div class="kpi"><span>Monto mes</span><strong>${money(k.monto_mes||0)}</strong></div><div class="kpi"><span>Recurrentes</span><strong>${k.recurrentes_unidad||0}</strong></div></div><div class="panel mobile-cards"><div class="rank-table-title"><h3>Unidades asignadas</h3><span>Panapass, placa, saldo y recurrencia</span></div>${tableHtml(rows,['unidad','placa','panapass_numero','empresa','estatus','saldo','neg7','pagos_mes','dias_mes','total_mes'],'pretty compact-table','mobile-cards')}</div>${(d.rotaciones||[]).length?`<div class="card"><h3>Rotaciones</h3>${tableHtml(d.rotaciones,['galera_anterior','galera_nueva','cambio_en'],'pretty compact-table','mobile-cards')}</div>`:''}</div>`;document.querySelector('#supClose').onclick=()=>modal.style.display='none'}catch(x){modal.innerHTML=`<div class="modal-card"><div class="alert">${esc(x.message)}</div><button id="supClose">Cerrar</button></div>`;document.querySelector('#supClose').onclick=()=>modal.style.display='none'}
-}
-async function negativos(v){
-  const maxf=state.today||state.meta?.max_snapshot||new Date().toISOString().slice(0,10);
-  const minf=state.meta?.min_snapshot||maxf;
-  v.innerHTML=`
-    <div class="section-tools">
-      <div class="field"><label>Fecha</label><input id="negFecha" type="date" max="${esc(maxf)}" value="${esc(maxf)}"></div>
-      <div class="field"><label>Buscar</label><input id="negQ" placeholder="Unidad, placa o empresa"></div>
-      <button id="negBuscar">Consultar</button>
-      <button id="negCompact" class="soft-btn">Vista captura</button>
-      <div class="share-note">Optimizado para capturas y WhatsApp.</div>
-    </div>
-    <div id="negOut"><div class="card">Cargando...</div></div>`;
-  let lastRows=[];
-  async function draw(){
-    const fecha=document.querySelector('#negFecha').value;
-    const out=document.querySelector('#negOut');
-    out.innerHTML='<div class="card">Consultando...</div>';
-    try{
-      lastRows=await rpc('panapass_negativos_fecha',{p_fecha:fecha||null});
-      const q=document.querySelector('#negQ').value.trim().toLowerCase();
-      const rows=q?lastRows.filter(r=>[r.unidad,r.placa,r.empresa,r.panapass_numero].join(' ').toLowerCase().includes(q)):lastRows;
-      const total=rows.reduce((a,x)=>a+Number(x.saldo||0),0);
-      const mx=rows.reduce((a,x)=>Math.max(a,Number(x.neg7||0)),0);
-      const riesgo=mx>=3?'ALERTA':mx===2?'CUIDADO':'OK';
-      out.innerHTML=`<div class="capture-title"><h2>Negativos Panapass · ${esc(fecha)}</h2><small>Detalle de unidades en negativo</small></div><div class="kpis">
-        <div class="kpi"><span>Unidades</span><strong>${rows.length}</strong></div>
-        <div class="kpi"><span>Saldo total</span><strong style="color:var(--red)">${money(total)}</strong></div>
-        <div class="kpi"><span>Máx neg 7d</span><strong>${mx}</strong></div>
-        <div class="kpi"><span>Riesgo</span><strong>${riesgo}</strong></div>
-      </div>${tableHtml(rows,['fecha','status','unidad','placa','panapass_numero','empresa','neg7','saldo'],'pretty neg-table','mobile-cards')}`;
-    }catch(x){out.innerHTML=`<div class="alert">${esc(x.message)}</div>`}
-  }
-  document.querySelector('#negBuscar').onclick=draw;
-  document.querySelector('#negQ').oninput=draw;
-  document.querySelector('#negCompact').onclick=e=>toggleCapture(e.currentTarget,'#negOut');
-  await draw();
 }
 async function pagos(v){
   const minf=state.meta?.min_pago||'2025-01-02',maxf=state.meta?.max_pago||new Date().toISOString().slice(0,10);
@@ -229,97 +153,6 @@ async function pagos(v){
   document.querySelector('#pagCompact').onclick=e=>toggleCapture(e.currentTarget,'#pagOut');
   await draw();
 }
-async function pagosConsultaHoy(v){
-  const hoy=state.today||new Date().toISOString().slice(0,10);
-  v.innerHTML=`<div class="source-card"><span class="entity-chip">PAGOS REGISTRADOS</span><div class="source-text"><strong>Resultado real de cobranza de tus unidades</strong><p>Por defecto ves lo pagado hoy. Puedes consultar una fecha anterior, pero no editar: la hoja online de trabajo es exclusiva de administración/personal autorizado.</p></div></div><div class="section-tools"><div class="field"><label>Fecha</label><input id="supPayFecha" type="date" value="${hoy}" max="${hoy}"></div><div class="field"><label>Buscar</label><input id="supPayQ" placeholder="Unidad, operador o empresa"></div><button id="supPayLoad">Consultar</button></div><div id="supPayOut"><div class="card">Cargando pagos...</div></div>`;
-  let rows=[];
-  function paint(){const q=document.querySelector('#supPayQ').value.trim().toLowerCase();let d=rows;if(q)d=d.filter(x=>[x.unidad,x.operador,x.n_op,x.empresa,x.cobrador].join(' ').toLowerCase().includes(q));const total=d.reduce((a,x)=>a+Number(x.boleta||x.a_pagar||0),0);document.querySelector('#supPayOut').innerHTML=`<div class="kpis"><div class="kpi"><span>Pagos</span><strong>${d.length}</strong></div><div class="kpi"><span>Total pagado</span><strong style="color:var(--green)">${money(total)}</strong></div></div>${tableHtml(d,['fecha','unidad','empresa','a_pagar','boleta','n_op','operador','tipo'],'pretty','mobile-cards')}`}
-  async function load(){const o=document.querySelector('#supPayOut'),f=document.querySelector('#supPayFecha').value||hoy;o.innerHTML='<div class="card">Consultando pagos...</div>';try{rows=await rpc('panapass_pagos_fecha',{p_fecha:f});paint()}catch(x){o.innerHTML=`<div class="alert">${esc(x.message)}</div>`}}
-  document.querySelector('#supPayLoad').onclick=load;document.querySelector('#supPayFecha').onchange=load;document.querySelector('#supPayQ').oninput=paint;await load();
-}
-async function pagosTrabajo(v){
-  v.innerHTML=`<div class="source-card"><span class="entity-chip">PAGOS HOY ONLINE</span><div class="source-text"><strong>La hoja de trabajo vive dentro del portal</strong><p>Carga los pendientes PM y registra únicamente lo que realmente se pagó. N_OP y Operador se bloquean cuando vienen asignados; solo se editan si faltan. Cobrador se completa con la supervisora asignada. Edita monto y tipo antes de archivar.</p></div></div>
-  <div class="section-tools"><button id="pmFromPM">Preparar desde pendientes PM</button><button id="pmValidate" class="soft-btn" title="Revisa solo los pagos con monto mayor que 0 antes de archivar">Validar pagos</button><button id="pmArchive" class="danger" title="Guarda definitivamente en el historial solo los pagos marcados y limpia la hoja de trabajo">Archivar pagos</button><button id="pmReload" class="soft-btn">Recargar</button><div class="share-note">Ya no necesitas importar el Excel para trabajar Pagos Hoy.</div></div><div id="pmMsg"></div><div id="pmOut"><div class="card">Cargando...</div></div>`;
-  let rows=[];
-  async function load(){const o=document.querySelector('#pmOut');o.innerHTML='<div class="card">Leyendo hoja online...</div>';try{rows=await rpc('panapass_v10_pagos_hoy');const paid=rows.filter(x=>Number(x.a_pagar)>0),total=paid.reduce((a,x)=>a+Number(x.a_pagar||0),0),boleta=paid.reduce((a,x)=>a+Number(x.con_boleta||0),0);o.innerHTML=`<div class="kpis"><div class="kpi"><span>Pendientes cargados</span><strong>${rows.length}</strong></div><div class="kpi"><span>Marcados pagados</span><strong>${paid.length}</strong></div><div class="kpi"><span>Total pagado</span><strong style="color:var(--green)">${money(total)}</strong></div><div class="kpi"><span>Boleta</span><strong>${money(boleta)}</strong></div></div>${pagosTrabajoTable(rows)}`;bind()}catch(x){o.innerHTML=`<div class="alert">${esc(x.message)}</div>`}}
-  function bind(){
-    // Estado de guardado compartido: viene de Supabase, no del navegador local.
-    const mark=(b,tr,isSaved,dirty=false)=>{
-      if(!b||!tr)return;
-      const td=b.closest('td');
-      let badge=td?.querySelector('[data-save-state]');
-      if(!badge&&td){
-        badge=document.createElement('div');
-        badge.setAttribute('data-save-state','');
-        badge.style.marginTop='5px';
-        badge.style.fontSize='10px';
-        badge.style.fontWeight='900';
-        td.appendChild(badge);
-      }
-      if(isSaved){
-        b.disabled=true;
-        b.textContent='Guardado ✓';
-        b.classList.add('pay-save-done');
-        tr.classList.add('pay-row-saved');
-        tr.classList.remove('pay-row-dirty');
-        if(badge){badge.textContent='GUARDADO ✓';badge.className='pay-save-state ok'}
-      }else{
-        b.disabled=false;
-        b.textContent=dirty?'Guardar cambios':'Guardar';
-        b.classList.remove('pay-save-done');
-        tr.classList.remove('pay-row-saved');
-        tr.classList.toggle('pay-row-dirty',!!dirty);
-        if(badge){badge.textContent=dirty?'CAMBIOS SIN GUARDAR':'';badge.className='pay-save-state'+(dirty?' dirty':'')}
-      }
-    };
-    document.querySelectorAll('[data-save-pay]').forEach(b=>{
-      const tr=b.closest('tr'),m=document.querySelector('#pmMsg');
-      mark(b,tr,tr.dataset.paySaved==='1',false);
-
-      const dirty=()=>{
-        mark(b,tr,false,true);
-      };
-      tr.querySelectorAll('[data-pay],[data-nop],[data-op],[data-tipo]').forEach(el=>{
-        el.addEventListener('input',dirty);
-        el.addEventListener('change',dirty);
-      });
-
-      b.onclick=async()=>{
-        if(b.disabled)return;
-        b.disabled=true;
-        b.textContent='Guardando...';
-        try{
-          const rr=await rpc('panapass_pagos_hoy_editar',{
-            p_id:Number(b.dataset.savePay),
-            p_a_pagar:Number(tr.querySelector('[data-pay]').value||0),
-            p_numero_operador:tr.querySelector('[data-nop]').value||null,
-            p_nombre_operador:tr.querySelector('[data-op]').value||null,
-            p_cobrador:tr.querySelector('[data-cobrador]').value||null,
-            p_tipo:tr.querySelector('[data-tipo]').value
-          });
-          const row=Array.isArray(rr)?rr[0]:rr;
-          if(row?.updated_at)tr.dataset.payUpdated=String(row.updated_at);
-          if(row?.con_boleta!==undefined&&tr.children?.[5]){
-            const boletaEl=tr.children[5].querySelector('b');
-            if(boletaEl)boletaEl.textContent=money(row.con_boleta);
-          }
-          tr.dataset.paySaved='1';
-          if(row?.guardado_en)tr.dataset.paySavedAt=String(row.guardado_en);
-          mark(b,tr,true,false);
-          m.innerHTML='<div class="success">Fila guardada ✓</div>';
-        }catch(x){
-          mark(b,tr,false,true);
-          m.innerHTML=`<div class="alert">${esc(x.message)}</div>`;
-        }
-      };
-    })
-  }
-  document.querySelector('#pmReload').onclick=load;
-  document.querySelector('#pmFromPM').onclick=async()=>{const m=document.querySelector('#pmMsg');try{const r=(await rpc('panapass_pagos_hoy_cargar_desde_pm'))[0];m.innerHTML=`<div class="success">${esc(r?.mensaje||'Pagos Hoy preparado.')}</div>`;await load()}catch(x){m.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};
-  document.querySelector('#pmValidate').onclick=async()=>{const m=document.querySelector('#pmMsg');try{const r=(await rpc('panapass_v10_validar_pagos_hoy'))[0];m.innerHTML=r.ok?`<div class="success">Validación OK · ${r.registros} pagos · ${money(r.total_a_pagar)}</div>`:`<div class="alert">${esc(JSON.stringify(r.errores))}</div>`}catch(x){m.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};
-  document.querySelector('#pmArchive').onclick=async()=>{if(!confirm('¿Archivar los pagos marcados?'))return;const m=document.querySelector('#pmMsg');try{const r=(await rpc('panapass_v10_archivar_pagos_hoy'))[0];m.innerHTML=`<div class="success">${esc(r.mensaje)} · ${r.registros} registros</div>`;await load()}catch(x){m.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};
-  await load();
-}
 function pagosTrabajoTable(rows){
   if(!rows.length)return '<div class="panel"><div class="empty">La hoja online está vacía. Pulsa “Preparar desde pendientes PM”.</div></div>';
   return `<div class="panel pagos-online mobile-cards"><div class="table-wrap"><table class="pretty compact-table pagos-work-fit"><thead><tr><th>Unidad</th><th>Panapass</th><th>Placa</th><th>Saldo PM</th><th>Monto pagado</th><th>Boleta</th><th>N_OP</th><th>Operador</th><th>Tipo</th><th>Cobrador</th><th></th></tr></thead><tbody>${rows.map(r=>{
@@ -332,30 +165,6 @@ function pagosTrabajoTable(rows){
   }).join('')}</tbody></table></div></div>`
 }
 
-async function historial(v){
-  const minf=state.meta?.min_pago||'2025-01-02', maxf=state.meta?.max_pago||new Date().toISOString().slice(0,10);
-  const admin=isAdminRole();
-  v.innerHTML=`<div class="card"><div class="toolbar"><div class="field"><label>Unidad</label><input id="hu"></div><div class="field"><label>Operador / N_OP</label><input id="ho"></div><div class="field"><label>Desde</label><input id="hd" type="date" value="${minf}"></div><div class="field"><label>Hasta</label><input id="hh" type="date" value="${maxf}"></div><button id="hb">Buscar</button>${admin?'<button id="cobraToday" class="soft-btn">Validar Cobra hoy</button>':''}</div>${admin?`<div class="source-card" style="margin-top:12px"><span class="entity-chip">COBRA</span><div class="source-text"><strong>Validación diaria</strong><p>PRE DIARIO y PRE NO DIARIO se revisan únicamente cuando presionas Validar. El resultado queda guardado para que el historial cargue rápido.</p></div></div><div id="cobraHistMsg"></div>`:''}<div id="histOut" class="muted">Cargando historial...</div></div>`;
-  async function runHist(){
-    const b={p_unidad:document.querySelector('#hu').value||null,p_operador:document.querySelector('#ho').value||null,p_desde:document.querySelector('#hd').value||null,p_hasta:document.querySelector('#hh').value||null,p_limit:500};
-    document.querySelector('#histOut').innerHTML='<div class="card">Consultando...</div>';
-    try{
-      const [rows,sum]=await Promise.all([rpc('panapass_historial',b),rpc('panapass_historial_resumen',{p_unidad:b.p_unidad,p_operador:b.p_operador,p_desde:b.p_desde,p_hasta:b.p_hasta})]);
-      const s=sum[0]||{};
-      document.querySelector('#histOut').innerHTML=`<div class="kpis"><div class="kpi"><span>Registros</span><strong>${s.registros||0}</strong></div><div class="kpi"><span>Unidades</span><strong>${s.unidades||0}</strong></div><div class="kpi"><span>Total A pagar</span><strong>${money(s.total_a_pagar)}</strong></div><div class="kpi"><span>Pendiente Cobra</span><strong style="color:var(--red)">${money(s.total_pendiente)}</strong></div></div>${tableHtml(rows,['fecha','unidad','panapass_numero','a_pagar','boleta','n_op','operador','cobrador','tipo','estado_cobra'])}`;
-    }catch(x){document.querySelector('#histOut').innerHTML=`<div class="alert">${esc(x.message)}</div>`}
-  }
-  document.querySelector('#hb').onclick=runHist;
-  if(admin){
-    document.querySelector('#cobraToday').onclick=async()=>{
-      const msg=document.querySelector('#cobraHistMsg');const hoy=state.meta?.max_pago||state.today||new Date().toISOString().slice(0,10);
-      if(!confirm(`¿Validar en Cobra los pagos PRE DIARIO y PRE NO DIARIO no validados del ${hoy}?`))return;
-      msg.innerHTML='<div class="cobra-progress">Validando Cobra del día...</div>';
-      try{const d=await cobraValidate(hoy,hoy,{soloNoValidados:true});msg.innerHTML=`<div class="success">${esc(d.mensaje)} · guardados ${d.guardados||0}</div>`;await runHist()}catch(x){msg.innerHTML=`<div class="alert">${esc(x.message)}</div>`}
-    };
-  }
-  await runHist();
-}
 async function pendientes(v){
   const minf=state.meta?.min_pago||'2025-01-02',maxf=state.meta?.max_pago||state.today||new Date().toISOString().slice(0,10);
   v.innerHTML=`<div class="source-card"><span class="entity-chip">PENDIENTES EXTERNO</span><div class="source-text"><strong>Todo lo pendiente dentro de tu alcance</strong><p>Por defecto muestra el histórico pendiente de la supervisora. Usa fecha solo cuando quieras revisar un día específico.</p></div></div><div class="section-tools"><div class="field"><label>Fecha opcional</label><input id="cobFecha" type="date" min="${minf}" max="${maxf}"></div><div class="field"><label>Buscar</label><input id="cobQ" placeholder="Unidad, operador o N_OP"></div><button id="cobLoad">Consultar</button>${isAdminRole()?'<button id="cobValidar" class="soft-btn">Validar fecha en Cobra</button>':''}</div><div id="cobMsg"></div><div id="cobOut"></div>`;
@@ -426,106 +235,7 @@ async function recurrentes(v){
   await run();
 }
 
-async function operaciones(v){
-  if(!isAdminRole()){v.innerHTML='<div class="alert">Este módulo es administrativo.</div>';return}
-  v.innerHTML='<div id="opRoot"><div class="card">Cargando operación...</div></div>';
 
-  async function load(){
-    const root=document.querySelector('#opRoot');
-    let s,runs=[];
-    try{
-      [s,runs]=await Promise.all([
-        (async()=> (await rpc('panapass_v10_estado_operativo'))[0])(),
-        rpc('panapass_ena_estado')
-      ]);
-    }catch(x){
-      root.innerHTML=`<div class="alert">${esc(x.message)}</div>`;
-      return;
-    }
-
-    const c6=runs.find(x=>x.tipo==='6AM');
-    const c11=runs.find(x=>x.tipo==='11AM');
-    const statusClass=c=>{
-      if(c?.estado==='LISTO')return 'done';
-      if(['ERROR','EXPIRADO'].includes(c?.estado))return 'warn';
-      return '';
-    };
-    const statusText=c=>{
-      if(!c)return 'PENDIENTE';
-      if(c.estado==='ESPERANDO'||c.estado==='DISPARADO')return 'ENA PROCESANDO';
-      if(c.estado==='LISTO')return 'LISTO';
-      return c.estado||'PENDIENTE';
-    };
-    const line=c=>{
-      if(!c)return 'Aún no iniciado';
-      const tm=fmtDT(c.finalizado_en||c.iniciado_en);
-      const rows=Number(c.filas_validas||0);
-      if(c.estado==='LISTO')return `${tm} · ${rows} filas válidas`;
-      if(c.estado==='ESPERANDO'||c.estado==='DISPARADO')return `${tm} · esperando que ENA termine`;
-      return `${tm}${c.error?' · '+c.error:''}`;
-    };
-
-    root.innerHTML=`<div class="source-card"><span class="entity-chip">ENA AUTOMÁTICO</span><div class="source-text"><strong>6:05 AM y 11:05 AM: primero actualiza ENA, después captura el corte</strong><p>El actualizador puede tardar ~40 minutos. El portal revisa cada 5 minutos y valida que el corte sea nuevo y consistente con la flota activa de Control de Auto. No usa una cantidad fija de unidades.</p></div></div>
-
-    <div class="cron-grid">
-      <div class="cron-card ${statusClass(c6)}"><span>Proceso AM · 6:05</span><strong>${statusText(c6)}</strong><small>${esc(line(c6))}</small></div>
-      <div class="cron-card ${statusClass(c11)}"><span>Proceso PM · 11:05</span><strong>${statusText(c11)}</strong><small>${esc(line(c11))}</small></div>
-      <div class="cron-card ${s.fuente_es_hoy?'done':'warn'}"><span>Fuente operativa</span><strong>${s.fuente_es_hoy?'DATA DE HOY':'BLOQUEADA'}</strong><small>${s.fuente_registros||0} registros · ${s.fuente_negativos||0} negativos</small></div>
-    </div>
-
-    ${!s.fuente_es_hoy?'<div class="alert"><b>AM/PM BLOQUEADOS:</b> la fuente validada todavía no corresponde a un corte aceptado de hoy. Espera que ENA termine y que el verificador automático registre el corte.</div>':''}
-
-    <div class="ops-grid-v9">
-      <div class="ops-card-v9"><h3>Verificar fuente</h3><p>Aprueba la fuente válida de hoy antes de procesar.</p><div class="op-actions"><button id="vfy">Verificar</button><button id="refreshOps" class="soft-btn">Actualizar pantalla</button></div></div>
-      <div class="ops-card-v9"><h3>Operación AM</h3><p>Crea el snapshot inicial de deuda usando el corte AM validado.</p><button id="procAM" ${s.puede_am?'':'disabled'}>Procesar AM</button><p>${esc(s.motivo_am||'')}</p></div>
-      <div class="ops-card-v9"><h3>Operación PM</h3><p>Compara el corte nuevo de las 11AM contra el snapshot AM.</p><button id="procPM" ${s.puede_pm?'':'disabled'}>Procesar PM</button><p>${esc(s.motivo_pm||'')}</p></div>
-      <div class="ops-card-v9"><h3>Resultado</h3><div class="metric-inline"><div><span>AM negativos</span><b>${s.am_negativos||0}</b></div><div><span>PM pendientes</span><b>${s.pm_pendientes||0}</b></div><div><span>Pagados</span><b>${s.pm_pagados||0}</b></div></div></div>
-    </div>
-    <div id="opMsg"></div>`;
-
-    const run=async(fn,msg)=>{
-      if(msg&&!confirm(msg))return;
-      const o=document.querySelector('#opMsg');
-      o.innerHTML='<div class="card">Ejecutando...</div>';
-      try{
-        const r=await rpc(fn);
-        o.innerHTML=`<div class="success">${esc(r?.[0]?.mensaje||'Proceso completado.')}</div>`;
-        await load();
-      }catch(x){
-        o.innerHTML=`<div class="alert">${esc(x.message)}</div>`;
-      }
-    };
-
-    document.querySelector('#vfy').onclick=()=>run('panapass_v10_verificar');
-    document.querySelector('#procAM').onclick=()=>run('panapass_v10_procesar_am','¿Procesar AM con el corte válido de hoy?');
-    document.querySelector('#procPM').onclick=()=>run('panapass_v10_procesar_pm','¿Procesar PM contra el corte nuevo de las 11AM?');
-    document.querySelector('#refreshOps').onclick=load;
-  }
-
-  await load();
-}
-
-async function reportes(v){
-  if(!state.modules.includes('reportes')){v.innerHTML='<div class="alert">Sin permiso para Reportes.</div>';return}
-  const hoy=state.today||new Date().toISOString().slice(0,10), ini=hoy.slice(0,8)+'01';
-  let est=[];try{est=await rpc('panapass_reportes_estado')}catch(_){}
-  const last=t=>{const x=est.find(z=>z.tipo===t);return x?.ultimo_envio?`Último envío: ${fmtDT(x.ultimo_envio)}${x.desde?' · '+x.desde+' → '+x.hasta:''}`:'Sin envíos registrados todavía'};
-  v.innerHTML=`<div class="source-card"><span class="entity-chip">CENTRO DE REPORTES</span><div class="source-text"><strong>Consulta, vista previa y control de envíos</strong><p>Los reportes digitales se preparan primero en pantalla. El historial registra el último rango enviado para evitar duplicados.</p></div></div>
-  <div class="section-tools"><div class="field"><label>Desde</label><input id="repDesde" type="date" value="${ini}"></div><div class="field"><label>Hasta</label><input id="repHasta" type="date" value="${hoy}"></div></div>
-  <div class="report-grid">
-   <div class="report-card"><h3>Negativos AM por Galera</h3><p>Snapshot AM para compartir por galera y supervisora.</p><div class="report-actions"><button class="soft-btn" data-go="negativos_hoy">Ver negativos</button></div><div class="report-status">${last('NEGATIVOS_GALERA')}</div></div>
-   <div class="report-card"><h3>Pagos del día por Galera</h3><p>Resultado real pagado en el día para cada galera.</p><div class="report-actions"><button class="soft-btn" data-go="historial">Ver pagos</button></div><div class="report-status">${last('PAGOS_GALERA')}</div></div>
-   <div class="report-card"><h3>Pagos · 4 Galeras</h3><p>Consolidado por rango para revisar y compartir el desempeño de VCARS, VCOMP, VIPCO y VINDU.</p><div class="report-actions"><button class="soft-btn" data-go="historial">Consultar</button></div><div class="report-status">${last('PAGOS_4_GALERAS')}</div></div>
-   <div class="report-card"><h3>Fondeo Administración</h3><p>Empresa + monto realmente pagado. Usa A PAGAR; nunca Con_boleta.</p><div class="report-actions"><button id="repFondeo">Vista previa</button></div><div class="report-status">${last('RESUMEN_FONDEO')}</div></div>
-   <div class="report-card"><h3>No PRE Diario / Cobra</h3><p>Todo lo que no es PRE DIARIO para gestionar la carga por la ruta especial de Cobra.</p><div class="report-actions"><button id="repNoPre">Vista previa</button></div></div>
-   <div class="report-card"><h3>Bajas Panapass</h3><p>Unidades no activas en Control de Auto que todavía aparecen en el último corte ENA.</p><div class="report-actions"><button id="repBajas">Consultar bajas</button></div></div>
-  </div><div id="repOut" style="margin-top:14px"></div>`;
-  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{state.active=b.dataset.go;shell();render()});
-  const out=document.querySelector('#repOut'),range=()=>({p_desde:document.querySelector('#repDesde').value,p_hasta:document.querySelector('#repHasta').value});
-  document.querySelector('#repFondeo').onclick=async()=>{out.innerHTML='<div class="card">Calculando fondeo...</div>';try{const rows=await rpc('panapass_reporte_fondeo',range());const total=rows.reduce((a,x)=>a+Number(x.monto||0),0);out.innerHTML=`<div class="kpis"><div class="kpi"><span>Empresas</span><strong>${rows.length}</strong></div><div class="kpi"><span>Total pagado</span><strong>${money(total)}</strong></div></div>${tableHtml(rows,['empresa','monto','registros'],'pretty','mobile-cards')}`}catch(x){out.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};
-  document.querySelector('#repNoPre').onclick=async()=>{out.innerHTML='<div class="card">Consultando...</div>';try{const rows=await rpc('panapass_reporte_no_pre_diario',range());out.innerHTML=`<div class="kpis"><div class="kpi"><span>Registros</span><strong>${rows.length}</strong></div><div class="kpi"><span>Total A pagar</span><strong>${money(rows.reduce((a,x)=>a+Number(x.a_pagar||0),0))}</strong></div></div>${tableHtml(rows,['fecha','galera','empresa','unidad','placa','panapass_numero','a_pagar','numero_operador','nombre_operador','cobrador','tipo','estado_cobra'],'pretty compact-table','mobile-cards')}`}catch(x){out.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};
-  document.querySelector('#repBajas').onclick=async()=>{out.innerHTML='<div class="card">Cruzando Control de Auto vs ENA...</div>';try{const rows=await rpc('panapass_reporte_bajas_v2');out.innerHTML=`<div class="kpis"><div class="kpi"><span>Bajas pendientes</span><strong>${rows.length}</strong></div></div>${tableHtml(rows,['galera','administrador','empresa','unidad','placa','panapass_numero','estatus_control','ultima_lectura','saldo','cantidad_tags','tags_ena','accion'],'pretty compact-table','mobile-cards')}`}catch(x){out.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};
-}
 
 async function usuarios(v){
   if(!isFullAdmin()){v.innerHTML='<div class="alert">Sin permiso.</div>';return}
@@ -753,11 +463,6 @@ dashboard=async function(v){await _v11dash(v);let k=[...v.querySelectorAll('.kpi
 const _v11neg=negativos;
 negativos=async function(v){await _v11neg(v);try{const f=document.querySelector('#negFecha')?.value;if(!f)return;const [rows,units]=await Promise.all([rpc('panapass_negativos_fecha',{p_fecha:f}),rpc('panapass_unidades_detalle',{p_buscar:null,p_limit:3000})]);const mm=new Map(units.map(x=>[norm(x.unidad),x]));let tb=document.querySelector('#negOut tbody');if(tb)tb.innerHTML=rows.map(r=>{let m=mm.get(norm(r.unidad))||{};return `<tr><td>${esc(r.fecha)}</td><td>${v11Status(r.status)}</td><td>${v11Unit(r.unidad,m.color)}</td><td>${esc(r.placa)}</td><td>${esc(r.panapass_numero)}</td><td style="text-align:left">${esc(r.empresa)}</td><td>${chipNum(r.neg7)}</td><td class="neg">${money(r.saldo)}</td></tr>`}).join('')}catch{}}
 
-async function historial(v){
- v.innerHTML=`<div class="source-card"><span class="entity-chip">HISTORIAL / PENDIENTE A COBRA</span><div class="source-text"><strong>Consulta unificada</strong><p>Busca por unidad u operador.</p></div></div><div class="v11-tabs"><button id="v11all">Historial</button><button id="v11cobra" class="soft-btn">Pendiente a Cobra</button></div><div class="section-tools"><div class="field"><label>Unidad</label><input id="v11u"></div><div class="field"><label>Operador</label><input id="v11op"></div><div class="field"><label>Desde</label><input id="v11d" type="date"></div><div class="field"><label>Hasta</label><input id="v11h" type="date"></div><button id="v11go">Consultar</button></div><div id="v11hist"></div>`;
- let mode='ALL';const run=async()=>{let o=document.querySelector('#v11hist');o.innerHTML='<div class="card">Consultando...</div>';try{let rows=await rpc('panapass_historial',{p_unidad:document.querySelector('#v11u').value||null,p_operador:document.querySelector('#v11op').value||null,p_desde:document.querySelector('#v11d').value||null,p_hasta:document.querySelector('#v11h').value||null,p_limit:1500});if(mode==='COBRA')rows=rows.filter(x=>['','PENDIENTE','NO VALIDADO','ERROR'].includes(norm(x.estado_cobra)));o.innerHTML=tableHtml(rows,['fecha','status','unidad','placa','panapass_numero','empresa','a_pagar','boleta','n_op','operador','cobrador','tipo','estado_cobra'],'pretty compact-table','mobile-cards')}catch(e){o.innerHTML=`<div class="alert">${esc(e.message)}</div>`}};
- document.querySelector('#v11all').onclick=()=>{mode='ALL';run()};document.querySelector('#v11cobra').onclick=()=>{mode='COBRA';run()};document.querySelector('#v11go').onclick=run;run()
-}
 pendientesExterno=historial;
 
 async function recurrentes(v){
@@ -816,29 +521,6 @@ ranking=async function(v){await _v12Ranking(v);const first=v.querySelector('.sou
 
 
 /* ===== V13 FINAL: perfiles y Pagos Hoy con colores ===== */
-async function openSupervisoraProfile(id){
-  let modal=document.querySelector('#supProfileModal');
-  if(!modal){modal=document.createElement('div');modal.id='supProfileModal';modal.className='modal';document.body.appendChild(modal)}
-  modal.style.display='flex';modal.innerHTML='<div class="modal-card" style="max-width:1180px;width:94vw"><div class="table-summary"><h2>Perfil operativo</h2><button class="soft-btn" id="supClose">Cerrar</button></div><div class="card">Cargando información...</div></div>';
-  document.querySelector('#supClose').onclick=()=>modal.style.display='none';
-  try{
-    const d=await rpc('panapass_supervisora_perfil',{p_supervisora_id:id}),s=d.supervisora||{},k=d.kpis||{},rows=d.unidades||[];
-    const um=new Map(rows.map(x=>[norm(x.unidad),x]));
-    modal.innerHTML=`<div class="modal-card" style="max-width:1180px;width:94vw;max-height:92vh;overflow:auto">
-      <div class="table-summary"><div><h2 style="margin:0">${esc(s.nombre||'Supervisora')}</h2><span class="muted">${esc(s.galera||'')} · ${esc(s.email||'')}</span></div><button class="soft-btn" id="supClose">Cerrar</button></div>
-      <div class="kpis">
-        <div class="kpi"><span>Unidades</span><strong>${k.unidades||0}</strong></div>
-        <div class="kpi"><span>Negativas ahora</span><strong>${k.negativas_ahora||0}</strong></div>
-        <div class="kpi"><span>Pagadas mes</span><strong>${k.unidades_pagadas_mes||0}</strong></div>
-        <div class="kpi"><span>Monto mes</span><strong>${money(k.monto_mes||0)}</strong></div>
-      </div>
-      ${v12Rows(rows,um,['status','unidad','placa','panapass_numero','empresa','saldo'])}
-      <div class="panel mobile-cards" style="margin-top:12px"><div class="rank-table-title"><h3>Comportamiento mensual</h3><span>Recurrencia por unidad</span></div>${tableHtml(rows,['unidad','neg7','pagos_mes','dias_mes','total_mes'],'pretty compact-table','mobile-cards')}</div>
-      ${(d.rotaciones||[]).length?`<div class="card"><h3>Rotaciones</h3>${tableHtml(d.rotaciones,['galera_anterior','galera_nueva','cambio_en'],'pretty compact-table','mobile-cards')}</div>`:''}
-    </div>`;
-    document.querySelector('#supClose').onclick=()=>modal.style.display='none';
-  }catch(x){modal.innerHTML=`<div class="modal-card"><div class="alert">${esc(x.message)}</div><button id="supClose">Cerrar</button></div>`;document.querySelector('#supClose').onclick=()=>modal.style.display='none'}
-}
 
 const _v13PagosTrabajo=pagosTrabajo;
 pagosTrabajo=async function(v){
