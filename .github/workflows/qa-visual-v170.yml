@@ -1,0 +1,38 @@
+name: QA visual V170
+on:
+  workflow_dispatch:
+  push:
+    branches: [visual-polish-v170]
+    paths:
+      - 'qa/v170-visual-test.js'
+      - '.github/workflows/qa-visual-v170.yml'
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install QA dependencies
+        run: |
+          npm init -y
+          npm install playwright @axe-core/playwright
+          npx playwright install --with-deps chromium
+      - name: Run visual QA
+        env:
+          QA_EMAIL: ${{ secrets.QA_EMAIL }}
+          QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
+          QA_URL: https://visual-polish-v170-portal-ena-rym.almarzayhonly.workers.dev
+        run: node qa/v170-visual-test.js
+      - name: Upload QA results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v170-visual-qa-results
+          path: qa-results/
+          if-no-files-found: warn
+          retention-days: 7
