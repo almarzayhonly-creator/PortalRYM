@@ -11,39 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract compact Control definitions
+      - name: Inspect direct Audit and Validator renderers
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
           s=Path('index.html').read_text(errors='ignore')
-          names=['v75ControlUnits','v75ControlAudit','v94ControlCuposATTT','v80OpenEcarValidator']
-          def extract(start):
-              brace=s.find('{',start)
-              if brace<0:return ''
-              depth=0; quote=None; esc=False; i=brace
-              while i<len(s):
-                  c=s[i]
-                  if quote:
-                      if esc: esc=False
-                      elif c=='\\': esc=True
-                      elif c==quote: quote=None
-                  else:
-                      if c in "'\"`": quote=c
-                      elif c=='{': depth+=1
-                      elif c=='}':
-                          depth-=1
-                          if depth==0:return s[start:i+1]
-                  i+=1
-              return s[start:start+12000]
-          for name in names:
-              print('\n===== '+name+' =====')
-              pats=[rf'window\.{name}\s*=\s*async\s*function\s*\(',rf'window\.{name}\s*=\s*function\s*\(',rf'async\s+function\s+{name}\s*\(',rf'function\s+{name}\s*\(']
-              hits=[]
-              for pat in pats:
-                  hits += [m.start() for m in re.finditer(pat,s)]
-              for j,i in enumerate(sorted(set(hits))[-4:],1):
-                  body=extract(i)
-                  print(f'--- DEF {j} @ {i} len={len(body)} ---')
-                  print(body[:12000])
+          targets=['ca6Audit','renderPanel','v112-audit-master','ca6Out','section-tools']
+          for t in targets:
+            print('\n===== '+t+' =====')
+            hits=[m.start() for m in re.finditer(re.escape(t),s)]
+            print('hits',hits[:30])
+            for i in hits[:12]:
+              print(f'--- context @{i} ---')
+              print(s[max(0,i-3000):min(len(s),i+7000)])
           PY
