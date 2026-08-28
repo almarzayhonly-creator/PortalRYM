@@ -1,0 +1,718 @@
+{
+  "index_bytes": 1331341,
+  "scripts": [
+    {
+      "script": 1,
+      "id": null,
+      "bytes": 133306,
+      "hits": {
+        "ranking": 18,
+        "recurrentes": 21,
+        "dashboard": 24,
+        "negativos": 28,
+        "pagosTrabajo": 10,
+        "pagosConsultaHoy": 6,
+        "historial": 32,
+        "operaciones": 13,
+        "reportes": 10,
+        "shell=function": 2,
+        "render=async": 1
+      },
+      "start": 64242,
+      "end": 197294
+    },
+    {
+      "script": 2,
+      "id": "phase1-ena-ui",
+      "bytes": 2153,
+      "hits": {
+        "shell=function": 1
+      },
+      "start": 197295,
+      "end": 199477
+    },
+    {
+      "script": 3,
+      "id": "v18-history-total",
+      "bytes": 4629,
+      "hits": {
+        "historial": 3
+      },
+      "start": 199478,
+      "end": 204143
+    },
+    {
+      "script": 4,
+      "id": "phase2-final-behavior",
+      "bytes": 4548,
+      "hits": {
+        "ranking": 5,
+        "recurrentes": 5,
+        "dashboard": 12,
+        "negativos": 5,
+        "pagosTrabajo": 3,
+        "pagosConsultaHoy": 1,
+        "historial": 6,
+        "operaciones": 3,
+        "reportes": 5,
+        "shell=function": 1,
+        "render=async": 1
+      },
+      "start": 211819,
+      "end": 216403
+    },
+    {
+      "script": 5,
+      "id": "phase3-supervisoras-filtros-behavior",
+      "bytes": 15076,
+      "hits": {
+        "ranking": 3,
+        "recurrentes": 3,
+        "dashboard": 4,
+        "negativos": 7,
+        "pagosConsultaHoy": 1,
+        "historial": 4,
+        "operaciones": 1,
+        "reportes": 2
+      },
+      "start": 222966,
+      "end": 238082
+    },
+    {
+      "script": 6,
+      "id": "phase4-dashboard-galeras-behavior",
+      "bytes": 3218,
+      "hits": {
+        "dashboard": 11,
+        "negativos": 5,
+        "pagosConsultaHoy": 2
+      },
+      "start": 240142,
+      "end": 243416
+    },
+    {
+      "script": 7,
+      "id": "phase4-ena-saldo-behavior",
+      "bytes": 4919,
+      "hits": {
+        "negativos": 2
+      },
+      "start": 243789,
+      "end": 248747
+    },
+    {
+      "script": 8,
+      "id": "phase5-search-ena-fix-behavior",
+      "bytes": 6797,
+      "hits": {
+        "dashboard": 3,
+        "negativos": 2
+      },
+      "start": 249807,
+      "end": 256648
+    },
+    {
+      "script": 9,
+      "id": "phase6-control-auto-secure-behavior",
+      "bytes": 13463,
+      "hits": {
+        "dashboard": 6,
+        "negativos": 2
+      },
+      "start": 259171,
+      "end": 272666
+    },
+    {
+      "script": 11,
+      "id": "v13-filtro-empresa-behavior",
+      "bytes": 3062,
+      "hits": {
+        "pagosTrabajo": 2
+      },
+      "start": 287188,
+      "end": 290298
+    },
+    {
+      "script": 12,
+      "id": "v18-whatsapp-ranking-behavior",
+      "bytes": 6484,
+      "hits": {
+        "ranking": 3,
+        "negativos": 3,
+        "pagosConsultaHoy": 2
+      },
+      "start": 291627,
+      "end": 298004
+    },
+    {
+      "script": 16,
+      "id": "phase31-saldo-express-behavior",
+      "bytes": 5242,
+      "hits": {
+        "negativos": 2
+      },
+      "start": 325884,
+      "end": 331156
+    },
+    {
+      "script": 18,
+      "id": "phase35-final-qa-behavior",
+      "bytes": 4557,
+      "hits": {
+        "ranking": 1,
+        "negativos": 1
+      },
+      "start": 340706,
+      "end": 345304
+    },
+    {
+      "script": 19,
+      "id": "v36-speed-portal-behavior",
+      "bytes": 9878,
+      "hits": {
+        "ranking": 1,
+        "dashboard": 4,
+        "negativos": 2,
+        "historial": 1,
+        "reportes": 1,
+        "shell=function": 1
+      },
+      "start": 349936,
+      "end": 359852
+    },
+    {
+      "script": 20,
+      "id": "v37-portal-routing-behavior",
+      "bytes": 2430,
+      "hits": {
+        "dashboard": 3,
+        "shell=function": 1
+      },
+      "start": 362686,
+      "end": 365164
+    },
+    {
+      "script": 21,
+      "id": "rym-control-auto-auditoria-js",
+      "bytes": 13468,
+      "hits": {
+        "historial": 1
+      },
+      "start": 366208,
+      "end": 379681
+    },
+    {
+      "script": 22,
+      "id": "rym-v70-stable-js",
+      "bytes": 19323,
+      "hits": {
+        "ranking": 2,
+        "recurrentes": 2,
+        "dashboard": 10,
+        "negativos": 1,
+        "historial": 3,
+        "operaciones": 1,
+        "reportes": 2,
+        "v70OpenPanapass": 2
+      },
+      "start": 388578,
+      "end": 407904
+    },
+    {
+      "script": 24,
+      "id": "rym-v75-control-recorrido-js",
+      "bytes": 16567,
+      "hits": {
+        "ranking": 1,
+        "recurrentes": 1,
+        "dashboard": 16,
+        "negativos": 1,
+        "historial": 1,
+        "operaciones": 1,
+        "reportes": 1,
+        "recorrido": 11,
+        "v70OpenPanapass": 1,
+        "render=async": 1
+      },
+      "start": 417745,
+      "end": 434320
+    },
+    {
+      "script": 25,
+      "id": "fondeo-gmail-v1",
+      "bytes": 4761,
+      "hits": {
+        "historial": 1,
+        "reportes": 2
+      },
+      "start": 437872,
+      "end": 442655
+    },
+    {
+      "script": 26,
+      "id": "rym-v74-responsive-pm-behavior",
+      "bytes": 7222,
+      "hits": {
+        "pagosTrabajo": 3
+      },
+      "start": 452022,
+      "end": 459276
+    },
+    {
+      "script": 27,
+      "id": "rym-v76-production-js",
+      "bytes": 14529,
+      "hits": {
+        "ranking": 2,
+        "recurrentes": 1,
+        "dashboard": 5,
+        "negativos": 2,
+        "historial": 2,
+        "operaciones": 1,
+        "reportes": 1,
+        "recorrido": 4
+      },
+      "start": 462140,
+      "end": 476553
+    },
+    {
+      "script": 28,
+      "id": "rym-v87-extra-bajas-js",
+      "bytes": 14817,
+      "hits": {
+        "dashboard": 3,
+        "pagosTrabajo": 5,
+        "bajas_panapass": 2,
+        "v70OpenPanapass": 2,
+        "shell=function": 1,
+        "render=async": 1
+      },
+      "start": 483043,
+      "end": 497877
+    },
+    {
+      "script": 29,
+      "id": "v92-consolidated-behavior",
+      "bytes": 17403,
+      "hits": {
+        "ranking": 4,
+        "negativos": 2,
+        "pagosTrabajo": 2,
+        "reportes": 2
+      },
+      "start": 501035,
+      "end": 518437
+    },
+    {
+      "script": 30,
+      "id": "v93-polish-behavior",
+      "bytes": 18670,
+      "hits": {
+        "ranking": 9,
+        "reportes": 2
+      },
+      "start": 521898,
+      "end": 540561
+    },
+    {
+      "script": 31,
+      "id": "rym-v100-smart-center-js",
+      "bytes": 2361,
+      "hits": {
+        "negativos": 3
+      },
+      "start": 542623,
+      "end": 545024
+    },
+    {
+      "script": 38,
+      "id": "rym-v96-final-js",
+      "bytes": 311169,
+      "hits": {
+        "historial": 1,
+        "reportes": 3,
+        "bajas_panapass": 1
+      },
+      "start": 590975,
+      "end": 902081
+    },
+    {
+      "script": 39,
+      "id": "rym-v99-centro-control-js",
+      "bytes": 54778,
+      "hits": {
+        "ranking": 2,
+        "dashboard": 1,
+        "negativos": 6,
+        "pagosTrabajo": 4,
+        "historial": 2,
+        "v70OpenPanapass": 2
+      },
+      "start": 918393,
+      "end": 972995
+    },
+    {
+      "script": 42,
+      "id": "rym-v103-v102-polish-js",
+      "bytes": 8786,
+      "hits": {
+        "ranking": 1,
+        "negativos": 4
+      },
+      "start": 997669,
+      "end": 1006493
+    },
+    {
+      "script": 44,
+      "id": "rym-v115-mobile-app-js",
+      "bytes": 1425,
+      "hits": {
+        "v70OpenPanapass": 1
+      },
+      "start": 1027543,
+      "end": 1029007
+    },
+    {
+      "script": 45,
+      "id": "rym-v117-project-identities-js",
+      "bytes": 3890,
+      "hits": {
+        "v70OpenPanapass": 3
+      },
+      "start": 1048137,
+      "end": 1052068
+    },
+    {
+      "script": 50,
+      "id": "rym-v122-readability-history-js",
+      "bytes": 4498,
+      "hits": {
+        "historial": 1
+      },
+      "start": 1089436,
+      "end": 1093955
+    },
+    {
+      "script": 51,
+      "id": "rym-v123-experience-js",
+      "bytes": 14263,
+      "hits": {
+        "ranking": 1,
+        "recurrentes": 6,
+        "dashboard": 1,
+        "historial": 1
+      },
+      "start": 1102485,
+      "end": 1116730
+    },
+    {
+      "script": 52,
+      "id": "rym-v124-dashboard-ranking-js",
+      "bytes": 8016,
+      "hits": {
+        "ranking": 1,
+        "dashboard": 1
+      },
+      "start": 1121485,
+      "end": 1129535
+    },
+    {
+      "script": 54,
+      "id": "rym-v127-enterprise-js",
+      "bytes": 4042,
+      "hits": {
+        "ranking": 2
+      },
+      "start": 1146886,
+      "end": 1150965
+    },
+    {
+      "script": 57,
+      "id": "rym-v141-activity-cupos-mail-js",
+      "bytes": 11221,
+      "hits": {
+        "historial": 1
+      },
+      "start": 1163237,
+      "end": 1174483
+    },
+    {
+      "script": 58,
+      "id": "rym-v145-login-nav-js",
+      "bytes": 4495,
+      "hits": {
+        "v70OpenPanapass": 3
+      },
+      "start": 1175080,
+      "end": 1179615
+    },
+    {
+      "script": 60,
+      "id": "rym-v154-safe-js",
+      "bytes": 31172,
+      "hits": {
+        "ranking": 2,
+        "dashboard": 1,
+        "v70OpenPanapass": 2
+      },
+      "start": 1206309,
+      "end": 1237399
+    },
+    {
+      "script": 61,
+      "id": "rym-v155-gps-fix-js",
+      "bytes": 16326,
+      "hits": {
+        "ranking": 1,
+        "dashboard": 1,
+        "v70OpenPanapass": 3
+      },
+      "start": 1238147,
+      "end": 1254436
+    },
+    {
+      "script": 62,
+      "id": "rym-v157-gps-js",
+      "bytes": 30338,
+      "hits": {
+        "ranking": 13,
+        "dashboard": 8,
+        "historial": 2
+      },
+      "start": 1264038,
+      "end": 1294191
+    },
+    {
+      "script": 65,
+      "id": "rym-v166-js",
+      "bytes": 14784,
+      "hits": {
+        "dashboard": 4,
+        "negativos": 1,
+        "pagosTrabajo": 1,
+        "pagosConsultaHoy": 1
+      },
+      "start": 1313824,
+      "end": 1328614
+    }
+  ],
+  "styles": [
+    {
+      "style": 1,
+      "id": null,
+      "bytes": 31392,
+      "start": 284,
+      "end": 31691
+    },
+    {
+      "style": 3,
+      "id": "phase1-ena-visual",
+      "bytes": 11097,
+      "start": 35318,
+      "end": 46437
+    },
+    {
+      "style": 10,
+      "id": "v17-style",
+      "bytes": 3429,
+      "start": 142013,
+      "end": 145458
+    },
+    {
+      "style": 23,
+      "id": "v18-whatsapp-ranking-style",
+      "bytes": 537,
+      "start": 291042,
+      "end": 291626
+    },
+    {
+      "style": 29,
+      "id": "phase35-final-qa-polish",
+      "bytes": 3409,
+      "start": 337254,
+      "end": 340705
+    },
+    {
+      "style": 31,
+      "id": "v37-portal-routing-ui",
+      "bytes": 2795,
+      "start": 359853,
+      "end": 362685
+    },
+    {
+      "style": 42,
+      "id": "rym-v87-extra-bajas-css",
+      "bytes": 4763,
+      "start": 478237,
+      "end": 483042
+    },
+    {
+      "style": 43,
+      "id": "v92-consolidated-css",
+      "bytes": 3114,
+      "start": 497879,
+      "end": 501034
+    },
+    {
+      "style": 44,
+      "id": "v93-polish-css",
+      "bytes": 3422,
+      "start": 518440,
+      "end": 521897
+    },
+    {
+      "style": 45,
+      "id": "rym-v100-smart-center",
+      "bytes": 1954,
+      "start": 540627,
+      "end": 542622
+    },
+    {
+      "style": 48,
+      "id": "v114-mobile-fix",
+      "bytes": 7443,
+      "start": 566742,
+      "end": 574218
+    },
+    {
+      "style": 49,
+      "id": "rym-v134-live-validator-css",
+      "bytes": 306,
+      "start": 574407,
+      "end": 574761
+    },
+    {
+      "style": 50,
+      "id": "rym-v137-revisados-fotos-css",
+      "bytes": 907,
+      "start": 574786,
+      "end": 575742
+    },
+    {
+      "style": 51,
+      "id": "rym-v163-gps-only-css",
+      "bytes": 1846,
+      "start": 577542,
+      "end": 579430
+    },
+    {
+      "style": 53,
+      "id": "rym-v96-final-css",
+      "bytes": 3021,
+      "start": 587915,
+      "end": 590974
+    },
+    {
+      "style": 55,
+      "id": "rym-v99-centro-control-css",
+      "bytes": 15295,
+      "start": 903049,
+      "end": 918391
+    },
+    {
+      "style": 56,
+      "id": "rym-v100-smart-ui",
+      "bytes": 1376,
+      "start": 973075,
+      "end": 974489
+    },
+    {
+      "style": 57,
+      "id": "rym-v102-dashboard-css",
+      "bytes": 5900,
+      "start": 975882,
+      "end": 981825
+    },
+    {
+      "style": 61,
+      "id": "rym-v117-project-identities",
+      "bytes": 18977,
+      "start": 1029113,
+      "end": 1048136
+    },
+    {
+      "style": 63,
+      "id": "rym-v119-unified-experience-css",
+      "bytes": 9266,
+      "start": 1060856,
+      "end": 1070170
+    },
+    {
+      "style": 65,
+      "id": "rym-v121-laptop-search-diagnostics-css",
+      "bytes": 2588,
+      "start": 1080170,
+      "end": 1082817
+    },
+    {
+      "style": 66,
+      "id": "rym-v122-readability-history-css",
+      "bytes": 5057,
+      "start": 1084332,
+      "end": 1089435
+    },
+    {
+      "style": 67,
+      "id": "rym-v123-experience-css",
+      "bytes": 8382,
+      "start": 1094070,
+      "end": 1102484
+    },
+    {
+      "style": 68,
+      "id": "rym-v124-dashboard-ranking-css",
+      "bytes": 4591,
+      "start": 1116844,
+      "end": 1121484
+    },
+    {
+      "style": 69,
+      "id": "rym-v125-consistency-css",
+      "bytes": 6076,
+      "start": 1129650,
+      "end": 1135769
+    },
+    {
+      "style": 70,
+      "id": "rym-v127-enterprise-css",
+      "bytes": 3140,
+      "start": 1143705,
+      "end": 1146885
+    },
+    {
+      "style": 71,
+      "id": "rym-v130-session-validator-css",
+      "bytes": 532,
+      "start": 1151073,
+      "end": 1151656
+    },
+    {
+      "style": 72,
+      "id": "rym-v133-closed-supervisor-css",
+      "bytes": 960,
+      "start": 1151769,
+      "end": 1152780
+    },
+    {
+      "style": 78,
+      "id": "rym-v154-safe-css",
+      "bytes": 6712,
+      "start": 1199558,
+      "end": 1206308
+    },
+    {
+      "style": 80,
+      "id": "rym-v157-gps-css",
+      "bytes": 9437,
+      "start": 1254563,
+      "end": 1264037
+    },
+    {
+      "style": 81,
+      "id": "rym-v158-gps-css",
+      "bytes": 4314,
+      "start": 1294321,
+      "end": 1298672
+    }
+  ]
+}
