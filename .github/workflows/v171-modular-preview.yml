@@ -4,6 +4,9 @@ on:
     branches: [v171-modular]
 permissions:
   contents: read
+concurrency:
+  group: v171-modular-preview
+  cancel-in-progress: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,6 +17,26 @@ jobs:
           node-version: 24
       - name: Inventory Panapass monolith
         run: node qa/v171-panapass-inventory.js
+      - name: Map Ranking and Recurrentes source references
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(errors='ignore')
+          names=['buildRankingPyramid','compactRanking','displayRanking','forceRankingPyramid','improveRanking','loadPeerRanking','peerPosition','peerRanking','renderRanking','recurrentes','recTable','recTable76','closeRec']
+          print('V171_SOURCE_MAP_START')
+          seen=[]
+          for name in names:
+              pos=s.find(name)
+              if pos < 0:
+                  continue
+              a=max(0,pos-1800); b=min(len(s),pos+4200)
+              chunk=s[a:b].replace('\x00','')
+              print('\n===== '+name+' @ '+str(pos)+' =====')
+              print(chunk)
+              seen.append(name)
+          print('\nFOUND:', ','.join(seen))
+          print('V171_SOURCE_MAP_END')
+          PY
       - name: Inject V171 loader into preview build only
         run: |
           python3 - <<'PY'
