@@ -5,15 +5,86 @@
   window.__RYM_V170_CONTROL_ROUTER__=true;
 
   const N=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+  const ROUTES={
+    'DASHBOARD':'v75ControlDashboard',
+    'UNIDADES':'v75ControlUnits',
+    'CUPOS ATTT':'v94ControlCuposATTT',
+    'AUDITORIA':'v75ControlAudit',
+    'VALIDADOR ECARCHECK':'v80OpenEcarValidator'
+  };
+  let desired=null;
+  let pending=null;
+  let busy=false;
+  let generation=0;
+  let repairs=0;
 
-  function routeFor(label){
-    const x=N(label);
-    if(x==='DASHBOARD') return 'v75ControlDashboard';
-    if(x==='UNIDADES') return 'v75ControlUnits';
-    if(x==='CUPOS ATTT') return 'v94ControlCuposATTT';
-    if(x==='AUDITORIA') return 'v75ControlAudit';
-    if(x==='VALIDADOR ECARCHECK') return 'v80OpenEcarValidator';
-    return null;
+  function routeFor(label){return ROUTES[N(label)]||null;}
+
+  function matches(fnName){
+    if(!document.body.classList.contains('v70-control')) return false;
+    const top=N(document.querySelector('.top h1')?.textContent||'');
+    if(fnName==='v75ControlDashboard') return top.includes('DASHBOARD')||!!document.querySelector('.v75-control-dashboard');
+    if(fnName==='v75ControlUnits') return top.includes('UNIDADES')&&!top.includes('CUPOS');
+    if(fnName==='v94ControlCuposATTT') return top.includes('CUPOS ATTT')||!!document.querySelector('.v94-cupos');
+    if(fnName==='v75ControlAudit') return top.includes('AUDITOR')||!!document.querySelector('.ca-audit,.v112-audit-master');
+    if(fnName==='v80OpenEcarValidator') return top.includes('VALIDADOR')||!!document.querySelector('.v80-validator');
+    return true;
+  }
+
+  function setSwitch(on){
+    try{document.body.classList.toggle('v123-control-switch',!!on)}catch(_){ }
+  }
+
+  function scheduleIntegrity(gen){
+    [350,1200,2800,5200].forEach(ms=>setTimeout(()=>{
+      if(gen!==generation||busy||pending||!desired) return;
+      if(matches(desired)) return;
+      if(repairs>=2){
+        try{console.error('[V170 Control router] view did not settle',desired)}catch(_){ }
+        return;
+      }
+      repairs++;
+      pending=desired;
+      runQueue();
+    },ms));
+  }
+
+  async function runQueue(){
+    if(busy) return;
+    busy=true;
+    setSwitch(true);
+    try{
+      while(pending){
+        const fnName=pending;
+        pending=null;
+        const fn=window[fnName];
+        if(typeof fn!=='function'){
+          try{console.error('[V170 Control router] missing canonical route',fnName)}catch(_){ }
+          continue;
+        }
+        try{
+          await fn.call(window);
+        }catch(err){
+          try{console.error('[V170 Control router]',fnName,err)}catch(_){ }
+        }
+        /* If the user clicked another tab while this one was loading,
+           pending now contains only the latest requested destination. */
+      }
+    }finally{
+      busy=false;
+      setSwitch(false);
+      const gen=generation;
+      scheduleIntegrity(gen);
+      if(pending) runQueue();
+    }
+  }
+
+  function request(fnName){
+    desired=fnName;
+    pending=fnName;       // latest click replaces any older queued destination
+    generation++;
+    repairs=0;
+    runQueue();
   }
 
   document.addEventListener('click',function(ev){
@@ -22,21 +93,8 @@
     if(!btn) return;
     const fnName=routeFor(btn.innerText||btn.textContent);
     if(!fnName) return;
-    const fn=window[fnName];
-    if(typeof fn!=='function'){
-      try{console.error('[V170 Control router] missing canonical route',fnName)}catch(_){ }
-      return;
-    }
-
     ev.preventDefault();
     ev.stopImmediatePropagation();
-    try{document.body.classList.add('v123-control-switch')}catch(_){ }
-
-    Promise.resolve()
-      .then(()=>fn.call(window))
-      .catch(err=>{ try{console.error('[V170 Control router]',fnName,err)}catch(_){ } })
-      .finally(()=>setTimeout(()=>{
-        try{document.body.classList.remove('v123-control-switch')}catch(_){ }
-      },250));
+    request(fnName);
   },true);
 })();
