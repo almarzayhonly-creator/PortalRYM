@@ -1,0 +1,3 @@
+body[data-rym-module="panapass"]{--rym-accent:var(--rym-panapass)}
+body[data-rym-module="panapass"] .rym-module-accent{color:var(--rym-accent)}
+body[data-rym-module="panapass"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
