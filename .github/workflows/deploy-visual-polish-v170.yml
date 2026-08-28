@@ -35,8 +35,10 @@ jobs:
               s=s[:body_end]+router+'\n'+s[body_end:]
           p.write_text(s)
           final=p.read_text()
-          assert final.rfind('id="rym-v170-control-router"') > final.rfind('</script>')
-          assert final.rfind('id="rym-v170-control-router"') < final.rfind('</body>')
+          marker=final.rfind('id="rym-v170-control-router"')
+          assert marker >= 0
+          assert marker < final.rfind('</body>')
+          assert final.find('</script>', marker) < final.rfind('</body>')
           PY
           grep -Fq 'id="rym-v170-visual-polish"' index.html
           grep -Fq 'id="rym-v170-control-router"' index.html
