@@ -99,3 +99,5 @@ print('V172 Control extraction OK')
 print('index bytes:',INDEX.stat().st_size)
 print('validador bytes:',(ROOT/'modules/control-auto/validador.js').stat().st_size)
 print('cupos bytes:',(ROOT/'modules/control-auto/cupos.js').stat().st_size)
+
+# trigger: control extraction contract v1
