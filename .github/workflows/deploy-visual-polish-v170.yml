@@ -24,13 +24,19 @@ jobs:
           css='<link id="rym-v170-visual-polish" rel="stylesheet" href="./v170-visual-polish.css?v=170">'
           router='<script id="rym-v170-control-router" src="./v170-control-router.js?v=170"></script>'
           assert '</head>' in s
+          assert '</body>' in s
           assert 'Posiciones 4–14' in Path('panapass-v169-final.js').read_text()
           assert 'v169-rec-r2' in Path('v169-final-polish.js').read_text()
           if 'id="rym-v170-visual-polish"' not in s:
               s=s.replace('</head>', css+'\n</head>', 1)
           if 'id="rym-v170-control-router"' not in s:
-              s=s.replace('</body>', router+'\n</body>', 1)
+              body_end=s.rfind('</body>')
+              assert body_end >= 0
+              s=s[:body_end]+router+'\n'+s[body_end:]
           p.write_text(s)
+          final=p.read_text()
+          assert final.rfind('id="rym-v170-control-router"') > final.rfind('</script>')
+          assert final.rfind('id="rym-v170-control-router"') < final.rfind('</body>')
           PY
           grep -Fq 'id="rym-v170-visual-polish"' index.html
           grep -Fq 'id="rym-v170-control-router"' index.html
