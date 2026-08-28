@@ -1,0 +1,46 @@
+name: Integrate isolated ENA module
+on:
+  push:
+    branches: [v170-ena-pdf-calibration]
+    paths:
+      - '.github/workflows/v170-ena-integrate.yml'
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v170-ena-pdf-calibration
+          fetch-depth: 0
+          token: ${{ github.token }}
+      - name: Link ENA module into portal
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<script src="/js/ena-transferencia.js?v=170ena1"></script>'
+          if marker not in s:
+              pos=s.lower().rfind('</body>')
+              if pos < 0: raise SystemExit('index.html has no </body>')
+              s=s[:pos]+marker+'\n'+s[pos:]
+              p.write_text(s,encoding='utf-8')
+          if s.count(marker) != 1: raise SystemExit('ENA module marker count must be exactly 1')
+          PY
+          grep -Fq 'js/ena-transferencia.js?v=170ena1' index.html
+          test -s js/ena-transferencia.js
+      - name: Commit integration only
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'Integration already present.'
+            exit 0
+          fi
+          git config user.name 'portal-rym-bot'
+          git config user.email 'portal-rym-bot@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Integrate isolated ENA transferencia module'
+          git push origin HEAD:v170-ena-pdf-calibration
