@@ -24,6 +24,10 @@ table tbody tr{background:#fff}table tbody tr:hover{background:#f8fafc!important
 .filters,.filter-bar,[class*="filters"]{gap:8px!important}.filters button,.filter-bar button,[class*="filters"] button{border-radius:9px!important}
 /* Sidebar */
 .side .nav button:not(.active),.v66-nav button:not(.active){opacity:.86}.side .nav button.active,.v66-nav button.active{box-shadow:inset 3px 0 0 currentColor;background:#fff!important}
+/* Control de Auto: never expose stale legacy KPI values during async refresh */
+body.v70-control.v123-control-switch{overflow:hidden}
+body.v70-control.v123-control-switch:before{content:"";position:fixed;inset:0;background:rgba(246,248,251,.94);z-index:2147483000;pointer-events:all}
+body.v70-control.v123-control-switch:after{content:"Actualizando Control de Auto…";position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2147483001;background:#fff;color:#176b47;border:1px solid #bfe5cf;border-radius:14px;padding:16px 22px;font-weight:900;box-shadow:0 10px 30px rgba(24,47,73,.12);white-space:nowrap}
 /* Portal cards keep distinct identity */
 body.v99-home .v99-module.pan,body.v99-home .v99-module.panapass{border-top:4px solid var(--rym-blue)!important}
 body.v99-home .v99-module.rev,body.v99-home .v99-module.revisados{border-top:4px solid var(--rym-orange)!important}
@@ -36,4 +40,5 @@ body.v99-home .v99-module.gps{border-top:4px solid var(--rym-gps)!important}
  table{font-size:11px!important}.side .nav,.v66-nav,.tabs{scrollbar-width:none}
  button,select,input{max-width:100%}
  .modal,.dialog,[class*="modal-content"]{max-width:calc(100vw - 20px)!important;margin-left:auto!important;margin-right:auto!important}
+ body.v70-control.v123-control-switch:after{max-width:calc(100vw - 32px);white-space:normal;text-align:center}
 }
