@@ -22,3 +22,5 @@ report={'index_bytes':len(html.encode()),'scripts':rows,'styles':styles}
 out=root/'docs/arquitectura/V172_PANAPASS_INVENTORY.json'
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(report,ensure_ascii=False,indent=2))
+
+# V172 clean inventory trigger 1
