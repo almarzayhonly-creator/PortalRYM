@@ -133,8 +133,11 @@
   document.addEventListener('DOMContentLoaded',scheduleRecurrentes,{once:true});
   scheduleRecurrentes();
 
-  const PDF_ENDPOINT='https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/panapass-baja-transferencia-pdf-v2';
-  const ENA_TEMPLATE='https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf';
+  const PDF_AUTOFILL_RETRY_V171=true;
+  const PDF_ENDPOINTS=[
+    'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/panapass-baja-transferencia-pdf-v2',
+    'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/panapass-baja-transferencia-pdf'
+  ];
 
   function authHeaders(){
     try{
@@ -175,14 +178,39 @@
     setTimeout(()=>window.URL.revokeObjectURL(objectUrl),15000);
   }
 
-  function openOfficialFallback(message){
-    const w=window.open(ENA_TEMPLATE,'_blank','noopener');
-    const text=(message&&String(message).trim())||'No se pudo generar el PDF firmado.';
-    if(w){
-      alert(text+'\n\nSe abrió como respaldo el formulario oficial de ENA usando el dominio válido.');
-    }else{
-      alert(text+'\n\nEl navegador bloqueó la ventana de respaldo. Habilita ventanas emergentes para abrir el formulario oficial ENA.');
+  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+  async function requestFilledPdf(bajaId){
+    let lastError=new Error('No se pudo generar el formulario autollenado.');
+    for(const endpoint of PDF_ENDPOINTS){
+      const attempts=endpoint.endsWith('-v2')?3:2;
+      for(let attempt=0;attempt<attempts;attempt++){
+        try{
+          const response=await fetch(endpoint,{
+            method:'POST',
+            headers:authHeaders(),
+            body:JSON.stringify({baja_id:bajaId}),
+            cache:'no-store'
+          });
+          if(response.ok) return response;
+          let message='HTTP '+response.status;
+          try{
+            const raw=await response.text();
+            try{message=JSON.parse(raw)?.error||raw||message}catch(_){message=raw||message}
+          }catch(_){ }
+          lastError=new Error(message);
+          if(![429,502,503,504].includes(response.status)) break;
+        }catch(error){
+          lastError=error instanceof Error?error:new Error(String(error));
+        }
+        if(attempt<attempts-1) await wait(700*(attempt+1));
+      }
     }
+    throw lastError;
+  }
+
+  function showPdfError(message){
+    alert('No se pudo generar el formulario ENA autollenado.\n\n'+((message&&String(message).trim())||'Intenta nuevamente en unos segundos.')+'\n\nNo se abrirá un formulario vacío.');
   }
 
   document.addEventListener('click',async function(event){
@@ -191,31 +219,18 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     const bajaId=Number(btn.dataset.v166Pdf);
-    if(!Number.isFinite(bajaId)) return openOfficialFallback('No se encontró el identificador de la baja.');
+    if(!Number.isFinite(bajaId)) return showPdfError('No se encontró el identificador de la baja.');
     btn.dataset.v169PdfBusy='1';
     btn.disabled=true;
     const old=btn.textContent;
     btn.textContent='Generando…';
     try{
-      const response=await fetch(PDF_ENDPOINT,{
-        method:'POST',
-        headers:authHeaders(),
-        body:JSON.stringify({baja_id:bajaId}),
-        cache:'no-store'
-      });
-      if(!response.ok){
-        let message='HTTP '+response.status;
-        try{
-          const raw=await response.text();
-          try{message=JSON.parse(raw)?.error||raw||message}catch(_){message=raw||message}
-        }catch(_){ }
-        throw new Error(message);
-      }
+      const response=await requestFilledPdf(bajaId);
       await downloadPdfResponse(response);
       btn.textContent='Generado ✓';
     }catch(error){
       btn.textContent='Abrir formulario ENA';
-      openOfficialFallback(error?.message||String(error));
+      showPdfError(error?.message||String(error));
     }finally{
       btn.disabled=false;
       btn.dataset.v169PdfBusy='0';
