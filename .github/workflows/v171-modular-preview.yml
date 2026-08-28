@@ -18,15 +18,19 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('index.html'); s=p.read_text()
+          import re
+          p=Path('index.html')
+          s=p.read_text()
           marker='<script id="rym-v171-loader" src="/modules/v171-loader.js?v=171"></script>\n'
           if 'id="rym-v171-loader"' not in s:
-              low=s.lower()
-              i=low.find('</head>')
-              if i < 0: raise SystemExit('head end not found')
-              p.write_text(s[:i]+marker+s[i:])
+              m=re.search(r'<head\b[^>]*>', s, re.I)
+              if not m: raise SystemExit('head start not found')
+              s=s[:m.end()]+'\n'+marker+s[m.end():]
+              p.write_text(s)
+          head=p.read_text()[:12000]
+          if 'id="rym-v171-loader"' not in head:
+              raise SystemExit('V171 loader not injected near document head')
           PY
-          grep -Fq 'rym-v171-loader' index.html
       - name: Deploy isolated preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
