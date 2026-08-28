@@ -10,6 +10,8 @@
     '/css/panapass-bajas.css',
     '/css/revisados.css',
     '/css/control-auto.css',
+    '/css/control-auto-validador.css',
+    '/css/control-auto-cupos.css',
     '/css/gps.css',
     '/css/usuarios.css'
   ];
@@ -25,6 +27,8 @@
     '/modules/panapass/bajas/index.js',
     '/modules/panapass/index.js',
     '/modules/revisados/index.js',
+    '/modules/control-auto/validador.js',
+    '/modules/control-auto/cupos.js',
     '/modules/control-auto/router.js',
     '/modules/control-auto/index.js',
     '/modules/gps/index.js',

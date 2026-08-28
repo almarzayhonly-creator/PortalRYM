@@ -1,3 +1,7 @@
 body[data-rym-module="control-auto"]{--rym-accent:var(--rym-control)}
 body[data-rym-module="control-auto"] .rym-module-accent{color:var(--rym-accent)}
 body[data-rym-module="control-auto"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
+
+/* V172 clean: internal functional hook, navigation owned by router.js */
+/* V83: un solo nivel visible de Auditoría. El botón interno se conserva oculto como hook funcional. */
+body.v70-control #ca6Audit{display:none!important}
