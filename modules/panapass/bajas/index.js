@@ -18,25 +18,28 @@
     }catch(e){throw e instanceof Error?e:new Error('Bajas Panapass: RPC no disponible')}
   }
 
-  function tags(value){return text(value).split(',').map(x=>x.trim()).filter(Boolean)}
+  function tags(value){
+    if(Array.isArray(value))return value.map(text).filter(Boolean);
+    return text(value).split(',').map(x=>x.trim()).filter(Boolean);
+  }
 
   function canonicalRow(row){
     if(!row||typeof row!=='object')throw new Error('Bajas Panapass: fila invalida');
-    const tagList=tags(row.tags_ena);
-    const cantidad=Math.max(0,num(row.cantidad_tags||tagList.length));
+    const tagList=tags(row.tags_ena??row.tags);
+    const cantidad=Math.max(0,num(row.cantidad_tags??row.cantidadTags??tagList.length));
     const saldo=num(row.saldo);
     return Object.freeze({
       unidad:text(row.unidad),
       galera:text(row.galera),
       empresa:text(row.empresa),
       placa:text(row.placa),
-      panapass:text(row.panapass_numero),
+      panapass:text(row.panapass_numero??row.panapass),
       tags:Object.freeze(tagList),
       cantidadTags:cantidad,
       saldo,
-      enaConsultadoAt:text(row.ena_consultado_at),
-      alertaAdmin:!!row.alerta_admin,
-      raw:row
+      enaConsultadoAt:text(row.ena_consultado_at??row.enaConsultadoAt),
+      alertaAdmin:Boolean(row.alerta_admin??row.alertaAdmin),
+      raw:row.raw??row
     });
   }
 
