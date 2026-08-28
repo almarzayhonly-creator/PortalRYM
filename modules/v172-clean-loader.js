@@ -25,6 +25,7 @@
     '/modules/panapass/bajas/index.js',
     '/modules/panapass/index.js',
     '/modules/revisados/index.js',
+    '/modules/control-auto/router.js',
     '/modules/control-auto/index.js',
     '/modules/gps/index.js',
     '/modules/usuarios/index.js'
@@ -58,6 +59,7 @@
     const expected=['panapass','panapass-ranking','panapass-recurrentes','panapass-bajas','revisados','control-auto','gps','usuarios'];
     const missing=expected.filter(name=>!w.RYM_MODULES?.has(name));
     if(missing.length) throw new Error('Modulos faltantes: '+missing.join(','));
+    if(!w.RYM_CONTROL_ROUTER) throw new Error('Control de Auto router faltante');
     return Object.freeze({version:'172-clean',modules:w.RYM_MODULES.list(),css:css.slice()});
   })();
 })(window,document);
