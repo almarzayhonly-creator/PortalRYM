@@ -36,6 +36,7 @@
     '/modules/control-auto/router.js',
     '/modules/control-auto/index.js',
     '/modules/gps/index.js',
+    '/modules/usuarios/app.js',
     '/modules/usuarios/index.js'
   ];
 
