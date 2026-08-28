@@ -1,0 +1,40 @@
+name: V172 clean shell split
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_split_shell.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-clean-shell-split
+  cancel-in-progress: true
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Split shell from core runtime
+        run: python3 tools/v172_split_shell.py
+      - name: Validate shell
+        run: |
+          node --check modules/core/runtime.js
+          node --check modules/core/shell.js
+          grep -Fq '/modules/core/shell.js?v=172-clean' index.html
+          grep -Fq "RYM_MODULES.open('panapass-ranking',{target:v})" modules/core/shell.js
+          grep -Fq "RYM_MODULES.open('panapass-recurrentes',{target:v})" modules/core/shell.js
+          ! grep -Eq '^[[:space:]]*(async[[:space:]]+)?function[[:space:]]+(shell|render)[[:space:]]*\(' modules/core/runtime.js
+      - name: Commit shell split
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules tools
+          git commit -m 'V172 clean: split base shell and renderer from runtime'
+          git push origin HEAD:v172-clean
