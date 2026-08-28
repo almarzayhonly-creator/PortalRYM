@@ -6,36 +6,34 @@ const out=path.join(process.cwd(),'qa-targeted-results');fs.mkdirSync(out,{recur
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
 async function visible(loc){for(let i=0;i<await loc.count();i++)if(await loc.nth(i).isVisible().catch(()=>false))return loc.nth(i);return null}
 async function login(page){
-  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
-  await page.waitForTimeout(700);
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForTimeout(700);
   const p=await visible(page.locator('input[type=password]'));
-  if(p){
-    const u=await visible(page.locator('input[type=email],input[placeholder*="usuario" i],input[placeholder*="correo" i],input[type=text]'));
-    if(!u) throw new Error('Login user field not found');
-    await u.fill(EMAIL);await p.fill(PASSWORD);
-    const b=await visible(page.getByRole('button',{name:/iniciar sesion|iniciar sesión|ingresar|entrar/i}));
-    if(b) await b.click(); else await p.press('Enter');
-  }
-  await page.waitForFunction(()=>{
-    const pw=[...document.querySelectorAll('input[type=password]')].some(e=>{const r=e.getBoundingClientRect();return r.width&&r.height});
-    const txt=(document.body.innerText||'').toUpperCase();
-    return !pw && typeof window.v70OpenControl==='function' && (/CONTROL DE AUTO|PANAPASS|REVISADOS|PORTAL RYM/.test(txt));
-  },null,{timeout:60000});
-  await page.waitForTimeout(1500);
+  if(p){const u=await visible(page.locator('input[type=email],input[placeholder*="usuario" i],input[placeholder*="correo" i],input[type=text]'));if(!u)throw new Error('Login user field not found');await u.fill(EMAIL);await p.fill(PASSWORD);const b=await visible(page.getByRole('button',{name:/iniciar sesion|iniciar sesión|ingresar|entrar/i}));if(b)await b.click();else await p.press('Enter');}
+  await page.waitForFunction(()=>{const pw=[...document.querySelectorAll('input[type=password]')].some(e=>{const r=e.getBoundingClientRect();return r.width&&r.height});const txt=(document.body.innerText||'').toUpperCase();return !pw&&typeof window.v70OpenControl==='function'&&(/CONTROL DE AUTO|PANAPASS|REVISADOS|PORTAL RYM/.test(txt));},null,{timeout:60000});await page.waitForTimeout(1500);
 }
-async function snap(page){return page.evaluate(()=>{const vis=e=>{const r=e.getBoundingClientRect();return r.width&&r.height};const nav=[...document.querySelectorAll('button,a,[role=tab],[role=button]')].filter(vis).map(e=>({text:(e.innerText||e.textContent||'').trim().replace(/\s+/g,' '),cls:String(e.className||''),id:e.id||'',disabled:!!e.disabled,aria:e.getAttribute('aria-selected')||''})).filter(x=>x.text).slice(0,100);return {bodyClass:document.body.className,headings:[...document.querySelectorAll('h1,h2,h3')].filter(vis).map(e=>(e.innerText||'').trim()).slice(0,15),active:nav.filter(x=>/\bactive\b/.test(x.cls)||x.aria==='true').slice(0,20),nav,text:(document.body.innerText||'').replace(/\s+/g,' ').slice(0,5000),scrollY,sw:document.documentElement.scrollWidth,iw:innerWidth};})}
-async function clickTab(page,label){const target=norm(label);return page.evaluate(target=>{const n=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();const vis=e=>{const r=e.getBoundingClientRect();return r.width&&r.height};const els=[...document.querySelectorAll('button,a,[role=tab],[role=button]')].filter(vis);let el=els.find(e=>n(e.innerText||e.textContent)===target);if(!el)el=els.find(e=>n(e.innerText||e.textContent).startsWith(target));if(!el)return null;const m={text:(el.innerText||el.textContent||'').trim().replace(/\s+/g,' '),cls:String(el.className||''),id:el.id||'',disabled:!!el.disabled};el.click();return m},target)}
-async function sampleAfter(page,delays){const arr=[];let prev=0;for(const ms of delays){await page.waitForTimeout(ms-prev);prev=ms;arr.push({ms,state:await snap(page)});}return arr}
-(async()=>{const browser=await chromium.launch({headless:true});const results=[];for(const setup of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){const ctx=await browser.newContext({viewport:setup[1]});const page=await ctx.newPage();const errs=[],pageerrs=[],failed=[];page.on('console',m=>{if(m.type()==='error')errs.push(m.text())});page.on('pageerror',e=>pageerrs.push(String(e)));page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));try{
- await login(page);
- const portal=await snap(page);console.log('PORTAL_READY '+setup[0]+' '+JSON.stringify({body:portal.bodyClass,head:portal.headings.slice(0,5),text:portal.text.slice(0,700)}));
- await page.evaluate(()=>window.v70OpenControl());
- await page.waitForFunction(()=>document.body.classList.contains('v70-control'),null,{timeout:30000});
- await page.waitForTimeout(4500);
- const funcs=await page.evaluate(()=>Object.keys(window).filter(k=>typeof window[k]==='function'&&/(v70|v75|v94|control|ecar|valid)/i.test(k)).sort());
- const initial=await snap(page);
- const normal=[];for(const label of ['Unidades','Cupos ATTT','Auditoría','Validador eCarCheck','Dashboard','Unidades','Dashboard']){const clicked=await clickTab(page,label);const samples=await sampleAfter(page,[250,1200,3500]);normal.push({label,clicked,samples});await page.screenshot({path:path.join(out,`${setup[0]}-normal-${norm(label).replace(/[^A-Z0-9]+/g,'-').toLowerCase()}-${normal.length}.png`),fullPage:true});}
- await page.evaluate(()=>window.v70OpenControl());await page.waitForTimeout(3500);
- const rapid=[];for(const label of ['Unidades','Cupos ATTT','Auditoría','Validador eCarCheck','Dashboard','Unidades','Auditoría','Dashboard']){const clicked=await clickTab(page,label);rapid.push({label,clicked,immediate:await snap(page)});await page.waitForTimeout(300);}const rapidAfter=await sampleAfter(page,[500,2000,5000,10000]);await page.screenshot({path:path.join(out,`${setup[0]}-rapid-final.png`),fullPage:true});
- const r={mode:setup[0],portal,funcs,initial,normal,rapid,rapidAfter,errs,pageerrs,failed};results.push(r);console.log('CONTROL_SEQ '+JSON.stringify({mode:setup[0],funcs,normal:normal.map(x=>({label:x.label,clicked:x.clicked,states:x.samples.map(s=>({ms:s.ms,body:s.state.bodyClass,head:s.state.headings.slice(0,4),active:s.state.active.map(a=>a.text).slice(0,5),text:s.state.text.slice(0,500)}))})),rapid:rapid.map(x=>({label:x.label,clicked:x.clicked,body:x.immediate.bodyClass,active:x.immediate.active.map(a=>a.text).slice(0,5),head:x.immediate.headings.slice(0,4)})),rapidAfter:rapidAfter.map(s=>({ms:s.ms,body:s.state.bodyClass,head:s.state.headings.slice(0,5),active:s.state.active.map(a=>a.text).slice(0,6),text:s.state.text.slice(0,750)})),errs,pageerrs,failed:failed.slice(0,10)}));
-}catch(e){const fatal={mode:setup[0],fatal:String(e.stack||e),state:await snap(page).catch(()=>null),errs,pageerrs,failed};results.push(fatal);console.log('CONTROL_SEQ_FATAL '+setup[0]+' '+JSON.stringify(fatal));}await ctx.close();}await browser.close();fs.writeFileSync(path.join(out,'control-sequence-report.json'),JSON.stringify(results,null,2));})();
+async function snap(page){return page.evaluate(()=>{const vis=e=>{const r=e.getBoundingClientRect();return r.width&&r.height};const nav=[...document.querySelectorAll('button,a,[role=tab],[role=button]')].filter(vis).map(e=>({text:(e.innerText||e.textContent||'').trim().replace(/\s+/g,' '),cls:String(e.className||''),id:e.id||'',aria:e.getAttribute('aria-selected')||''})).filter(x=>x.text).slice(0,100);return {bodyClass:document.body.className,headings:[...document.querySelectorAll('h1,h2,h3')].filter(vis).map(e=>(e.innerText||'').trim()).slice(0,20),active:nav.filter(x=>/\bactive\b/.test(x.cls)||x.aria==='true').slice(0,20),text:(document.body.innerText||'').replace(/\s+/g,' ').slice(0,8000),guard:!!document.querySelector('#v170ControlRouteGuard'),sw:document.documentElement.scrollWidth,iw:innerWidth};})}
+async function clickTab(page,label){const target=norm(label);return page.evaluate(target=>{const n=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();const vis=e=>{const r=e.getBoundingClientRect();return r.width&&r.height};const els=[...document.querySelectorAll('button,a,[role=tab],[role=button]')].filter(vis);let el=els.find(e=>n(e.innerText||e.textContent)===target);if(!el)el=els.find(e=>n(e.innerText||e.textContent).startsWith(target));if(!el)return null;const m={text:(el.innerText||el.textContent||'').trim().replace(/\s+/g,' '),cls:String(el.className||''),id:el.id||''};el.click();return m},target)}
+const READY={
+  'Unidades':t=>t.includes('TRASPASO MANUAL')&&t.includes('UNIDADES ACTIVAS'),
+  'Cupos ATTT':t=>t.includes('ECARCHECK / ATTT ES LA INFORMACION OFICIAL'),
+  'Auditoría':t=>t.includes('CUPOS OFICIALES DETECTADOS EN ECARCHECK')||t.includes('TRASPASOS DETECTADOS POR TITULAR / CUPO')||t.includes('CUPOS QUE NO COINCIDEN'),
+  'Validador eCarCheck':t=>t.includes('VALIDACION MANUAL POR GALERA'),
+  'Dashboard':t=>t.includes('MAESTRA OPERATIVA DE FLOTA')&&t.includes('CONTROL DE AUTO')
+};
+async function waitReady(page,label,timeout=20000){const start=Date.now();const key=label;while(Date.now()-start<timeout){const s=await snap(page);const t=norm(s.text);if(READY[key](t)&&!s.guard)return {ms:Date.now()-start,state:s};await page.waitForTimeout(100);}const s=await snap(page);throw new Error(`VIEW_NOT_READY ${label} after ${Date.now()-start}ms :: ${s.headings.join(' | ')} :: ${s.text.slice(0,1200)}`)}
+(async()=>{const browser=await chromium.launch({headless:true});const results=[];let failedOverall=false;
+for(const setup of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){const ctx=await browser.newContext({viewport:setup[1]});const page=await ctx.newPage();const errs=[],pageerrs=[],failed=[];page.on('console',m=>{if(m.type()==='error')errs.push(m.text())});page.on('pageerror',e=>pageerrs.push(String(e)));page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));try{
+  await login(page);await page.evaluate(()=>window.v70OpenControl());await page.waitForFunction(()=>document.body.classList.contains('v70-control'),null,{timeout:30000});await waitReady(page,'Dashboard',20000);
+  const routeResults=[];
+  for(const label of ['Unidades','Cupos ATTT','Auditoría','Validador eCarCheck','Dashboard']){const clicked=await clickTab(page,label);if(!clicked)throw new Error('TAB_NOT_FOUND '+label);const ready=await waitReady(page,label,25000);routeResults.push({label,clicked,readyMs:ready.ms,state:{head:ready.state.headings.slice(0,8),active:ready.state.active.map(x=>x.text).slice(0,8),guard:ready.state.guard,text:ready.state.text.slice(0,1400)}});await page.screenshot({path:path.join(out,`${setup[0]}-settled-${norm(label).replace(/[^A-Z0-9]+/g,'-').toLowerCase()}.png`),fullPage:true});}
+  await page.evaluate(()=>window.v70OpenControl());await waitReady(page,'Dashboard',20000);
+  const rapidLabels=['Unidades','Cupos ATTT','Auditoría','Validador eCarCheck','Dashboard','Unidades','Auditoría','Dashboard'];
+  for(const label of rapidLabels){const clicked=await clickTab(page,label);if(!clicked)throw new Error('RAPID_TAB_NOT_FOUND '+label);await page.waitForTimeout(300)}
+  const rapidReady=await waitReady(page,'Dashboard',30000);await page.waitForTimeout(500);const final=await snap(page);
+  if(final.guard)throw new Error('ROUTE_GUARD_STUCK');if(!document.body)throw new Error('NO_BODY');
+  if(errs.some(x=>/V170 Control router|view did not settle/i.test(x)))throw new Error('ROUTER_ERROR '+errs.join(' || '));
+  if(pageerrs.length)throw new Error('PAGE_ERRORS '+pageerrs.join(' || '));
+  if(failed.length)throw new Error('REQUEST_FAILURES '+JSON.stringify(failed.slice(0,5)));
+  const r={mode:setup[0],routeResults,rapidReadyMs:rapidReady.ms,final:{head:final.headings.slice(0,8),active:final.active.map(x=>x.text).slice(0,8),guard:final.guard,text:final.text.slice(0,1400)},errs,pageerrs,failed};results.push(r);console.log('CONTROL_STRICT '+JSON.stringify(r));
+}catch(e){failedOverall=true;const fatal={mode:setup[0],fatal:String(e.stack||e),state:await snap(page).catch(()=>null),errs,pageerrs,failed};results.push(fatal);console.error('CONTROL_STRICT_FATAL '+JSON.stringify(fatal));}await ctx.close();}
+await browser.close();fs.writeFileSync(path.join(out,'control-strict-report.json'),JSON.stringify(results,null,2));if(failedOverall)process.exit(1);})();
