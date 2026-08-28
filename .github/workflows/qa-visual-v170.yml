@@ -5,6 +5,7 @@ on:
     branches: [visual-polish-v170]
     paths:
       - 'qa/v170-visual-test.js'
+      - 'qa/v170-module-nav-test.js'
       - '.github/workflows/qa-visual-v170.yml'
 permissions:
   contents: read
@@ -28,11 +29,19 @@ jobs:
           QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
           QA_URL: https://e358b6df-portal-ena-rym.almarzayhonly.workers.dev
         run: node qa/v170-visual-test.js
+      - name: Run exact module navigation QA
+        env:
+          QA_EMAIL: ${{ secrets.QA_EMAIL }}
+          QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
+          QA_URL: https://e358b6df-portal-ena-rym.almarzayhonly.workers.dev
+        run: node qa/v170-module-nav-test.js
       - name: Upload QA results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v170-visual-qa-results
-          path: qa-results/
+          path: |
+            qa-results/
+            qa-module-results/
           if-no-files-found: warn
           retention-days: 7
