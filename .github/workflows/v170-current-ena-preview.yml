@@ -1,0 +1,49 @@
+name: V170 current plus ENA preview
+on:
+  push:
+    branches: [v170-current-ena]
+    paths: ['.github/workflows/v170-current-ena-preview.yml']
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v170-current-ena
+          token: ${{ github.token }}
+      - name: Integrate ENA only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html');s=p.read_text()
+          add='''<script src="/js/ena-transferencia.js?v=170current"></script>\n<script src="/js/ena-pdf-engine.js?v=170current"></script>\n<script id="rym-v170-current-ena">window.RYM_GENERAR_ENA_TRANSFERENCIA=function(d){return window.RYM_ENA_PDF_ENGINE.download(d||{})}</script>\n'''
+          if 'rym-v170-current-ena' not in s:
+            i=s.lower().rfind('</body>');s=s[:i]+add+s[i:];p.write_text(s)
+          PY
+          grep -Fq 'v169r2-head' v169-final-polish.js
+          grep -Fq 'Pagos recurrentes' v169-final-polish.js
+          grep -Fq 'Posiciones 4' panapass-v169-final.js
+          git config user.name portal-rym-bot
+          git config user.email portal-rym-bot@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Integrate ENA fix without changing ranking or recurrentes'
+          git push origin HEAD:v170-current-ena
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@latest versions upload --preview-alias v170-current-ena
+      - name: Verify
+        run: |
+          U='https://v170-current-ena-portal-ena-rym.almarzayhonly.workers.dev'
+          sleep 5
+          curl -fsSL "$U/?x=$(date +%s)" -o /tmp/i
+          curl -fsSL "$U/v169-final-polish.js?x=$(date +%s)" -o /tmp/f
+          curl -fsSL "$U/panapass-v169-final.js?x=$(date +%s)" -o /tmp/r
+          grep -Fq 'rym-v170-current-ena' /tmp/i
+          grep -Fq 'v169r2-head' /tmp/f
+          grep -Fq 'Pagos recurrentes' /tmp/f
+          grep -Fq 'Posiciones 4' /tmp/r
+          echo "$U"
