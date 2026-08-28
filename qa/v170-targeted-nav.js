@@ -20,7 +20,7 @@ const READY={
   'Validador eCarCheck':t=>t.includes('VALIDACION MANUAL POR GALERA'),
   'Dashboard':t=>t.includes('MAESTRA OPERATIVA DE FLOTA')&&t.includes('CONTROL DE AUTO')
 };
-async function waitReady(page,label,timeout=20000){const start=Date.now();const key=label;while(Date.now()-start<timeout){const s=await snap(page);const t=norm(s.text);if(READY[key](t)&&!s.guard)return {ms:Date.now()-start,state:s};await page.waitForTimeout(100);}const s=await snap(page);throw new Error(`VIEW_NOT_READY ${label} after ${Date.now()-start}ms :: ${s.headings.join(' | ')} :: ${s.text.slice(0,1200)}`)}
+async function waitReady(page,label,timeout=20000){const start=Date.now();while(Date.now()-start<timeout){const s=await snap(page);const t=norm(s.text);if(READY[label](t)&&!s.guard)return {ms:Date.now()-start,state:s};await page.waitForTimeout(100);}const s=await snap(page);throw new Error(`VIEW_NOT_READY ${label} after ${Date.now()-start}ms :: ${s.headings.join(' | ')} :: ${s.text.slice(0,1200)}`)}
 (async()=>{const browser=await chromium.launch({headless:true});const results=[];let failedOverall=false;
 for(const setup of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){const ctx=await browser.newContext({viewport:setup[1]});const page=await ctx.newPage();const errs=[],pageerrs=[],failed=[];page.on('console',m=>{if(m.type()==='error')errs.push(m.text())});page.on('pageerror',e=>pageerrs.push(String(e)));page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));try{
   await login(page);await page.evaluate(()=>window.v70OpenControl());await page.waitForFunction(()=>document.body.classList.contains('v70-control'),null,{timeout:30000});await waitReady(page,'Dashboard',20000);
@@ -30,7 +30,7 @@ for(const setup of [['desktop',{width:1440,height:1000}],['mobile',{width:390,he
   const rapidLabels=['Unidades','Cupos ATTT','Auditoría','Validador eCarCheck','Dashboard','Unidades','Auditoría','Dashboard'];
   for(const label of rapidLabels){const clicked=await clickTab(page,label);if(!clicked)throw new Error('RAPID_TAB_NOT_FOUND '+label);await page.waitForTimeout(300)}
   const rapidReady=await waitReady(page,'Dashboard',30000);await page.waitForTimeout(500);const final=await snap(page);
-  if(final.guard)throw new Error('ROUTE_GUARD_STUCK');if(!document.body)throw new Error('NO_BODY');
+  if(final.guard)throw new Error('ROUTE_GUARD_STUCK');if(!final.bodyClass.includes('v70-control'))throw new Error('LEFT_CONTROL_MODULE '+final.bodyClass);
   if(errs.some(x=>/V170 Control router|view did not settle/i.test(x)))throw new Error('ROUTER_ERROR '+errs.join(' || '));
   if(pageerrs.length)throw new Error('PAGE_ERRORS '+pageerrs.join(' || '));
   if(failed.length)throw new Error('REQUEST_FAILURES '+JSON.stringify(failed.slice(0,5)));
