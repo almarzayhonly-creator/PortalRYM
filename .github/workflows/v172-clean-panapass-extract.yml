@@ -1,0 +1,54 @@
+name: V172 clean Panapass extraction
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_extract_panapass.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-clean-panapass-extract
+  cancel-in-progress: true
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Extract Panapass views from monolith
+        run: python3 tools/v172_extract_panapass.py
+      - name: Validate JavaScript syntax
+        run: |
+          node --check modules/panapass/dashboard.js
+          node --check modules/panapass/negativos.js
+          node --check modules/panapass/pagos-consulta.js
+          node --check modules/panapass/pagos-trabajo.js
+          node --check modules/panapass/historial.js
+          node --check modules/panapass/operaciones.js
+          node --check modules/panapass/reportes.js
+          node --check modules/panapass/perfil-supervisora.js
+          node --check modules/panapass/router.js
+          node --check modules/v172-clean-loader.js
+      - name: Validate ownership and source loading
+        run: |
+          for f in dashboard.js negativos.js pagos-consulta.js pagos-trabajo.js historial.js operaciones.js reportes.js perfil-supervisora.js; do
+            test -s "modules/panapass/$f"
+            grep -Fq "/modules/panapass/$f" modules/v172-clean-loader.js
+          done
+          grep -Fq '/modules/panapass/router.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/panapass/ranking/index.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/panapass/recurrentes/index.js' modules/v172-clean-loader.js
+          ! grep -Eq '^[[:space:]]*async function (dashboard|negativos|pagosConsultaHoy|pagosTrabajo|historial|operaciones|reportes|openSupervisoraProfile)\(' index.html
+      - name: Commit extracted Panapass views
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules css qa tools
+          git commit -m 'V172 clean: extract Panapass base views'
+          git push origin HEAD:v172-clean
