@@ -1,0 +1,54 @@
+name: V172 clean Control extraction
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_extract_control.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-clean-control-extract
+  cancel-in-progress: true
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Extract Control de Auto from monolith
+        run: python3 tools/v172_extract_control.py
+      - name: Validate JavaScript syntax
+        run: |
+          node --check modules/core/module-registry.js
+          node --check modules/core/session.js
+          node --check modules/core/router.js
+          node --check modules/control-auto/router.js
+          node --check modules/control-auto/index.js
+          node --check modules/control-auto/validador.js
+          node --check modules/control-auto/cupos.js
+          node --check modules/v172-clean-loader.js
+          node --check qa/v172-control-router-contract.js
+      - name: Validate Control ownership
+        run: |
+          ! grep -Fq '__v83wrapped' index.html
+          ! grep -Fq '__v94cupos' index.html
+          ! grep -Fq 'rym-v80-control-ecarcheck-js' index.html
+          ! grep -Fq 'rym-v83-control-nav-fix-js' index.html
+          ! grep -Fq 'rym-v94-cupos-attt-js' index.html
+          grep -Fq '/modules/control-auto/router.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/control-auto/validador.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/control-auto/cupos.js' modules/v172-clean-loader.js
+          grep -Fq 'rym-v172-clean-loader' index.html
+      - name: Commit extracted Control module
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules css qa tools
+          git commit -m 'V172 clean: extract Control navigation and features'
+          git push origin HEAD:v172-clean
