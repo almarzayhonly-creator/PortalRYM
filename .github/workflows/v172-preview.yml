@@ -16,12 +16,14 @@ jobs:
           fetch-depth: 0
       - name: Recover approved V169/V170 files
         run: |
-          git fetch origin visual-polish-v170
+          git fetch origin visual-polish-v170 test-ranking-recurrentes-correctos
           git show origin/visual-polish-v170:panapass-v169-final.js > panapass-v169-final.js
+          git show 5116c4f:v169-final-polish.js > v169-final-polish.js
           git show origin/visual-polish-v170:v170-control-router.js > v170-control-router.js
           git show origin/visual-polish-v170:v170-stability-visual.js > v170-stability-visual.js
           grep -Fq 'Panapass final: ranking oficial + recurrentes por galera' panapass-v169-final.js
           grep -Fq 'V170 Control routing guard' v170-control-router.js
+          grep -Fq 'Recurrentes V2: real layout change' v169-final-polish.js
       - name: Inject approved files into preview build
         run: |
           python3 - <<'PY'
@@ -32,6 +34,7 @@ jobs:
           markers=[
             '<script id="rym-v171-loader" src="/modules/v171-loader.js?v=171"></script>\n',
             '<script id="rym-v169-panapass-final" src="/panapass-v169-final.js?v=172" defer></script>\n',
+            '<script id="rym-v169-recurrentes-r2" src="/v169-final-polish.js?v=172" defer></script>\n',
             '<script id="rym-v170-control-router" src="/v170-control-router.js?v=172" defer></script>\n',
             '<script id="rym-v170-stability" src="/v170-stability-visual.js?v=172" defer></script>\n',
             '<script id="rym-v172-fixes" src="/modules/v172-fixes.js?v=172" defer></script>\n',
@@ -44,7 +47,7 @@ jobs:
               s=s[:m.end()]+'\n'+insert+s[m.end():]
               p.write_text(s)
           head=p.read_text()[:20000]
-          for marker in ('rym-v169-panapass-final','rym-v170-control-router','rym-v170-stability','rym-v172-fixes'):
+          for marker in ('rym-v169-panapass-final','rym-v169-recurrentes-r2','rym-v170-control-router','rym-v170-stability','rym-v172-fixes'):
               if marker not in head: raise SystemExit(marker+' not injected')
           PY
       - name: Deploy isolated preview
@@ -66,11 +69,13 @@ jobs:
           test -n "$U"
           curl -fsSL --max-time 20 "$U/?v172=$(date +%s)" -o /tmp/index.html
           curl -fsSL --max-time 20 "$U/panapass-v169-final.js?v=172" -o /tmp/panapass.js
+          curl -fsSL --max-time 20 "$U/v169-final-polish.js?v=172" -o /tmp/recurrentes-r2.js
           curl -fsSL --max-time 20 "$U/v170-control-router.js?v=172" -o /tmp/control.js
           curl -fsSL --max-time 20 "$U/modules/v172-fixes.js?v=172" -o /tmp/v172.js
           grep -Fq 'rym-v169-panapass-final' /tmp/index.html
           grep -Fq 'rym-v170-control-router' /tmp/index.html
           grep -Fq 'window.ranking=ranking169' /tmp/panapass.js
           grep -Fq 'window.recurrentes=recurrentes169' /tmp/panapass.js
+          grep -Fq 'Recurrentes V2: real layout change' /tmp/recurrentes-r2.js
           grep -Fq 'V170 Control routing guard' /tmp/control.js
           grep -Fq 'negativos-pagos' /tmp/v172.js || grep -Fq 'pagos detectados PM' /tmp/v172.js
