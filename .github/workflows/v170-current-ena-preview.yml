@@ -22,13 +22,13 @@ jobs:
           if 'rym-v170-current-ena' not in s:
             i=s.lower().rfind('</body>');s=s[:i]+add+s[i:];p.write_text(s)
           PY
-          grep -Fq 'v169r2-head' v169-final-polish.js
-          grep -Fq 'Pagos recurrentes' v169-final-polish.js
-          grep -Fq 'Posiciones 4' panapass-v169-final.js
+          grep -Fq 'rym-v170-current-ena' index.html
+          grep -Fq 'ena-transferencia.js?v=170current' index.html
+          grep -Fq 'ena-pdf-engine.js?v=170current' index.html
           git config user.name portal-rym-bot
           git config user.email portal-rym-bot@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || git commit -m 'Integrate ENA fix without changing ranking or recurrentes'
+          git diff --cached --quiet || git commit -m 'Integrate ENA fix on current V170'
           git push origin HEAD:v170-current-ena
       - name: Deploy
         env:
@@ -38,12 +38,8 @@ jobs:
       - name: Verify
         run: |
           U='https://v170-current-ena-portal-ena-rym.almarzayhonly.workers.dev'
-          sleep 5
-          curl -fsSL "$U/?x=$(date +%s)" -o /tmp/i
-          curl -fsSL "$U/v169-final-polish.js?x=$(date +%s)" -o /tmp/f
-          curl -fsSL "$U/panapass-v169-final.js?x=$(date +%s)" -o /tmp/r
-          grep -Fq 'rym-v170-current-ena' /tmp/i
-          grep -Fq 'v169r2-head' /tmp/f
-          grep -Fq 'Pagos recurrentes' /tmp/f
-          grep -Fq 'Posiciones 4' /tmp/r
-          echo "$U"
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --max-time 20 "$U/?x=$(date +%s)" -o /tmp/i && curl -fsSL --max-time 20 "$U/js/ena-transferencia.js?x=$(date +%s)" -o /tmp/c && curl -fsSL --max-time 20 "$U/js/ena-pdf-engine.js?x=$(date +%s)" -o /tmp/e && grep -Fq 'rym-v170-current-ena' /tmp/i && grep -Fq 'RYM_ENA_TRANSFERENCIA' /tmp/c && grep -Fq 'RYM_ENA_PDF_ENGINE' /tmp/e; then echo "$U"; exit 0; fi
+            sleep 5
+          done
+          exit 1
