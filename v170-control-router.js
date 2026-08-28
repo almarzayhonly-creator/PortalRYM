@@ -12,6 +12,13 @@
     'AUDITORIA':'v75ControlAudit',
     'VALIDADOR ECARCHECK':'v80OpenEcarValidator'
   };
+  const LABELS={
+    v75ControlDashboard:'Dashboard',
+    v75ControlUnits:'Unidades',
+    v94ControlCuposATTT:'Cupos ATTT',
+    v75ControlAudit:'Auditoría',
+    v80OpenEcarValidator:'Validador eCarCheck'
+  };
   let desired=null,pending=null,busy=false,generation=0,repairs=0;
 
   function routeFor(label){return ROUTES[N(label)]||null;}
@@ -21,15 +28,34 @@
     if(fnName==='v75ControlDashboard') return top.includes('DASHBOARD')||!!document.querySelector('.v75-control-dashboard');
     if(fnName==='v75ControlUnits') return top.includes('UNIDADES')&&!top.includes('CUPOS');
     if(fnName==='v94ControlCuposATTT') return top.includes('CUPOS ATTT')||!!document.querySelector('.v94-cupos');
-    if(fnName==='v75ControlAudit') return top.includes('AUDITOR')||!!document.querySelector('.ca-audit,.v112-audit-master');
-    if(fnName==='v80OpenEcarValidator') return top.includes('VALIDADOR')||!!document.querySelector('.v80-validator');
+    if(fnName==='v75ControlAudit') return !!document.querySelector('.ca-audit,.v112-audit-master')||(top.includes('AUDITOR')&&!document.querySelector('.v75-control-dashboard'));
+    if(fnName==='v80OpenEcarValidator') return !!document.querySelector('.v80-validator');
     return true;
   }
   function setSwitch(on){try{document.body.classList.toggle('v123-control-switch',!!on)}catch(_){}}
 
+  function removeGuard(){document.querySelector('#v170ControlRouteGuard')?.remove()}
+  function showGuard(fnName){
+    if(fnName!=='v75ControlAudit'&&fnName!=='v80OpenEcarValidator')return;
+    let g=document.querySelector('#v170ControlRouteGuard');
+    if(!g){
+      g=document.createElement('div');g.id='v170ControlRouteGuard';
+      Object.assign(g.style,{position:'fixed',zIndex:'9997',display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(248,250,252,.97)',backdropFilter:'blur(2px)',pointerEvents:'none',borderRadius:'14px'});
+      document.body.appendChild(g);
+    }
+    const v=document.querySelector('#view');
+    if(v){const r=v.getBoundingClientRect();Object.assign(g.style,{left:Math.max(0,r.left)+'px',top:Math.max(0,r.top)+'px',width:Math.max(1,r.width)+'px',height:Math.max(1,r.height)+'px'});}
+    else Object.assign(g.style,{left:'0',top:'64px',right:'0',bottom:'0',width:'auto',height:'auto'});
+    const label=LABELS[fnName]||'vista';
+    g.innerHTML='<div style="text-align:center;padding:28px;color:#183b6b"><div style="font-size:13px;font-weight:900;letter-spacing:.02em">Cargando '+label+'…</div><div style="font-size:10px;color:#6b7c91;margin-top:6px">Preparando la vista sin salir de Control de Auto</div></div>';
+    const top=document.querySelector('.top h1');if(top)top.textContent=label;
+  }
+  function refreshGuard(){if(desired)showGuard(desired)}
+
   async function invoke(fnName){
     const fn=window[fnName];
     if(typeof fn!=='function') throw new Error('missing canonical route '+fnName);
+    showGuard(fnName);
     /* Cupos already owns #view and its own RPC. Its legacy implementation
        preloads the full Units screen first; suppress only that redundant
        nested preload while Cupos builds its own view. */
@@ -44,12 +70,22 @@
     return await fn.call(window);
   }
 
+  async function waitForSettle(fnName,gen){
+    const guarded=fnName==='v75ControlAudit'||fnName==='v80OpenEcarValidator';
+    if(!guarded)return;
+    const start=Date.now(),minimum=fnName==='v75ControlAudit'?650:150;
+    while(gen===generation&&Date.now()-start<7000){
+      if(Date.now()-start>=minimum&&matches(fnName))return;
+      await new Promise(r=>setTimeout(r,100));
+    }
+  }
+
   function scheduleIntegrity(gen){
     [350,1200,2800,5200,9000].forEach(ms=>setTimeout(()=>{
       if(gen!==generation||busy||pending||!desired)return;
-      if(matches(desired))return;
-      if(repairs>=2){try{console.error('[V170 Control router] view did not settle',desired)}catch(_){};return}
-      repairs++;pending=desired;runQueue();
+      if(matches(desired)){removeGuard();return}
+      if(repairs>=2){try{console.error('[V170 Control router] view did not settle',desired)}catch(_){};removeGuard();return}
+      repairs++;pending=desired;showGuard(desired);runQueue();
     },ms));
   }
 
@@ -59,17 +95,22 @@
     try{
       while(pending){
         const fnName=pending;pending=null;
-        try{await invoke(fnName)}catch(err){try{console.error('[V170 Control router]',fnName,err)}catch(_){}}
+        const gen=generation;
+        try{await invoke(fnName);await waitForSettle(fnName,gen)}catch(err){try{console.error('[V170 Control router]',fnName,err)}catch(_){}}
+        if(pending)refreshGuard();
       }
     }finally{
       busy=false;setSwitch(false);
-      const gen=generation;scheduleIntegrity(gen);
+      const gen=generation;
+      if(desired&&matches(desired))removeGuard();else if(desired)showGuard(desired);else removeGuard();
+      scheduleIntegrity(gen);
       if(pending)runQueue();
     }
   }
 
-  function request(fnName){desired=fnName;pending=fnName;generation++;repairs=0;runQueue()}
+  function request(fnName){desired=fnName;pending=fnName;generation++;repairs=0;showGuard(fnName);runQueue()}
 
+  window.addEventListener('resize',()=>{if(document.querySelector('#v170ControlRouteGuard'))refreshGuard()},{passive:true});
   document.addEventListener('click',function(ev){
     if(!document.body.classList.contains('v70-control'))return;
     const btn=ev.target.closest&&ev.target.closest('button,a,[role="button"],[role="tab"]');
