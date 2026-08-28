@@ -1,0 +1,35 @@
+name: Inspect Panapass PDF wiring
+on:
+  push:
+    branches: [cleanup-v168]
+    paths: ['.github/workflows/v169-pdf-wire-inspect.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+          fetch-depth: 0
+      - name: Probe ENA PDF hostnames
+        shell: bash
+        run: |
+          mkdir -p audit
+          : > audit/ena-host-probe.txt
+          for u in \
+            'https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf' \
+            'https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf'; do
+            echo "--- $u" >> audit/ena-host-probe.txt
+            curl -fsSIL --max-time 20 "$u" >> audit/ena-host-probe.txt 2>&1 || echo "curl_exit=$?" >> audit/ena-host-probe.txt
+            echo >> audit/ena-host-probe.txt
+          done
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add audit/ena-host-probe.txt
+          git commit -m 'Audit ENA PDF TLS hostnames' || exit 0
+          git push origin HEAD:cleanup-v168

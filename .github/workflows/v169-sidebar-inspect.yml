@@ -1,0 +1,20 @@
+name: Inspect V169 Panapass sidebar
+on:
+  push:
+    branches: [cleanup-v168]
+    paths: ['.github/workflows/v169-sidebar-inspect.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find Panapass sidebar code
+        shell: bash
+        run: |
+          echo '--- sidebar matches ---'
+          grep -n -i -E 'Volver al Portal|sidebar|collapsed|collapse|toggle.*side|side.*toggle|nav.*collapsed|shell.*side|Portal RYM' index.html | head -220 || true
+          echo '--- contexts around Volver al Portal ---'
+          for n in $(grep -n -i -E 'Volver al Portal' index.html | cut -d: -f1 | head -10); do
+            s=$((n>70?n-70:1)); e=$((n+110)); echo "### lines $s-$e"; sed -n "${s},${e}p" index.html; done

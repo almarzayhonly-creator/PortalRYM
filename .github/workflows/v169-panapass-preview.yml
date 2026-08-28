@@ -1,0 +1,47 @@
+name: Deploy V169 Panapass preview
+on:
+  push:
+    branches: [cleanup-v168]
+    paths:
+      - 'index.html'
+      - 'panapass-v169-final.js'
+      - '.github/workflows/v169-panapass-preview.yml'
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+      - name: Verify Panapass V169 wiring
+        shell: bash
+        run: |
+          grep -q 'panapass-v169-final.js?v=169' index.html
+          grep -q 'window.__RYM_PANAPASS_V169_FINAL=true' panapass-v169-final.js
+          grep -q "p_galera:g==='TODAS'?null:g" panapass-v169-final.js
+          grep -q 'posicion_global' panapass-v169-final.js
+          echo 'V169 Panapass wiring OK'
+      - name: Upload preview
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
+      - name: Smoke test preview
+        shell: bash
+        run: |
+          URL='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev'
+          for i in 1 2 3 4 5; do
+            code=$(curl -sS -o /tmp/home.html -w '%{http_code}' "$URL" || true)
+            test "$code" = '200' && break
+            sleep 5
+          done
+          test "$code" = '200'
+          grep -q 'panapass-v169-final.js?v=169' /tmp/home.html
+          js=$(curl -sS -o /tmp/panapass.js -w '%{http_code}' "$URL/panapass-v169-final.js?v=169")
+          test "$js" = '200'
+          grep -q 'window.__RYM_PANAPASS_V169_FINAL=true' /tmp/panapass.js
+          echo "PREVIEW_OK $URL"

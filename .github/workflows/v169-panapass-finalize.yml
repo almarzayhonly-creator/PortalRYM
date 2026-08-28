@@ -1,0 +1,51 @@
+name: Finalize V169 Panapass
+on:
+  push:
+    branches: [cleanup-v168]
+    paths:
+      - 'panapass-v169-final.js'
+      - '.github/workflows/v169-panapass-finalize.yml'
+permissions:
+  contents: write
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cleanup-v168
+          fetch-depth: 0
+      - name: Inject V169 Panapass with defer in head
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='<script src="panapass-v169-final.js?v=169"></script>'
+          new='<script src="panapass-v169-final.js?v=169" defer></script>'
+          s=s.replace(old+'\n','').replace(old,'').replace(new+'\n','').replace(new,'')
+          marker='<script src="./v169-cleanup.js"></script>'
+          if marker not in s:
+              raise SystemExit('missing v169-cleanup marker')
+          s=s.replace(marker, marker+new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          tag='<script src="panapass-v169-final.js?v=169" defer></script>'
+          marker='<script src="./v169-cleanup.js"></script>'
+          assert s.count(tag)==1, f'expected one deferred V169 tag, got {s.count(tag)}'
+          assert s.find(tag)==s.find(marker)+len(marker)
+          print('Deferred V169 head injection verified')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet; then
+            echo 'Already injected safely'
+          else
+            git add index.html
+            git commit -m 'Repair V169 Panapass script placement'
+            git push origin HEAD:cleanup-v168
+          fi

@@ -1,0 +1,28 @@
+--- https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf
+curl: (60) SSL: no alternative certificate subject name matches target host name 'www.ena.com.pa'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+curl_exit=60
+
+--- https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf
+HTTP/1.1 200 OK
+Date: Thu, 27 Aug 2026 20:34:48 GMT
+Server: Apache/2.4.58 (Ubuntu)
+Strict-Transport-Security: max-age=31536000
+Content-Security-Policy: upgrade-insecure-requests
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Expect-CT: max-age=7776000, enforce
+Referrer-Policy: no-referrer-when-downgrade
+X-Frame-Options: SAMEORIGIN
+Permissions-Policy: geolocation=(self);midi=(none);notifications=(self);push=(self);sync-xhr=(self);microphone=(none);camera=(none);magnetometer=(none);gyroscope=(none);speaker=(none);vibrate=(none);fullscreen=(self);payment=(none)
+Last-Modified: Thu, 03 Dec 2020 16:05:29 GMT
+ETag: "192eb-5b59187560440"
+Accept-Ranges: bytes
+Content-Length: 103147
+Content-Type: application/pdf
+
+

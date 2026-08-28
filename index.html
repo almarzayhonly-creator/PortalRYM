@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 
 <html lang="es">
-<head><!-- PORTAL RYM BUILD V96 2026-08-21 | CONSOLIDADO FINAL: Cupos ATTT + eCarCheck + Bajas/Devoluciones + Pagos + Revisados -->
+<head>
+<script src="./v169-cleanup.js"></script><script src="panapass-v169-final.js?v=169" defer></script><!-- PORTAL RYM BUILD V96 2026-08-21 | CONSOLIDADO FINAL: Cupos ATTT + eCarCheck + Bajas/Devoluciones + Pagos + Revisados -->
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Portal RYM</title>
 <style>
@@ -691,6 +692,8 @@ body.v66-revisados .v66-daily-gal{background:#fff0d1!important;color:#734600!imp
 @media(max-width:1300px){.ca77-audit-kpis{grid-template-columns:repeat(4,minmax(130px,1fr))!important}}@media(max-width:760px){.ca77-audit-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 <!-- BUILD V80: base V78 + validador eCarCheck protegido + traspasos + Revisado Taxi -->
+<script src="./v169-final-polish.js?v=169final" defer></script>
+<script src="./v170-stability-visual.js?v=170" defer></script>
 </head>
 <body><div id="app"></div>
 <script>
@@ -718,7 +721,7 @@ async function refreshSessionToken(){
     const r=await fetch(URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:state.refreshToken})});
     const t=await r.text();let d;try{d=t?JSON.parse(t):null}catch{d=t}
     if(sessionVersion!==state.sessionVersion)throw Error('La sesión cambió.');
-    if(!r.ok||!d?.access_token){clearSession();throw Error('Tu sesión expiró. Ingresa nuevamente.')}
+    if(!r.ok||!d?.access_token){clearSession();if(typeof loginView==='function')loginView('Tu sesión expiró. Ingresa nuevamente.');throw Error('Tu sesión expiró. Ingresa nuevamente.')}
     state.token=String(d.access_token||'');
     state.refreshToken=String(d.refresh_token||state.refreshToken||'');
     state.expiresAt=Number(d.expires_at||0)||Math.floor(Date.now()/1000)+Number(d.expires_in||3600);
@@ -737,7 +740,7 @@ async function req(path,opt={}){
   const jwtProblem=r.status===401&&/invalid jwt|jwt expired|token.*expired|expired.*token/i.test(msg);
   if(jwtProblem&&canRefresh){await refreshSessionToken();r=await send();t=await r.text();try{d=t?JSON.parse(t):null}catch{d=t}}
   if(sessionVersion!==state.sessionVersion)throw Error('La sesión cambió.');
-  if(!r.ok){const m=String(d?.message||d?.error_description||d?.error||t||('HTTP '+r.status));if(r.status===401&&/invalid jwt|jwt expired|token.*expired|expired.*token/i.test(m)){clearSession();throw Error('Tu sesión expiró. Ingresa nuevamente.')}throw Error(m)}
+  if(!r.ok){const m=String(d?.message||d?.error_description||d?.error||t||('HTTP '+r.status));if(r.status===401&&/invalid jwt|jwt expired|token.*expired|expired.*token/i.test(m)){clearSession();if(typeof loginView==='function')loginView('Tu sesión expiró. Ingresa nuevamente.');throw Error('Tu sesión expiró. Ingresa nuevamente.')}throw Error(m)}
   return {data:d,headers:r.headers}
 }
 async function rest(table,q=''){return (await req('/rest/v1/'+table+(q?'?'+q:''))).data}
@@ -5195,6 +5198,45 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 </style>
 <!-- BUILD V163 END -->
 
+
+
+<script id="v169-session-expiry-guard">
+(function(){
+  'use strict';
+  if(window.__RYM_V169_SESSION_GUARD__)return;
+  window.__RYM_V169_SESSION_GUARD__=true;
+  let checking=false;
+  const expiredMessage='Tu sesión expiró. Ingresa nuevamente.';
+  function showExpired(){
+    try{if(typeof clearSession==='function')clearSession()}catch(_){}
+    try{if(typeof loginView==='function')loginView(expiredMessage)}catch(_){}
+  }
+  async function checkSession(){
+    if(checking)return;
+    try{
+      if(typeof state==='undefined'||!state||!state.refreshToken||!state.expiresAt)return;
+      const now=Math.floor(Date.now()/1000);
+      if(now<Number(state.expiresAt)-90)return;
+      checking=true;
+      try{
+        if(typeof refreshSessionToken!=='function')return;
+        await refreshSessionToken();
+      }catch(e){
+        const msg=String(e&&e.message||e||'');
+        if(/sesión expir|session expir|invalid jwt|jwt expired|refresh_token/i.test(msg))showExpired();
+      }finally{checking=false}
+    }catch(_){checking=false}
+  }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkSession()});
+  window.addEventListener('focus',checkSession);
+  window.addEventListener('pageshow',checkSession);
+  window.addEventListener('unhandledrejection',e=>{
+    const msg=String(e&&e.reason&&e.reason.message||e&&e.reason||'');
+    if(/sesión expir|session expir|invalid jwt|jwt expired|refresh_token/i.test(msg))showExpired();
+  });
+  setInterval(checkSession,45000);
+})();
+</script>
 
 </body>
 </html>
