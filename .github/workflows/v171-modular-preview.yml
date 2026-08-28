@@ -16,8 +16,9 @@ jobs:
           p=Path('index.html'); s=p.read_text()
           marker='<script id="rym-v171-loader" src="/modules/v171-loader.js?v=171"></script>\n'
           if 'id="rym-v171-loader"' not in s:
-              i=s.lower().rfind('</body>')
-              if i < 0: raise SystemExit('body end not found')
+              low=s.lower()
+              i=low.find('</head>')
+              if i < 0: raise SystemExit('head end not found')
               p.write_text(s[:i]+marker+s[i:])
           PY
           grep -Fq 'rym-v171-loader' index.html
@@ -40,7 +41,7 @@ jobs:
           exit 1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - name: Install Playwright
         run: npm install playwright && npx playwright install --with-deps chromium
       - name: Module smoke test
