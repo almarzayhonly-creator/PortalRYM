@@ -16,4 +16,3 @@ function install(){hookReq();patchPanapassHome()}
 let tries=0;const timer=setInterval(()=>{install();if(++tries>120)clearInterval(timer)},250);d.addEventListener('click',()=>setTimeout(patchPanapassHome,60),true);if(d.readyState!=='loading')install();else d.addEventListener('DOMContentLoaded',install,{once:true});
 w.RYM_V172_READY=Promise.resolve(w.RYM_V171_READY).then(()=>({version:'172',recovered:['approved-panapass-final','panapass-pm','control-router']}));
 })(window,document);
-
