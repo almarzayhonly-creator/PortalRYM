@@ -52,3 +52,5 @@ print('V172 GPS extraction OK')
 print('index bytes:',INDEX.stat().st_size)
 print('gps app bytes:',APP.stat().st_size)
 print('gps css bytes:',CSS.stat().st_size)
+
+# trigger v172 gps extraction
