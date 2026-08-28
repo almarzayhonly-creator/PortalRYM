@@ -5198,6 +5198,14 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 
 <script src="/js/ena-transferencia.js?v=170ena1"></script>
 <script src="/js/ena-pdf-engine.js?v=170ena1"></script>
+<script id="rym-v170-ena-engine-hook">
+(function(){
+ document.addEventListener('rym:ena-transferencia',function(e){
+  if(window.RYM_ENA_PDF_ENGINE) window.RYM_ENA_PDF_ENGINE.download((e&&e.detail)||{}).catch(function(x){console.error('ENA PDF',x);});
+ });
+ window.RYM_GENERAR_ENA_TRANSFERENCIA=function(data){return window.RYM_ENA_PDF_ENGINE.download(data||{});};
+})();
+</script>
 </body>
 </html>
 <style id="rym-v95-transfer-manual-css">
