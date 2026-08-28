@@ -1,0 +1,5 @@
+/* Portal RYM V172 - eCarCheck V2 failure clarity */
+(function(w,d){'use strict';if(w.__RYM_V172_ECAR_STATUS__)return;w.__RYM_V172_ECAR_STATUS__=true;
+function patch(){if(!d.body.classList.contains('v66-revisados'))return;const box=d.querySelector('#v111EcarSync');if(!box)return;const st=box.querySelector('#v111EcarState'),b=box.querySelector('#v111EcarBtn');if(!st||st.dataset.v172)return;st.dataset.v172='1';const obs=new MutationObserver(()=>{const t=(st.textContent||'').toUpperCase();if(t.includes('API_CAMBIO')||t.includes('RESPUESTA_LISTADO_INVALIDA')){st.textContent='eCarCheck V2 cambió la respuesta del listado · consultas individuales siguen operativas';st.title='El puente V2 está conectado, pero el endpoint de listado cambió formato. No es un fallo de sesión.';if(b){b.disabled=false;b.textContent='Reintentar listado V2'}}});obs.observe(st,{childList:true,subtree:true,characterData:true})}
+let n=0,t=setInterval(()=>{patch();if(++n>120)clearInterval(t)},250);d.addEventListener('click',()=>setTimeout(patch,50),true);
+})(window,document);
