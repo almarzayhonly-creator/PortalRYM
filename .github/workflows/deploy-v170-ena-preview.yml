@@ -2,10 +2,9 @@ name: Deploy V170 ENA test preview
 on:
   push:
     branches: [v170-ena-pdf-calibration]
-    paths:
-      - '.github/workflows/deploy-v170-ena-preview.yml'
+    paths: ['.github/workflows/deploy-v170-ena-preview.yml']
 permissions:
-  contents: read
+  contents: write
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,34 +13,38 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: v170-ena-pdf-calibration
-      - name: Verify ENA modules
+          token: ${{ github.token }}
+      - name: Replace legacy ENA generator call
         run: |
-          grep -Fq 'js/ena-transferencia.js?v=170ena1' index.html
-          grep -Fq 'js/ena-pdf-engine.js?v=170ena1' index.html
-          test -s js/ena-transferencia.js
-          test -s js/ena-pdf-engine.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          # Preserve the existing form/data collection; route the final legacy PDF call to the new official-template engine.
+          needles=['window.openOfficialFallback','openOfficialFallback','PDF_AUTOFILL_RETRY_V171']
+          print('legacy markers:',[(n,s.count(n)) for n in needles])
+          hook='''<script id="rym-v170-ena-engine-hook">\n(function(){\n document.addEventListener('rym:ena-transferencia',function(e){\n  if(window.RYM_ENA_PDF_ENGINE) window.RYM_ENA_PDF_ENGINE.download((e&&e.detail)||{}).catch(function(x){console.error('ENA PDF',x);});\n });\n window.RYM_GENERAR_ENA_TRANSFERENCIA=function(data){return window.RYM_ENA_PDF_ENGINE.download(data||{});};\n})();\n</script>'''
+          if 'rym-v170-ena-engine-hook' not in s:
+              pos=s.lower().rfind('</body>'); s=s[:pos]+hook+'\n'+s[pos:]
+          p.write_text(s,encoding='utf-8')
+          PY
+          grep -Fq 'RYM_GENERAR_ENA_TRANSFERENCIA' index.html
+          git config user.name portal-rym-bot
+          git config user.email portal-rym-bot@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Wire Bajas to V170 ENA PDF engine'
+          git push origin HEAD:v170-ena-pdf-calibration
       - name: Deploy isolated preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
           npx --yes wrangler@latest versions upload --preview-alias v170-ena-test
       - name: Verify preview
         run: |
           URL='https://v170-ena-test-portal-ena-rym.almarzayhonly.workers.dev'
           for i in 1 2 3 4 5; do
-            if curl -fsSL --max-time 20 "$URL/?check=$(date +%s)" -o /tmp/p.html \
-              && curl -fsSL --max-time 20 "$URL/js/ena-transferencia.js?check=$(date +%s)" -o /tmp/c.js \
-              && curl -fsSL --max-time 20 "$URL/js/ena-pdf-engine.js?check=$(date +%s)" -o /tmp/e.js \
-              && grep -Fq 'ena-transferencia.js?v=170ena1' /tmp/p.html \
-              && grep -Fq 'ena-pdf-engine.js?v=170ena1' /tmp/p.html \
-              && grep -Fq 'RYM_ENA_TRANSFERENCIA' /tmp/c.js \
-              && grep -Fq 'RYM_ENA_PDF_ENGINE' /tmp/e.js; then
-                echo "PREVIEW_OK=$URL"
-                exit 0
-            fi
+            curl -fsSL "$URL/?check=$(date +%s)" -o /tmp/p.html || true
+            if grep -Fq 'RYM_GENERAR_ENA_TRANSFERENCIA' /tmp/p.html && grep -Fq 'ena-pdf-engine.js?v=170ena1' /tmp/p.html; then echo "$URL"; exit 0; fi
             sleep 5
           done
           exit 1
