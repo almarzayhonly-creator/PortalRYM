@@ -12,7 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject V171 and V172 loaders into preview build
+        with:
+          fetch-depth: 0
+      - name: Recover approved V169/V170 files
+        run: |
+          git fetch origin visual-polish-v170
+          git show origin/visual-polish-v170:panapass-v169-final.js > panapass-v169-final.js
+          git show origin/visual-polish-v170:v170-control-router.js > v170-control-router.js
+          git show origin/visual-polish-v170:v170-stability-visual.js > v170-stability-visual.js
+          grep -Fq 'Panapass final: ranking oficial + recurrentes por galera' panapass-v169-final.js
+          grep -Fq 'V170 Control routing guard' v170-control-router.js
+      - name: Inject approved files into preview build
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -21,8 +31,11 @@ jobs:
           s=p.read_text()
           markers=[
             '<script id="rym-v171-loader" src="/modules/v171-loader.js?v=171"></script>\n',
-            '<script id="rym-v172-fixes" src="/modules/v172-fixes.js?v=172"></script>\n',
-            '<script id="rym-v172-ecar-status" src="/modules/v172-ecarcheck-status.js?v=172"></script>\n'
+            '<script id="rym-v169-panapass-final" src="/panapass-v169-final.js?v=172" defer></script>\n',
+            '<script id="rym-v170-control-router" src="/v170-control-router.js?v=172" defer></script>\n',
+            '<script id="rym-v170-stability" src="/v170-stability-visual.js?v=172" defer></script>\n',
+            '<script id="rym-v172-fixes" src="/modules/v172-fixes.js?v=172" defer></script>\n',
+            '<script id="rym-v172-ecar-status" src="/modules/v172-ecarcheck-status.js?v=172" defer></script>\n'
           ]
           m=re.search(r'<head\b[^>]*>', s, re.I)
           if not m: raise SystemExit('head start not found')
@@ -30,8 +43,8 @@ jobs:
           if insert:
               s=s[:m.end()]+'\n'+insert+s[m.end():]
               p.write_text(s)
-          head=p.read_text()[:16000]
-          for marker in ('rym-v171-loader','rym-v172-fixes','rym-v172-ecar-status'):
+          head=p.read_text()[:20000]
+          for marker in ('rym-v169-panapass-final','rym-v170-control-router','rym-v170-stability','rym-v172-fixes'):
               if marker not in head: raise SystemExit(marker+' not injected')
           PY
       - name: Deploy isolated preview
@@ -45,19 +58,19 @@ jobs:
           test -n "$U"
           echo "url=$U" >> "$GITHUB_OUTPUT"
           echo "Exact preview: $U"
-      - name: Verify recovered preview assets
+      - name: Verify approved preview assets
         env:
           QA_URL: ${{ steps.deploy.outputs.url }}
         run: |
           U="$QA_URL"
           test -n "$U"
           curl -fsSL --max-time 20 "$U/?v172=$(date +%s)" -o /tmp/index.html
-          curl -fsSL --max-time 20 "$U/modules/v171-loader.js?v=172" -o /tmp/v171.js
-          curl -fsSL --max-time 20 "$U/modules/panapass/ranking/index.js?v=172" -o /tmp/ranking.js
-          curl -fsSL --max-time 20 "$U/modules/panapass/recurrentes/index.js?v=172" -o /tmp/recurrentes.js
+          curl -fsSL --max-time 20 "$U/panapass-v169-final.js?v=172" -o /tmp/panapass.js
+          curl -fsSL --max-time 20 "$U/v170-control-router.js?v=172" -o /tmp/control.js
           curl -fsSL --max-time 20 "$U/modules/v172-fixes.js?v=172" -o /tmp/v172.js
-          grep -Fq 'rym-v171-loader' /tmp/index.html
-          grep -Fq 'rym-v172-fixes' /tmp/index.html
-          grep -Fq 'RYM_PANAPASS_RANKING' /tmp/ranking.js
-          grep -Fq 'RYM_PANAPASS_RECURRENTES' /tmp/recurrentes.js
-          grep -Fq 'pending_cobra' /tmp/v172.js || grep -Fq 'pendiente_cobra' /tmp/v172.js
+          grep -Fq 'rym-v169-panapass-final' /tmp/index.html
+          grep -Fq 'rym-v170-control-router' /tmp/index.html
+          grep -Fq 'window.ranking=ranking169' /tmp/panapass.js
+          grep -Fq 'window.recurrentes=recurrentes169' /tmp/panapass.js
+          grep -Fq 'V170 Control routing guard' /tmp/control.js
+          grep -Fq 'negativos-pagos' /tmp/v172.js || grep -Fq 'pagos detectados PM' /tmp/v172.js
