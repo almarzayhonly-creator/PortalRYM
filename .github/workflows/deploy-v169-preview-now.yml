@@ -23,7 +23,7 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           npx --yes wrangler@latest versions upload --preview-alias cleanup-v168
-      - name: Verify published V169 markers
+      - name: Verify published V170 and ENA autofill markers
         shell: bash
         run: |
           URL='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev'
@@ -42,8 +42,9 @@ jobs:
                 && grep -Fq 'v169r2-head' /tmp/final.js \
                 && grep -Fq 'Pagos recurrentes' /tmp/final.js \
                 && grep -Fq 'panapass-baja-transferencia-pdf-v2' /tmp/final.js \
-                && grep -Fq 'https://ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf' /tmp/final.js \
-                && ! grep -Fq 'https://www.ena.com.pa/wp-content/uploads/2020/12/TRANSFERENCIA-DE-SALDO-POSITIVO.pdf' /tmp/final.js; then
+                && grep -Fq 'panapass-baja-transferencia-pdf' /tmp/final.js \
+                && grep -Fq 'PDF_AUTOFILL_RETRY_V171' /tmp/final.js \
+                && ! grep -Fq 'openOfficialFallback' /tmp/final.js; then
                   ok=1
                   break
               fi
@@ -51,4 +52,4 @@ jobs:
             sleep 5
           done
           test "$ok" -eq 1
-          echo 'Preview verified: recurrentes redesign + refined ENA PDF endpoint.'
+          echo 'Preview verified: recurrentes + V170 + resilient ENA autofill.'
