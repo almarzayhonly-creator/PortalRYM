@@ -1,0 +1,47 @@
+name: V172 clean Revisados extraction
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_extract_revisados.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-clean-revisados-extract
+  cancel-in-progress: true
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Extract Revisados from monolith
+        run: python3 tools/v172_extract_revisados.py
+      - name: Validate JavaScript syntax
+        run: |
+          node --check modules/revisados/app.js
+          node --check modules/revisados/router.js
+          node --check modules/revisados/index.js
+          node --check modules/v172-clean-loader.js
+          node --check qa/v172-revisados-router-contract.js
+      - name: Validate Revisados ownership
+        run: |
+          ! grep -Fq 'rym-v66-friendly-css' index.html
+          ! grep -Fq 'rym-v66-friendly-js' index.html
+          grep -Fq 'RYM_REVISADOS_APP' modules/revisados/app.js
+          grep -Fq '/modules/revisados/app.js' modules/v172-clean-loader.js
+          grep -Fq '/css/revisados-v66.css' modules/v172-clean-loader.js
+          grep -Fq 'RYM_REVISADOS_ROUTER' modules/revisados/router.js
+      - name: Commit extracted Revisados module
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules css qa tools
+          git commit -m 'V172 clean: extract Revisados app from monolith'
+          git push origin HEAD:v172-clean
