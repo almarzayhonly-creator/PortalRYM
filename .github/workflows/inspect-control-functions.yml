@@ -11,18 +11,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect direct Audit and Validator renderers
+      - name: Extract Audit and Validator implementation contexts
         run: |
-          python3 - <<'PY'
+          python3 - <<'PY' > control-functions.txt
           from pathlib import Path
           import re
           s=Path('index.html').read_text(errors='ignore')
-          targets=['ca6Audit','renderPanel','v112-audit-master','ca6Out','section-tools']
+          targets=[
+            'v75ControlAudit','v80OpenEcarValidator','v75ControlUnits',
+            'window.v75ControlAudit','window.v80OpenEcarValidator','window.v75ControlUnits',
+            'ca6Audit','v112-audit-master','ca6Out','section-tools'
+          ]
           for t in targets:
             print('\n===== '+t+' =====')
             hits=[m.start() for m in re.finditer(re.escape(t),s)]
-            print('hits',hits[:30])
-            for i in hits[:12]:
+            print('hits',hits[:50])
+            for i in hits[:20]:
               print(f'--- context @{i} ---')
-              print(s[max(0,i-3000):min(len(s),i+7000)])
+              print(s[max(0,i-6000):min(len(s),i+18000)])
+          print('\n===== explicit Units awaits/calls =====')
+          for m in re.finditer(r'(?:await\s+)?(?:window\.)?v75ControlUnits\s*\([^)]*\)',s):
+            i=m.start()
+            print(f'--- call @{i}: {m.group(0)} ---')
+            print(s[max(0,i-7000):min(len(s),i+14000)])
           PY
+          wc -c control-functions.txt
+      - name: Upload inspection artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-functions
+          path: control-functions.txt
+          retention-days: 2
