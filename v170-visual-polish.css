@@ -1,15 +1,25 @@
 /* Portal RYM V170 visual polish - presentation only; no business logic. */
 :root{--rym-blue:#1769aa;--rym-orange:#e86f19;--rym-green:#23865b;--rym-gps:#5967d8;--rym-ok:#23865b;--rym-warn:#d98712;--rym-bad:#c9473f;--rym-muted:#6c7a89;--rym-line:#e3e9f0;--rym-bg:#f6f8fb}
-/* Calm surfaces */
 body{background:var(--rym-bg)}
 .card,.v99-module,.v157-card,.v157-kpi,.v66-card,.ca6-card,.kpi,.stat-card{box-shadow:0 5px 18px rgba(24,47,73,.07)!important;border-color:var(--rym-line)!important}
-/* Module identity: accents instead of saturated full backgrounds */
-body.v36-admin-total:not(.v66-revisados):not(.v70-control):not(.v157-gps) .side .nav button.active,
-body.v36-admin-total:not(.v66-revisados):not(.v70-control):not(.v157-gps) .tabs button.active{border-color:var(--rym-blue)!important;color:var(--rym-blue)!important}
+/* Module identity */
+body.v36-admin-total:not(.v66-revisados):not(.v70-control):not(.v157-gps) .side .nav button.active,body.v36-admin-total:not(.v66-revisados):not(.v70-control):not(.v157-gps) .tabs button.active{border-color:var(--rym-blue)!important;color:var(--rym-blue)!important}
 body.v66-revisados .v66-nav button.active,body.v66-revisados .tabs button.active{border-color:var(--rym-orange)!important;color:var(--rym-orange)!important}
-body.v70-control .side .nav button.active,body.v70-control .tabs button.active{border-color:var(--rym-green)!important;color:var(--rym-green)!important}
 body.v157-gps .v157-mobile-nav button.active,body.v157-gps .tabs button.active{border-color:var(--rym-gps)!important;color:var(--rym-gps)!important}
-/* Status chips: readable text, soft background */
+/* Control de Auto V170: deliberately visible green identity */
+body.v70-control{background:#f3f8f5!important}
+body.v70-control .side{background:linear-gradient(180deg,#eff8f3 0%,#f8fbf9 100%)!important;border-right:1px solid #cfe4d8!important}
+body.v70-control .side .nav button{border-radius:10px!important;transition:background .16s ease,color .16s ease,transform .16s ease!important}
+body.v70-control .side .nav button:not(.active){color:#355c49!important;opacity:.92!important;background:transparent!important}
+body.v70-control .side .nav button:hover:not(.active){background:#e2f1e8!important;color:#176b47!important}
+body.v70-control .side .nav button.active,body.v70-control .tabs button.active{background:var(--rym-green)!important;color:#fff!important;border-color:var(--rym-green)!important;box-shadow:0 6px 14px rgba(35,134,91,.20)!important}
+body.v70-control .card,body.v70-control .ca6-card,body.v70-control .kpi,body.v70-control .stat-card{background:#fff!important;border-color:#d7e8de!important;box-shadow:0 7px 20px rgba(31,91,62,.08)!important}
+body.v70-control h1,body.v70-control h2{color:#174f36}
+body.v70-control .card b,body.v70-control .card strong,body.v70-control .kpi b,body.v70-control .stat-card b{letter-spacing:-.025em}
+body.v70-control table th{background:#eef7f2!important;color:#315f49!important;border-color:#dbeadf!important}
+body.v70-control table tbody tr:hover{background:#f1f8f4!important}
+body.v70-control input:focus,body.v70-control select:focus{outline:2px solid rgba(35,134,91,.22)!important;border-color:var(--rym-green)!important}
+/* Status chips */
 .badge,.chip,.pill,[class*="status"],[class*="estado"]{font-weight:800}
 .badge.good,.chip.good,.pill.good,.status-ok,.estado-ok{background:#eaf7f0!important;color:#176b47!important;border-color:#bfe5cf!important}
 .badge.warn,.chip.warn,.pill.warn,.status-warn,.estado-warn{background:#fff6e7!important;color:#8a5709!important;border-color:#efd29a!important}
@@ -18,27 +28,27 @@ body.v157-gps .v157-mobile-nav button.active,body.v157-gps .tabs button.active{b
 .kpi,.v157-kpi,.v99-mini,.stat-card{background:#fff!important}
 .kpi b,.kpi strong,.v157-kpi b,.v99-mini b,.stat-card b{letter-spacing:-.025em}
 .kpi small,.v157-kpi small,.v99-mini span,.stat-card small{color:var(--rym-muted)!important}
-/* Tables: don't paint full rows with aggressive status colors */
+/* Tables */
 table tbody tr{background:#fff}table tbody tr:hover{background:#f8fafc!important}table th{white-space:nowrap;color:#526579}table td{border-color:#edf1f5!important}
 /* Filters */
 .filters,.filter-bar,[class*="filters"]{gap:8px!important}.filters button,.filter-bar button,[class*="filters"] button{border-radius:9px!important}
-/* Sidebar */
-.side .nav button:not(.active),.v66-nav button:not(.active){opacity:.86}.side .nav button.active,.v66-nav button.active{box-shadow:inset 3px 0 0 currentColor;background:#fff!important}
-/* Control de Auto: never expose stale legacy KPI values during async refresh */
+/* Other sidebars */
+body:not(.v70-control) .side .nav button:not(.active),.v66-nav button:not(.active){opacity:.86}body:not(.v70-control) .side .nav button.active,.v66-nav button.active{box-shadow:inset 3px 0 0 currentColor;background:#fff!important}
+/* Control loading shield already used by the app while switching */
 body.v70-control.v123-control-switch{overflow:hidden}
-body.v70-control.v123-control-switch:before{content:"";position:fixed;inset:0;background:rgba(246,248,251,.94);z-index:2147483000;pointer-events:all}
+body.v70-control.v123-control-switch:before{content:"";position:fixed;inset:0;background:rgba(243,248,245,.94);z-index:2147483000;pointer-events:all}
 body.v70-control.v123-control-switch:after{content:"Actualizando Control de Auto…";position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2147483001;background:#fff;color:#176b47;border:1px solid #bfe5cf;border-radius:14px;padding:16px 22px;font-weight:900;box-shadow:0 10px 30px rgba(24,47,73,.12);white-space:nowrap}
 /* Portal cards keep distinct identity */
 body.v99-home .v99-module.pan,body.v99-home .v99-module.panapass{border-top:4px solid var(--rym-blue)!important}
 body.v99-home .v99-module.rev,body.v99-home .v99-module.revisados{border-top:4px solid var(--rym-orange)!important}
 body.v99-home .v99-module.control{border-top:4px solid var(--rym-green)!important}
 body.v99-home .v99-module.gps{border-top:4px solid var(--rym-gps)!important}
-/* Mobile density and no horizontal clipping */
 @media(max-width:820px){
  .card,.v99-module,.v157-card,.v66-card,.ca6-card{border-radius:13px!important}
  .kpi,.v157-kpi,.stat-card{min-height:76px!important;padding:12px!important}
  table{font-size:11px!important}.side .nav,.v66-nav,.tabs{scrollbar-width:none}
  button,select,input{max-width:100%}
  .modal,.dialog,[class*="modal-content"]{max-width:calc(100vw - 20px)!important;margin-left:auto!important;margin-right:auto!important}
+ body.v70-control .side .nav button.active{box-shadow:0 4px 10px rgba(35,134,91,.16)!important}
  body.v70-control.v123-control-switch:after{max-width:calc(100vw - 32px);white-space:normal;text-align:center}
 }
