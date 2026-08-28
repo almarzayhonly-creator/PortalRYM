@@ -8,11 +8,11 @@
 
   function routeFor(label){
     const x=N(label);
-    if(x==='DASHBOARD') return 'v75ControlDash';
-    if(x==='UNIDADES') return 'v70ControlUnits';
-    if(x==='CUPOS ATTT') return 'v70ControlCupos';
-    if(x==='AUDITORIA') return 'v70ControlAudit';
-    if(x==='VALIDADOR ECARCHECK') return 'v94ControlValidador';
+    if(x==='DASHBOARD') return 'v75ControlDashboard';
+    if(x==='UNIDADES') return 'v75ControlUnits';
+    if(x==='CUPOS ATTT') return 'v94ControlCuposATTT';
+    if(x==='AUDITORIA') return 'v75ControlAudit';
+    if(x==='VALIDADOR ECARCHECK') return 'v80OpenEcarValidator';
     return null;
   }
 
@@ -23,7 +23,10 @@
     const fnName=routeFor(btn.innerText||btn.textContent);
     if(!fnName) return;
     const fn=window[fnName];
-    if(typeof fn!=='function') return;
+    if(typeof fn!=='function'){
+      try{console.error('[V170 Control router] missing canonical route',fnName)}catch(_){ }
+      return;
+    }
 
     ev.preventDefault();
     ev.stopImmediatePropagation();
