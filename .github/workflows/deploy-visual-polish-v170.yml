@@ -14,18 +14,20 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Inject visual-only loader into preview build
+      - name: Inject V170 stylesheet directly into preview build
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text()
-          marker='<script src="./v169-cleanup.js"></script>'
-          assert marker in s
-          s=s.replace(marker, marker+'<script src="./v170-visual-loader.js?v=170"></script>',1)
+          tag='<link id="rym-v170-visual-polish" rel="stylesheet" href="./v170-visual-polish.css?v=170">'
+          assert '</head>' in s
+          assert 'Posiciones 4–14' in Path('panapass-v169-final.js').read_text()
+          assert 'v169-rec-r2' in Path('v169-final-polish.js').read_text()
+          s=s.replace('</head>', tag+'\n</head>', 1)
           p.write_text(s)
           PY
-          grep -Fq 'v170-visual-loader.js' index.html
+          grep -Fq 'id="rym-v170-visual-polish"' index.html
           grep -Fq 'Portal RYM V170 visual polish' v170-visual-polish.css
           grep -Fq 'Posiciones 4–14' panapass-v169-final.js
           grep -Fq 'v169-rec-r2' v169-final-polish.js
@@ -34,11 +36,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx --yes wrangler@latest versions upload --preview-alias visual-polish-v170
-      - name: Verify preview assets
+      - name: Verify preview assets and injected stylesheet
         run: |
           U='https://visual-polish-v170-portal-ena-rym.almarzayhonly.workers.dev'
           for i in 1 2 3 4 5; do
-            if curl -fsSL --max-time 20 "$U/v170-visual-polish.css?x=$(date +%s)" | grep -Fq 'Portal RYM V170 visual polish'; then echo "$U"; exit 0; fi
+            HTML="$(curl -fsSL --max-time 20 "$U/?x=$(date +%s)" || true)"
+            CSS="$(curl -fsSL --max-time 20 "$U/v170-visual-polish.css?x=$(date +%s)" || true)"
+            if printf '%s' "$HTML" | grep -Fq 'id="rym-v170-visual-polish"' && printf '%s' "$CSS" | grep -Fq 'Portal RYM V170 visual polish'; then
+              echo "$U"
+              exit 0
+            fi
             sleep 5
           done
           exit 1
