@@ -55,8 +55,10 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html v170-stability-visual.js
-          git commit -m 'Add V170 stability, freshness and mobile usability fixes'
-          git push origin HEAD:cleanup-v168
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add V170 stability, freshness and mobile usability fixes'
+            git push origin HEAD:cleanup-v168
+          fi
 
       - name: Deploy Cloudflare preview
         shell: bash
@@ -71,16 +73,20 @@ jobs:
           base='https://cleanup-v168-portal-ena-rym.almarzayhonly.workers.dev'
           ready=0
           for attempt in $(seq 1 12); do
-            if curl --fail --silent --show-error "$base/" | grep -Fq 'v170-stability-visual.js?v=170'; then
+            curl --fail --silent --show-error "$base/" --output /tmp/portal-index.html
+            if grep -Fq 'v170-stability-visual.js?v=170' /tmp/portal-index.html; then
               ready=1
               break
             fi
             sleep 5
           done
           test "$ready" -eq 1
-          curl --fail --silent --show-error "$base/v170-stability-visual.js?v=170" | grep -Fq '__RYM_V170_STABILITY__'
-          curl --fail --silent --show-error "$base/v170-stability-visual.js?v=170" | grep -Fq 'Regla temporal confirmada'
-          curl --fail --silent --show-error "$base/panapass-v169-final.js?v=169final" | grep -Fq 'Posiciones 4–14'
-          curl --fail --silent --show-error "$base/panapass-v169-final.js?v=169final" | grep -Fq 'Posiciones 15–25'
-          curl --fail --silent --show-error "$base/v169-final-polish.js?v=169final" | grep -Fq 'v169-rec-r2'
-          curl --fail --silent --show-error "$base/v169-final-polish.js?v=169final" | grep -Fq 'panapass-baja-transferencia-pdf-v2'
+          curl --fail --silent --show-error "$base/v170-stability-visual.js?v=170" --output /tmp/v170.js
+          curl --fail --silent --show-error "$base/panapass-v169-final.js?v=169final" --output /tmp/panapass-v169.js
+          curl --fail --silent --show-error "$base/v169-final-polish.js?v=169final" --output /tmp/v169-polish.js
+          grep -Fq '__RYM_V170_STABILITY__' /tmp/v170.js
+          grep -Fq 'Regla temporal confirmada' /tmp/v170.js
+          grep -Fq 'Posiciones 4–14' /tmp/panapass-v169.js
+          grep -Fq 'Posiciones 15–25' /tmp/panapass-v169.js
+          grep -Fq 'v169-rec-r2' /tmp/v169-polish.js
+          grep -Fq 'panapass-baja-transferencia-pdf-v2' /tmp/v169-polish.js
