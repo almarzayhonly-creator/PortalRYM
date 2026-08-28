@@ -19,6 +19,8 @@ jobs:
         run: node qa/v171-panapass-inventory.js
       - name: Map Panapass Ranking only
         run: node qa/v171-panapass-ranking-map.js
+      - name: Map ENA signer and form rules
+        run: node qa/v171-ena-source-map.js
       - name: Ranking contract QA
         run: node qa/v171-ranking-contract.js
       - name: Recurrentes contract QA
