@@ -1,0 +1,3 @@
+body[data-rym-module="gps"]{--rym-accent:var(--rym-gps)}
+body[data-rym-module="gps"] .rym-module-accent{color:var(--rym-accent)}
+body[data-rym-module="gps"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
