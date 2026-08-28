@@ -27,6 +27,7 @@
     '/modules/panapass/bajas/index.js',
     '/modules/panapass/router.js',
     '/modules/panapass/index.js',
+    '/modules/revisados/router.js',
     '/modules/revisados/index.js',
     '/modules/control-auto/validador.js',
     '/modules/control-auto/cupos.js',
@@ -65,6 +66,7 @@
     const missing=expected.filter(name=>!w.RYM_MODULES?.has(name));
     if(missing.length) throw new Error('Modulos faltantes: '+missing.join(','));
     if(!w.RYM_PANAPASS_ROUTER) throw new Error('Panapass router faltante');
+    if(!w.RYM_REVISADOS_ROUTER) throw new Error('Revisados router faltante');
     if(!w.RYM_CONTROL_ROUTER) throw new Error('Control de Auto router faltante');
     return Object.freeze({version:'172-clean',modules:w.RYM_MODULES.list(),css:css.slice()});
   })();
