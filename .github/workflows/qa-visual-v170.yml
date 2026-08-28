@@ -6,13 +6,14 @@ on:
     paths:
       - 'qa/v170-visual-test.js'
       - 'qa/v170-module-nav-test.js'
+      - 'qa/v170-readonly-tabs.js'
       - '.github/workflows/qa-visual-v170.yml'
 permissions:
   contents: read
 jobs:
   qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,6 +36,12 @@ jobs:
           QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
           QA_URL: https://e358b6df-portal-ena-rym.almarzayhonly.workers.dev
         run: node qa/v170-module-nav-test.js
+      - name: Run read-only all tabs QA
+        env:
+          QA_EMAIL: ${{ secrets.QA_EMAIL }}
+          QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
+          QA_URL: https://e358b6df-portal-ena-rym.almarzayhonly.workers.dev
+        run: node qa/v170-readonly-tabs.js
       - name: Upload QA results
         if: always()
         uses: actions/upload-artifact@v4
@@ -43,5 +50,6 @@ jobs:
           path: |
             qa-results/
             qa-module-results/
+            qa-tabs-results/
           if-no-files-found: warn
           retention-days: 7
