@@ -78,4 +78,5 @@ jobs:
           grep -Fq 'window.recurrentes=recurrentes169' /tmp/panapass.js
           grep -Fq 'Recurrentes V2: real layout change' /tmp/recurrentes-r2.js
           grep -Fq 'V170 Control routing guard' /tmp/control.js
-          grep -Fq 'negativos-pagos' /tmp/v172.js || grep -Fq 'pagos detectados PM' /tmp/v172.js
+          grep -Fq "PM_CERRADO" /tmp/v172.js
+          grep -Fq "ciclo.por_revisar" /tmp/v172.js
