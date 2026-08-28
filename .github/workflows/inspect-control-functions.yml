@@ -15,22 +15,21 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          names=['v70OpenControl','v75ControlUnits','v75ControlAudit','v75ControlDashboard','v94ControlCuposATTT','v80OpenEcarValidator','v123-control-switch']
-          files=[p for p in Path('.').rglob('*') if p.is_file() and p.suffix.lower() in {'.html','.js','.css'} and '.git' not in p.parts]
+          names=['v70OpenControl','v75ControlUnits','v75ControlAudit','v75ControlDashboard','v94ControlCuposATTT','v80OpenEcarValidator']
+          files=[p for p in Path('.').rglob('*') if p.is_file() and p.suffix.lower() in {'.html','.js'} and '.git' not in p.parts]
           for name in names:
             print('\n===== '+name+' =====')
             for p in files:
               try:s=p.read_text(errors='ignore')
               except:continue
-              start=0
-              found=0
+              start=0; found=0
               while True:
                 i=s.find(name,start)
                 if i<0:break
                 found+=1
-                a=max(0,i-1800); b=min(len(s),i+4200)
+                a=max(0,i-8000); b=min(len(s),i+16000)
                 print(f'--- {p} occurrence {found} at {i} ---')
                 print(s[a:b])
                 start=i+len(name)
-                if found>=8:break
+                if found>=5:break
           PY
