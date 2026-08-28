@@ -19,6 +19,8 @@ jobs:
         run: node qa/v171-panapass-inventory.js
       - name: Map Panapass Ranking only
         run: node qa/v171-panapass-ranking-map.js
+      - name: Ranking contract QA
+        run: node qa/v171-ranking-contract.js
       - name: Inject V171 loader into preview build only
         run: |
           python3 - <<'PY'
@@ -57,8 +59,9 @@ jobs:
             ok=1
             curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/?x=$(date +%s)" -o /tmp/i || ok=0
             curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/v171-loader.js?x=$(date +%s)" -o /tmp/l || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/panapass/ranking/index.js?x=$(date +%s)" -o /tmp/ranking || ok=0
             for f in core panapass revisados control-auto gps usuarios; do curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/css/$f.css?x=$(date +%s)" -o "/tmp/$f.css" || ok=0; done
-            if [ "$ok" = 1 ] && grep -Fq 'rym-v171-loader' /tmp/i && grep -Fq 'RYM_V171_READY' /tmp/l && grep -Fq -- '--rym-panapass' /tmp/core.css; then exit 0; fi
+            if [ "$ok" = 1 ] && grep -Fq 'rym-v171-loader' /tmp/i && grep -Fq 'RYM_V171_READY' /tmp/l && grep -Fq 'RYM_PANAPASS_RANKING' /tmp/ranking && grep -Fq -- '--rym-panapass' /tmp/core.css; then exit 0; fi
             sleep 3
           done
           exit 1
