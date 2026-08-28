@@ -19,7 +19,6 @@ html=INDEX.read_text(encoding='utf-8')
 css,html=extract(html,'style','rym-v66-friendly-css')
 js,html=extract(html,'script','rym-v66-friendly-js')
 
-# Remove legacy tab ownership from the extracted app; the V172 router owns nav/back.
 js=js.replace("    $$('#v66Nav [data-v66-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.v66Tab;preset={};render()});\n",'',1)
 js=js.replace("    $('#v66Back').onclick=()=>{document.body.classList.remove('v66-revisados');if(typeof window.v36PortalHome==='function')window.v36PortalHome()};\n",'',1)
 
@@ -46,3 +45,5 @@ print('V172 Revisados extraction OK')
 print('index bytes:',INDEX.stat().st_size)
 print('app bytes:',(ROOT/'modules/revisados/app.js').stat().st_size)
 print('css bytes:',(ROOT/'css/revisados-v66.css').stat().st_size)
+
+# trigger extraction v1
