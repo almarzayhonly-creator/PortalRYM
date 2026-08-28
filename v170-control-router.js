@@ -71,9 +71,10 @@
   }
 
   async function waitForSettle(fnName,gen){
-    const guarded=fnName==='v75ControlAudit'||fnName==='v80OpenEcarValidator';
+    const guarded=fnName==='v94ControlCuposATTT'||fnName==='v75ControlAudit'||fnName==='v80OpenEcarValidator';
     if(!guarded)return;
-    const start=Date.now(),minimum=fnName==='v75ControlAudit'?650:150;
+    const start=Date.now();
+    const minimum=fnName==='v75ControlAudit'?650:(fnName==='v94ControlCuposATTT'?450:150);
     while(gen===generation&&Date.now()-start<7000){
       if(Date.now()-start>=minimum&&matches(fnName))return;
       await new Promise(r=>setTimeout(r,100));
