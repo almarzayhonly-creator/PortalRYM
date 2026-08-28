@@ -22,14 +22,16 @@
   let desired=null,pending=null,busy=false,generation=0,repairs=0;
 
   function routeFor(label){return ROUTES[N(label)]||null;}
+  function viewText(){return N(document.querySelector('#view')?.textContent||'')}
   function matches(fnName){
     if(!document.body.classList.contains('v70-control')) return false;
     const top=N(document.querySelector('.top h1')?.textContent||'');
+    const text=viewText();
     if(fnName==='v75ControlDashboard') return top.includes('DASHBOARD')||!!document.querySelector('.v75-control-dashboard');
     if(fnName==='v75ControlUnits') return top.includes('UNIDADES')&&!top.includes('CUPOS');
-    if(fnName==='v94ControlCuposATTT') return top.includes('CUPOS ATTT')||!!document.querySelector('.v94-cupos');
-    if(fnName==='v75ControlAudit') return !!document.querySelector('.ca-audit,.v112-audit-master')||(top.includes('AUDITOR')&&!document.querySelector('.v75-control-dashboard'));
-    if(fnName==='v80OpenEcarValidator') return !!document.querySelector('.v80-validator');
+    if(fnName==='v94ControlCuposATTT') return !!document.querySelector('.v94-cupos')||text.includes('ECARCHECK / ATTT ES LA INFORMACION OFICIAL');
+    if(fnName==='v75ControlAudit') return !!document.querySelector('.ca-audit,.v112-audit-master')||text.includes('CUPOS OFICIALES DETECTADOS EN ECARCHECK')||text.includes('TRASPASOS DETECTADOS POR TITULAR / CUPO');
+    if(fnName==='v80OpenEcarValidator') return !!document.querySelector('.v80-validator')||text.includes('VALIDACION MANUAL POR GALERA');
     return true;
   }
   function setSwitch(on){try{document.body.classList.toggle('v123-control-switch',!!on)}catch(_){}}
@@ -56,9 +58,8 @@
     const fn=window[fnName];
     if(typeof fn!=='function') throw new Error('missing canonical route '+fnName);
     showGuard(fnName);
-    /* Cupos already owns #view and its own RPC. Its legacy implementation
-       preloads the full Units screen first; suppress only that redundant
-       nested preload while Cupos builds its own view. */
+    /* Cupos owns #view and its own RPC. Its legacy implementation preloads
+       the full Units screen first; suppress only that redundant nested preload. */
     if(fnName==='v94ControlCuposATTT'){
       const units=window.v75ControlUnits;
       if(typeof units==='function'){
@@ -70,15 +71,16 @@
     return await fn.call(window);
   }
 
-  async function waitForSettle(fnName,gen){
+  async function waitForSettle(fnName){
     const guarded=fnName==='v94ControlCuposATTT'||fnName==='v75ControlAudit'||fnName==='v80OpenEcarValidator';
-    if(!guarded)return;
+    if(!guarded)return true;
     const start=Date.now();
     const minimum=fnName==='v75ControlAudit'?650:(fnName==='v94ControlCuposATTT'?450:150);
-    while(gen===generation&&Date.now()-start<7000){
-      if(Date.now()-start>=minimum&&matches(fnName))return;
+    while(Date.now()-start<10000){
+      if(Date.now()-start>=minimum&&matches(fnName))return true;
       await new Promise(r=>setTimeout(r,100));
     }
+    return false;
   }
 
   function scheduleIntegrity(gen){
@@ -96,8 +98,11 @@
     try{
       while(pending){
         const fnName=pending;pending=null;
-        const gen=generation;
-        try{await invoke(fnName);await waitForSettle(fnName,gen)}catch(err){try{console.error('[V170 Control router]',fnName,err)}catch(_){}}
+        try{
+          await invoke(fnName);
+          const settled=await waitForSettle(fnName);
+          if(!settled&&desired===fnName)try{console.error('[V170 Control router] view did not settle',fnName)}catch(_){}
+        }catch(err){try{console.error('[V170 Control router]',fnName,err)}catch(_){}}
         if(pending)refreshGuard();
       }
     }finally{
@@ -117,8 +122,8 @@
     const btn=ev.target.closest&&ev.target.closest('button,a,[role="button"],[role="tab"]');
     if(!btn)return;
     /* #ca6Audit is the legacy internal functional hook used by v75ControlAudit.
-       It must reach its original handler; intercepting it here prevents the
-       audit renderer from ever running and leaves later routes queued. */
+       It must reach its original handler; intercepting it prevents the audit
+       renderer from running and leaves later routes queued. */
     if(btn.id==='ca6Audit')return;
     const fnName=routeFor(btn.innerText||btn.textContent);if(!fnName)return;
     ev.preventDefault();ev.stopImmediatePropagation();request(fnName);
