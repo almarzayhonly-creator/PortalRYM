@@ -115,6 +115,10 @@
     if(!document.body.classList.contains('v70-control'))return;
     const btn=ev.target.closest&&ev.target.closest('button,a,[role="button"],[role="tab"]');
     if(!btn)return;
+    /* #ca6Audit is the legacy internal functional hook used by v75ControlAudit.
+       It must reach its original handler; intercepting it here prevents the
+       audit renderer from ever running and leaves later routes queued. */
+    if(btn.id==='ca6Audit')return;
     const fnName=routeFor(btn.innerText||btn.textContent);if(!fnName)return;
     ev.preventDefault();ev.stopImmediatePropagation();request(fnName);
   },true);
