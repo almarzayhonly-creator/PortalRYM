@@ -26,7 +26,7 @@ jobs:
         env:
           QA_EMAIL: ${{ secrets.QA_EMAIL }}
           QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
-          QA_URL: https://9f3d1e8a-portal-ena-rym.almarzayhonly.workers.dev
+          QA_URL: https://3855bc92-portal-ena-rym.almarzayhonly.workers.dev
         run: node qa/v170-targeted-nav.js
       - name: Upload targeted results
         if: always()
