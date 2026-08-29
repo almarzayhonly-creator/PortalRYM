@@ -1,0 +1,49 @@
+name: V172 function services migration
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_function_services.trigger'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-save acorn
+      - name: Migrate ENA saldo and unit modal ownership
+        run: node tools/v172_function_services.mjs
+      - name: Validate syntax and ownership
+        run: |
+          node --check modules/panapass/ena/saldo-service.js
+          node --check modules/control-auto/unit-modal-service.js
+          find modules -name '*.js' -print0 | xargs -0 -n1 node --check
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('index.html').read_text()
+          assert html.index('rym-v172-ena-saldo') < html.index('rym-v172-core-runtime')
+          assert html.index('rym-v172-control-unit-modal') < html.index('rym-v172-core-runtime')
+          assert '<style' not in html.lower()
+          for p in Path('modules').rglob('*.js'):
+              if p.name in {'saldo-service.js','unit-modal-service.js'}: continue
+              s=p.read_text(errors='ignore')
+              assert not re.search(r'(?:window\.)?phase6ConsultarSaldoENA\s*=\s*(?:async\s*)?(?:function|\([^)]*\)\s*=>)',s), p
+              assert not re.search(r'(?:window\.)?phase6OpenUnit\s*=\s*(?:async\s*)?(?:function|\([^)]*\)\s*=>)',s), p
+          print('canonical ENA saldo + unit modal ownership OK')
+          PY
+      - name: Commit migration
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules tools
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: canonicalize ENA saldo and unit modal services'
+          git push origin HEAD:v172-clean
