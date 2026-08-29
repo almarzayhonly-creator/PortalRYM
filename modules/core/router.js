@@ -5,6 +5,7 @@
 
   let current=null;
   let navigating=false;
+  let queued=null;
   const listeners=new Set();
 
   function normalize(name){return String(name||'').trim().toLowerCase()}
@@ -14,7 +15,7 @@
   async function open(name,ctx={}){
     const target=normalize(name);
     if(!target) throw new Error('Ruta invalida');
-    if(navigating) return false;
+    if(navigating){queued={name:target,ctx};return false;}
     if(!w.RYM_MODULES?.has(target)) throw new Error('Modulo no registrado: '+target);
     navigating=true;
     try{
@@ -27,6 +28,7 @@
     }finally{
       navigating=false;
     }
+    if(queued){const next=queued;queued=null;if(next.name!==current)return open(next.name,next.ctx)}
   }
 
   async function home(ctx={}){

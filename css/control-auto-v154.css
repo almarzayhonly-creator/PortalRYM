@@ -1,0 +1,4 @@
+/* V172 clean externalized legacy layer: rym-v154-safe-css */
+.v154-control-filters{display:grid;grid-template-columns:minmax(180px,240px) minmax(200px,260px) auto;gap:8px;align-items:end;width:100%;margin-top:8px}.v154-control-filters .field{min-width:0!important}.v154-control-filters select{width:100%;min-height:42px}.v154-control-count{padding:11px 4px;font-size:11px;font-weight:900;color:#315f4d}.v154-filter-hidden{display:none!important}
+.v147-kpi.v154-click{cursor:pointer;transition:.15s}.v147-kpi.v154-click:hover{transform:translateY(-2px);box-shadow:0 8px 20px #17375f18}.v147-kpi.v154-selected{outline:2px solid #174f9f;outline-offset:2px}.v154-cupos-tools{grid-template-columns:minmax(260px,1fr) repeat(5,minmax(130px,180px))!important}.v154-cupos-tools select,.v154-cupos-tools input{width:100%;min-height:42px}
+@media(max-width:520px){.v154-control-filters,.v154-cupos-tools{grid-template-columns:1fr!important}}
