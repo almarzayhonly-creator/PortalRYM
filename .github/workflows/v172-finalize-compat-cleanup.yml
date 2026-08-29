@@ -4,6 +4,7 @@ on:
     branches: [v172-clean]
     paths:
       - 'tools/v172_finalize_compat_cleanup.py'
+      - 'tools/v172_finalize_compat_cleanup.trigger'
 permissions:
   contents: write
 concurrency:
