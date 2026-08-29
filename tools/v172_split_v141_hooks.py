@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+MIGRATION_VERSION='1.0'
 root=Path(__file__).resolve().parents[1]
 p=root/'modules/revisados/runtime/063-rym-v141-activity-cupos-mail-js-80ed7e76.js'
 s=p.read_text(encoding='utf-8')
@@ -15,4 +16,4 @@ new="  (window.__RYM_CONTROL_PENDING_AFTER__ ||= []).push(['cupos',async functio
 if old not in s: raise SystemExit('Cupos V141 wrapper missing')
 s=s.replace(old,new,1)
 p.write_text(s,encoding='utf-8')
-print('V141 Usuarios and Cupos wrappers converted to canonical lifecycle hooks')
+print('V141 Usuarios and Cupos wrappers converted to canonical lifecycle hooks',MIGRATION_VERSION)
