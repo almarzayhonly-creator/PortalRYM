@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+# trigger: final session wiring
 root=Path(__file__).resolve().parents[1]
 p=root/'modules/core/runtime.js'
 s=p.read_text(encoding='utf-8')
