@@ -6,29 +6,44 @@ function phase5Today(){
   return new Date().toISOString().slice(0,10);
 }
 
-v11UnitList=async function(){
-  state.active='dashboard';shell();
-  const v=document.querySelector('#view');
-  v.innerHTML=`<div class="source-card"><span class="entity-chip">UNIDADES</span><div class="source-text"><strong>Control de Auto</strong><p>Detalle operativo de las unidades bajo tu alcance.</p></div></div><div class="section-tools"><div class="field"><label>Buscar</label><input id="p5UnitQ" placeholder="Unidad, placa, Panapass, empresa, color o modelo" autocomplete="off"></div><button id="p5UnitGo">Buscar</button></div><div class="phase5-search-note">La búsqueda consulta directamente la base de Control de Auto.</div><div id="p5UnitOut"><div class="card">Cargando unidades...</div></div>`;
-  const out=document.querySelector('#p5UnitOut'),q=document.querySelector('#p5UnitQ');
-  let seq=0,timer=null;
-  const draw=rows=>{
-    out.innerHTML=`<div class="panel"><div class="table-wrap"><table class="pretty"><thead><tr><th>Estatus</th><th>Unidad</th><th>Placa</th><th>Panapass</th><th>Empresa</th><th>Supervisora</th><th>Galera</th><th>Color</th><th>Marca</th><th>Modelo</th><th>Año</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${v12Status(r.estatus)}</td><td>${v17UnitBadge(r.unidad,r.color)}</td><td>${esc(r.placa||'')}</td><td>${esc(r.panapass_numero||'')}</td><td style="text-align:center">${esc(r.empresa||'')}</td><td>${esc(r.supervisora||'')}</td><td>${esc(r.galera||'')}</td><td>${esc(r.color||'')}</td><td>${esc(r.marca||'')}</td><td>${esc(r.modelo||'')}</td><td>${esc(r.anio||'')}</td></tr>`).join(''):`<tr><td colspan="11" class="empty">Sin coincidencias.</td></tr>`}</tbody></table></div></div>`;
-  };
-  const run=async()=>{
-    const my=++seq,term=String(q.value||'').trim();
-    out.innerHTML='<div class="card">Consultando Control de Auto...</div>';
-    try{
-      const rows=await rpc('panapass_unidades_detalle',{p_buscar:term||null,p_limit:term?200:5000});
-      if(my!==seq)return;
-      draw(rows||[]);
-    }catch(e){if(my===seq)out.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`}
-  };
-  document.querySelector('#p5UnitGo').onclick=run;
-  q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();run()}};
-  q.oninput=()=>{clearTimeout(timer);timer=setTimeout(run,250)};
-  await run();
+(window.__RYM_CONTROL_PENDING_AROUND__ ||= []).push(["unidades", async function(next,ctx){
+
+state.active = 'dashboard';
+shell();
+const v = document.querySelector('#view');
+v.innerHTML = `<div class="source-card"><span class="entity-chip">UNIDADES</span><div class="source-text"><strong>Control de Auto</strong><p>Detalle operativo de las unidades bajo tu alcance.</p></div></div><div class="section-tools"><div class="field"><label>Buscar</label><input id="p5UnitQ" placeholder="Unidad, placa, Panapass, empresa, color o modelo" autocomplete="off"></div><button id="p5UnitGo">Buscar</button></div><div class="phase5-search-note">La búsqueda consulta directamente la base de Control de Auto.</div><div id="p5UnitOut"><div class="card">Cargando unidades...</div></div>`;
+const out = document.querySelector('#p5UnitOut'), q = document.querySelector('#p5UnitQ');
+let seq = 0, timer = null;
+const draw = rows => {
+  out.innerHTML = `<div class="panel"><div class="table-wrap"><table class="pretty"><thead><tr><th>Estatus</th><th>Unidad</th><th>Placa</th><th>Panapass</th><th>Empresa</th><th>Supervisora</th><th>Galera</th><th>Color</th><th>Marca</th><th>Modelo</th><th>Año</th></tr></thead><tbody>${rows.length ? rows.map(r => `<tr><td>${v12Status(r.estatus)}</td><td>${v17UnitBadge(r.unidad, r.color)}</td><td>${esc(r.placa || '')}</td><td>${esc(r.panapass_numero || '')}</td><td style="text-align:center">${esc(r.empresa || '')}</td><td>${esc(r.supervisora || '')}</td><td>${esc(r.galera || '')}</td><td>${esc(r.color || '')}</td><td>${esc(r.marca || '')}</td><td>${esc(r.modelo || '')}</td><td>${esc(r.anio || '')}</td></tr>`).join('') : `<tr><td colspan="11" class="empty">Sin coincidencias.</td></tr>`}</tbody></table></div></div>`;
 };
+const run = async () => {
+  const my = ++seq, term = String(q.value || '').trim();
+  out.innerHTML = '<div class="card">Consultando Control de Auto...</div>';
+  try {
+    const rows = await rpc('panapass_unidades_detalle', {
+      p_buscar: term || null,
+      p_limit: term ? 200 : 5000
+    });
+    if (my !== seq) return;
+    draw(rows || []);
+  } catch (e) {
+    if (my === seq) out.innerHTML = `<div class="alert">${esc(e.message || e)}</div>`;
+  }
+};
+document.querySelector('#p5UnitGo').onclick = run;
+q.onkeydown = e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    run();
+  }
+};
+q.oninput = () => {
+  clearTimeout(timer);
+  timer = setTimeout(run, 250);
+};
+await run();
+}]);
 
 (window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["negativos_hoy", async function(next,ctx){
 const v=ctx.view;

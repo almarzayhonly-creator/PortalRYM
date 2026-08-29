@@ -15,16 +15,57 @@ function phase6OpenUnit(r){
  m.querySelector('#ca6Close').onclick=()=>m.style.display='none';m.onclick=e=>{if(e.target===m)m.style.display='none'};m.onkeydown=e=>{if(e.key==='Escape')m.style.display='none'};m.tabIndex=-1;m.focus();const b=m.querySelector('[data-ca6-reveal]');if(b)b.onclick=()=>phase6RevealCredential(r.panapass_numero,m);
 }
 
-v11UnitList=async function(){
- state.active='dashboard';shell();const v=document.querySelector('#view');
- v.innerHTML=`<div class="source-card"><span class="entity-chip">CONTROL DE AUTO</span><div class="source-text"><strong>Flota bajo tu alcance</strong><p>Las unidades activas son la vista principal. Cerradas y canibalizadas permanecen disponibles como control histórico.</p></div></div><div id="ca6Summary"></div><div class="ca6-tabs"><button id="ca6Active" class="active">Unidades activas</button><button id="ca6Other" class="soft-btn">Cerradas / canibalizadas</button></div><div class="section-tools"><div class="field"><label>Buscar unidad</label><input id="ca6Q" placeholder="Unidad; también reconoce placa, empresa, Panapass o TAG" autocomplete="off"></div><button id="ca6Go">Buscar</button></div><div id="ca6Out"><div class="card">Cargando Control de Auto...</div></div>`;
- let group='ACTIVAS',seq=0,timer=null,last=[];const out=document.querySelector('#ca6Out'),q=document.querySelector('#ca6Q');
- const sum=await rpc('panapass_control_auto_resumen').catch(()=>[]);const z=sum?.[0]||{},totalFlota=Number(z.activas||0)+Number(z.otros||0);document.querySelector('#ca6Summary').innerHTML=`<div class="ca6-summary"><div class="kpi"><span>Total flota</span><strong>${totalFlota}</strong></div><div class="kpi"><span>Activas</span><strong>${Number(z.activas||0)}</strong></div><div class="kpi"><span>Cerradas</span><strong style="color:var(--red)">${Number(z.cerradas||0)}</strong></div><div class="kpi"><span>Canibalizadas</span><strong>${Number(z.canibalizadas||0)}</strong></div></div><p class="v125-count-equation"><b>${totalFlota}</b> = ${Number(z.activas||0)} activas + ${Number(z.cerradas||0)} cerradas + ${Number(z.canibalizadas||0)} canibalizadas</p>`;
- const draw=rows=>{last=rows||[];out.innerHTML=`<div class="panel"><div class="table-wrap"><table class="pretty ca6-main-table"><thead><tr><th>Estatus</th><th>Unidad</th><th>Placa</th><th>Panapass</th><th>TAG</th><th>Empresa</th><th>Supervisora</th><th>Galera</th><th>Marca / Modelo</th><th>ENA</th><th></th></tr></thead><tbody>${last.length?last.map((r,i)=>`<tr><td data-label="Estatus">${phase6StatusText(r.estatus)}</td><td data-label="Unidad">${v17UnitBadge(r.unidad,r.color)}</td><td data-label="Placa">${esc(r.placa_unica||r.placa_comercial||'')}</td><td data-label="Panapass">${esc(r.panapass_numero||'')}</td><td data-label="TAG">${esc(r.tag||'')}</td><td data-label="Empresa">${esc(r.empresa_operadora||r.empresa_duena||'')}</td><td data-label="Supervisora">${esc(r.supervisora||'')}</td><td data-label="Galera">${esc(r.galera||'')}</td><td data-label="Marca / Modelo">${esc([r.marca,r.modelo,r.anio].filter(Boolean).join(' '))}</td><td data-label="ENA">${r.credencial_disponible?'<span class="chip ok">Credencial OK</span>':'<span class="muted">Sin credencial</span>'}</td><td data-label="Detalle"><button class="soft-btn" data-ca6-row="${i}">Ver ficha</button></td></tr>`).join(''):`<tr><td colspan="11" class="empty">Sin coincidencias.</td></tr>`}</tbody></table></div></div>`;out.querySelectorAll('[data-ca6-row]').forEach(b=>b.onclick=()=>phase6OpenUnit(last[Number(b.dataset.ca6Row)]))};
- const run=async()=>{const my=++seq;out.innerHTML='<div class="card">Consultando Control de Auto...</div>';try{const rows=await rpc('panapass_control_auto_v2',{p_grupo:group,p_buscar:String(q.value||'').trim()||null,p_limit:String(q.value||'').trim()?500:5000});if(my===seq)draw(rows)}catch(e){if(my===seq)out.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`}};
- const setGroup=g=>{group=g;document.querySelector('#ca6Active').className=g==='ACTIVAS'?'active':'soft-btn';document.querySelector('#ca6Other').className=g==='OTROS'?'active':'soft-btn';run()};
- document.querySelector('#ca6Active').onclick=()=>setGroup('ACTIVAS');document.querySelector('#ca6Other').onclick=()=>setGroup('OTROS');document.querySelector('#ca6Go').onclick=run;q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();run()}};q.oninput=()=>{clearTimeout(timer);timer=setTimeout(run,280)};await run();
+(window.__RYM_CONTROL_PENDING_AROUND__ ||= []).push(["unidades", async function(next,ctx){
+
+state.active = 'dashboard';
+shell();
+const v = document.querySelector('#view');
+v.innerHTML = `<div class="source-card"><span class="entity-chip">CONTROL DE AUTO</span><div class="source-text"><strong>Flota bajo tu alcance</strong><p>Las unidades activas son la vista principal. Cerradas y canibalizadas permanecen disponibles como control histórico.</p></div></div><div id="ca6Summary"></div><div class="ca6-tabs"><button id="ca6Active" class="active">Unidades activas</button><button id="ca6Other" class="soft-btn">Cerradas / canibalizadas</button></div><div class="section-tools"><div class="field"><label>Buscar unidad</label><input id="ca6Q" placeholder="Unidad; también reconoce placa, empresa, Panapass o TAG" autocomplete="off"></div><button id="ca6Go">Buscar</button></div><div id="ca6Out"><div class="card">Cargando Control de Auto...</div></div>`;
+let group = 'ACTIVAS', seq = 0, timer = null, last = [];
+const out = document.querySelector('#ca6Out'), q = document.querySelector('#ca6Q');
+const sum = await rpc('panapass_control_auto_resumen').catch(() => []);
+const z = sum?.[0] || ({}), totalFlota = Number(z.activas || 0) + Number(z.otros || 0);
+document.querySelector('#ca6Summary').innerHTML = `<div class="ca6-summary"><div class="kpi"><span>Total flota</span><strong>${totalFlota}</strong></div><div class="kpi"><span>Activas</span><strong>${Number(z.activas || 0)}</strong></div><div class="kpi"><span>Cerradas</span><strong style="color:var(--red)">${Number(z.cerradas || 0)}</strong></div><div class="kpi"><span>Canibalizadas</span><strong>${Number(z.canibalizadas || 0)}</strong></div></div><p class="v125-count-equation"><b>${totalFlota}</b> = ${Number(z.activas || 0)} activas + ${Number(z.cerradas || 0)} cerradas + ${Number(z.canibalizadas || 0)} canibalizadas</p>`;
+const draw = rows => {
+  last = rows || [];
+  out.innerHTML = `<div class="panel"><div class="table-wrap"><table class="pretty ca6-main-table"><thead><tr><th>Estatus</th><th>Unidad</th><th>Placa</th><th>Panapass</th><th>TAG</th><th>Empresa</th><th>Supervisora</th><th>Galera</th><th>Marca / Modelo</th><th>ENA</th><th></th></tr></thead><tbody>${last.length ? last.map((r, i) => `<tr><td data-label="Estatus">${phase6StatusText(r.estatus)}</td><td data-label="Unidad">${v17UnitBadge(r.unidad, r.color)}</td><td data-label="Placa">${esc(r.placa_unica || r.placa_comercial || '')}</td><td data-label="Panapass">${esc(r.panapass_numero || '')}</td><td data-label="TAG">${esc(r.tag || '')}</td><td data-label="Empresa">${esc(r.empresa_operadora || r.empresa_duena || '')}</td><td data-label="Supervisora">${esc(r.supervisora || '')}</td><td data-label="Galera">${esc(r.galera || '')}</td><td data-label="Marca / Modelo">${esc([r.marca, r.modelo, r.anio].filter(Boolean).join(' '))}</td><td data-label="ENA">${r.credencial_disponible ? '<span class="chip ok">Credencial OK</span>' : '<span class="muted">Sin credencial</span>'}</td><td data-label="Detalle"><button class="soft-btn" data-ca6-row="${i}">Ver ficha</button></td></tr>`).join('') : `<tr><td colspan="11" class="empty">Sin coincidencias.</td></tr>`}</tbody></table></div></div>`;
+  out.querySelectorAll('[data-ca6-row]').forEach(b => b.onclick = () => phase6OpenUnit(last[Number(b.dataset.ca6Row)]));
 };
+const run = async () => {
+  const my = ++seq;
+  out.innerHTML = '<div class="card">Consultando Control de Auto...</div>';
+  try {
+    const rows = await rpc('panapass_control_auto_v2', {
+      p_grupo: group,
+      p_buscar: String(q.value || '').trim() || null,
+      p_limit: String(q.value || '').trim() ? 500 : 5000
+    });
+    if (my === seq) draw(rows);
+  } catch (e) {
+    if (my === seq) out.innerHTML = `<div class="alert">${esc(e.message || e)}</div>`;
+  }
+};
+const setGroup = g => {
+  group = g;
+  document.querySelector('#ca6Active').className = g === 'ACTIVAS' ? 'active' : 'soft-btn';
+  document.querySelector('#ca6Other').className = g === 'OTROS' ? 'active' : 'soft-btn';
+  run();
+};
+document.querySelector('#ca6Active').onclick = () => setGroup('ACTIVAS');
+document.querySelector('#ca6Other').onclick = () => setGroup('OTROS');
+document.querySelector('#ca6Go').onclick = run;
+q.onkeydown = e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    run();
+  }
+};
+q.oninput = () => {
+  clearTimeout(timer);
+  timer = setTimeout(run, 280);
+};
+await run();
+}]);
 
 async function phase6ConsultarSaldoENA(panapass,btn){
  if(!panapass||btn.disabled)return;const old=btn.textContent;btn.disabled=true;btn.textContent='Consultando...';let box=btn.parentElement.querySelector('.ena-saldo-box');if(!box){box=document.createElement('div');box.className='ena-saldo-box';btn.parentElement.appendChild(box)}box.innerHTML='Verificando disponibilidad y saldo ENA...';
