@@ -2,13 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {parse} from 'acorn';
 
+const MIGRATOR_VERSION='1.0';
 const root=process.cwd(),target='v36PortalHome';
 function targetOf(left){if(left?.type==='Identifier')return left.name;if(left?.type==='MemberExpression'&&!left.computed&&left.object?.type==='Identifier'&&left.object.name==='window'&&left.property?.type==='Identifier')return left.property.name;return null}
 function initIsTarget(init){return init?.type==='Identifier'&&init.name===target||(init?.type==='MemberExpression'&&!init.computed&&init.object?.name==='window'&&init.property?.name===target)}
 function walk(node,cb,parent=null){if(!node||typeof node!=='object')return;cb(node,parent);for(const [k,v] of Object.entries(node)){if(['start','end','loc'].includes(k))continue;if(Array.isArray(v))for(const x of v)walk(x,cb,node);else if(v&&typeof v==='object')walk(v,cb,node)}}
 const files=[];
 for(const domain of fs.readdirSync(path.join(root,'modules'))){const dir=path.join(root,'modules',domain,'runtime');if(!fs.existsSync(dir))continue;for(const f of fs.readdirSync(dir).filter(x=>x.endsWith('.js')).sort())files.push({domain,file:f,path:path.join(dir,f)})}
-// preserve actual source order using index positions when possible
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 files.sort((a,b)=>{const aa=index.indexOf('/'+path.relative(root,a.path).replaceAll('\\','/')),bb=index.indexOf('/'+path.relative(root,b.path).replaceAll('\\','/'));return (aa<0?1e9:aa)-(bb<0?1e9:bb)});
 let baseAssigned=false,count=0;
@@ -22,4 +22,4 @@ for(const f of files){
 }
 if(!baseAssigned)throw new Error('Portal Home base assignment not found');
 let html=fs.readFileSync(path.join(root,'index.html'),'utf8');const comp='<script id="rym-v172-core-composition" src="/modules/core/composition.js?v=172-clean"></script>',home='\n<script id="rym-v172-portal-home" src="/modules/core/portal-home.js?v=172-clean"></script>';if(!html.includes('rym-v172-portal-home')){if(!html.includes(comp))throw new Error('composition marker missing');html=html.replace(comp,comp+home);fs.writeFileSync(path.join(root,'index.html'),html)}
-console.log('Portal Home assignments migrated:',count);
+console.log('Portal Home assignments migrated:',count,MIGRATOR_VERSION);
