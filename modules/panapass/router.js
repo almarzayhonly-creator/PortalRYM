@@ -26,6 +26,8 @@
   let current='dashboard';
   let busy=false;
   let queued=null;
+  const aroundHooks=new Map();
+  const afterHooks=new Map();
 
   function st(){try{return state}catch(_){return w.state||null}}
   function labelsMap(){try{return labels}catch(_){return w.labels||{}}}
@@ -103,7 +105,7 @@
     return d.querySelector('#view');
   }
 
-  async function render(tab,view){
+  async function baseRender(tab,view){
     if(!view)throw new Error('Panapass view no disponible');
     view.innerHTML='<div class="card">Cargando...</div>';
     const moduleName=MODULE_TABS[tab];
@@ -117,6 +119,19 @@
       return false;
     }
     return fn.call(w,view);
+  }
+
+  async function render(tab,view){
+    const ctx=Object.freeze({route:tab,view,state:st(),router:null});
+    let run=()=>baseRender(tab,view);
+    const list=aroundHooks.get(tab)||[];
+    for(const hook of list){
+      const previous=run;
+      run=()=>hook(previous,{...ctx,router:w.RYM_PANAPASS_ROUTER});
+    }
+    const result=await run();
+    for(const hook of afterHooks.get(tab)||[])await hook({...ctx,router:w.RYM_PANAPASS_ROUTER,result});
+    return result;
   }
 
   async function invoke(requested){
@@ -146,9 +161,19 @@
     return w.RYM_ROUTER?.home?.()||false;
   }
 
+  function around(route,fn){
+    const key=normalize(route);if(!TABS.includes(key)||typeof fn!=='function')throw new Error('Hook around Panapass invalido');
+    const list=aroundHooks.get(key)||[];list.push(fn);aroundHooks.set(key,list);
+    return()=>aroundHooks.set(key,(aroundHooks.get(key)||[]).filter(x=>x!==fn));
+  }
+  function after(route,fn){
+    const key=normalize(route);if(!TABS.includes(key)||typeof fn!=='function')throw new Error('Hook after Panapass invalido');
+    const list=afterHooks.get(key)||[];list.push(fn);afterHooks.set(key,list);
+    return()=>afterHooks.set(key,(afterHooks.get(key)||[]).filter(x=>x!==fn));
+  }
   function active(){return current}
   function isBusy(){return busy}
   function routes(){return TABS.slice()}
 
-  w.RYM_PANAPASS_ROUTER=Object.freeze({open,leave,active,isBusy,routes,permittedTabs});
+  w.RYM_PANAPASS_ROUTER=Object.freeze({open,leave,active,isBusy,routes,permittedTabs,around,after});
 })(window,document);
