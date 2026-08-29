@@ -1,0 +1,67 @@
+name: V172 clean isolated preview
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'qa/v172-preview-smoke.trigger'
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Architecture QA
+        run: |
+          node --check modules/core/runtime.js
+          node --check modules/core/session.js
+          node --check modules/v172-clean-loader.js
+          node --check modules/control-auto/app-v75.js
+          node --check modules/control-auto/router.js
+          ! grep -Fq 'window.v75ControlDashboard=async function()' index.html
+          grep -Fq 'rym-v172-clean-loader' index.html
+      - name: Deploy isolated preview version
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest versions upload --preview-alias v172-clean 2>&1 | tee /tmp/wrangler.out
+          U=$(grep -Eo 'https://[a-zA-Z0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$U"
+          echo "url=$U" >> "$GITHUB_OUTPUT"
+          echo "Preview URL: $U"
+      - name: Verify clean assets
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          U="$QA_URL"
+          for i in 1 2 3 4 5; do
+            ok=1
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/?x=$(date +%s)" -o /tmp/index || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/v172-clean-loader.js?x=$(date +%s)" -o /tmp/loader || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/core/session.js?x=$(date +%s)" -o /tmp/session || ok=0
+            curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$U/modules/control-auto/app-v75.js?x=$(date +%s)" -o /tmp/control || ok=0
+            if [ "$ok" = 1 ] && grep -Fq 'rym-v172-clean-loader' /tmp/index && grep -Fq 'RYM_V172_CLEAN_READY' /tmp/loader && grep -Fq "STORAGE_KEY='rym:v172:session'" /tmp/session && grep -Fq 'RYM_CONTROL_APP' /tmp/control; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+      - name: Install Playwright
+        run: npm install playwright && npx playwright install --with-deps chromium
+      - name: Browser smoke
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: node qa/v172-preview-smoke.js
+      - name: Record preview URL
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: echo "$QA_URL" > v172-preview-url.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v172-clean-preview-url
+          path: v172-preview-url.txt
