@@ -13,8 +13,11 @@ function resetUserRuntime(){
   document.querySelectorAll('#v101CheckModal,#v123PortalTransition,#v125PortalTransition,.v66-modal.open').forEach(x=>x.remove());
   document.body.className='';
 }
-function clearSession(){state.sessionVersion=Number(state.sessionVersion||0)+1;state.token='';state.refreshToken='';state.expiresAt=0;authRefreshPromise=null;resetUserRuntime()}
+function clearSession(){state.sessionVersion=Number(state.sessionVersion||0)+1;state.token='';state.refreshToken='';state.expiresAt=0;authRefreshPromise=null;try{window.RYM_SESSION?.clear()}catch(_){}resetUserRuntime()}
 async function refreshSessionToken(){
+  if(window.RYM_SESSION){
+    try{window.RYM_SESSION.configure({url:URL,apikey:KEY});window.RYM_SESSION.syncLegacy(state);const snap=await window.RYM_SESSION.refresh();state.token=snap.accessToken;state.refreshToken=snap.refreshToken;state.expiresAt=snap.expiresAt;return state.token}catch(e){if(String(e?.message||e)==='SESSION_CHANGED')throw Error('La sesión cambió.');if(String(e?.message||e)==='SESSION_EXPIRED'){clearSession();throw Error('Tu sesión expiró. Ingresa nuevamente.')}}
+  }
   if(!state.refreshToken)throw Error('Tu sesión expiró. Ingresa nuevamente.');
   if(authRefreshPromise)return authRefreshPromise;
   const sessionVersion=state.sessionVersion;
@@ -74,7 +77,7 @@ function monthRanges(desde,hasta){
 }
 
 function loginView(msg=''){app.innerHTML=`<main class="login"><section class="login-card"><div class="login-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM" onerror="this.style.display='none'"></div><div class="brand">Portal RYM</div><h1>Portal RYM</h1><p class="muted login-help">Ingresa con tu usuario y contraseña.</p>${msg?`<div class="alert">${esc(msg)}</div>`:''}<form id="f"><input name="usuario" autocomplete="username" placeholder="Usuario" required><input name="password" type="password" autocomplete="current-password" placeholder="Contraseña" required><button id="loginBtn">Entrar</button></form></section></main>`;document.querySelector('#f').onsubmit=login}
-async function login(e){e.preventDefault();const f=new FormData(e.currentTarget),b=document.querySelector('#loginBtn');b.disabled=true;b.textContent='Ingresando...';try{const {data}=await req('/functions/v1/auth-username',{method:'POST',body:JSON.stringify({usuario:f.get('usuario'),password:f.get('password')})});if(!data?.ok||!data.access_token)throw Error(data?.error||'No se pudo iniciar sesión.');const nextToken=data.access_token,nextRefresh=String(data.refresh_token||''),nextExpires=Number(data.expires_at||0)||0;clearSession();state.token=nextToken;state.refreshToken=nextRefresh;state.expiresAt=nextExpires;if(data.profile&&data.modules){state.profile=data.profile;state.modules=data.modules;if(data.profile.must_change_password){passwordChangeView();return}state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');shell();render().catch(x=>{const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(x.message||x)}</div>`});return}await loadApp()}catch(x){clearSession();loginView(x.message)}}
+async function login(e){e.preventDefault();const f=new FormData(e.currentTarget),b=document.querySelector('#loginBtn');b.disabled=true;b.textContent='Ingresando...';try{const {data}=await req('/functions/v1/auth-username',{method:'POST',body:JSON.stringify({usuario:f.get('usuario'),password:f.get('password')})});if(!data?.ok||!data.access_token)throw Error(data?.error||'No se pudo iniciar sesión.');const nextToken=data.access_token,nextRefresh=String(data.refresh_token||''),nextExpires=Number(data.expires_at||0)||0;clearSession();state.token=nextToken;state.refreshToken=nextRefresh;state.expiresAt=nextExpires;try{window.RYM_SESSION?.configure({url:URL,apikey:KEY});window.RYM_SESSION?.set({accessToken:nextToken,refreshToken:nextRefresh,expiresAt:nextExpires});window.RYM_SESSION?.startActivityRenewal()}catch(_){}if(data.profile&&data.modules){state.profile=data.profile;state.modules=data.modules;if(data.profile.must_change_password){passwordChangeView();return}state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');shell();render().catch(x=>{const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(x.message||x)}</div>`});return}await loadApp()}catch(x){clearSession();loginView(x.message)}}
 function passwordChangeView(){app.innerHTML=`<main class="login"><section class="password-panel"><div class="login-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM"></div><div class="brand" style="text-align:center">Portal RYM</div><h1>Cambia tu contraseña</h1><p class="muted">Por seguridad debes crear una contraseña personal antes de continuar.</p><form id="pc"><input name="p1" type="password" autocomplete="new-password" placeholder="Nueva contraseña" minlength="8" required><input name="p2" type="password" autocomplete="new-password" placeholder="Confirmar contraseña" minlength="8" required><button>Guardar contraseña</button></form><div id="pcMsg"></div></section></main>`;document.querySelector('#pc').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),m=document.querySelector('#pcMsg'),p1=String(f.get('p1')||''),p2=String(f.get('p2')||'');if(p1!==p2){m.innerHTML='<div class="alert">Las contraseñas no coinciden.</div>';return}m.innerHTML='<div class="card">Guardando...</div>';try{const {data}=await req('/functions/v1/change-password',{method:'POST',body:JSON.stringify({password:p1})});if(!data?.ok)throw Error(data?.error||'No se pudo cambiar la contraseña.');m.innerHTML='<div class="success">Contraseña actualizada.</div>';setTimeout(loadApp,350)}catch(x){m.innerHTML=`<div class="alert">${esc(x.message)}</div>`}}}
 async function loadApp(){try{const me=(await req('/auth/v1/user')).data;const p=(await rest('perfiles_usuario','select=id,nombre,email,usuario,rol,activo,supervisora_id,must_change_password&id=eq.'+me.id))[0];if(!p?.activo)throw Error('Tu usuario no está habilitado.');state.profile=p;if(p.must_change_password){passwordChangeView();return}const [mods,ovs,metaRes]=await Promise.all([rest('rol_modulo_permisos','select=modulo_codigo,puede_ver&rol=eq.'+encodeURIComponent(String(p.rol).toUpperCase())+'&puede_ver=eq.true'),rest('usuario_permisos','select=modulo_codigo,puede_ver&user_id=eq.'+me.id),rpc('panapass_meta').catch(()=>[])]);const map=new Map((mods||[]).map(x=>[x.modulo_codigo,true]));for(const o of ovs||[]){if(o.puede_ver===true)map.set(o.modulo_codigo,true);if(o.puede_ver===false)map.delete(o.modulo_codigo)}state.modules=[...map.keys()];state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');state.meta=metaRes?.[0]||null;shell();try{await render()}catch(x){const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(x.message||x)}</div>`}}catch(x){clearSession();loginView(x.message)}}
 function role(){return String(state.profile?.rol||'').toUpperCase()}
@@ -290,7 +293,20 @@ function tableHtml(rows,cols,extraClass='',panelClass=''){
   };
   return `<div class="panel ${panelClass}"><div class="table-wrap"><table class="${extraClass}"><thead><tr>${cols.map(c=>`<th>${human[c]||c}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${cols.map(c=>`<td data-label="${esc(human[c]||c)}" class="${c==='saldo'?'saldo':(['a_pagar','boleta','monto_original','total_pagado'].includes(c)?'money':'')}">${val(r,c)}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${cols.length}" class="empty">Sin datos.</td></tr>`}</tbody></table></div></div>`;
 }
-loginView();
+(async function bootstrapSession(){
+  const wait=()=>new Promise(r=>setTimeout(r,25));
+  for(let i=0;i<120&&!window.RYM_SESSION;i++)await wait();
+  if(!window.RYM_SESSION){loginView();return}
+  try{
+    window.RYM_SESSION.configure({url:URL,apikey:KEY});
+    const snap=window.RYM_SESSION.restore();
+    window.RYM_SESSION.startActivityRenewal();
+    if(!snap.refreshToken&&!snap.accessToken){loginView();return}
+    state.token=snap.accessToken;state.refreshToken=snap.refreshToken;state.expiresAt=snap.expiresAt;
+    if(window.RYM_SESSION.isExpiringSoon(90)){const fresh=await window.RYM_SESSION.refresh();state.token=fresh.accessToken;state.refreshToken=fresh.refreshToken;state.expiresAt=fresh.expiresAt}
+    await loadApp();
+  }catch(_){clearSession();loginView()}
+})();
 
 
 /* ===== V10 OVERRIDES ===== */
