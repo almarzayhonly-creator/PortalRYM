@@ -1,0 +1,96 @@
+/* Admin users stays accessible without making the home crowded. */
+body.v99-home #v118NavUsers{margin-top:10px!important;border-top:1px solid rgba(255,255,255,.16)!important}
+.v118-top-users{width:38px!important;height:38px!important;padding:0!important;border-radius:50%!important;background:#eef5ff!important;color:#356db5!important;border:1px solid #d4e3f6!important;box-shadow:none!important;font-size:15px!important}
+@media(min-width:821px){.v118-top-users{display:none!important}}
+
+/* Revisados/eCarCheck palette lock. Blue/white/gray are branding; traffic colors remain only for semantic status. */
+body.v66-revisados .v66-scope,
+body.v66-revisados .v66-sync-label{background:#eef5ff!important;border-color:#d3e2f5!important;color:#426ea8!important}
+body.v66-revisados .v66-refresh,
+body.v66-revisados .v66-hero-btn:not(.soft),
+body.v66-revisados .v66-btn-mini.primary,
+body.v66-revisados .v66-form-actions .save,
+body.v66-revisados #v66DailySend{background:linear-gradient(90deg,#568cdd,#78a9f4)!important;color:#fff!important;border-color:#568cdd!important;box-shadow:0 7px 16px rgba(86,140,221,.16)!important}
+body.v66-revisados .v66-refresh:hover,
+body.v66-revisados .v66-hero-btn:not(.soft):hover,
+body.v66-revisados .v66-btn-mini.primary:hover,
+body.v66-revisados .v66-form-actions .save:hover,
+body.v66-revisados #v66DailySend:hover{background:linear-gradient(90deg,#4d82d1,#6e9ee8)!important;color:#fff!important}
+body.v66-revisados .v66-hero-btn.soft,
+body.v66-revisados .v66-btn-mini:not(.primary),
+body.v66-revisados .v66-month-toolbar button,
+body.v66-revisados .v66-daily-rec-actions button,
+body.v66-revisados .v66-manual-mail button,
+body.v66-revisados .v66-daily-send-actions button:not(#v66DailySend){background:#f2f7fd!important;color:#426fae!important;border-color:#d4e2f4!important;box-shadow:none!important}
+body.v66-revisados .v66-hero-btn.soft:hover,
+body.v66-revisados .v66-btn-mini:not(.primary):hover,
+body.v66-revisados .v66-month-toolbar button:hover,
+body.v66-revisados .v66-daily-rec-actions button:hover,
+body.v66-revisados .v66-manual-mail button:hover,
+body.v66-revisados .v66-daily-send-actions button:not(#v66DailySend):hover{background:#e5effc!important;color:#315f9d!important;border-color:#bcd2ed!important}
+body.v66-revisados .v66-link{color:#467bc0!important}
+body.v66-revisados .v66-link:hover{color:#315f9d!important}
+body.v66-revisados button:focus-visible{outline:3px solid rgba(77,143,232,.24)!important;outline-offset:2px!important}
+body.v66-revisados .v66-filterbar input:focus,
+body.v66-revisados .v66-filterbar select:focus,
+body.v66-revisados .v66-daily-search:focus,
+body.v66-revisados .v66-manual-mail input:focus{border-color:#78a9f4!important;box-shadow:0 0 0 3px rgba(77,143,232,.12)!important;outline:none!important}
+body.v66-revisados .v66-galleries .v66-gallery{background:linear-gradient(145deg,#fff,#f5f9ff)!important;border-color:#dce7f4!important}
+body.v66-revisados .v66-galleries .v66-gallery:hover{border-color:#78a9f4!important}
+body.v66-revisados .v66-progress i{background:linear-gradient(90deg,#568cdd,#9fc5f8)!important}
+body.v66-revisados .v66-progress.good i{background:#53ad70!important}
+body.v66-revisados .v66-ops-head,
+body.v66-revisados .v66-history-head,
+body.v66-revisados .v66-matrix th,
+body.v66-revisados .v66-month-detail-head,
+body.v66-revisados .v66-daily-head{background:#edf4fd!important;color:#365f94!important;border-color:#d7e4f4!important;text-shadow:none!important}
+body.v66-revisados .v66-ops-row:hover,
+body.v66-revisados .v66-history-row:hover,
+body.v66-revisados .v66-month-detail-row:hover,
+body.v66-revisados .v66-daily-row:hover{background:#f7faff!important}
+body.v66-revisados .v66-matrix td:first-child,
+body.v66-revisados .v66-matrix tbody tr:nth-child(even) td:first-child{background:#f7faff!important;border-color:#e1eaf5!important}
+body.v66-revisados .v66-modal-box{background:#fff!important;border-top-color:#568cdd!important}
+body.v66-revisados .v66-modal-close{background:#eaf2fd!important;color:#356db5!important}
+body.v66-revisados .v66-field{background:#fbfdff!important;border-color:#e1e9f3!important}
+body.v66-revisados .v66-daily-from,
+body.v66-revisados .v66-daily-group-title,
+body.v66-revisados .v66-month-modal-summary>div,
+body.v66-revisados .v98-third-kv{background:#f3f7fd!important;border-color:#d9e5f3!important;color:#334e72!important}
+body.v66-revisados .v66-daily-group-title b,
+body.v66-revisados .v66-daily-group-title span,
+body.v66-revisados .v66-daily-from span,
+body.v66-revisados .v66-daily-from b{color:#426b9f!important}
+body.v66-revisados .v66-recipient:hover{background:#f7faff!important;border-color:#9bbce3!important}
+body.v66-revisados .v66-recipient:has(input:checked){background:#edf5ff!important;border-color:#78a9f4!important;box-shadow:inset 3px 0 0 #568cdd!important}
+body.v66-revisados .v66-recipient input{accent-color:#568cdd!important}
+body.v66-revisados .v66-daily-gal,
+body.v66-revisados .v66-month-priority:not(.critica):not(.urgente):not(.alta){background:#edf5ff!important;color:#426fae!important;border-color:#d3e2f5!important}
+body.v66-revisados .v66-cycle>i,
+body.v66-revisados .v66-cycle-chev{color:#568cdd!important}
+body.v66-revisados .v66-cycle:hover,
+body.v66-revisados .v66-month-item:hover{border-color:#8db0dc!important}
+body.v66-revisados .v66-kpi:hover{border-color:#9ebee3!important;box-shadow:0 12px 28px rgba(60,96,145,.08)!important}
+body.v66-revisados .v66-kpi .chev{color:#568cdd!important}
+body.v66-revisados .v66-role{background:#eaf2fd!important;color:#426fae!important}
+body.v66-revisados .v66-chip.log{background:#edf5ff!important;color:#426fae!important;border-color:#d3e2f5!important}
+body.v66-revisados .v66-empty{background:#f7faff!important;color:#71839a!important}
+body.v66-revisados .v66-today{border-color:#d9e5f3!important;background:#fff!important}
+body.v66-revisados .v66-today .eye,body.v66-revisados .v66-today h3 b{color:#568cdd!important}
+body.v66-revisados .v66-ring{border-color:#78a9f4!important;background:#eef5ff!important}
+body.v66-revisados .v66-ring span{color:#426fae!important}
+body.v66-revisados .v66-today-progress{background:#e8eef6!important}
+body.v66-revisados .v66-today-progress i{background:linear-gradient(90deg,#568cdd,#9fc5f8)!important}
+body.v66-revisados .v66-recent,body.v66-revisados .v66-boleta{background:#fbfdff!important;border-color:#dce7f4!important}
+body.v66-revisados .v66-recent:hover{border-color:#78a9f4!important}
+body.v66-revisados .v66-recent span,body.v66-revisados .v66-recent small,body.v66-revisados .v66-boleta-check span{color:#71839a!important}
+body.v66-revisados .v66-stat{border-color:#dce7f4!important}
+body.v66-revisados .v66-stat span{color:#71839a!important}
+body.v66-revisados .v66-barrow .bar{background:#e8eef6!important}
+body.v66-revisados .v66-barrow .bar i{background:linear-gradient(90deg,#568cdd,#9fc5f8)!important}
+body.v66-revisados .v66-boleta-check{border-color:#e1e9f3!important;background:#fff!important}
+body.v66-revisados .v66-toast{border-left-color:#568cdd!important}
+body.v66-revisados .v66-month-summary article{border-color:#dce7f4!important;box-shadow:0 6px 18px rgba(60,96,145,.045)!important}
+body.v66-revisados .v66-month-summary article span,body.v66-revisados .v66-month-summary article small{color:#71839a!important}
+body.v66-revisados .v66-daily-selected{background:#f3f7fd!important;border-color:#cbdcf0!important;color:#60748f!important}
+@media(max-width:820px){body.v66-revisados .v66-side{background:#f8fbff!important;border-bottom-color:#d8e6f7!important}}

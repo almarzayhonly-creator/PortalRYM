@@ -1,0 +1,13 @@
+/* V14: identificación visual de filas guardadas en Cargar Pagos */
+.pagos-online tr.pay-row-saved td{background:#f0fdf4!important}
+.pagos-online tr.pay-row-saved td:first-child,
+.pagos-online tr.pay-row-saved td:last-child{background:#f0fdf4!important}
+.pagos-online tr.pay-row-saved{box-shadow:inset 4px 0 0 #16a34a}
+.pagos-online tr.pay-row-dirty{box-shadow:inset 4px 0 0 #f59e0b}
+.pagos-online .pay-save-done{
+  background:#dcfce7!important;color:#166534!important;border-color:#86efac!important;
+  opacity:1!important;cursor:default!important
+}
+.pay-save-state{white-space:nowrap;text-align:center;letter-spacing:.02em}
+.pay-save-state.ok{color:#15803d}
+.pay-save-state.dirty{color:#b45309}

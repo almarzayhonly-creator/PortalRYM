@@ -1,0 +1,188 @@
+/* =========================================================
+   FASE 1 ENA - SOLO PRESENTACION
+   No modifica RPC, permisos, AM/PM, Cobra ni reglas de datos.
+   ========================================================= */
+:root{
+  --ena-navy:#082B67;
+  --ena-blue:#164B9B;
+  --ena-blue-2:#2D65BB;
+  --ena-sky:#54B7E8;
+  --ena-orange:#F47C20;
+  --ena-orange-2:#FF9A3D;
+  --ena-ink:#11254D;
+  --ena-muted:#65748D;
+  --ena-line:#D8E3F0;
+  --ena-surface:#FFFFFF;
+  --ena-bg:#EAF0F7;
+}
+
+/* Fondo general y superficie */
+html,body{background:var(--ena-bg)!important;color:var(--ena-ink)}
+.main{
+  background:
+    radial-gradient(circle at 88% 3%,rgba(84,183,232,.16),transparent 24%),
+    linear-gradient(135deg,#ECF2F8 0%,#DFE8F3 100%)!important;
+}
+.top h1{color:var(--ena-navy)!important;letter-spacing:-.025em}
+.portal-kicker{color:#60708A!important}
+.pill{background:#EDF5FF!important;color:var(--ena-blue)!important;border:1px solid #D2E2F5}
+
+/* Login ENA: fondo geometrico moderno, sin tocar autenticacion */
+.login{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 13% 16%,rgba(84,183,232,.36) 0 6%,transparent 6.5%),
+    radial-gradient(circle at 88% 82%,rgba(244,124,32,.27) 0 8%,transparent 8.5%),
+    linear-gradient(125deg,#061A42 0%,#0B3477 42%,#1E64AD 72%,#57B8E6 100%)!important;
+}
+.login:before{
+  content:"";position:absolute;z-index:-1;width:720px;height:720px;border:1px solid rgba(255,255,255,.13);
+  border-radius:50%;left:-250px;bottom:-390px;box-shadow:0 0 0 72px rgba(255,255,255,.035),0 0 0 145px rgba(255,255,255,.025);
+}
+.login:after{
+  content:"";position:absolute;z-index:-1;width:520px;height:110px;right:-95px;top:10%;
+  transform:rotate(-13deg);border-radius:999px;background:linear-gradient(90deg,transparent,rgba(244,124,32,.72),rgba(255,164,72,.12));
+  filter:blur(.2px);
+}
+.login-card,.password-panel{
+  position:relative;overflow:hidden;background:rgba(255,255,255,.97)!important;
+  border:1px solid rgba(255,255,255,.74)!important;border-radius:26px!important;
+  box-shadow:0 30px 80px rgba(3,19,54,.34)!important;
+}
+.login-card:before,.password-panel:before{
+  content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,var(--ena-orange),var(--ena-orange-2),var(--ena-sky));
+}
+.login-logo img{max-width:205px!important;filter:drop-shadow(0 8px 16px rgba(8,43,103,.10))}
+.login .brand,.password-panel .brand{color:var(--ena-blue)!important;letter-spacing:.16em!important;font-size:12px}
+.login h1,.password-panel h1{color:var(--ena-navy)!important;letter-spacing:-.025em}
+.login form input,.password-panel form input{
+  min-height:48px;border:1px solid #C9D7E9!important;background:#F9FBFE!important;transition:.18s ease;
+}
+.login form input:focus,.password-panel form input:focus{
+  outline:none;border-color:#76A8E2!important;box-shadow:0 0 0 4px rgba(36,84,173,.11);background:#fff!important;
+}
+#loginBtn{min-height:48px;background:linear-gradient(135deg,var(--ena-orange),#E7680A)!important;box-shadow:0 10px 24px rgba(244,124,32,.25)}
+#loginBtn:hover{filter:brightness(1.03)}
+
+/* Sidebar ENA premium */
+.shell{grid-template-columns:248px minmax(0,1fr)!important;transition:grid-template-columns .2s ease}
+.side{
+  background:linear-gradient(180deg,#FBFDFF 0%,#F3F7FC 100%)!important;
+  color:#17233D!important;border-right:1px solid #D8E3F0!important;
+  box-shadow:10px 0 32px rgba(12,42,82,.06)!important;padding:18px 16px!important;gap:12px!important;
+}
+.brand-logo-app{
+  min-height:70px!important;background:#fff!important;border:1px solid #DCE6F1!important;border-radius:18px!important;
+  box-shadow:0 10px 24px rgba(8,43,103,.07)!important;margin-bottom:0!important;
+}
+.brand-logo-app img{max-width:150px!important;max-height:58px!important}
+.portal-name-side{color:var(--ena-navy)!important;font-size:14px!important;letter-spacing:.055em!important;margin:5px 0 8px!important}
+.nav{gap:6px!important;min-height:0}
+.nav button{
+  background:transparent!important;color:#53627A!important;border:1px solid transparent!important;border-radius:13px!important;
+  box-shadow:none!important;padding:11px 12px 11px 40px!important;position:relative!important;font-weight:850!important;transition:.16s ease!important;
+}
+.nav button:hover{background:#ECF4FE!important;color:var(--ena-navy)!important;transform:translateX(2px)}
+.nav button.active{
+  background:linear-gradient(90deg,#E6F0FF 0%,#F7FAFE 100%)!important;color:#174A8B!important;
+  border-color:#CFDFF3!important;box-shadow:0 7px 17px rgba(22,75,155,.075)!important;
+}
+.nav button.active:after{left:0!important;right:auto!important;top:9px!important;bottom:9px!important;width:4px!important;height:auto!important;background:linear-gradient(var(--ena-orange-2),var(--ena-orange))!important}
+.nav button:before{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;text-align:center;font-size:15px;font-weight:1000;color:var(--ena-blue);opacity:.92}
+.nav button[data-m="dashboard"]:before{content:"▦"}
+.nav button[data-m="negativos_hoy"]:before{content:"!"}
+.nav button[data-m="pagos_hoy"]:before{content:"$"}
+.nav button[data-m="historial"]:before{content:"▣"}
+.nav button[data-m="recurrentes"]:before{content:"↻"}
+.nav button[data-m="ranking"]:before{content:"★"}
+.nav button[data-m="reportes"]:before{content:"▤"}
+.nav button[data-m="operaciones"]:before{content:"⚙"}
+.nav button[data-m="usuarios"]:before{content:"♙"}
+.user{background:#fff!important;border:1px solid #DCE6F1!important;border-radius:14px!important;padding:11px!important;box-shadow:0 8px 18px rgba(8,43,103,.05)!important}
+.side .logout{background:#FFF3F3!important;color:#B42318!important;border:1px solid #FED1D4!important;border-radius:11px!important}
+.side .logout:hover{background:#FFE9EA!important}
+
+/* Boton de contraer sidebar: UI solamente */
+.phase1-side-toggle{
+  display:flex;align-items:center;justify-content:center;width:38px;height:34px;padding:0!important;margin:0 0 2px auto!important;
+  background:#EDF4FD!important;color:var(--ena-blue)!important;border:1px solid #D1E0F2!important;border-radius:11px!important;
+  box-shadow:none!important;font-size:16px!important;
+}
+.phase1-side-toggle:hover{background:#E2EEFC!important}
+.shell.side-collapsed{grid-template-columns:84px minmax(0,1fr)!important}
+.shell.side-collapsed .side{padding:16px 10px!important}
+.shell.side-collapsed .brand-logo-app{min-height:56px!important;padding:7px!important}
+.shell.side-collapsed .brand-logo-app img{max-width:52px!important;max-height:42px!important}
+.shell.side-collapsed .portal-name-side,.shell.side-collapsed .user strong,.shell.side-collapsed .user span{display:none!important}
+.shell.side-collapsed .phase1-side-toggle{margin:0 auto 2px!important}
+.shell.side-collapsed .nav button{font-size:0!important;padding:11px!important;min-height:44px!important}
+.shell.side-collapsed .nav button:before{left:50%!important;transform:translate(-50%,-50%)!important;font-size:17px!important}
+.shell.side-collapsed .user{padding:8px!important}
+.shell.side-collapsed .side .logout{font-size:0!important;min-height:38px!important;padding:8px!important}
+.shell.side-collapsed .side .logout:before{content:"↪";font-size:17px!important}
+
+/* Cards / botones / tablas con identidad ENA */
+.card,.panel,.kpi,.section-tools,.source-card,.ops-card-v9,.cron-card,.report-card,.quick-card{
+  border-color:#D7E2EF!important;box-shadow:0 12px 30px rgba(13,43,83,.07)!important;
+}
+button{transition:transform .12s ease,filter .12s ease,box-shadow .12s ease}
+button:not(:disabled):active{transform:translateY(1px)}
+button:not(.soft-btn):not(.danger):not(.logout):not(#loginBtn){background:linear-gradient(180deg,#2455AE,#183F8E)}
+.soft-btn{background:#EFF5FD!important;color:#1C4B97!important;border-color:#CBDAED!important}
+th{background:linear-gradient(180deg,#1E55AD,#173F8C)!important}
+.panel-title,.rank-table-title{background:#F5F9FE!important}
+
+/* Badge de unidad: mismo lenguaje visual que Estatus */
+.unit-v11,.unit-color-badge{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:56px!important;
+  padding:5px 9px!important;border-radius:10px!important;font-weight:1000!important;
+  border:1px solid rgba(12,43,82,.14)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)!important;
+}
+
+/* Pagos Hoy: ninguna columna queda escondida. Unidad y Guardar se mantienen visibles. */
+.pagos-online{overflow:visible!important}
+.pagos-online .table-wrap,.pay-table-v14,.pay-table-v17{
+  overflow-x:auto!important;overflow-y:auto!important;max-width:100%!important;padding-bottom:10px!important;
+  scrollbar-gutter:stable both-edges;
+}
+.pagos-online table{min-width:1220px!important;width:100%!important;table-layout:auto!important}
+.pagos-online th,.pagos-online td{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
+.pagos-online th:first-child,.pagos-online td:first-child{position:sticky;left:0;z-index:5}
+.pagos-online td:first-child{background:#fff;box-shadow:7px 0 12px rgba(13,43,83,.055)}
+.pagos-online tbody tr:nth-child(even) td:first-child{background:#F8FBFF}
+.pagos-online th:first-child{z-index:9;background:linear-gradient(180deg,#1E55AD,#173F8C)!important}
+.pagos-online th:last-child,.pagos-online td:last-child{position:sticky;right:0;z-index:6;min-width:102px!important}
+.pagos-online td:last-child{background:#fff;box-shadow:-8px 0 14px rgba(13,43,83,.08)}
+.pagos-online tbody tr:nth-child(even) td:last-child{background:#F8FBFF}
+.pagos-online th:last-child{z-index:10;background:linear-gradient(180deg,#1E55AD,#173F8C)!important}
+.pagos-online td:last-child .soft-btn{white-space:nowrap;padding:8px 11px!important}
+.pagos-online input,.pagos-online select{min-width:0!important}
+.pagos-online [data-pay]{width:120px!important}
+.pagos-online [data-nop]{width:130px!important}
+.pagos-online [data-op]{width:220px!important}
+.pagos-online [data-tipo]{width:160px!important}
+.pagos-online [data-cobrador]{width:190px!important}
+.readonly-user{background:#F2F6FB!important;border-color:#D7E1EE!important;color:#32496B!important}
+
+/* Scrollbars discretos */
+.table-wrap::-webkit-scrollbar,.nav::-webkit-scrollbar{height:10px;width:9px}
+.table-wrap::-webkit-scrollbar-thumb,.nav::-webkit-scrollbar-thumb{background:#B9C9DD;border-radius:999px;border:2px solid transparent;background-clip:padding-box}
+.table-wrap::-webkit-scrollbar-track,.nav::-webkit-scrollbar-track{background:transparent}
+
+@media(max-width:820px){
+  .phase1-side-toggle{display:none!important}
+  .shell,.shell.side-collapsed{display:block!important}
+  .side{padding:9px 10px!important}
+  .shell.side-collapsed .portal-name-side{display:block!important}
+  .shell.side-collapsed .user strong{display:none!important}
+  .nav button{padding-left:12px!important}
+  .nav button:before{display:none!important}
+  .pagos-online table{min-width:1120px!important}
+}
+@media(max-width:520px){
+  .login:before{width:480px;height:480px;left:-250px;bottom:-250px}
+  .login:after{width:350px;right:-150px}
+  .login-card,.password-panel{padding:25px 18px!important}
+}

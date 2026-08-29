@@ -1,0 +1,14 @@
+.phase5-search-note{font-size:10px;color:var(--muted);margin-top:7px}
+.phase5-ena-cell{min-width:138px}
+.phase5-ena-cell .ena-saldo-box{white-space:normal;text-align:left}
+.phase3-neg-table th:nth-child(1),.phase3-neg-table td:nth-child(1){width:7%}
+.phase3-neg-table th:nth-child(2),.phase3-neg-table td:nth-child(2){width:7%}
+.phase3-neg-table th:nth-child(3),.phase3-neg-table td:nth-child(3){width:8%}
+.phase3-neg-table th:nth-child(4),.phase3-neg-table td:nth-child(4){width:9%}
+.phase3-neg-table th:nth-child(5),.phase3-neg-table td:nth-child(5){width:7%}
+.phase3-neg-table th:nth-child(6),.phase3-neg-table td:nth-child(6){width:12%}
+.phase3-neg-table th:nth-child(7),.phase3-neg-table td:nth-child(7){width:15%}
+.phase3-neg-table th:nth-child(8),.phase3-neg-table td:nth-child(8){width:7%}
+.phase3-neg-table th:nth-child(9),.phase3-neg-table td:nth-child(9){width:8%}
+.phase3-neg-table th:nth-child(10),.phase3-neg-table td:nth-child(10){width:20%}
+@media(max-width:820px){.phase5-ena-cell{min-width:0}}

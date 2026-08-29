@@ -1,0 +1,11 @@
+body.v120-home-loading .v101-updated b:after{content:"Actualizando datos…";color:#55708f}
+body.v120-home-loading .v101-updated b{font-size:0}
+body.v120-home-loading .v99-kpi strong,
+body.v120-home-loading .v99-mini b{color:transparent!important;position:relative;overflow:hidden;border-radius:7px;background:#e8eef6!important;min-height:1em}
+body.v120-home-loading .v99-kpi strong:after,
+body.v120-home-loading .v99-mini b:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);animation:v120Shimmer 1.15s infinite}
+body.v120-home-loading .v99-alerts .v99-empty{color:#60748f;background:#f5f8fc;border:1px dashed #cbd8e7}
+body.v120-home-loading .v99-alerts .v99-empty:before{content:"Actualizando prioridades…";font-size:12px;font-weight:900}
+body.v120-home-loading .v99-alerts .v99-empty{font-size:0}
+#v115MobileNav [data-a="ctl"].v120-opening{background:rgba(255,255,255,.16)!important;color:#fff!important}
+@keyframes v120Shimmer{to{transform:translateX(100%)}}

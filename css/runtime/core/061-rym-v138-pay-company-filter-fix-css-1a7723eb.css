@@ -1,0 +1,4 @@
+#pmOut tbody tr[data-v138-company-match="1"]{display:table-row!important}
+#pmOut tbody tr[data-v138-company-match="0"]{display:none!important}
+.v119-pager.v138-filter-active{display:none!important}
+@media(max-width:820px){#pmOut tbody tr[data-v138-company-match="1"]{display:block!important}}

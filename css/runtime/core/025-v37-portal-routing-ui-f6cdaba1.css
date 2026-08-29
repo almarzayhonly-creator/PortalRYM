@@ -1,0 +1,53 @@
+/* ===== V37 PORTAL RYM: fondo premium + separación real de módulos ===== */
+.v36-home{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 12% 18%,rgba(45,101,187,.22) 0 7%,transparent 27%),
+    radial-gradient(circle at 86% 16%,rgba(84,183,232,.30) 0 8%,transparent 30%),
+    radial-gradient(circle at 78% 88%,rgba(244,124,32,.13) 0 6%,transparent 24%),
+    linear-gradient(135deg,#F7FAFE 0%,#E6EFF8 43%,#DCEAF6 70%,#EEF5FA 100%)!important;
+}
+.v36-home:before{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(31,83,151,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(31,83,151,.035) 1px,transparent 1px);
+  background-size:42px 42px;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.62),transparent 82%);
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.62),transparent 82%);
+}
+.v36-home:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:760px;
+  height:260px;
+  right:-190px;
+  top:-105px;
+  border-radius:999px;
+  transform:rotate(-13deg);
+  background:linear-gradient(90deg,transparent,rgba(84,183,232,.18),rgba(36,74,165,.10),transparent);
+  filter:blur(1px);
+}
+.v36-home-shell{position:relative;padding:30px;border-radius:34px;background:rgba(255,255,255,.34);border:1px solid rgba(255,255,255,.70);box-shadow:0 30px 80px rgba(15,52,96,.11);backdrop-filter:blur(10px)}
+.v36-home-head{padding:2px 4px 12px}.v36-home-brand img{box-shadow:0 12px 28px rgba(15,52,96,.10)}
+.v36-module-card{background:linear-gradient(165deg,rgba(255,255,255,.98),rgba(248,251,255,.94));box-shadow:0 18px 46px rgba(15,52,96,.10)}
+.v36-module-card.panapass{border-top:4px solid #2D65BB}.v36-module-card.control{border-top:4px solid #20A066}.v36-module-card.soon{border-top:4px solid #E6A34A}
+.v36-module-card:not(.soon):hover{transform:translateY(-5px);box-shadow:0 26px 58px rgba(15,52,96,.16)}
+.v36-module-icon{box-shadow:0 8px 18px rgba(36,85,174,.10)}
+
+/* Control de Auto abierto desde su tarjeta: shell independiente, sin navegación Panapass. */
+body.v37-control-only .side .nav{display:grid!important}
+body.v37-control-only .side .nav button{cursor:default!important;transform:none!important}
+body.v37-control-only .side .nav button:before{content:"C"!important;font-size:13px!important}
+body.v37-control-only .portal-name-side{font-size:13px!important}
+body.v37-control-only .top .portal-kicker:after{content:" · Módulo independiente";font-weight:800}
+body.v37-control-only .v36-portal-home-btn{background:#EAF3FF!important;border-color:#C9DBF0!important;color:#174A8B!important}
+
+@media(max-width:850px){.v36-home-shell{padding:18px;border-radius:24px}}
+@media(max-width:560px){.v36-home-shell{padding:14px;border-radius:20px}.v36-home{padding:10px}}

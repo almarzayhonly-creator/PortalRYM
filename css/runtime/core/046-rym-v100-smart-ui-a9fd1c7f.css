@@ -1,0 +1,7 @@
+body.v99-home .v99-hero{padding:24px 28px!important;min-height:0!important}
+body.v99-home .v99-hero h2{font-size:28px!important;margin:7px 0 8px!important}
+body.v99-home .v99-priority{margin-top:14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.10);border-radius:14px}
+body.v99-home .v99-priority .ico{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:17px}.v99-priority b{display:block;font-size:12px}.v99-priority span{display:block;margin-top:2px;font-size:10px;opacity:.84}
+body.v99-home .v99-kpi{position:relative;overflow:hidden}body.v99-home .v99-kpi:after{content:'';position:absolute;left:0;bottom:0;height:3px;width:var(--v100-progress,42%);background:#4b91d8}.v99-kpi.warn:after{background:#f59e0b!important}.v99-kpi.bad:after{background:#dc2626!important}.v99-kpi.good:after{background:#16a34a!important}
+body:not(.v100-admin-total) .v97-bajas-mail,body:not(.v100-admin-total) .v66-daily-sendbox{display:none!important}body:not(.v100-admin-total) .v97-bajas-layout,body:not(.v100-admin-total) .v66-daily-layout{grid-template-columns:1fr!important}
+@media(max-width:720px){body.v99-home .v99-priority{grid-template-columns:auto 1fr}.v99-priority .action{display:none}}

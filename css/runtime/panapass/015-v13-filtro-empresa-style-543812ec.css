@@ -1,0 +1,7 @@
+/* V13: filtro de empresa dueña dentro de Cargar Pagos */
+#pmEmpresaFiltro{min-width:190px}
+.section-tools .pm-company-filter{min-width:190px;max-width:240px}
+@media(max-width:820px){
+  .section-tools .pm-company-filter{min-width:0;max-width:none;width:100%}
+  #pmEmpresaFiltro{min-width:0;width:100%}
+}

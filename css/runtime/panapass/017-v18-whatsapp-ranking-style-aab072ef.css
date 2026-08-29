@@ -1,0 +1,5 @@
+/* V18: copiar ranking por galera para WhatsApp. Solo ADMIN_TOTAL y PAGADOR. */
+.wa-rank-btn{background:linear-gradient(180deg,#128C7E,#08786C)!important;border:1px solid #08786C!important;color:#fff!important;white-space:nowrap}
+.wa-rank-btn:disabled{background:#e7edf4!important;border-color:#d5dfeb!important;color:#8390a3!important;opacity:1!important}
+.wa-rank-status{font-size:10px;font-weight:900;color:var(--green);min-height:15px;align-self:center}
+@media(max-width:1180px){.phase3-filterbar .wa-rank-status{grid-column:1/-1}}
