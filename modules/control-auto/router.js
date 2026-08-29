@@ -9,6 +9,7 @@
   let busy=false;
   let queued=null;
   const hooks=new Map();
+  const aroundHooks=new Map();
 
   function normalize(name){
     const n=String(name||'').trim().toLowerCase();
@@ -76,9 +77,12 @@
     const {key,fn}=appView(name);
     d.body.dataset.rymModule='control-auto';
     d.body.dataset.rymControlRoute=key;
-    await fn.call(w);
+    const ctx={route:key,router:w.RYM_CONTROL_ROUTER};
+    let run=()=>fn.call(w);
+    for(const hook of aroundHooks.get(key)||[]){const previous=run;run=()=>hook(previous,ctx);}
+    await run();
     const list=hooks.get(key)||[];
-    for(const hook of list) await hook({route:key});
+    for(const hook of list) await hook(ctx);
     current=key;
     bindNavigation();
     return key;
@@ -112,6 +116,10 @@
     return w.RYM_ROUTER?.home?.()||false;
   }
 
+  function around(route,fn){
+    const key=normalize(route);if(!routes[key]||typeof fn!=='function')throw new Error('Hook around Control invalido');
+    const list=aroundHooks.get(key)||[];list.push(fn);aroundHooks.set(key,list);return()=>aroundHooks.set(key,(aroundHooks.get(key)||[]).filter(x=>x!==fn));
+  }
   function after(route,fn){
     const key=normalize(route);if(!routes[key]||typeof fn!=='function')throw new Error('Hook Control invalido');
     const list=hooks.get(key)||[];list.push(fn);hooks.set(key,list);return()=>hooks.set(key,(hooks.get(key)||[]).filter(x=>x!==fn));
@@ -121,5 +129,8 @@
   function isBusy(){return busy}
   function rebind(){bindNavigation();return true}
 
-  w.RYM_CONTROL_ROUTER=Object.freeze({open,leave,active,isBusy,rebind,routes,after});
+  w.RYM_CONTROL_ROUTER=Object.freeze({open,leave,active,isBusy,rebind,routes,around,after});
+  for(const [route,fn] of (w.__RYM_CONTROL_PENDING_AROUND__||[])) around(route,fn);
+  for(const [route,fn] of (w.__RYM_CONTROL_PENDING_AFTER__||[])) after(route,fn);
+  delete w.__RYM_CONTROL_PENDING_AROUND__;delete w.__RYM_CONTROL_PENDING_AFTER__;
 })(window,document);
