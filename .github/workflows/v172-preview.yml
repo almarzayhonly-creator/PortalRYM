@@ -104,7 +104,7 @@ jobs:
           grep -Fq 'portalGpsPriority' /tmp/gps-v158.js
           grep -Fq '.v158-action-order' /tmp/gps-v158.css
           grep -Fq '.v160-exec-grid' /tmp/gps-v160.css
-          grep -Fq '.v66-shell' /tmp/revisados-v66.css
+          grep -Fq '.v66-app' /tmp/revisados-v66.css
           grep -Fq 'window.v60OpenRevisados' /tmp/revisados-v66.js
           node --check /tmp/revisados-v66.js
           node --check /tmp/gps-v158.js
