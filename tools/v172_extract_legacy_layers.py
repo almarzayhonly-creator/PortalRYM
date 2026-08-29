@@ -12,8 +12,6 @@ changed=[]
 def safe_name(value):
     return re.sub(r'[^a-zA-Z0-9._-]+','-',value).strip('-')
 
-# Extract scripts with matching ids, preserving exact source order by replacing
-# inline blocks in place with external script tags.
 script_pat=re.compile(r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>',re.S|re.I)
 script_matches=[]
 for m in script_pat.finditer(html):
@@ -34,7 +32,6 @@ for m,sid,body in reversed(script_matches):
     html=html[:m.start()]+repl+html[m.end():]
     changed.append(str(path.relative_to(ROOT)))
 
-# Extract styles the same way.
 style_pat=re.compile(r'<style(?P<attrs>[^>]*)>(?P<body>.*?)</style>',re.S|re.I)
 style_matches=[]
 for m in style_pat.finditer(html):
@@ -56,7 +53,6 @@ for m,sid,body in reversed(style_matches):
 
 INDEX.write_text(html,encoding='utf-8')
 
-# Assertions: no matching inline versioned script/style remains.
 for v in VERSIONS:
     bad_script=re.search(rf'<script[^>]+id=["\'][^"\']*{re.escape(v)}[^"\']*["\'][^>]*>(?!\s*</script>)',html,re.I)
     bad_style=re.search(rf'<style[^>]+id=["\'][^"\']*{re.escape(v)}[^"\']*["\']',html,re.I)
@@ -66,3 +62,4 @@ for v in VERSIONS:
 print('externalized files:',len(changed))
 for p in changed: print(p)
 print('index bytes:',INDEX.stat().st_size)
+# trigger: 2026-08-28
