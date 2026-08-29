@@ -37,6 +37,7 @@
     '/modules/revisados/router.js',
     '/modules/revisados/enhancements-v154.js',
     '/modules/revisados/index.js',
+    '/modules/control-auto/app-v75.js',
     '/modules/control-auto/validador.js',
     '/modules/control-auto/cupos.js',
     '/modules/control-auto/router.js',

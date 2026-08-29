@@ -3,13 +3,7 @@
   'use strict';
   if(w.RYM_CONTROL_ROUTER) return;
 
-  const routes=Object.freeze({
-    dashboard:'v75ControlDashboard',
-    unidades:'v75ControlUnits',
-    cupos:'v94ControlCuposATTT',
-    auditoria:'v75ControlAudit',
-    validador:'v80OpenEcarValidator'
-  });
+  const routes=Object.freeze({dashboard:'dashboard',unidades:'unidades',cupos:'cupos',auditoria:'auditoria',validador:'validador'});
 
   let current='dashboard';
   let busy=false;
@@ -24,12 +18,11 @@
     return n;
   }
 
-  function legacyView(name){
+  function appView(name){
     const key=normalize(name);
-    const fnName=routes[key];
-    if(!fnName) throw new Error('Ruta Control de Auto invalida: '+key);
-    const fn=w[fnName];
-    if(typeof fn!=='function') throw new Error('Vista Control de Auto no disponible: '+fnName);
+    if(!routes[key]) throw new Error('Ruta Control de Auto invalida: '+key);
+    const fn=w.RYM_CONTROL_APP?.[key];
+    if(typeof fn!=='function') throw new Error('Vista Control de Auto no disponible: '+key);
     return {key,fn};
   }
 
@@ -80,7 +73,7 @@
   }
 
   async function invoke(name){
-    const {key,fn}=legacyView(name);
+    const {key,fn}=appView(name);
     d.body.dataset.rymModule='control-auto';
     d.body.dataset.rymControlRoute=key;
     await fn.call(w);
