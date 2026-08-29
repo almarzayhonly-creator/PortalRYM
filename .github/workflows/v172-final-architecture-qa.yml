@@ -1,0 +1,50 @@
+name: V172 final architecture QA
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_final_architecture_qa.trigger'
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: JavaScript syntax
+        run: |
+          find modules/core modules/panapass modules/revisados modules/control-auto modules/gps modules/usuarios -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+          node --check modules/v172-clean-loader.js
+      - name: Canonical ownership
+        run: |
+          test ! -e modules/core/compat-v154.js
+          test ! -e css/core-compat-v154.css
+          test ! -e modules/gps/v155.js
+          test ! -e css/gps-v155.css
+          test ! -d modules/legacy
+          test ! -d css/legacy
+          ! grep -R -F '__RYM_ROUTE_V155' modules index.html
+          ! grep -R -F 'const wrapControl=' modules/core modules/control-auto
+          ! grep -R -E 'window\.v75ControlUnits\s*=|window\.v94ControlCuposATTT\s*=|window\.v60OpenRevisados\s*=' modules/core/home-v154.js modules/control-auto/enhancements modules/revisados/enhancements-v154.js
+          grep -Fq 'function after(route,fn)' modules/control-auto/router.js
+          grep -Fq 'function after(route,fn)' modules/revisados/router.js
+          grep -Fq "register('portal'" modules/core/portal-module.js
+          grep -Fq "bajas_panapass:'panapass-bajas'" modules/panapass/router.js
+      - name: Loader contract
+        run: |
+          grep -Fq '/modules/core/portal-module.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/core/home-v154.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/control-auto/enhancements/supervisor-summary-v123.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/control-auto/enhancements/unidades-v154.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/control-auto/enhancements/cupos-v154.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/revisados/enhancements-v154.js' modules/v172-clean-loader.js
+          ! grep -Fq '/modules/core/compat-v154.js' index.html
+          ! grep -Fq '/modules/gps/v155.js' index.html
+      - name: Architecture metrics
+        run: |
+          echo "INDEX_BYTES=$(wc -c < index.html)"
+          echo "CORE_RUNTIME_BYTES=$(wc -c < modules/core/runtime.js)"
+          echo "JS_FILES=$(find modules -type f -name '*.js' | wc -l)"
