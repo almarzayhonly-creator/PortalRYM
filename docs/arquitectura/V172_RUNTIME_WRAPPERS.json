@@ -1,7 +1,7 @@
 {
-  "audit_version": "1.2",
-  "files_with_wrapper_signals": 28,
-  "wrapper_signal_total": 73,
+  "audit_version": "1.3",
+  "files_with_wrapper_signals": 26,
+  "wrapper_signal_total": 71,
   "files": [
     {
       "path": "modules/control-auto/runtime/023-phase30-admin-status-behavior-8cf3585b.js",
@@ -157,24 +157,6 @@
       "function_reassign": [
         "phase2Allowed",
         "usuarios"
-      ]
-    },
-    {
-      "path": "modules/panapass/runtime/017-phase5-search-ena-fix-behavior-ebc3dc90.js",
-      "bytes": 7101,
-      "saved_previous": [],
-      "window_reassign": [],
-      "function_reassign": [
-        "v11UnitList"
-      ]
-    },
-    {
-      "path": "modules/panapass/runtime/018-phase6-control-auto-secure-behavior-18e06485.js",
-      "bytes": 14309,
-      "saved_previous": [],
-      "window_reassign": [],
-      "function_reassign": [
-        "v11UnitList"
       ]
     },
     {
