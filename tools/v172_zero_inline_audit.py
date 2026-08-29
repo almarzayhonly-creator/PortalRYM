@@ -2,6 +2,7 @@
 from pathlib import Path
 import json,re
 
+AUDIT_VERSION='1.0'
 root=Path(__file__).resolve().parents[1]
 idx=root/'index.html'
 html=idx.read_text(encoding='utf-8')
@@ -44,6 +45,7 @@ for i,m in enumerate(re.finditer(r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script
     scripts.append({'n':i,'id':sid,'bytes':len(body.encode()),'domain':classify(body,sid),'wrapper_hits':len(wrappers),'wrapper_samples':wrappers[:8],'start':m.start(),'end':m.end()})
 
 report={
+  'audit_version':AUDIT_VERSION,
   'index_bytes':len(html.encode()),
   'inline_style_count':len(styles),
   'inline_style_bytes':sum(x['bytes'] for x in styles),
