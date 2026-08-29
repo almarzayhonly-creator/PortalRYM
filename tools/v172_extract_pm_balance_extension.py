@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+MIGRATION_VERSION='1.0'
 root=Path(__file__).resolve().parents[1]
 src=root/'modules/panapass/runtime/034-rym-v74-responsive-pm-behavior-3578d7fc.js'
 idx=root/'index.html'
@@ -14,4 +15,4 @@ old='/modules/panapass/runtime/034-rym-v74-responsive-pm-behavior-3578d7fc.js?v=
 if old not in h: raise SystemExit('PM source reference missing')
 h=h.replace(old,'/modules/panapass/pm-balance-validator.js?v=172-clean',1);idx.write_text(h,encoding='utf-8')
 src.unlink()
-print('PM balance validator moved to Panapass after-hook')
+print('PM balance validator moved to Panapass after-hook',MIGRATION_VERSION)
