@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {parse} from 'acorn';
 
+const MIGRATOR_VERSION='1.0';
 const root=process.cwd();
 const files=['modules/core/portal-v70.js','modules/core/portal-home-v99.js'];
 function walk(node,cb,parent=null){if(!node||typeof node!=='object')return;cb(node,parent);for(const [k,v] of Object.entries(node)){if(['start','end','loc'].includes(k))continue;if(Array.isArray(v))for(const x of v)walk(x,cb,node);else if(v&&typeof v==='object')walk(v,cb,node)}}
@@ -24,7 +25,6 @@ for(const rel of files){
   if(reps.length){reps.sort((a,b)=>b.start-a.start);let out=src,seen=new Set();for(const r of reps){const k=r.start+':'+r.end;if(seen.has(k))continue;seen.add(k);out=out.slice(0,r.start)+r.code+out.slice(r.end)}fs.writeFileSync(p,out)}
 }
 
-// Replace Portal module button bindings with canonical application router.
 for(const rel of files){
   const p=path.join(root,rel);let s=fs.readFileSync(p,'utf8');
   const replacements=[
@@ -41,11 +41,10 @@ for(const rel of files){
   fs.writeFileSync(p,s);
 }
 
-// Convert legacy module-entry globals in V70 into thin compatibility aliases to canonical router only.
 {
  const p=path.join(root,'modules/core/portal-v70.js');let s=fs.readFileSync(p,'utf8');
  s=s.replace(/window\.v70OpenPanapass=async function\(\)\{.*?\};\n/s,"window.v70OpenPanapass=()=>window.RYM_ROUTER?.open('panapass');\n");
  s=s.replace(/window\.v70OpenControl=async function\(\)\{.*?\};\n/s,"window.v70OpenControl=()=>window.RYM_ROUTER?.open('control-auto');\n");
  fs.writeFileSync(p,s);
 }
-console.log('Portal semantic home and module entry cleanup complete');
+console.log('Portal semantic home and module entry cleanup complete',MIGRATOR_VERSION);
