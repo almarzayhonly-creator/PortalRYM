@@ -22,11 +22,11 @@
   }
   window.v36InvalidateCache=invalidate;
 
-  const baseClearSession=clearSession;
-  clearSession=function(){PERF.cache.clear();PERF.inflight.clear();PERF.metaPromise=null;return baseClearSession()};
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["clearSession",function(next,args,ctx){const baseClearSession=(...a)=>next(a);const impl=function(){PERF.cache.clear();PERF.inflight.clear();PERF.metaPromise=null;return baseClearSession()};return impl.apply(ctx.thisArg,args)}]);
 
-  const baseRpc=rpc;
-  rpc=async function(fn,body={}){
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["rpc",async function(next,args,ctx){const baseRpc=(...a)=>next(a);const impl=async function(fn,body={}){
     const ttl=ttlFor(fn,body);
     if(!ttl)return baseRpc(fn,body);
     const normalized=normalizeBody(fn,body),key=cacheKey(fn,normalized),now=Date.now();
@@ -42,10 +42,10 @@
     })();
     PERF.inflight.set(key,p);
     return p;
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
-  const baseReq=req;
-  req=async function(path,opt={}){
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["req",async function(next,args,ctx){const baseReq=(...a)=>next(a);const impl=async function(path,opt={}){
     const out=await baseReq(path,opt);
     if(String(path).includes('/functions/v1/ena-consulta-saldo'))invalidate('panapass_saldo_disponibilidad');
     if(String(path).includes('/functions/v1/admin-unidad-status')){
@@ -53,7 +53,7 @@
       invalidate('panapass_control_auto_resumen');
     }
     return out;
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
   async function ensureMeta(){
     if(state.meta)return state.meta;
@@ -84,8 +84,8 @@
     ensureMeta();
   };
 
-  const baseShell=shell;
-  shell=function(){
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["shell",function(next,args,ctx){const baseShell=(...a)=>next(a);const impl=function(){
     if(window.__v36PagosObserver&&state.active!=='cargar_pagos'){try{window.__v36PagosObserver.disconnect()}catch(_){}}
     if(window.__v36PayFilterObserver&&state.active!=='cargar_pagos'){try{window.__v36PayFilterObserver.disconnect()}catch(_){}}
     if(window.__v36NegObserver&&state.active!=='negativos_hoy'){try{window.__v36NegObserver.disconnect()}catch(_){}}
@@ -95,10 +95,10 @@
     if(side&&nav&&!side.querySelector('#v36PortalHomeBtn')){
       const b=document.createElement('button');b.id='v36PortalHomeBtn';b.type='button';b.className='v36-portal-home-btn';b.textContent='Inicio Portal';b.onclick=()=>window.v36PortalHome();side.insertBefore(b,nav);
     }
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
   /* Login directo al selector. La carga de meta queda en segundo plano para que el acceso se sienta inmediato. */
-  login=async function(e){
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["login",async function(next,args,ctx){const impl=async function(e){
     e.preventDefault();
     const f=new FormData(e.currentTarget),b=document.querySelector('#loginBtn');
     b.disabled=true;b.textContent='Ingresando...';
@@ -115,9 +115,9 @@
       }
       await loadApp();
     }catch(x){clearSession();loginView(x.message)}
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
-  loadApp=async function(){
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["loadApp",async function(next,args,ctx){const impl=async function(){
     try{
       const me=(await req('/auth/v1/user')).data;
       const p=(await rest('perfiles_usuario','select=id,nombre,email,usuario,rol,activo,supervisora_id,must_change_password&id=eq.'+me.id))[0];
@@ -134,7 +134,7 @@
       if(typeof phase2NormalizeModules==='function')phase2NormalizeModules();
       window.v36PortalHome();
     }catch(x){clearSession();loginView(x.message)}
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
   const baseV36UnitList=v11UnitList;
   v11UnitList=async function(){

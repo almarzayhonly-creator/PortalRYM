@@ -9,8 +9,8 @@
   const norm86=phase2NormalizeModules;
   phase2NormalizeModules=function(){const wanted=state.active;const r=norm86?.apply(this,arguments);ensureBajasModule87();if(wanted===V87_MOD&&canBajas87())state.active=V87_MOD;return r};
 
-  const shell86=shell;
-  shell=function(){ensureBajasModule87();return shell86.apply(this,arguments)};
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["shell",function(next,args,ctx){const shell86=(...a)=>next(a);const impl=function(){ensureBajasModule87();return shell86.apply(this,arguments)};return impl.apply(ctx.thisArg,args)}]);
 
   const openPan86=window.v70OpenPanapass;
   if(typeof openPan86==='function'){

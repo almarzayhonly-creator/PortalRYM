@@ -17,8 +17,8 @@
   v12Unit=function(u,c){const [bg,fg]=colorPair(c);return `<span class="unit-v11" title="Color: ${esc(c||'Sin color')}" style="background:${bg};color:${fg}">${esc(u||'')}</span>`};
 
   /* Contraer/expandir sidebar; se conserva solo en el navegador del usuario. */
-  const previousShell=shell;
-  shell=function(){
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["shell",function(next,args,ctx){const previousShell=(...a)=>next(a);const impl=function(){
     previousShell();
     const sh=document.querySelector('.shell');
     const side=document.querySelector('.side');
@@ -38,5 +38,5 @@
       b.onclick=()=>{localStorage.setItem('ena_sidebar_collapsed',sh.classList.contains('side-collapsed')?'0':'1');apply()};
     }
     apply();
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 })();

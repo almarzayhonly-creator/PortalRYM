@@ -27,12 +27,12 @@
   };
   try{v36PortalHome=window.v36PortalHome}catch(_){}
 
-  const clear75=clearSession;
-  clearSession=function(){
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["clearSession",function(next,args,ctx){const clear75=(...a)=>next(a);const impl=function(){
     const r=clear75();
     state.profile=null;state.modules=[];state.allModules=[];state.active='dashboard';
     return r;
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
   /* Unifica todos los botones visibles Volver al Portal con la reconstrucción segura. */
   document.addEventListener('click',e=>{

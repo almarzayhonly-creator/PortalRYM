@@ -6,7 +6,7 @@
     Durante la carga principal del Centro de Control, pospone solo warmups secundarios
     que antes competian con portal-home-resumen (GPS, Control resumen y Revisados).
   */
-  const reqBase=req;
+  
   let homeGate=null,releaseHomeGate=null,homeInFlight=null;
   const secondaryPath=p=>[
     '/functions/v1/gps-rym-admin',
@@ -14,12 +14,12 @@
     '/functions/v1/revisados-final'
   ].includes(String(p||''));
 
-  req=async function(path,opt={}){
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["req",async function(next,args,ctx){const reqBase=(...a)=>next(a);const impl=async function(path,opt={}){
     if(window.__RYM_HOME_PRIMARY_LOADING&&homeGate&&secondaryPath(path)){
       try{await Promise.race([homeGate,new Promise(r=>setTimeout(r,6000))])}catch(_){}
     }
     return reqBase(path,opt);
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
   const homeBase=window.v36PortalHome;
   if(typeof homeBase==='function'&&!homeBase.__v156){

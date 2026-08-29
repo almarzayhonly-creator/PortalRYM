@@ -25,11 +25,11 @@ isFullAdmin=function(){return ['ADMIN_TOTAL','SISTEMA'].includes(role())};
 isAdminRole=function(){return ['ADMIN_TOTAL','SISTEMA','PAGADOR'].includes(role())};
 
 /* El filtro se ejecuta también en sesiones restauradas, no solo al iniciar sesión. */
-const _phase2Shell=shell;
-shell=function(){
+
+(window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["shell",function(next,args,ctx){const _phase2Shell=(...a)=>next(a);const impl=function(){
   phase2NormalizeModules();
   _phase2Shell();
-};
+};return impl.apply(ctx.thisArg,args)}]);
 
 /* Pagos Hoy SIEMPRE consulta. Cargar Pagos es la hoja online editable. */
 render=async function(){

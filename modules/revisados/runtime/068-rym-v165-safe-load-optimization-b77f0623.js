@@ -47,8 +47,8 @@
   }
 
   if(typeof window.req === 'function'){
-    const reqBase = window.req;
-    window.req = async function(path,opt={}){
+    
+    (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["req",async function(next,args,ctx){const reqBase=(...a)=>next(a);const impl=async function(path,opt={}){
       const p=String(path||'');
       if(!tracked.has(p)) return reqBase(path,opt);
       const key=routeKey(p,opt);
@@ -69,7 +69,7 @@
         .finally(()=>inflight.delete(key));
       inflight.set(key,job);
       return job;
-    };
+    };return impl.apply(ctx.thisArg,args)}]);
     try{req=window.req}catch(_){ }
   }
 

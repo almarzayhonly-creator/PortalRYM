@@ -67,7 +67,7 @@
   });
 
   // Restaura el flujo visual que existia: autentica -> logo RYM animado -> Centro de Control.
-  login=async function(e){
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["login",async function(next,args,ctx){const impl=async function(e){
     e.preventDefault();
     const f=new FormData(e.currentTarget),b=document.querySelector('#loginBtn');
     b.disabled=true;b.textContent='Ingresando...';
@@ -103,7 +103,7 @@
       clearSession();
       loginView(x.message);
     }
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 
   // El formulario visible fue enlazado antes de este parche; se vuelve a enlazar al login V145.
   if(!state.token)loginView();

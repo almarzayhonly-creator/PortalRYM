@@ -29,8 +29,8 @@
     };
   };
 
-  const baseShellV37=shell;
-  shell=function(){
+  
+  (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["shell",function(next,args,ctx){const baseShellV37=(...a)=>next(a);const impl=function(){
     baseShellV37();
 
     /* Dentro de cualquier módulo, Salir significa volver al selector; el logout real queda en el Portal RYM. */
@@ -61,5 +61,5 @@
     if(nav){
       nav.innerHTML='<button type="button" class="active" aria-current="page">Control de Auto</button>';
     }
-  };
+  };return impl.apply(ctx.thisArg,args)}]);
 })();

@@ -8,8 +8,8 @@
 
   /* Revisados: el consumo diario real incluye todo APROBADO operativo del taller 986, también terceros. */
   if(typeof req==='function'&&!window.__v96ReqWrapped){
-    const old=req;window.__v96ReqWrapped=true;
-    req=async function(path,opt={}){const z=await old(path,opt);if(path==='/functions/v1/revisados-final'&&z?.data?.ok&&isAdmin()){try{const d=await rpc('revisados_emitidos_hoy_v1');if(d)z.data.emitidos_hoy=d}catch(_){}}return z};
+    window.__v96ReqWrapped=true;
+    (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["req",async function(next,args,ctx){const old=(...a)=>next(a);const impl=async function(path,opt={}){const z=await old(path,opt);if(path==='/functions/v1/revisados-final'&&z?.data?.ok&&isAdmin()){try{const d=await rpc('revisados_emitidos_hoy_v1');if(d)z.data.emitidos_hoy=d}catch(_){}}return z};return impl.apply(ctx.thisArg,args)}]);
   }
 
   /* Control de Auto: ficha histórica local + situación oficial eCarCheck en dos bloques separados. */
