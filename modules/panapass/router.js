@@ -156,8 +156,6 @@
     queued=null;
     if(busy)return false;
     d.body.dataset.rymPanapassRoute='';
-    const home=legacyFn('v36PortalHome');
-    if(home){await home.call(w);return true}
     return w.RYM_ROUTER?.home?.()||false;
   }
 

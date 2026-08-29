@@ -7,7 +7,7 @@
   const panMods76=()=>PAN76.filter(x=>fullMods76().includes(x));
 
   /* -------- Navegación: reconstruye permisos completos al volver al Portal -------- */
-  const home75=window.v36PortalHome;
+  
   async function refreshFullModules76(){
     if(!state.token)return false;
     try{
@@ -20,11 +20,11 @@
     }catch(_){ }
     return false;
   }
-  window.v36PortalHome=async function(){
+  (window.__RYM_PORTAL_HOME_PENDING_AROUND__ ||= []).push(async function(next,args,ctx){const home75=(...a)=>next(a);const impl=async function(){
     window.__v75ControlMode=false;
     await refreshFullModules76();
     return home75?.apply(this,arguments);
-  };
+  };return impl.apply(ctx.thisArg,args)});
   try{v36PortalHome=window.v36PortalHome}catch(_){}
 
   

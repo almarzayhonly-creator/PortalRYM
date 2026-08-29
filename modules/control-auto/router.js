@@ -109,10 +109,6 @@
     queued=null;
     if(busy) return false;
     d.body.dataset.rymControlRoute='';
-    if(typeof w.v36PortalHome==='function'){
-      await w.v36PortalHome();
-      return true;
-    }
     return w.RYM_ROUTER?.home?.()||false;
   }
 

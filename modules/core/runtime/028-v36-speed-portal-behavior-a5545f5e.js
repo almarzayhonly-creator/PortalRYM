@@ -62,7 +62,7 @@
     return PERF.metaPromise;
   }
 
-  window.v36PortalHome=function(){
+  window.__RYM_PORTAL_HOME_BASE__=function(){
     document.body.classList.remove('capture-mode','v36-admin-total');
     if(window.__v36PagosObserver){try{window.__v36PagosObserver.disconnect()}catch(_){}}
     if(window.__v36PayFilterObserver){try{window.__v36PayFilterObserver.disconnect()}catch(_){}}

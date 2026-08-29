@@ -3,8 +3,8 @@
   let portalMode='home';
   window.__v37PortalMode=()=>portalMode;
 
-  const basePortalHome=window.v36PortalHome;
-  window.v36PortalHome=function(){
+  
+  (window.__RYM_PORTAL_HOME_PENDING_AROUND__ ||= []).push(function(next,args,ctx){const basePortalHome=(...a)=>next(a);const impl=function(){
     portalMode='home';
     document.body.classList.remove('v37-control-only');
     basePortalHome();
@@ -27,7 +27,7 @@
         if(v)v.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`;
       }
     };
-  };
+  };return impl.apply(ctx.thisArg,args)});
 
   
   (window.__RYM_CORE_PENDING_AROUND__ ||= []).push(["shell",function(next,args,ctx){const baseShellV37=(...a)=>next(a);const impl=function(){

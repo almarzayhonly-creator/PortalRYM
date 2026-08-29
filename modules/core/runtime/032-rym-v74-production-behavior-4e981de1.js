@@ -7,6 +7,6 @@
     try{phase6OpenUnit=window.phase6OpenUnit}catch(_){ }
   }
   window.rymPrefetchRevisados=function(){try{if(!(typeof rymHasModule==='function'&&rymHasModule('portal.revisados')))return;const key=String(state?.profile?.id||'')+'|'+String(state?.profile?.rol||'').trim().toUpperCase();if(!key||key==='|')return;const cur=window.__rymRevisadosPrefetch;if(cur&&cur.key===key&&(cur.promise||cur.data)&&Date.now()-(cur.at||Date.now())<120000)return;const holder={key,at:Date.now(),data:null,promise:null};holder.promise=req('/functions/v1/revisados-final',{method:'POST',body:'{}'}).then(r=>{if(r.data?.ok){holder.data=r.data;holder.at=Date.now();return r.data}throw Error(r.data?.error||'prefetch_failed')}).catch(()=>null).finally(()=>{holder.promise=null});window.__rymRevisadosPrefetch=holder}catch(_){}};
-  const oldHome=window.v36PortalHome;if(typeof oldHome==='function'){window.v36PortalHome=function(){const r=oldHome.apply(this,arguments);setTimeout(()=>window.rymPrefetchRevisados?.(),250);return r};try{v36PortalHome=window.v36PortalHome}catch(_){}}
+  if(typeof oldHome==='function'){(window.__RYM_PORTAL_HOME_PENDING_AROUND__ ||= []).push(function(next,args,ctx){const oldHome=(...a)=>next(a);const impl=function(){const r=oldHome.apply(this,arguments);setTimeout(()=>window.rymPrefetchRevisados?.(),250);return r};return impl.apply(ctx.thisArg,args)});try{v36PortalHome=window.v36PortalHome}catch(_){}}
   document.addEventListener('DOMContentLoaded',()=>{document.querySelector('#v36PortalHomeBtn')?.remove()});
 })();

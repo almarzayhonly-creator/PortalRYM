@@ -5,8 +5,8 @@
  w.RYM_MODULES.register('portal',{
    open:async function(){
      d.body.dataset.rymModule='portal';
-     if(typeof w.v36PortalHome!=='function')throw new Error('Portal home renderer unavailable');
-     const out=await w.v36PortalHome();
+     if(!w.RYM_PORTAL_HOME||typeof w.RYM_PORTAL_HOME.open!=='function')throw new Error('Portal home renderer unavailable');
+     const out=await w.RYM_PORTAL_HOME.open();
      setTimeout(()=>w.RYM_HOME_V154?.decorate?.(),50);
      return out;
    }
