@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import re,json
-AUDIT_VERSION='1.3'
+AUDIT_VERSION='1.4'
 root=Path(__file__).resolve().parents[1]
 patterns={
  'saved_previous':re.compile(r'\b(?:const|let|var)\s+([A-Za-z_$][\w$]*(?:old|previous|base)[\w$]*)\s*=\s*(?:window\.)?([A-Za-z_$][\w$]*)',re.I),
