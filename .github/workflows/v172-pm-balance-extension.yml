@@ -1,0 +1,32 @@
+name: V172 PM balance semantic extension
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_extract_pm_balance_extension.py'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - run: python3 tools/v172_extract_pm_balance_extension.py
+      - name: Validate
+        run: |
+          node --check modules/panapass/pm-balance-validator.js
+          test ! -e modules/panapass/runtime/034-rym-v74-responsive-pm-behavior-3578d7fc.js
+          ! grep -Fq 'previousPagosTrabajo' modules/panapass/pm-balance-validator.js
+          ! grep -Fq 'pagosTrabajo=async function' modules/panapass/pm-balance-validator.js
+          grep -Fq "__RYM_PANAPASS_PENDING_AFTER__" modules/panapass/pm-balance-validator.js
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A modules/panapass index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: move PM balance validator to Panapass route hook'
+          git push origin HEAD:v172-clean
