@@ -1,231 +1,398 @@
 {
-  "audit_version": "1.0",
+  "audit_version": "1.1",
   "files_with_wrapper_signals": 32,
   "wrapper_signal_total": 90,
   "files": [
     {
       "path": "modules/control-auto/runtime/023-phase30-admin-status-behavior-8cf3585b.js",
       "bytes": 4438,
-      "saved_previous": 0,
-      "window_reassign": 2,
-      "function_reassign": 0
+      "saved_previous": [],
+      "window_reassign": [
+        "phase6OpenUnit",
+        "phase10RenderSaldo"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/control-auto/runtime/030-rym-control-auto-auditoria-js-363fa89a.js",
       "bytes": 13467,
-      "saved_previous": 0,
-      "window_reassign": 1,
-      "function_reassign": 0
+      "saved_previous": [],
+      "window_reassign": [
+        "v11UnitList"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/control-auto/runtime/043-rym-v95-transfer-manual-js-00f2c1df.js",
       "bytes": 7461,
-      "saved_previous": 0,
-      "window_reassign": 1,
-      "function_reassign": 0
+      "saved_previous": [],
+      "window_reassign": [
+        "v11UnitList"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/core/runtime/011-phase1-ena-ui-006eb00f.js",
       "bytes": 2152,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 2
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "v12Unit",
+        "shell"
+      ]
     },
     {
       "path": "modules/core/runtime/028-v36-speed-portal-behavior-a5545f5e.js",
       "bytes": 9877,
-      "saved_previous": 0,
-      "window_reassign": 1,
-      "function_reassign": 8
+      "saved_previous": [],
+      "window_reassign": [
+        "v36PortalHome"
+      ],
+      "function_reassign": [
+        "clearSession",
+        "rpc",
+        "req",
+        "shell",
+        "login",
+        "loadApp",
+        "v11UnitList",
+        "negativos"
+      ]
     },
     {
       "path": "modules/core/runtime/029-v37-portal-routing-behavior-310eaa70.js",
       "bytes": 2429,
-      "saved_previous": 0,
-      "window_reassign": 1,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [
+        "v36PortalHome"
+      ],
+      "function_reassign": [
+        "shell"
+      ]
     },
     {
       "path": "modules/core/runtime/032-rym-v74-production-behavior-4e981de1.js",
       "bytes": 3682,
-      "saved_previous": 0,
-      "window_reassign": 3,
-      "function_reassign": 0
+      "saved_previous": [],
+      "window_reassign": [
+        "phase6OpenUnit",
+        "rymPrefetchRevisados",
+        "v36PortalHome"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/core/runtime/037-rym-v100-smart-center-js-cd98af74.js",
       "bytes": 2360,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "shellHome99"
+      ]
     },
     {
       "path": "modules/core/runtime/041-rym-v156-gps-login-perf-js-56b101dc.js",
       "bytes": 1448,
-      "saved_previous": 2,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [
+        {
+          "alias": "reqBase",
+          "target": "req"
+        },
+        {
+          "alias": "homeBase",
+          "target": "v36PortalHome"
+        }
+      ],
+      "window_reassign": [],
+      "function_reassign": [
+        "req"
+      ]
     },
     {
       "path": "modules/core/runtime/064-rym-v145-login-nav-js-2723593e.js",
       "bytes": 4494,
-      "saved_previous": 1,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [
+        {
+          "alias": "homeBase",
+          "target": "v36PortalHome"
+        }
+      ],
+      "window_reassign": [],
+      "function_reassign": [
+        "login"
+      ]
     },
     {
       "path": "modules/gps/runtime/056-rym-v122-readability-history-js-c58b9eb0.js",
       "bytes": 4497,
-      "saved_previous": 0,
-      "window_reassign": 1,
-      "function_reassign": 0
+      "saved_previous": [],
+      "window_reassign": [
+        "draw113"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/panapass/runtime/012-v18-history-total-1c9527ba.js",
       "bytes": 4628,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "historial"
+      ]
     },
     {
       "path": "modules/panapass/runtime/013-phase2-final-behavior-dde2a586.js",
       "bytes": 4547,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 7
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "isFullAdmin",
+        "isAdminRole",
+        "shell",
+        "render",
+        "pagosTrabajo",
+        "reportes",
+        "toggleCapture"
+      ]
     },
     {
       "path": "modules/panapass/runtime/014-phase3-supervisoras-filtros-behavior-66fbe9d5.js",
       "bytes": 15075,
-      "saved_previous": 2,
-      "window_reassign": 0,
-      "function_reassign": 5
+      "saved_previous": [
+        {
+          "alias": "_phase3UsuariosBase",
+          "target": "usuarios"
+        },
+        {
+          "alias": "_phase3ReportesBase",
+          "target": "reportes"
+        }
+      ],
+      "window_reassign": [],
+      "function_reassign": [
+        "phase2Allowed",
+        "negativos",
+        "pagosConsultaHoy",
+        "usuarios",
+        "reportes"
+      ]
     },
     {
       "path": "modules/panapass/runtime/016-phase4-ena-saldo-behavior-35120f4a.js",
       "bytes": 4918,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "negativos"
+      ]
     },
     {
       "path": "modules/panapass/runtime/017-phase5-search-ena-fix-behavior-ebc3dc90.js",
       "bytes": 6796,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 2
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "v11UnitList",
+        "negativos"
+      ]
     },
     {
       "path": "modules/panapass/runtime/018-phase6-control-auto-secure-behavior-18e06485.js",
       "bytes": 13462,
-      "saved_previous": 1,
-      "window_reassign": 0,
-      "function_reassign": 3
+      "saved_previous": [
+        {
+          "alias": "_phase6NegBase",
+          "target": "negativos"
+        }
+      ],
+      "window_reassign": [],
+      "function_reassign": [
+        "v11UnitList",
+        "negativos",
+        "dashboard"
+      ]
     },
     {
       "path": "modules/panapass/runtime/019-phase10-ena-saldo-modal-behavior-d94f23a9.js",
       "bytes": 5685,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "phase6ConsultarSaldoENA"
+      ]
     },
     {
       "path": "modules/panapass/runtime/020-v13-filtro-empresa-behavior-a4b1da27.js",
       "bytes": 3061,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "pagosTrabajo"
+      ]
     },
     {
       "path": "modules/panapass/runtime/021-v18-whatsapp-ranking-behavior-61b76ed8.js",
       "bytes": 6483,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 2
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "negativos",
+        "pagosConsultaHoy"
+      ]
     },
     {
       "path": "modules/panapass/runtime/022-v22-admin-ena-access-behavior-d8ec558a.js",
       "bytes": 13492,
-      "saved_previous": 0,
-      "window_reassign": 1,
-      "function_reassign": 0
+      "saved_previous": [],
+      "window_reassign": [
+        "phase6OpenUnit"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/panapass/runtime/024-phase32-saldo-2min-admin-modal-dafa0612.js",
       "bytes": 6176,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 2
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "phase6ConsultarSaldoENA",
+        "phase6OpenUnit"
+      ]
     },
     {
       "path": "modules/panapass/runtime/025-phase31-saldo-express-behavior-4f5f90c1.js",
       "bytes": 5241,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 2
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "phase6ConsultarSaldoENA",
+        "negativos"
+      ]
     },
     {
       "path": "modules/panapass/runtime/026-phase33-saldo-clean-final-30f012b9.js",
       "bytes": 5485,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "phase6ConsultarSaldoENA"
+      ]
     },
     {
       "path": "modules/panapass/runtime/027-phase35-final-qa-behavior-9962eeaf.js",
       "bytes": 4556,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 4
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "wa18Attach",
+        "wa18Run",
+        "phase31EnhanceSaldoButtons",
+        "negativos"
+      ]
     },
     {
       "path": "modules/panapass/runtime/033-fondeo-gmail-v1-e03976e9.js",
       "bytes": 4760,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "reportes"
+      ]
     },
     {
       "path": "modules/panapass/runtime/034-rym-v74-responsive-pm-behavior-3578d7fc.js",
       "bytes": 7221,
-      "saved_previous": 0,
-      "window_reassign": 0,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [],
+      "function_reassign": [
+        "pagosTrabajo"
+      ]
     },
     {
       "path": "modules/panapass/runtime/035-rym-v76-production-js-71127037.js",
       "bytes": 14528,
-      "saved_previous": 0,
-      "window_reassign": 4,
-      "function_reassign": 1
+      "saved_previous": [],
+      "window_reassign": [
+        "v36PortalHome",
+        "v75Recorrido",
+        "wa18BuildPay",
+        "wa18BuildNeg"
+      ],
+      "function_reassign": [
+        "clearSession"
+      ]
     },
     {
       "path": "modules/panapass/runtime/036-rym-v87-extra-bajas-js-c571520e.js",
       "bytes": 14816,
-      "saved_previous": 0,
-      "window_reassign": 2,
-      "function_reassign": 6
+      "saved_previous": [],
+      "window_reassign": [
+        "v70OpenPanapass",
+        "v87BajasPanapass"
+      ],
+      "function_reassign": [
+        "phase2NormalizeModules",
+        "shell",
+        "pagosTrabajoTable",
+        "pagosTrabajo",
+        "render",
+        "dashboard"
+      ]
     },
     {
       "path": "modules/panapass/runtime/044-rym-v96-final-js-2e85c908.js",
       "bytes": 311168,
-      "saved_previous": 1,
-      "window_reassign": 2,
-      "function_reassign": 1
+      "saved_previous": [
+        {
+          "alias": "holder",
+          "target": "document"
+        }
+      ],
+      "window_reassign": [
+        "v87BajasPanapass",
+        "v94ControlCuposATTT"
+      ],
+      "function_reassign": [
+        "req"
+      ]
     },
     {
       "path": "modules/revisados/runtime/063-rym-v141-activity-cupos-mail-js-80ed7e76.js",
       "bytes": 11220,
-      "saved_previous": 2,
-      "window_reassign": 2,
-      "function_reassign": 0
+      "saved_previous": [
+        {
+          "alias": "openUsersBase",
+          "target": "v70OpenUsers"
+        },
+        {
+          "alias": "cuposBase",
+          "target": "v94ControlCuposATTT"
+        }
+      ],
+      "window_reassign": [
+        "v70OpenUsers",
+        "v94ControlCuposATTT"
+      ],
+      "function_reassign": []
     },
     {
       "path": "modules/revisados/runtime/068-rym-v165-safe-load-optimization-b77f0623.js",
       "bytes": 2981,
-      "saved_previous": 2,
-      "window_reassign": 2,
-      "function_reassign": 0
+      "saved_previous": [
+        {
+          "alias": "reqBase",
+          "target": "req"
+        },
+        {
+          "alias": "prefetchBase",
+          "target": "rymPrefetchRevisados"
+        }
+      ],
+      "window_reassign": [
+        "req",
+        "rymPrefetchRevisados"
+      ],
+      "function_reassign": []
     }
   ]
 }
