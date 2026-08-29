@@ -1,0 +1,31 @@
+name: V172 Control nested hooks
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_control_nested_hooks.py'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - run: python3 tools/v172_control_nested_hooks.py
+      - name: Validate
+        run: |
+          node --check modules/control-auto/runtime/030-rym-control-auto-auditoria-js-363fa89a.js
+          node --check modules/control-auto/runtime/043-rym-v95-transfer-manual-js-00f2c1df.js
+          ! grep -Fq 'window.v11UnitList=async function' modules/control-auto/runtime/030-rym-control-auto-auditoria-js-363fa89a.js
+          ! grep -Fq 'window.v11UnitList=async function' modules/control-auto/runtime/043-rym-v95-transfer-manual-js-00f2c1df.js
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add modules/control-auto
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: replace nested Control unit wrappers with hooks'
+          git push origin HEAD:v172-clean
