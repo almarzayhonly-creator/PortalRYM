@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+# Trigger revision 2: run the corrected scoped assertion against the current v172-clean tree.
 root=Path(__file__).resolve().parents[1]
 src=(root/'tools/v172_finalize_compat_cleanup.py').read_text(encoding='utf-8')
 # V123 may keep its Portal transition wrapper in Core; this cleanup targets cross-module
