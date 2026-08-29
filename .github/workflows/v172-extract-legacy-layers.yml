@@ -1,0 +1,41 @@
+name: V172 clean extract legacy layers
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_extract_legacy_layers.py'
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Extract versioned legacy layers
+        run: python3 tools/v172_extract_legacy_layers.py
+      - name: Validate extracted JavaScript
+        run: |
+          find modules/legacy -name '*.js' -print0 | xargs -0 -r -n1 node --check
+      - name: Validate index is thinner and externalized
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          assert '/modules/legacy/' in s
+          assert '/css/legacy/' in s
+          print('index bytes',Path('index.html').stat().st_size)
+          PY
+      - name: Commit extraction
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules/legacy css/legacy
+          git commit -m 'V172 clean: externalize historical V92-V155 layers'
+          git push origin HEAD:v172-clean
