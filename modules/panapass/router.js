@@ -9,7 +9,8 @@
   ]);
   const MODULE_TABS=Object.freeze({
     ranking:'panapass-ranking',
-    recurrentes:'panapass-recurrentes'
+    recurrentes:'panapass-recurrentes',
+    bajas_panapass:'panapass-bajas'
   });
   const LEGACY_VIEWS=Object.freeze({
     dashboard:'dashboard',
@@ -20,7 +21,6 @@
     operaciones:'operaciones',
     reportes:'reportes',
     recorrido:'v75Recorrido',
-    bajas_panapass:'v87BajasPanapass'
   });
 
   let current='dashboard';

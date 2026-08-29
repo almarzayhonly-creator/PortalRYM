@@ -14,6 +14,7 @@
   let current='dashboard';
   let busy=false;
   let queued=null;
+  const hooks=new Map();
 
   function normalize(name){
     const n=String(name||'').trim().toLowerCase();
@@ -83,6 +84,8 @@
     d.body.dataset.rymModule='control-auto';
     d.body.dataset.rymControlRoute=key;
     await fn.call(w);
+    const list=hooks.get(key)||[];
+    for(const hook of list) await hook({route:key});
     current=key;
     bindNavigation();
     return key;
@@ -116,9 +119,14 @@
     return w.RYM_ROUTER?.home?.()||false;
   }
 
+  function after(route,fn){
+    const key=normalize(route);if(!routes[key]||typeof fn!=='function')throw new Error('Hook Control invalido');
+    const list=hooks.get(key)||[];list.push(fn);hooks.set(key,list);return()=>hooks.set(key,(hooks.get(key)||[]).filter(x=>x!==fn));
+  }
+
   function active(){return current}
   function isBusy(){return busy}
   function rebind(){bindNavigation();return true}
 
-  w.RYM_CONTROL_ROUTER=Object.freeze({open,leave,active,isBusy,rebind,routes});
+  w.RYM_CONTROL_ROUTER=Object.freeze({open,leave,active,isBusy,rebind,routes,after});
 })(window,document);

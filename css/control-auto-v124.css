@@ -1,0 +1,9 @@
+/* V172 clean externalized legacy layer: rym-v124-dashboard-ranking-css */
+/* Control de Auto: cinco cifras que sí cierran entre sí. */
+.v75-control-kpis.v124-exclusive-kpis{grid-template-columns:repeat(5,minmax(0,1fr))}
+.v124-control-kpi{position:relative;overflow:hidden}.v124-control-kpi:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:#88a39a}.v124-control-kpi.total:before{background:#173f72}.v124-control-kpi.active:before{background:#0d9660}.v124-control-kpi.closed:before{background:#d0443e}.v124-control-kpi.other:before{background:#d48a17}.v124-control-kpi.audit:before{background:#6b61c9}
+.v124-control-kpi b{display:block;margin-top:5px;font-size:27px;color:#0a2d69}.v124-control-kpi.active b{color:#087d52}.v124-control-kpi.closed b{color:#bd302a}.v124-control-kpi.other b{color:#a96308}.v124-control-kpi small{display:block;margin-top:5px;color:#708097;font-size:9px;font-weight:800;line-height:1.25}.v124-control-formula{margin:0 0 12px;padding:9px 12px;border:1px solid #d7e4ef;border-radius:12px;background:#f8fbfe;color:#526881;font-size:10px}.v124-control-formula b{color:#173f72}
+.v124-supervisor-fallback{display:inline-flex!important;align-items:center;gap:5px;background:#edf3ff!important;color:#28558f!important}
+@media(max-width:1400px){.v75-control-kpis.v124-exclusive-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){.v75-control-kpis.v124-exclusive-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.v75-control-kpis.v124-exclusive-kpis{grid-template-columns:1fr}}

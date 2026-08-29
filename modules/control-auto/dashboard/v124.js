@@ -33,17 +33,5 @@
     }catch(e){err.className='v123-supervisor-error';err.textContent='Resumen por supervisora pendiente de activar. Publica la función control-auto-resumen-supervisoras.';host.dataset.v124Fallback='waiting'}
   }
 
-  function buildRankingPyramid(){
-    const out=document.querySelector('#v93ROut'),grid=out?.querySelector('.v93-rank-grid');if(!grid||grid.dataset.v124==='1')return;
-    const original=[...grid.querySelectorAll(':scope > .v93-rank-card')];if(!original.length)return;grid.dataset.v124='1';
-    const firstRank=Number(String(original[0]?.querySelector('.v93-rank-num')?.textContent||'').replace(/\D/g,'')),cards=firstRank>0&&firstRank<=3?original.slice(3):original;
-    if(cards!==original)original.slice(0,3).forEach(card=>card.remove());if(!cards.length)return;
-    out.querySelector('.v121-rank-more')?.remove();const journey=document.createElement('section');journey.className='v124-rank-journey';const total=3+cards.length;
-    journey.innerHTML=`<div class="v124-rank-intro"><div><h3>Ruta al podio</h3><p>Cada nivel acerca a las supervisoras a las tres posiciones destacadas.</p></div><span>${total} supervisoras · ranking completo</span></div><div class="v124-pyramid"></div>`;
-    const pyramid=journey.querySelector('.v124-pyramid'),tiers=[{name:'Élite',tone:'elite',size:3},{name:'Impulso',tone:'impulso',size:5},{name:'Competencia',tone:'competencia',size:7},{name:'Remontada',tone:'remontada',size:99}];let cursor=0,rank=4;
-    tiers.forEach(t=>{const slice=cards.slice(cursor,cursor+t.size);if(!slice.length)return;const start=rank,end=rank+slice.length-1,tier=document.createElement('section');tier.className='v124-rank-tier';tier.dataset.tone=t.tone;tier.innerHTML=`<div class="v124-tier-head"><b>${t.name}</b><span>Posiciones ${start}–${end}</span></div><div class="v124-tier-grid" style="--tier-cols:${Math.min(slice.length,t.size===99?7:t.size)}"></div>`;slice.forEach(c=>tier.lastElementChild.appendChild(c));pyramid.appendChild(tier);cursor+=slice.length;rank=end+1});
-    grid.replaceWith(journey);
-  }
-
-  let timer=0;const enhance=()=>{clearTimeout(timer);timer=setTimeout(()=>{fixControlKpis();fallbackSupervisorSummary();buildRankingPyramid()},90)};new MutationObserver(enhance).observe(document.documentElement,{subtree:true,childList:true});enhance();
+  let timer=0;const enhance=()=>{clearTimeout(timer);timer=setTimeout(()=>{fixControlKpis();fallbackSupervisorSummary()},90)};new MutationObserver(enhance).observe(document.documentElement,{subtree:true,childList:true});enhance();
 })();
