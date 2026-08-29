@@ -18,17 +18,22 @@
     if(navigating){queued={name:target,ctx};return false;}
     if(!w.RYM_MODULES?.has(target)) throw new Error('Modulo no registrado: '+target);
     navigating=true;
+    let ok=false;
     try{
       const previous=current;
       d.body.dataset.rymModule=target;
       await w.RYM_MODULES.open(target,{...ctx,from:previous,to:target});
       current=target;
       emit(Object.freeze({from:previous,to:target}));
-      return true;
+      ok=true;
     }finally{
       navigating=false;
     }
-    if(queued){const next=queued;queued=null;if(next.name!==current)return open(next.name,next.ctx)}
+    if(queued){
+      const next=queued;queued=null;
+      if(next.name!==current)return open(next.name,next.ctx);
+    }
+    return ok;
   }
 
   async function home(ctx={}){
