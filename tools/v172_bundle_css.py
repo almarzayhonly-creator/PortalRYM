@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 
-BUNDLE_VERSION='1.1'
+BUNDLE_VERSION='1.2'
 root=Path(__file__).resolve().parents[1]
 idx=root/'index.html'; loader=root/'modules/v172-clean-loader.js'
 html=idx.read_text(encoding='utf-8'); ls=loader.read_text(encoding='utf-8')
@@ -15,8 +15,6 @@ for m in re.finditer(r'<link\b[^>]*rel=["\']stylesheet["\'][^>]*>',html,re.I):
     p=root/href.lstrip('/')
     if not p.exists(): raise SystemExit(f'missing CSS asset: {href}')
     links.append((m.start(),m.end(),href,p))
-
-# CSS injected by the clean loader is logically later in the cascade, so append it later.
 cm=re.search(r"const css=\[(.*?)\];",ls,re.S)
 if not cm: raise SystemExit('loader css array missing')
 loader_hrefs=re.findall(r"['\"](/css/[^'\"]+)['\"]",cm.group(1))
@@ -28,13 +26,11 @@ for href in loader_hrefs:
     if not p.exists(): raise SystemExit(f'missing loader CSS asset: {href}')
     ordered.append((href,p));seen.add(href)
 if not ordered: raise SystemExit('no CSS assets found')
-
 parts=[]
 for href,p in ordered:
     body=p.read_text(encoding='utf-8').strip()
     parts.append(f'/* source: {href} */\n{body}\n')
 bundle=root/'css/portal-rym.css';bundle.write_text('\n'.join(parts),encoding='utf-8')
-
 for start,end,_,_ in reversed(links):html=html[:start]+html[end:]
 insert='<link id="rym-v172-css" rel="stylesheet" href="/css/portal-rym.css?v=172-clean">'
 marker='</title>';pos=html.find(marker)
