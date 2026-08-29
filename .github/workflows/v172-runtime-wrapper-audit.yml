@@ -1,0 +1,26 @@
+name: V172 runtime wrapper audit
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_runtime_wrapper_audit.py'
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Audit runtime wrappers
+        run: python3 tools/v172_runtime_wrapper_audit.py
+      - name: Commit wrapper report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/arquitectura/V172_RUNTIME_WRAPPERS.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: record runtime wrapper audit'
+          git push origin HEAD:v172-clean
