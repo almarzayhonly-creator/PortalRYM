@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {parse} from 'acorn';
 
+const MIGRATOR_VERSION='1.0';
 const root=process.cwd();
 const targets=new Set(['req','rpc','clearSession','login','loadApp','shell']);
 function targetOf(left){
@@ -57,4 +58,4 @@ if(!html.includes('rym-v172-core-composition')){
   if(!html.includes(runtime))throw new Error('core runtime index marker missing');
   html=html.replace(runtime,runtime+composition);fs.writeFileSync(idx,html);
 }
-console.log('Core service overrides migrated:',count);
+console.log('Core service overrides migrated:',count,MIGRATOR_VERSION);
