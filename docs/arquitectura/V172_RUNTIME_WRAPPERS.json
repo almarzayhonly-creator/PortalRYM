@@ -1,7 +1,7 @@
 {
-  "audit_version": "1.1",
-  "files_with_wrapper_signals": 32,
-  "wrapper_signal_total": 90,
+  "audit_version": "1.2",
+  "files_with_wrapper_signals": 28,
+  "wrapper_signal_total": 73,
   "files": [
     {
       "path": "modules/control-auto/runtime/023-phase30-admin-status-behavior-8cf3585b.js",
@@ -132,17 +132,8 @@
       "function_reassign": []
     },
     {
-      "path": "modules/panapass/runtime/012-v18-history-total-1c9527ba.js",
-      "bytes": 4628,
-      "saved_previous": [],
-      "window_reassign": [],
-      "function_reassign": [
-        "historial"
-      ]
-    },
-    {
       "path": "modules/panapass/runtime/013-phase2-final-behavior-dde2a586.js",
-      "bytes": 4547,
+      "bytes": 4739,
       "saved_previous": [],
       "window_reassign": [],
       "function_reassign": [
@@ -150,66 +141,40 @@
         "isAdminRole",
         "shell",
         "render",
-        "pagosTrabajo",
-        "reportes",
         "toggleCapture"
       ]
     },
     {
       "path": "modules/panapass/runtime/014-phase3-supervisoras-filtros-behavior-66fbe9d5.js",
-      "bytes": 15075,
+      "bytes": 15783,
       "saved_previous": [
         {
           "alias": "_phase3UsuariosBase",
           "target": "usuarios"
-        },
-        {
-          "alias": "_phase3ReportesBase",
-          "target": "reportes"
         }
       ],
       "window_reassign": [],
       "function_reassign": [
         "phase2Allowed",
-        "negativos",
-        "pagosConsultaHoy",
-        "usuarios",
-        "reportes"
-      ]
-    },
-    {
-      "path": "modules/panapass/runtime/016-phase4-ena-saldo-behavior-35120f4a.js",
-      "bytes": 4918,
-      "saved_previous": [],
-      "window_reassign": [],
-      "function_reassign": [
-        "negativos"
+        "usuarios"
       ]
     },
     {
       "path": "modules/panapass/runtime/017-phase5-search-ena-fix-behavior-ebc3dc90.js",
-      "bytes": 6796,
+      "bytes": 7101,
       "saved_previous": [],
       "window_reassign": [],
       "function_reassign": [
-        "v11UnitList",
-        "negativos"
+        "v11UnitList"
       ]
     },
     {
       "path": "modules/panapass/runtime/018-phase6-control-auto-secure-behavior-18e06485.js",
-      "bytes": 13462,
-      "saved_previous": [
-        {
-          "alias": "_phase6NegBase",
-          "target": "negativos"
-        }
-      ],
+      "bytes": 14309,
+      "saved_previous": [],
       "window_reassign": [],
       "function_reassign": [
-        "v11UnitList",
-        "negativos",
-        "dashboard"
+        "v11UnitList"
       ]
     },
     {
@@ -219,25 +184,6 @@
       "window_reassign": [],
       "function_reassign": [
         "phase6ConsultarSaldoENA"
-      ]
-    },
-    {
-      "path": "modules/panapass/runtime/020-v13-filtro-empresa-behavior-a4b1da27.js",
-      "bytes": 3061,
-      "saved_previous": [],
-      "window_reassign": [],
-      "function_reassign": [
-        "pagosTrabajo"
-      ]
-    },
-    {
-      "path": "modules/panapass/runtime/021-v18-whatsapp-ranking-behavior-61b76ed8.js",
-      "bytes": 6483,
-      "saved_previous": [],
-      "window_reassign": [],
-      "function_reassign": [
-        "negativos",
-        "pagosConsultaHoy"
       ]
     },
     {
@@ -261,12 +207,11 @@
     },
     {
       "path": "modules/panapass/runtime/025-phase31-saldo-express-behavior-4f5f90c1.js",
-      "bytes": 5241,
+      "bytes": 5358,
       "saved_previous": [],
       "window_reassign": [],
       "function_reassign": [
-        "phase6ConsultarSaldoENA",
-        "negativos"
+        "phase6ConsultarSaldoENA"
       ]
     },
     {
@@ -280,14 +225,13 @@
     },
     {
       "path": "modules/panapass/runtime/027-phase35-final-qa-behavior-9962eeaf.js",
-      "bytes": 4556,
+      "bytes": 4701,
       "saved_previous": [],
       "window_reassign": [],
       "function_reassign": [
         "wa18Attach",
         "wa18Run",
-        "phase31EnhanceSaldoButtons",
-        "negativos"
+        "phase31EnhanceSaldoButtons"
       ]
     },
     {
