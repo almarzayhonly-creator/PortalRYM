@@ -2,7 +2,7 @@
 from pathlib import Path
 import re
 
-BUNDLE_VERSION='1.2'
+BUNDLE_VERSION='1.3'
 root=Path(__file__).resolve().parents[1]
 idx=root/'index.html'; loader=root/'modules/v172-clean-loader.js'
 html=idx.read_text(encoding='utf-8'); ls=loader.read_text(encoding='utf-8')
