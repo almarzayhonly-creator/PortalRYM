@@ -48,3 +48,4 @@ report={'index_bytes':len(html.encode()),'scripts':rows,'styles':styles}
 OUT.parent.mkdir(parents=True,exist_ok=True)
 OUT.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(report,ensure_ascii=False,indent=2))
+# audit trigger: 2026-08-28
