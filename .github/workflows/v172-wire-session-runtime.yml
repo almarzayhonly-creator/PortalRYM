@@ -1,0 +1,35 @@
+name: V172 wire session runtime
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_wire_session_runtime.py'
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Wire persistent session
+        run: python3 tools/v172_wire_session_runtime.py
+      - name: Validate syntax and session contract
+        run: |
+          node --check modules/core/runtime.js
+          node --check modules/core/session.js
+          grep -Fq 'window.RYM_SESSION.restore()' modules/core/runtime.js
+          grep -Fq 'window.RYM_SESSION?.set({accessToken:nextToken' modules/core/runtime.js
+          grep -Fq 'window.RYM_SESSION.isExpiringSoon(90)' modules/core/runtime.js
+          grep -Fq "STORAGE_KEY='rym:v172:session'" modules/core/session.js
+          grep -Fq 'startActivityRenewal' modules/core/session.js
+      - name: Commit session wiring
+        run: |
+          if git diff --quiet; then echo 'No changes'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add modules/core/runtime.js
+          git commit -m 'V172 clean: wire persistent renewable session into runtime'
+          git push origin HEAD:v172-clean
