@@ -4,21 +4,7 @@
   if(w.__RYM_V172_CLEAN_LOADER__) return;
   w.__RYM_V172_CLEAN_LOADER__=true;
 
-  const css=[
-    '/css/core.css',
-    '/css/panapass.css',
-    '/css/panapass-bajas.css',
-    '/css/revisados.css',
-    '/css/revisados-v66.css',
-    '/css/core-home-v154.css',
-    '/css/control-auto-v123.css',
-    '/css/control-auto-v154.css',
-    '/css/control-auto.css',
-    '/css/control-auto-validador.css',
-    '/css/control-auto-cupos.css',
-    '/css/gps.css',
-    '/css/usuarios.css'
-  ];
+  const css=[];
 
   const files=[
     '/modules/core/module-registry.js',
