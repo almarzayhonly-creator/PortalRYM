@@ -1,0 +1,203 @@
+{
+  "index_bytes": 1100199,
+  "scripts": [
+    {
+      "script": 38,
+      "id": "v92-consolidated-behavior",
+      "bytes": 17403,
+      "owners": [
+        {
+          "name": "ranking",
+          "matches": 1
+        },
+        {
+          "name": "pagosTrabajo",
+          "matches": 1
+        },
+        {
+          "name": "reportes",
+          "matches": 1
+        }
+      ],
+      "references": {
+        "ranking": 2,
+        "pagosTrabajo": 2,
+        "reportes": 2
+      },
+      "start": 309893,
+      "end": 327295
+    },
+    {
+      "script": 39,
+      "id": "v93-polish-behavior",
+      "bytes": 18670,
+      "owners": [
+        {
+          "name": "ranking",
+          "matches": 2
+        },
+        {
+          "name": "reportes",
+          "matches": 1
+        }
+      ],
+      "references": {
+        "ranking": 5,
+        "reportes": 2
+      },
+      "start": 330756,
+      "end": 349419
+    },
+    {
+      "script": 48,
+      "id": "rym-v99-centro-control-js",
+      "bytes": 54778,
+      "owners": [
+        {
+          "name": "v36PortalHome",
+          "matches": 2
+        },
+        {
+          "name": "pagosTrabajo",
+          "matches": 1
+        }
+      ],
+      "references": {
+        "ranking": 2,
+        "dashboard": 1,
+        "shell": 1,
+        "v70OpenPanapass": 2,
+        "v36PortalHome": 5,
+        "v70OpenUsers": 1,
+        "v70OpenControl": 3,
+        "v60OpenRevisados": 2,
+        "v113OpenGps": 1,
+        "pagosTrabajo": 3,
+        "historial": 2
+      },
+      "start": 727251,
+      "end": 781853
+    },
+    {
+      "script": 60,
+      "id": "rym-v123-experience-js",
+      "bytes": 14263,
+      "owners": [
+        {
+          "name": "recurrentes",
+          "matches": 1
+        }
+      ],
+      "references": {
+        "ranking": 1,
+        "recurrentes": 5,
+        "dashboard": 1,
+        "v36PortalHome": 3,
+        "historial": 1
+      },
+      "start": 911343,
+      "end": 925588
+    },
+    {
+      "script": 61,
+      "id": "rym-v124-dashboard-ranking-js",
+      "bytes": 8016,
+      "owners": [],
+      "references": {
+        "ranking": 1,
+        "dashboard": 1
+      },
+      "start": 930343,
+      "end": 938393
+    },
+    {
+      "script": 69,
+      "id": "rym-v154-safe-js",
+      "bytes": 31172,
+      "owners": [],
+      "references": {
+        "ranking": 2,
+        "dashboard": 1,
+        "shell": 1,
+        "render": 2,
+        "v70OpenPanapass": 2,
+        "v36PortalHome": 4,
+        "v70OpenUsers": 1,
+        "v60OpenRevisados": 4,
+        "v113OpenGps": 5
+      },
+      "start": 1015167,
+      "end": 1046257
+    },
+    {
+      "script": 70,
+      "id": "rym-v155-gps-fix-js",
+      "bytes": 16326,
+      "owners": [],
+      "references": {
+        "ranking": 1,
+        "dashboard": 1,
+        "shell": 1,
+        "v70OpenPanapass": 3,
+        "v36PortalHome": 4,
+        "v70OpenUsers": 3,
+        "v70OpenControl": 3,
+        "v60OpenRevisados": 3,
+        "v113OpenGps": 2
+      },
+      "start": 1047005,
+      "end": 1063294
+    }
+  ],
+  "styles": [
+    {
+      "style": 36,
+      "id": "v92-consolidated-css",
+      "bytes": 3114,
+      "start": 306737,
+      "end": 309892
+    },
+    {
+      "style": 37,
+      "id": "v93-polish-css",
+      "bytes": 3422,
+      "start": 327298,
+      "end": 330755
+    },
+    {
+      "style": 48,
+      "id": "rym-v99-centro-control-css",
+      "bytes": 15295,
+      "start": 711907,
+      "end": 727249
+    },
+    {
+      "style": 60,
+      "id": "rym-v123-experience-css",
+      "bytes": 8382,
+      "start": 902928,
+      "end": 911342
+    },
+    {
+      "style": 61,
+      "id": "rym-v124-dashboard-ranking-css",
+      "bytes": 4591,
+      "start": 925702,
+      "end": 930342
+    },
+    {
+      "style": 71,
+      "id": "rym-v154-safe-css",
+      "bytes": 6712,
+      "start": 1008416,
+      "end": 1015166
+    },
+    {
+      "style": 72,
+      "id": "rym-v155-gps-fix-css",
+      "bytes": 611,
+      "start": 1046352,
+      "end": 1047004
+    }
+  ]
+}
