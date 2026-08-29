@@ -1,0 +1,49 @@
+name: V172 consolidate legacy domains
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_consolidate_legacy_domains.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-consolidate-legacy-domains
+  cancel-in-progress: true
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Consolidate legacy layers by domain
+        run: python3 tools/v172_consolidate_legacy_domains.py
+      - name: Validate JavaScript
+        run: |
+          node --check modules/panapass/router.js
+          node --check modules/control-auto/router.js
+          find modules/core modules/panapass modules/control-auto modules/gps -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Validate ownership and paths
+        run: |
+          ! grep -R -F '/modules/legacy/' index.html modules || false
+          ! grep -R -F '/css/legacy/' index.html css || false
+          test ! -d modules/legacy || test -z "$(find modules/legacy -type f -print -quit)"
+          test ! -d css/legacy || test -z "$(find css/legacy -type f -print -quit)"
+          grep -Fq "bajas_panapass:'panapass-bajas'" modules/panapass/router.js
+          grep -Fq 'function after(route,fn)' modules/control-auto/router.js
+          ! grep -R -E '\branking\s*=\s*async function|\brecurrentes\s*=\s*async function' modules/core modules/control-auto modules/gps
+          test -s modules/gps/v155.js
+          test -s modules/core/portal-home-v99.js
+          test -s modules/control-auto/dashboard/v124.js
+      - name: Commit consolidated architecture
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'V172 clean: consolidate legacy layers by module owner'
+          git push origin HEAD:v172-clean
