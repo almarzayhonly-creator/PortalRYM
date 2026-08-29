@@ -4,6 +4,7 @@ on:
     branches: [v172-clean]
     paths:
       - 'tools/v172_finalize_compat_cleanup.py'
+      - 'tools/v172_finalize_compat_cleanup_v2.py'
       - 'tools/v172_finalize_compat_cleanup.trigger'
 permissions:
   contents: write
@@ -19,7 +20,7 @@ jobs:
           ref: v172-clean
           fetch-depth: 0
       - name: Finalize V123 V154 V155 ownership
-        run: python3 tools/v172_finalize_compat_cleanup.py
+        run: python3 tools/v172_finalize_compat_cleanup_v2.py
       - name: Validate JavaScript
         run: |
           node --check modules/core/router.js
