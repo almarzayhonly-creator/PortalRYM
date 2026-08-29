@@ -91,7 +91,17 @@ function wa18Attach(v,tipo,prefix){
   gal.onchange=async e=>{if(old)await old.call(gal,e);b.disabled=!gal.value;st.textContent=''};
   b.onclick=()=>wa18Run(tipo,prefix);
 }
-const _v18Negativos=negativos;
-negativos=async function(v){await _v18Negativos(v);wa18Attach(v,'NEGATIVOS','p3Neg')};
-const _v18PagosConsulta=pagosConsultaHoy;
-pagosConsultaHoy=async function(v){await _v18PagosConsulta(v);wa18Attach(v,'PAGOS','p3Pay')};
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["negativos_hoy", async function(next,ctx){
+const v=ctx.view;
+const _v18Negativos=(..._args)=>next();
+await _v18Negativos(v);
+wa18Attach(v, 'NEGATIVOS', 'p3Neg');
+}]);
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["pagos_hoy", async function(next,ctx){
+const v=ctx.view;
+const _v18PagosConsulta=(..._args)=>next();
+await _v18PagosConsulta(v);
+wa18Attach(v, 'PAGOS', 'p3Pay');
+}]);

@@ -31,13 +31,102 @@ async function phase6ConsultarSaldoENA(panapass,btn){
  try{const {data}=await req('/functions/v1/ena-consulta-saldo',{method:'POST',body:JSON.stringify({panapass:Number(panapass)})});const r=data?.results?.[0];if(!data?.ok||!r)throw Error(data?.error||'No se pudo consultar ENA.');if(r.error==='credential_not_configured'){btn.disabled=true;btn.textContent='Sin credencial';btn.classList.add('ca6-disabled');box.innerHTML='<span class="muted">Todavía no tenemos credencial ENA para esta cuenta.</span>';return}if(!r.ok)throw Error(r.error||r.result||'ENA no devolvió saldo.');if(r.result==='BUSY'){const saldo=String(r?.summary?.saldo_texto??'').trim();box.innerHTML=`<span class="ena-busy">Consulta ya en proceso.</span>${saldo?`<br>Último saldo guardado: <b>${esc(saldo)}</b>`:''}${r.ultima_consulta?`<span class="ena-age">${esc(phase6Ago(r.ultima_consulta))}</span>`:''}`;return}if(r.result!=='OK')throw Error(r.result||'ENA no devolvió saldo.');const saldo=String(r?.summary?.saldo_texto??'').trim()||'N/D';box.innerHTML=`<b>Saldo ENA: ${esc(saldo)}</b><br><span class="${r.cached?'ena-cache':'muted'}">${r.cached?'Última consulta ENA':'Consulta realizada ahora'}${r.ultima_consulta?` · ${esc(phase6Ago(r.ultima_consulta))}`:''}</span>`}catch(e){box.innerHTML=`<span style="color:var(--red)">${esc(e.message||e)}</span>`}finally{if(!btn.classList.contains('ca6-disabled')){btn.disabled=false;btn.textContent=old}}
 }
 
-const _phase6NegBase=negativos;
-negativos=async function(v){
- await _phase6NegBase(v);
- const enhance=async()=>{const buttons=[...v.querySelectorAll('[data-ena-saldo]')];const nums=[...new Set(buttons.map(b=>Number(b.dataset.enaSaldo)).filter(Boolean))];if(!nums.length)return;let rows=[];try{rows=await rpc('panapass_ena_disponibilidad',{p_panapass:nums})}catch(e){console.warn('Disponibilidad ENA',e);return}const map=new Map((rows||[]).map(x=>[String(x.panapass_numero),x]));buttons.forEach(b=>{const d=map.get(String(b.dataset.enaSaldo));const cell=b.parentElement;if(!d?.credencial_disponible){b.disabled=true;b.textContent='Sin credencial';b.classList.add('ca6-disabled');b.title='No se consultará ENA porque aún no existe credencial activa.';if(d?.ena_saldo!=null){let box=cell.querySelector('.ena-saldo-box');if(!box){box=document.createElement('div');box.className='ena-saldo-box';cell.appendChild(box)}box.innerHTML=`Último saldo guardado: <b>${money(d.ena_saldo)}</b>${d.ena_ultima_consulta?`<span class="ena-age">${esc(phase6Ago(d.ena_ultima_consulta))}</span>`:''}`}}else{b.classList.remove('ca6-disabled');b.onclick=()=>phase6ConsultarSaldoENA(b.dataset.enaSaldo,b);b.dataset.enaLast=d?.ena_ultima_consulta||'';const last=d?.ena_ultima_consulta?new Date(d.ena_ultima_consulta).getTime():0;const remain=last?Math.max(0,1800000-(Date.now()-last)):0;if(remain>0){b.disabled=true;b.textContent=`Disponible en ${Math.ceil(remain/60000)} min`;b.title='Esta unidad ya fue consultada en ENA dentro de los últimos 30 minutos.'}else{b.disabled=false;b.textContent='Consultar saldo';b.title='Consulta rápida: solo saldo ENA.'}if(d?.ena_saldo!=null&&d?.ena_ultima_consulta){let age=cell.querySelector('.ena-age');if(!age){age=document.createElement('span');age.className='ena-age';cell.appendChild(age)}age.textContent='Última: '+phase6Ago(d.ena_ultima_consulta)}}})};
- await enhance();
- const go=v.querySelector('#p3NegGo');if(go){const old=go.onclick;go.onclick=async()=>{await old?.();setTimeout(enhance,80)}}const date=v.querySelector('#p3NegFecha');if(date){const old=date.onchange;date.onchange=async()=>{await old?.();setTimeout(enhance,80)}};
-};
 
-const _phase6Dashboard=dashboard;
-dashboard=async function(v){await _phase6Dashboard(v);try{const s=(await rpc('panapass_control_auto_resumen'))?.[0]||{},total=Number(s.activas||0)+Number(s.otros||0);const card=document.createElement('div');card.className='card ca6-dashboard-card';card.innerHTML=`<div><b>Control de Auto</b><div class="muted">Vista principal: unidades activas. Cerradas y canibalizadas permanecen como control histórico.</div></div><div class="ca6-dashboard-stats"><span>${total} unidades</span><span>${Number(s.activas||0)} activas</span><span>${Number(s.cerradas||0)} cerradas</span><span>${Number(s.canibalizadas||0)} canibalizadas</span><button id="ca6DashOpen">Abrir Control de Auto</button></div>`;v.prepend(card);card.querySelector('#ca6DashOpen').onclick=v11UnitList}catch(e){console.warn('Control Auto dashboard',e)}};
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["negativos_hoy", async function(next,ctx){
+const v=ctx.view;
+const _phase6NegBase=(..._args)=>next();
+await _phase6NegBase(v);
+const enhance = async () => {
+  const buttons = [...v.querySelectorAll('[data-ena-saldo]')];
+  const nums = [...new Set(buttons.map(b => Number(b.dataset.enaSaldo)).filter(Boolean))];
+  if (!nums.length) return;
+  let rows = [];
+  try {
+    rows = await rpc('panapass_ena_disponibilidad', {
+      p_panapass: nums
+    });
+  } catch (e) {
+    console.warn('Disponibilidad ENA', e);
+    return;
+  }
+  const map = new Map((rows || []).map(x => [String(x.panapass_numero), x]));
+  buttons.forEach(b => {
+    const d = map.get(String(b.dataset.enaSaldo));
+    const cell = b.parentElement;
+    if (!d?.credencial_disponible) {
+      b.disabled = true;
+      b.textContent = 'Sin credencial';
+      b.classList.add('ca6-disabled');
+      b.title = 'No se consultará ENA porque aún no existe credencial activa.';
+      if (d?.ena_saldo != null) {
+        let box = cell.querySelector('.ena-saldo-box');
+        if (!box) {
+          box = document.createElement('div');
+          box.className = 'ena-saldo-box';
+          cell.appendChild(box);
+        }
+        box.innerHTML = `Último saldo guardado: <b>${money(d.ena_saldo)}</b>${d.ena_ultima_consulta ? `<span class="ena-age">${esc(phase6Ago(d.ena_ultima_consulta))}</span>` : ''}`;
+      }
+    } else {
+      b.classList.remove('ca6-disabled');
+      b.onclick = () => phase6ConsultarSaldoENA(b.dataset.enaSaldo, b);
+      b.dataset.enaLast = d?.ena_ultima_consulta || '';
+      const last = d?.ena_ultima_consulta ? new Date(d.ena_ultima_consulta).getTime() : 0;
+      const remain = last ? Math.max(0, 1800000 - (Date.now() - last)) : 0;
+      if (remain > 0) {
+        b.disabled = true;
+        b.textContent = `Disponible en ${Math.ceil(remain / 60000)} min`;
+        b.title = 'Esta unidad ya fue consultada en ENA dentro de los últimos 30 minutos.';
+      } else {
+        b.disabled = false;
+        b.textContent = 'Consultar saldo';
+        b.title = 'Consulta rápida: solo saldo ENA.';
+      }
+      if (d?.ena_saldo != null && d?.ena_ultima_consulta) {
+        let age = cell.querySelector('.ena-age');
+        if (!age) {
+          age = document.createElement('span');
+          age.className = 'ena-age';
+          cell.appendChild(age);
+        }
+        age.textContent = 'Última: ' + phase6Ago(d.ena_ultima_consulta);
+      }
+    }
+  });
+};
+await enhance();
+const go = v.querySelector('#p3NegGo');
+if (go) {
+  const old = go.onclick;
+  go.onclick = async () => {
+    await old?.();
+    setTimeout(enhance, 80);
+  };
+}
+const date = v.querySelector('#p3NegFecha');
+if (date) {
+  const old = date.onchange;
+  date.onchange = async () => {
+    await old?.();
+    setTimeout(enhance, 80);
+  };
+}
+;
+}]);
+
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["dashboard", async function(next,ctx){
+const v=ctx.view;
+const _phase6Dashboard=(..._args)=>next();
+await _phase6Dashboard(v);
+try {
+  const s = (await rpc('panapass_control_auto_resumen'))?.[0] || ({}), total = Number(s.activas || 0) + Number(s.otros || 0);
+  const card = document.createElement('div');
+  card.className = 'card ca6-dashboard-card';
+  card.innerHTML = `<div><b>Control de Auto</b><div class="muted">Vista principal: unidades activas. Cerradas y canibalizadas permanecen como control histórico.</div></div><div class="ca6-dashboard-stats"><span>${total} unidades</span><span>${Number(s.activas || 0)} activas</span><span>${Number(s.cerradas || 0)} cerradas</span><span>${Number(s.canibalizadas || 0)} canibalizadas</span><button id="ca6DashOpen">Abrir Control de Auto</button></div>`;
+  v.prepend(card);
+  card.querySelector('#ca6DashOpen').onclick = v11UnitList;
+} catch (e) {
+  console.warn('Control Auto dashboard', e);
+}
+}]);

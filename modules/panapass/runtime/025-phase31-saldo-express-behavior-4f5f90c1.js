@@ -82,10 +82,18 @@ async function phase31EnhanceSaldoButtons(v){
   v.querySelectorAll('th').forEach(th=>{if(['ENA','SALDO ENA','SALDO EXPRESS'].includes(norm(th.textContent)))th.textContent='Saldo actual'});
 }
 
-const _phase31Negativos=negativos;
-negativos=async function(v){
-  await _phase31Negativos(v);
-  await phase31EnhanceSaldoButtons(v);
-  const obs=new MutationObserver(()=>{clearTimeout(obs._t);obs._t=setTimeout(()=>phase31EnhanceSaldoButtons(v),80)});
-  obs.observe(v,{childList:true,subtree:true});
-};
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["negativos_hoy", async function(next,ctx){
+const v=ctx.view;
+const _phase31Negativos=(..._args)=>next();
+await _phase31Negativos(v);
+await phase31EnhanceSaldoButtons(v);
+const obs = new MutationObserver(() => {
+  clearTimeout(obs._t);
+  obs._t = setTimeout(() => phase31EnhanceSaldoButtons(v), 80);
+});
+obs.observe(v, {
+  childList: true,
+  subtree: true
+});
+}]);

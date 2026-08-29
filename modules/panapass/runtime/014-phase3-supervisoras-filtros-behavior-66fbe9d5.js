@@ -42,55 +42,87 @@ function phase3ScopeBody(prefix){
   };
 }
 
-negativos=async function(v){
-  const maxf=state.today||state.meta?.max_snapshot||new Date().toISOString().slice(0,10),minf=state.meta?.min_snapshot||'2025-01-01';
-  const [scope,units]=await Promise.all([phase3ScopeData(),rpc('panapass_unidades_detalle',{p_buscar:null,p_limit:5000}).catch(()=>[])]);
-  const um=new Map((units||[]).map(x=>[norm(x.unidad),x]));
-  v.innerHTML=`<div class="section-tools phase3-filterbar"><div class="field"><label>Fecha</label><input id="p3NegFecha" type="date" min="${minf}" max="${maxf}" value="${maxf}"></div>${phase3ScopeMarkup('p3Neg',scope)}<div class="field"><label>Buscar</label><input id="p3NegQ" placeholder="Unidad, Panapass, empresa o supervisora"></div><button id="p3NegGo">Consultar</button><button id="p3NegCapture" class="soft-btn">Vista captura</button></div><div id="p3NegOut"></div>`;
-  let last=[];
-  const paint=()=>{
-    const q=norm(document.querySelector('#p3NegQ')?.value||'');
-    const rows=q?last.filter(r=>norm([r.unidad,r.placa,r.panapass_numero,r.empresa,r.galera,r.supervisora].join(' ')).includes(q)):last;
-    const total=rows.reduce((a,x)=>a+Number(x.saldo||0),0),mx=rows.reduce((a,x)=>Math.max(a,Number(x.neg7||0)),0);
-    const body=rows.length?rows.map(r=>{const m=um.get(norm(r.unidad))||{};return `<tr><td data-label="Estatus">${v12Status(r.status||m.estatus)}</td><td data-label="Unidad">${v17UnitBadge(r.unidad,m.color)}</td><td data-label="Placa">${esc(r.placa||'')}</td><td data-label="Panapass">${esc(r.panapass_numero||'')}</td><td data-label="Galera">${esc(r.galera||'')}</td><td data-label="Supervisora"><b>${esc(r.supervisora||'SIN SUPERVISORA')}</b></td><td data-label="Empresa">${esc(r.empresa||'')}</td><td data-label="Neg. 7d">${chipNum(r.neg7)}</td><td data-label="Saldo" class="saldo">${money(r.saldo)}</td></tr>`}).join(''):`<tr><td colspan="9" class="empty">Sin datos.</td></tr>`;
-    document.querySelector('#p3NegOut').innerHTML=`<div class="capture-title"><h2>Negativos Panapass · ${esc(document.querySelector('#p3NegFecha').value)}</h2><small>Galera y supervisora según asignación actual</small></div><div class="kpis"><div class="kpi"><span>Unidades</span><strong>${rows.length}</strong></div><div class="kpi"><span>Saldo total</span><strong style="color:var(--red)">${money(total)}</strong></div><div class="kpi"><span>Máx neg 7d</span><strong>${mx}</strong></div><div class="kpi"><span>Riesgo</span><strong>${mx>=3?'ALERTA':mx===2?'CUIDADO':'OK'}</strong></div></div><div class="panel phase3-panel mobile-cards"><div class="table-wrap"><table class="pretty phase3-fit-table phase3-neg-table"><thead><tr><th>Estatus</th><th>Unidad</th><th>Placa</th><th>Panapass</th><th>Galera</th><th>Supervisora</th><th>Empresa</th><th>Neg. 7d</th><th>Saldo</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
-  };
-  const load=async()=>{
-    const o=document.querySelector('#p3NegOut');o.innerHTML='<div class="card">Consultando...</div>';
-    try{last=await rpc('panapass_negativos_fecha_v2',{p_fecha:document.querySelector('#p3NegFecha').value||null,...phase3ScopeBody('p3Neg')});paint()}catch(e){o.innerHTML=`<div class="alert">${esc(e.message)}</div>`}
-  };
-  phase3BindScope('p3Neg',scope,load);
-  document.querySelector('#p3NegGo').onclick=load;
-  document.querySelector('#p3NegFecha').onchange=load;
-  document.querySelector('#p3NegQ').oninput=paint;
-  document.querySelector('#p3NegCapture').onclick=e=>toggleCapture(e.currentTarget,'#p3NegOut');
-  await load();
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["negativos_hoy", async function(next,ctx){
+const v=ctx.view;
+const maxf = state.today || state.meta?.max_snapshot || new Date().toISOString().slice(0, 10), minf = state.meta?.min_snapshot || '2025-01-01';
+const [scope, units] = await Promise.all([phase3ScopeData(), rpc('panapass_unidades_detalle', {
+  p_buscar: null,
+  p_limit: 5000
+}).catch(() => [])]);
+const um = new Map((units || []).map(x => [norm(x.unidad), x]));
+v.innerHTML = `<div class="section-tools phase3-filterbar"><div class="field"><label>Fecha</label><input id="p3NegFecha" type="date" min="${minf}" max="${maxf}" value="${maxf}"></div>${phase3ScopeMarkup('p3Neg', scope)}<div class="field"><label>Buscar</label><input id="p3NegQ" placeholder="Unidad, Panapass, empresa o supervisora"></div><button id="p3NegGo">Consultar</button><button id="p3NegCapture" class="soft-btn">Vista captura</button></div><div id="p3NegOut"></div>`;
+let last = [];
+const paint = () => {
+  const q = norm(document.querySelector('#p3NegQ')?.value || '');
+  const rows = q ? last.filter(r => norm([r.unidad, r.placa, r.panapass_numero, r.empresa, r.galera, r.supervisora].join(' ')).includes(q)) : last;
+  const total = rows.reduce((a, x) => a + Number(x.saldo || 0), 0), mx = rows.reduce((a, x) => Math.max(a, Number(x.neg7 || 0)), 0);
+  const body = rows.length ? rows.map(r => {
+    const m = um.get(norm(r.unidad)) || ({});
+    return `<tr><td data-label="Estatus">${v12Status(r.status || m.estatus)}</td><td data-label="Unidad">${v17UnitBadge(r.unidad, m.color)}</td><td data-label="Placa">${esc(r.placa || '')}</td><td data-label="Panapass">${esc(r.panapass_numero || '')}</td><td data-label="Galera">${esc(r.galera || '')}</td><td data-label="Supervisora"><b>${esc(r.supervisora || 'SIN SUPERVISORA')}</b></td><td data-label="Empresa">${esc(r.empresa || '')}</td><td data-label="Neg. 7d">${chipNum(r.neg7)}</td><td data-label="Saldo" class="saldo">${money(r.saldo)}</td></tr>`;
+  }).join('') : `<tr><td colspan="9" class="empty">Sin datos.</td></tr>`;
+  document.querySelector('#p3NegOut').innerHTML = `<div class="capture-title"><h2>Negativos Panapass · ${esc(document.querySelector('#p3NegFecha').value)}</h2><small>Galera y supervisora según asignación actual</small></div><div class="kpis"><div class="kpi"><span>Unidades</span><strong>${rows.length}</strong></div><div class="kpi"><span>Saldo total</span><strong style="color:var(--red)">${money(total)}</strong></div><div class="kpi"><span>Máx neg 7d</span><strong>${mx}</strong></div><div class="kpi"><span>Riesgo</span><strong>${mx >= 3 ? 'ALERTA' : mx === 2 ? 'CUIDADO' : 'OK'}</strong></div></div><div class="panel phase3-panel mobile-cards"><div class="table-wrap"><table class="pretty phase3-fit-table phase3-neg-table"><thead><tr><th>Estatus</th><th>Unidad</th><th>Placa</th><th>Panapass</th><th>Galera</th><th>Supervisora</th><th>Empresa</th><th>Neg. 7d</th><th>Saldo</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
 };
+const load = async () => {
+  const o = document.querySelector('#p3NegOut');
+  o.innerHTML = '<div class="card">Consultando...</div>';
+  try {
+    last = await rpc('panapass_negativos_fecha_v2', {
+      p_fecha: document.querySelector('#p3NegFecha').value || null,
+      ...phase3ScopeBody('p3Neg')
+    });
+    paint();
+  } catch (e) {
+    o.innerHTML = `<div class="alert">${esc(e.message)}</div>`;
+  }
+};
+phase3BindScope('p3Neg', scope, load);
+document.querySelector('#p3NegGo').onclick = load;
+document.querySelector('#p3NegFecha').onchange = load;
+document.querySelector('#p3NegQ').oninput = paint;
+document.querySelector('#p3NegCapture').onclick = e => toggleCapture(e.currentTarget, '#p3NegOut');
+await load();
+}]);
 
-pagosConsultaHoy=async function(v){
-  const hoy=state.today||state.meta?.max_pago||new Date().toISOString().slice(0,10),minf=state.meta?.min_pago||'2025-01-01';
-  const [scope,units]=await Promise.all([phase3ScopeData(),rpc('panapass_unidades_detalle',{p_buscar:null,p_limit:5000}).catch(()=>[])]);
-  const um=new Map((units||[]).map(x=>[norm(x.unidad),x]));
-  v.innerHTML=`<div class="section-tools phase3-filterbar"><div class="field"><label>Fecha</label><input id="p3PayFecha" type="date" min="${minf}" max="${hoy}" value="${hoy}"></div>${phase3ScopeMarkup('p3Pay',scope)}<div class="field"><label>Buscar</label><input id="p3PayQ" placeholder="Unidad, operador, N_OP o supervisora"></div><button id="p3PayGo">Consultar</button><button id="p3PayCapture" class="soft-btn">Vista captura</button></div><div id="p3PayOut"></div>`;
-  let last=[];
-  const paint=()=>{
-    const q=norm(document.querySelector('#p3PayQ')?.value||'');
-    const rows=q?last.filter(r=>norm([r.unidad,r.panapass_numero,r.empresa,r.galera,r.supervisora,r.operador,r.n_op,r.tipo,r.estado_cobra].join(' ')).includes(q)):last;
-    const total=rows.reduce((a,x)=>a+Number(x.a_pagar||0),0),boleta=rows.reduce((a,x)=>a+Number(x.boleta||0),0),mx=rows.reduce((a,x)=>Math.max(a,Number(x.pag7||0)),0);
-    const body=rows.length?rows.map(r=>{const m=um.get(norm(r.unidad))||{};return `<tr><td data-label="Unidad">${v17UnitBadge(r.unidad,m.color)}</td><td data-label="Panapass">${esc(r.panapass_numero||'')}</td><td data-label="Galera">${esc(r.galera||'')}</td><td data-label="Supervisora"><b>${esc(r.supervisora||'SIN SUPERVISORA')}</b></td><td data-label="Empresa">${esc(r.empresa||'')}</td><td data-label="A pagar" class="money">${money(r.a_pagar)}</td><td data-label="Boleta" class="money">${money(r.boleta)}</td><td data-label="Pag. 7d">${chipNum(r.pag7)}</td><td data-label="N_OP">${esc(r.n_op||'')}</td><td data-label="Operador">${esc(r.operador||'')}</td><td data-label="Tipo">${esc(r.tipo||'')}</td><td data-label="Estado Cobra">${cobraChip(r.estado_cobra)}</td></tr>`}).join(''):`<tr><td colspan="12" class="empty">Sin datos.</td></tr>`;
-    document.querySelector('#p3PayOut').innerHTML=`<div class="capture-title"><h2>Pagos Panapass · ${esc(document.querySelector('#p3PayFecha').value)}</h2><small>Galera y supervisora según asignación actual</small></div><div class="kpis"><div class="kpi"><span>Pagos</span><strong>${rows.length}</strong></div><div class="kpi"><span>Total pagado</span><strong style="color:var(--green)">${money(total)}</strong></div><div class="kpi"><span>Total boleta</span><strong>${money(boleta)}</strong></div><div class="kpi"><span>Máx pag 7d</span><strong>${mx}</strong></div></div><div class="panel phase3-panel mobile-cards"><div class="table-wrap"><table class="pretty phase3-fit-table phase3-pay-table"><thead><tr><th>Unidad</th><th>Panapass</th><th>Galera</th><th>Supervisora</th><th>Empresa</th><th>A pagar</th><th>Boleta</th><th>Pag. 7d</th><th>N_OP</th><th>Operador</th><th>Tipo</th><th>Estado Cobra</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
-  };
-  const load=async()=>{
-    const o=document.querySelector('#p3PayOut');o.innerHTML='<div class="card">Consultando...</div>';
-    try{last=await rpc('panapass_pagos_fecha_v2',{p_fecha:document.querySelector('#p3PayFecha').value||null,...phase3ScopeBody('p3Pay')});paint()}catch(e){o.innerHTML=`<div class="alert">${esc(e.message)}</div>`}
-  };
-  phase3BindScope('p3Pay',scope,load);
-  document.querySelector('#p3PayGo').onclick=load;
-  document.querySelector('#p3PayFecha').onchange=load;
-  document.querySelector('#p3PayQ').oninput=paint;
-  document.querySelector('#p3PayCapture').onclick=e=>toggleCapture(e.currentTarget,'#p3PayOut');
-  await load();
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["pagos_hoy", async function(next,ctx){
+const v=ctx.view;
+const hoy = state.today || state.meta?.max_pago || new Date().toISOString().slice(0, 10), minf = state.meta?.min_pago || '2025-01-01';
+const [scope, units] = await Promise.all([phase3ScopeData(), rpc('panapass_unidades_detalle', {
+  p_buscar: null,
+  p_limit: 5000
+}).catch(() => [])]);
+const um = new Map((units || []).map(x => [norm(x.unidad), x]));
+v.innerHTML = `<div class="section-tools phase3-filterbar"><div class="field"><label>Fecha</label><input id="p3PayFecha" type="date" min="${minf}" max="${hoy}" value="${hoy}"></div>${phase3ScopeMarkup('p3Pay', scope)}<div class="field"><label>Buscar</label><input id="p3PayQ" placeholder="Unidad, operador, N_OP o supervisora"></div><button id="p3PayGo">Consultar</button><button id="p3PayCapture" class="soft-btn">Vista captura</button></div><div id="p3PayOut"></div>`;
+let last = [];
+const paint = () => {
+  const q = norm(document.querySelector('#p3PayQ')?.value || '');
+  const rows = q ? last.filter(r => norm([r.unidad, r.panapass_numero, r.empresa, r.galera, r.supervisora, r.operador, r.n_op, r.tipo, r.estado_cobra].join(' ')).includes(q)) : last;
+  const total = rows.reduce((a, x) => a + Number(x.a_pagar || 0), 0), boleta = rows.reduce((a, x) => a + Number(x.boleta || 0), 0), mx = rows.reduce((a, x) => Math.max(a, Number(x.pag7 || 0)), 0);
+  const body = rows.length ? rows.map(r => {
+    const m = um.get(norm(r.unidad)) || ({});
+    return `<tr><td data-label="Unidad">${v17UnitBadge(r.unidad, m.color)}</td><td data-label="Panapass">${esc(r.panapass_numero || '')}</td><td data-label="Galera">${esc(r.galera || '')}</td><td data-label="Supervisora"><b>${esc(r.supervisora || 'SIN SUPERVISORA')}</b></td><td data-label="Empresa">${esc(r.empresa || '')}</td><td data-label="A pagar" class="money">${money(r.a_pagar)}</td><td data-label="Boleta" class="money">${money(r.boleta)}</td><td data-label="Pag. 7d">${chipNum(r.pag7)}</td><td data-label="N_OP">${esc(r.n_op || '')}</td><td data-label="Operador">${esc(r.operador || '')}</td><td data-label="Tipo">${esc(r.tipo || '')}</td><td data-label="Estado Cobra">${cobraChip(r.estado_cobra)}</td></tr>`;
+  }).join('') : `<tr><td colspan="12" class="empty">Sin datos.</td></tr>`;
+  document.querySelector('#p3PayOut').innerHTML = `<div class="capture-title"><h2>Pagos Panapass · ${esc(document.querySelector('#p3PayFecha').value)}</h2><small>Galera y supervisora según asignación actual</small></div><div class="kpis"><div class="kpi"><span>Pagos</span><strong>${rows.length}</strong></div><div class="kpi"><span>Total pagado</span><strong style="color:var(--green)">${money(total)}</strong></div><div class="kpi"><span>Total boleta</span><strong>${money(boleta)}</strong></div><div class="kpi"><span>Máx pag 7d</span><strong>${mx}</strong></div></div><div class="panel phase3-panel mobile-cards"><div class="table-wrap"><table class="pretty phase3-fit-table phase3-pay-table"><thead><tr><th>Unidad</th><th>Panapass</th><th>Galera</th><th>Supervisora</th><th>Empresa</th><th>A pagar</th><th>Boleta</th><th>Pag. 7d</th><th>N_OP</th><th>Operador</th><th>Tipo</th><th>Estado Cobra</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
 };
+const load = async () => {
+  const o = document.querySelector('#p3PayOut');
+  o.innerHTML = '<div class="card">Consultando...</div>';
+  try {
+    last = await rpc('panapass_pagos_fecha_v2', {
+      p_fecha: document.querySelector('#p3PayFecha').value || null,
+      ...phase3ScopeBody('p3Pay')
+    });
+    paint();
+  } catch (e) {
+    o.innerHTML = `<div class="alert">${esc(e.message)}</div>`;
+  }
+};
+phase3BindScope('p3Pay', scope, load);
+document.querySelector('#p3PayGo').onclick = load;
+document.querySelector('#p3PayFecha').onchange = load;
+document.querySelector('#p3PayQ').oninput = paint;
+document.querySelector('#p3PayCapture').onclick = e => toggleCapture(e.currentTarget, '#p3PayOut');
+await load();
+}]);
 
 const _phase3UsuariosBase=usuarios;
 usuarios=async function(v){
@@ -113,10 +145,26 @@ usuarios=async function(v){
   }catch(e){const warn=document.createElement('div');warn.className='alert';warn.textContent='No se pudo cargar detección de supervisoras: '+e.message;host.prepend(warn)}
 };
 
-const _phase3ReportesBase=reportes;
-reportes=async function(v){
-  if(role()==='GERENTE_GALERA'){v.innerHTML='<div class="alert">Este perfil no tiene acceso al módulo Reportes.</div>';return}
-  await _phase3ReportesBase(v);
-  const b=v.querySelector('#rNeg');
-  if(b)b.onclick=async()=>{try{const f=document.querySelector('#repHasta').value,rows=await rpc('panapass_negativos_fecha_v2',{p_fecha:f,p_galera:null,p_supervisora_id:null}),total=rows.reduce((a,x)=>a+Number(x.saldo||0),0);openDataWindow('Negativos AM por Galera',`Fecha ${f}`,`<div class="outlook"><b>Reporte de Negativos AM</b><div class="muted">Supervisora según la asignación actual de cada unidad.</div></div><div class="kpis"><div class="k">Unidades<b>${rows.length}</b></div><div class="k">Saldo total<b>${money(total)}</b></div></div>${rowsTable(rows,['galera','supervisora','unidad','placa','panapass_numero','empresa','neg7','saldo'])}`)}catch(e){alert(e.message)}};
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["reportes", async function(next,ctx){
+const v=ctx.view;
+const _phase3ReportesBase=(..._args)=>next();
+if (role() === 'GERENTE_GALERA') {
+  v.innerHTML = '<div class="alert">Este perfil no tiene acceso al módulo Reportes.</div>';
+  return;
+}
+await _phase3ReportesBase(v);
+const b = v.querySelector('#rNeg');
+if (b) b.onclick = async () => {
+  try {
+    const f = document.querySelector('#repHasta').value, rows = await rpc('panapass_negativos_fecha_v2', {
+      p_fecha: f,
+      p_galera: null,
+      p_supervisora_id: null
+    }), total = rows.reduce((a, x) => a + Number(x.saldo || 0), 0);
+    openDataWindow('Negativos AM por Galera', `Fecha ${f}`, `<div class="outlook"><b>Reporte de Negativos AM</b><div class="muted">Supervisora según la asignación actual de cada unidad.</div></div><div class="kpis"><div class="k">Unidades<b>${rows.length}</b></div><div class="k">Saldo total<b>${money(total)}</b></div></div>${rowsTable(rows, ['galera', 'supervisora', 'unidad', 'placa', 'panapass_numero', 'empresa', 'neg7', 'saldo'])}`);
+  } catch (e) {
+    alert(e.message);
+  }
 };
+}]);

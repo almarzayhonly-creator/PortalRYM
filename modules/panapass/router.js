@@ -176,4 +176,7 @@
   function routes(){return TABS.slice()}
 
   w.RYM_PANAPASS_ROUTER=Object.freeze({open,leave,active,isBusy,routes,permittedTabs,around,after});
+  for(const [route,fn] of (w.__RYM_PANAPASS_PENDING_AROUND__||[])) around(route,fn);
+  for(const [route,fn] of (w.__RYM_PANAPASS_PENDING_AFTER__||[])) after(route,fn);
+  delete w.__RYM_PANAPASS_PENDING_AROUND__;delete w.__RYM_PANAPASS_PENDING_AFTER__;
 })(window,document);

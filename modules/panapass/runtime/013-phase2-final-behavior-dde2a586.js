@@ -57,34 +57,38 @@ render=async function(){
 };
 
 /* Renombre visible de la hoja online sin cambiar RPC/tablas ya probadas. */
-const _phase2PagosTrabajo=pagosTrabajo;
-pagosTrabajo=async function(v){
-  await _phase2PagosTrabajo(v);
-  const chip=v.querySelector('.source-card .entity-chip');
-  if(chip)chip.textContent='CARGAR PAGOS ONLINE';
-  const strong=v.querySelector('.source-card .source-text strong');
-  if(strong)strong.textContent='Hoja online para preparar y registrar pagos';
-  const p=v.querySelector('.source-card .source-text p');
-  if(p)p.textContent='Prepara los pendientes PM y registra únicamente lo que realmente se pagó. N_OP y Operador quedan bloqueados cuando vienen asignados; solo se editan si faltan. Cobrador corresponde a la supervisora asignada.';
-  const note=v.querySelector('.share-note');
-  if(note)note.textContent='Cargar Pagos reemplaza la antigua hoja tipo Excel dentro del portal.';
-};
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["cargar_pagos", async function(next,ctx){
+const v=ctx.view;
+const _phase2PagosTrabajo=(..._args)=>next();
+await _phase2PagosTrabajo(v);
+const chip = v.querySelector('.source-card .entity-chip');
+if (chip) chip.textContent = 'CARGAR PAGOS ONLINE';
+const strong = v.querySelector('.source-card .source-text strong');
+if (strong) strong.textContent = 'Hoja online para preparar y registrar pagos';
+const p = v.querySelector('.source-card .source-text p');
+if (p) p.textContent = 'Prepara los pendientes PM y registra únicamente lo que realmente se pagó. N_OP y Operador quedan bloqueados cuando vienen asignados; solo se editan si faltan. Cobrador corresponde a la supervisora asignada.';
+const note = v.querySelector('.share-note');
+if (note) note.textContent = 'Cargar Pagos reemplaza la antigua hoja tipo Excel dentro del portal.';
+}]);
 
 /* En Reportes, un gerente recibe únicamente su galera desde Supabase. Ajusta el texto para no sugerir 4 galeras. */
-const _phase2Reportes=reportes;
-reportes=async function(v){
-  await _phase2Reportes(v);
-  if(role()==='GERENTE_GALERA'){
-    const b=v.querySelector('#r4');
-    const card=b?.closest('.report-card');
-    if(card){
-      const h=card.querySelector('h3');
-      const p=card.querySelector('p');
-      if(h)h.textContent='Consolidado de tu galera';
-      if(p)p.textContent='Resumen del rango limitado automáticamente a la galera asignada a tu perfil.';
-    }
+
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["reportes", async function(next,ctx){
+const v=ctx.view;
+const _phase2Reportes=(..._args)=>next();
+await _phase2Reportes(v);
+if (role() === 'GERENTE_GALERA') {
+  const b = v.querySelector('#r4');
+  const card = b?.closest('.report-card');
+  if (card) {
+    const h = card.querySelector('h3');
+    const p = card.querySelector('p');
+    if (h) h.textContent = 'Consolidado de tu galera';
+    if (p) p.textContent = 'Resumen del rango limitado automáticamente a la galera asignada a tu perfil.';
   }
-};
+}
+}]);
 
 /* Mantiene el texto correcto de captura aunque shell/render vuelvan a dibujar. */
 const _phase2ToggleCapture=toggleCapture;

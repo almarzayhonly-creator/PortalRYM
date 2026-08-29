@@ -67,18 +67,29 @@ phase31EnhanceSaldoButtons=async function(v){
   v?.querySelectorAll?.('[data-saldo-express-info].muted').forEach(x=>{if(!String(x.textContent||'').trim())x.style.display='none'});
 };
 /* Reemplaza el observer anterior por uno seguro: se desconecta mientras aplica mejoras para evitar bucles de mutaciones. */
-negativos=async function(v){
-  await _phase31Negativos(v);
-  await phase31EnhanceSaldoButtons(v);
-  const out=v?.querySelector?.('#p3NegOut');
-  if(!out)return;
-  let timer=0;
-  const obs=new MutationObserver(()=>{
-    clearTimeout(timer);
-    timer=setTimeout(async()=>{
-      obs.disconnect();
-      try{await phase31EnhanceSaldoButtons(v)}finally{obs.observe(out,{childList:true,subtree:true})}
-    },70);
-  });
-  obs.observe(out,{childList:true,subtree:true});
-};
+(window.__RYM_PANAPASS_PENDING_AROUND__ ||= []).push(["negativos_hoy", async function(next,ctx){
+const v=ctx.view;
+await _phase31Negativos(v);
+await phase31EnhanceSaldoButtons(v);
+const out = v?.querySelector?.('#p3NegOut');
+if (!out) return;
+let timer = 0;
+const obs = new MutationObserver(() => {
+  clearTimeout(timer);
+  timer = setTimeout(async () => {
+    obs.disconnect();
+    try {
+      await phase31EnhanceSaldoButtons(v);
+    } finally {
+      obs.observe(out, {
+        childList: true,
+        subtree: true
+      });
+    }
+  }, 70);
+});
+obs.observe(out, {
+  childList: true,
+  subtree: true
+});
+}]);
