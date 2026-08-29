@@ -3,6 +3,7 @@ import path from 'node:path';
 import {parse} from 'acorn';
 import {generate} from 'astring';
 
+const MIGRATOR_VERSION='1.0';
 const root=process.cwd();
 const runtimeDir=path.join(root,'modules/panapass/runtime');
 const routeMap={dashboard:'dashboard',negativos:'negativos_hoy',pagosConsultaHoy:'pagos_hoy',pagosTrabajo:'cargar_pagos',historial:'historial',operaciones:'operaciones',reportes:'reportes'};
@@ -71,4 +72,4 @@ if(router.includes(marker)){
   router=router.replace(marker,"  w.RYM_PANAPASS_ROUTER=Object.freeze({open,leave,active,isBusy,routes,permittedTabs,around,after});\n  for(const [route,fn] of (w.__RYM_PANAPASS_PENDING_AROUND__||[])) around(route,fn);\n  for(const [route,fn] of (w.__RYM_PANAPASS_PENDING_AFTER__||[])) after(route,fn);\n  delete w.__RYM_PANAPASS_PENDING_AROUND__;delete w.__RYM_PANAPASS_PENDING_AFTER__;\n})(window,document);");
   fs.writeFileSync(routerPath,router);
 }
-console.log('Panapass route assignments migrated:',total);
+console.log('Panapass route assignments migrated:',total,MIGRATOR_VERSION);
