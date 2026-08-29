@@ -1,0 +1,64 @@
+name: V172 finalize compat cleanup
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_finalize_compat_cleanup.py'
+permissions:
+  contents: write
+concurrency:
+  group: v172-finalize-compat-cleanup
+  cancel-in-progress: true
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Finalize V123 V154 V155 ownership
+        run: python3 tools/v172_finalize_compat_cleanup.py
+      - name: Validate JavaScript
+        run: |
+          node --check modules/core/router.js
+          node --check modules/core/portal-module.js
+          node --check modules/core/experience-v123.js
+          node --check modules/core/home-v154.js
+          node --check modules/control-auto/router.js
+          node --check modules/control-auto/enhancements/supervisor-summary-v123.js
+          node --check modules/control-auto/enhancements/unidades-v154.js
+          node --check modules/control-auto/enhancements/cupos-v154.js
+          node --check modules/revisados/router.js
+          node --check modules/revisados/enhancements-v154.js
+          node --check modules/gps/app.js
+          node --check modules/usuarios/app.js
+          node --check modules/v172-clean-loader.js
+      - name: Validate ownership
+        run: |
+          test ! -e modules/core/compat-v154.js
+          test ! -e css/core-compat-v154.css
+          test ! -e modules/gps/v155.js
+          test ! -e css/gps-v155.css
+          ! grep -R -F '__RYM_ROUTE_V155' modules index.html
+          ! grep -R -F 'const wrapControl=' modules/core modules/control-auto
+          ! grep -R -E 'window\.v75ControlUnits\s*=|window\.v94ControlCuposATTT\s*=|window\.v60OpenRevisados\s*=|window\.v36PortalHome\s*=' modules/core/home-v154.js modules/control-auto/enhancements modules/revisados/enhancements-v154.js
+          grep -Fq 'function after(route,fn)' modules/control-auto/router.js
+          grep -Fq 'function after(route,fn)' modules/revisados/router.js
+          grep -Fq "register('portal'" modules/core/portal-module.js
+          grep -Fq '/modules/core/portal-module.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/control-auto/enhancements/supervisor-summary-v123.js' modules/v172-clean-loader.js
+          grep -Fq '/modules/revisados/enhancements-v154.js' modules/v172-clean-loader.js
+          ! grep -Fq '/modules/core/compat-v154.js' index.html
+          ! grep -Fq '/modules/gps/v155.js' index.html
+      - name: Commit cleanup
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'V172 clean: remove V123 V154 V155 wrappers and compat owners'
+          git push origin HEAD:v172-clean
