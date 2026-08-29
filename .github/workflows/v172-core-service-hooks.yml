@@ -1,0 +1,37 @@
+name: V172 Core service hooks
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_core_service_hooks.mjs'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-save acorn
+      - name: Convert Core service overrides to composition hooks
+        run: node tools/v172_core_service_hooks.mjs
+      - name: Validate
+        run: |
+          node --check modules/core/composition.js
+          node --check modules/core/runtime.js
+          find modules -type f -path '*/runtime/*.js' -print0 | xargs -0 -n1 node --check
+          grep -Fq 'rym-v172-core-composition' index.html
+          ! grep -R -E '^[[:space:]]*(req|rpc|clearSession|login|loadApp|shell)[[:space:]]*=[[:space:]]*(async[[:space:]]*)?function' modules/*/runtime || false
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: replace Core service overrides with composition hooks'
+          git push origin HEAD:v172-clean
