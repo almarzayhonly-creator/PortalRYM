@@ -1,0 +1,31 @@
+name: V172 remove GPS V122 wrapper
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_remove_gps_v122_wrapper.py'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - run: python3 tools/v172_remove_gps_v122_wrapper.py
+      - name: Validate
+        run: |
+          node --check modules/gps/readability.js
+          node --check modules/gps/app.js
+          test ! -e modules/gps/runtime/056-rym-v122-readability-history-js-c58b9eb0.js
+          ! grep -R -F 'window.draw113=function' modules/gps
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A modules/gps index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: retire obsolete GPS V122 wrappers'
+          git push origin HEAD:v172-clean
