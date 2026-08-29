@@ -79,12 +79,14 @@ jobs:
           curl -fsSL --max-time 20 "$U/modules/gps/v158.js?v=172" -o /tmp/gps-v158.js
           curl -fsSL --max-time 20 "$U/css/gps-v158.css?v=172" -o /tmp/gps-v158.css
           curl -fsSL --max-time 20 "$U/css/gps-v160.css?v=172" -o /tmp/gps-v160.css
+          curl -fsSL --max-time 20 "$U/css/revisados-v66.css?v=172" -o /tmp/revisados-v66.css
           grep -Fq 'rym-v169-panapass-final' /tmp/index.html
           grep -Fq 'rym-v170-control-router' /tmp/index.html
           grep -Fq 'css/gps-v113.css?v=172' /tmp/index.html
           grep -Fq 'css/gps-v157.css?v=172' /tmp/index.html
           grep -Fq 'css/gps-v158.css?v=172' /tmp/index.html
           grep -Fq 'css/gps-v160.css?v=172' /tmp/index.html
+          grep -Fq 'css/revisados-v66.css?v=172' /tmp/index.html
           grep -Fq 'window.ranking=ranking169' /tmp/panapass.js
           grep -Fq 'window.recurrentes=recurrentes169' /tmp/panapass.js
           grep -Fq 'Recurrentes V2: real layout change' /tmp/recurrentes-r2.js
@@ -100,4 +102,5 @@ jobs:
           grep -Fq 'portalGpsPriority' /tmp/gps-v158.js
           grep -Fq '.v158-action-order' /tmp/gps-v158.css
           grep -Fq '.v160-exec-grid' /tmp/gps-v160.css
+          grep -Fq '.v66-shell' /tmp/revisados-v66.css
           node --check /tmp/gps-v158.js
