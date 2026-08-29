@@ -1,0 +1,35 @@
+name: V172 extract Control V75
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_extract_control_v75.py'
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Extract Control V75
+        run: python3 tools/v172_extract_control_v75.py
+      - name: Validate
+        run: |
+          node --check modules/control-auto/app-v75.js
+          node --check modules/control-auto/router.js
+          node --check modules/v172-clean-loader.js
+          grep -Fq 'window.RYM_CONTROL_APP=Object.freeze' modules/control-auto/app-v75.js
+          grep -Fq 'w.RYM_CONTROL_APP?.[key]' modules/control-auto/router.js
+          grep -Fq '/modules/control-auto/app-v75.js' modules/v172-clean-loader.js
+          ! grep -Fq 'window.v75ControlDashboard=async function()' index.html
+      - name: Commit
+        run: |
+          if git diff --quiet; then echo 'No changes'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'V172 clean: externalize Control V75 application owner'
+          git push origin HEAD:v172-clean
