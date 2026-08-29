@@ -1,0 +1,35 @@
+body.v157-gps{--v158-gps-navy:#173C70;--v158-gps-blue:#24548E;--v158-gps-blue-soft:#EAF1F8;--v158-gps-lime:#9CCB18;--v158-gps-ink:#0B315E;--v158-gps-muted:#61758D;background:#F1F6FB!important;color:var(--v158-gps-ink)!important}
+body.v157-gps .v157-side{background:linear-gradient(180deg,var(--v158-gps-blue) 0%,var(--v158-gps-navy) 100%)!important;border-right:4px solid var(--v158-gps-lime)}
+body.v157-gps .v157-brand-icon{background:rgba(255,255,255,.13)!important;color:#fff!important;border-color:rgba(255,255,255,.26)!important}
+body.v157-gps .v157-nav button{color:#F1F7FF!important}
+body.v157-gps .v157-nav button:hover{background:rgba(255,255,255,.12)!important;color:#fff!important}
+body.v157-gps .v157-nav button.active{background:var(--v158-gps-lime)!important;color:var(--v158-gps-navy)!important;box-shadow:0 8px 22px rgba(0,0,0,.14)!important}
+body.v157-gps .v157-nav button.active i{color:var(--v158-gps-navy)!important}
+body.v157-gps .v157-back{background:#fff!important;color:var(--v158-gps-navy)!important;border-color:#fff!important}
+body.v157-gps .v157-title h1,body.v157-gps .v157-card-head h3,body.v157-gps .v157-table td b{color:var(--v158-gps-ink)!important}
+body.v157-gps .v157-live:before{background:var(--v158-gps-lime)!important;box-shadow:0 0 0 4px rgba(156,203,24,.18)!important}
+body.v157-gps .v157-toolbar button,body.v157-gps .v157-btn{background:var(--v158-gps-blue)!important;color:#fff!important;border:1px solid var(--v158-gps-blue)!important}
+body.v157-gps .v157-toolbar button:hover,body.v157-gps .v157-btn:hover{background:var(--v158-gps-navy)!important;color:#fff!important}
+body.v157-gps .v157-btn.soft{background:#fff!important;color:var(--v158-gps-navy)!important;border:1px solid #BFD1E5!important}
+body.v157-gps .v157-btn.green{background:var(--v158-gps-navy)!important;color:#fff!important;border-bottom:3px solid var(--v158-gps-lime)!important}
+body.v157-gps .v157-table th{background:var(--v158-gps-blue)!important;color:#fff!important}
+body.v157-gps .v157-map{color:var(--v158-gps-blue)!important}
+body.v157-gps .v157-kpi.good:before{background:var(--v158-gps-lime)!important}
+body.v157-gps .v157-pill.good{background:#EFF8D7!important;color:#3A6510!important}
+body.v157-gps .v157-progress i{background:linear-gradient(90deg,#E34949,#F39A16)!important}
+body.v157-gps .v157-rank .alert{color:#A85A00!important}
+body.v157-gps .v157-ranking{overflow-x:auto}
+body.v157-gps .v157-rank{grid-template-columns:42px minmax(150px,1fr) 58px 62px 62px 88px 105px;min-width:760px}
+.v158-action-order{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
+.v158-action-order>div{background:#fff;border:1px solid #D9E5F1;border-radius:14px;padding:11px 13px;display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:center;box-shadow:0 6px 18px rgba(8,47,99,.035)}
+.v158-action-order>div>b{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--v158-gps-blue-soft);color:var(--v158-gps-blue);font-size:12px}
+.v158-action-order strong{display:block;color:var(--v158-gps-ink);font-size:11px}.v158-action-order small{display:block;color:#72859A;font-size:9px;margin-top:2px;line-height:1.35}
+.v158-action-order .critical{border-left:4px solid #E34949}.v158-action-order .critical>b{background:#FDE9E9;color:#B52D2D}
+.v158-action-order .warning{border-left:4px solid #F39A16}.v158-action-order .warning>b{background:#FFF0D9;color:#A85A00}
+.v158-action-order .audit{border-left:4px solid var(--v158-gps-lime)}.v158-action-order .audit>b{background:#EFF8D7;color:#426D12}
+body.v99-home .v99-module.gps .v158-home-priority{margin:10px 0 0;padding:9px 10px;border-radius:11px;background:#F3F7FB;border:1px solid #D6E2EF;color:#365675;font-size:10px;line-height:1.4}
+body.v99-home .v99-module.gps .v158-home-priority b{color:#173C70}
+body.v99-home .v99-module.gps .v158-home-priority.danger{background:#FFF3F1;border-color:#F0C9C4;color:#874238}
+body.v99-home .v99-module.gps .v158-home-priority.good{background:#F2F8DF;border-color:#D6E6A7;color:#48651E}
+body.v99-home .v99-module.gps>button{color:#fff!important;background:linear-gradient(90deg,#173C70,#24548E)!important;border-bottom:3px solid #9CCB18!important}
+@media(max-width:760px){.v158-action-order{grid-template-columns:1fr}.v157-rank{min-width:690px}}

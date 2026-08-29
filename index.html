@@ -7471,113 +7471,13 @@ body.v99-home .v99-alert.v154-clickable{cursor:pointer;transition:.12s}body.v99-
 <script id="rym-v157-gps-js" src="/modules/gps/v157.js?v=172"></script>
 <!-- BUILD V157 END -->
 <!-- BUILD V158 START: GPS visual polish + scoped portal daily priorities. No other modules changed. -->
-<style id="rym-v158-gps-css">
-body.v157-gps{--v158-gps-navy:#173C70;--v158-gps-blue:#24548E;--v158-gps-blue-soft:#EAF1F8;--v158-gps-lime:#9CCB18;--v158-gps-ink:#0B315E;--v158-gps-muted:#61758D;background:#F1F6FB!important;color:var(--v158-gps-ink)!important}
-body.v157-gps .v157-side{background:linear-gradient(180deg,var(--v158-gps-blue) 0%,var(--v158-gps-navy) 100%)!important;border-right:4px solid var(--v158-gps-lime)}
-body.v157-gps .v157-brand-icon{background:rgba(255,255,255,.13)!important;color:#fff!important;border-color:rgba(255,255,255,.26)!important}
-body.v157-gps .v157-nav button{color:#F1F7FF!important}
-body.v157-gps .v157-nav button:hover{background:rgba(255,255,255,.12)!important;color:#fff!important}
-body.v157-gps .v157-nav button.active{background:var(--v158-gps-lime)!important;color:var(--v158-gps-navy)!important;box-shadow:0 8px 22px rgba(0,0,0,.14)!important}
-body.v157-gps .v157-nav button.active i{color:var(--v158-gps-navy)!important}
-body.v157-gps .v157-back{background:#fff!important;color:var(--v158-gps-navy)!important;border-color:#fff!important}
-body.v157-gps .v157-title h1,body.v157-gps .v157-card-head h3,body.v157-gps .v157-table td b{color:var(--v158-gps-ink)!important}
-body.v157-gps .v157-live:before{background:var(--v158-gps-lime)!important;box-shadow:0 0 0 4px rgba(156,203,24,.18)!important}
-body.v157-gps .v157-toolbar button,body.v157-gps .v157-btn{background:var(--v158-gps-blue)!important;color:#fff!important;border:1px solid var(--v158-gps-blue)!important}
-body.v157-gps .v157-toolbar button:hover,body.v157-gps .v157-btn:hover{background:var(--v158-gps-navy)!important;color:#fff!important}
-body.v157-gps .v157-btn.soft{background:#fff!important;color:var(--v158-gps-navy)!important;border:1px solid #BFD1E5!important}
-body.v157-gps .v157-btn.green{background:var(--v158-gps-navy)!important;color:#fff!important;border-bottom:3px solid var(--v158-gps-lime)!important}
-body.v157-gps .v157-table th{background:var(--v158-gps-blue)!important;color:#fff!important}
-body.v157-gps .v157-map{color:var(--v158-gps-blue)!important}
-body.v157-gps .v157-kpi.good:before{background:var(--v158-gps-lime)!important}
-body.v157-gps .v157-pill.good{background:#EFF8D7!important;color:#3A6510!important}
-body.v157-gps .v157-progress i{background:linear-gradient(90deg,#E34949,#F39A16)!important}
-body.v157-gps .v157-rank .alert{color:#A85A00!important}
-body.v157-gps .v157-ranking{overflow-x:auto}
-body.v157-gps .v157-rank{grid-template-columns:42px minmax(150px,1fr) 58px 62px 62px 88px 105px;min-width:760px}
-.v158-action-order{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
-.v158-action-order>div{background:#fff;border:1px solid #D9E5F1;border-radius:14px;padding:11px 13px;display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:center;box-shadow:0 6px 18px rgba(8,47,99,.035)}
-.v158-action-order>div>b{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--v158-gps-blue-soft);color:var(--v158-gps-blue);font-size:12px}
-.v158-action-order strong{display:block;color:var(--v158-gps-ink);font-size:11px}.v158-action-order small{display:block;color:#72859A;font-size:9px;margin-top:2px;line-height:1.35}
-.v158-action-order .critical{border-left:4px solid #E34949}.v158-action-order .critical>b{background:#FDE9E9;color:#B52D2D}
-.v158-action-order .warning{border-left:4px solid #F39A16}.v158-action-order .warning>b{background:#FFF0D9;color:#A85A00}
-.v158-action-order .audit{border-left:4px solid var(--v158-gps-lime)}.v158-action-order .audit>b{background:#EFF8D7;color:#426D12}
-body.v99-home .v99-module.gps .v158-home-priority{margin:10px 0 0;padding:9px 10px;border-radius:11px;background:#F3F7FB;border:1px solid #D6E2EF;color:#365675;font-size:10px;line-height:1.4}
-body.v99-home .v99-module.gps .v158-home-priority b{color:#173C70}
-body.v99-home .v99-module.gps .v158-home-priority.danger{background:#FFF3F1;border-color:#F0C9C4;color:#874238}
-body.v99-home .v99-module.gps .v158-home-priority.good{background:#F2F8DF;border-color:#D6E6A7;color:#48651E}
-body.v99-home .v99-module.gps>button{color:#fff!important;background:linear-gradient(90deg,#173C70,#24548E)!important;border-bottom:3px solid #9CCB18!important}
-@media(max-width:760px){.v158-action-order{grid-template-columns:1fr}.v157-rank{min-width:690px}}
-</style>
-<script id="rym-v158-gps-js">
-(function(){
-  if(window.__RYM_V158_GPS__)return;window.__RYM_V158_GPS__=true;
-  const N=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
-  const gpsClass=r=>{if(r?.historico)return'HISTORICO';const i=Number(r?.instalados||0),p=Number(r?.reportando||0);if(i===0||p===0)return'CRITICO';if(i===2&&p===1)return'ALERTA';return'OK'};
-  const profileKey=()=>[state?.profile?.id||'',state?.profile?.email||'',state?.profile?.supervisora_id||'',N(state?.profile?.rol||'')].join('|');
-  const storeKey=()=> 'rym_gps_portal_'+profileKey();
-  function summarize(data){const rows=Array.isArray(data?.rows)?data.rows:[],act=rows.filter(r=>!r.historico&&N(r.estado_operativo)==='ACTIVO'),crit=act.filter(r=>gpsClass(r)==='CRITICO').length,alert=act.filter(r=>gpsClass(r)==='ALERTA').length;return{crit,alert,pending:crit+alert,at:Date.now()}}
-  function paint(sum){
-    if(!document.body.classList.contains('v99-home'))return false;const card=document.querySelector('.v99-module.gps');if(!card)return false;const minis=card.querySelector('.v99-mini-kpis'),btn=card.querySelector('button');if(!minis||!btn)return false;
-    const crit=Number(sum?.crit||0),alert=Number(sum?.alert||0),pending=crit+alert;
-    minis.innerHTML='<div class="v99-mini"><span>Críticas</span><b>'+crit+'</b></div><div class="v99-mini"><span>Alertas</span><b>'+alert+'</b></div><div class="v99-mini"><span>Pendientes hoy</span><b>'+pending+'</b></div>';
-    card.querySelector('.v158-home-priority')?.remove();const badge=card.querySelector('.v99-badge');if(badge){badge.classList.remove('good','warn','medal');badge.classList.add('v103-state-badge',pending?'warn':'good');const icon=pending?'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#e89218"/><path d="M16 9v9" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="16" cy="23" r="1.8" fill="#fff"/></svg>':'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#1e9b68"/><path d="M9.5 16.2l4.2 4.2 8.9-9.3" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';badge.innerHTML='<span class="v103-state-icon">'+icon+'</span><span class="v103-state-copy"><b>'+(pending?pending+' pendiente'+(pending===1?'':'s'):'GPS al día')+'</b><small>'+(pending?(crit?crit+' crítico'+(crit===1?'':'s'):'Sin críticos'):'Sin prioridades ACTIVO')+'</small></span>'}
-    btn.textContent=pending?'Atender '+pending+' prioridades':'Abrir GPS';btn.onclick=()=>window.v113OpenGps?.();return true
-  }
-  async function portalGpsPriority(){
-    if(!document.body.classList.contains('v99-home'))return;
-    const key=profileKey();
-    try{const raw=localStorage.getItem(storeKey());if(raw){const cached=JSON.parse(raw);if(cached&&Date.now()-Number(cached.at||0)<6*3600000)paint(cached)}}catch(_){}
-    try{
-      const shared=window.__v164GpsPortalData;let data=shared&&shared.key===key?shared.data:null,c=window.__v163GpsPortalCache;if(!data&&c&&c.key===key&&Date.now()-c.at<30000)data=c.data;
-      if(!data){const res=await req('/functions/v1/gps-rym-admin',{method:'POST',body:JSON.stringify({q:'',galera:'TODAS',estado:'TODOS',nivel:'TODOS',onlyProblems:false})});if(!res?.data?.ok)throw Error('GPS no disponible');data=res.data}
-      window.__v164GpsPortalData={key,data};window.__v163GpsPortalCache={key,at:Date.now(),data};const sum=summarize(data);paint(sum);try{localStorage.setItem(storeKey(),JSON.stringify(sum))}catch(_){}
-    }catch(_){/* conserva el último dato visible sin bloquear el Portal */}
-  }
-  const oldHome=window.v36PortalHome;
-  if(typeof oldHome==='function'&&!oldHome.__v164gps){const fn=async function(){const r=await oldHome.apply(this,arguments);portalGpsPriority();setTimeout(portalGpsPriority,120);return r};fn.__v164gps=true;window.v36PortalHome=fn;try{v36PortalHome=fn}catch(_){}}
-  setTimeout(portalGpsPriority,60);
-})();
-</script>
+<link rel="stylesheet" href="/css/gps-v158.css?v=172">
+<script id="rym-v158-gps-js" src="/modules/gps/v158.js?v=172"></script>
 <!-- BUILD V158 END -->
 <!-- BUILD V159: GPS copy report + audit only with GPS data + portal badge aligned -->
 
 <!-- BUILD V160 START: GPS Executive matrix; ADMIN_TOTAL only. Other modules untouched. -->
-<style id="rym-v160-gps-executive-css">
-body.v157-gps .v160-exec-intro{margin-bottom:14px}
-body.v157-gps .v160-exec-intro>.v157-card-head>strong{font-size:18px;color:#173C70;white-space:nowrap}
-body.v157-gps .v160-exec-global{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px 16px;background:#F8FBFE;border-top:1px solid #E1EAF3}
-body.v157-gps .v160-exec-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-body.v157-gps .v160-exec-state{background:#fff;border:1px solid #D8E4F0;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(11,49,94,.055)}
-body.v157-gps .v160-exec-state.active{border-top:4px solid #9CCB18}
-body.v157-gps .v160-exec-state.stopped{border-top:4px solid #F39A16}
-body.v157-gps .v160-exec-state.extra{border-top:4px solid #24548E}
-body.v157-gps .v160-exec-head{padding:14px 15px 11px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#F8FBFE;border-bottom:1px solid #E5EDF5}
-body.v157-gps .v160-exec-head span{font-size:10px;font-weight:1000;letter-spacing:.04em;color:#61758D}
-body.v157-gps .v160-exec-head h3{margin:3px 0 0;font-size:23px;color:#0B315E!important}
-body.v157-gps .v160-exec-head small{font-size:9px;color:#70839A;text-align:right;line-height:1.3}
-body.v157-gps .v160-dist{padding:12px 14px;border-bottom:1px solid #E7EEF5}
-body.v157-gps .v160-dist>b{display:block;font-size:10px;color:#173C70;margin-bottom:8px}
-body.v157-gps .v160-dist>div{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-body.v157-gps .v160-dist span{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:58px;border:1px solid #DDE7F1;border-radius:11px;background:#F9FBFD}
-body.v157-gps .v160-dist strong{font-size:20px;color:#0B315E;line-height:1}
-body.v157-gps .v160-dist small{font-size:9px;color:#6B7F96;margin-top:5px}
-body.v157-gps .v160-dist.installed span:nth-child(1){background:#FFF3F1;border-color:#F2D0CB}
-body.v157-gps .v160-dist.installed span:nth-child(2){background:#FFF7E8;border-color:#F2DEB9}
-body.v157-gps .v160-dist.installed span:nth-child(3){background:#F3F9E3;border-color:#DDEBB7}
-body.v157-gps .v160-dist.reporting span:nth-child(1){background:#FFF3F1;border-color:#F2D0CB}
-body.v157-gps .v160-dist.reporting span:nth-child(2){background:#FFF7E8;border-color:#F2DEB9}
-body.v157-gps .v160-dist.reporting span:nth-child(3){background:#F3F9E3;border-color:#DDEBB7}
-body.v157-gps .v160-matrix{padding:12px 14px 14px;overflow:auto}
-body.v157-gps .v160-matrix table{width:100%;border-collapse:separate;border-spacing:4px;font-size:9px;min-width:310px}
-body.v157-gps .v160-matrix th{background:#EAF1F8!important;color:#173C70!important;padding:7px;border-radius:7px;font-weight:900;text-align:center}
-body.v157-gps .v160-matrix td{padding:8px;text-align:center;border-radius:7px;border:1px solid #E1E9F1;background:#fff;color:#0B315E}
-body.v157-gps .v160-matrix td.bad{background:#FFF0EE;color:#A72B2B;border-color:#F0C5C0}
-body.v157-gps .v160-matrix td.warn{background:#FFF5E5;color:#9A5700;border-color:#F2D8AA}
-body.v157-gps .v160-matrix td.good{background:#F0F8DB;color:#3F6812;border-color:#D8E8AE}
-body.v157-gps .v160-matrix td b{color:inherit!important;font-size:14px}
-@media(max-width:1180px){body.v157-gps .v160-exec-grid{grid-template-columns:1fr}body.v157-gps .v160-exec-global{grid-template-columns:1fr}}
-@media(max-width:760px){body.v157-gps .v160-exec-head{flex-direction:column}body.v157-gps .v160-exec-head small{text-align:left}body.v157-gps .v157-mobile-nav:not(:has([data-v157-tab="executive"])){grid-template-columns:repeat(4,1fr)}}
-</style>
+<link rel="stylesheet" href="/css/gps-v160.css?v=172">
 <!-- BUILD V160 END -->
 <!-- BUILD V164: GPS final corrections only: operational states, KPI links, dashboard default, WhatsApp report, executive galera, fast Portal GPS -->
 
