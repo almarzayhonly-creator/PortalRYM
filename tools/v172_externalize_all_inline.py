@@ -2,6 +2,7 @@
 from pathlib import Path
 import re,hashlib
 
+EXTERNALIZER_VERSION='1.0'
 root=Path(__file__).resolve().parents[1]
 idx=root/'index.html'
 html=idx.read_text(encoding='utf-8')
@@ -24,7 +25,6 @@ def safe(v):
     v=re.sub(r'[^a-zA-Z0-9._-]+','-',v).strip('-').lower()
     return v[:100] or 'inline'
 
-# Collect all inline style/script blocks and replace from end to start.
 items=[]
 for i,m in enumerate(re.finditer(r'<style(?P<attrs>[^>]*)>(?P<body>.*?)</style>',html,re.S|re.I),1):
     attrs=m.group('attrs');body=m.group('body')
@@ -33,7 +33,6 @@ for i,m in enumerate(re.finditer(r'<style(?P<attrs>[^>]*)>(?P<body>.*?)</style>'
 for i,m in enumerate(re.finditer(r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>',html,re.S|re.I),1):
     attrs=m.group('attrs');body=m.group('body')
     if re.search(r'\bsrc\s*=',attrs,re.I): continue
-    # Ignore non-executable structured-data script tags if ever present.
     tm=re.search(r'\btype=["\']([^"\']+)',attrs,re.I)
     if tm and tm.group(1).lower() not in ('text/javascript','application/javascript','module'):
         continue
@@ -56,7 +55,6 @@ for kind,start,end,attrs,body,ident,dom,n in sorted(items,key=lambda x:x[1],reve
     created.append(str(path.relative_to(root)))
 
 idx.write_text(html,encoding='utf-8')
-# Hard zero-inline checks.
 if re.search(r'<style(?:\s|>)',html,re.I): raise SystemExit('inline style remains')
 for m in re.finditer(r'<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>',html,re.S|re.I):
     if not re.search(r'\bsrc\s*=',m.group('attrs'),re.I) and m.group('body').strip():
