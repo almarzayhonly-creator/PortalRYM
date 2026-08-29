@@ -1,0 +1,33 @@
+name: V172 canonical CSS bundle
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_bundle_css.py'
+permissions:
+  contents: write
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - name: Build canonical CSS in exact cascade order
+        run: python3 tools/v172_bundle_css.py
+      - name: Validate CSS ownership
+        run: |
+          test -s css/portal-rym.css
+          grep -Fq '/css/portal-rym.css' index.html
+          test "$(grep -Eo '<link[^>]+rel=["'"']stylesheet["'"'][^>]*>' index.html | wc -l)" -eq 1
+          grep -Fq 'const css=[];' modules/v172-clean-loader.js
+          ! grep -q '<style' index.html
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules/v172-clean-loader.js css/portal-rym.css
+          if git diff --cached --quiet; then exit 0; fi
+          git pull --rebase origin v172-clean
+          git push origin HEAD:v172-clean
