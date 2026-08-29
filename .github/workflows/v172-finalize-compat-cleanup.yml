@@ -8,9 +8,6 @@ on:
       - 'tools/v172_finalize_compat_cleanup.trigger'
 permissions:
   contents: write
-concurrency:
-  group: v172-finalize-compat-cleanup
-  cancel-in-progress: true
 jobs:
   cleanup:
     runs-on: ubuntu-latest
