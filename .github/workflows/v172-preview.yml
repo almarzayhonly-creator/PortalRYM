@@ -74,9 +74,12 @@ jobs:
           curl -fsSL --max-time 20 "$U/modules/v172-fixes.js?v=172" -o /tmp/v172.js
           curl -fsSL --max-time 20 "$U/modules/gps/v113.js?v=172" -o /tmp/gps-v113.js
           curl -fsSL --max-time 20 "$U/css/gps-v113.css?v=172" -o /tmp/gps-v113.css
+          curl -fsSL --max-time 20 "$U/modules/gps/v157.js?v=172" -o /tmp/gps-v157.js
+          curl -fsSL --max-time 20 "$U/css/gps-v157.css?v=172" -o /tmp/gps-v157.css
           grep -Fq 'rym-v169-panapass-final' /tmp/index.html
           grep -Fq 'rym-v170-control-router' /tmp/index.html
           grep -Fq 'css/gps-v113.css?v=172' /tmp/index.html
+          grep -Fq 'css/gps-v157.css?v=172' /tmp/index.html
           grep -Fq 'window.ranking=ranking169' /tmp/panapass.js
           grep -Fq 'window.recurrentes=recurrentes169' /tmp/panapass.js
           grep -Fq 'Recurrentes V2: real layout change' /tmp/recurrentes-r2.js
@@ -86,3 +89,6 @@ jobs:
           grep -Fq 'window.v113OpenGps' /tmp/gps-v113.js
           grep -Fq '.v113-gps' /tmp/gps-v113.css
           node --check /tmp/gps-v113.js
+          grep -Fq 'window.v113OpenGps' /tmp/gps-v157.js
+          grep -Fq '.v157-gps' /tmp/gps-v157.css
+          node --check /tmp/gps-v157.js
