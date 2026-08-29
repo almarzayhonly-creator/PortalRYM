@@ -60,7 +60,6 @@ if src.exists():
 html=replace_src(html,'/modules/legacy/rym-v124-dashboard-ranking-js.js','/modules/control-auto/dashboard/v124.js')
 move('css/legacy/rym-v124-dashboard-ranking-css.css','css/control-auto-v124.css')
 html=replace_src(html,'/css/legacy/rym-v124-dashboard-ranking-css.css','/css/control-auto-v124.css')
-# Remove the obsolete Ranking-specific CSS from v124 stylesheet.
 p=ROOT/'css/control-auto-v124.css'
 if p.exists():
     c=p.read_text(encoding='utf-8'); marker='/* Ranking:'
@@ -71,13 +70,10 @@ if p.exists():
 src=ROOT/'modules/legacy/rym-v123-experience-js.js'
 if src.exists():
     body=src.read_text(encoding='utf-8')
-    # Remove improveRanking function.
     body=re.sub(r'\n  function improveRanking\(\)\{.*?\n  \}\n','\n',body,count=1,flags=re.S)
-    # Remove recurrentes implementation through supervisorSummary declaration.
     a=body.find('  recurrentes=async function(v){')
     b=body.find('  async function supervisorSummary(){',a)
     if a!=-1 and b!=-1: body=body[:a]+body[b:]
-    # Remove GPS draw compatibility from this mixed file; GPS V155 is canonical.
     a=body.find('  const oldDraw=window.draw113;')
     b=body.find('  let timer=0;const enhance=',a)
     if a!=-1 and b!=-1: body=body[:a]+body[b:]
@@ -89,7 +85,6 @@ html=replace_src(html,'/css/legacy/rym-v123-experience-css.css','/css/core-exper
 p=ROOT/'css/core-experience-v123.css'
 if p.exists():
     c=p.read_text(encoding='utf-8')
-    # Drop Ranking and Recurrentes style blocks; canonical modules own these views.
     c=re.sub(r'/\* Ranking completo:.*?(?=/\* Recurrentes:)', '', c, flags=re.S)
     c=re.sub(r'/\* Recurrentes:.*?(?=/\* Control de Auto:)', '', c, flags=re.S)
     p.write_text(c,encoding='utf-8')
@@ -118,14 +113,11 @@ c=c.replace("Object.freeze({open,leave,active,isBusy,rebind,routes})","Object.fr
 cp.write_text(c,encoding='utf-8')
 
 INDEX.write_text(html,encoding='utf-8')
-
-# Remove empty legacy directories.
 for d in [ROOT/'modules/legacy',ROOT/'css/legacy']:
     if d.exists() and not any(d.iterdir()): d.rmdir()
-
-# Hard checks.
 final=INDEX.read_text(encoding='utf-8')
 if '/modules/legacy/' in final or '/css/legacy/' in final: raise SystemExit('legacy reference remains in index')
 if re.search(r'\branking\s*=\s*async function|\brecurrentes\s*=\s*async function',(ROOT/'modules/core/experience-v123.js').read_text(encoding='utf-8')): raise SystemExit('obsolete Panapass owner remains in V123')
 print('V172 legacy domains consolidated')
 print('index bytes',INDEX.stat().st_size)
+# trigger: 2026-08-29T00:05Z
