@@ -23,7 +23,6 @@
   }
   setTimeout(heartbeat141,3500);setInterval(heartbeat141,60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')heartbeat141()});window.addEventListener('focus',heartbeat141);
 
-  const openUsersBase=window.v70OpenUsers;
   async function activity141(){
     const main=document.querySelector('.v70-admin-main');if(!main||role141()!=='ADMIN_TOTAL')return;
     document.querySelectorAll('.v70-admin-side>button').forEach(b=>b.classList.remove('active'));document.querySelector('#v141ActivityTab')?.classList.add('active');
@@ -42,7 +41,7 @@
     usersBtn.id='v141UsersTab';usersBtn.onclick=()=>window.v70OpenUsers?.();
     const b=document.createElement('button');b.id='v141ActivityTab';b.className='v141-admin-activity-btn';b.textContent='Actividad';b.onclick=activity141;usersBtn.insertAdjacentElement('afterend',b);
   }
-  if(typeof openUsersBase==='function')window.v70OpenUsers=async function(...args){const r=await openUsersBase.apply(this,args);installActivity141();heartbeat141();return r};
+  (window.__RYM_USERS_PENDING_AFTER__ ||= []).push(async function(){installActivity141();heartbeat141()});
 
   function closeMail141(){document.querySelector('#v141CuposMail')?.remove()}
   async function cuposMail141(){
@@ -54,6 +53,5 @@
       const list=body.querySelector('#v141RecList'),search=body.querySelector('#v141RecQ'),status=body.querySelector('#v141MailStatus');search.oninput=()=>{const t=V141N(search.value);list.querySelectorAll('.v141-rec').forEach(x=>x.style.display=!t||String(x.dataset.search||'').includes(t)?'flex':'none')};body.querySelector('#v141RecClear').onclick=()=>list.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);body.querySelector('#v141RecTarget').onclick=()=>{list.querySelectorAll('.v141-rec').forEach(x=>{const t=V141N(x.textContent);x.querySelector('input').checked=/PAGADOR|ADMIN|GERENTE/.test(t)})};body.querySelector('#v141ManualAdd').onclick=()=>{const input=body.querySelector('#v141Manual'),em=String(input.value||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){status.textContent='Correo manual inválido.';return}const lab=document.createElement('label');lab.className='v141-rec';lab.innerHTML=`<input type="checkbox" data-mail="${V141E(em)}" checked><span><b>${V141E(em)}</b><small>Manual</small></span>`;list.prepend(lab);input.value=''};body.querySelector('#v141MailCancel').onclick=closeMail141;body.querySelector('#v141MailSend').onclick=async()=>{const to=[...list.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.dataset.mail).filter(Boolean);if(!to.length){status.textContent='Selecciona al menos un destinatario.';return}if(!confirm(`Enviar reporte de Cupos ATTT a ${to.length} destinatario(s)?`))return;const btn=body.querySelector('#v141MailSend');btn.disabled=true;status.textContent='Generando Excel y enviando...';try{const r=await req('/functions/v1/control-auto-cupos-attt-email',{method:'POST',body:JSON.stringify({action:'SEND',to})});if(!r.data?.ok)throw Error(r.data?.error||'No se pudo enviar');status.textContent=`Enviado correctamente a ${to.length} destinatario(s).`;btn.textContent='Enviado ✓'}catch(e){status.textContent=e.message||String(e);btn.disabled=false}};
     }catch(e){modal.querySelector('#v141MailBody').innerHTML=`<div class="alert">${V141E(e.message||e)}</div>`}
   }
-  const cuposBase=window.v94ControlCuposATTT;
-  if(typeof cuposBase==='function')window.v94ControlCuposATTT=async function(...args){const r=await cuposBase.apply(this,args);try{if(role141()==='ADMIN_TOTAL'){const hero=document.querySelector('.v94-cupos-hero');if(hero&&!hero.querySelector('#v141CuposMailBtn')){const b=document.createElement('button');b.id='v141CuposMailBtn';b.className='v141-mail-btn';b.textContent='Enviar reporte';b.onclick=cuposMail141;hero.appendChild(b)}}}catch(_){}heartbeat141();return r};
+  (window.__RYM_CONTROL_PENDING_AFTER__ ||= []).push(['cupos',async function(){try{if(role141()==='ADMIN_TOTAL'){const hero=document.querySelector('.v94-cupos-hero');if(hero&&!hero.querySelector('#v141CuposMailBtn')){const b=document.createElement('button');b.id='v141CuposMailBtn';b.className='v141-mail-btn';b.textContent='Enviar reporte';b.onclick=cuposMail141;hero.appendChild(b)}}}catch(_){}heartbeat141()}]);
 })();
