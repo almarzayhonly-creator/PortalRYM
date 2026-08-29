@@ -3,6 +3,7 @@ import path from 'node:path';
 import {parse} from 'acorn';
 import {generate} from 'astring';
 
+const MIGRATOR_VERSION='1.0';
 const root=process.cwd();
 const routeMap={v11UnitList:'unidades',v94ControlCuposATTT:'cupos',v75ControlDashboard:'dashboard',v75ControlAudit:'auditoria',v80OpenEcarValidator:'validador'};
 function targetOf(left){
@@ -40,4 +41,4 @@ for(const domain of ['control-auto','panapass','revisados','core']){
     replacements.sort((a,b)=>b.start-a.start);let out=src;for(const r of replacements)out=out.slice(0,r.start)+r.code+out.slice(r.end);fs.writeFileSync(p,out);console.log('migrated',domain,file,replacements.length);
   }
 }
-console.log('Control route assignments migrated:',total);
+console.log('Control route assignments migrated:',total,MIGRATOR_VERSION);
