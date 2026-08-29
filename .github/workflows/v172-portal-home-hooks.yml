@@ -1,0 +1,54 @@
+name: V172 Portal Home hooks
+on:
+  push:
+    branches: [v172-clean]
+    paths:
+      - 'tools/v172_portal_home_hooks.mjs'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v172-clean
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install --no-save acorn
+      - run: node tools/v172_portal_home_hooks.mjs
+      - name: Update canonical callers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('modules/core/portal-module.js');s=p.read_text();s=s.replace("if(typeof w.v36PortalHome!=='function')throw new Error('Portal home renderer unavailable');\n     const out=await w.v36PortalHome();","if(!w.RYM_PORTAL_HOME||typeof w.RYM_PORTAL_HOME.open!=='function')throw new Error('Portal home renderer unavailable');\n     const out=await w.RYM_PORTAL_HOME.open();");p.write_text(s)
+          for f in ['modules/panapass/router.js','modules/control-auto/router.js']:
+              p=Path(f);s=p.read_text();
+              if f.endswith('panapass/router.js'):
+                  old="    const home=legacyFn('v36PortalHome');\n    if(home){await home.call(w);return true}\n    return w.RYM_ROUTER?.home?.()||false;"
+                  s=s.replace(old,"    return w.RYM_ROUTER?.home?.()||false;")
+              else:
+                  old="    if(typeof w.v36PortalHome==='function'){\n      await w.v36PortalHome();\n      return true;\n    }\n    return w.RYM_ROUTER?.home?.()||false;"
+                  s=s.replace(old,"    return w.RYM_ROUTER?.home?.()||false;")
+              p.write_text(s)
+          PY
+      - name: Validate
+        run: |
+          node --check modules/core/portal-home.js
+          node --check modules/core/portal-module.js
+          node --check modules/panapass/router.js
+          node --check modules/control-auto/router.js
+          find modules -type f -path '*/runtime/*.js' -print0 | xargs -0 -n1 node --check
+          grep -Fq 'rym-v172-portal-home' index.html
+          ! grep -R -F 'window.v36PortalHome=async function' modules/*/runtime || false
+          ! grep -R -F 'window.v36PortalHome=function' modules/*/runtime || false
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html modules
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'V172 clean: replace Portal Home overrides with canonical composition'
+          git push origin HEAD:v172-clean
