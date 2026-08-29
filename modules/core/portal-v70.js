@@ -13,7 +13,7 @@
   function cleanBody(){document.body.classList.remove('capture-mode','v36-admin-total','v37-control-only','v38-revisados-only','v60-revisados','v63-revisados','v66-revisados','v70-control','v70-admin');document.body.classList.add('v70-portal')}
   function role70(){return String(state.profile?.rol||'').trim().toUpperCase()}
   function card(cls,icon,title,desc,id){return `<article class="v70-project ${cls}"><div class="v70-icon">${icon}</div><h2>${esc(title)}</h2><p>${esc(desc)}</p><div class="v70-actions"><span class="v70-status">Disponible</span><button id="${id}">Abrir</button></div></article>`}
-  window.v36PortalHome=function(){
+  (window.__RYM_PORTAL_HOME_PENDING_AROUND__ ||= []).push(function(next,args,ctx){const impl=function(){
     rememberModules();cleanBody();
     const mods=allModules(),r=role70(),cards=[];
     if(mods.includes('portal.panapass')||panModules().length)cards.push(card('pan','P','Panapass','Negativos, pagos, historial, recurrentes, rankings, reportes y operación diaria.','v70Pan'));
@@ -23,14 +23,14 @@
     const name=state.profile?.nombre||state.profile?.email||'Usuario';
     app.innerHTML=`<main class="v70-home"><section class="v70-wrap"><header class="v70-head"><div class="v70-brand"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM" onerror="this.style.display='none'"><div><h1>Portal RYM</h1><p>Selecciona el sistema que deseas utilizar.</p></div></div><div class="v70-user"><b>${esc(name)}</b><span>${esc(r)}</span><button id="v70Logout">Salir</button></div></header><div class="v70-projects">${cards.join('')||'<div class="v70-empty">No tienes módulos habilitados.</div>'}</div></section></main>`;
     document.querySelector('#v70Logout').onclick=()=>{clearSession();loginView()};
-    document.querySelector('#v70Pan')?.addEventListener('click',window.v70OpenPanapass);
-    document.querySelector('#v70Control')?.addEventListener('click',window.v70OpenControl);
-    document.querySelector('#v70Rev')?.addEventListener('click',()=>window.v60OpenRevisados?window.v60OpenRevisados():null);
-    document.querySelector('#v70Users')?.addEventListener('click',window.v70OpenUsers);
+    document.querySelector('#v70Pan')?.addEventListener('click',()=>window.RYM_ROUTER?.open('panapass'));
+    document.querySelector('#v70Control')?.addEventListener('click',()=>window.RYM_ROUTER?.open('control-auto'));
+    document.querySelector('#v70Rev')?.addEventListener('click',()=>window.RYM_ROUTER?.open('revisados'));
+    document.querySelector('#v70Users')?.addEventListener('click',()=>window.RYM_ROUTER?.open('usuarios'));
     if(mods.includes('portal.revisados')&&window.v66PrefetchRevisados){const warm=()=>window.v66PrefetchRevisados();if('requestIdleCallback' in window)requestIdleCallback(warm,{timeout:1800});else setTimeout(warm,900)}
-  };
-  window.v70OpenPanapass=async function(){rememberModules();document.body.classList.remove('v70-portal','v70-control','v70-admin');state.modules=panModules();state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');shell();try{await render()}catch(e){const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`}};
-  window.v70OpenControl=async function(){rememberModules();if(!(rymHasModule('portal.control_auto')||rymHasModule('control_auto.unidades')))return;document.body.classList.remove('v70-portal','v70-admin');document.body.classList.add('v70-control');state.modules=['dashboard'];state.active='dashboard';try{await v11UnitList();document.body.classList.add('v70-control');const n=document.querySelector('[data-m="dashboard"]');if(n)n.textContent='Unidades';const t=document.querySelector('.top h1');if(t)t.textContent='Control de Auto';const k=document.querySelector('.portal-kicker');if(k)k.textContent='Portal RYM · Control de Auto'}catch(e){app.innerHTML=`<div class="alert">${esc(e.message||e)}</div><button onclick="v36PortalHome()">Volver al Portal</button>`}};
+  };return impl.apply(ctx.thisArg,args)});
+  window.v70OpenPanapass=()=>window.RYM_ROUTER?.open('panapass');
+  window.v70OpenControl=()=>window.RYM_ROUTER?.open('control-auto');
 
   if(state.token&&state.profile){rememberModules();phase2NormalizeModules();v36PortalHome()}
 })();
