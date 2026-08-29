@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {parse} from 'acorn';
 
+const AUDIT_VERSION='1.0';
 const root=process.cwd();
 const targets=new Set(['phase6ConsultarSaldoENA','phase6OpenUnit','phase10RenderSaldo','phase31EnhanceSaldoButtons','wa18Attach','wa18Run','wa18BuildPay','wa18BuildNeg','v75Recorrido','v87BajasPanapass','v94ControlCuposATTT','rymPrefetchRevisados','dashboard','render','pagosTrabajo','pagosTrabajoTable','reportes','usuarios','v11UnitList']);
 function nameOf(left){if(left?.type==='Identifier')return left.name;if(left?.type==='MemberExpression'&&!left.computed&&left.object?.type==='Identifier'&&left.object.name==='window'&&left.property?.type==='Identifier')return left.property.name;return null}
@@ -16,6 +17,6 @@ for(const domain of fs.readdirSync(path.join(root,'modules'))){
 }
 rows.sort((a,b)=>a.order-b.order||a.start-b.start);
 const grouped={};for(const r of rows)(grouped[r.target]??=[]).push(r);
-const report={targets:{}};for(const [t,a] of Object.entries(grouped))report.targets[t]={count:a.length,effective:a[a.length-1],definitions:a};
+const report={audit_version:AUDIT_VERSION,targets:{}};for(const [t,a] of Object.entries(grouped))report.targets[t]={count:a.length,effective:a[a.length-1],definitions:a};
 fs.writeFileSync(path.join(root,'docs/arquitectura/V172_EFFECTIVE_OWNERS.json'),JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
