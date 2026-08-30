@@ -3843,6 +3843,7 @@ body.v70-admin{margin:0;background:#eef3f8!important;color:#17233d}.v70-admin-ap
     if(mods.includes('portal.panapass')||panModules().length)cards.push(card('pan','P','Panapass','Negativos, pagos, historial, recurrentes, rankings, reportes y operación diaria.','v70Pan'));
     if(mods.includes('portal.control_auto')||mods.includes('control_auto.unidades'))cards.push(card('control','C','Control de Auto','Consulta centralizada de unidades, estatus, placas, Panapass, TAG, empresa y supervisora.','v70Control'));
     if(mods.includes('portal.revisados'))cards.push(card('rev','R','Revisados','Control legal vehicular, operación, avance, historial, estadísticas, boletas y cupos según permisos.','v70Rev'));
+    if(mods.includes('portal.validador')||(r==='ADMIN_TOTAL'&&/\.workers\.dev$/i.test(location.hostname)&&new URLSearchParams(location.search).has('v172')))cards.push(card('validator','V','Validador de unidad','Control de Auto, Revisados, Panapass y GPS en una validación consolidada.','v70Validator'));
     if(r==='ADMIN_TOTAL'&&mods.includes('admin.usuarios'))cards.push(card('admin','U','Administración RYM','Usuarios, perfiles, galeras y permisos separados por proyecto y módulo.','v70Users'));
     const name=state.profile?.nombre||state.profile?.email||'Usuario';
     app.innerHTML=`<main class="v70-home"><section class="v70-wrap"><header class="v70-head"><div class="v70-brand"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM" onerror="this.style.display='none'"><div><h1>Portal RYM</h1><p>Selecciona el sistema que deseas utilizar.</p></div></div><div class="v70-user"><b>${esc(name)}</b><span>${esc(r)}</span><button id="v70Logout">Salir</button></div></header><div class="v70-projects">${cards.join('')||'<div class="v70-empty">No tienes módulos habilitados.</div>'}</div></section></main>`;
@@ -3851,6 +3852,7 @@ body.v70-admin{margin:0;background:#eef3f8!important;color:#17233d}.v70-admin-ap
     document.querySelector('#v70Control')?.addEventListener('click',window.v70OpenControl);
     document.querySelector('#v70Rev')?.addEventListener('click',()=>window.v60OpenRevisados?window.v60OpenRevisados():null);
     document.querySelector('#v70Users')?.addEventListener('click',window.v70OpenUsers);
+    document.querySelector('#v70Validator')?.addEventListener('click',()=>{state.modules=['portal.validador'];state.active='portal.validador';shell();render()});
     if(mods.includes('portal.revisados')&&window.v66PrefetchRevisados){const warm=()=>window.v66PrefetchRevisados();if('requestIdleCallback' in window)requestIdleCallback(warm,{timeout:1800});else setTimeout(warm,900)}
   };
   window.v70OpenPanapass=async function(){rememberModules();document.body.classList.remove('v70-portal','v70-control','v70-admin');state.modules=panModules();state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');shell();try{await render()}catch(e){const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`}};
