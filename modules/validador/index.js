@@ -60,6 +60,12 @@
     host.querySelector('#rymValidatorBack').onclick=()=>{d.body.classList.remove('v172-validator');w.v36PortalHome?.()};
     if(seed){input.value=typeof seed==='string'?seed:unitOf(seed);await run(seed)}else input.focus();
   }
-  w.RYM_VALIDATOR=Object.freeze({canAccess,validate,open,search:q=>w.RYM_VALIDATOR_SERVICES.search(q)});
+  async function enter(seed){
+    if(!canAccess())throw Error('No tienes permiso para usar el Validador.');
+    w.state.modules=['portal.validador'];w.state.active='portal.validador';
+    if(typeof w.shell==='function')w.shell();
+    return open(seed);
+  }
+  w.RYM_VALIDATOR=Object.freeze({canAccess,validate,open,enter,search:q=>w.RYM_VALIDATOR_SERVICES.search(q)});
   w.RYM_MODULES.register('validador',{open});
 })(window,document);
