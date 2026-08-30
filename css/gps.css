@@ -1,3 +1,14 @@
 body[data-rym-module="gps"]{--rym-accent:var(--rym-gps)}
 body[data-rym-module="gps"] .rym-module-accent{color:var(--rym-accent)}
 body[data-rym-module="gps"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
+
+/* V172 visual-only refinement. */
+body[data-rym-module="gps"]{background:#f5f4fb!important;color:#25233d}
+body[data-rym-module="gps"] .card,body[data-rym-module="gps"] .kpi,body[data-rym-module="gps"] .panel{border-radius:16px!important;border-color:#e1dff0!important;box-shadow:0 7px 20px rgba(65,53,126,.07)!important}
+body[data-rym-module="gps"] .kpi{position:relative;overflow:hidden;background:linear-gradient(145deg,#fff,#faf9ff)!important}
+body[data-rym-module="gps"] .kpi:after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#6b5ac7}
+body[data-rym-module="gps"] th{background:#f3f1fb!important;color:#625c82!important;font-size:10px!important;letter-spacing:.045em;text-transform:uppercase}
+body[data-rym-module="gps"] td{border-color:#ebe9f4!important}
+body[data-rym-module="gps"] tbody tr:hover{background:#f7f5ff!important}
+body[data-rym-module="gps"] input,body[data-rym-module="gps"] select{border-color:#d8d4e9!important;border-radius:10px!important;background:#fff!important}
+@media(max-width:760px){body[data-rym-module="gps"] .card,body[data-rym-module="gps"] .kpi,body[data-rym-module="gps"] .panel{border-radius:14px!important}body[data-rym-module="gps"] input,body[data-rym-module="gps"] select,body[data-rym-module="gps"] button{min-height:44px}}
