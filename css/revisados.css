@@ -1,3 +1,14 @@
 body[data-rym-module="revisados"]{--rym-accent:var(--rym-revisados)}
 body[data-rym-module="revisados"] .rym-module-accent{color:var(--rym-accent)}
 body[data-rym-module="revisados"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
+
+/* V172 visual-only refinement. */
+body[data-rym-module="revisados"]{background:#fbf6f0!important;color:#35291f}
+body[data-rym-module="revisados"] .card,body[data-rym-module="revisados"] .kpi,body[data-rym-module="revisados"] .panel{border-radius:16px!important;border-color:#eedfce!important;box-shadow:0 7px 20px rgba(111,67,24,.065)!important}
+body[data-rym-module="revisados"] .kpi{position:relative;overflow:hidden;background:linear-gradient(145deg,#fff,#fffaf5)!important}
+body[data-rym-module="revisados"] .kpi:after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#e8872c}
+body[data-rym-module="revisados"] th{background:#fcf2e8!important;color:#765b43!important;font-size:10px!important;letter-spacing:.045em;text-transform:uppercase}
+body[data-rym-module="revisados"] td{border-color:#f1e6da!important}
+body[data-rym-module="revisados"] tbody tr:hover{background:#fff8f1!important}
+body[data-rym-module="revisados"] input,body[data-rym-module="revisados"] select{border-color:#e4d5c5!important;border-radius:10px!important;background:#fff!important}
+@media(max-width:760px){body[data-rym-module="revisados"] .card,body[data-rym-module="revisados"] .kpi,body[data-rym-module="revisados"] .panel{border-radius:14px!important}body[data-rym-module="revisados"] input,body[data-rym-module="revisados"] select,body[data-rym-module="revisados"] button{min-height:44px}}
