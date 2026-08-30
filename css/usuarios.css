@@ -1,3 +1,11 @@
-body[data-rym-module="usuarios"]{--rym-accent:#7c3aed}
+body[data-rym-module="usuarios"]{--rym-accent:#7c3aed;background:#f7f5fb!important;color:#2b2540}
 body[data-rym-module="usuarios"] .rym-module-accent{color:var(--rym-accent)}
 body[data-rym-module="usuarios"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
+
+/* V172 visual-only Usuarios refinement. */
+body[data-rym-module="usuarios"] .card,body[data-rym-module="usuarios"] .kpi,body[data-rym-module="usuarios"] .panel{border-radius:16px!important;border-color:#e5def1!important;box-shadow:0 7px 20px rgba(73,49,112,.06)!important}
+body[data-rym-module="usuarios"] th{background:#f4f0fa!important;color:#675b79!important;font-size:10px!important;letter-spacing:.045em;text-transform:uppercase}
+body[data-rym-module="usuarios"] td{border-color:#ece7f3!important}
+body[data-rym-module="usuarios"] tbody tr:hover{background:#faf7ff!important}
+body[data-rym-module="usuarios"] input,body[data-rym-module="usuarios"] select{border-color:#ddd5e9!important;border-radius:10px!important;background:#fff!important}
+@media(max-width:760px){body[data-rym-module="usuarios"] .card,body[data-rym-module="usuarios"] .kpi,body[data-rym-module="usuarios"] .panel{border-radius:14px!important}body[data-rym-module="usuarios"] input,body[data-rym-module="usuarios"] select,body[data-rym-module="usuarios"] button{min-height:44px}}
