@@ -1,6 +1,20 @@
-:root{--rym-radius:14px;--rym-gap:16px;--rym-shadow:0 8px 24px rgba(0,0,0,.08);--rym-panapass:#2563eb;--rym-revisados:#f97316;--rym-control:#16a34a;--rym-gps:#0f766e;--rym-text:#0f172a;--rym-muted:#64748b;--rym-bg:#f8fafc}
+:root{--rym-radius:16px;--rym-gap:16px;--rym-shadow:0 8px 24px rgba(25,45,72,.08);--rym-panapass:#2563eb;--rym-revisados:#f97316;--rym-control:#16a34a;--rym-gps:#675bc8;--rym-text:#142238;--rym-muted:#64748b;--rym-bg:#f4f7fb;--rym-line:#dce5ef;--rym-surface:#fff}
 .rym-module-root{color:var(--rym-text)}
 .rym-card{border-radius:var(--rym-radius);box-shadow:var(--rym-shadow)}
 .rym-grid{display:grid;gap:var(--rym-gap)}
 .rym-muted{color:var(--rym-muted)}
-@media(max-width:768px){.rym-grid{grid-template-columns:1fr!important}.rym-card{border-radius:12px}}
+
+/* V172 global presentation layer: visual only, no behavior selectors. */
+html{scroll-behavior:smooth}
+body{font-feature-settings:"kern" 1,"liga" 1;text-rendering:optimizeLegibility}
+button,input,select,textarea{font:inherit}
+button{transition:transform .14s ease,box-shadow .14s ease,filter .14s ease}
+button:not(:disabled):active{transform:translateY(1px)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid rgba(37,99,235,.2);outline-offset:2px}
+.table-wrap{scrollbar-width:thin;scrollbar-color:#bdcad8 transparent}
+table{border-collapse:separate;border-spacing:0}
+th{font-weight:850}
+.badge,.pill,.chip{white-space:nowrap}
+
+@media(max-width:768px){.rym-grid{grid-template-columns:1fr!important}.rym-card{border-radius:14px}button,input,select{min-height:44px}.table-wrap{-webkit-overflow-scrolling:touch}body{overflow-x:hidden}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
