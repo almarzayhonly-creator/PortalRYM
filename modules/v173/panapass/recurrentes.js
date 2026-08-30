@@ -30,5 +30,5 @@
     return Object.freeze({ mode, count:filtered.length, critical:filtered.filter(r=>norm(r.nivel)==='CRITICO').length, total:filtered.reduce((a,r)=>a+r.total,0), page, pages, pageSize, rows:Object.freeze(filtered.slice((page-1)*pageSize,page*pageSize)) });
   }
 
-  app.register('panapass-recurrentes-v173', { monthRange, load, model });
+  app.register('panapass-recurrentes', { monthRange, load, model });
 })();
