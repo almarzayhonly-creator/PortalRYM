@@ -4,12 +4,13 @@ import assert from 'node:assert/strict';
 
 const read=p=>fs.readFileSync(p,'utf8');
 const html=read('index.html');
-for(const asset of ['core/api.js','core/permissions.js','core/auth.js','login/index.js','panapass/ranking.js','panapass/recurrentes.js','panapass/bajas.js','panapass/index.js']) assert.ok(html.includes('/modules/v173/'+asset),`missing asset ${asset}`);
+for(const asset of ['core/api.js','core/permissions.js','core/auth.js','login/index.js','panapass/dashboard.js','panapass/negativos.js','panapass/pagos.js','panapass/historial.js','panapass/ranking.js','panapass/recurrentes.js','panapass/bajas.js','panapass/index.js']) assert.ok(html.includes('/modules/v173/'+asset),`missing asset ${asset}`);
+assert.ok(html.includes('/css/v173/panapass.css'),'Panapass stylesheet missing');
 assert.ok(html.indexOf('/modules/v173/core/api.js')<html.indexOf('/modules/v173/core/auth.js'),'api must load before auth');
 assert.ok(html.indexOf('/modules/v173/core/rpc-adapter.js')<html.indexOf('/modules/v173/core/auth.js'),'rpc adapter must load before auth');
 assert.ok(html.indexOf('/modules/v173/panapass/ranking.js')<html.indexOf('/modules/v173/panapass/index.js'),'features must load before Panapass shell');
 
-const files=['modules/v173/bootstrap.js','modules/v173/core/index.js','modules/v173/core/api.js','modules/v173/core/permissions.js','modules/v173/core/auth.js','modules/v173/core/rpc-adapter.js','modules/v173/core/router.js','modules/v173/login/index.js','modules/v173/portal/index.js','modules/v173/panapass/contracts.js','modules/v173/panapass/ranking.js','modules/v173/panapass/recurrentes.js','modules/v173/panapass/bajas.js','modules/v173/panapass/index.js'];
+const files=['modules/v173/bootstrap.js','modules/v173/core/index.js','modules/v173/core/api.js','modules/v173/core/permissions.js','modules/v173/core/auth.js','modules/v173/core/rpc-adapter.js','modules/v173/core/router.js','modules/v173/login/index.js','modules/v173/portal/index.js','modules/v173/panapass/contracts.js','modules/v173/panapass/dashboard.js','modules/v173/panapass/negativos.js','modules/v173/panapass/pagos.js','modules/v173/panapass/historial.js','modules/v173/panapass/ranking.js','modules/v173/panapass/recurrentes.js','modules/v173/panapass/bajas.js','modules/v173/panapass/index.js'];
 for(const f of files)new vm.Script(read(f),{filename:f});
 
 const login=read('modules/v173/login/index.js');
@@ -21,10 +22,20 @@ assert.ok(!pan.includes("document.querySelector('#app') || document.body"),'lega
 const core=read('modules/v173/core/index.js');
 assert.ok(core.includes("activate('login')"),'startup must gate on login');
 assert.ok(!core.includes("()=>bootPortal().catch"),'startup must not open portal unconditionally');
+const rpcAdapter=read('modules/v173/core/rpc-adapter.js');
+assert.ok(rpcAdapter.includes("registry?.get('api')"),'RPC adapter must use the native API client');
+assert.ok(rpcAdapter.includes("'api-client'"),'RPC adapter status must expose native provider');
 const ranking=read('modules/v173/panapass/ranking.js');
 assert.match(ranking,/rpc\(\)\.call\(contracts\(\)\.sources\.ranking,\s*\{\s*p_periodo\s*:\s*p\s*\}\s*\)/,'ranking RPC contract changed');
 const recurrentes=read('modules/v173/panapass/recurrentes.js');
 assert.match(recurrentes,/p_limit\s*:\s*2000/,'recurrentes max load changed');
 const bajas=read('modules/v173/panapass/bajas.js');
 assert.ok(bajas.includes('Transferencia de saldo por baja de Panapass - placa'),'ENA motive contract changed');
+const negativos=read('modules/v173/panapass/negativos.js');
+assert.ok(negativos.includes('panapass-contracts'),'Negativos must use native contracts');
+assert.match(negativos,/p_fecha\s*:/,'Negativos date contract missing');
+const pagos=read('modules/v173/panapass/pagos.js');
+assert.match(pagos,/p_supervisora_id\s*:/,'Pagos scope contract missing');
+const historial=read('modules/v173/panapass/historial.js');
+assert.ok(historial.includes('p_page_size'),'Historial pagination contract missing');
 console.log('V173 smoke contract OK');

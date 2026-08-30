@@ -3,6 +3,10 @@
   if (!window.RYM173) throw new Error('V173 bootstrap missing');
 
   const tabs = Object.freeze([
+    ['dashboard','Dashboard'],
+    ['negativos','Negativos'],
+    ['pagos','Pagos'],
+    ['historial','Historial'],
     ['ranking','Ranking'],
     ['recurrentes','Recurrentes'],
     ['bajas','Bajas']
@@ -19,7 +23,9 @@
     const view=root.querySelector('[data-panapass-view]');
     view.innerHTML='<div class="v173-loading">Cargando…</div>';
     try {
-      if(name==='ranking'){
+      if(feature.render){
+        await feature.render(view,{...context,openTab:tab=>openTab(tab,root,context)});
+      } else if(name==='ranking'){
         const rows=await feature.load(context.rankingPeriod||'DIA');
         const m=feature.model(rows,{metric:context.rankingMetric||'unidades',galera:context.galera||'TODAS'});
         view.innerHTML=`<section class="v173-panel"><header><h2>Ranking Panapass</h2><p>Menor resultado = mejor posicion.</p></header><div class="v173-ranking-list">${m.rows.map(r=>`<article><strong>#${r.posicion}</strong><span><b>${esc(r.supervisora)}</b><small>${esc(r.galera)}</small></span><span>${r.unidades} unid.<small>B/. ${Number(r.monto).toFixed(2)}</small></span></article>`).join('')||'<p>Sin datos.</p>'}</div></section>`;
@@ -43,7 +49,7 @@
     root.innerHTML=`<section class="v173-panapass"><header class="v173-panapass-head"><button type="button" data-panapass-back>← Portal</button><div><span>RYM · Panapass</span><h1>Control Panapass</h1></div></header><nav class="v173-panapass-tabs" aria-label="Panapass">${tabs.map(([id,label])=>`<button type="button" data-panapass-tab="${id}">${label}</button>`).join('')}</nav><main data-panapass-view></main></section>`;
     root.querySelector('[data-panapass-back]').onclick=()=>window.RYM173.registry.get('router')?.go('portal');
     root.querySelectorAll('[data-panapass-tab]').forEach(b=>b.onclick=()=>openTab(b.dataset.panapassTab,root,context));
-    await openTab(context.tab||'ranking',root,context);
+    await openTab(context.tab||'dashboard',root,context);
   }
 
   async function unmount(){if(document.body.dataset.rymModule==='panapass')delete document.body.dataset.rymModule;}

@@ -12,6 +12,8 @@
   function resolveProvider() {
     if (provider) return provider;
     if (typeof window.rpc === 'function') return window.rpc;
+    const api = window.RYM173?.registry?.get('api');
+    if (typeof api?.rpc === 'function') return (name, params) => api.rpc(name, params);
     return null;
   }
 
@@ -22,7 +24,8 @@
   }
 
   function status() {
-    return Object.freeze({ available: !!resolveProvider(), source: provider ? 'v173' : (typeof window.rpc === 'function' ? 'legacy-adapter' : 'none') });
+    const apiAvailable = typeof window.RYM173?.registry?.get('api')?.rpc === 'function';
+    return Object.freeze({ available: !!resolveProvider(), source: provider ? 'v173' : (typeof window.rpc === 'function' ? 'legacy-adapter' : (apiAvailable ? 'api-client' : 'none')) });
   }
 
   window.RYM173.register('rpc', { call, setProvider, status });

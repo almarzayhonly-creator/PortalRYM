@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: 24
       - name: V173 static smoke contracts
-        run: node qa/v173/smoke-contract.mjs
+        run: |
+          node qa/v173/smoke-contract.mjs
+          node qa/v173/panapass-native-contract.mjs
       - name: Deploy isolated V173 preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

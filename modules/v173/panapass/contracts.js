@@ -3,6 +3,12 @@
   if (!window.RYM173) throw new Error('V173 bootstrap missing');
 
   const sources = Object.freeze({
+    dashboard: 'dashboard_resumen',
+    galeras: 'panapass_dashboard_galeras',
+    negativos: 'panapass_negativos_fecha_v2',
+    pagos: 'panapass_pagos_fecha_v2',
+    historialResumen: 'panapass_historial_resumen_v2',
+    historialLista: 'panapass_historial_lista_v2',
     ranking: 'panapass_ranking_pagos',
     recurrentes: 'panapass_recurrentes_entidad',
     bajas: 'panapass_bajas_listar_v5'
@@ -10,6 +16,59 @@
 
   const text = v => String(v ?? '').trim();
   const number = v => Number.isFinite(Number(v)) ? Number(v) : 0;
+
+  function dashboardRow(row = {}) {
+    return Object.freeze({
+      fecha: text(row.fecha),
+      unidades: Math.max(0, number(row.unidades_visibles)),
+      negativos: Math.max(0, number(row.negativos_hoy)),
+      pagos: Math.max(0, number(row.pagos_hoy)),
+      recurrentes: Math.max(0, number(row.recurrentes_mes)),
+      montoMes: number(row.monto_pagos_mes)
+    });
+  }
+
+  function galeraRow(row = {}) {
+    return Object.freeze({
+      galera: text(row.galera),
+      unidades: Math.max(0, number(row.unidades)),
+      negativos: Math.max(0, number(row.negativos)),
+      pagadas: Math.max(0, number(row.unidades_pagadas)),
+      saldoNegativo: number(row.saldo_negativo),
+      montoPagado: number(row.monto_pagado)
+    });
+  }
+
+  function negativoRow(row = {}) {
+    return Object.freeze({
+      fecha: text(row.fecha), status: text(row.status), unidad: text(row.unidad),
+      placa: text(row.placa), panapass: text(row.panapass_numero ?? row.panapass),
+      galera: text(row.galera), supervisora: text(row.supervisora),
+      empresa: text(row.empresa), neg7: Math.max(0, number(row.neg7)), saldo: number(row.saldo)
+    });
+  }
+
+  function pagoRow(row = {}) {
+    return Object.freeze({
+      fecha: text(row.fecha), unidad: text(row.unidad),
+      panapass: text(row.panapass_numero ?? row.panapass), galera: text(row.galera),
+      supervisora: text(row.supervisora), empresa: text(row.empresa),
+      aPagar: number(row.a_pagar), boleta: number(row.boleta),
+      pag7: Math.max(0, number(row.pag7)), nOp: text(row.n_op),
+      operador: text(row.operador), cobrador: text(row.cobrador),
+      tipo: text(row.tipo), estadoCobra: text(row.estado_cobra)
+    });
+  }
+
+  function historialResumen(row = {}) {
+    return Object.freeze({
+      registros: Math.max(0, number(row.registros)),
+      unidades: Math.max(0, number(row.unidades)),
+      total: number(row.total_a_pagar),
+      pendiente: number(row.monto_pendiente),
+      revisar: Math.max(0, number(row.revisar))
+    });
+  }
 
   function rankingRow(row = {}) {
     return Object.freeze({
@@ -50,5 +109,8 @@
     return 'SIN_TAG_ACTIVO';
   }
 
-  window.RYM173.register('panapass-contracts', { sources, rankingRow, recurrenteRow, bajaRow, bajaStatus });
+  window.RYM173.register('panapass-contracts', {
+    sources, dashboardRow, galeraRow, negativoRow, pagoRow, historialResumen,
+    rankingRow, recurrenteRow, bajaRow, bajaStatus
+  });
 })();
