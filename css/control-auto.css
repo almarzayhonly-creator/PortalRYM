@@ -1,3 +1,17 @@
 body[data-rym-module="control-auto"]{--rym-accent:var(--rym-control)}
 body[data-rym-module="control-auto"] .rym-module-accent{color:var(--rym-accent)}
 body[data-rym-module="control-auto"] .rym-module-accent-bg{background:var(--rym-accent);color:#fff}
+
+/* V172 visual-only refinement — preserves existing markup, handlers and data logic. */
+body[data-rym-module="control-auto"]{background:#f3f7f5!important;color:#17332a}
+body[data-rym-module="control-auto"] .topbar,body[data-rym-module="control-auto"] .toolbar,body[data-rym-module="control-auto"] .filters{background:#fff;border-color:#dce8e2!important}
+body[data-rym-module="control-auto"] .card,body[data-rym-module="control-auto"] .kpi,body[data-rym-module="control-auto"] .panel{border-radius:16px!important;border-color:#dce8e2!important;box-shadow:0 7px 20px rgba(28,78,59,.06)!important}
+body[data-rym-module="control-auto"] .kpi{position:relative;overflow:hidden;background:linear-gradient(145deg,#fff,#f8fcfa)!important}
+body[data-rym-module="control-auto"] .kpi:after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#25936b}
+body[data-rym-module="control-auto"] table{background:#fff}
+body[data-rym-module="control-auto"] th{background:#f0f7f4!important;color:#45675a!important;font-size:10px!important;letter-spacing:.045em;text-transform:uppercase}
+body[data-rym-module="control-auto"] td{border-color:#e7efeb!important}
+body[data-rym-module="control-auto"] tbody tr:hover{background:#f4faf7!important}
+body[data-rym-module="control-auto"] input,body[data-rym-module="control-auto"] select{border-color:#cfddd6!important;border-radius:10px!important;background:#fff!important}
+body[data-rym-module="control-auto"] button.active{box-shadow:0 5px 13px rgba(26,117,82,.16)}
+@media(max-width:760px){body[data-rym-module="control-auto"] .card,body[data-rym-module="control-auto"] .kpi,body[data-rym-module="control-auto"] .panel{border-radius:14px!important}body[data-rym-module="control-auto"] .toolbar,body[data-rym-module="control-auto"] .filters{gap:8px!important}body[data-rym-module="control-auto"] input,body[data-rym-module="control-auto"] select,body[data-rym-module="control-auto"] button{min-height:44px}}
