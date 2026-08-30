@@ -1,0 +1,47 @@
+name: V173 Panapass isolated preview
+on:
+  push:
+    branches: [v173-panapass-native]
+permissions:
+  contents: read
+concurrency:
+  group: v173-panapass-preview
+  cancel-in-progress: true
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: V173 static smoke contracts
+        run: node qa/v173/smoke-contract.mjs
+      - name: Deploy isolated V173 preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx --yes wrangler@latest versions upload --preview-alias v173-panapass
+      - name: Verify V173 public shell and assets
+        run: |
+          URL='https://v173-panapass-portal-ena-rym.almarzayhonly.workers.dev'
+          ok=0
+          for i in 1 2 3 4 5; do
+            stamp="$(date +%s)"
+            if curl -fsSL --max-time 20 "$URL/?v173=$stamp" -o /tmp/index \
+              && curl -fsSL --max-time 20 "$URL/modules/v173/core/auth.js?v173=$stamp" -o /tmp/auth \
+              && curl -fsSL --max-time 20 "$URL/modules/v173/panapass/index.js?v173=$stamp" -o /tmp/pan \
+              && grep -Fq 'Portal RYM · V173' /tmp/index \
+              && grep -Fq "app.register('auth'" /tmp/auth \
+              && grep -Fq "register('panapass'" /tmp/pan; then
+              ok=1
+              break
+            fi
+            sleep 4
+          done
+          test "$ok" -eq 1
+          echo "V173 preview verified: $URL"
