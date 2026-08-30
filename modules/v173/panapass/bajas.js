@@ -25,11 +25,13 @@
     return Object.freeze({ unidades:list.length, pendientes:actionable.length, tags:actionable.reduce((a,r)=>a+r.cantidadTags,0), saldo:actionable.reduce((a,r)=>a+r.saldo,0), revisionAdmin:list.filter(r=>r.alertaAdmin).length, devolucion:actionable.filter(r=>r.saldo>0).length });
   }
 
+  function status(row) { return contracts().bajaStatus(row); }
+
   function enaContext(row, extra = {}) {
     const r=contracts().bajaRow(row);
     if (!r.unidad || !r.placa || !r.panapass) throw new Error('ENA: faltan datos obligatorios');
     return Object.freeze({ unidad:r.unidad, placa:r.placa, empresa:r.empresa, cuentaOrigen:r.panapass, saldo:r.saldo, motivo:`Transferencia de saldo por baja de Panapass - placa ${r.placa}`, telefono:'', firmante:null, ...extra });
   }
 
-  app.register('panapass-bajas-v173', { load, filter, summary, enaContext });
+  app.register('panapass-bajas', { load, filter, summary, status, enaContext });
 })();
