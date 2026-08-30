@@ -12,6 +12,9 @@ assert.ok(html.indexOf('/modules/v173/panapass/ranking.js')<html.indexOf('/modul
 const files=['modules/v173/bootstrap.js','modules/v173/core/index.js','modules/v173/core/api.js','modules/v173/core/permissions.js','modules/v173/core/auth.js','modules/v173/core/rpc-adapter.js','modules/v173/core/router.js','modules/v173/login/index.js','modules/v173/portal/index.js','modules/v173/panapass/contracts.js','modules/v173/panapass/ranking.js','modules/v173/panapass/recurrentes.js','modules/v173/panapass/bajas.js','modules/v173/panapass/index.js'];
 for(const f of files)new vm.Script(read(f),{filename:f});
 
+const login=read('modules/v173/login/index.js');
+assert.ok(login.includes("typeof input==='string'"),'login must ignore router context objects as error text');
+assert.ok(!login.includes("function mount(message='')"),'login must not render route context as [object Object]');
 const pan=read('modules/v173/panapass/index.js');
 assert.ok(pan.includes("document.getElementById('rym-app')"),'Panapass must own #rym-app');
 assert.ok(!pan.includes("document.querySelector('#app') || document.body"),'legacy body fallback forbidden');
