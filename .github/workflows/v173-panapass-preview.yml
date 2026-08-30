@@ -45,3 +45,5 @@ jobs:
           done
           test "$ok" -eq 1
           echo "V173 preview verified: $URL"
+      - name: Preview checkpoint
+        run: echo 'V173 isolated preview workflow checkpoint 2026-08-30'
