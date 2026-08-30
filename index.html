@@ -658,6 +658,7 @@ const URL='https://avczyvcpmicpuhdkmxzx.supabase.co';
 const KEY='sb_publishable_Xq9jQFfPrywG4kbmw1dOuQ_IyjsrlsQ';
 const app=document.querySelector('#app');
 const state={token:'',refreshToken:'',expiresAt:0,sessionVersion:0,profile:null,modules:[],allModules:[],active:'dashboard',today:null,meta:null,cobraCache:null,cobraCacheAt:0};
+window.state=state;
 const labels={dashboard:'Dashboard',ranking:'Ranking',negativos_hoy:'Negativos Hoy',pagos_hoy:'Pagos Hoy',historial:'Historial / Pendiente a Cobra',pendientes_externo:'Historial / Pendiente a Cobra',recurrentes:'Recurrentes',operaciones:'Operación AM / PM',operacion_am:'Operación AM / PM',operacion_pm:'Operación AM / PM',reportes:'Reportes',usuarios:'Usuarios'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
