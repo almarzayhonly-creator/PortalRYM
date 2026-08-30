@@ -104,6 +104,7 @@
     // issued earlier this month is not missed; the server deduplicates by
     // inspectionId and only queues records it has never imported.
     const startDate = panamaMonthStartYmd(), endDate = panamaYmd(0);
+    const maxRecords = 100; // Operational ceiling: never fan out an unlimited monthly listing in one run.
     const first = await queryListPage(1, startDate, endDate);
     const totalPages = Math.min(Math.max(1, Number(first.pagination?.totalPages) || 1), 100);
     const rows = [], known = new Set();
@@ -111,15 +112,16 @@
       for (const row of Array.isArray(payload?.data) ? payload.data : []) {
         const id = Number(row?.inspectionId);
         if (!Number.isFinite(id) || known.has(id)) continue;
+        if (rows.length >= maxRecords) return;
         known.add(id); rows.push(row);
       }
     };
     append(first);
-    for (let page = 2; page <= totalPages; page++) append(await queryListPage(page, startDate, endDate));
+    for (let page = 2; page <= totalPages && rows.length < maxRecords; page++) append(await queryListPage(page, startDate, endDate));
     return {
       data: rows,
       pagination: {...first.pagination, currentPage:1, totalPages, totalRecords:rows.length},
-      range:{startDate,endDate}
+      range:{startDate,endDate,maxRecords,truncated:rows.length>=maxRecords}
     };
   }
 
