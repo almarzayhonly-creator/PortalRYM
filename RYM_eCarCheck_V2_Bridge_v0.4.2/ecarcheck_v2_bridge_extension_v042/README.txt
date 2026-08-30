@@ -1,4 +1,4 @@
-RYM eCarCheck V2 Bridge v0.4.3
+RYM eCarCheck V2 Bridge v0.4.4
 
 CAMBIOS
 - Acepta bloqueos estructurados de eCarCheck con status 4xx/5xx, no solo 400.
@@ -18,3 +18,4 @@ ACTUALIZACION
 
 0.4.2: soporte LISTADO_REVISADOS V2, reanudacion de sesion y conserva timeout al final de cola.
 0.4.3: interpreta React Flight/RSC anidado de /dashboard/revisados, consulta paginas aprobadas de las ultimas 48 horas y deduplica por inspectionId antes de enviar el listado al bridge.
+0.4.4: el rango de listado es desde el primer dia del mes vigente hasta hoy (01/08/2026 a hoy durante agosto). La base deduplica por inspectionId; solo se encolan revisados nuevos.

@@ -71,6 +71,13 @@
     return date.toISOString().slice(0,10);
   }
 
+  function panamaMonthStartYmd() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone:"America/Panama", year:"numeric", month:"2-digit"
+    }).formatToParts(new Date()).reduce((out, part) => ({...out, [part.type]:part.value}), {});
+    return `${parts.year}-${parts.month}-01`;
+  }
+
   async function queryListPage(page, startDate, endDate) {
     const params = new URLSearchParams({
       status:"APROBADO", page:String(page), startDate, endDate,
@@ -93,7 +100,10 @@
   }
 
   async function queryList() {
-    const startDate = panamaYmd(-1), endDate = panamaYmd(0);
+    // eCarCheck filters by date.  Re-read the current month so a revisado
+    // issued earlier this month is not missed; the server deduplicates by
+    // inspectionId and only queues records it has never imported.
+    const startDate = panamaMonthStartYmd(), endDate = panamaYmd(0);
     const first = await queryListPage(1, startDate, endDate);
     const totalPages = Math.min(Math.max(1, Number(first.pagination?.totalPages) || 1), 100);
     const rows = [], known = new Set();

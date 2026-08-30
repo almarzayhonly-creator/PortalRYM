@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "RYM eCarCheck V2 Bridge",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Puente controlado entre una sesi\u00f3n humana de eCarCheck V2 y Portal RYM.",
   "permissions": [
     "storage"
