@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "RYM eCarCheck V2 Bridge",
+  "version": "0.4.3",
+  "description": "Puente controlado entre una sesi\u00f3n humana de eCarCheck V2 y Portal RYM.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://v2.ecarcheck.net/*",
+    "https://avczyvcpmicpuhdkmxzx.supabase.co/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://v2.ecarcheck.net/*"
+      ],
+      "js": [
+        "main-world.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://v2.ecarcheck.net/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "RYM eCarCheck V2 Bridge"
+  }
+}
