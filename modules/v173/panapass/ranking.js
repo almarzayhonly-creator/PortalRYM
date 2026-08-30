@@ -28,5 +28,5 @@
     return Object.freeze({ metric, galera, rows:Object.freeze(ranked), podio:Object.freeze(ranked.slice(0,3)), resto:Object.freeze(ranked.slice(3)) });
   }
 
-  app.register('panapass-ranking-v173', { load, sort, model });
+  app.register('panapass-ranking', { load, sort, model });
 })();
