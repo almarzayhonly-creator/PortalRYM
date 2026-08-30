@@ -1,22 +1,31 @@
 /* Portal RYM V172 — presentation-only home refinement. Keeps canonical markup and handlers intact. */
-body.v99-home{background:#f4f7fb!important;color:#17243a!important}
-body.v99-home .v101-side{background:linear-gradient(180deg,#071a36 0%,#0c315f 58%,#10254a 100%)!important;border-right:1px solid rgba(148,188,238,.18)!important}
-body.v99-home .v101-side-logo{padding:11px 8px 13px!important;border-radius:16px!important;background:rgba(255,255,255,.07)!important}
-body.v99-home .v101-top{height:76px!important;padding:0 30px!important;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(23,36,58,.06)!important}
+body.v99-home{background:radial-gradient(circle at 100% 0,#e0ecff 0,transparent 32%),#eff4fb!important;color:#17243a!important}
+body.v99-home .v101-side{background:#fff!important;color:#22344f!important;border-right:1px solid #dce5f0!important;box-shadow:8px 0 28px rgba(35,57,91,.06)!important}
+body.v99-home .v101-side-logo{padding:11px 8px 13px!important;border-radius:16px!important;background:#f1f6fd!important}
+body.v99-home .v101-side-logo b{color:#16315a!important}
+body.v99-home .v101-nav button{color:#58708f!important;border:1px solid transparent!important}
+body.v99-home .v101-nav button:hover,body.v99-home .v101-nav button.active{background:#eaf2ff!important;color:#175fb7!important;border-color:#c9dcf8!important}
+body.v99-home .v101-user-side{background:#f2f6fb!important;color:#22344f!important}
+body.v99-home .v101-user-side span{color:#71839b!important}
+body.v99-home .v101-user-side small{color:#16865d!important}
+body.v99-home .v101-user-side button{background:#fff!important;color:#244368!important;border-color:#d7e2f0!important}
+body.v99-home .v101-top{height:76px!important;padding:0 30px!important;background:rgba(255,255,255,.72)!important;backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(23,36,58,.06)!important}
 body.v99-home .v101-title h1{font-size:24px!important;letter-spacing:-.035em!important}
 body.v99-home .v101-content{max-width:1680px!important;padding:25px 30px 42px!important}
-body.v99-home .v101-greeting{margin-bottom:17px!important}
-body.v99-home .v101-greeting h2{font-size:27px!important;color:#122544!important}
-body.v99-home .v101-greeting p{font-size:13px!important;color:#66778f!important}
-body.v99-home .v101-rank{min-width:255px!important;padding:13px 16px!important;border-radius:15px!important;background:linear-gradient(135deg,#102a50,#1c4f88)!important;box-shadow:0 12px 28px rgba(23,63,111,.16)!important}
-body.v99-home .v101-validator{border:1px solid #bfd2eb!important;border-radius:19px!important;background:linear-gradient(105deg,#fafdff,#f2f7ff)!important;box-shadow:0 10px 26px rgba(20,61,108,.07)!important}
-body.v99-home .v101-validator-go{background:linear-gradient(135deg,#1255ac,#2276d8)!important;box-shadow:0 7px 16px rgba(18,85,172,.2)!important}
+body.v99-home .v101-greeting{margin-bottom:17px!important;padding:23px 25px!important;border-radius:22px!important;background:linear-gradient(128deg,#102a50,#1e5fab 63%,#548cdf)!important;box-shadow:0 15px 35px rgba(22,63,117,.18)!important}
+body.v99-home .v101-greeting h2{font-size:29px!important;color:#fff!important}
+body.v99-home .v101-greeting p{font-size:13px!important;color:#dbeaff!important}
+body.v99-home .v101-rank{min-width:255px!important;padding:13px 16px!important;border-radius:15px!important;background:rgba(8,31,66,.26)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)!important}
+body.v99-home .v101-validator{border:0!important;border-radius:19px!important;background:linear-gradient(115deg,#0b2e61,#1356a5 64%,#2a78d4)!important;box-shadow:0 13px 30px rgba(20,61,108,.17)!important;color:#fff!important}
+body.v99-home .v101-validator *{color:inherit!important}
+body.v99-home .v101-validator input{background:#fff!important;color:#17243a!important;border-color:transparent!important}
+body.v99-home .v101-validator-go{background:#f5b51b!important;color:#112747!important;box-shadow:0 7px 16px rgba(0,0,0,.16)!important}
 body.v99-home .v99-section-title{margin-top:23px!important}
 body.v99-home .v99-section-title h3{font-size:16px!important;color:#1b2f4d!important}
 body.v99-home .v99-alerts{gap:10px!important}
 body.v99-home .v99-alert{border-radius:14px!important;box-shadow:0 5px 14px rgba(38,59,88,.045)!important}
 body.v99-home .v99-grid{gap:14px!important}
-body.v99-home .v99-module{position:relative!important;min-height:300px!important;border-radius:18px!important;box-shadow:0 9px 24px rgba(25,55,92,.06)!important;transition:transform .16s ease,box-shadow .16s ease!important}
+body.v99-home .v99-module{position:relative!important;min-height:300px!important;border-radius:18px!important;border-width:1px!important;box-shadow:0 9px 24px rgba(25,55,92,.08)!important;transition:transform .16s ease,box-shadow .16s ease!important}
 body.v99-home .v99-module:hover{transform:translateY(-3px)!important;box-shadow:0 15px 32px rgba(25,55,92,.11)!important}
 body.v99-home .v99-module:after{content:""!important;position:absolute!important;inset:auto 15px 0!important;height:3px!important;border-radius:3px 3px 0 0!important;background:var(--rym-module-accent,#2667b8)!important}
 body.v99-home .v99-module.pan{--rym-module-accent:#2168c3!important}
@@ -29,4 +38,4 @@ body.v99-home .v99-mini{border-radius:11px!important;background:rgba(255,255,255
 body.v99-home .v99-mini span{color:#64758b!important}
 body.v99-home .v99-mini b{color:#1c304d!important}
 body.v99-home .v99-module>button{border-radius:11px!important;box-shadow:none!important;position:relative!important;z-index:1!important}
-@media(max-width:900px){body.v99-home .v101-content{padding:16px 12px 28px!important}body.v99-home .v101-top{padding:13px 16px!important}body.v99-home .v101-greeting{margin-bottom:14px!important}body.v99-home .v99-module:hover{transform:none!important}}
+@media(max-width:900px){body.v99-home .v101-content{padding:16px 12px 28px!important}body.v99-home .v101-top{padding:13px 16px!important}body.v99-home .v101-greeting{margin-bottom:14px!important;padding:19px 17px!important;border-radius:18px!important}body.v99-home .v99-module:hover{transform:none!important}}
