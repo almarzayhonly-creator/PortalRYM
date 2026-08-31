@@ -37,9 +37,11 @@ jobs:
             if curl -fsSL --max-time 20 "$URL/?v173=$stamp" -o /tmp/index \
               && curl -fsSL --max-time 20 "$URL/modules/v173/core/auth.js?v173=$stamp" -o /tmp/auth \
               && curl -fsSL --max-time 20 "$URL/modules/v173/panapass/index.js?v173=$stamp" -o /tmp/pan \
+              && curl -fsSL --max-time 20 "$URL/css/v173/production.css?v173=$stamp" -o /tmp/theme \
               && grep -Fq 'Portal RYM · V173' /tmp/index \
               && grep -Fq "app.register('auth'" /tmp/auth \
-              && grep -Fq "register('panapass'" /tmp/pan; then
+              && grep -Fq "register('panapass'" /tmp/pan \
+              && grep -Fq 'Identidad visual de produccion' /tmp/theme; then
               ok=1
               break
             fi

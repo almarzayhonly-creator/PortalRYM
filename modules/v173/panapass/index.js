@@ -46,7 +46,8 @@
     document.body.dataset.rymModule='panapass';
     const root=document.getElementById('rym-app');
     if(!root) throw new Error('Panapass V173: mount root missing');
-    root.innerHTML=`<section class="v173-panapass"><header class="v173-panapass-head"><button type="button" data-panapass-back>← Portal</button><div><span>RYM · Panapass</span><h1>Control Panapass</h1></div></header><nav class="v173-panapass-tabs" aria-label="Panapass">${tabs.map(([id,label])=>`<button type="button" data-panapass-tab="${id}">${label}</button>`).join('')}</nav><main data-panapass-view></main></section>`;
+    const session=window.RYM173.registry.get('core')?.getSession?.()||{},user=session.user||{},name=esc(user.nombre||user.usuario||user.email||'Usuario'),role=esc(session.role||'');
+    root.innerHTML=`<section class="v173-panapass"><aside class="v173-panapass-side"><div class="v173-panapass-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM" onerror="this.parentElement.innerHTML='<b>Portal RYM</b>'"></div><div class="v173-panapass-name">Portal RYM</div><button type="button" class="v173-panapass-back" data-panapass-back>← Portal</button><nav class="v173-panapass-tabs" aria-label="Panapass">${tabs.map(([id,label])=>`<button type="button" data-panapass-tab="${id}">${label}</button>`).join('')}</nav><div class="v173-panapass-user"><strong>${name}</strong><span>${role}</span></div></aside><div class="v173-panapass-main"><header class="v173-panapass-head"><div><h1>Panapass</h1><span>Portal RYM</span></div><span class="v173-panapass-role">${role}</span></header><main data-panapass-view></main></div></section>`;
     root.querySelector('[data-panapass-back]').onclick=()=>window.RYM173.registry.get('router')?.go('portal');
     root.querySelectorAll('[data-panapass-tab]').forEach(b=>b.onclick=()=>openTab(b.dataset.panapassTab,root,context));
     await openTab(context.tab||'dashboard',root,context);
