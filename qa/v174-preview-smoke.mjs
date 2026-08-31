@@ -7,8 +7,8 @@ assert.ok(previewUrl, 'QA_URL missing');
 
 const browser = await chromium.launch({ headless: true });
 
-async function inspect(url) {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+async function inspect(url, viewport) {
+  const page = await browser.newPage({ viewport });
   const errors = [];
   const failed = [];
   page.on('pageerror', error => errors.push(String(error)));
@@ -38,21 +38,30 @@ async function inspect(url) {
   return { ...result, errors, failed };
 }
 
-const [production, preview] = await Promise.all([inspect(productionUrl), inspect(previewUrl)]);
+const viewports = [
+  { name: 'desktop', width: 1440, height: 1000 },
+  { name: 'mobile', width: 390, height: 844 },
+];
 
-assert.equal(preview.title, production.title, 'Título distinto');
-assert.equal(preview.appHtml, production.appHtml, 'DOM público distinto');
-assert.equal(preview.visibleText, production.visibleText, 'Texto público distinto');
-assert.deepEqual(preview.styles, production.styles, 'Estilos calculados distintos');
-assert.equal(preview.coreCss, true, 'CSS Core externo no cargó');
-assert.equal(preview.coreRuntime, true, 'Runtime Core externo no cargó');
-assert.deepEqual(preview.errors, [], 'Errores JavaScript en preview');
-const previewOrigin = new URL(previewUrl).origin;
-assert.deepEqual(
-  preview.failed.filter(url => url.startsWith(previewOrigin)),
-  [],
-  'Recursos internos fallidos en preview',
-);
+for (const { name, ...viewport } of viewports) {
+  const [production, preview] = await Promise.all([
+    inspect(productionUrl, viewport),
+    inspect(previewUrl, viewport),
+  ]);
+  assert.equal(preview.title, production.title, `${name}: título distinto`);
+  assert.equal(preview.appHtml, production.appHtml, `${name}: DOM público distinto`);
+  assert.equal(preview.visibleText, production.visibleText, `${name}: texto público distinto`);
+  assert.deepEqual(preview.styles, production.styles, `${name}: estilos calculados distintos`);
+  assert.equal(preview.coreCss, true, `${name}: CSS Core externo no cargó`);
+  assert.equal(preview.coreRuntime, true, `${name}: Runtime Core externo no cargó`);
+  assert.deepEqual(preview.errors, [], `${name}: errores JavaScript en preview`);
+  const previewOrigin = new URL(previewUrl).origin;
+  assert.deepEqual(
+    preview.failed.filter(url => url.startsWith(previewOrigin)),
+    [],
+    `${name}: recursos internos fallidos en preview`,
+  );
+}
 
 console.log('V174 preview parity: exacta');
 await browser.close();
