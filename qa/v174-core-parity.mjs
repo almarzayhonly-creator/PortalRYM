@@ -10,8 +10,8 @@ reconstructed = reconstructed
   .replace(/<link rel="stylesheet"([^>]*?) href="\/css\/legacy\/v174\/([^"?]+)\?v=174">/g, (_, attrs, file) => `<style${attrs}>${readFileSync(`css/legacy/v174/${file}`, 'utf8')}</style>`)
   .replace(/<script([^>]*) src="\/modules\/legacy\/v174\/([^"?]+)\?v=174"><\/script>/g, (_, attrs, file) => `<script${attrs}>${readFileSync(`modules/legacy/v174/${file}`, 'utf8')}</script>`)
   .replace('<script src="/modules/core/runtime.js?v=174"></script>\n<script>', `<script>\n${coreRuntime}`);
-const at=[...reconstructed].findIndex((c,i)=>c!==production[i]);
-if(at>=0||reconstructed.length!==production.length) console.error(JSON.stringify({at,a:reconstructed.length,b:production.length,x:reconstructed.slice(at-80,at+160),y:production.slice(at-80,at+160)}));
+let at=0;while(at<reconstructed.length&&at<production.length&&reconstructed[at]===production[at])at++;
+if(at<reconstructed.length||at<production.length)console.error(JSON.stringify({at,a:reconstructed.length,b:production.length,ac:[...reconstructed.slice(at,at+30)].map(c=>c.codePointAt(0)),bc:[...production.slice(at,at+30)].map(c=>c.codePointAt(0))}));
 assert.equal(reconstructed, production, 'La extracción modificó el HTML/CSS/JS de producción');
 assert.equal((current.match(/<link[^>]+\/css\/legacy\/v174\//g) || []).length, 86, 'CSS legacy incompleto');
 assert.equal((current.match(/src="\/modules\/legacy\/v174\//g) || []).length, 68, 'Scripts legacy incompletos');
