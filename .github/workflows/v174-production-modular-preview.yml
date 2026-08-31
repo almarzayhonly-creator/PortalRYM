@@ -1,0 +1,48 @@
+name: V174 production modular preview
+on:
+  push:
+    branches: [v174-production-modular]
+permissions:
+  contents: read
+concurrency:
+  group: v174-production-modular-preview
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify exact extraction
+        run: |
+          node --check modules/core/runtime.js
+          node qa/v174-core-parity.mjs
+      - name: Deploy isolated preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest versions upload --preview-alias v174-modular 2>&1 | tee /tmp/wrangler.out
+          U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$U"
+          echo "url=$U" >> "$GITHUB_OUTPUT"
+          echo "Exact preview: $U"
+      - name: Verify modular assets
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          curl -fsSL --retry 5 --retry-delay 3 "$QA_URL/css/core/production-base.css?v=174" -o /tmp/core.css
+          curl -fsSL --retry 5 --retry-delay 3 "$QA_URL/modules/core/runtime.js?v=174" -o /tmp/runtime.js
+          cmp /tmp/core.css css/core/production-base.css
+          cmp /tmp/runtime.js modules/core/runtime.js
+      - name: Install browser tests
+        run: npm install playwright && npx playwright install --with-deps chromium
+      - name: Compare production and preview
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: node qa/v174-preview-smoke.mjs
