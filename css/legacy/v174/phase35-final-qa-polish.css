@@ -1,0 +1,84 @@
+
+/* V35 QA FINAL: alineación visual y toolbar de Negativos/Pagos. No cambia lógica de datos. */
+.phase3-filterbar.phase35-ready{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:flex-end!important;
+  gap:10px!important;
+  padding:12px 14px!important;
+}
+.phase3-filterbar.phase35-ready>.field{min-width:0!important;margin:0!important}
+.phase3-filterbar.phase35-ready>.phase35-date{flex:0 1 150px!important}
+.phase3-filterbar.phase35-ready>.phase35-galera{flex:0 1 155px!important}
+.phase3-filterbar.phase35-ready>.phase35-supervisora{flex:0 1 215px!important}
+.phase3-filterbar.phase35-ready>.phase35-search{flex:1 1 260px!important;min-width:210px!important}
+.phase3-filterbar.phase35-ready input,
+.phase3-filterbar.phase35-ready select{
+  height:42px!important;
+  min-height:42px!important;
+  padding:9px 11px!important;
+  border-radius:11px!important;
+}
+.phase35-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+  margin:0!important;
+}
+.phase35-actions button{
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  line-height:1!important;
+  margin:0!important;
+  border-radius:11px!important;
+  white-space:nowrap!important;
+}
+.phase35-actions .wa-rank-btn{min-width:146px!important}
+.phase35-actions .soft-btn{min-width:116px!important}
+.phase35-actions button[id$="Go"]{min-width:104px!important}
+.phase35-wa-status{
+  display:none;
+  flex:0 0 100%!important;
+  width:100%!important;
+  min-height:0!important;
+  margin:-2px 0 0!important;
+  text-align:right!important;
+  font-size:10px!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  color:var(--green)!important;
+}
+.phase35-wa-status:not(:empty){display:block!important}
+.phase5-ena-cell,.phase3-neg-table td:last-child{vertical-align:middle!important}
+.phase5-ena-cell .ena-saldo-btn,.phase3-neg-table [data-ena-saldo]{min-width:112px!important;margin:0 auto!important}
+[data-saldo-express-info]{display:block;margin:5px auto 0!important;max-width:150px;font-size:9.5px!important;line-height:1.15!important;text-align:center!important}
+.ena10-card{overflow:hidden}
+.ena10-head,.ena10-actions{box-sizing:border-box}
+.ena10-meta>div{min-width:0}
+.ena10-meta b{overflow-wrap:anywhere}
+.ena33-tag{width:100%!important}
+
+@media(max-width:1250px){
+  .phase3-filterbar.phase35-ready>.phase35-search{flex:1 1 100%!important;order:5}
+  .phase35-actions{order:6;margin-left:auto!important}
+  .phase35-wa-status{order:7}
+}
+@media(max-width:820px){
+  .phase3-filterbar.phase35-ready{gap:8px!important}
+  .phase3-filterbar.phase35-ready>.field{flex:1 1 calc(50% - 4px)!important;min-width:0!important;order:initial!important}
+  .phase3-filterbar.phase35-ready>.phase35-search{flex-basis:100%!important}
+  .phase35-actions{order:initial!important;flex:1 1 100%!important;width:100%!important;justify-content:stretch!important}
+  .phase35-actions button{flex:1 1 0!important;min-width:0!important;padding:0 9px!important}
+  .phase35-wa-status{order:initial!important;text-align:left!important}
+}
+@media(max-width:560px){
+  .phase3-filterbar.phase35-ready>.field{flex-basis:100%!important}
+  .phase35-actions{flex-wrap:wrap!important}
+  .phase35-actions button{flex:1 1 100%!important}
+}

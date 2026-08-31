@@ -1,0 +1,8 @@
+
+.v117-meta .v130-mobile-owner{display:none}
+@media(max-width:680px){
+  .v117-check-card{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;scrollbar-gutter:stable}
+  .v117-meta .v130-mobile-owner{display:inline-flex!important;flex-basis:100%;width:max-content;background:#eef7f2!important;border-color:#cbe7d7!important;color:#476858!important}
+  .v117-meta .v130-mobile-owner b{color:#0b7048!important;margin-left:3px}
+  .v117-identity-line.v125-clean .v130-owner-identity{display:none!important}
+}

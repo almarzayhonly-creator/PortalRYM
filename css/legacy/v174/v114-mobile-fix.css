@@ -1,0 +1,94 @@
+
+/* V114 - responsive real para Portal RYM */
+@media (max-width: 760px){
+  html,body{max-width:100%!important;overflow-x:hidden!important}
+  body.v99-home .v101-shell{display:block!important;grid-template-columns:1fr!important;width:100%!important;max-width:100%!important}
+  body.v99-home .v101-main{width:100%!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+  body.v99-home .v101-top{height:auto!important;min-height:0!important;padding:14px 16px!important;display:block!important}
+  body.v99-home .v101-title h1{font-size:25px!important;line-height:1.08!important}
+  body.v99-home .v101-title p{font-size:13px!important;margin-top:6px!important}
+  body.v99-home .v101-top-right{display:none!important}
+  body.v99-home .v101-content{width:100%!important;max-width:100%!important;padding:18px 12px 30px!important;box-sizing:border-box!important}
+  body.v99-home .v101-greeting{display:block!important;margin-bottom:16px!important}
+  body.v99-home .v101-greeting h2{font-size:27px!important;line-height:1.12!important;margin:0!important}
+  body.v99-home .v101-greeting p{font-size:15px!important;margin-top:8px!important}
+  body.v99-home .v101-rank{margin-top:12px!important;width:100%!important;min-width:0!important}
+
+  body.v99-home .v101-validator{margin:14px 0 20px!important;padding:16px!important;border-radius:20px!important;overflow:visible!important}
+  body.v99-home .v101-validator-head{display:block!important}
+  body.v99-home .v101-validator-head h3{font-size:20px!important;line-height:1.18!important}
+  body.v99-home .v101-validator-head p{font-size:12px!important;line-height:1.4!important}
+  body.v99-home .v101-validator-badge{display:inline-flex!important;margin:10px 0 12px!important}
+  body.v99-home .v101-validator-tools{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+  body.v99-home .v101-validator-input{height:54px!important;font-size:16px!important;padding:0 15px!important}
+  body.v99-home .v101-validator-go{width:100%!important;height:52px!important;margin:0!important}
+  body.v99-home .v101-validator-list{left:0!important;right:0!important;width:100%!important;max-height:48vh!important;z-index:9999!important}
+
+  body.v99-home .v99-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  body.v99-home .v99-kpi{min-width:0!important;padding:13px!important}
+  body.v99-home .v99-kpi strong{font-size:22px!important;overflow-wrap:anywhere!important}
+  body.v99-home .v99-alerts{grid-template-columns:1fr!important;gap:10px!important}
+  body.v99-home .v99-alert{min-width:0!important}
+  body.v99-home .v99-section-title{align-items:flex-start!important;gap:8px!important}
+  body.v99-home .v99-section-title h3{font-size:20px!important;line-height:1.15!important}
+
+  /* Lo importante: módulos uno debajo del otro, jamás comprimidos lado a lado */
+  body.v99-home .v99-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;width:100%!important;max-width:100%!important}
+  body.v99-home .v99-module{
+    display:flex!important;flex-direction:column!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    min-height:0!important;height:auto!important;
+    padding:18px 16px 16px!important;border-radius:20px!important;
+    overflow:hidden!important;box-sizing:border-box!important;
+  }
+  body.v99-home .v99-module-head{order:1!important;min-height:0!important;margin-bottom:4px!important}
+  body.v99-home .v99-module h4{order:2!important;font-size:23px!important;line-height:1.1!important;margin:10px 0 7px!important;padding:0!important;width:100%!important}
+  body.v99-home .v99-module>p{order:3!important;width:100%!important;max-width:100%!important;min-height:0!important;font-size:13px!important;line-height:1.45!important;margin:0 0 8px!important;padding:0!important}
+  body.v99-home .v102-visual{
+    order:4!important;position:relative!important;inset:auto!important;
+    width:100%!important;max-width:190px!important;height:108px!important;
+    margin:2px auto 10px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  }
+  body.v99-home .v102-visual svg{width:100%!important;height:100%!important;max-height:108px!important;object-fit:contain!important}
+  body.v99-home .v99-mini-kpis{order:5!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin-top:4px!important}
+  body.v99-home .v102-extra-kpis{order:6!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  body.v99-home .v99-mini,body.v99-home .v102-extra-kpis>*{min-width:0!important;overflow:hidden!important;padding:12px!important}
+  body.v99-home .v99-mini span,body.v99-home .v102-extra-kpis span{white-space:normal!important;line-height:1.15!important}
+  body.v99-home .v99-mini b,body.v99-home .v102-extra-kpis b{white-space:normal!important;overflow-wrap:anywhere!important;font-size:18px!important;line-height:1.15!important}
+  body.v99-home .v99-module>button{order:20!important;width:100%!important;min-height:50px!important;margin-top:12px!important;font-size:16px!important}
+
+  /* GPS admin card y pantalla */
+  body.v99-home .v99-module.gps{min-height:0!important}
+  .v113-gps-top{padding:16px!important;display:block!important}
+  .v113-gps-top h1{font-size:23px!important}
+  .v113-gps-top button{margin-top:12px!important;width:100%!important}
+  .v113-gps-body{padding:14px 10px 24px!important;width:100%!important;box-sizing:border-box!important}
+  .v113-gps-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  .v113-gps-kpi{padding:13px!important;min-width:0!important}
+  .v113-gps-kpi b{font-size:24px!important}
+  .v113-gps-tools{grid-template-columns:1fr!important;padding:11px!important}
+  .v113-gps-tools input,.v113-gps-tools select,.v113-gps-tools button{width:100%!important;min-width:0!important;height:46px!important}
+  .v113-gps-panel-head{display:block!important;padding:13px!important}
+  .v113-gps-table{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+  .v113-gps table{min-width:760px!important}
+
+  /* Modales del validador */
+  .v101-check-modal{padding:8px!important;align-items:flex-start!important;overflow:auto!important}
+  .v101-check-card{width:100%!important;max-width:100%!important;max-height:none!important;border-radius:20px!important;padding:14px!important;margin:8px 0!important}
+  .v101-check-head{display:flex!important;gap:8px!important}
+  .v101-check-title h2{font-size:26px!important}
+  .v101-check-summary{grid-template-columns:1fr!important;gap:8px!important}
+  .v101-check-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .v101-check-actions{display:grid!important;grid-template-columns:1fr!important;position:static!important}
+  .v101-check-action{width:100%!important}
+
+  /* tablas/operaciones generales: scroll interno, nunca toda la página */
+  .table-wrap,.v66-table-wrap,.ca6-table-wrap{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+}
+
+@media (max-width: 390px){
+  body.v99-home .v99-kpis{grid-template-columns:1fr!important}
+  body.v99-home .v99-mini-kpis,body.v99-home .v102-extra-kpis{grid-template-columns:1fr 1fr!important}
+  .v113-gps-kpis{grid-template-columns:1fr 1fr!important}
+  body.v99-home .v101-greeting h2{font-size:24px!important}
+}

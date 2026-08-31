@@ -1,0 +1,39 @@
+
+(function(){
+ const E95=v=>typeof esc==='function'?esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const role95=()=>String((typeof state!=='undefined'&&state?.profile?.rol)||'').trim().toUpperCase();
+ const isAdmin95=()=>role95()==='ADMIN_TOTAL';
+ function rpc95(name,args){if(typeof rpc!=='function')throw Error('RPC no disponible');return rpc(name,args)}
+ function ensureManualButton(){
+   if(!isAdmin95())return;
+   const tabs=document.querySelector('.ca6-tabs');
+   if(!tabs||document.querySelector('#ca95ManualTransfer'))return;
+   const b=document.createElement('button');b.id='ca95ManualTransfer';b.className='soft-btn';b.textContent='Traspaso manual';tabs.appendChild(b);b.onclick=()=>manualModal95();
+ }
+ const oldV11=window.v11UnitList;
+ if(typeof oldV11==='function'){
+   window.v11UnitList=async function(){const z=await oldV11.apply(this,arguments);ensureManualButton();return z};
+   try{v11UnitList=window.v11UnitList}catch{}
+ }
+ function manualModal95(prefill={}){
+   let m=document.querySelector('#ca95ManualModal');if(!m){m=document.createElement('div');m.id='ca95ManualModal';m.className='user-modal';document.body.appendChild(m)}
+   m.style.display='flex';m.innerHTML=`<div class="user-modal-card" style="max-width:700px;width:95vw"><div class="table-summary"><div><h2 style="margin:0">Traspaso manual extraordinario</h2><span class="muted">Solo ADMIN_TOTAL · deja trazabilidad completa</span></div><button class="soft-btn" id="ca95Close">Cancelar</button></div><div class="v95-manual-note"><b>Úsalo solo cuando el traspaso esté confirmado por Administración pero eCarCheck no pueda entregar ficha</b>, por ejemplo por boleta/restricción del nuevo titular. Si existe cupo en Control de Auto debes decidir qué ocurre con ese cupo.</div><div class="v95-manual-grid"><div><label>Unidad</label><input id="ca95Unit" value="${E95(prefill.unit||'')}" placeholder="Ej. P454"></div><div><label>Nuevo titular / referencia</label><input id="ca95Owner" value="${E95(prefill.owner||'')}" placeholder="Nombre si se conoce"></div><div><label>Resolución del cupo</label><select id="ca95Cupo"><option value="REVISION">REVISIÓN · no hay evidencia suficiente</option><option value="STOCK">STOCK · el cupo quedó con el grupo</option><option value="BAJA">BAJA · el mismo cupo salió con la unidad</option></select></div><div><label>Fuente de confirmación</label><input id="ca95Source" value="Administración" placeholder="Administración / documento / correo"></div><div class="wide"><label>Nota obligatoria</label><textarea id="ca95Note" rows="4" placeholder="Explique quién confirmó el traspaso y por qué eCarCheck no permite validar la ficha.">${E95(prefill.note||'')}</textarea></div></div><div class="v95-danger-note"><b>Regla de cupo:</b> STOCK solo si el cupo anterior sigue siendo del grupo. BAJA si el mismo cupo se fue con el nuevo titular. REVISIÓN cuando no hay ficha/evidencia suficiente para decidir.</div><div id="ca95Msg" style="margin-top:10px"></div><div class="actions" style="margin-top:12px"><button id="ca95Apply">Confirmar traspaso manual</button></div></div>`;
+   const close=()=>m.style.display='none';m.querySelector('#ca95Close').onclick=close;m.onclick=e=>{if(e.target===m)close()};
+   m.querySelector('#ca95Apply').onclick=async()=>{const b=m.querySelector('#ca95Apply'),msg=m.querySelector('#ca95Msg'),unit=m.querySelector('#ca95Unit').value.trim(),owner=m.querySelector('#ca95Owner').value.trim(),res=m.querySelector('#ca95Cupo').value,source=m.querySelector('#ca95Source').value.trim(),note=m.querySelector('#ca95Note').value.trim();if(!unit){msg.innerHTML='<div class="alert">Indique la unidad.</div>';return}if(note.length<5){msg.innerHTML='<div class="alert">Debe explicar el caso.</div>';return}b.disabled=true;b.textContent='Aplicando...';try{const data=await rpc95('control_auto_traspaso_aplicar_v2',{p_unidad:unit,p_modo:'MANUAL',p_cupo_resolucion:res,p_nota:`${source?source+': ':''}${note}`,p_nuevo_titular:owner||null});if(!data?.ok)throw Error(data?.error||'No se pudo aplicar');msg.innerHTML=`<div class="success">${E95(unit)} cerrada correctamente. Resolución de cupo: <b>${E95(data.cupo_resolucion||'NONE')}</b>.</div>`;setTimeout(()=>{close();if(typeof v11UnitList==='function')v11UnitList()},650)}catch(e){msg.innerHTML=`<div class="alert">${E95(e.message||e)}</div>`;b.disabled=false;b.textContent='Confirmar traspaso manual'}};
+ }
+ function officialModal95(info){
+   let m=document.querySelector('#ca95OfficialModal');if(!m){m=document.createElement('div');m.id='ca95OfficialModal';m.className='user-modal';document.body.appendChild(m)}
+   const same=info.local&&info.official&&String(info.local).toUpperCase()===String(info.official).toUpperCase();
+   const resolution=!info.local?'Sin cupo anterior: solo se cierra la unidad':!info.official?'eCarCheck sin cupo: el cupo anterior vuelve a STOCK':same?'Mismo cupo en eCarCheck: el cupo sale con la unidad y pasa a BAJA':'Cupo distinto en eCarCheck: el cupo anterior vuelve a STOCK; el cupo nuevo NO es nuestro';
+   m.style.display='flex';m.innerHTML=`<div class="user-modal-card" style="max-width:680px;width:95vw"><div class="table-summary"><div><h2 style="margin:0">Procesar traspaso oficial</h2><span class="muted">${E95(info.unit)} · ${E95(info.plate||'')}</span></div><button class="soft-btn" id="ca95OClose">Cancelar</button></div><div class="v95-manual-grid"><div><span class="muted">Titular eCarCheck</span><b style="display:block;margin-top:4px">${E95(info.owner||'Sin dato')}</b></div><div><span class="muted">Cupo Control / eCarCheck</span><b style="display:block;margin-top:4px">${E95(info.local||'—')} / ${E95(info.official||'—')}</b></div></div><div class="v95-manual-note"><b>Resultado automático:</b> ${E95(resolution)}</div><div id="ca95OMsg"></div><div class="actions"><button id="ca95OApply" class="danger">Confirmar traspaso</button></div></div>`;
+   const close=()=>m.style.display='none';m.querySelector('#ca95OClose').onclick=close;m.onclick=e=>{if(e.target===m)close()};m.querySelector('#ca95OApply').onclick=async()=>{const b=m.querySelector('#ca95OApply'),msg=m.querySelector('#ca95OMsg');b.disabled=true;b.textContent='Procesando...';try{const data=await rpc95('control_auto_traspaso_aplicar_v2',{p_unidad:info.unit,p_modo:'OFICIAL',p_cupo_resolucion:null,p_nota:null,p_nuevo_titular:null});if(!data?.ok)throw Error(data?.error||'No se pudo procesar');msg.innerHTML=`<div class="success">Traspaso aplicado. Cupo: <b>${E95(data.cupo_resolucion||'NONE')}</b>.</div>`;setTimeout(()=>{close();document.querySelector('#ca6Audit')?.click()},650)}catch(e){msg.innerHTML=`<div class="alert">${E95(e.message||e)}</div>`;b.disabled=false;b.textContent='Confirmar traspaso'}};
+ }
+ document.addEventListener('click',function(e){
+   if(!isAdmin95())return;
+   const a=e.target.closest('.ca78-audit-apply[data-action="PROCESAR_TRASPASO"]');
+   if(a){e.preventDefault();e.stopImmediatePropagation();officialModal95({unit:a.dataset.unit,plate:a.dataset.plate,owner:a.dataset.owner,official:a.dataset.cupo||'',local:a.closest('tr')?.children?.[6]?.textContent?.trim().replace('—','')||''});return}
+   const c=e.target.closest('.ca78-close-unit');
+   if(c){e.preventDefault();e.stopImmediatePropagation();officialModal95({unit:c.dataset.unit,plate:c.dataset.plate,owner:c.dataset.owner,official:'',local:''});}
+ },true);
+ setTimeout(ensureManualButton,500);
+})();

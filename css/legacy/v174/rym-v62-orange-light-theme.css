@@ -1,0 +1,14 @@
+
+body.v60-revisados{background:#fff7ed!important}
+.v60-app{background:linear-gradient(135deg,#fff7ed 0%,#fffdf7 58%,#fff4d6 100%)!important}
+.v60-side{background:linear-gradient(180deg,#f28c00 0%,#ff9f1a 56%,#f7b733 100%)!important;color:#241500!important;border-right:1px solid #df7900!important;box-shadow:8px 0 30px rgba(210,115,0,.10)}
+.v60-brand strong{color:#241500!important}.v60-brand small{color:#704200!important}.v60-logo{background:#fff7c7!important;border:1px solid rgba(36,21,0,.12)}
+.v60-profile{background:rgba(255,255,255,.40)!important;border:1px solid rgba(78,43,0,.18)!important}.v60-profile b{color:#241500!important}.v60-profile span{color:#704200!important}
+.v60-nav button{color:#4a2a00!important}.v60-nav button:hover{background:rgba(255,255,255,.42)!important;color:#17100a!important}.v60-nav button.active{background:#ffd54a!important;color:#17100a!important;box-shadow:0 8px 18px rgba(117,66,0,.12)!important}
+.v60-side-foot button{background:#171717!important;color:#ffd54a!important;border-color:#171717!important}.v60-side-foot button:hover{background:#252525!important;color:#fff!important}
+.v60-refresh{background:#f28c00!important;border-color:#f28c00!important;color:#241500!important}.v60-refresh:hover{background:#ffd54a!important;border-color:#ffd54a!important}
+.v60-hero{background:linear-gradient(125deg,#f28c00 0%,#ff9f1a 58%,#ffd54a 125%)!important;color:#241500!important;box-shadow:0 16px 38px rgba(242,140,0,.17)!important}.v60-hero .eyebrow,.v60-hero b{color:#241500!important}.v60-hero p{color:#6b3c00!important}.v60-hero:after{background:rgba(255,255,255,.24)!important}
+.v60-kpi.black:before{background:#f28c00!important}.v60-kpi strong,.v60-card h3,.v61-section-title h3{color:#241500!important}
+.v60-table th,.v60-month th{background:#f28c00!important;color:#241500!important;border-bottom-color:#ffd54a!important}.v60-badge.rezagado,.v61-pri.URGENTE{background:#171717!important;color:#ffd54a!important}
+.v61-syncbar{background:linear-gradient(135deg,#f28c00,#ffb000)!important;color:#241500!important}.v61-syncbar p{color:#754400!important}.v61-pill{background:rgba(255,255,255,.36)!important;border-color:rgba(78,43,0,.14)!important;color:#241500!important}.v61-syncbtn{background:#ffd54a!important;color:#241500!important}.v61-pcard.black:before{background:#f28c00!important}
+.ca-audit-kpi{border-top:3px solid #f28c00!important}.ca-audit-section h3{color:#241500!important}

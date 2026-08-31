@@ -1,0 +1,3 @@
+
+/* V83: un solo nivel visible de Auditoría. El botón interno se conserva oculto como hook funcional. */
+body.v70-control #ca6Audit{display:none!important}

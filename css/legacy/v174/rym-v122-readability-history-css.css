@@ -1,0 +1,49 @@
+
+/* Jerarquía legible y controles que no recortan texto en los módulos principales. */
+body.v99-home,body.v36-admin-total,body.v117-panapass,body.v66-revisados,body.v70-control,body.v70-admin,body.v113-gps{font-size:14px!important}
+body.v36-admin-total button,body.v117-panapass button,body.v66-revisados button,body.v70-control button,body.v70-admin button,body.v113-gps button{font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+body.v36-admin-total input,body.v36-admin-total select,body.v117-panapass input,body.v117-panapass select,body.v66-revisados input,body.v66-revisados select,body.v70-control input,body.v70-control select,body.v70-admin input,body.v70-admin select,body.v113-gps input,body.v113-gps select{font-size:13px;line-height:1.25}
+body.v36-admin-total .nav button,body.v117-panapass .nav button,body.v66-revisados .v66-nav button,body.v70-control .nav button{min-height:42px;white-space:normal}
+.v117-status-card,.v117-status-card *,.v66-card,.v66-card *,.v99-module,.v99-module *{min-width:0}
+.v117-status-card .v117-card-value,.v117-status-card .v117-card-detail,.v117-status-card .v117-card-detail b,.v66-card p,.v66-card small{overflow-wrap:anywhere;word-break:normal}
+.v117-status-card .v117-card-detail b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important}
+
+/* El encabezado GPS debe conservar contraste aunque cambie la paleta general. */
+body.v113-gps .v113-gps-top h1{color:#fff!important;font-size:clamp(24px,2vw,34px)!important;line-height:1.12!important;text-shadow:0 1px 1px rgba(0,0,0,.12)}
+body.v113-gps .v113-gps-top p{color:#dceaff!important;font-size:13px!important;line-height:1.4!important}
+body.v113-gps .v113-gps-top button{min-height:46px!important;font-size:13px!important;white-space:normal!important}
+body.v113-gps .v113-gps-kpis{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+body.v113-gps .v113-gps-kpi span{font-size:10px!important;line-height:1.3!important;display:block!important;min-height:26px!important}
+body.v113-gps .v113-gps-kpi b{font-size:27px!important;line-height:1!important}
+body.v113-gps .v113-gps-kpi.historic{border-top:3px solid #7181a6!important}
+body.v113-gps .v113-gps-kpi.historic b{color:#526486!important}
+body.v113-gps .v113-gps-panel-head{align-items:flex-start!important;flex-wrap:wrap!important}
+body.v113-gps .v113-gps-panel-head h3{font-size:18px!important;line-height:1.25!important;color:#102f5b!important}
+body.v113-gps .v113-gps-panel-head small{font-size:11px!important;line-height:1.4!important}
+body.v113-gps .v113-gps-table table{min-width:1120px!important;font-size:12px!important}
+body.v113-gps .v113-gps-table th{color:#fff!important;font-size:11px!important;line-height:1.25!important;padding:11px 10px!important}
+body.v113-gps .v113-gps-table td{font-size:12px!important;line-height:1.35!important;padding:10px!important}
+body.v113-gps .v113-gps-table td small{font-size:10px!important;line-height:1.35!important}
+body.v113-gps .v113-level,body.v113-gps .v113-state{font-size:10px!important;line-height:1.15!important;max-width:100%;white-space:normal!important;text-align:center!important}
+body.v113-gps .v113-level.HISTORICO,body.v113-gps .v113-state.historic{background:#e9edf7!important;color:#42577d!important;border:1px solid #cbd4e6!important}
+body.v113-gps tr.v122-closed-row{background:#f8f9fc!important}
+body.v113-gps tr.v122-closed-row:hover{background:#f0f3f9!important}
+.v122-last-date{display:block;color:#5e6f89!important;margin-bottom:4px;font-weight:800}
+
+/* Ajuste para laptops de 14–15 pulgadas: más área útil sin reducir la lectura. */
+@media(min-width:1001px) and (max-width:1600px){
+  body.v36-admin-total .shell,body.v117-panapass .shell{grid-template-columns:205px minmax(0,1fr)!important}
+  body.v36-admin-total .main,body.v117-panapass .main,body.v66-revisados .v66-main,body.v70-control .main{padding:16px!important}
+  body.v36-admin-total .top h1,body.v117-panapass .top h1,body.v66-revisados h1,body.v70-control .top h1{font-size:clamp(28px,2.4vw,36px)!important;line-height:1.08!important}
+  body.v113-gps .v113-gps-body{padding:18px!important}
+  body.v113-gps .v113-gps-tools{grid-template-columns:minmax(230px,1fr) 120px 145px 140px auto auto!important}
+}
+@media(max-width:1100px){body.v113-gps .v113-gps-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:700px){
+  body.v113-gps .v113-gps-kpis{grid-template-columns:1fr 1fr!important}
+  body.v113-gps .v113-gps-kpis .v113-gps-kpi:last-child{grid-column:auto!important}
+  body.v113-gps .v113-gps-table table{min-width:0!important;font-size:13px!important}
+  body.v113-gps .v113-gps-table td{font-size:13px!important;align-items:flex-start!important}
+  body.v36-admin-total input,body.v117-panapass input,body.v66-revisados input,body.v70-control input,body.v70-admin input,body.v113-gps input,
+  body.v36-admin-total select,body.v117-panapass select,body.v66-revisados select,body.v70-control select,body.v70-admin select,body.v113-gps select{font-size:16px!important}
+}

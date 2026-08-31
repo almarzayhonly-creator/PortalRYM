@@ -1,0 +1,224 @@
+
+/* ===== FASE 2 FINAL: captura = misma tabla normal, usando todo el viewport ===== */
+.nav button[data-m="cargar_pagos"]:before{content:"⇧"}
+
+body.capture-mode{background:var(--bg)!important}
+body.capture-mode .shell{display:block!important}
+body.capture-mode .side,
+body.capture-mode .top{display:none!important}
+body.capture-mode .main{
+  margin:0!important;
+  padding:10px 14px 16px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:100vh!important;
+}
+body.capture-mode #view{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+}
+/* La barra de filtros permanece visible, igual que en la vista normal. */
+body.capture-mode .section-tools{
+  display:flex!important;
+  box-shadow:var(--shadow)!important;
+  border-radius:16px!important;
+  padding:12px 14px!important;
+  margin-bottom:14px!important;
+}
+body.capture-mode .section-tools .field{
+  min-width:0!important;
+}
+body.capture-mode .capture-title{
+  display:block!important;
+  text-align:center!important;
+  margin:4px 0 16px!important;
+}
+body.capture-mode .kpis{
+  gap:12px!important;
+}
+body.capture-mode .kpi{
+  padding:14px 16px!important;
+}
+body.capture-mode .panel{
+  width:100%!important;
+  max-width:none!important;
+  box-shadow:var(--shadow)!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+}
+body.capture-mode .table-wrap,
+body.capture-mode #supPayOut .pay-table-v17{
+  width:100%!important;
+  max-width:none!important;
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  max-height:none!important;
+}
+/* Neutraliza TODAS las reglas antiguas de captura por nth-child/porcentajes. */
+body.capture-mode table,
+body.capture-mode table.pretty,
+body.capture-mode #supPayOut .pay-table-v17 table{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  table-layout:auto!important;
+  margin:0!important;
+  font-size:inherit!important;
+}
+body.capture-mode table th,
+body.capture-mode table td,
+body.capture-mode table.pretty th,
+body.capture-mode table.pretty td,
+body.capture-mode #supPayOut .pay-table-v17 th,
+body.capture-mode #supPayOut .pay-table-v17 td{
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:11px 12px!important;
+  font-size:inherit!important;
+  white-space:nowrap!important;
+}
+/* Neutralización explícita: gana también a los nth-child antiguos con !important. */
+body.capture-mode .pretty th:nth-child(1),
+body.capture-mode .pretty td:nth-child(1),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(1),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(1){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(2),
+body.capture-mode .pretty td:nth-child(2),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(2),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(2){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(3),
+body.capture-mode .pretty td:nth-child(3),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(3),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(3){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(4),
+body.capture-mode .pretty td:nth-child(4),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(4),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(4){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(5),
+body.capture-mode .pretty td:nth-child(5),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(5),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(5){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(6),
+body.capture-mode .pretty td:nth-child(6),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(6),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(6){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(7),
+body.capture-mode .pretty td:nth-child(7),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(7),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(7){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(8),
+body.capture-mode .pretty td:nth-child(8),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(8),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(8){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(9),
+body.capture-mode .pretty td:nth-child(9),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(9),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(9){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(10),
+body.capture-mode .pretty td:nth-child(10),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(10),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(10){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(11),
+body.capture-mode .pretty td:nth-child(11),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(11),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(11){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(12),
+body.capture-mode .pretty td:nth-child(12),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(12),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(12){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+body.capture-mode .pretty th:nth-child(13),
+body.capture-mode .pretty td:nth-child(13),
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(13),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(13){
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+
+/* Pagos tiene 13 columnas: solo Operador puede crecer y Estado Cobra nunca se corta. */
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(11),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(11){
+  min-width:210px!important;
+}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(13),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(13){
+  min-width:165px!important;
+  padding-right:16px!important;
+}
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(11),
+body.capture-mode #supPayOut .pay-table-v17 td:nth-child(12){
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  max-width:260px!important;
+}
+body.capture-mode .share-note{display:none!important}
+
+/* Cargar Pagos: tabla de trabajo usa el ancho completo sin tapar Guardar. */
+body.capture-mode #pmOut .pagos-online .table-wrap{overflow-x:auto!important}
+body.capture-mode #pmOut .pagos-online table{min-width:1180px!important;width:100%!important}
+body.capture-mode #pmOut .pagos-online th:last-child,
+body.capture-mode #pmOut .pagos-online td:last-child{
+  position:sticky!important;
+  right:0!important;
+  z-index:2!important;
+  background:inherit!important;
+  padding-right:14px!important;
+}
+
+@media(max-width:900px){
+  body.capture-mode .main{padding:8px!important}
+  body.capture-mode .section-tools{display:flex!important}
+  body.capture-mode table,
+  body.capture-mode table.pretty{min-width:900px!important}
+  body.capture-mode #supPayOut .pay-table-v17 table{min-width:1450px!important}
+}

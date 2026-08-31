@@ -1,0 +1,5 @@
+
+#v139HomeTransition{position:fixed;inset:0;z-index:210000;background:rgba(244,248,252,.94);backdrop-filter:blur(7px);display:grid;place-items:center}
+#v139HomeTransition .v139-card{width:min(360px,86vw);background:#fff;border:1px solid #d8e4f1;border-radius:20px;padding:22px;text-align:center;box-shadow:0 20px 55px rgba(12,46,88,.16);font-family:Inter,"Segoe UI",Arial,sans-serif;color:#163b6d}
+#v139HomeTransition .v139-card b{display:block;font-size:17px}.v139-track{height:6px;background:#eaf0f7;border-radius:99px;overflow:hidden;margin-top:14px}.v139-track i{display:block;height:100%;width:38%;background:linear-gradient(90deg,#1756b3,#ffad12);border-radius:99px;animation:v139load 1.05s ease-in-out infinite}
+@keyframes v139load{0%{transform:translateX(-120%)}100%{transform:translateX(330%)}}

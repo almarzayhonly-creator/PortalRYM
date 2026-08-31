@@ -1,0 +1,22 @@
+
+.ca22-pan-link{color:var(--blue);font-weight:1000;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.ca22-pan-link:hover{color:var(--navy)}
+.ca22-access-card{margin-top:14px;border:1px solid #dce6f3;border-radius:16px;background:#f8fbff;padding:14px}
+.ca22-access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.ca22-access-grid>div{border:1px solid #e1e8f2;border-radius:12px;background:#fff;padding:10px}
+.ca22-access-grid span{display:block;font-size:9px;font-weight:1000;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.ca22-access-grid b{display:block;overflow-wrap:anywhere;color:var(--navy)}
+.ca22-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.ca22-msg{margin-top:10px}.ca22-good{padding:10px 12px;border-radius:12px;background:#eafaf1;border:1px solid #b8edca;color:#087a45;font-weight:900}
+.ca22-warn{padding:10px 12px;border-radius:12px;background:#fff8eb;border:1px solid #f4d59c;color:#8a5200;font-weight:900}
+.ca22-bad{padding:10px 12px;border-radius:12px;background:#fff1f1;border:1px solid #ffcaca;color:#b42318;font-weight:900}
+.ca22-probe{background:linear-gradient(180deg,#2455AE,#183F8E)!important}
+.ca22-step{margin-top:10px;font-size:11px;color:var(--muted);font-weight:800;line-height:1.45}
+@media(max-width:620px){.ca22-access-grid{grid-template-columns:1fr}.ca22-actions button{width:100%}}
+.ca22-manual-box{margin-top:12px;padding:12px;border:1px solid #cfdcf0;border-radius:14px;background:#fff}
+.ca22-manual-title{font-weight:1000;color:var(--navy);margin-bottom:8px}
+.ca22-manual-row{display:grid;grid-template-columns:120px 1fr auto;gap:8px;align-items:center;margin-top:8px}
+.ca22-manual-row span{font-size:10px;font-weight:1000;text-transform:uppercase;color:var(--muted)}
+.ca22-secret{font-family:Consolas,monospace;background:#f6f8fb;border:1px solid #d9e3ef;border-radius:10px;padding:9px 10px;overflow-wrap:anywhere;color:var(--navy);font-weight:900}
+.ca22-manual-help{margin-top:9px;font-size:11px;line-height:1.45;color:var(--muted);font-weight:800}
+@media(max-width:620px){.ca22-manual-row{grid-template-columns:1fr}.ca22-manual-row button{width:100%}}

@@ -1,0 +1,82 @@
+
+/* ===== FASE 1 V2: AJUSTES VISUALES FINALES =====
+   Solo interfaz: sidebar, login y captura de Pagos Hoy. */
+
+/* Login: tarjeta completamente blanca para integrar el fondo blanco del logo. */
+.login-card,.password-panel{
+  background:#FFFFFF!important;
+  background-image:none!important;
+}
+.login-logo,.login-logo img{background:#FFFFFF!important}
+
+/* Sidebar: todos los módulos conservan una tarjeta/sombreado; el activo pasa a azul ENA. */
+.side .nav{gap:8px!important}
+.side .nav button{
+  background:linear-gradient(180deg,#F2F6FB 0%,#EAF1F9 100%)!important;
+  color:#435675!important;
+  border:1px solid #D9E5F2!important;
+  box-shadow:0 5px 13px rgba(13,43,83,.055)!important;
+  border-radius:13px!important;
+}
+.side .nav button:before{color:#2255A7!important}
+.side .nav button:hover{
+  background:linear-gradient(180deg,#EAF3FF 0%,#E3EEFB 100%)!important;
+  color:#123E7C!important;
+  border-color:#C9DBF0!important;
+  box-shadow:0 7px 16px rgba(22,75,155,.09)!important;
+}
+.side .nav button.active{
+  background:linear-gradient(135deg,#2559B3 0%,#17458F 100%)!important;
+  color:#FFFFFF!important;
+  border-color:#17458F!important;
+  box-shadow:0 9px 20px rgba(23,69,143,.20)!important;
+}
+.side .nav button.active:before{color:#FFFFFF!important}
+.side .nav button.active:after{
+  left:0!important;right:auto!important;top:9px!important;bottom:9px!important;
+  width:4px!important;height:auto!important;
+  background:linear-gradient(180deg,#FF9B31,#F47C20)!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.15);
+}
+
+/* Pagos Hoy - Vista captura:
+   en modo captura la tabla usa todo el ancho disponible y 13 columnas proporcionadas.
+   La vista normal conserva su ancho/scroll actual. */
+body.capture-mode #view{max-width:none!important;width:100%!important;margin:0!important}
+body.capture-mode .main{padding:8px 10px 14px!important}
+body.capture-mode #supPayOut{width:100%!important;max-width:none!important}
+body.capture-mode #supPayOut .panel{width:100%!important;max-width:none!important;overflow:visible!important}
+body.capture-mode #supPayOut .pay-table-v17{
+  width:100%!important;max-width:none!important;overflow:visible!important;padding:0!important;
+}
+body.capture-mode #supPayOut .pay-table-v17 table{
+  width:100%!important;min-width:0!important;max-width:none!important;table-layout:fixed!important;margin:0!important;
+}
+body.capture-mode #supPayOut .pay-table-v17 th,
+body.capture-mode #supPayOut .pay-table-v17 td{
+  padding:6px 5px!important;font-size:10.5px!important;line-height:1.15!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(1),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(1){width:7.5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(2),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(2){width:6.5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(3),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(3){width:6%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(4),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(4){width:6.5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(5),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(5){width:7.5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(6),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(6){width:9%!important;min-width:0!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(7),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(7){width:5.5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(8),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(8){width:5.5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(9),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(9){width:5%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(10),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(10){width:6%!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(11),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(11){width:14%!important;min-width:0!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(12),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(12){width:8%!important;min-width:0!important}
+body.capture-mode #supPayOut .pay-table-v17 th:nth-child(13),body.capture-mode #supPayOut .pay-table-v17 td:nth-child(13){width:13%!important;min-width:0!important}
+body.capture-mode #supPayOut .pay-table-v17 .chip{
+  max-width:100%!important;white-space:nowrap!important;padding:4px 7px!important;font-size:10px!important;
+}
+body.capture-mode #supPayOut .unit-v11,body.capture-mode #supPayOut .unit-color-badge{
+  min-width:48px!important;padding:4px 6px!important;
+}
+
+@media(max-width:820px){
+  .side .nav button{box-shadow:none!important}
+}

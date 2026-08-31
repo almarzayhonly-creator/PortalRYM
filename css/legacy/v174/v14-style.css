@@ -1,0 +1,25 @@
+
+:root{--v14-navy:#082b67;--v14-blue:#2454ad;--v14-line:#d7e1ef;--v14-bg:#e7edf5;--v14-card:#fff;--v14-orange:#ff7a1a}
+body{background:linear-gradient(135deg,#e8eef6 0%,#dce6f2 100%)!important}
+.sidebar-v14{background:rgba(255,255,255,.84)!important;backdrop-filter:blur(16px);box-shadow:12px 0 35px rgba(16,45,82,.08);border-right:1px solid rgba(160,180,205,.32)}
+.sidebar-v14 .brand{background:linear-gradient(145deg,#fff,#f6f9fd);box-shadow:0 10px 28px rgba(20,53,94,.08)}
+.nav-section-v14{font-size:10px;font-weight:900;letter-spacing:1.7px;color:#8b9ab0;padding:8px 16px 4px}
+.sidebar-v14 nav button{border:1px solid transparent;transition:.18s ease;position:relative}
+.sidebar-v14 nav button:hover{transform:translateX(4px);background:#edf4ff;border-color:#d7e5f7}
+.sidebar-v14 nav button.active{background:linear-gradient(90deg,#e9f2ff,#f5f8fd)!important;box-shadow:0 8px 22px rgba(36,84,173,.09);border-color:#d3e1f4}
+.sidebar-v14 nav button.active:before{content:"";position:absolute;left:-1px;top:22%;height:56%;width:4px;border-radius:5px;background:linear-gradient(#ff9b32,#ff6713)}
+.card,.panel,.kpi,.section-tools,.modal-card{box-shadow:0 12px 32px rgba(16,45,82,.07)!important;border-color:rgba(173,191,215,.5)!important}
+.kpi{transition:.18s ease}.kpi:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(16,45,82,.12)!important}
+.pretty{table-layout:auto!important;width:100%!important}
+.pretty th{white-space:nowrap}.pretty td{vertical-align:middle}
+.pretty th,.pretty td{padding-left:12px!important;padding-right:12px!important}
+.pretty th:nth-child(6),.pretty td:nth-child(6){text-align:center}
+.pay-table-v14{overflow-x:auto!important;padding-bottom:5px}
+.pay-table-v14 table{min-width:1320px!important;table-layout:auto!important}
+.pay-table-v14 th,.pay-table-v14 td{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
+.pay-table-v14 th:nth-child(6),.pay-table-v14 td:nth-child(6){min-width:170px;text-align:center!important}
+.pay-table-v14 th:nth-child(11),.pay-table-v14 td:nth-child(11){min-width:150px}
+.pay-table-v14 th:last-child,.pay-table-v14 td:last-child{min-width:175px}
+.status-v11,.unit-v11{box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.v11-tabs button{box-shadow:0 7px 16px rgba(36,84,173,.10)}
+@media(max-width:900px){.pay-table-v14 table{min-width:1180px!important}}

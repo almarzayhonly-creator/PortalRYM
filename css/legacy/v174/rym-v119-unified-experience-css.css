@@ -1,0 +1,65 @@
+
+:root{
+  --rym-ui-navy:#0b2b58;--rym-ui-blue:#245fbd;--rym-ui-blue-soft:#edf4ff;
+  --rym-ui-green:#13805a;--rym-ui-orange:#e58a16;--rym-ui-red:#d64545;
+  --rym-ui-bg:#f4f7fb;--rym-ui-surface:#fff;--rym-ui-line:#dbe5f1;
+  --rym-ui-text:#18324f;--rym-ui-muted:#6b7b91;--rym-ui-shadow:0 8px 24px rgba(18,52,91,.065)
+}
+body.v99-home,body.v36-admin-total,body.v66-revisados,body.v70-control,body.v70-admin,body.v113-gps{background:var(--rym-ui-bg)!important;color:var(--rym-ui-text)!important}
+body.v36-admin-total .main,body.v70-control .main,body.v66-revisados .v66-main,body.v70-admin .v70-admin-main,.v113-gps-body{background:var(--rym-ui-bg)!important}
+body.v36-admin-total .side,body.v70-control .side,body.v66-revisados .v66-side,body.v70-admin .v70-admin-side{background:linear-gradient(180deg,#fff,#f6f9fd)!important;border-color:var(--rym-ui-line)!important;box-shadow:8px 0 26px rgba(18,52,91,.055)!important}
+body.v36-admin-total .card,body.v36-admin-total .panel,body.v70-control .card,body.v70-control .panel,body.v66-revisados .v66-card,body.v66-revisados .v66-kpi,body.v70-admin .v70-panel,.v113-gps-panel,.v113-gps-kpi{background:var(--rym-ui-surface)!important;border-color:var(--rym-ui-line)!important;box-shadow:var(--rym-ui-shadow)!important}
+body.v36-admin-total input,body.v36-admin-total select,body.v70-control input,body.v70-control select,body.v66-revisados input,body.v66-revisados select,body.v70-admin input,body.v70-admin select,.v113-gps input,.v113-gps select{border-color:#cfdbe9!important;border-radius:11px!important;background:#fff!important;color:var(--rym-ui-text)!important}
+body.v36-admin-total .top h1,body.v70-control .top h1,body.v66-revisados h1,body.v70-admin h1,.v113-gps h1{color:var(--rym-ui-navy)!important}
+body.v36-admin-total .nav button,body.v70-control .nav button{color:#52657d!important;background:transparent!important;border-color:transparent!important}
+body.v36-admin-total .nav button.active{background:var(--rym-ui-blue-soft)!important;color:var(--rym-ui-blue)!important;border-color:#cfe0f5!important}
+body.v70-control .nav button.active{background:#eaf7f1!important;color:var(--rym-ui-green)!important;border-color:#cae7d8!important}
+body.v66-revisados .v66-nav button.active{background:var(--rym-ui-blue-soft)!important;color:var(--rym-ui-blue)!important}
+body.v113-gps .v113-gps-top{background:linear-gradient(105deg,var(--rym-ui-navy),#245b96)!important;border-bottom:3px solid #80aee5!important}
+body.v113-gps .v113-gps-top button{background:#fff!important;color:var(--rym-ui-navy)!important;border-color:#d7e3f0!important}
+.v113-gps-panel{border-top:3px solid var(--rym-ui-blue)!important}.v113-gps th{background:var(--rym-ui-navy)!important}
+.v113-gps-tools button{background:var(--rym-ui-blue)!important}.v113-gps-tools button.soft{background:var(--rym-ui-blue-soft)!important;color:var(--rym-ui-blue)!important}
+
+/* Tablet: no dejar accesos ocultos ni barras laterales desperdiciando espacio. */
+@media(min-width:821px) and (max-width:1000px){
+  body.v99-home .v118-top-users{display:inline-grid!important;place-items:center!important}
+  body.v36-admin-total .shell,body.v117-panapass .shell{grid-template-columns:190px minmax(0,1fr)!important}
+  body.v36-admin-total .side,body.v117-panapass .side{width:190px!important;padding:13px 10px!important;overflow:hidden!important}
+  body.v36-admin-total .side .nav,body.v117-panapass .side .nav{display:grid!important;grid-template-columns:1fr!important;gap:5px!important;overflow-x:hidden!important;overflow-y:auto!important;max-height:calc(100vh - 250px)!important;padding:2px!important}
+  body.v36-admin-total .side .nav button,body.v117-panapass .side .nav button{display:block!important;width:100%!important;min-width:0!important;white-space:normal!important;text-align:left!important;font-size:11px!important}
+  body.v66-revisados .v66-app{display:block!important}
+  body.v66-revisados .v66-side{position:sticky!important;top:0!important;width:100%!important;height:auto!important;z-index:60!important;padding:8px 12px!important;border-right:0!important;border-bottom:1px solid var(--rym-ui-line)!important}
+  body.v66-revisados .v66-brand,body.v66-revisados .v66-user,body.v66-revisados .v66-foot{display:none!important}
+  body.v66-revisados .v66-nav{display:flex!important;gap:6px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px!important}
+  body.v66-revisados .v66-nav button{width:auto!important;min-width:max-content!important;padding:9px 11px!important;white-space:nowrap!important}
+  body.v66-revisados .v66-main{width:100%!important;min-width:0!important;padding:15px!important}
+}
+
+/* Reporte diario: su scroll queda dentro de la tabla, nunca en toda la página. */
+body.v66-revisados{overflow-x:hidden!important}
+body.v66-revisados .v66-main,body.v66-revisados .v66-body,body.v66-revisados .v66-daily-layout,body.v66-revisados .v66-daily-layout>*{min-width:0!important;max-width:100%!important}
+body.v66-revisados .v66-daily-table,body.v66-revisados .v66-daily-group{max-width:100%!important;overflow-x:auto!important}
+@media(max-width:1000px){body.v66-revisados .v66-daily-layout{grid-template-columns:minmax(0,1fr)!important}body.v66-revisados .v66-daily-sendbox{position:static!important;width:auto!important}}
+
+/* Paginación reutilizable para listados extensos. */
+.v119-pager{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 16px;padding:10px 12px;background:#fff;border:1px solid var(--rym-ui-line);border-radius:12px;box-shadow:0 5px 15px rgba(18,52,91,.04);font-size:11px;color:var(--rym-ui-muted)}
+.v119-pager b{color:var(--rym-ui-text)}.v119-pager-actions{display:flex;align-items:center;gap:7px}.v119-pager button{min-height:34px!important;padding:7px 11px!important;border:1px solid #d5e1ef!important;border-radius:9px!important;background:var(--rym-ui-blue-soft)!important;color:var(--rym-ui-blue)!important;font-weight:900!important}.v119-pager button:disabled{opacity:.42!important;cursor:not-allowed!important}
+tr[hidden]{display:none!important}
+.v119-month-summary .v66-matrix,.v119-month-summary .v66-month-grid,.v119-month-summary table{display:none!important}.v119-summary-note{margin:9px 0 0;padding:10px 12px;border:1px dashed #cbd9e9;border-radius:11px;background:#f7faff;color:var(--rym-ui-muted);font-size:11px}
+
+/* Usuarios: permisos por proyecto plegables y acciones sensibles separadas. */
+.v119-perm-project{border:1px solid var(--rym-ui-line)!important;border-radius:14px!important;background:#fff!important;margin:10px 0!important;overflow:hidden!important}
+.v119-perm-project summary{list-style:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:14px 15px!important;background:#f7faff!important}.v119-perm-project summary::-webkit-details-marker{display:none}.v119-perm-project summary span{display:block}.v119-perm-project summary small{display:block;margin-top:4px}.v119-perm-project summary i{font-style:normal;font-size:18px;transition:transform .15s}.v119-perm-project[open] summary i{transform:rotate(180deg)}
+.v119-perm-content{overflow-x:auto}.v70-actions-row:has(#v70SavePerm){position:sticky!important;bottom:8px!important;z-index:10!important;padding:10px!important;background:rgba(255,255,255,.94)!important;border:1px solid var(--rym-ui-line)!important;border-radius:12px!important;box-shadow:0 10px 25px rgba(18,52,91,.12)!important}.v70-actions-row:has(#v70DeleteUser){padding:10px!important;background:#fff7f7!important;border:1px solid #f2d0d0!important;border-radius:12px!important}.v70-actions-row:has(#v70DeleteUser):before{content:'Zona sensible';font-size:10px;font-weight:900;color:#b42318;text-transform:uppercase}.v119-unsaved:after{content:' · cambios sin guardar';font-size:9px;font-weight:800}
+
+/* Directorios de correo cerrados por defecto y filtrables por rol. */
+.v119-rec-toolbar{display:grid;grid-template-columns:1fr 150px;gap:7px;margin:8px 0}.v119-rec-toggle,.v119-rec-role{height:38px!important;border-radius:10px!important}.v119-rec-list-collapsed{display:none!important}
+@media(max-width:620px){.v119-rec-toolbar{grid-template-columns:1fr}.v119-pager{align-items:flex-start;flex-direction:column}.v119-pager-actions{width:100%;justify-content:space-between}}
+
+/* Procesos guiados y CTAs descriptivos. */
+.v119-step{position:relative!important;padding-left:38px!important}.v119-step:before{content:attr(data-step);position:absolute;left:10px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);font-size:10px;font-weight:1000}.v119-report-action{min-width:170px!important}
+.v87-dash-kpi strong,.v87-dash-kpi small{display:block!important}.v87-dash-kpi small{margin-top:4px!important;line-height:1.35!important}
+
+/* GPS: filtro de severidad y textos operativos más legibles. */
+#v119GpsLevel{height:43px;border:1px solid #d4dfec;border-radius:10px;padding:0 11px;background:#fff}.v113-gps tr.v119-level-hidden{display:none!important}.v113-gps td[data-label="Velocidad"]{white-space:nowrap}
+@media(min-width:901px){body.v113-gps .v113-gps-tools{grid-template-columns:minmax(240px,1fr) 130px 160px 150px auto auto!important}}

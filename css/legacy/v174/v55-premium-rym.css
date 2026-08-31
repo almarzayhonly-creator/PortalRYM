@@ -1,0 +1,21 @@
+
+body.v38-revisados-only{background:linear-gradient(135deg,#f7f9fc,#edf2f7)!important}
+body.v38-revisados-only .v38-rev{--rym:#f28c18!important;--rym2:#ffb52e!important;--gold:#ffd24a!important;--orange:#f28c18!important;--line:#e6e9ef!important;--muted:#667085!important}
+body.v38-revisados-only .v38-shell{width:100%!important;max-width:none!important;min-height:100vh!important;grid-template-columns:230px minmax(0,1fr)!important;background:transparent!important}
+body.v38-revisados-only .v38-top{background:linear-gradient(120deg,#f28c18 0%,#ffad22 62%,#ffd24a 100%)!important;border:0!important;box-shadow:0 14px 36px rgba(242,140,24,.20)!important;color:#fff!important}
+body.v38-revisados-only .v38-logo{background:#fff!important;color:#b85d00!important;box-shadow:0 8px 24px rgba(126,72,0,.13)!important}
+body.v38-revisados-only .v38-top h1,body.v38-revisados-only .v38-top .v38-sub{color:#fff!important}
+body.v38-revisados-only .v38-tabs{background:#fff!important;border-right:1px solid #e6e9ef!important;box-shadow:8px 0 28px rgba(16,24,40,.05)!important}
+body.v38-revisados-only .v38-tabs button{background:transparent!important;color:#596579!important;border-radius:12px!important;margin:3px 8px!important}
+body.v38-revisados-only .v38-tabs button:hover{background:#fff6e8!important;color:#b85d00!important}
+body.v38-revisados-only .v38-tabs button.active{background:linear-gradient(135deg,#fff0d6,#fff8eb)!important;color:#b85d00!important;box-shadow:inset 4px 0 0 #f28c18!important}
+body.v38-revisados-only .v38-body{padding:22px 24px 34px!important}
+body.v38-revisados-only .v38-card,body.v38-revisados-only .v49-kpi{border:1px solid #e6e9ef!important;border-radius:18px!important;box-shadow:0 12px 30px rgba(16,24,40,.065)!important}
+body.v38-revisados-only .v38-kpi{border-top:3px solid #f5a623!important}
+body.v38-revisados-only .v49-primary,body.v38-revisados-only #v39Go,body.v38-revisados-only .v38-top-actions button:not(.soft-btn){background:linear-gradient(135deg,#ef7d00,#f5a623)!important;border-color:#ef7d00!important;color:#fff!important;box-shadow:0 8px 18px rgba(239,125,0,.18)!important}
+body.v38-revisados-only .v49-table th{background:#fff7ea!important;color:#8a4a00!important;border-bottom:1px solid #f4d7ad!important}
+body.v38-revisados-only .v49-table tbody tr:hover{background:#fffaf2!important}
+body.v38-revisados-only .v49-badge.v49-ok{background:#ecfdf3!important;color:#067647!important}
+body.v38-revisados-only .v49-badge.v49-bad{background:#fff1f1!important;color:#b42318!important}
+body.v38-revisados-only .v49-badge.v49-warn{background:#fff7e6!important;color:#a15c00!important}
+@media(max-width:900px){body.v38-revisados-only .v38-shell{grid-template-columns:1fr!important}body.v38-revisados-only .v38-body{padding:12px!important}}

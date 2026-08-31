@@ -1,0 +1,8 @@
+
+@media(max-width:410px){
+  #v117GpsCard .v117-card-detail:nth-child(2),
+  #v117PanCard .v117-card-detail:nth-child(2),
+  #v117RevCard .v117-card-detail:nth-child(2){display:grid!important}
+}
+#v117GpsCard .v117-card-details{gap:4px!important}
+#v117GpsCard .v117-card-detail b{white-space:normal!important}

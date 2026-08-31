@@ -1,0 +1,22 @@
+
+/* V100 · Centro de Control inteligente + correo solo ADMIN_TOTAL */
+body:not(.rym-mail-admin) .v66-daily-sendbox,
+body:not(.rym-mail-admin) .v97-bajas-mail,
+body:not(.rym-mail-admin) #fondeoSendV1,
+body:not(.rym-mail-admin) #fondeoResendV1{display:none!important}
+body:not(.rym-mail-admin) .v66-daily-layout,
+body:not(.rym-mail-admin) .v97-bajas-layout{grid-template-columns:minmax(0,1fr)!important}
+body.v99-home .v99-hero{padding:22px 26px!important;min-height:0!important}
+body.v99-home .v99-hero h2{font-size:27px!important;margin:5px 0 6px!important}
+body.v99-home .v99-hero p{max-width:790px!important;margin:0 0 10px!important}
+.v100-priority{margin:14px 0 4px;display:grid;gap:9px}
+.v100-priority-head{display:flex;justify-content:space-between;align-items:end;gap:12px}
+.v100-priority-head h3{margin:0;color:#0a326d;font-size:16px}.v100-priority-head p{margin:2px 0 0;color:#6b7d96;font-size:10px}
+.v100-priority-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.v100-priority-card{border:1px solid #d8e4f2;background:rgba(255,255,255,.9);border-radius:15px;padding:12px 14px;box-shadow:0 8px 22px rgba(21,57,103,.05);display:flex;gap:10px;align-items:center;min-width:0}
+.v100-priority-card .v100-dot{width:10px;height:10px;border-radius:50%;background:#2f69bb;box-shadow:0 0 0 5px rgba(47,105,187,.09);flex:0 0 auto}
+.v100-priority-card.warn .v100-dot{background:#e18b00;box-shadow:0 0 0 5px rgba(225,139,0,.11)}
+.v100-priority-card.bad .v100-dot{background:#d92d20;box-shadow:0 0 0 5px rgba(217,45,32,.10)}
+.v100-priority-card.good .v100-dot{background:#14804a;box-shadow:0 0 0 5px rgba(20,128,74,.10)}
+.v100-priority-card b{display:block;color:#102f63;font-size:12px}.v100-priority-card span{display:block;color:#71819a;font-size:9.5px;margin-top:2px;line-height:1.35}
+@media(max-width:900px){.v100-priority-grid{grid-template-columns:1fr}.v100-priority-head{align-items:start}.v99-clock{display:none!important}}

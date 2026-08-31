@@ -1,0 +1,13 @@
+
+/* V84: el validador V80 es navegación oficial de Control de Auto y no puede quedar oculto por reglas V70/V75. */
+body.v70-control .side .nav button[data-v80-control="validator"]{display:block!important}
+body.v66-revisados .v84-stat-click{cursor:pointer;position:relative;transition:.15s ease}
+body.v66-revisados .v84-stat-click:hover{transform:translateY(-2px);border-color:#e2aa47!important;box-shadow:0 10px 24px rgba(84,55,12,.10)!important}
+body.v66-revisados .v84-stat-click small{display:block;margin-top:4px;font-size:8px;color:#8b7352;font-weight:850}
+body.v66-revisados .v84-taxi-stat{background:#fff7df!important;border-color:#e6bf67!important}
+body.v66-revisados .v84-taxi-chip{background:#171717!important;color:#ffd54a!important;border-color:#171717!important}
+body.v66-revisados .v84-alert-row{background:#fffdf7!important;box-shadow:inset 3px 0 0 #f2a31b}
+body.v66-revisados .v84-history-filters{grid-template-columns:minmax(220px,1.3fr) repeat(6,minmax(115px,.65fr))!important}
+body.v66-revisados .v84-history-stats{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+@media(max-width:1300px){body.v66-revisados .v84-history-filters{grid-template-columns:repeat(3,minmax(0,1fr))!important}body.v66-revisados .v84-history-filters input:first-child{grid-column:span 2}body.v66-revisados .v84-history-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:700px){body.v66-revisados .v84-history-filters{grid-template-columns:1fr!important}body.v66-revisados .v84-history-filters input:first-child{grid-column:auto}body.v66-revisados .v84-history-stats{grid-template-columns:1fr 1fr!important}}

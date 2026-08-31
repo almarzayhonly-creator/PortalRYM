@@ -32,6 +32,10 @@ async function inspect(url, viewport) {
       },
       coreCss: [...document.styleSheets].some(sheet => String(sheet.href || '').includes('/css/core/production-base.css')),
       coreRuntime: [...document.scripts].some(script => String(script.src || '').includes('/modules/core/runtime.js')),
+      legacyCss: document.querySelectorAll('link[href*="/css/legacy/v174/"]').length,
+      legacyScripts: document.querySelectorAll('script[src*="/modules/legacy/v174/"]').length,
+      inlineStyles: document.querySelectorAll('style').length,
+      inlineScripts: [...document.scripts].filter(script => !script.src).length,
     };
   });
   await page.close();
@@ -54,6 +58,10 @@ for (const { name, ...viewport } of viewports) {
   assert.deepEqual(preview.styles, production.styles, `${name}: estilos calculados distintos`);
   assert.equal(preview.coreCss, true, `${name}: CSS Core externo no cargó`);
   assert.equal(preview.coreRuntime, true, `${name}: Runtime Core externo no cargó`);
+  assert.equal(preview.legacyCss, 86, `${name}: CSS legacy incompleto`);
+  assert.equal(preview.legacyScripts, 68, `${name}: módulos legacy incompletos`);
+  assert.equal(preview.inlineStyles, 0, `${name}: quedan estilos inline`);
+  assert.equal(preview.inlineScripts, 0, `${name}: quedan scripts inline`);
   assert.deepEqual(preview.errors, [], `${name}: errores JavaScript en preview`);
   const previewOrigin = new URL(previewUrl).origin;
   assert.deepEqual(
