@@ -5228,6 +5228,8 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 
 
 
+
+<style id="rym-profile-top-only">#rymLoveFab,#rymYhAlertBadge{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 <script id="rym-aracelys-messages-inline">
 /* Portal RYM - Yhonly private profile + Aracelys welcome + ENA change alerts */
 (function(w,d){'use strict';if(w.__RYM_ARACELYS_MESSAGES__)return;w.__RYM_ARACELYS_MESSAGES__=true;
@@ -5475,24 +5477,6 @@ install();
 let timer=0;
 function trigger(){clearTimeout(timer);timer=setTimeout(()=>{const go=d.querySelector('#rrpGo');if(go&&!go.disabled)go.click()},0)}
 d.addEventListener('click',e=>{const b=e.target?.closest?.('#rrpAmount,#rrpCount');if(!b)return;trigger()},true);
-})(window,document);
-
-</script>
-<script id="rym-yhonly-change-alerts-inline">
-/* Portal RYM - private operational change alerts for Yhonly */
-(function(w,d){'use strict';if(w.__RYM_YHONLY_ALERTS__)return;w.__RYM_YHONLY_ALERTS__=true;
-function profile(){try{return state?.profile||null}catch(_){return null}}
-function isYhonly(){const p=profile(),u=String(p?.usuario||p?.nombre||'').trim().toLowerCase();return u==='yhonly'||u.startsWith('yhonly ')}
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function style(){if(d.querySelector('#rym-yh-alert-style'))return;const s=d.createElement('style');s.id='rym-yh-alert-style';s.textContent=`.rym-yh-alert-badge{position:fixed;right:18px;bottom:70px;z-index:2147481900;min-width:30px;height:30px;border-radius:999px;border:2px solid #fff;background:#d92d63;color:#fff;font:900 12px Inter,Segoe UI,sans-serif;box-shadow:0 8px 20px rgba(90,20,50,.25);display:grid;place-items:center;cursor:pointer}.rym-yh-alert-modal{position:fixed;inset:0;z-index:2147483100;background:rgba(7,21,45,.48);backdrop-filter:blur(6px);display:grid;place-items:center;padding:18px}.rym-yh-alert-card{width:min(650px,95vw);max-height:calc(100dvh - 36px);overflow:auto;background:#fff;border:1px solid #d9e3ef;border-radius:24px;padding:20px;box-shadow:0 30px 90px rgba(20,45,80,.24);font-family:Inter,Segoe UI,Arial,sans-serif}.rym-yh-alert-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.rym-yh-alert-head h3{margin:0;color:#0f3972;font-size:21px}.rym-yh-alert-head p{margin:5px 0 0;color:#6d7e92;font-size:12px}.rym-yh-alert-list{display:grid;gap:9px;margin-top:15px}.rym-yh-alert-item{padding:12px 13px;border:1px solid #dce5ef;border-radius:14px;background:#f9fbfe}.rym-yh-alert-item b{display:block;color:#153e75;font-size:13px}.rym-yh-alert-item p{margin:4px 0 0;color:#556b83;font-size:12px;line-height:1.4}.rym-yh-alert-item small{display:block;margin-top:6px;color:#8a97a7;font-size:10px}.rym-yh-alert-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}.rym-yh-alert-actions button{border:0;border-radius:11px;padding:10px 14px;font-weight:900;cursor:pointer}.rym-yh-alert-read{background:#1f5db2;color:#fff}.rym-yh-alert-close{background:#eef3f8;color:#24517f}.rym-yh-alert-empty{padding:18px;text-align:center;color:#738399;background:#f7fafc;border-radius:12px;margin-top:14px}@media(max-width:650px){.rym-yh-alert-badge{right:14px;bottom:70px}.rym-yh-alert-card{padding:16px;border-radius:18px}}`;d.head.appendChild(s)}
-async function fetchAlerts(){try{return await rpc('panapass_alertas_yhonly_pendientes')}catch(_){return []}}
-async function markRead(ids){try{return await rpc('panapass_alertas_yhonly_marcar_leidas',{p_ids:ids})}catch(_){return 0}}
-function fmtDate(v){try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',dateStyle:'medium',timeStyle:'short'}).format(new Date(v))}catch(_){return ''}}
-async function openAlerts(){if(!isYhonly())return;style();d.querySelector('#rymYhAlerts')?.remove();const rows=await fetchAlerts();const m=d.createElement('div');m.id='rymYhAlerts';m.className='rym-yh-alert-modal';m.innerHTML=`<div class="rym-yh-alert-card"><div class="rym-yh-alert-head"><div><h3>🔔 Cambios detectados por ENA</h3><p>Altas, reactivaciones y rotaciones pendientes de tu lectura.</p></div></div>${rows.length?`<div class="rym-yh-alert-list">${rows.map(x=>`<article class="rym-yh-alert-item"><b>${esc(x.titulo)}</b><p>${esc(x.mensaje)}</p><small>${fmtDate(x.created_at)}</small></article>`).join('')}</div>`:`<div class="rym-yh-alert-empty">No tienes cambios pendientes.</div>`}<div class="rym-yh-alert-actions">${rows.length?'<button id="rymYhRead" class="rym-yh-alert-read">Marcar todo como leído</button>':''}<button id="rymYhClose" class="rym-yh-alert-close">Cerrar</button></div></div>`;d.body.appendChild(m);m.querySelector('#rymYhClose').onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()};const rb=m.querySelector('#rymYhRead');if(rb)rb.onclick=async()=>{rb.disabled=true;await markRead(rows.map(x=>Number(x.id)));m.remove();refreshBadge()}}
-async function refreshBadge(){if(!isYhonly()){d.querySelector('#rymYhAlertBadge')?.remove();return}style();const rows=await fetchAlerts();let b=d.querySelector('#rymYhAlertBadge');if(!rows.length){b?.remove();return}if(!b){b=d.createElement('button');b.id='rymYhAlertBadge';b.className='rym-yh-alert-badge';b.type='button';b.onclick=openAlerts;d.body.appendChild(b)}b.textContent=String(rows.length>99?'99+':rows.length);b.title='Cambios ENA pendientes'}
-let lastUser='';async function tick(){const u=String(profile()?.usuario||profile()?.nombre||'').toLowerCase();if(u!==lastUser){lastUser=u;setTimeout(refreshBadge,150)}else if(isYhonly()&&!d.querySelector('#rymYhAlertBadge'))refreshBadge()}
-setInterval(tick,3000);new MutationObserver(()=>{if(isYhonly()&&!d.querySelector('#rymYhAlertBadge'))setTimeout(refreshBadge,100)}).observe(d.documentElement,{childList:true,subtree:true});if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',tick,{once:true});else tick();
-w.RYMOpenYhonlyAlerts=openAlerts;
 })(window,document);
 
 </script>
