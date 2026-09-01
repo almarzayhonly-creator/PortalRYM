@@ -21,7 +21,7 @@ jobs:
           npx playwright install --with-deps chromium >/dev/null
       - name: Probe production runtime
         run: |
-          cat > /tmp/love-diag.mjs <<'JS'
+          cat > love-diag.mjs <<'JS'
           import { chromium } from 'playwright';
           const url='https://portal-ena-rym.almarzayhonly.workers.dev/?love_diag='+Date.now();
           const b=await chromium.launch({headless:true});
@@ -48,4 +48,4 @@ jobs:
           await b.close();
           if(!before.inline || !before.flag || before.stateType==='undefined' || !fake.fab) process.exit(2);
           JS
-          node /tmp/love-diag.mjs
+          node love-diag.mjs
