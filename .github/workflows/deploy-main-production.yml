@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: portal-rym-production
   cancel-in-progress: false
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Inline private messages controller
+      - name: Persist private messages controller
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -28,14 +28,21 @@ jobs:
           s=re.sub(r'<script id="rym-aracelys-messages-v4"[^>]*></script>\s*','',s)
           s=re.sub(r'<script id="rym-aracelys-messages-inline">.*?</script>\s*','',s,flags=re.S)
           marker='\n<script id="rym-aracelys-messages-inline">\n'+js+'\n</script>\n'
-          m=re.search(r'</body\s*>',s,re.I)
-          if not m: raise SystemExit('body end not found')
-          s=s[:m.start()]+marker+s[m.start():]
+          pos=s.lower().rfind('</body')
+          if pos < 0: raise SystemExit('final body end not found')
+          s=s[:pos]+marker+s[pos:]
           p.write_text(s)
-          tail=p.read_text()[-25000:]
-          if 'id="rym-aracelys-messages-inline"' not in tail or 'portal_mensajes_config' not in tail:
+          full=p.read_text()
+          if 'id="rym-aracelys-messages-inline"' not in full or 'portal_mensajes_config' not in full:
               raise SystemExit('private messages inline controller not injected')
           PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Persist private messages controller [skip ci]"
+            git push origin HEAD:main
+          fi
       - name: Verify build files
         run: |
           test -s index.html
