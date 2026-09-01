@@ -1,0 +1,28 @@
+name: Inspect Panapass tabs
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/inspect-panapass-tabs.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect active renderers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          needles=['ranking=async function','recurrentes=async function','function ranking(','function recurrentes(','Ranking · Menos unidades pagadas','OPERADORES RECURRENTES','Por operador','v169-rec-r2','Ruta al podio']
+          for n in needles:
+            print('\n###',n,'COUNT',s.count(n))
+            start=0
+            for _ in range(5):
+              i=s.find(n,start)
+              if i<0: break
+              print('INDEX',i)
+              print(s[max(0,i-2500):min(len(s),i+6500)])
+              start=i+len(n)
+          PY
