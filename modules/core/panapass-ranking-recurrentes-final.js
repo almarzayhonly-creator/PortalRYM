@@ -126,28 +126,23 @@ async function finalRecurrentes(v){
 
 function install(){
   addCss();
-  try{ranking=finalRanking}catch(_){}
   try{recurrentes=finalRecurrentes}catch(_){}
-  try{w.ranking=finalRanking;w.recurrentes=finalRecurrentes}catch(_){}
+  try{w.recurrentes=finalRecurrentes}catch(_){}
 
   try{
     if(typeof render==='function'&&!w.__RYM_FINAL_RENDER_WRAPPED__){
       const oldRender=render;
-      const wrapped=async function(){const v=d.querySelector('#view');if(state?.active==='ranking')return finalRanking(v);if(state?.active==='recurrentes')return finalRecurrentes(v);return oldRender.apply(this,arguments)};
+      const wrapped=async function(){const v=d.querySelector('#view');if(state?.active==='recurrentes')return finalRecurrentes(v);return oldRender.apply(this,arguments)};
       render=wrapped;w.render=wrapped;w.__RYM_FINAL_RENDER_WRAPPED__=true;
     }
   }catch(_){}
 
   d.addEventListener('click',e=>{
-    const nav=e.target?.closest?.('[data-m]');if(!nav)return;const m=nav.dataset.m;if(m!=='ranking'&&m!=='recurrentes')return;
+    const nav=e.target?.closest?.('[data-m="recurrentes"]');if(!nav)return;const m='recurrentes';
     e.preventDefault();e.stopImmediatePropagation();
     try{state.active=m;if(typeof shell==='function')shell()}catch(_){}
-    const v=d.querySelector('#view');(m==='ranking'?finalRanking:finalRecurrentes)(v);
+    finalRecurrentes(d.querySelector('#view'));
   },true);
-
-  let timer=0;
-  const enforce=()=>{clearTimeout(timer);timer=setTimeout(()=>{let m;try{m=state?.active}catch(_){return}if(m!=='ranking'&&m!=='recurrentes')return;const v=d.querySelector('#view');if(!v)return;const marker=v.querySelector(`[data-rym-final="${m}"]`);if(!marker)(m==='ranking'?finalRanking:finalRecurrentes)(v)},70)};
-  const obs=new MutationObserver(enforce);obs.observe(d.documentElement,{childList:true,subtree:true});enforce();
 }
 install();
 })(window,document);
