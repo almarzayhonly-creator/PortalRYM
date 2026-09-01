@@ -16,18 +16,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Persist private messages controller
+      - name: Persist production controllers
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
           p=Path('index.html')
           s=p.read_text()
-          js=Path('modules/core/aracelys-messages.js').read_text()
+          love=Path('modules/core/aracelys-messages.js').read_text()
+          dash=Path('modules/core/dashboard-payments-enhance.js').read_text()
           s=re.sub(r'<script id="rym-aracelys-messages"[^>]*></script>\s*','',s)
           s=re.sub(r'<script id="rym-aracelys-messages-v4"[^>]*></script>\s*','',s)
           s=re.sub(r'<script id="rym-aracelys-messages-inline">.*?</script>\s*','',s,flags=re.S)
-          marker='\n<script id="rym-aracelys-messages-inline">\n'+js+'\n</script>\n'
+          s=re.sub(r'<script id="rym-dashboard-payments-inline">.*?</script>\s*','',s,flags=re.S)
+          marker='\n<script id="rym-aracelys-messages-inline">\n'+love+'\n</script>\n<script id="rym-dashboard-payments-inline">\n'+dash+'\n</script>\n'
           pos=s.lower().rfind('</body')
           if pos < 0: raise SystemExit('final body end not found')
           s=s[:pos]+marker+s[pos:]
@@ -35,20 +37,25 @@ jobs:
           full=p.read_text()
           if 'id="rym-aracelys-messages-inline"' not in full or 'portal_mensajes_config' not in full:
               raise SystemExit('private messages inline controller not injected')
+          if 'id="rym-dashboard-payments-inline"' not in full or 'panapass_dashboard_galeras_7d' not in full:
+              raise SystemExit('dashboard payments controller not injected')
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m "Persist private messages controller [skip ci]"
+            git commit -m "Persist production controllers [skip ci]"
             git push origin HEAD:main
           fi
       - name: Verify build files
         run: |
           test -s index.html
           test -s modules/core/aracelys-messages.js
+          test -s modules/core/dashboard-payments-enhance.js
           grep -Fq 'rym-aracelys-messages-inline' index.html
           grep -Fq 'portal_mensajes_config' index.html
+          grep -Fq 'rym-dashboard-payments-inline' index.html
+          grep -Fq 'panapass_dashboard_galeras_7d' index.html
       - name: Deploy production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
