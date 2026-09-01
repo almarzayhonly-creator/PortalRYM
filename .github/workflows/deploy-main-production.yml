@@ -22,6 +22,7 @@ jobs:
           node --check modules/core/dashboard-payments-enhance.js
           node --check modules/core/panapass-ranking-recurrentes-final.js
           node --check modules/core/panapass-ranking-criteria-final.js
+          node --check modules/core/panapass-ranking-owner-lock.js
       - name: Persist production controllers
         run: |
           python3 - <<'PY'
@@ -33,17 +34,18 @@ jobs:
           dash=Path('modules/core/dashboard-payments-enhance.js').read_text()
           tabs=Path('modules/core/panapass-ranking-recurrentes-final.js').read_text()
           rank=Path('modules/core/panapass-ranking-criteria-final.js').read_text()
+          lock=Path('modules/core/panapass-ranking-owner-lock.js').read_text()
           s=re.sub(r'<script id="rym-aracelys-messages"[^>]*></script>\s*','',s)
           s=re.sub(r'<script id="rym-aracelys-messages-v4"[^>]*></script>\s*','',s)
-          for sid in ['rym-aracelys-messages-inline','rym-dashboard-payments-inline','rym-pay-competition-inline','rym-panapass-final-tabs-inline','rym-ranking-criteria-inline']:
+          for sid in ['rym-aracelys-messages-inline','rym-dashboard-payments-inline','rym-pay-competition-inline','rym-panapass-final-tabs-inline','rym-ranking-criteria-inline','rym-ranking-owner-lock-inline']:
               s=re.sub(r'<script id="'+re.escape(sid)+r'">.*?</script>\s*','',s,flags=re.S)
-          marker='\n<script id="rym-aracelys-messages-inline">\n'+love+'\n</script>\n<script id="rym-dashboard-payments-inline">\n'+dash+'\n</script>\n<script id="rym-panapass-final-tabs-inline">\n'+tabs+'\n</script>\n<script id="rym-ranking-criteria-inline">\n'+rank+'\n</script>\n'
+          marker='\n<script id="rym-aracelys-messages-inline">\n'+love+'\n</script>\n<script id="rym-dashboard-payments-inline">\n'+dash+'\n</script>\n<script id="rym-panapass-final-tabs-inline">\n'+tabs+'\n</script>\n<script id="rym-ranking-criteria-inline">\n'+rank+'\n</script>\n<script id="rym-ranking-owner-lock-inline">\n'+lock+'\n</script>\n'
           pos=s.lower().rfind('</body')
           if pos < 0: raise SystemExit('final body end not found')
           s=s[:pos]+marker+s[pos:]
           p.write_text(s)
           full=p.read_text()
-          checks=['rym-aracelys-messages-inline','portal_mensajes_config','rym-dashboard-payments-inline','portal-home-resumen','rym-panapass-final-tabs-inline','rym-ranking-criteria-inline','panapass_reporte_competencia_cobrador_v2','panapass_ultima_fecha_pago']
+          checks=['rym-aracelys-messages-inline','portal_mensajes_config','rym-dashboard-payments-inline','portal-home-resumen','rym-panapass-final-tabs-inline','rym-ranking-criteria-inline','rym-ranking-owner-lock-inline','panapass_reporte_competencia_cobrador_v2','panapass_ultima_fecha_pago']
           missing=[x for x in checks if x not in full]
           if missing: raise SystemExit('missing controllers: '+','.join(missing))
           PY
@@ -51,7 +53,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m "Persist split Ranking criteria [skip ci]"
+            git commit -m "Persist Ranking ownership lock [skip ci]"
             git push origin HEAD:main
           fi
       - name: Verify build files
@@ -61,10 +63,12 @@ jobs:
           test -s modules/core/dashboard-payments-enhance.js
           test -s modules/core/panapass-ranking-recurrentes-final.js
           test -s modules/core/panapass-ranking-criteria-final.js
+          test -s modules/core/panapass-ranking-owner-lock.js
           grep -Fq 'rym-aracelys-messages-inline' index.html
           grep -Fq 'rym-dashboard-payments-inline' index.html
           grep -Fq 'rym-panapass-final-tabs-inline' index.html
           grep -Fq 'rym-ranking-criteria-inline' index.html
+          grep -Fq 'rym-ranking-owner-lock-inline' index.html
           grep -Fq 'panapass_reporte_competencia_cobrador_v2' index.html
       - name: Deploy production
         env:
