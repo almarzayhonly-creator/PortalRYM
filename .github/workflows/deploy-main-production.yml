@@ -16,6 +16,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Verify controller syntax
+        run: |
+          node --check modules/core/aracelys-messages.js
+          node --check modules/core/dashboard-payments-enhance.js
+          node --check modules/core/reportes-competencia-pagos.js
       - name: Persist production controllers
         run: |
           python3 - <<'PY'
@@ -37,7 +42,7 @@ jobs:
           s=s[:pos]+marker+s[pos:]
           p.write_text(s)
           full=p.read_text()
-          checks=['rym-aracelys-messages-inline','portal_mensajes_config','rym-dashboard-payments-inline','panapass_dashboard_galeras_7d','rym-pay-competition-inline','panapass_reporte_pagos_competencia']
+          checks=['rym-aracelys-messages-inline','portal_mensajes_config','rym-dashboard-payments-inline','portal-home-resumen','rym-pay-competition-inline','panapass_reporte_pagos_competencia']
           missing=[x for x in checks if x not in full]
           if missing: raise SystemExit('missing controllers: '+','.join(missing))
           PY
