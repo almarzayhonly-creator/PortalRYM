@@ -1,28 +1,68 @@
-name: Inspect dashboard and reports DOM
+name: Patch dashboard and competitive payments
 on:
   push:
     branches: [main]
     paths: ['.github/workflows/report-pagos-diagnostic.yml']
 permissions:
-  contents: read
+  contents: write
 jobs:
-  inspect:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect DOM anchors
+      - name: Patch active renderers
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          s=Path('index.html').read_text()
-          needles=['PAGADO ESTE MES','Pagado este mes','PAGADAS HOY','Pagadas hoy','MONTO PAGADO','Monto pagado','Pagos · 4 Galeras','Pagos por Galera','id="r4"','report-grid','report-card','repDesde','repHasta']
-          for n in needles:
-              print('\n###',n,'COUNT',s.count(n))
-              start=0
-              for k in range(4):
-                  i=s.find(n,start)
-                  if i<0: break
-                  print('INDEX',i)
-                  print(s[max(0,i-1200):min(len(s),i+2200)])
-                  start=i+len(n)
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+
+          old_quick='<div class="quick-card"><small>PAGADO ESTE MES</small><strong>${money(d.monto_pagos_mes||0)}</strong><span class="muted">Monto visible según tu alcance.</span></div>'
+          new_quick='<div class="quick-card"><small>PAGADO EN ${["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"][new Date().getMonth()]}</small><strong>${money(d.monto_pagos_mes||0)}</strong><span class="muted">Mes actual · desde 01/${String(new Date().getMonth()+1).padStart(2,"0")}/${new Date().getFullYear()}</span></div>'
+          if old_quick not in s: raise SystemExit('dashboard quick card anchor not found')
+          s=s.replace(old_quick,new_quick,1)
+
+          pat=r"async function phase4RenderGaleraKpis\(v\)\{.*?\}\nconst _phase4Dashboard=dashboard;"
+          repl=r'''async function phase4RenderGaleraKpis(v){const old=v.querySelector('#rotationFeed');if(old)old.remove();if(!phase4CanSeeGaleraKpis())return;try{const [rows,week]=await Promise.all([rpc('panapass_dashboard_galeras'),rpc('panapass_dashboard_galeras_7d')]);const by7=new Map((week||[]).map(x=>[String(x.galera||'').toUpperCase(),x]));const anchor=v.querySelector('.dashboard-welcome')||v.querySelector('.kpis');if(!anchor)return;const wrap=document.createElement('section');wrap.className='galera-kpi-section';wrap.id='phase4GaleraKpis';wrap.innerHTML=`<div class="galera-kpi-title"><div><h3>Resumen por galera</h3><span>Vista general de las 4 galeras. Haz clic para abrir detalle.</span></div></div><div class="galera-kpi-grid">${(rows||[]).map(r=>{const w=by7.get(String(r.galera||'').toUpperCase())||{};return `<article class="galera-kpi" data-galera-kpi="${esc(r.galera)}"><span class="gname">${esc(r.galera)}</span><div class="gmetrics"><div class="gm"><span>Unidades</span><b>${Number(r.unidades||0)}</b></div><div class="gm bad"><span>Negativos</span><b>${Number(r.negativos||0)}</b></div><div class="gm good"><span>Pagos 7 días</span><b>${Number(w.registros_7d||0)}</b></div></div><div class="gmetrics" style="margin-top:7px;grid-template-columns:1fr 1fr"><div class="gm bad"><span>Saldo negativo</span><b>${money(r.saldo_negativo||0)}</b></div><div class="gm good"><span>Pagado 7 días</span><b>${money(w.monto_7d||0)}</b></div></div></article>`}).join('')}</div><div id="phase4GaleraDetail"></div>`;anchor.insertAdjacentElement('afterend',wrap);wrap.querySelectorAll('[data-galera-kpi]').forEach(card=>card.onclick=()=>phase4OpenGalera(card.dataset.galeraKpi))}catch(e){console.warn('KPIs galeras:',e)}}
+const _phase4Dashboard=dashboard;'''
+          s,n=re.subn(pat,repl,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit(f'phase4 dashboard anchor count {n}')
+
+          marker='reportes=async function(v){'
+          pos=s.rfind(marker)
+          if pos<0: raise SystemExit('active reportes renderer not found')
+          head,tail=s[:pos],s[pos:]
+
+          card='  <div class="report-card"><h3>Pagos · 4 Galeras</h3><p>Consolidado general de VCARS, VCOMP, VIPCO y VINDU.</p><button id="r4">Abrir consolidado</button></div>'
+          comp=card+'\n  <div class="report-card"><h3>🏆 Cierre competitivo de pagos</h3><p>Ranking por las 4 galeras o por supervisoras dentro de una galera, usando el rango seleccionado arriba.</p><button id="rComp">Abrir ranking</button></div>'
+          if card not in tail: raise SystemExit('reports card anchor not found')
+          tail=tail.replace(card,comp,1)
+
+          endgrid='  <div class="report-card"><h3>Bajas Panapass</h3><p>Control de Auto vs último corte ENA para gestionar bajas.</p><button id="rBajas">Abrir bajas</button></div></div>`;'
+          new_endgrid='  <div class="report-card"><h3>Bajas Panapass</h3><p>Control de Auto vs último corte ENA para gestionar bajas.</p><button id="rBajas">Abrir bajas</button></div></div><div id="repCompOut" style="margin-top:14px"></div>`;'
+          if endgrid not in tail: raise SystemExit('reports grid end anchor not found')
+          tail=tail.replace(endgrid,new_endgrid,1)
+
+          old_r4="  document.querySelector('#r4').onclick=async()=>{const r=range(),rows=await rpc('panapass_reporte_pagos_rango',{...r,p_galera:null}),sum={};rows.forEach(x=>sum[x.galera]=(sum[x.galera]||0)+Number(x.a_pagar||0));const a=Object.entries(sum).map(([galera,monto])=>({galera,monto:monto.toFixed(2),registros:rows.filter(x=>x.galera===galera).length}));openDataWindow('Pagos · 4 Galeras',`${r.p_desde} → ${r.p_hasta}`,rowsTable(a,['galera','registros','monto']))};"
+          new_r4="  document.querySelector('#r4').onclick=async()=>{const r=range(),rows=await rpc('panapass_reporte_pagos_4_galeras',r),totalReg=rows.reduce((a,x)=>a+Number(x.registros||0),0),totalMonto=rows.reduce((a,x)=>a+Number(x.monto||0),0),a=[...rows,{galera:'TOTAL',registros:totalReg,monto:totalMonto.toFixed(2)}];openDataWindow('Pagos · 4 Galeras',`${r.p_desde} → ${r.p_hasta}`,rowsTable(a,['galera','registros','monto']))};"
+          if old_r4 not in tail: raise SystemExit('active r4 handler anchor not found')
+          tail=tail.replace(old_r4,new_r4,1)
+
+          before_fon="  document.querySelector('#rFon').onclick=async()=>{"
+          comp_handler=r'''  document.querySelector('#rComp').onclick=()=>{const out=document.querySelector('#repCompOut'),r=range();out.innerHTML=`<div class="panel"><div class="table-summary"><div><h3 style="margin:0">🏆 Cierre competitivo de pagos</h3><span class="muted">${r.p_desde} → ${r.p_hasta}</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="compGal"><option value="TODAS">4 GALERAS</option><option>VCARS</option><option>VCOMP</option><option>VIPCO</option><option>VINDU</option></select><button id="compRun">Generar ranking</button><button id="compCopy" class="soft-btn">Copiar WhatsApp</button></div></div><div id="compData" class="muted" style="margin-top:12px">Selecciona la galera y genera el cierre.</div></div>`;let current=[];const run=async()=>{const gal=document.querySelector('#compGal').value,box=document.querySelector('#compData');box.innerHTML='<div class="card">Calculando ranking...</div>';try{current=await rpc('panapass_reporte_pagos_competencia',{...r,p_galera:gal});const tm=current.reduce((a,x)=>a+Number(x.monto||0),0),tr=current.reduce((a,x)=>a+Number(x.registros||0),0);box.innerHTML=`<div class="kpis"><div class="kpi"><span>Total ciclo</span><strong>${money(tm)}</strong></div><div class="kpi"><span>Pagos</span><strong>${tr}</strong></div><div class="kpi"><span>Participantes</span><strong>${current.length}</strong></div></div><div class="panel mobile-cards" style="margin-top:12px"><div class="table-wrap"><table class="pretty"><thead><tr><th>Pos.</th><th>${gal==='TODAS'?'Galera':'Supervisora'}</th><th>Galera</th><th>Pagos</th><th>Unidades</th><th>Días</th><th>Monto</th><th>Promedio</th></tr></thead><tbody>${current.map(x=>`<tr><td><b>${Number(x.puesto)===1?'🥇':Number(x.puesto)===2?'🥈':Number(x.puesto)===3?'🥉':'#'+x.puesto}</b></td><td><b>${esc(x.entidad)}</b></td><td>${esc(x.galera)}</td><td>${x.registros}</td><td>${x.unidades_pagadas}</td><td>${x.dias_con_pago}</td><td><b>${money(x.monto)}</b></td><td>${money(x.promedio_por_pago)}</td></tr>`).join('')}</tbody></table></div></div>`}catch(x){box.innerHTML=`<div class="alert">${esc(x.message)}</div>`}};document.querySelector('#compRun').onclick=run;document.querySelector('#compCopy').onclick=async()=>{if(!current.length)await run();const gal=document.querySelector('#compGal').value,tm=current.reduce((a,x)=>a+Number(x.monto||0),0),tr=current.reduce((a,x)=>a+Number(x.registros||0),0);let txt=`🏆 *CIERRE DE PAGOS*\n📅 ${r.p_desde} → ${r.p_hasta}\n📍 ${gal==='TODAS'?'4 GALERAS':gal}\n\n`;current.forEach(x=>{const m=Number(x.puesto)===1?'🥇':Number(x.puesto)===2?'🥈':Number(x.puesto)===3?'🥉':'🏁';txt+=`${m} *#${x.puesto} ${x.entidad}*\n💵 ${money(x.monto)} · ${x.registros} pagos · ${x.unidades_pagadas} unidades\n\n`});txt+=`📊 *TOTAL:* ${money(tm)} · ${tr} pagos\n🔥 ¡A seguir compitiendo por el primer lugar!`;try{await navigator.clipboard.writeText(txt);const b=document.querySelector('#compCopy');b.textContent='Copiado ✓';setTimeout(()=>b.textContent='Copiar WhatsApp',1400)}catch(_){prompt('Copia el reporte:',txt)}};run();out.scrollIntoView({behavior:'smooth',block:'start'})};
+'''
+          if before_fon not in tail: raise SystemExit('rFon insertion anchor not found')
+          tail=tail.replace(before_fon,comp_handler+before_fon,1)
+
+          s=head+tail
+          p.write_text(s)
+          checks=['PAGADO EN ${["ENERO"','panapass_dashboard_galeras_7d','id="rComp"','panapass_reporte_pagos_competencia','galera:\'TOTAL\'']
+          missing=[x for x in checks if x not in s]
+          if missing: raise SystemExit('missing patched anchors: '+','.join(missing))
           PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Wire dashboard and competitive payments into active renderers"
+          git push origin HEAD:main
