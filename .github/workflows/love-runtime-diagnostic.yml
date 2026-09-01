@@ -1,0 +1,51 @@
+name: Love runtime diagnostic
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/love-runtime-diagnostic.yml']
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.55.0
+          npx playwright install --with-deps chromium >/dev/null
+      - name: Probe production runtime
+        run: |
+          cat > /tmp/love-diag.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const url='https://portal-ena-rym.almarzayhonly.workers.dev/?love_diag='+Date.now();
+          const b=await chromium.launch({headless:true});
+          const p=await b.newPage();
+          const errors=[]; p.on('pageerror',e=>errors.push(String(e)));
+          await p.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+          await p.waitForTimeout(2500);
+          const before=await p.evaluate(()=>({
+            inline:!!document.querySelector('#rym-aracelys-messages-inline'),
+            external:!!document.querySelector('#rym-aracelys-messages'),
+            flag:window.__RYM_ARACELYS_MESSAGES__===true,
+            stateType:typeof state,
+            reqType:typeof req,
+            restType:typeof rest,
+            ready:document.readyState
+          }));
+          const fake=await p.evaluate(async()=>{
+            if(typeof state==='undefined') return {set:false};
+            state.profile={id:'411317da-bed0-4007-b7a4-612b2f5b5bf7',usuario:'Yhonly',nombre:'Yhonly Almarza',rol:'ADMIN_TOTAL'};
+            await new Promise(r=>setTimeout(r,1600));
+            return {set:true,fab:!!document.querySelector('#rymLoveFab'),header:!!document.querySelector('#rymLoveHeader'),text:document.querySelector('#rymLoveFab')?.textContent||''};
+          });
+          console.log('LOVE_DIAG '+JSON.stringify({url,before,fake,errors}));
+          await b.close();
+          if(!before.inline || !before.flag || before.stateType==='undefined' || !fake.fab) process.exit(2);
+          JS
+          node /tmp/love-diag.mjs
