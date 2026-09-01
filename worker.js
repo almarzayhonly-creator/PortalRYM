@@ -9,9 +9,10 @@ export default {
       headers.set("x-portal-build", "panapass-admin-dashboard-v6");
       const html = await response.text();
       const controller = '<script src="/modules/core/dashboard-payments-enhance.js?v=6" defer></script>';
-      const body = html.includes(controller)
+      const bodyEnd = html.toLowerCase().lastIndexOf("</body>");
+      const body = html.includes(controller) || bodyEnd < 0
         ? html
-        : html.replace(/<\/body\s*>/i, `${controller}</body>`);
+        : html.slice(0, bodyEnd) + controller + html.slice(bodyEnd);
       return new Response(body, {
         status: response.status,
         statusText: response.statusText,
