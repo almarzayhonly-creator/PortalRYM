@@ -5221,6 +5221,7 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 
 
 
+
 <script id="rym-aracelys-messages-inline">
 /* Portal RYM - private welcome messages for Aracelys, controlled only by Yhonly */
 (function(w,d){'use strict';if(w.__RYM_ARACELYS_MESSAGES__)return;w.__RYM_ARACELYS_MESSAGES__=true;
@@ -5453,22 +5454,6 @@ const setCriterion=c=>{criterion=c;v.querySelector('#rrpAmount').classList.toggl
 v.querySelector('#rrpAmount').onclick=()=>{setCriterion('MONTO')};v.querySelector('#rrpCount').onclick=()=>{setCriterion('PAGOS')};v.querySelector('#rrpGo').onclick=paint;v.querySelector('#rrpScope').onchange=paint;v.querySelector('#rrpCopy').onclick=async()=>{if(!rows.length)await paint();const txt=wa(rows,v.querySelector('#rrpScope').value,criterion,v.querySelector('#rrpFrom').value,v.querySelector('#rrpTo').value);try{await navigator.clipboard.writeText(txt);const b=v.querySelector('#rrpCopy'),old=b.textContent;b.textContent='Copiado ✓';setTimeout(()=>b.textContent=old,1000)}catch(_){prompt('Copia el reporte:',txt)}};await paint()}
 function install(){try{ranking=renderRanking;w.ranking=renderRanking}catch(_){}d.addEventListener('click',e=>{const nav=e.target?.closest?.('[data-m="ranking"]');if(!nav)return;e.preventDefault();e.stopImmediatePropagation();try{state.active='ranking';if(typeof shell==='function')shell()}catch(_){}renderRanking(d.querySelector('#view'))},true);let timer=0;new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(()=>{try{if(state?.active!=='ranking')return}catch(_){return}const v=d.querySelector('#view');if(v&&!v.querySelector('[data-rym-final="ranking-criteria"]'))renderRanking(v)},120)}).observe(d.documentElement,{childList:true,subtree:true})}
 install();
-})(window,document);
-
-</script>
-<script id="rym-ranking-owner-lock-inline">
-/* Portal RYM - prevent legacy Ranking renderer from repainting over split criteria */
-(function(w,d){'use strict';if(w.__RYM_RANKING_OWNER_LOCK__)return;w.__RYM_RANKING_OWNER_LOCK__=true;
-let busy=false,timer=0;
-function active(){try{return state?.active==='ranking'}catch(_){return false}}
-function view(){return d.querySelector('#view')}
-function addLegacyMarker(root){if(!root||root.querySelector('[data-rym-final="ranking"]'))return;const x=d.createElement('i');x.setAttribute('data-rym-final','ranking');x.hidden=true;root.prepend(x)}
-async function enforce(){if(busy||!active())return;const v=view();if(!v)return;const current=v.querySelector('[data-rym-final="ranking-criteria"]');if(current){addLegacyMarker(current);return}if(typeof w.ranking!=='function')return;busy=true;try{await w.ranking(v);const root=v.querySelector('[data-rym-final="ranking-criteria"]');if(root)addLegacyMarker(root)}catch(_){}finally{busy=false}}
-function schedule(){clearTimeout(timer);timer=setTimeout(enforce,20)}
-new MutationObserver(schedule).observe(d.documentElement,{childList:true,subtree:true});
-d.addEventListener('click',e=>{if(e.target?.closest?.('[data-m="ranking"]')){setTimeout(enforce,0);setTimeout(enforce,100)}},true);
-setInterval(enforce,700);
-schedule();
 })(window,document);
 
 </script>
