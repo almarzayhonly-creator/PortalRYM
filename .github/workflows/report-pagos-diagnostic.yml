@@ -1,31 +1,31 @@
-name: Pagos report diagnostic
+name: Fix Pagos 4 Galeras report
 on:
   push:
     branches: [main]
     paths: ['.github/workflows/report-pagos-diagnostic.yml']
 permissions:
-  contents: read
+  contents: write
 jobs:
-  inspect:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect pagos report code
+      - name: Patch report
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          s=Path('index.html').read_text()
-          needles=['4 Galeras','fecha_recarga','registros','PANELES','Pagos · 4 Galeras','Pagos - 4 Galeras']
-          for n in needles:
-              print('\n###',n)
-              start=0
-              found=0
-              while True:
-                  i=s.find(n,start)
-                  if i<0: break
-                  found+=1
-                  print('INDEX',i)
-                  print(s[max(0,i-1800):min(len(s),i+2600)])
-                  start=i+len(n)
-                  if found>=8: break
+          p=Path('index.html')
+          s=p.read_text()
+          old="document.querySelector('#r4').onclick=async()=>{const r=range(),rows=await rpc('panapass_reporte_pagos_rango',{...r,p_galera:null}),sum={};rows.forEach(x=>sum[x.galera]=(sum[x.galera]||0)+Number(x.a_pagar||0));const a=Object.entries(sum).map(([galera,monto])=>({galera,monto:monto.toFixed(2),registros:rows.filter(x=>x.galera===galera).length}));openDataWindow('Pagos · 4 Galeras',`${r.p_desde} → ${r.p_hasta}`,rowsTable(a,['galera','registros','monto']))};"
+          new="document.querySelector('#r4').onclick=async()=>{const r=range(),rows=await rpc('panapass_reporte_pagos_4_galeras',r);openDataWindow('Pagos · 4 Galeras',`${r.p_desde} → ${r.p_hasta}`,rowsTable(rows,['galera','registros','monto']))};"
+          n=s.count(old)
+          if n!=1: raise SystemExit(f'expected exactly 1 target, found {n}')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          if "panapass_reporte_pagos_4_galeras" not in s: raise SystemExit('replacement missing')
           PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Fix Pagos 4 Galeras aggregation"
+          git push origin HEAD:main
