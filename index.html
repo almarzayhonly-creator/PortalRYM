@@ -5240,6 +5240,7 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 
 
 
+
 <style id="rym-profile-top-only">#rymLoveFab,#rymYhAlertBadge{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 <script id="rym-aracelys-messages-inline">
 /* Portal RYM - Yhonly private profile + Aracelys welcome + ENA change alerts */
@@ -5275,7 +5276,7 @@ setInterval(tick,700);new MutationObserver(()=>tick()).observe(d.documentElement
 </script>
 <script id="rym-dashboard-payments-inline">
 /* Portal RYM - ADMIN_TOTAL Panapass dashboard V5 */
-(function(w,d){'use strict';if(w.__RYM_ADMIN_DASH_V5__)return;w.__RYM_ADMIN_DASH_V5__=true;
+(function(w,d){'use strict';if(w.__RYM_ADMIN_DASH_V6__)return;w.__RYM_ADMIN_DASH_V6__=true;
 const GALS=['VCARS','VCOMP','VIPCO','VINDU'];
 const norm=s=>String(s||'').trim().toUpperCase();
 const money=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -5325,7 +5326,7 @@ function galCard(r,daily){const g=norm(r?.galera),sum=daily.dates.reduce((a,f)=>
 function adminMarkup(){style();return `<div class="kpis rym-admin-kpis" data-rym-ready="0">${topSkeleton()}</div><div class="dashboard-welcome rym-admin-compact"><div class="welcome-card"><small>Portal RYM</small><h2>Hola, ${esc(displayName())}</h2></div></div><section id="phase4GaleraKpis" class="rym-admin-galeras" data-rym-ready="0">${galSkeleton()}</section>`}
 function renderAdminDashboard(view=d.querySelector('#view')){if(!isAdminTotal()||!view)return false;view.innerHTML=adminMarkup();hydrate(true);bindReport();return true}
 w.__RYM_RENDER_ADMIN_DASH_V5__=renderAdminDashboard;
-function installDashboardOverride(){if(w.__RYM_ADMIN_DASH_OVERRIDE_V5__)return true;if(typeof w.dashboard!=='function')return false;legacyDashboard=w.dashboard;w.dashboard=function(...args){if(!isAdminTotal())return legacyDashboard.apply(this,args);const view=d.querySelector('#view');if(!view)return legacyDashboard.apply(this,args);view.innerHTML=adminMarkup();hydrate();bindReport();return undefined};w.__RYM_ADMIN_DASH_OVERRIDE_V5__=true;return true}
+function installDashboardOverride(){if(w.__RYM_ADMIN_DASH_OVERRIDE_V6__)return true;if(typeof w.dashboard!=='function')return false;legacyDashboard=w.dashboard;w.dashboard=function(...args){if(!isAdminTotal())return legacyDashboard.apply(this,args);const view=d.querySelector('#view');if(!view)return legacyDashboard.apply(this,args);return renderAdminDashboard(view)};w.__RYM_ADMIN_DASH_OVERRIDE_V6__=true;return true}
 function dashboardShell(){if(!isAdminTotal())return null;const view=d.querySelector('#view');if(!view)return null;const welcome=view.querySelector('.dashboard-welcome'),root=view.querySelector('#phase4GaleraKpis');if(!welcome&&!root)return null;style();if(welcome)welcome.classList.add('rym-admin-compact');const top=view.querySelector('.kpis');if(top&&!top.querySelector('.rym-admin-kpi')){top.classList.add('rym-admin-kpis');top.innerHTML=topSkeleton();top.dataset.rymReady='0'}if(root){root.classList.add('rym-admin-galeras');if(!root.querySelector('.galera-kpi-grid')){root.innerHTML=galSkeleton();root.dataset.rymReady='0'}}return {view,welcome,top,root}}
 async function openModule(name,ctx={}){try{if(w.RYM_V171_READY)await w.RYM_V171_READY;if(w.RYM_MODULES?.has(name))return await w.RYM_MODULES.open(name,ctx)}catch(e){console.warn('module open',name,e)}return null}
 function noPanRows(data){const b=data?.bajas||{},alerts=Array.isArray(b.alertas)?b.alertas:[];return alerts.filter(x=>norm(x.tipo)==='PANAPASS_NO_ASIGNADO').map(x=>({unidad:x.unidad||x.numero_unidad||'',placa:x.placa||'',galera:x.galera||'',empresa:x.empresa||x.empresa_operadora||'',detalle:x.detalle||x.mensaje||x.observacion||'Sin número Panapass asignado'}))}
