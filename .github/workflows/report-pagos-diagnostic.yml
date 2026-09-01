@@ -1,31 +1,28 @@
-name: Fix Pagos 4 Galeras report
+name: Inspect dashboard and reports DOM
 on:
   push:
     branches: [main]
     paths: ['.github/workflows/report-pagos-diagnostic.yml']
 permissions:
-  contents: write
+  contents: read
 jobs:
-  patch:
+  inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch report
+      - name: Inspect DOM anchors
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text()
-          old="document.querySelector('#r4').onclick=async()=>{const r=range(),rows=await rpc('panapass_reporte_pagos_rango',{...r,p_galera:null}),sum={};rows.forEach(x=>sum[x.galera]=(sum[x.galera]||0)+Number(x.a_pagar||0));const a=Object.entries(sum).map(([galera,monto])=>({galera,monto:monto.toFixed(2),registros:rows.filter(x=>x.galera===galera).length}));openDataWindow('Pagos · 4 Galeras',`${r.p_desde} → ${r.p_hasta}`,rowsTable(a,['galera','registros','monto']))};"
-          new="document.querySelector('#r4').onclick=async()=>{const r=range(),rows=await rpc('panapass_reporte_pagos_4_galeras',r);openDataWindow('Pagos · 4 Galeras',`${r.p_desde} → ${r.p_hasta}`,rowsTable(rows,['galera','registros','monto']))};"
-          n=s.count(old)
-          if n!=1: raise SystemExit(f'expected exactly 1 target, found {n}')
-          s=s.replace(old,new,1)
-          p.write_text(s)
-          if "panapass_reporte_pagos_4_galeras" not in s: raise SystemExit('replacement missing')
+          s=Path('index.html').read_text()
+          needles=['PAGADO ESTE MES','Pagado este mes','PAGADAS HOY','Pagadas hoy','MONTO PAGADO','Monto pagado','Pagos · 4 Galeras','Pagos por Galera','id="r4"','report-grid','report-card','repDesde','repHasta']
+          for n in needles:
+              print('\n###',n,'COUNT',s.count(n))
+              start=0
+              for k in range(4):
+                  i=s.find(n,start)
+                  if i<0: break
+                  print('INDEX',i)
+                  print(s[max(0,i-1200):min(len(s),i+2200)])
+                  start=i+len(n)
           PY
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "Fix Pagos 4 Galeras aggregation"
-          git push origin HEAD:main
