@@ -1,0 +1,31 @@
+name: Pagos report diagnostic
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/report-pagos-diagnostic.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect pagos report code
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          needles=['4 Galeras','fecha_recarga','registros','PANELES','Pagos · 4 Galeras','Pagos - 4 Galeras']
+          for n in needles:
+              print('\n###',n)
+              start=0
+              found=0
+              while True:
+                  i=s.find(n,start)
+                  if i<0: break
+                  found+=1
+                  print('INDEX',i)
+                  print(s[max(0,i-1800):min(len(s),i+2600)])
+                  start=i+len(n)
+                  if found>=8: break
+          PY
