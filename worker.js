@@ -6,9 +6,9 @@ export default {
 
     if (contentType.includes("text/html")) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
-      headers.set("x-portal-build", "panapass-dashboard-scope-v8");
+      headers.set("x-portal-build", "panapass-dashboard-scope-v9");
       const html = await response.text();
-      const controller = '<script src="/modules/core/dashboard-payments-enhance.js?v=8" defer></script>';
+      const controller = '<script src="/modules/core/dashboard-payments-enhance.js?v=9" defer></script>';
       const bodyEnd = html.toLowerCase().lastIndexOf("</body>");
       const body = html.includes(controller) || bodyEnd < 0
         ? html
