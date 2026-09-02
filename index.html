@@ -5251,6 +5251,7 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 
 
 
+
 <style id="rym-profile-top-only">#rymLoveFab,#rymYhAlertBadge{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 <script id="rym-aracelys-messages-inline">
 /* Portal RYM - Yhonly private profile + Aracelys welcome + ENA change alerts */
@@ -5287,8 +5288,8 @@ setInterval(tick,700);new MutationObserver(()=>tick()).observe(d.documentElement
 
 </script>
 <script id="rym-dashboard-payments-inline">
-/* Portal RYM - Panapass dashboard por alcance V9 */
-(function(w,d){'use strict';if(w.__RYM_ADMIN_DASH_V9__)return;w.__RYM_ADMIN_DASH_V9__=true;
+/* Portal RYM - Panapass dashboard por alcance V11 */
+(function(w,d){'use strict';if(w.__RYM_ADMIN_DASH_V11__)return;w.__RYM_ADMIN_DASH_V11__=true;
 const GALS=['VCARS','VCOMP','VIPCO','VINDU'];
 const norm=s=>String(s||'').trim().toUpperCase();
 const money=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -5303,7 +5304,7 @@ function dateShift(iso,days){const x=new Date(`${iso}T12:00:00-05:00`);x.setDate
 function dayLabel(iso){return new Intl.DateTimeFormat('es-PA',{weekday:'short',timeZone:'America/Panama'}).format(new Date(`${iso}T12:00:00-05:00`)).replace('.','').slice(0,3)}
 function displayName(){const p=currentProfile();return String(p?.nombre||p?.name||'').trim()||'Administrador'}
 function go(mod){try{state.active=mod;shell();render()}catch(e){console.warn('dashboard nav',e)}}
-function style(){if(d.querySelector('#rym-admin-dash-style-v9'))return;const s=d.createElement('style');s.id='rym-admin-dash-style-v9';s.textContent=`
+function style(){if(d.querySelector('#rym-admin-dash-style-v11'))return;const s=d.createElement('style');s.id='rym-admin-dash-style-v11';s.textContent=`
 #view .dashboard-welcome.rym-admin-compact{display:none!important}
 #view .dashboard-welcome.rym-admin-compact .welcome-card{padding:10px 14px!important;min-height:0!important;border-radius:14px!important;background:linear-gradient(135deg,#0b2f6b,#174d98)!important;color:#fff!important;box-shadow:0 8px 22px rgba(15,47,107,.14)!important}
 #view .dashboard-welcome.rym-admin-compact .welcome-card small{opacity:.72!important;color:#dce9ff!important}
@@ -5347,7 +5348,7 @@ function galCard(r,daily,rank={}){const g=norm(r?.galera),neg=Number(r?.negativo
 function adminMarkup(){style();return `<div class="kpis rym-admin-kpis" data-rym-ready="0">${topSkeleton()}</div><section id="phase4GaleraKpis" class="rym-admin-galeras" data-rym-ready="0">${galSkeleton()}</section>`}
 function renderAdminDashboard(view=d.querySelector('#view')){if(!isEnhancedRole()||!view)return false;view.innerHTML=adminMarkup();hydrate(true);bindReport();return true}
 w.__RYM_RENDER_ADMIN_DASH_V5__=renderAdminDashboard;
-function installDashboardOverride(){if(w.__RYM_ADMIN_DASH_OVERRIDE_V9__)return true;if(typeof w.dashboard!=='function')return false;legacyDashboard=w.dashboard;w.dashboard=function(...args){if(!isEnhancedRole())return legacyDashboard.apply(this,args);const view=d.querySelector('#view');if(!view)return legacyDashboard.apply(this,args);return renderAdminDashboard(view)};w.__RYM_ADMIN_DASH_OVERRIDE_V9__=true;return true}
+function installDashboardOverride(){if(w.__RYM_ADMIN_DASH_OVERRIDE_V11__)return true;if(typeof w.dashboard!=='function')return false;legacyDashboard=w.dashboard;w.dashboard=function(...args){if(!isEnhancedRole())return legacyDashboard.apply(this,args);const view=d.querySelector('#view');if(!view)return legacyDashboard.apply(this,args);return renderAdminDashboard(view)};w.__RYM_ADMIN_DASH_OVERRIDE_V11__=true;return true}
 function dashboardShell(){if(!isEnhancedRole())return null;const view=d.querySelector('#view');if(!view)return null;const welcome=view.querySelector('.dashboard-welcome'),root=view.querySelector('#phase4GaleraKpis');if(!welcome&&!root)return null;style();if(welcome)welcome.classList.add('rym-admin-compact');const top=view.querySelector('.kpis');if(top&&!top.querySelector('.rym-admin-kpi')){top.classList.add('rym-admin-kpis');top.innerHTML=topSkeleton();top.dataset.rymReady='0'}if(root){root.classList.add('rym-admin-galeras');if(!root.querySelector('.galera-kpi-grid')){root.innerHTML=galSkeleton();root.dataset.rymReady='0'}}return {view,welcome,top,root}}
 async function openModule(name,ctx={}){try{if(w.RYM_V171_READY)await w.RYM_V171_READY;if(w.RYM_MODULES?.has(name))return await w.RYM_MODULES.open(name,ctx)}catch(e){console.warn('module open',name,e)}return null}
 function noPanRows(data){const b=data?.bajas||{},alerts=Array.isArray(b.alertas)?b.alertas:[];return alerts.filter(x=>norm(x.tipo)==='PANAPASS_NO_ASIGNADO').map(x=>({unidad:x.unidad||x.numero_unidad||'',placa:x.placa||'',galera:x.galera||'',empresa:x.empresa||x.empresa_operadora||'',detalle:x.detalle||x.mensaje||x.observacion||'Sin número Panapass asignado'}))}
