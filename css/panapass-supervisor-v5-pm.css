@@ -1,0 +1,15 @@
+/* Portal RYM · Supervisor PM success state */
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-performance-strip.pm.supervisor{grid-template-columns:minmax(280px,1.1fr) minmax(300px,.9fr)!important;background:linear-gradient(120deg,#f6fffa,#f4fbff)!important;border-color:#cfe9dc!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-performance-strip.pm.supervisor.perfect{background:linear-gradient(120deg,#effcf5,#f8fffb)!important;box-shadow:0 12px 28px rgba(8,122,69,.10)!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-performance-strip.pm.supervisor.perfect .rym-p3-phase-lead>strong{color:#087a45!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-performance-strip.pm.supervisor.perfect .rym-p3-perf-card.best{border-color:#9fd8b7!important;background:linear-gradient(145deg,#ffffff,#f0fff6)!important}
+
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p5-rank-panel.rym-p5-perfect,
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-rank-panel.rym-p5-perfect{border-color:#a9dfbf!important;background:linear-gradient(145deg,#ffffff,#f4fff8)!important;box-shadow:0 12px 30px rgba(8,122,69,.10)!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-rank-panel.rym-p5-perfect .rym-rank-hero{background:linear-gradient(135deg,#087a45,#13a966)!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p5-result-badge{position:absolute;top:12px;right:12px;z-index:3;display:inline-flex;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);font-size:9px;font-weight:950;letter-spacing:.04em;color:#fff}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p5-result-badge.perfect{background:#e9fff2!important;border-color:#b8ebca!important;color:#087a45!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p5-rank-live .rym-rank-row.rym-p5-zero-paid{background:#f3fff7!important;border-color:#bfe5cd!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p5-rank-live .rym-rank-row.rym-p5-zero-paid .rym-rank-value{color:#087a45!important}
+
+@media(max-width:900px){body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-performance-strip.pm.supervisor{grid-template-columns:1fr!important}}
