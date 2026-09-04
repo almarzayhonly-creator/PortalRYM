@@ -1,4 +1,4 @@
-/* Portal RYM V171 - Panapass Ranking (parallel module, no legacy takeover) */
+/* Portal RYM Architecture V2 - Panapass Ranking */
 (function(w){
   'use strict';
   if(w.RYM_PANAPASS_RANKING) return;
@@ -10,20 +10,34 @@
   const text=v=>String(v??'').trim();
   const esc=v=>text(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  function portalState(){
-    try{return w.state||(typeof state!=='undefined'?state:null)}catch(_){return w.state||null}
+  function isModuleContext(value){
+    return !!(value&&typeof value==='object'&&value.api&&value.session);
   }
-  function role(){return text(portalState()?.profile?.rol).toUpperCase()}
-  function isAdminRole(){return ADMIN_ROLES.includes(role())}
-  function rpcFn(){
-    try{
-      const fn=w.rpc||(typeof rpc==='function'?rpc:null);
-      if(typeof fn!=='function')throw new Error('Ranking Panapass: RPC no disponible');
-      return fn;
-    }catch(e){throw e instanceof Error?e:new Error('Ranking Panapass: RPC no disponible')}
+
+  function contextFrom(input){
+    if(isModuleContext(input)) return input;
+    if(input&&isModuleContext(input.context)) return input.context;
+    if(input&&isModuleContext(input.rymContext)) return input.rymContext;
+    if(w.RYM_CONTEXT&&typeof w.RYM_CONTEXT.create==='function') return w.RYM_CONTEXT.create('panapass-ranking');
+    return null;
   }
-  function profileOpener(){
-    try{return w.openSupervisoraProfile||(typeof openSupervisoraProfile==='function'?openSupervisoraProfile:null)}catch(_){return w.openSupervisoraProfile||null}
+
+  function requireContext(input){
+    const context=contextFrom(input);
+    if(!context) throw new Error('Ranking Panapass: RYM_CONTEXT no disponible');
+    if(!context.api?.panapass?.ranking) throw new Error('Ranking Panapass: API de ranking no disponible');
+    return context;
+  }
+
+  function sessionProfile(input){
+    const context=contextFrom(input);
+    return input?.profile||context?.session?.profile||{};
+  }
+
+  function sessionRole(input){
+    const context=contextFrom(input);
+    const profile=sessionProfile(input);
+    return text(input?.role||context?.session?.role||profile?.rol).toUpperCase();
   }
 
   function canonicalRow(row){
@@ -60,11 +74,11 @@
     });
   }
 
-  async function load(){
-    const call=rpcFn();
+  async function load(ctx){
+    const context=requireContext(ctx);
     const [dia,mes]=await Promise.all([
-      call(SOURCE,{p_periodo:'DIA'}),
-      call(SOURCE,{p_periodo:'MES'})
+      context.api.panapass.ranking('DIA'),
+      context.api.panapass.ranking('MES')
     ]);
     return normalizeDataset({DIA:dia||[],MES:mes||[]});
   }
@@ -76,10 +90,10 @@
 
   function initialGalera(dataset,ctx={}){
     const d=normalizeDataset(dataset),gals=galeras(d);
-    const st=portalState(),profile=ctx.profile||st?.profile||{};
-    const currentRole=text(ctx.role||profile.rol).toUpperCase();
+    const profile=sessionProfile(ctx);
+    const currentRole=sessionRole(ctx);
     if(ADMIN_ROLES.includes(currentRole))return 'TODAS';
-    const me=d.DIA.find(x=>text(x.id)===text(profile.supervisora_id));
+    const me=d.DIA.find(x=>text(x.id)===text(profile?.supervisora_id));
     return me?.galera||gals[0]||'TODAS';
   }
 
@@ -123,28 +137,39 @@
   function render(target,dataset,opts={}){
     const host=typeof target==='string'?document.querySelector(target):target;
     if(!host) throw new Error('Ranking Panapass: contenedor no encontrado');
+    const context=contextFrom(opts);
     const data=normalizeDataset(dataset),available=galeras(data);
-    const selectedGalera=opts.galera||initialGalera(data,opts);
+    const selectedGalera=opts.galera||initialGalera(data,{...opts,context});
     const m=model(data,{...opts,galera:selectedGalera});
-    const canAll=ADMIN_ROLES.includes(text(opts.role||portalState()?.profile?.rol).toUpperCase());
+    const canAll=ADMIN_ROLES.includes(sessionRole({...opts,context}));
     const dayDate=data.DIA[0]?.fechaDesde||'';
     host.innerHTML=`<section class="v171-ranking" data-v171-ranking="1"><header class="v171-rank-head"><div><h2>Ranking Panapass</h2><p>Resultado de cobranza · menor resultado = mejor posición.</p></div><span class="v171-rank-source">${esc(SOURCE)}</span></header><div class="v171-rank-toolbar"><label>Galera<select data-rank-galera>${canAll?'<option value="TODAS">Todas las 4 galeras</option>':''}${available.map(g=>`<option value="${esc(g)}" ${g===m.galera?'selected':''}>${esc(g)}</option>`).join('')}</select></label><label>Periodo<select data-rank-period><option value="DIA" ${m.period==='DIA'?'selected':''}>Día / último cierre${dayDate?' · '+esc(dayDate):''}</option><option value="MES" ${m.period==='MES'?'selected':''}>Mes</option></select></label><div><span>Estadística</span><div class="v171-rank-switch"><button type="button" data-rank-metric="unidades" class="${m.metric==='unidades'?'active':''}">Menos unidades pagadas</button><button type="button" data-rank-metric="monto" class="${m.metric==='monto'?'active':''}">Menor monto pagado</button></div></div></div><div class="v171-rank-summary"><h3>Ranking · ${m.metric==='unidades'?'Menos unidades pagadas':'Menor monto pagado'}</h3><span>${m.rows.length} cobradoras · ${m.period==='DIA'?'último cierre':'mes'}</span></div><div class="v171-rank-podium">${m.podio.map((r,i)=>podiumCard(r,m.metric,i+1)).join('')||'<div class="v171-rank-empty">Sin datos para estos filtros.</div>'}</div>${pyramid(m.resto,m.metric)}</section>`;
 
-    const rerender=next=>render(host,data,{...opts,galera:m.galera,period:m.period,metric:m.metric,...next});
+    const rerender=next=>render(host,data,{...opts,context,galera:m.galera,period:m.period,metric:m.metric,...next});
     const g=host.querySelector('[data-rank-galera]');if(g){g.value=m.galera;g.onchange=()=>rerender({galera:g.value})}
     const p=host.querySelector('[data-rank-period]');if(p)p.onchange=()=>rerender({period:p.value});
     host.querySelectorAll('[data-rank-metric]').forEach(b=>b.onclick=()=>rerender({metric:b.dataset.rankMetric}));
-    host.querySelectorAll('[data-sup-id]').forEach(el=>el.onclick=()=>{if(!el.dataset.supId)return;const open=profileOpener();if(typeof open==='function')open(el.dataset.supId)});
+    host.querySelectorAll('[data-sup-id]').forEach(el=>el.onclick=()=>{
+      if(!el.dataset.supId)return;
+      const open=context?.api?.panapass?.openSupervisoraProfile;
+      if(typeof open==='function')open(el.dataset.supId);
+    });
     return m;
   }
 
   async function open(ctx={}){
-    const target=ctx.target||'#view';
+    const context=requireContext(ctx);
+    const options=isModuleContext(ctx)?{}:ctx;
+    const target=options.target||context.root||'#view';
     const host=typeof target==='string'?document.querySelector(target):target;
     if(!host)throw new Error('Ranking Panapass: contenedor no encontrado');
-    if(!ctx.dataset&&!ctx.rows)host.innerHTML='<div class="card">Cargando ranking de pagos...</div>';
-    const data=ctx.dataset?normalizeDataset(ctx.dataset):ctx.rows?normalizeDataset({[String(ctx.period||'MES').toUpperCase()]:ctx.rows}):await load();
-    return render(host,data,ctx);
+    if(!options.dataset&&!options.rows)host.innerHTML='<div class="card">Cargando ranking de pagos...</div>';
+    const data=options.dataset
+      ? normalizeDataset(options.dataset)
+      : options.rows
+        ? normalizeDataset({[String(options.period||'MES').toUpperCase()]:options.rows})
+        : await load(context);
+    return render(host,data,{...options,context});
   }
 
   const api=Object.freeze({SOURCE,PERIODS,ADMIN_ROLES,canonicalRow,sortRows,normalizeDataset,load,galeras,initialGalera,selectRows,model,render,open});
