@@ -13,3 +13,77 @@ body[data-rym-module="panapass"] .rym-module-accent-bg{background:var(--rym-acce
 @media(max-width:900px){.v171-rec-toolbar{grid-template-columns:1fr 1fr}.v171-rec-mode{grid-column:1/-1}}
 @media(max-width:760px){.v171-rank-head{align-items:stretch;flex-direction:column}.v171-rank-toolbar{grid-template-columns:1fr}.v171-rank-toolbar>div:last-child{grid-column:auto}.v171-rank-switch{display:grid;grid-template-columns:1fr}.v171-rank-podium{grid-template-columns:1fr}.v171-rank-tier-grid{grid-template-columns:1fr 1fr}.v171-rank-summary,.v171-rank-route>header{align-items:flex-start;flex-direction:column}.v171-rec-toolbar,.v171-rec-summary{grid-template-columns:1fr}.v171-rec-table thead{display:none}.v171-rec-table table,.v171-rec-table tbody,.v171-rec-table tr,.v171-rec-table td{display:block;width:100%}.v171-rec-table tr{padding:8px 11px;border-bottom:8px solid #eef3f8}.v171-rec-table td{display:flex;justify-content:space-between;gap:12px;text-align:right}.v171-rec-table td:before{content:attr(data-label);font-size:9px;font-weight:900;color:#6c7b90;text-transform:uppercase}.v171-rec-pager{align-items:flex-start;flex-direction:column}}
 @media(max-width:480px){.v171-rank-tier-grid{grid-template-columns:1fr}}
+
+/* Architecture V2 visual isolation demo - Panapass only */
+body[data-rym-module="panapass"] #view{
+  --pp-v2-navy:#0b2f66;
+  --pp-v2-teal:#0f766e;
+  --pp-v2-orange:#f59e0b;
+  --pp-v2-border:#d7e4ee;
+  position:relative;
+  background:linear-gradient(180deg,#edf6fb 0%,#f7fafc 58%,#f8fafc 100%);
+  border-radius:24px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+body[data-rym-module="panapass"] #view::before{
+  content:"DISEÑO V2 · PANAPASS";
+  position:absolute;
+  z-index:20;
+  top:10px;
+  right:14px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--pp-v2-navy),var(--pp-v2-teal));
+  color:#fff;
+  box-shadow:0 6px 18px rgba(11,47,102,.18);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  pointer-events:none;
+}
+body[data-rym-module="panapass"] #view :where(.card,article,[class*="kpi"],[class*="summary"],[class*="panel"]){
+  border-color:var(--pp-v2-border)!important;
+  box-shadow:0 10px 28px rgba(29,78,116,.08);
+}
+body[data-rym-module="panapass"] #view :where(input,select,textarea){
+  border-radius:12px!important;
+  border-color:#c8d9e5!important;
+  background:#fff!important;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+body[data-rym-module="panapass"] #view :where(input,select,textarea):focus{
+  outline:none;
+  border-color:var(--pp-v2-teal)!important;
+  box-shadow:0 0 0 3px rgba(15,118,110,.12)!important;
+}
+body[data-rym-module="panapass"] #view button{
+  border-radius:12px!important;
+  transition:transform .14s ease,box-shadow .14s ease,filter .14s ease;
+}
+body[data-rym-module="panapass"] #view button:hover:not(:disabled){
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(11,47,102,.14);
+}
+body[data-rym-module="panapass"] #view :where(table){
+  border-collapse:separate;
+  border-spacing:0;
+}
+body[data-rym-module="panapass"] #view :where(thead th){
+  background:linear-gradient(90deg,var(--pp-v2-navy),#174d92)!important;
+  color:#fff!important;
+  border-bottom-color:transparent!important;
+}
+body[data-rym-module="panapass"] #view :where(tbody tr){
+  transition:background .14s ease,transform .14s ease;
+}
+body[data-rym-module="panapass"] #view :where(tbody tr:hover){
+  background:#f0f8f7!important;
+}
+body[data-rym-module="panapass"] #view :where(h1,h2,h3){
+  color:var(--pp-v2-navy);
+  letter-spacing:-.02em;
+}
+body[data-rym-module="panapass"] #view :where(.v171-bajas-status,.v171-rec-level){
+  box-shadow:inset 0 0 0 1px rgba(15,23,42,.04);
+}
+@media(max-width:760px){body[data-rym-module="panapass"] #view{border-radius:16px}body[data-rym-module="panapass"] #view::before{position:static;display:inline-flex;margin:8px 10px}}
