@@ -5,6 +5,7 @@
 
   const originals=new Map();
   const wrappers=new Map();
+  const routing=new Set();
   const definitions=[
     {key:'panapass',global:'v70OpenPanapass',module:'panapass'},
     {key:'revisados',global:'v60OpenRevisados',module:'revisados'},
@@ -22,10 +23,26 @@
     if(typeof current!=='function')return false;
     if(current&&current.__rymV2RouteBridge===def.module)return true;
 
-    originals.set(def.key,current);
+    /* Capture the canonical legacy implementation once. Later legacy wrappers
+       may replace window[name], but they must never replace this preserved entrypoint. */
+    if(!originals.has(def.key)) originals.set(def.key,current);
+
     const wrapped=async function(...args){
-      if(!w.RYM_MODULES||typeof w.RYM_MODULES.open!=='function')return current.apply(this,args);
-      return w.RYM_MODULES.open(def.module,{legacyArgs:args,source:'legacy-entrypoint'});
+      const canonical=originals.get(def.key);
+      if(!w.RYM_MODULES||typeof w.RYM_MODULES.open!=='function'){
+        if(typeof canonical!=='function') throw new Error(def.module+' canonical entrypoint unavailable');
+        return canonical.apply(this,args);
+      }
+      if(routing.has(def.module)){
+        if(typeof canonical!=='function') throw new Error(def.module+' canonical entrypoint unavailable');
+        return canonical.apply(this,args);
+      }
+      routing.add(def.module);
+      try{
+        return await w.RYM_MODULES.open(def.module,{legacyArgs:args,source:'legacy-entrypoint'});
+      }finally{
+        routing.delete(def.module);
+      }
     };
     Object.defineProperty(wrapped,'__rymV2RouteBridge',{value:def.module});
     wrappers.set(def.global,wrapped);
@@ -39,7 +56,7 @@
     if(homeWrapper&&current===homeWrapper)return true;
     if(typeof current!=='function')return false;
     if(current&&current.__rymV2RouteBridge==='home')return true;
-    originalHome=current;
+    if(!originalHome) originalHome=current;
     homeWrapper=async function(...args){
       if(w.RYM_MODULES&&typeof w.RYM_MODULES.unmount==='function')await w.RYM_MODULES.unmount();
       return originalHome.apply(this,args);
