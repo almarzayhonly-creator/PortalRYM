@@ -7,6 +7,8 @@ const fail = msg => { console.error('ARCH_V2_FAIL:', msg); process.exitCode = 1;
 const ok = msg => console.log('ARCH_V2_OK:', msg);
 
 const loader = read('modules/v171-loader.js');
+const registry = read('modules/core/module-registry.js');
+const styleManager = read('modules/core/style-manager.js');
 const panapass = read('modules/panapass/index.js');
 const ranking = read('modules/panapass/ranking/index.js');
 const recurrentes = read('modules/panapass/recurrentes/index.js');
@@ -20,6 +22,9 @@ const rankingCriteria = read('modules/panapass/ranking/criteria-final.js');
 const rankingClickfix = read('modules/panapass/ranking/criteria-clickfix.js');
 const rankingOwnerLock = read('modules/panapass/ranking/owner-lock.js');
 const gps = read('modules/gps/index.js');
+const revisados = read('modules/revisados/index.js');
+const controlAuto = read('modules/control-auto/index.js');
+const usuarios = read('modules/usuarios/index.js');
 const context = read('modules/core/context.js');
 const events = read('modules/core/event-bus.js');
 const coreDashboardShim = read('modules/core/dashboard-payments-enhance.js');
@@ -30,6 +35,8 @@ const coreClickfixShim = read('modules/core/panapass-ranking-criteria-clickfix.j
 const coreOwnerLockShim = read('modules/core/panapass-ranking-owner-lock.js');
 
 for (const file of [
+  'modules/core/module-registry.js',
+  'modules/core/style-manager.js',
   'modules/core/event-bus.js',
   'modules/core/context.js',
   'modules/panapass/pagos/index.js',
@@ -44,6 +51,25 @@ for (const file of [
   if (!loader.includes(file)) fail(`loader no carga ${file}`); else ok(`loader carga ${file}`);
 }
 
+if (!/const css=\['\/css\/core\.css'\]/.test(loader)) fail('Loader todavia precarga CSS de dominio'); else ok('Loader solo precarga core.css');
+for (const css of ['/css/panapass.css','/css/panapass-bajas.css','/css/revisados.css','/css/control-auto.css','/css/gps.css','/css/usuarios.css']) {
+  if (loader.includes(`'${css}'`) && !styleManager.includes(css)) fail(`Loader contiene CSS de dominio fuera del style manager: ${css}`);
+}
+if (!/RYM_STYLES/.test(loader)) fail('Loader no exige style manager'); else ok('Loader exige style manager');
+
+for (const [domain, css] of [
+  ['panapass','/css/panapass.css'],['panapass','/css/panapass-bajas.css'],['gps','/css/gps.css'],['revisados','/css/revisados.css'],['control-auto','/css/control-auto.css'],['usuarios','/css/usuarios.css']
+]) {
+  if (!styleManager.includes(css)) fail(`Style manager no registra ${css}`); else ok(`Style manager registra ${domain}: ${css}`);
+}
+if (!/disableOthers/.test(styleManager) || !/link\.disabled/.test(styleManager)) fail('Style manager no desactiva CSS de dominios inactivos'); else ok('Style manager desactiva CSS de dominios inactivos');
+if (!/panapass-ranking/.test(styleManager) || !/panapass-recurrentes/.test(styleManager)) fail('Style manager no mapea submodulos Panapass'); else ok('Submodulos Panapass comparten dominio CSS');
+
+if (!/await unmount\(active\)/.test(registry)) fail('Registry no desmonta modulo anterior'); else ok('Registry desmonta modulo anterior');
+if (!/RYM_STYLES.*activate/.test(registry)) fail('Registry no activa estilos por modulo'); else ok('Registry activa estilos por modulo');
+if (!/RYM_STYLES.*deactivate/.test(registry)) fail('Registry no desactiva estilos al desmontar'); else ok('Registry desactiva estilos al desmontar');
+if (!/current/.test(registry)) fail('Registry no expone modulo activo'); else ok('Registry expone modulo activo');
+
 if (/v70OpenPanapass/.test(panapass)) fail('boundary Panapass aun llama v70OpenPanapass directamente'); else ok('boundary Panapass no llama legacy directamente');
 if (!/RYM_CONTEXT/.test(panapass) || !/context\.api\.panapass/.test(panapass)) fail('Panapass no consume el contrato RYM_CONTEXT'); else ok('Panapass consume RYM_CONTEXT');
 if (!/mount/.test(panapass) || !/unmount/.test(panapass)) fail('Panapass no expone mount/unmount'); else ok('Panapass expone mount/unmount');
@@ -51,6 +77,14 @@ if (/modules\/gps|RYM_GPS|v113OpenGps/.test(panapass)) fail('Panapass tiene depe
 if (/modules\/panapass|RYM_PANAPASS|v70OpenPanapass/.test(gps)) fail('GPS tiene dependencia directa de Panapass'); else ok('GPS no depende directamente de Panapass');
 if (!/Object\.freeze/.test(context) || !/Object\.freeze/.test(events)) fail('core V2 no congela contratos publicos'); else ok('core V2 expone contratos congelados');
 if (!/module:mounted/.test(panapass) || !/module:unmounted/.test(panapass)) fail('Panapass no publica eventos de ciclo de vida'); else ok('Panapass publica eventos de ciclo de vida');
+
+for (const [name, code, dataset] of [
+  ['GPS',gps,'gps'],['Revisados',revisados,'revisados'],['Control Auto',controlAuto,'control-auto'],['Usuarios',usuarios,'usuarios']
+]) {
+  if (!/unmount/.test(code)) fail(`${name} no implementa unmount`); else ok(`${name} implementa unmount`);
+  const cleanup = new RegExp(`dataset\\.rymModule===['\"]${dataset.replace('-','\\-')}['\"]`);
+  if (!cleanup.test(code)) fail(`${name} no limpia body[data-rym-module]`); else ok(`${name} limpia body[data-rym-module]`);
+}
 
 const modules = [
   ['Ranking', ranking, /context\.api\.panapass\.ranking|context\?\.api\?\.panapass\?\.openSupervisoraProfile/],
@@ -63,7 +97,6 @@ const forbiddenGlobals = [
   ['window.state', /\bw\.state\b|\bwindow\.state\b/],
   ['window.rpc', /\bw\.rpc\b|\bwindow\.rpc\b/]
 ];
-
 for (const [name, code, expectedApi] of modules) {
   for (const [label, re] of forbiddenGlobals) {
     if (re.test(code)) fail(`${name} Panapass depende de ${label}`); else ok(`${name} Panapass no depende de ${label}`);
