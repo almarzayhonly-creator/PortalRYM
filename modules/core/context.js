@@ -12,10 +12,14 @@
   function session(){
     const state = w.state || null;
     const profile = state && state.profile ? state.profile : null;
+    const meta = state && state.meta ? state.meta : null;
     return Object.freeze({
       profile,
       role: profile && profile.rol ? String(profile.rol) : '',
-      userId: profile && (profile.id || profile.user_id) ? String(profile.id || profile.user_id) : ''
+      userId: profile && (profile.id || profile.user_id) ? String(profile.id || profile.user_id) : '',
+      meta: Object.freeze({
+        maxPago: meta && meta.max_pago ? String(meta.max_pago) : ''
+      })
     });
   }
 
@@ -30,6 +34,8 @@
       const period = String(periodo || 'DIA').toUpperCase() === 'MES' ? 'MES' : 'DIA';
       return legacyRpc('panapass_ranking_pagos', {p_periodo: period});
     },
+    recurrentes: (params) => legacyRpc('panapass_recurrentes_entidad', params || {}),
+    bajas: () => legacyRpc('panapass_bajas_listar_v5', {}),
     openSupervisoraProfile,
     openLegacy: () => {
       if(typeof w.v70OpenPanapass !== 'function') throw new Error('Panapass canonical entrypoint unavailable');
