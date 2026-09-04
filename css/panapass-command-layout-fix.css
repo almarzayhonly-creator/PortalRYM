@@ -1,0 +1,167 @@
+/* Portal RYM · Panapass Command Center layout correction
+   High-specificity compatibility layer over the legacy 12-column dashboard grid. */
+
+body[data-rym-module="panapass"].rym-panapass-command #view .kpis.rym-admin-kpis.rym-command-shell{
+  display:block!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+  grid-auto-columns:auto!important;
+  grid-auto-rows:auto!important;
+  grid-auto-flow:row!important;
+  gap:0!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0 0 24px!important;
+  padding:0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-shell > *{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  grid-column:1 / -1!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-header{
+  box-sizing:border-box!important;
+  min-height:82px!important;
+  padding:2px 2px 0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-header h1{
+  font-size:34px!important;
+  line-height:1.05!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-pulse{
+  box-sizing:border-box!important;
+  min-height:46px!important;
+  margin:0 0 22px!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-attention-section{
+  display:block!important;
+  margin:0 0 22px!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-attention-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(220px,1fr))!important;
+  gap:14px!important;
+  width:100%!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-attention-grid > .rym-admin-kpi{
+  grid-column:auto!important;
+  width:auto!important;
+  min-width:0!important;
+  min-height:176px!important;
+  padding:18px!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-middle{
+  display:grid!important;
+  grid-template-columns:minmax(0,2fr) minmax(300px,.72fr)!important;
+  gap:16px!important;
+  align-items:stretch!important;
+  width:100%!important;
+  margin:0 0 28px!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-payment-section,
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-context{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-payment-body{
+  display:grid!important;
+  grid-template-columns:minmax(210px,.55fr) minmax(0,1.45fr)!important;
+  gap:14px!important;
+  width:100%!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-payment-body > .rym-admin-kpi{
+  grid-column:auto!important;
+  width:auto!important;
+  min-width:0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-payment-body .rym-exec-strip{
+  grid-column:auto!important;
+  width:auto!important;
+  min-width:0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-context-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:10px!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-context-grid > .rym-admin-kpi{
+  grid-column:auto!important;
+  width:auto!important;
+  min-width:0!important;
+}
+
+/* Galera section remains a two-column comparison surface on desktop. */
+body[data-rym-module="panapass"].rym-panapass-command #view #phase4GaleraKpis.rym-command-galeras{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-galeras > .galera-kpi-title{
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 14px!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-galeras .galera-kpi-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:16px!important;
+  width:100%!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-galera{
+  width:auto!important;
+  min-width:0!important;
+}
+
+/* Give the main view comfortable breathing room on large monitors without creating dead space. */
+body[data-rym-module="panapass"].rym-panapass-command #view{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:none!important;
+}
+
+@media(max-width:1180px){
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-middle{
+    grid-template-columns:1fr!important;
+  }
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-context-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:900px){
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-attention-grid,
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-galeras .galera-kpi-grid,
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-payment-body{
+    grid-template-columns:1fr!important;
+  }
+}
+
+@media(max-width:680px){
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-context-grid{
+    grid-template-columns:1fr!important;
+  }
+  body[data-rym-module="panapass"].rym-panapass-command #view .rym-command-header h1{
+    font-size:28px!important;
+  }
+}
