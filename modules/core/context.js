@@ -19,15 +19,27 @@
     });
   }
 
+  function openSupervisoraProfile(id){
+    const fn = w.openSupervisoraProfile || (typeof openSupervisoraProfile === 'function' ? openSupervisoraProfile : null);
+    if(typeof fn !== 'function') return null;
+    return fn(id);
+  }
+
+  const panapassApi = Object.freeze({
+    ranking: (periodo) => {
+      const period = String(periodo || 'DIA').toUpperCase() === 'MES' ? 'MES' : 'DIA';
+      return legacyRpc('panapass_ranking_pagos', {p_periodo: period});
+    },
+    openSupervisoraProfile,
+    openLegacy: () => {
+      if(typeof w.v70OpenPanapass !== 'function') throw new Error('Panapass canonical entrypoint unavailable');
+      return w.v70OpenPanapass();
+    }
+  });
+
   const api = Object.freeze({
     call: legacyRpc,
-    panapass: Object.freeze({
-      ranking: (periodo) => legacyRpc('panapass_ranking_pagos', {p_periodo: periodo}),
-      openLegacy: () => {
-        if(typeof w.v70OpenPanapass !== 'function') throw new Error('Panapass canonical entrypoint unavailable');
-        return w.v70OpenPanapass();
-      }
-    })
+    panapass: panapassApi
   });
 
   function create(moduleId, extra){
