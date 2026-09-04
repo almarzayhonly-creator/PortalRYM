@@ -49,6 +49,13 @@
     return Number.isFinite(n)?n:0;
   }
 
+  function shortMoney(raw,value){
+    if(!value)return '—';
+    const clean=String(raw||'').replace(/\s+/g,' ').trim();
+    if(clean && /B\/\./i.test(clean)) return clean.replace(/\s+/g,' ');
+    return `B/. ${Number(value).toFixed(2)}`;
+  }
+
   function enhanceTop(top){
     if(!top||top.dataset.p2Enhanced==='1'||top.dataset.rymReady!=='1')return false;
     const cards=cardMap(top),exec=top.querySelector('.rym-exec-strip');
@@ -103,8 +110,9 @@
     const rank=String(rankNode?.textContent||'').trim();
     const rankClass=rankNode?.classList.contains('best')?'best':rankNode?.classList.contains('watch')?'watch':'';
     const palette=['#1570ef','#10a37f','#7c3aed','#f59e0b'];const color=palette[index%palette.length];
-    const vals=days.map(amountFromDay),positive=vals.filter(v=>v>0),mean=positive.length?positive.reduce((a,b)=>a+b,0)/positive.length:0,max=Math.max(...vals,1);
-    const bars=vals.map(v=>`<i style="height:${v>0?Math.max(18,Math.round((v/max)*100)):10}%"></i>`).join('');
+    const meta=days.map(day=>({day:(txt(day,'span')||'').slice(0,3).toUpperCase(),raw:txt(day,'b'),value:amountFromDay(day)}));
+    const vals=meta.map(x=>x.value),positive=vals.filter(v=>v>0),mean=positive.length?positive.reduce((a,b)=>a+b,0)/positive.length:0,max=Math.max(...vals,1);
+    const bars=meta.map(x=>`<div class="rym-p2-bar-day" title="${esc(x.day)} · ${esc(shortMoney(x.raw,x.value))}"><strong>${esc(shortMoney(x.raw,x.value))}</strong><span class="rym-p2-bar-track"><i style="height:${x.value>0?Math.max(18,Math.round((x.value/max)*100)):10}%"></i></span><span>${esc(x.day||'—')}</span></div>`).join('');
 
     const topbar=el('div','rym-p2-gal-top');
     topbar.style.setProperty('--gal-color',color);
