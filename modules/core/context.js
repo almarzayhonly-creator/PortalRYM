@@ -29,6 +29,14 @@
     return fn(id);
   }
 
+  function openRoute(moduleName){
+    const state = w.state || null;
+    if(state) state.active = moduleName;
+    if(typeof w.shell === 'function') w.shell();
+    if(typeof w.render === 'function') return w.render();
+    return null;
+  }
+
   const panapassApi = Object.freeze({
     ranking: (periodo) => {
       const period = String(periodo || 'DIA').toUpperCase() === 'MES' ? 'MES' : 'DIA';
@@ -50,6 +58,11 @@
     panapass: panapassApi
   });
 
+  const router = Object.freeze({
+    home: () => typeof w.v36PortalHome === 'function' ? w.v36PortalHome() : null,
+    open: openRoute
+  });
+
   function create(moduleId, extra){
     const id = String(moduleId || '');
     if(!id) throw new Error('moduleId requerido');
@@ -59,12 +72,10 @@
       session: session(),
       api,
       events: w.RYM_EVENTS,
-      router: Object.freeze({
-        home: () => typeof w.v36PortalHome === 'function' ? w.v36PortalHome() : null
-      }),
+      router,
       extra: Object.freeze(extra || {})
     });
   }
 
-  w.RYM_CONTEXT = Object.freeze({create, api, session});
+  w.RYM_CONTEXT = Object.freeze({create, api, session, router});
 })(window,document);
