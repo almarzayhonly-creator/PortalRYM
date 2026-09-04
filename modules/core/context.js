@@ -36,6 +36,8 @@
     },
     recurrentes: (params) => legacyRpc('panapass_recurrentes_entidad', params || {}),
     bajas: () => legacyRpc('panapass_bajas_listar_v5', {}),
+    pagos7d: () => legacyRpc('panapass_dashboard_pagos_7d', {}),
+    negativosActual: (params) => legacyRpc('panapass_portal_negativos_actual', params || {}),
     openSupervisoraProfile,
     openLegacy: () => {
       if(typeof w.v70OpenPanapass !== 'function') throw new Error('Panapass canonical entrypoint unavailable');
