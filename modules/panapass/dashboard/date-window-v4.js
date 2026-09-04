@@ -39,7 +39,7 @@
     const startDate=shiftISO(endDate,-6),key=`${startDate}:${endDate}`;
     if(cache.has(key))return cache.get(key);
     const c=context();if(!c?.api?.call)throw new Error('Contexto Panapass no disponible');
-    const p=Promise.resolve(c.api.call('panapass_reporte_pagos_rango',{p_desde:startDate,p_hasta:endDate,p_galera:null})).then(rows=>Array.isArray(rows)?rows:[]);
+    const p=Promise.resolve(c.api.call('panapass_dashboard_pagos_rango',{p_desde:startDate,p_hasta:endDate,p_galera:null})).then(rows=>Array.isArray(rows)?rows:[]);
     cache.set(key,p);
     try{return await p}catch(e){cache.delete(key);throw e}
   }
