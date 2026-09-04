@@ -14,7 +14,7 @@ function todayPanama(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Americ
 function dateShift(iso,days){const x=new Date(`${iso}T12:00:00-05:00`);x.setDate(x.getDate()+days);const p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(x).reduce((a,z)=>(a[z.type]=z.value,a),{});return `${p.year}-${p.month}-${p.day}`}
 function dayLabel(iso){return new Intl.DateTimeFormat('es-PA',{weekday:'short',timeZone:'America/Panama'}).format(new Date(`${iso}T12:00:00-05:00`)).replace('.','').slice(0,3)}
 function displayName(){const p=currentProfile();return String(p?.nombre||p?.name||'').trim()||'Administrador'}
-function go(mod){try{const c=context();if(c?.router?.open)return c.router.open(mod);if(w.state){w.state.active=mod;if(typeof w.shell==='function')w.shell();if(typeof w.render==='function')w.render()}}catch(e){console.warn('dashboard nav',e)}}
+function go(mod){try{const c=context();if(!c?.router?.open)throw new Error('Panapass dashboard router unavailable');return c.router.open(mod)}catch(e){console.warn('dashboard nav',e)}}
 function style(){if(d.querySelector('#rym-admin-dash-style-v11'))return;const s=d.createElement('style');s.id='rym-admin-dash-style-v11';s.textContent=`
 #view .dashboard-welcome.rym-admin-compact{display:none!important}
 #view .dashboard-welcome.rym-admin-compact .welcome-card{padding:10px 14px!important;min-height:0!important;border-radius:14px!important;background:linear-gradient(135deg,#0b2f6b,#174d98)!important;color:#fff!important;box-shadow:0 8px 22px rgba(15,47,107,.14)!important}
