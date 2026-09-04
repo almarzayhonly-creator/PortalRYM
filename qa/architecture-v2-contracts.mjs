@@ -11,11 +11,13 @@ const panapass = read('modules/panapass/index.js');
 const ranking = read('modules/panapass/ranking/index.js');
 const recurrentes = read('modules/panapass/recurrentes/index.js');
 const bajas = read('modules/panapass/bajas/index.js');
+const pagos = read('modules/panapass/pagos/index.js');
+const negativos = read('modules/panapass/negativos/index.js');
 const gps = read('modules/gps/index.js');
 const context = read('modules/core/context.js');
 const events = read('modules/core/event-bus.js');
 
-for (const file of ['modules/core/event-bus.js','modules/core/context.js']) {
+for (const file of ['modules/core/event-bus.js','modules/core/context.js','modules/panapass/pagos/index.js','modules/panapass/negativos/index.js']) {
   if (!loader.includes(file)) fail(`loader no carga ${file}`); else ok(`loader carga ${file}`);
 }
 
@@ -30,7 +32,9 @@ if (!/module:mounted/.test(panapass) || !/module:unmounted/.test(panapass)) fail
 const modules = [
   ['Ranking', ranking, /context\.api\.panapass\.ranking|context\?\.api\?\.panapass\?\.openSupervisoraProfile/],
   ['Recurrentes', recurrentes, /context\.api\.panapass\.recurrentes/],
-  ['Bajas', bajas, /context\.api\.panapass\.bajas/]
+  ['Bajas', bajas, /context\.api\.panapass\.bajas/],
+  ['Pagos', pagos, /context\.api\.panapass\.pagos7d/],
+  ['Negativos', negativos, /context\.api\.panapass\.negativosActual/]
 ];
 const forbiddenGlobals = [
   ['window.state', /\bw\.state\b|\bwindow\.state\b/],
@@ -46,9 +50,9 @@ for (const [name, code, expectedApi] of modules) {
 }
 
 if (/\bw\.openSupervisoraProfile\b|typeof\s+openSupervisoraProfile/.test(ranking)) fail('Ranking Panapass depende de openSupervisoraProfile global'); else ok('Ranking Panapass no depende de openSupervisoraProfile global');
-if (/modules\/gps|RYM_GPS|v113OpenGps/.test(ranking+recurrentes+bajas)) fail('Submodulos Panapass tienen dependencia directa de GPS'); else ok('Submodulos Panapass no dependen directamente de GPS');
+if (/modules\/gps|RYM_GPS|v113OpenGps/.test(ranking+recurrentes+bajas+pagos+negativos)) fail('Submodulos Panapass tienen dependencia directa de GPS'); else ok('Submodulos Panapass no dependen directamente de GPS');
 
-for (const apiName of ['ranking','recurrentes','bajas']) {
+for (const apiName of ['ranking','recurrentes','bajas','pagos7d','negativosActual']) {
   if (!new RegExp(`${apiName}:`).test(context)) fail(`Context no expone panapass.${apiName}`); else ok(`Context expone panapass.${apiName}`);
 }
 if (!/maxPago/.test(context)) fail('Context no encapsula session.meta.maxPago'); else ok('Context encapsula session.meta.maxPago');
