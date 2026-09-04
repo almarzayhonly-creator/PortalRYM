@@ -9,6 +9,7 @@
   async function mount(ctx){
     const context = ctx || (w.RYM_CONTEXT && w.RYM_CONTEXT.create('panapass'));
     if(!context) throw new Error('Panapass context unavailable');
+    if(!context.api.panapass) throw new Error('Panapass API contract unavailable');
     d.body.dataset.rymModule = 'panapass';
     lastContext = context;
     mounted = true;
