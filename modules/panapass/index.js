@@ -13,7 +13,9 @@
     lastContext = context;
     mounted = true;
     context.events && context.events.emit('module:mounted', {moduleId:'panapass'});
-    return context.api.panapass.openLegacy();
+    const legacy=w.RYM_LEGACY_ROUTES&&w.RYM_LEGACY_ROUTES.get('panapass');
+    if(typeof legacy!=='function')throw new Error('Panapass canonical entrypoint unavailable');
+    return legacy.apply(w,context.extra?.legacyArgs||[]);
   }
 
   async function unmount(){
