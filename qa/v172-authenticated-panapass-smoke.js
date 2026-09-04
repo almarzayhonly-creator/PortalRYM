@@ -18,11 +18,23 @@ const { chromium } = require('playwright');
   page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
 
   await page.goto(url+'/?auth_panapass_smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
-  await page.locator('input[name="usuario"]').waitFor({state:'visible',timeout:20000});
-  await page.locator('input[name="usuario"]').fill(username);
-  await page.locator('input[name="password"]').fill(password);
+  const userInput=page.locator('input[name="usuario"]');
+  const passwordInput=page.locator('input[name="password"]');
+  await userInput.waitFor({state:'visible',timeout:20000});
+  await userInput.fill(username);
+  await passwordInput.fill(password);
+
+  const authResponsePromise=page.waitForResponse(r=>r.url().includes('/functions/v1/auth-username'),{timeout:30000});
   await page.locator('button[type="submit"],#loginBtn').first().click();
-  await page.waitForFunction(()=>!!window.state?.token && !document.querySelector('main.login'),null,{timeout:30000});
+  const authResponse=await authResponsePromise;
+  let authJson={};
+  try{authJson=await authResponse.json()}catch{}
+  const authSummary={status:authResponse.status(),ok:authJson?.ok===true,error:String(authJson?.error||'')};
+  if(authResponse.status()!==200||authJson?.ok!==true){
+    throw new Error('Authenticated audit login failed: '+JSON.stringify(authSummary));
+  }
+
+  await userInput.waitFor({state:'hidden',timeout:30000});
   await page.waitForTimeout(1800);
 
   const boot=await page.evaluate(()=>({
@@ -87,7 +99,7 @@ const { chromium } = require('playwright');
 
   await page.screenshot({path:'audit/architecture-v2-panapass-bajas.png',fullPage:true});
 
-  console.log('AUTH_PANAPASS_SMOKE_PASS '+JSON.stringify({boot,pan:{current:pan.current,styleDomain:pan.styleDomain,dataset:pan.dataset,bodyClass:pan.bodyClass},bajas,pageErrors,consoleErrors:consoleErrors.slice(-10),failed:failed.slice(-10)}));
+  console.log('AUTH_PANAPASS_SMOKE_PASS '+JSON.stringify({auth:authSummary,boot,pan:{current:pan.current,styleDomain:pan.styleDomain,dataset:pan.dataset,bodyClass:pan.bodyClass},bajas,pageErrors,consoleErrors:consoleErrors.slice(-10),failed:failed.slice(-10)}));
   await context.close();
   await browser.close();
 })().catch(async e=>{
