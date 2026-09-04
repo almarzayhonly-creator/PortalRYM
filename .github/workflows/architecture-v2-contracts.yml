@@ -1,0 +1,26 @@
+name: Architecture V2 contracts
+
+on:
+  push:
+    branches: [architecture-v2-panapass-pilot]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify JavaScript syntax
+        run: |
+          node --check modules/core/event-bus.js
+          node --check modules/core/context.js
+          node --check modules/panapass/index.js
+          node --check modules/v171-loader.js
+      - name: Verify architecture contracts
+        run: node qa/architecture-v2-contracts.mjs
