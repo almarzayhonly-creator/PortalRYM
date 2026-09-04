@@ -1,4 +1,4 @@
-/* Portal RYM V171 - Panapass Recurrentes (parallel module, no legacy takeover) */
+/* Portal RYM Architecture V2 - Panapass Recurrentes */
 (function(w){
   'use strict';
   if(w.RYM_PANAPASS_RECURRENTES)return;
@@ -13,13 +13,18 @@
   const esc=v=>text(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const norm=v=>text(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
 
-  function portalState(){try{return w.state||(typeof state!=='undefined'?state:null)}catch(_){return w.state||null}}
-  function rpcFn(){
-    try{
-      const fn=w.rpc||(typeof rpc==='function'?rpc:null);
-      if(typeof fn!=='function')throw new Error('Recurrentes Panapass: RPC no disponible');
-      return fn;
-    }catch(e){throw e instanceof Error?e:new Error('Recurrentes Panapass: RPC no disponible')}
+  function isContext(v){return !!(v&&typeof v==='object'&&v.api&&v.session)}
+  function contextFrom(input){
+    if(isContext(input))return input;
+    if(input&&isContext(input.context))return input.context;
+    if(w.RYM_CONTEXT&&typeof w.RYM_CONTEXT.create==='function')return w.RYM_CONTEXT.create('panapass-recurrentes');
+    return null;
+  }
+  function requireContext(input){
+    const ctx=contextFrom(input);
+    if(!ctx)throw new Error('Recurrentes Panapass: RYM_CONTEXT no disponible');
+    if(typeof ctx.api?.panapass?.recurrentes!=='function')throw new Error('Recurrentes Panapass: API no disponible');
+    return ctx;
   }
 
   function canonicalRow(row){
@@ -40,8 +45,9 @@
     });
   }
 
-  function defaultMonth(){
-    const base=text(portalState()?.meta?.max_pago)||new Date().toISOString().slice(0,10);
+  function defaultMonth(ctx){
+    const context=contextFrom(ctx);
+    const base=text(context?.session?.meta?.maxPago)||new Date().toISOString().slice(0,10);
     const m=base.match(/^(\d{4})-(\d{2})/);
     return m?`${m[1]}-${m[2]}`:new Date().toISOString().slice(0,7);
   }
@@ -58,14 +64,15 @@
   }
 
   function buildParams(opts={}){
-    const range=monthRange(opts.month||defaultMonth());
+    const range=monthRange(opts.month||defaultMonth(opts));
     const min=Math.min(20,Math.max(2,Math.floor(num(opts.minPagos)||DEFAULT_MIN)));
     return Object.freeze({p_desde:range.desde,p_hasta:range.hasta,p_galera:null,p_min_pagos:min,p_limit:MAX_LIMIT});
   }
 
   async function load(opts={}){
-    const call=rpcFn(),params=buildParams(opts);
-    const rows=await call(SOURCE,params);
+    const context=requireContext(opts);
+    const params=buildParams({...opts,context});
+    const rows=await context.api.panapass.recurrentes(params);
     return Object.freeze((rows||[]).map(canonicalRow));
   }
 
@@ -102,9 +109,10 @@
   }
 
   async function render(target,opts={}){
+    const context=requireContext(opts);
     const root=typeof target==='string'?document.querySelector(target):target;
     if(!root)throw new Error('Recurrentes Panapass: contenedor no encontrado');
-    const initialMonth=opts.month||defaultMonth();
+    const initialMonth=opts.month||defaultMonth(context);
     root.innerHTML=`<section class="v171-rec"><div class="v171-rec-toolbar"><div class="v171-rec-mode"><button type="button" data-rec-mode="OPERADOR" class="active">Por operador</button><button type="button" data-rec-mode="UNIDAD">Por unidad</button></div><div class="field"><label>Mes</label><input data-rec-month type="month" value="${esc(initialMonth)}"></div><div class="field"><label>Mínimo de pagos</label><input data-rec-min type="number" min="2" max="20" value="${Math.min(20,Math.max(2,num(opts.minPagos)||DEFAULT_MIN))}"></div><button type="button" data-rec-go>Consultar</button></div><div class="field v171-rec-search"><label>Filtrar resultados</label><input data-rec-search placeholder="Unidad, operador o supervisora"></div><div data-rec-out><div class="card">Cargando recurrentes…</div></div></section>`;
 
     const out=root.querySelector('[data-rec-out]');
@@ -115,7 +123,7 @@
     const reload=async()=>{
       out.innerHTML='<div class="card">Analizando frecuencia…</div>';
       try{
-        rows=opts.rows?Object.freeze(opts.rows.map(canonicalRow)):await load({month:root.querySelector('[data-rec-month]').value,minPagos:root.querySelector('[data-rec-min]').value});
+        rows=opts.rows?Object.freeze(opts.rows.map(canonicalRow)):await load({context,month:root.querySelector('[data-rec-month]').value,minPagos:root.querySelector('[data-rec-min]').value});
         state.page=1;repaint();
       }catch(e){out.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`}
     };
@@ -126,7 +134,13 @@
     return {root,get rows(){return rows},state,reload};
   }
 
-  const api=Object.freeze({SOURCE,MODES,PAGE_SIZE,DEFAULT_MIN,MAX_LIMIT,canonicalRow,defaultMonth,monthRange,buildParams,load,filterRows,model,paint,render,open:ctx=>render(ctx?.target||'#view',ctx||{})});
+  async function open(ctx={}){
+    const context=requireContext(ctx);
+    const options=isContext(ctx)?{}:ctx;
+    return render(options.target||context.root||'#view',{...options,context});
+  }
+
+  const api=Object.freeze({SOURCE,MODES,PAGE_SIZE,DEFAULT_MIN,MAX_LIMIT,canonicalRow,defaultMonth,monthRange,buildParams,load,filterRows,model,paint,render,open});
   w.RYM_PANAPASS_RECURRENTES=api;
-  if(w.RYM_MODULES&&!w.RYM_MODULES.has('panapass-recurrentes'))w.RYM_MODULES.register('panapass-recurrentes',{open:api.open});
+  if(w.RYM_MODULES&&!w.RYM_MODULES.has('panapass-recurrentes'))w.RYM_MODULES.register('panapass-recurrentes',{open});
 })(window);
