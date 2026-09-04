@@ -55,15 +55,23 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galeras .g
   display:grid!important;
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
   width:100%!important;
-  gap:12px!important;
+  gap:14px!important;
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera{
   width:auto!important;
   min-width:0!important;
   max-width:none!important;
+  min-height:332px!important;
   margin:0!important;
   padding:0!important;
 }
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-top{
+  min-height:66px!important;
+  padding:14px 16px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-name{font-size:22px!important;line-height:1!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-status{font-size:10px!important;padding:5px 9px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-date{font-size:11px!important;font-weight:800!important}
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metrics{
   display:grid!important;
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
@@ -74,20 +82,84 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .ry
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric{
   min-width:0!important;
+  min-height:98px!important;
+  padding:14px 16px!important;
   border:0!important;
   border-right:1px solid #e7edf5!important;
   border-radius:0!important;
   background:#fff!important;
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric:last-child{border-right:0!important}
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark svg{display:block!important;width:100%!important;height:52px!important}
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{display:flex!important;align-items:flex-end!important;height:44px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric span{font-size:11px!important;font-weight:700!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric b{display:block!important;font-size:26px!important;line-height:1!important;margin-top:8px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric small{display:block!important;font-size:10px!important;line-height:1.25!important;margin-top:7px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-visual{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.22fr) minmax(290px,.88fr)!important;
+  gap:18px!important;
+  align-items:end!important;
+  min-height:118px!important;
+  padding:13px 16px 8px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark{height:76px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark svg{display:block!important;width:100%!important;height:72px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{
+  display:grid!important;
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+  align-items:end!important;
+  gap:5px!important;
+  height:86px!important;
+  overflow:visible!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day{
+  display:grid!important;
+  grid-template-rows:18px 1fr 17px!important;
+  align-items:end!important;
+  height:86px!important;
+  min-width:0!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>strong{
+  display:block!important;
+  text-align:center!important;
+  color:#526b8d!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-track{
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  height:51px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-track i{
+  display:block!important;
+  width:100%!important;
+  max-width:28px!important;
+  min-height:6px!important;
+  border-radius:4px 4px 1px 1px!important;
+  background:color-mix(in srgb,var(--gal-color) 58%,#fff)!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>span{
+  display:block!important;
+  text-align:center!important;
+  color:#7a8da6!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  text-transform:uppercase!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot{min-height:42px!important;padding:10px 14px!important;font-size:10px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot strong{font-size:12px!important}
 
 @media(max-width:1280px){
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-hero{grid-template-columns:1fr!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-mini-stack{grid-template-columns:1fr 1fr!important;grid-template-rows:auto!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-mid{grid-template-columns:1fr 1fr!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-alert{grid-column:1/-1!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-visual{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{height:92px!important}
 }
 @media(max-width:900px){
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-primary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
@@ -97,4 +169,7 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{displ
 @media(max-width:620px){
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-primary-kpis,
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-mini-stack{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric b{font-size:22px!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-visual{padding-left:10px!important;padding-right:10px!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>strong{font-size:8px!important}
 }
