@@ -1,177 +1,304 @@
 /* Portal RYM V171 - Panapass Bajas */
 .v171-bajas{display:grid;gap:12px}.v171-bajas>header{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;padding:14px 16px;background:#fff;border:1px solid #d8e3f1;border-radius:17px}.v171-bajas>header h2{margin:0;color:#12386e}.v171-bajas>header p{margin:4px 0 0;color:#6b7f99;font-size:11px}.v171-bajas>header>span{font-size:9px;color:#7a8da5;font-weight:900}.v171-bajas-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:11px;background:#fff;border:1px solid #d8e3f1;border-radius:16px}.v171-bajas-tools label{display:grid;gap:5px;font-size:9px;font-weight:900;color:#61758f}.v171-bajas-tools select,.v171-bajas-tools input{width:100%;box-sizing:border-box}.v171-bajas-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.v171-bajas-kpis article{padding:11px 13px;border:1px solid #d8e3f1;border-radius:14px;background:#fff}.v171-bajas-kpis span{display:block;font-size:9px;font-weight:900;color:#687b93;text-transform:uppercase}.v171-bajas-kpis b{display:block;margin-top:5px;font-size:20px;color:#0a326e}.v171-bajas-kpis .warn b{color:#b35b00}.v171-bajas-table{background:#fff;border:1px solid #d8e3f1;border-radius:16px;overflow:hidden}.v171-bajas-table .table-wrap{overflow:auto}.v171-bajas-table table{width:100%;border-collapse:collapse}.v171-bajas-table th,.v171-bajas-table td{padding:8px 9px;border-bottom:1px solid #edf1f6;font-size:10px;text-align:left}.v171-bajas-table th{background:#f7faff;color:#526982;font-size:9px;text-transform:uppercase}.v171-bajas-status{display:inline-flex;padding:5px 7px;border-radius:999px;font-size:8px;font-weight:1000}.v171-bajas-status.pendiente_baja{background:#fff1dc;color:#a65b00}.v171-bajas-status.baja_pendiente_devolucion{background:#e8f7ee;color:#157347}.v171-bajas-status.revision_admin{background:#ffe8e8;color:#b42318}.v171-bajas-status.sin_tag_activo{background:#eef2f7;color:#64748b}.v171-bajas-table button{padding:6px 8px;font-size:9px}.v171-bajas-table .empty{text-align:center;color:#6f8197;padding:18px}
 
-/* Architecture V2 visual demo - exact legacy Bajas Panapass screen.
-   This file is lazy-loaded only for the Panapass domain and every override is
-   additionally scoped to body[data-rym-module="panapass"]. */
+/* Approved Panapass visual direction - exact legacy Bajas screen.
+   Scoped to the Panapass runtime boundary so sibling modules remain untouched. */
+body[data-rym-module="panapass"] #view{
+  --pp-navy:#0f2f5f;
+  --pp-blue:#1557b0;
+  --pp-blue-strong:#0d47a1;
+  --pp-blue-soft:#eaf2ff;
+  --pp-bg:#f6f8fb;
+  --pp-surface:#ffffff;
+  --pp-text:#0f172a;
+  --pp-muted:#64748b;
+  --pp-border:#dbe4ef;
+  --pp-border-strong:#c9d6e5;
+  --pp-warning-bg:#fff3df;
+  --pp-warning:#a85a00;
+  background:var(--pp-bg)!important;
+  border-radius:16px!important;
+  box-shadow:none!important;
+}
+body[data-rym-module="panapass"] #view::before{display:none!important;content:none!important}
+
 body[data-rym-module="panapass"] .v87-bajas-hero{
   position:relative;
   overflow:hidden;
+  min-height:112px;
   padding:22px 24px!important;
-  border:0!important;
-  border-radius:22px!important;
-  background:linear-gradient(120deg,#082f49 0%,#0f766e 58%,#14b8a6 100%)!important;
-  box-shadow:0 18px 38px rgba(8,47,73,.18)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:16px!important;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.025) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.025) 50%,rgba(255,255,255,.025) 75%,transparent 75%) right center/90px 90px no-repeat,
+    linear-gradient(110deg,#0f2f5f 0%,#0d47a1 56%,#123b78 100%)!important;
+  box-shadow:0 8px 22px rgba(15,47,95,.12)!important;
 }
-body[data-rym-module="panapass"] .v87-bajas-hero::after{
-  content:"PANAPASS · DISEÑO V2";
-  position:absolute;
-  right:20px;
-  bottom:14px;
-  padding:5px 9px;
-  border:1px solid rgba(255,255,255,.28);
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  color:#fff;
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.08em;
+body[data-rym-module="panapass"] .v87-bajas-hero::after{display:none!important;content:none!important}
+body[data-rym-module="panapass"] .v87-bajas-hero h2{
+  margin-bottom:6px!important;
+  color:#fff!important;
+  font-size:20px!important;
+  line-height:1.2!important;
+  letter-spacing:-.015em!important;
 }
-body[data-rym-module="panapass"] .v87-bajas-hero h2,
-body[data-rym-module="panapass"] .v87-bajas-hero p,
+body[data-rym-module="panapass"] .v87-bajas-hero p{
+  max-width:900px;
+  margin:0!important;
+  color:#e8f0ff!important;
+  font-size:12px!important;
+  line-height:1.55!important;
+  opacity:1!important;
+}
 body[data-rym-module="panapass"] .v87-bajas-hero b{color:#fff!important}
-body[data-rym-module="panapass"] .v87-bajas-hero p{max-width:880px;opacity:.88}
 body[data-rym-module="panapass"] #v99BReload{
-  border:1px solid rgba(255,255,255,.55)!important;
-  background:#fff!important;
-  color:#0f4c5c!important;
-  box-shadow:0 9px 22px rgba(3,45,55,.18)!important;
+  min-height:40px;
+  padding:9px 16px!important;
+  border:1px solid rgba(255,255,255,.38)!important;
+  border-radius:10px!important;
+  background:rgba(8,35,78,.34)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+  font-size:12px!important;
+  font-weight:750!important;
 }
+body[data-rym-module="panapass"] #v99BReload:hover{background:rgba(8,35,78,.5)!important}
 
 body[data-rym-module="panapass"] .v99-baja-kpis{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
   gap:12px!important;
   margin-top:14px!important;
 }
 body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi{
-  position:relative;
-  overflow:hidden;
-  min-height:86px;
-  padding:16px 17px!important;
-  border:1px solid #d7e7e5!important;
-  border-radius:18px!important;
-  background:#fff!important;
-  box-shadow:0 10px 28px rgba(15,118,110,.08)!important;
+  min-height:84px;
+  padding:15px 16px!important;
+  border:1px solid var(--pp-border)!important;
+  border-radius:14px!important;
+  background:var(--pp-surface)!important;
+  box-shadow:0 3px 10px rgba(15,47,95,.045)!important;
 }
-body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi::before{
-  content:"";
-  position:absolute;
-  inset:0 auto 0 0;
-  width:5px;
-  background:#0f766e;
-}
-body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi:nth-child(2)::before{background:#2563eb}
-body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi:nth-child(3)::before{background:#f59e0b}
-body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi:nth-child(4)::before{background:#7c3aed}
-body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi:nth-child(5)::before{background:#ef4444}
+body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi::before{display:none!important;content:none!important}
 body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi span{
-  color:#64748b!important;
-  font-size:9px!important;
-  letter-spacing:.05em;
+  color:var(--pp-muted)!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
 }
 body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi strong{
-  color:#0f172a!important;
-  font-size:27px!important;
-  line-height:1.1;
+  display:block;
+  margin-top:7px!important;
+  color:var(--pp-navy)!important;
+  font-size:26px!important;
+  font-weight:800!important;
+  line-height:1!important;
 }
-body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi.warn strong{color:#c2410c!important}
+body[data-rym-module="panapass"] .v99-baja-kpis .v87-bajas-kpi.warn strong{color:#b54708!important}
 
 body[data-rym-module="panapass"] .v96-import-note{
   margin:12px 0!important;
-  padding:10px 14px!important;
-  border:1px solid #c7d2fe!important;
-  border-radius:12px!important;
-  background:#eef2ff!important;
-  color:#3730a3!important;
-}
-
-body[data-rym-module="panapass"] .v97-bajas-layout{gap:16px!important}
-body[data-rym-module="panapass"] .v96-tabs{
-  display:flex;
-  gap:7px!important;
-  padding:6px!important;
-  border:1px solid #d7e7e5;
-  border-radius:16px;
-  background:#eaf4f3!important;
-}
-body[data-rym-module="panapass"] .v96-tabs [data-v99bt]{
-  min-height:38px;
-  padding:8px 14px!important;
-  border:0!important;
-  border-radius:11px!important;
-  background:transparent!important;
-  color:#315b59!important;
+  padding:10px 13px!important;
+  border:1px solid #c9daf3!important;
+  border-radius:10px!important;
+  background:#eef5ff!important;
+  color:#31527f!important;
+  font-size:11px!important;
+  line-height:1.4!important;
   box-shadow:none!important;
 }
+
+body[data-rym-module="panapass"] .v97-bajas-layout{
+  grid-template-columns:minmax(0,1fr) minmax(320px,360px)!important;
+  gap:14px!important;
+  align-items:start!important;
+}
+body[data-rym-module="panapass"] .v96-tabs{
+  display:flex;
+  gap:4px!important;
+  padding:4px!important;
+  border:1px solid var(--pp-border)!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+body[data-rym-module="panapass"] .v96-tabs [data-v99bt]{
+  min-height:36px;
+  padding:8px 13px!important;
+  border:0!important;
+  border-radius:8px!important;
+  background:transparent!important;
+  color:#4a607c!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+  font-weight:700!important;
+}
+body[data-rym-module="panapass"] .v96-tabs [data-v99bt]:hover{background:#f3f6fa!important;color:var(--pp-navy)!important}
 body[data-rym-module="panapass"] .v96-tabs [data-v99bt].active{
-  background:#0f766e!important;
+  background:var(--pp-blue-strong)!important;
   color:#fff!important;
-  box-shadow:0 7px 16px rgba(15,118,110,.22)!important;
+  box-shadow:none!important;
 }
 
 body[data-rym-module="panapass"] #v99BBody .panel{
-  margin-top:10px;
+  margin-top:8px!important;
   overflow:hidden;
-  border:1px solid #d7e7e5!important;
-  border-radius:18px!important;
+  border:1px solid var(--pp-border)!important;
+  border-radius:12px!important;
   background:#fff!important;
-  box-shadow:0 12px 30px rgba(15,23,42,.07)!important;
+  box-shadow:none!important;
+}
+body[data-rym-module="panapass"] #v99BBody table{
+  width:100%!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
 }
 body[data-rym-module="panapass"] #v99BBody table thead th{
-  padding-top:12px!important;
-  padding-bottom:12px!important;
-  border-color:#0b4f4a!important;
-  background:#0f5f59!important;
+  padding:11px 12px!important;
+  border-color:#174e9a!important;
+  background:#10499f!important;
   color:#fff!important;
-  font-size:9px!important;
-  letter-spacing:.035em;
+  font-size:10px!important;
+  font-weight:750!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
 }
 body[data-rym-module="panapass"] #v99BBody table tbody td{
-  padding-top:12px!important;
-  padding-bottom:12px!important;
-  border-bottom-color:#e7efee!important;
+  padding:11px 12px!important;
+  border-bottom:1px solid #e7edf4!important;
+  color:#263b56!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+  background:#fff!important;
 }
-body[data-rym-module="panapass"] #v99BBody table tbody tr:nth-child(even){background:#f8fbfb!important}
-body[data-rym-module="panapass"] #v99BBody table tbody tr:hover{background:#ecf8f6!important}
+body[data-rym-module="panapass"] #v99BBody table tbody tr:nth-child(even) td{background:#fbfcfe!important}
+body[data-rym-module="panapass"] #v99BBody table tbody tr:hover td{background:#f3f7fd!important}
+body[data-rym-module="panapass"] #v99BBody table tbody td small{
+  color:#7a899c!important;
+  font-size:9px!important;
+  line-height:1.3!important;
+}
 body[data-rym-module="panapass"] #v99BBody .v99-process-btn,
 body[data-rym-module="panapass"] #v99BBody [data-v99ba]:not(.soft-btn){
-  border-color:#0f766e!important;
-  background:#0f766e!important;
+  min-height:34px;
+  padding:7px 10px!important;
+  border:1px solid var(--pp-blue-strong)!important;
+  border-radius:8px!important;
+  background:var(--pp-blue-strong)!important;
   color:#fff!important;
-  box-shadow:0 6px 14px rgba(15,118,110,.18)!important;
+  box-shadow:none!important;
+  font-size:10px!important;
+  font-weight:750!important;
+}
+body[data-rym-module="panapass"] #v99BBody .soft-btn{
+  min-height:34px;
+  padding:7px 10px!important;
+  border:1px solid #b9cbe4!important;
+  border-radius:8px!important;
+  background:#fff!important;
+  color:#174a91!important;
+  box-shadow:none!important;
+  font-size:10px!important;
+  font-weight:700!important;
 }
 body[data-rym-module="panapass"] #v99BBody .v96-baja-state{
   padding:5px 8px!important;
   border-radius:999px!important;
+  font-size:9px!important;
+  font-weight:700!important;
+  box-shadow:none!important;
 }
 
 body[data-rym-module="panapass"] .v97-bajas-mail{
-  padding:18px!important;
-  border:1px solid #bddbd7!important;
-  border-radius:20px!important;
-  background:linear-gradient(180deg,#ffffff 0%,#f0fdfa 100%)!important;
-  box-shadow:0 14px 34px rgba(15,118,110,.1)!important;
+  padding:16px!important;
+  border:1px solid var(--pp-border)!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:0 3px 10px rgba(15,47,95,.04)!important;
 }
-body[data-rym-module="panapass"] .v97-bajas-mail h3{color:#0b4f4a!important;font-size:17px!important}
+body[data-rym-module="panapass"] .v97-bajas-mail h3{
+  margin-bottom:5px!important;
+  color:var(--pp-navy)!important;
+  font-size:16px!important;
+  font-weight:800!important;
+}
+body[data-rym-module="panapass"] .v97-bajas-mail p,
+body[data-rym-module="panapass"] .v97-bajas-mail small{
+  color:var(--pp-muted)!important;
+  font-size:10px!important;
+  line-height:1.45!important;
+}
 body[data-rym-module="panapass"] .v97-bajas-mail .v66-daily-from{
-  border-color:#99d5cd!important;
-  background:#e6fffb!important;
+  border:1px solid var(--pp-border)!important;
+  border-radius:10px!important;
+  background:#f8fafc!important;
+  box-shadow:none!important;
 }
 body[data-rym-module="panapass"] .v97-bajas-mail input,
 body[data-rym-module="panapass"] .v97-bajas-mail select{
-  border-color:#b7d8d3!important;
-  border-radius:12px!important;
+  min-height:39px!important;
+  border:1px solid var(--pp-border-strong)!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:var(--pp-text)!important;
+  font-size:11px!important;
+  box-shadow:none!important;
+}
+body[data-rym-module="panapass"] .v97-bajas-mail input:focus,
+body[data-rym-module="panapass"] .v97-bajas-mail select:focus{
+  border-color:#6c9fe4!important;
+  box-shadow:0 0 0 3px rgba(21,87,176,.1)!important;
+}
+body[data-rym-module="panapass"] .v97-bajas-mail button{
+  min-height:38px;
+  border-radius:9px!important;
+  box-shadow:none!important;
+  font-size:10px!important;
+  font-weight:750!important;
 }
 body[data-rym-module="panapass"] .v97-bajas-mail .send,
-body[data-rym-module="panapass"] #v99MailSend{
-  border-color:#0f766e!important;
-  background:#0f766e!important;
+body[data-rym-module="panapass"] #v99MailSend,
+body[data-rym-module="panapass"] #v99MailOpen{
+  border:1px solid var(--pp-blue-strong)!important;
+  background:var(--pp-blue-strong)!important;
   color:#fff!important;
 }
 body[data-rym-module="panapass"] #v99ManualAdd{
-  border-color:#f59e0b!important;
-  background:#f59e0b!important;
-  color:#4a2b00!important;
+  border:1px solid #b9cbe4!important;
+  background:#fff!important;
+  color:#174a91!important;
+}
+body[data-rym-module="panapass"] #v99CopyReport,
+body[data-rym-module="panapass"] .v97-bajas-mail .soft-btn{
+  border:1px solid #b9cbe4!important;
+  background:#fff!important;
+  color:#174a91!important;
+}
+body[data-rym-module="panapass"] .v97-bajas-mail button:disabled{
+  border-color:#e1e7ef!important;
+  background:#eef2f6!important;
+  color:#9aa8ba!important;
+  opacity:1!important;
+}
+body[data-rym-module="panapass"] #v99Selected{
+  border-color:#dbe4ef!important;
+  background:#f8fafc!important;
+  color:#50637d!important;
 }
 
-@media(max-width:1100px){.v171-bajas-tools{grid-template-columns:1fr 1fr 1fr}.v171-bajas-kpis{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:700px){.v171-bajas>header{align-items:flex-start;flex-direction:column}.v171-bajas-tools,.v171-bajas-kpis{grid-template-columns:1fr}.v171-bajas-table thead{display:none}.v171-bajas-table table,.v171-bajas-table tbody,.v171-bajas-table tr,.v171-bajas-table td{display:block;width:100%}.v171-bajas-table tr{padding:8px 11px;border-bottom:8px solid #eef3f8}.v171-bajas-table td{display:flex;justify-content:space-between;gap:12px;text-align:right;border:0}.v171-bajas-table td:before{content:attr(data-label);font-size:8px;font-weight:900;color:#6c7b90;text-transform:uppercase;text-align:left}body[data-rym-module="panapass"] .v87-bajas-hero{padding:18px!important}body[data-rym-module="panapass"] .v87-bajas-hero::after{position:static;display:inline-flex;margin-top:10px}body[data-rym-module="panapass"] .v96-tabs{overflow:auto}}
+@media(max-width:1280px){
+  body[data-rym-module="panapass"] .v99-baja-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  body[data-rym-module="panapass"] .v97-bajas-layout{grid-template-columns:minmax(0,1fr) 320px!important}
+}
+@media(max-width:980px){
+  body[data-rym-module="panapass"] .v97-bajas-layout{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .v97-bajas-mail{order:2}
+}
+@media(max-width:700px){
+  .v171-bajas>header{align-items:flex-start;flex-direction:column}.v171-bajas-tools,.v171-bajas-kpis{grid-template-columns:1fr}.v171-bajas-table thead{display:none}.v171-bajas-table table,.v171-bajas-table tbody,.v171-bajas-table tr,.v171-bajas-table td{display:block;width:100%}.v171-bajas-table tr{padding:8px 11px;border-bottom:8px solid #eef3f8}.v171-bajas-table td{display:flex;justify-content:space-between;gap:12px;text-align:right;border:0}.v171-bajas-table td:before{content:attr(data-label);font-size:8px;font-weight:900;color:#6c7b90;text-transform:uppercase;text-align:left}
+  body[data-rym-module="panapass"] .v87-bajas-hero{min-height:0;padding:18px!important}
+  body[data-rym-module="panapass"] .v99-baja-kpis{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .v96-tabs{overflow:auto;white-space:nowrap}
+  body[data-rym-module="panapass"] #v99BBody .panel{overflow:auto}
+  body[data-rym-module="panapass"] #v99BBody table{min-width:900px}
+}
