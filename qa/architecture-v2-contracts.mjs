@@ -18,6 +18,7 @@ const negativosDate = read('modules/panapass/negativos/panama-date.js');
 const rankingFinalTabs = read('modules/panapass/ranking/final-tabs.js');
 const rankingCriteria = read('modules/panapass/ranking/criteria-final.js');
 const rankingClickfix = read('modules/panapass/ranking/criteria-clickfix.js');
+const rankingOwnerLock = read('modules/panapass/ranking/owner-lock.js');
 const gps = read('modules/gps/index.js');
 const context = read('modules/core/context.js');
 const events = read('modules/core/event-bus.js');
@@ -26,6 +27,7 @@ const coreNegativosShim = read('modules/core/panapass-negativos-panama-date.js')
 const coreFinalTabsShim = read('modules/core/panapass-ranking-recurrentes-final.js');
 const coreCriteriaShim = read('modules/core/panapass-ranking-criteria-final.js');
 const coreClickfixShim = read('modules/core/panapass-ranking-criteria-clickfix.js');
+const coreOwnerLockShim = read('modules/core/panapass-ranking-owner-lock.js');
 
 for (const file of [
   'modules/core/event-bus.js',
@@ -36,7 +38,8 @@ for (const file of [
   'modules/panapass/dashboard/index.js',
   'modules/panapass/ranking/final-tabs.js',
   'modules/panapass/ranking/criteria-final.js',
-  'modules/panapass/ranking/criteria-clickfix.js'
+  'modules/panapass/ranking/criteria-clickfix.js',
+  'modules/panapass/ranking/owner-lock.js'
 ]) {
   if (!loader.includes(file)) fail(`loader no carga ${file}`); else ok(`loader carga ${file}`);
 }
@@ -70,7 +73,7 @@ for (const [name, code, expectedApi] of modules) {
 }
 
 if (/\bw\.openSupervisoraProfile\b|typeof\s+openSupervisoraProfile/.test(ranking)) fail('Ranking Panapass depende de openSupervisoraProfile global'); else ok('Ranking Panapass no depende de openSupervisoraProfile global');
-if (/modules\/gps|RYM_GPS|v113OpenGps/.test(ranking+recurrentes+bajas+pagos+negativos+dashboard+negativosDate+rankingFinalTabs+rankingCriteria+rankingClickfix)) fail('Submodulos Panapass tienen dependencia directa de GPS'); else ok('Submodulos Panapass no dependen directamente de GPS');
+if (/modules\/gps|RYM_GPS|v113OpenGps/.test(ranking+recurrentes+bajas+pagos+negativos+dashboard+negativosDate+rankingFinalTabs+rankingCriteria+rankingClickfix+rankingOwnerLock)) fail('Submodulos Panapass tienen dependencia directa de GPS'); else ok('Submodulos Panapass no dependen directamente de GPS');
 
 for (const apiName of ['ranking','recurrentes','bajas','pagos7d','negativosActual']) {
   if (!new RegExp(`${apiName}:`).test(context)) fail(`Context no expone panapass.${apiName}`); else ok(`Context expone panapass.${apiName}`);
@@ -87,17 +90,41 @@ const shimRules = [
   ['negativos-date', coreNegativosShim, '/modules/panapass/negativos/panama-date.js'],
   ['ranking-final-tabs', coreFinalTabsShim, '/modules/panapass/ranking/final-tabs.js'],
   ['ranking-criteria', coreCriteriaShim, '/modules/panapass/ranking/criteria-final.js'],
-  ['ranking-clickfix', coreClickfixShim, '/modules/panapass/ranking/criteria-clickfix.js']
+  ['ranking-clickfix', coreClickfixShim, '/modules/panapass/ranking/criteria-clickfix.js'],
+  ['ranking-owner-lock', coreOwnerLockShim, '/modules/panapass/ranking/owner-lock.js']
 ];
 for (const [name, code, target] of shimRules) {
   if (!code.includes(target)) fail(`Core shim ${name} no delega a ${target}`); else ok(`Core shim ${name} delega a dominio Panapass`);
-  if (/\brpc\s*\(|\bstate\s*\.|function\s+todayPanama|function\s+renderRanking|function\s+finalRecurrentes/.test(code)) fail(`Core shim ${name} contiene logica de negocio Panapass`); else ok(`Core shim ${name} no contiene logica de negocio Panapass`);
+  if (/\brpc\s*\(|\bstate\s*\.|function\s+todayPanama|function\s+renderRanking|function\s+finalRecurrentes|function\s+enforce/.test(code)) fail(`Core shim ${name} contiene logica de negocio Panapass`); else ok(`Core shim ${name} no contiene logica de negocio Panapass`);
   if (code.length > 1000) fail(`Core shim ${name} es demasiado grande (${code.length} bytes)`); else ok(`Core shim ${name} permanece minimo`);
 }
 
 if (!rankingFinalTabs.includes('__RYM_PANAPASS_FINAL_TABS_V2__')) fail('Controlador final-tabs canonico incompleto'); else ok('Controlador final-tabs canonico presente');
 if (!rankingCriteria.includes('__RYM_RANKING_CRITERIA_FINAL_V3__')) fail('Controlador criteria canonico incompleto'); else ok('Controlador criteria canonico presente');
 if (!rankingClickfix.includes('__RYM_RANKING_CRITERIA_CLICKFIX__')) fail('Controlador clickfix canonico incompleto'); else ok('Controlador clickfix canonico presente');
+if (!rankingOwnerLock.includes('__RYM_RANKING_OWNER_LOCK__')) fail('Controlador owner-lock canonico incompleto'); else ok('Controlador owner-lock canonico presente');
+
+const cssDomains = [
+  ['panapass', 'css/panapass.css', ['gps','revisados','control-auto','usuarios']],
+  ['gps', 'css/gps.css', ['panapass','revisados','control-auto','usuarios']],
+  ['revisados', 'css/revisados.css', ['panapass','gps','control-auto','usuarios']],
+  ['control-auto', 'css/control-auto.css', ['panapass','gps','revisados','usuarios']],
+  ['usuarios', 'css/usuarios.css', ['panapass','gps','revisados','control-auto']]
+];
+for (const [domain, file, foreign] of cssDomains) {
+  const code = read(file);
+  if (!code.trim()) fail(`CSS ${domain} esta vacio`); else ok(`CSS ${domain} existe separado`);
+  for (const other of foreign) {
+    const bodyRef = new RegExp(`data-rym-module=["']${other}["']`, 'i');
+    const classRef = new RegExp(`\\.rym-${other.replace(/-/g,'\\-')}\\b`, 'i');
+    if (bodyRef.test(code) || classRef.test(code)) fail(`CSS ${domain} contiene selector del dominio ${other}`);
+  }
+  ok(`CSS ${domain} no apunta a dominios hermanos`);
+}
+const panapassCss = read('css/panapass.css');
+const gpsCss = read('css/gps.css');
+if (!/data-rym-module=["']panapass["']|\.v171-rank|\.v171-rec/.test(panapassCss)) fail('CSS Panapass no tiene scope/prefijo reconocible'); else ok('CSS Panapass usa scope o prefijos propios');
+if (!/data-rym-module=["']gps["']/.test(gpsCss)) fail('CSS GPS no esta scoped al modulo GPS'); else ok('CSS GPS esta scoped al modulo GPS');
 
 if (process.exitCode) process.exit(process.exitCode);
 console.log('ARCH_V2_RESULT: PASS');
