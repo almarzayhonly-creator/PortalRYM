@@ -1,0 +1,75 @@
+name: Architecture V2 preview
+
+on:
+  push:
+    branches: [architecture-v2-panapass-pilot]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: architecture-v2-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify architecture contracts
+        run: node qa/architecture-v2-contracts.mjs
+      - name: Inject Architecture V2 loader into preview build only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          marker='<script id="rym-v171-loader" src="/modules/v171-loader.js?v=172-pilot"></script>\n'
+          if 'id="rym-v171-loader"' not in s:
+              m=re.search(r'<head\b[^>]*>', s, re.I)
+              if not m: raise SystemExit('head start not found')
+              s=s[:m.end()]+'\n'+marker+s[m.end():]
+              p.write_text(s)
+          head=p.read_text()[:12000]
+          if 'id="rym-v171-loader"' not in head:
+              raise SystemExit('Architecture V2 loader not injected near document head')
+          PY
+      - name: Deploy isolated Cloudflare preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest versions upload --preview-alias architecture-v2 2>&1 | tee /tmp/wrangler.out
+          U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$U"
+          echo "url=$U" >> "$GITHUB_OUTPUT"
+          echo "Exact preview: $U"
+      - name: Verify preview assets
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          U="$QA_URL"
+          test -n "$U"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/?x=$(date +%s)" -o /tmp/index
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/v171-loader.js?x=$(date +%s)" -o /tmp/loader
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/style-manager.js?x=$(date +%s)" -o /tmp/styles
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/module-registry.js?x=$(date +%s)" -o /tmp/registry
+          for f in core panapass panapass-bajas revisados control-auto gps usuarios; do
+            curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/css/$f.css?x=$(date +%s)" -o "/tmp/$f.css"
+          done
+          grep -Fq 'rym-v171-loader' /tmp/index
+          grep -Fq "const css=['/css/core.css']" /tmp/loader
+          grep -Fq 'RYM_STYLES' /tmp/styles
+          grep -Fq 'await unmount(active)' /tmp/registry
+      - name: Install Playwright
+        run: npm install playwright && npx playwright install --with-deps chromium
+      - name: Browser lifecycle and CSS isolation smoke
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: node qa/v171-module-smoke.js
