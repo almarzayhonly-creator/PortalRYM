@@ -22,8 +22,14 @@ jobs:
           node --check modules/core/context.js
           node --check modules/core/dashboard-payments-enhance.js
           node --check modules/core/panapass-negativos-panama-date.js
+          node --check modules/core/panapass-ranking-recurrentes-final.js
+          node --check modules/core/panapass-ranking-criteria-final.js
+          node --check modules/core/panapass-ranking-criteria-clickfix.js
           node --check modules/panapass/index.js
           node --check modules/panapass/ranking/index.js
+          node --check modules/panapass/ranking/final-tabs.js
+          node --check modules/panapass/ranking/criteria-final.js
+          node --check modules/panapass/ranking/criteria-clickfix.js
           node --check modules/panapass/recurrentes/index.js
           node --check modules/panapass/bajas/index.js
           node --check modules/panapass/pagos/index.js
