@@ -1,0 +1,411 @@
+/* Portal RYM · Panapass Command Center V2
+   Clear operational hierarchy: attention → payments → galeras. */
+body[data-rym-module="panapass"].rym-panapass-command{
+  --cc-navy:#0f2f5f;
+  --cc-blue:#2563eb;
+  --cc-blue-50:#eff6ff;
+  --cc-bg:#f5f7fb;
+  --cc-card:#ffffff;
+  --cc-text:#0f172a;
+  --cc-muted:#667085;
+  --cc-border:#dde5ee;
+  --cc-red:#b42318;
+  --cc-red-bg:#fff3f2;
+  --cc-amber:#b54708;
+  --cc-amber-bg:#fff8eb;
+  --cc-green:#087443;
+  --cc-green-bg:#ecfdf3;
+}
+
+body[data-rym-module="panapass"].rym-panapass-command #view{
+  background:var(--cc-bg)!important;
+  padding:18px 20px 28px!important;
+}
+
+/* Command shell */
+body[data-rym-module="panapass"] .rym-command-shell{
+  display:block!important;
+  margin:0!important;
+}
+body[data-rym-module="panapass"] .rym-command-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:24px;
+  margin:0 0 14px;
+  padding:4px 2px 0;
+}
+body[data-rym-module="panapass"] .rym-command-eyebrow{
+  display:block;
+  margin-bottom:6px;
+  color:var(--cc-blue);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+body[data-rym-module="panapass"] .rym-command-header h1{
+  margin:0;
+  color:var(--cc-text);
+  font-size:30px;
+  line-height:1.1;
+  letter-spacing:-.035em;
+  font-weight:780;
+}
+body[data-rym-module="panapass"] .rym-command-header p{
+  margin:7px 0 0;
+  color:var(--cc-muted);
+  font-size:13px;
+  line-height:1.45;
+}
+body[data-rym-module="panapass"] .rym-command-date{
+  min-width:150px;
+  padding:10px 0 0;
+  text-align:right;
+}
+body[data-rym-module="panapass"] .rym-command-date span{
+  display:block;
+  color:#98a2b3;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+body[data-rym-module="panapass"] .rym-command-date strong{
+  display:block;
+  margin-top:3px;
+  color:#344054;
+  font-size:12px;
+  text-transform:capitalize;
+}
+
+/* One-line pulse instead of another wall of KPI cards */
+body[data-rym-module="panapass"] .rym-command-pulse{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  margin-bottom:18px;
+  padding:0 14px;
+  border:1px solid #d8e5f5;
+  border-radius:12px;
+  background:#f8fbff;
+  color:#344054;
+}
+body[data-rym-module="panapass"] .rym-command-pulse>span{
+  color:var(--cc-blue);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+body[data-rym-module="panapass"] .rym-command-pulse strong{
+  font-size:12px;
+  font-weight:700;
+}
+body[data-rym-module="panapass"] .rym-command-pulse i{color:#98a2b3;font-style:normal}
+
+body[data-rym-module="panapass"] .rym-command-section{
+  margin-bottom:18px;
+}
+body[data-rym-module="panapass"] .rym-section-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:10px;
+}
+body[data-rym-module="panapass"] .rym-section-heading>div{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+body[data-rym-module="panapass"] .rym-section-heading>div>span,
+body[data-rym-module="panapass"] .rym-section-index{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border-radius:9px;
+  background:#eaf2ff;
+  color:#1d4ed8!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  flex:0 0 auto;
+}
+body[data-rym-module="panapass"] .rym-section-heading h2{
+  margin:0;
+  color:var(--cc-text);
+  font-size:18px;
+  line-height:1.2;
+  font-weight:760;
+}
+body[data-rym-module="panapass"] .rym-section-heading p{
+  margin:3px 0 0;
+  color:var(--cc-muted);
+  font-size:11px;
+  line-height:1.4;
+}
+body[data-rym-module="panapass"] .rym-section-heading>b{
+  color:#98a2b3;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+/* Attention cards are intentionally action-oriented. */
+body[data-rym-module="panapass"] .rym-attention-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+body[data-rym-module="panapass"] .rym-command-card{
+  position:relative!important;
+  min-height:0!important;
+  padding:16px 16px 14px!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+body[data-rym-module="panapass"] .rym-command-card::after{display:none!important}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="attention"]{
+  border:1px solid #f0d5d2!important;
+  background:linear-gradient(180deg,#fff 0%,#fffafa 100%)!important;
+}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="attention"] .rym-kpi-icon{
+  background:var(--cc-red-bg)!important;
+  color:var(--cc-red)!important;
+}
+body[data-rym-module="panapass"] .rym-command-card .rym-kpi-icon{
+  width:30px!important;height:30px!important;margin-bottom:10px!important;border-radius:9px!important;font-size:13px!important;
+}
+body[data-rym-module="panapass"] .rym-command-card .label{
+  color:#475467!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  text-transform:none!important;
+}
+body[data-rym-module="panapass"] .rym-command-card strong{
+  margin-top:7px!important;
+  font-size:30px!important;
+  line-height:1!important;
+  letter-spacing:-.03em!important;
+}
+body[data-rym-module="panapass"] .rym-command-card small{display:none!important}
+body[data-rym-module="panapass"] .rym-command-explain{
+  max-width:280px;
+  margin-top:8px;
+  color:var(--cc-muted);
+  font-size:11px;
+  line-height:1.4;
+}
+body[data-rym-module="panapass"] .rym-command-link{
+  display:block;
+  margin-top:13px;
+  color:var(--cc-blue);
+  font-size:11px;
+  font-weight:750;
+}
+
+/* Middle row: payments are primary, context is secondary. */
+body[data-rym-module="panapass"] .rym-command-middle{
+  display:grid;
+  grid-template-columns:minmax(0,1.7fr) minmax(270px,.6fr);
+  gap:14px;
+  align-items:stretch;
+  margin-bottom:22px;
+}
+body[data-rym-module="panapass"] .rym-payment-section{
+  margin:0!important;
+  padding:16px;
+  border:1px solid var(--cc-border);
+  border-radius:16px;
+  background:#fff;
+}
+body[data-rym-module="panapass"] .rym-payment-body{
+  display:grid;
+  grid-template-columns:minmax(180px,.52fr) minmax(0,1.48fr);
+  gap:12px;
+  align-items:stretch;
+}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="payment"]{
+  border:1px solid #f3dfc7!important;
+  background:var(--cc-amber-bg)!important;
+}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="payment"] strong{color:var(--cc-amber)!important}
+body[data-rym-module="panapass"] .rym-payment-body .rym-exec-strip{
+  display:grid!important;
+  grid-template-columns:minmax(260px,1.2fr) minmax(130px,.45fr) minmax(140px,.5fr)!important;
+  gap:0!important;
+  min-height:0!important;
+  padding:14px 16px!important;
+  border:1px solid #e4eaf1!important;
+  border-radius:13px!important;
+  background:#fbfcfe!important;
+  box-shadow:none!important;
+}
+body[data-rym-module="panapass"] .rym-payment-body .rym-exec-main b{font-size:13px!important}
+body[data-rym-module="panapass"] .rym-payment-body .rym-exec-main small{font-size:10px!important}
+body[data-rym-module="panapass"] .rym-payment-body .rym-exec-stat strong{font-size:19px!important}
+
+body[data-rym-module="panapass"] .rym-command-context{
+  display:flex;
+  flex-direction:column;
+  padding:16px;
+  border:1px solid var(--cc-border);
+  border-radius:16px;
+  background:#fff;
+}
+body[data-rym-module="panapass"] .rym-context-heading span{
+  color:#344054;
+  font-size:12px;
+  font-weight:750;
+}
+body[data-rym-module="panapass"] .rym-context-heading p{
+  margin:4px 0 12px;
+  color:var(--cc-muted);
+  font-size:10px;
+}
+body[data-rym-module="panapass"] .rym-context-grid{display:grid;grid-template-columns:1fr;gap:9px}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="context"]{
+  min-height:94px!important;
+  padding:13px!important;
+  border:1px solid #e5eaf0!important;
+  background:#fafbfc!important;
+}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="context"] .rym-kpi-icon{display:none!important}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="context"] strong{font-size:24px!important;color:var(--cc-navy)!important}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="context"] .rym-command-explain{font-size:10px}
+body[data-rym-module="panapass"] .rym-command-card[data-command-role="context"] .rym-command-link{margin-top:7px;font-size:10px}
+
+/* Galeras: card is a comparison story, not a mini spreadsheet. */
+body[data-rym-module="panapass"] .rym-command-galeras{
+  margin-top:0!important;
+}
+body[data-rym-module="panapass"] .rym-command-galeras>.galera-kpi-title{
+  display:grid!important;
+  grid-template-columns:28px 1fr!important;
+  align-items:start!important;
+  gap:10px!important;
+  margin:0 0 10px!important;
+}
+body[data-rym-module="panapass"] .rym-command-galeras>.galera-kpi-title>div{display:block!important}
+body[data-rym-module="panapass"] .rym-command-galeras .galera-kpi-title h3{
+  font-size:18px!important;
+  color:var(--cc-text)!important;
+}
+body[data-rym-module="panapass"] .rym-command-galeras .galera-kpi-title span:not(.rym-section-index){
+  margin-top:3px!important;
+  font-size:11px!important;
+  color:var(--cc-muted)!important;
+}
+body[data-rym-module="panapass"] .rym-command-galeras .galera-kpi-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+body[data-rym-module="panapass"] .rym-command-galera{
+  padding:0!important;
+  overflow:hidden!important;
+  border:1px solid var(--cc-border)!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+body[data-rym-module="panapass"] .rym-command-galera:hover{
+  border-color:#b8c9df!important;
+  box-shadow:0 8px 20px rgba(15,47,95,.06)!important;
+}
+body[data-rym-module="panapass"] .rym-gal-identity{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:15px 16px 11px;
+}
+body[data-rym-module="panapass"] .rym-gal-identity .rym-gal-head{margin:0!important;flex:1}
+body[data-rym-module="panapass"] .rym-gal-name{font-size:19px!important;color:var(--cc-navy)!important}
+body[data-rym-module="panapass"] .rym-gal-action{
+  color:var(--cc-blue);
+  font-size:10px;
+  font-weight:750;
+  white-space:nowrap;
+}
+body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metrics{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  margin:0 16px!important;
+  border:1px solid #e6ebf1!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#fafbfc!important;
+}
+body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metric{
+  min-height:78px!important;
+  padding:11px 12px!important;
+  border:0!important;
+  border-right:1px solid #e6ebf1!important;
+  background:transparent!important;
+}
+body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metric:last-child{border-right:0!important}
+body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metric span{font-size:10px!important;text-transform:none!important}
+body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metric b{font-size:22px!important}
+body[data-rym-module="panapass"] .rym-command-galera .rym-gal-progress{display:none!important}
+body[data-rym-module="panapass"] .rym-gal-trend{
+  margin-top:12px;
+  padding:11px 16px 13px;
+  border-top:1px solid #edf0f4;
+  background:#fcfdff;
+}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-7d-title{margin-bottom:9px!important}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-7d-title b{
+  color:#475467!important;
+  font-size:10px!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-7d{
+  display:flex!important;
+  gap:5px!important;
+  border:0!important;
+  overflow:hidden!important;
+}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-day{
+  flex:1 1 0!important;
+  min-width:0!important;
+  min-height:56px!important;
+  padding:7px 3px!important;
+  border:1px solid #edf0f4!important;
+  border-radius:8px!important;
+  background:#fff!important;
+}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-day span{font-size:8px!important}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-day b{font-size:10px!important;margin-top:5px!important}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-day small{font-size:8px!important;margin-top:3px!important}
+body[data-rym-module="panapass"] .rym-gal-trend .rym-day.today{
+  border-color:#9bbcf2!important;
+  background:#f4f8ff!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:1180px){
+  body[data-rym-module="panapass"] .rym-command-middle{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .rym-context-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:900px){
+  body[data-rym-module="panapass"] .rym-attention-grid,
+  body[data-rym-module="panapass"] .rym-command-galeras .galera-kpi-grid{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .rym-payment-body{grid-template-columns:1fr!important}
+}
+@media(max-width:680px){
+  body[data-rym-module="panapass"].rym-panapass-command #view{padding:14px!important}
+  body[data-rym-module="panapass"] .rym-command-header{display:block}
+  body[data-rym-module="panapass"] .rym-command-date{text-align:left;padding-top:10px}
+  body[data-rym-module="panapass"] .rym-command-pulse{align-items:flex-start;flex-wrap:wrap;padding:10px 12px}
+  body[data-rym-module="panapass"] .rym-context-grid{grid-template-columns:1fr}
+  body[data-rym-module="panapass"] .rym-payment-body .rym-exec-strip{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metrics{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metric{border-right:0!important;border-bottom:1px solid #e6ebf1!important}
+  body[data-rym-module="panapass"] .rym-command-galera .rym-gal-metric:last-child{border-bottom:0!important}
+}
