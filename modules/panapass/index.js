@@ -6,10 +6,19 @@
   let mounted = false;
   let lastContext = null;
 
+  function normalizeContext(ctx){
+    if(ctx && ctx.api && ctx.api.panapass) return ctx;
+    const extra = ctx && ctx.extra ? ctx.extra : (ctx || {});
+    if(w.RYM_CONTEXT && typeof w.RYM_CONTEXT.create === 'function'){
+      return w.RYM_CONTEXT.create('panapass', extra);
+    }
+    return null;
+  }
+
   async function mount(ctx){
-    const context = ctx || (w.RYM_CONTEXT && w.RYM_CONTEXT.create('panapass'));
+    const context = normalizeContext(ctx);
     if(!context) throw new Error('Panapass context unavailable');
-    if(!context.api.panapass) throw new Error('Panapass API contract unavailable');
+    if(!context.api || !context.api.panapass) throw new Error('Panapass API contract unavailable');
     d.body.dataset.rymModule = 'panapass';
     lastContext = context;
     mounted = true;
@@ -29,10 +38,11 @@
 
   w.RYM_MODULES.register('panapass', {
     init:function(ctx){
-      if(ctx) lastContext = ctx;
+      const context=normalizeContext(ctx);
+      if(context) lastContext = context;
     },
     open:function(ctx){
-      return mount(ctx || lastContext || (w.RYM_CONTEXT && w.RYM_CONTEXT.create('panapass')));
+      return mount(ctx || lastContext);
     },
     mount,
     unmount
