@@ -1,0 +1,7 @@
+/* Panapass Ops V3 shell cleanup */
+body[data-rym-module="panapass"]:has(#view .rym-p2-shell) .main>.top{display:none!important}
+body[data-rym-module="panapass"]:has(#view .rym-p2-shell) .main{padding-top:18px!important}
+
+/* Historical views stay compact: 30d = 5 weekly points, 90d = 13 weekly points. */
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-range-bars.range-30 .rym-p2-bar-day>strong{font-size:10px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p3-range-bars.range-90 .rym-p2-bar-tooltip{min-width:156px!important}
