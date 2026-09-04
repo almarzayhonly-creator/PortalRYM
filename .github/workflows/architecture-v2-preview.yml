@@ -26,18 +26,22 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
+          import os,re
           p=Path('index.html')
           s=p.read_text()
-          marker='<script id="rym-v171-loader" src="/modules/v171-loader.js?v=172-pilot"></script>\n'
-          if 'id="rym-v171-loader"' not in s:
+          build=os.environ.get('GITHUB_SHA','172-pilot')
+          marker=f'<script id="rym-v171-loader" src="/modules/v171-loader.js?v={build}"></script>\n'
+          existing=re.compile(r'<script id="rym-v171-loader"[^>]*></script>\s*',re.I)
+          if existing.search(s):
+              s=existing.sub(marker,s,count=1)
+          else:
               m=re.search(r'<head\b[^>]*>', s, re.I)
               if not m: raise SystemExit('head start not found')
               s=s[:m.end()]+'\n'+marker+s[m.end():]
-              p.write_text(s)
-          head=p.read_text()[:12000]
-          if 'id="rym-v171-loader"' not in head:
-              raise SystemExit('Architecture V2 loader not injected near document head')
+          p.write_text(s)
+          head=s[:12000]
+          if f'v={build}' not in head:
+              raise SystemExit('Architecture V2 loader build token not injected')
           PY
       - name: Deploy isolated Cloudflare preview
         id: deploy
@@ -60,12 +64,16 @@ jobs:
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/v171-loader.js?x=$(date +%s)" -o /tmp/loader
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/style-manager.js?x=$(date +%s)" -o /tmp/styles
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/module-registry.js?x=$(date +%s)" -o /tmp/registry
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/legacy-route-bridge.js?x=$(date +%s)" -o /tmp/routes
           for f in core panapass panapass-bajas revisados control-auto gps usuarios; do
             curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/css/$f.css?x=$(date +%s)" -o "/tmp/$f.css"
           done
           grep -Fq 'rym-v171-loader' /tmp/index
           grep -Fq "const css=['/css/core.css']" /tmp/loader
+          grep -Fq 'legacy-route-bridge.js' /tmp/loader
           grep -Fq 'RYM_STYLES' /tmp/styles
+          grep -Fq 'RYM_MODULES.open' /tmp/routes
+          grep -Fq 'PANAPASS · DISEÑO V2' /tmp/panapass-bajas.css
           grep -Fq 'await unmount(active)' /tmp/registry
       - name: Install Playwright
         run: npm install playwright && npx playwright install --with-deps chromium
