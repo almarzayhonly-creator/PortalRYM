@@ -12,7 +12,6 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
   function isPan(){return d.body?.dataset?.rymModule==='panapass'&&d.body?.classList.contains('rym-panapass-proposal2')}
-  function phase(){return d.body?.dataset?.rymPanapassPhase||'am'}
 
   function galeraName(root){
     return txt(root,'.rym-p2-gal-name')||String(txt(root,'.galera-kpi-title h3').split('·').pop()||'Tu galera').trim();
@@ -33,6 +32,19 @@
     return prev?.classList?.contains('galera-kpi-title')?prev:null;
   }
 
+  function setSupervisorHeader(waiting){
+    const header=d.querySelector('#view .rym-p2-header');if(!header)return;
+    const badge=header.querySelector('.rym-p3-phase-badge');
+    const subtitle=header.querySelector('p');
+    if(waiting){
+      if(badge){badge.className='rym-p3-phase-badge am';badge.textContent='SIN PAGOS HOY'}
+      if(subtitle)subtitle.textContent='Cobranza activa · todavía no hay pagos gestionados hoy';
+    }else{
+      if(badge){badge.className='rym-p3-phase-badge pm';badge.textContent='GESTIÓN PM'}
+      if(subtitle)subtitle.textContent='Gestión registrada · revisa tu rendimiento y posición de hoy';
+    }
+  }
+
   function renderWaiting(root,panel,title){
     const gal=galeraName(root),neg=negatives(root);
     if(!panel.__rymSupervisorOriginal) panel.__rymSupervisorOriginal=panel.innerHTML;
@@ -43,6 +55,7 @@
       if(h)h.textContent=`Rendimiento de hoy · ${gal}`;
       if(s)s.textContent='La prioridad sigue siendo la cobranza; el ranking aparece cuando existan pagos.';
     }
+    setSupervisorHeader(true);
   }
 
   function renderLive(root,panel,title){
@@ -61,6 +74,7 @@
       row.classList.toggle('rym-p5-first',i===0);
       if(row.classList.contains('me')) row.setAttribute('aria-label','Tu posición actual');
     });
+    setSupervisorHeader(false);
   }
 
   function run(){
@@ -71,7 +85,7 @@
     root.classList.add('rym-p5-supervisor-view');
     const title=titleBefore(panel);
     const paid=payments(root);
-    if(phase()==='am'||paid===0) renderWaiting(root,panel,title);
+    if(paid===0) renderWaiting(root,panel,title);
     else renderLive(root,panel,title);
   }
 
