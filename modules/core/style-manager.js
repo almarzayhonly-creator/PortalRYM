@@ -19,6 +19,8 @@
     'panapass-negativos':'panapass'
   });
 
+  const build=String(w.RYM_BUILD_VERSION||'172-pilot');
+  const q='?v='+encodeURIComponent(build);
   let activeDomain = '';
   const loaded = new Map();
 
@@ -45,7 +47,7 @@
       }
       link=d.createElement('link');
       link.rel='stylesheet';
-      link.href=href+'?v=172-pilot';
+      link.href=href+q;
       link.dataset.rymModuleStyle='1';
       link.dataset.rymStyleDomain=domain;
       link.dataset.href=href;
