@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: architecture-v2-preview
@@ -15,6 +16,7 @@ concurrency:
 jobs:
   preview:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -75,9 +77,44 @@ jobs:
           grep -Fq 'RYM_MODULES.open' /tmp/routes
           grep -Fq 'PANAPASS · DISEÑO V2' /tmp/panapass-bajas.css
           grep -Fq 'await unmount(active)' /tmp/registry
+      - name: Create temporary authenticated audit user
+        shell: bash
+        run: |
+          mkdir -p audit
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          R=$(curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' \
+            -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data '{"action":"create"}')
+          test "$(jq -r .ok <<<"$R")" = true
+          ID=$(jq -r .id <<<"$R"); U=$(jq -r .usuario <<<"$R"); P=$(jq -r .password <<<"$R")
+          echo "::add-mask::$U"; echo "::add-mask::$P"
+          echo "AUDIT_USER_ID=$ID" >> "$GITHUB_ENV"
+          echo "AUDIT_USERNAME=$U" >> "$GITHUB_ENV"
+          echo "AUDIT_PASSWORD=$P" >> "$GITHUB_ENV"
       - name: Install Playwright
         run: npm install playwright && npx playwright install --with-deps chromium
       - name: Browser lifecycle and CSS isolation smoke
         env:
           QA_URL: ${{ steps.deploy.outputs.url }}
         run: node qa/v171-module-smoke.js
+      - name: Authenticated Panapass and Bajas smoke
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+          AUDIT_USERNAME: ${{ env.AUDIT_USERNAME }}
+          AUDIT_PASSWORD: ${{ env.AUDIT_PASSWORD }}
+        run: node qa/v172-authenticated-panapass-smoke.js
+      - name: Delete temporary authenticated audit user
+        if: always() && env.AUDIT_USER_ID != ''
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' \
+            -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' \
+            --data "{\"action\":\"delete\",\"id\":\"$AUDIT_USER_ID\"}" | jq -c .
+      - name: Upload authenticated preview evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-v2-authenticated-panapass
+          path: audit/
+          if-no-files-found: warn
+          retention-days: 3
