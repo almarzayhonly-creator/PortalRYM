@@ -8,6 +8,7 @@
 
   const LABELS={active:'UNIDADES ACTIVAS',negatives:'NEGATIVOS HOY',paid:'REQUIRIERON PAGO',recurrent:'RECURRENTES',bajas:'BAJAS PANAPASS',noPan:'SIN PANAPASS'};
   const norm=s=>String(s||'').trim().replace(/\s+/g,' ').toUpperCase();
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const el=(tag,cls,html)=>{const x=d.createElement(tag);if(cls)x.className=cls;if(html!=null)x.innerHTML=html;return x};
   const txt=(node,sel)=>String(node?.querySelector(sel)?.textContent||'').trim();
 
@@ -27,7 +28,7 @@
     return out;
   }
 
-  function setCard(card,role){if(!card)return;card.className=`rym-admin-kpi click rym-p2-card`;card.dataset.p2Role=role}
+  function setCard(card,role){if(!card)return;card.className='rym-admin-kpi click rym-p2-card';card.dataset.p2Role=role}
   function todayLabel(){try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',weekday:'short',day:'2-digit',month:'short',year:'numeric'}).format(new Date())}catch(_){return 'Hoy'}}
 
   function sparkline(values,color){
@@ -74,9 +75,10 @@
     alert.querySelector('.rym-p2-alert-head>button').onclick=()=>cards.negatives.click();
 
     const payment=el('section','rym-p2-payment');
-    const payAmount=txt(exec,'.rym-exec-stat:last-child strong')||'B/. —';
-    const payAvg=txt(exec,'.rym-exec-stat:first-of-type strong')||'—';
-    payment.innerHTML=`<div class="rym-p2-panel-title"><span>$</span><div><strong>Pagos de hoy</strong><small>Movimiento operativo del día</small></div></div><div class="rym-p2-payment-main"><div><strong>${payAmount}</strong><small>Monto pagado hoy</small></div><div class="rym-p2-mini-bars"><i style="height:28%"></i><i style="height:46%"></i><i style="height:38%"></i><i style="height:68%"></i><i style="height:54%"></i><i style="height:82%"></i><i style="height:64%"></i></div></div><div class="rym-p2-payment-foot"><span>Promedio 7 días</span><strong>${payAvg}</strong><button type="button">Ver detalle →</button></div>`;
+    const payStats=[...exec.querySelectorAll('.rym-exec-stat strong')];
+    const payAvg=String(payStats[0]?.textContent||'—').trim();
+    const payAmount=String(payStats[1]?.textContent||payStats.at(-1)?.textContent||'B/. —').trim();
+    payment.innerHTML=`<div class="rym-p2-panel-title"><span>$</span><div><strong>Pagos de hoy</strong><small>Movimiento operativo del día</small></div></div><div class="rym-p2-payment-main"><div><strong>${esc(payAmount)}</strong><small>Monto pagado hoy</small></div><div class="rym-p2-mini-bars"><i style="height:28%"></i><i style="height:46%"></i><i style="height:38%"></i><i style="height:68%"></i><i style="height:54%"></i><i style="height:82%"></i><i style="height:64%"></i></div></div><div class="rym-p2-payment-foot"><span>Promedio 7 días</span><strong>${esc(payAvg)}</strong><button type="button">Ver detalle →</button></div>`;
     payment.querySelector('button').onclick=()=>cards.paid.click();
 
     const context=el('section','rym-p2-context');
@@ -92,13 +94,22 @@
 
   function enhanceGaleraCard(card,index){
     if(!card||card.dataset.p2Enhanced==='1')return;
-    const head=card.querySelector('.rym-gal-head'),metrics=card.querySelector('.rym-gal-metrics'),days=[...card.querySelectorAll('.rym-day')];
-    if(!head||!metrics||!days.length)return;
+    const metrics=card.querySelector('.rym-gal-metrics'),days=[...card.querySelectorAll('.rym-day')];
+    if(!metrics||!days.length)return;
+
+    const name=txt(card,'.rym-gal-name')||'GALERA';
+    const today=txt(card,'.rym-gal-today')||'HOY';
+    const rankNode=card.querySelector('.rym-gal-rank');
+    const rank=String(rankNode?.textContent||'').trim();
+    const rankClass=rankNode?.classList.contains('best')?'best':rankNode?.classList.contains('watch')?'watch':'';
     const palette=['#1570ef','#10a37f','#7c3aed','#f59e0b'];const color=palette[index%palette.length];
     const vals=days.map(amountFromDay),positive=vals.filter(v=>v>0),mean=positive.length?positive.reduce((a,b)=>a+b,0)/positive.length:0,max=Math.max(...vals,1);
     const bars=vals.map(v=>`<i style="height:${v>0?Math.max(18,Math.round((v/max)*100)):10}%"></i>`).join('');
-    const topbar=el('div','rym-p2-gal-top');topbar.style.setProperty('--gal-color',color);topbar.appendChild(head);
-    const arrow=el('span','rym-p2-gal-arrow');arrow.textContent='›';topbar.appendChild(arrow);
+
+    const topbar=el('div','rym-p2-gal-top');
+    topbar.style.setProperty('--gal-color',color);
+    topbar.innerHTML=`<div class="rym-p2-gal-identity"><strong class="rym-p2-gal-name">${esc(name)}</strong>${rank?`<span class="rym-p2-gal-status ${rankClass}">${esc(rank)}</span>`:''}</div><span class="rym-p2-gal-date">${esc(today)}</span><span class="rym-p2-gal-arrow">›</span>`;
+
     const visual=el('div','rym-p2-gal-visual');visual.innerHTML=`<div class="rym-p2-spark">${sparkline(vals,color)}</div><div class="rym-p2-bars" style="--gal-color:${color}">${bars}</div>`;
     const foot=el('div','rym-p2-gal-foot');foot.innerHTML=`<span>Tendencia · 7 días</span><strong>Promedio B/. ${mean.toFixed(2)}</strong><button type="button">Ver galera →</button>`;foot.querySelector('button').onclick=e=>{e.stopPropagation();card.click()};
     card.className='rym-gal-card rym-p2-galera';
@@ -118,6 +129,11 @@
   function enhance(){
     const body=d.body,view=d.querySelector('#view'),isPan=body?.dataset?.rymModule==='panapass',top=view?.querySelector('.rym-admin-kpis'),gal=view?.querySelector('#phase4GaleraKpis');
     if(!isPan||!top||!gal){body?.classList.remove('rym-panapass-proposal2');return}
+
+    /* Keep the styled legacy skeleton visible until both async data blocks are ready.
+       Removing its stylesheet before hydration caused the raw CARGANDO screen flash. */
+    if(top.dataset.rymReady!=='1'||gal.dataset.rymReady!=='1') return;
+
     purgeLegacyVisuals();
     const a=enhanceTop(top),b=enhanceGalera(gal);if(a||b||top.dataset.p2Enhanced==='1')body.classList.add('rym-panapass-proposal2');
   }
