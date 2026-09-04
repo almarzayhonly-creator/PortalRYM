@@ -13,11 +13,22 @@ const recurrentes = read('modules/panapass/recurrentes/index.js');
 const bajas = read('modules/panapass/bajas/index.js');
 const pagos = read('modules/panapass/pagos/index.js');
 const negativos = read('modules/panapass/negativos/index.js');
+const dashboard = read('modules/panapass/dashboard/index.js');
+const negativosDate = read('modules/panapass/negativos/panama-date.js');
 const gps = read('modules/gps/index.js');
 const context = read('modules/core/context.js');
 const events = read('modules/core/event-bus.js');
+const coreDashboardShim = read('modules/core/dashboard-payments-enhance.js');
+const coreNegativosShim = read('modules/core/panapass-negativos-panama-date.js');
 
-for (const file of ['modules/core/event-bus.js','modules/core/context.js','modules/panapass/pagos/index.js','modules/panapass/negativos/index.js']) {
+for (const file of [
+  'modules/core/event-bus.js',
+  'modules/core/context.js',
+  'modules/panapass/pagos/index.js',
+  'modules/panapass/negativos/index.js',
+  'modules/panapass/negativos/panama-date.js',
+  'modules/panapass/dashboard/index.js'
+]) {
   if (!loader.includes(file)) fail(`loader no carga ${file}`); else ok(`loader carga ${file}`);
 }
 
@@ -50,12 +61,26 @@ for (const [name, code, expectedApi] of modules) {
 }
 
 if (/\bw\.openSupervisoraProfile\b|typeof\s+openSupervisoraProfile/.test(ranking)) fail('Ranking Panapass depende de openSupervisoraProfile global'); else ok('Ranking Panapass no depende de openSupervisoraProfile global');
-if (/modules\/gps|RYM_GPS|v113OpenGps/.test(ranking+recurrentes+bajas+pagos+negativos)) fail('Submodulos Panapass tienen dependencia directa de GPS'); else ok('Submodulos Panapass no dependen directamente de GPS');
+if (/modules\/gps|RYM_GPS|v113OpenGps/.test(ranking+recurrentes+bajas+pagos+negativos+dashboard+negativosDate)) fail('Submodulos Panapass tienen dependencia directa de GPS'); else ok('Submodulos Panapass no dependen directamente de GPS');
 
 for (const apiName of ['ranking','recurrentes','bajas','pagos7d','negativosActual']) {
   if (!new RegExp(`${apiName}:`).test(context)) fail(`Context no expone panapass.${apiName}`); else ok(`Context expone panapass.${apiName}`);
 }
 if (!/maxPago/.test(context)) fail('Context no encapsula session.meta.maxPago'); else ok('Context encapsula session.meta.maxPago');
+if (!/router/.test(context) || !/openRoute/.test(context)) fail('Context no encapsula navegacion legacy'); else ok('Context encapsula navegacion legacy');
+
+if (!/RYM_CONTEXT/.test(dashboard)) fail('Dashboard Panapass no consume RYM_CONTEXT'); else ok('Dashboard Panapass consume RYM_CONTEXT');
+if (/\brpc\s*\(/.test(dashboard)) fail('Dashboard Panapass llama rpc directamente'); else ok('Dashboard Panapass no llama rpc directamente');
+if (/\bw\.state\b|\bwindow\.state\b/.test(dashboard)) fail('Dashboard Panapass depende de window.state'); else ok('Dashboard Panapass no depende de window.state');
+
+const shimRules = [
+  ['dashboard', coreDashboardShim, '/modules/panapass/dashboard/index.js'],
+  ['negativos-date', coreNegativosShim, '/modules/panapass/negativos/panama-date.js']
+];
+for (const [name, code, target] of shimRules) {
+  if (!code.includes(target)) fail(`Core shim ${name} no delega a ${target}`); else ok(`Core shim ${name} delega a dominio Panapass`);
+  if (/panapass_dashboard_pagos_7d|panapass_ranking_pagos|panapass_portal_negativos_actual|function\s+todayPanama/.test(code)) fail(`Core shim ${name} contiene logica de negocio Panapass`); else ok(`Core shim ${name} no contiene logica de negocio Panapass`);
+}
 
 if (process.exitCode) process.exit(process.exitCode);
 console.log('ARCH_V2_RESULT: PASS');
