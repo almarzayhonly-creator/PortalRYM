@@ -16,6 +16,14 @@
 
   function get(key){return originals.get(String(key))||null}
 
+  function moduleContext(moduleId,args){
+    const extra={legacyArgs:Array.from(args||[]),source:'legacy-entrypoint'};
+    if(w.RYM_CONTEXT&&typeof w.RYM_CONTEXT.create==='function'){
+      return w.RYM_CONTEXT.create(moduleId,extra);
+    }
+    return extra;
+  }
+
   function install(def){
     const current=w[def.global];
     const installed=wrappers.get(def.global);
@@ -39,7 +47,7 @@
       }
       routing.add(def.module);
       try{
-        return await w.RYM_MODULES.open(def.module,{legacyArgs:args,source:'legacy-entrypoint'});
+        return await w.RYM_MODULES.open(def.module,moduleContext(def.module,args));
       }finally{
         routing.delete(def.module);
       }
