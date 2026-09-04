@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
     let data;
     try{data=await window.RYM_V171_READY}catch(e){return {ready:false,error:String(e),loader:loader?{src:loader.src}:null}}
 
-    const result={ready:true,data,styles:{},lifecycle:{}};
+    const result={ready:true,data,styles:{},lifecycle:{},bridge:{}};
     const moduleLinks=()=>[...document.querySelectorAll('link[data-rym-module-style]')].map(x=>({href:x.dataset.href||x.getAttribute('href'),domain:x.dataset.rymStyleDomain||'',disabled:x.disabled}));
 
     await window.RYM_STYLES.activate('panapass');
@@ -35,6 +35,21 @@ const { chromium } = require('playwright');
     await window.RYM_MODULES.open('__qa_b');
     await window.RYM_MODULES.unmount('__qa_b');
     result.lifecycle={calls,current:window.RYM_MODULES.current()};
+
+    if(window.RYM_LEGACY_ROUTES){
+      const canonical=window.RYM_LEGACY_ROUTES.get('panapass');
+      const bridgeBefore=window.v70OpenPanapass;
+      if(typeof canonical==='function'&&typeof bridgeBefore==='function'){
+        window.v70OpenPanapass=async function(...args){return bridgeBefore.apply(this,args)};
+        window.RYM_LEGACY_ROUTES.install();
+        result.bridge={
+          available:true,
+          canonicalPreserved:window.RYM_LEGACY_ROUTES.get('panapass')===canonical,
+          bridged:window.RYM_LEGACY_ROUTES.isBridged('v70OpenPanapass'),
+          canonicalIsBridge:!!canonical.__rymV2RouteBridge
+        };
+      }else result.bridge={available:false,reason:'panapass entrypoints unavailable'};
+    }else result.bridge={available:false,reason:'route bridge unavailable'};
     return result;
   });
 
@@ -60,5 +75,6 @@ const { chromium } = require('playwright');
   const sequence=state.lifecycle.calls.join(',');
   if(sequence!=='open-a,unmount-a,open-b,unmount-b') process.exit(1);
   if(state.lifecycle.current!=='') process.exit(1);
+  if(!state.bridge.available||!state.bridge.canonicalPreserved||!state.bridge.bridged||state.bridge.canonicalIsBridge) process.exit(1);
   if(errors.length) process.exit(1);
 })().catch(e=>{console.error(e);process.exit(1)});
