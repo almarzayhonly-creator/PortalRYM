@@ -61,7 +61,7 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera{
   width:auto!important;
   min-width:0!important;
   max-width:none!important;
-  min-height:332px!important;
+  min-height:348px!important;
   margin:0!important;
   padding:0!important;
 }
@@ -82,7 +82,7 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .ry
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric{
   min-width:0!important;
-  min-height:98px!important;
+  min-height:106px!important;
   padding:14px 16px!important;
   border:0!important;
   border-right:1px solid #e7edf5!important;
@@ -91,67 +91,120 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .ry
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric:last-child{border-right:0!important}
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric span{font-size:11px!important;font-weight:700!important}
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric b{display:block!important;font-size:26px!important;line-height:1!important;margin-top:8px!important}
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric small{display:block!important;font-size:10px!important;line-height:1.25!important;margin-top:7px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric b{display:block!important;font-size:27px!important;line-height:1!important;margin-top:8px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric small{
+  display:block!important;
+  font-size:13px!important;
+  line-height:1.2!important;
+  margin-top:8px!important;
+  font-weight:800!important;
+  letter-spacing:-.01em!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric.bad small{color:#c62828!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric.pay small{color:#b86100!important}
+
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-visual{
   display:grid!important;
-  grid-template-columns:minmax(0,1.22fr) minmax(290px,.88fr)!important;
-  gap:18px!important;
+  grid-template-columns:minmax(0,1.18fr) minmax(330px,.92fr)!important;
+  gap:20px!important;
   align-items:end!important;
-  min-height:118px!important;
-  padding:13px 16px 8px!important;
+  min-height:132px!important;
+  padding:15px 16px 10px!important;
 }
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark{height:76px!important}
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark svg{display:block!important;width:100%!important;height:72px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark{height:82px!important;position:relative!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark svg{display:block!important;width:100%!important;height:78px!important;overflow:visible!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark-point{transition:r .12s ease,stroke-width .12s ease,opacity .12s ease;opacity:.82}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-spark-point.active{r:4!important;stroke:#fff!important;stroke-width:1.6!important;opacity:1!important}
+
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{
   display:grid!important;
   grid-template-columns:repeat(7,minmax(0,1fr))!important;
   align-items:end!important;
-  gap:5px!important;
-  height:86px!important;
+  gap:7px!important;
+  height:100px!important;
   overflow:visible!important;
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day{
+  position:relative!important;
   display:grid!important;
-  grid-template-rows:18px 1fr 17px!important;
+  grid-template-rows:22px 1fr 18px!important;
   align-items:end!important;
-  height:86px!important;
+  height:100px!important;
   min-width:0!important;
+  border-radius:8px!important;
+  outline:none!important;
+  transition:background .12s ease,transform .12s ease!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day:hover,
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day:focus,
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day.active{
+  background:color-mix(in srgb,var(--gal-color) 7%,#fff)!important;
+  transform:translateY(-2px)!important;
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>strong{
   display:block!important;
   text-align:center!important;
-  color:#526b8d!important;
-  font-size:9px!important;
+  color:#405b7e!important;
+  font-size:10px!important;
   line-height:1!important;
-  font-weight:800!important;
+  font-weight:900!important;
   white-space:nowrap!important;
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-track{
   display:flex!important;
   align-items:flex-end!important;
   justify-content:center!important;
-  height:51px!important;
+  height:58px!important;
 }
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-track i{
   display:block!important;
   width:100%!important;
-  max-width:28px!important;
+  max-width:32px!important;
   min-height:6px!important;
-  border-radius:4px 4px 1px 1px!important;
+  border-radius:5px 5px 1px 1px!important;
   background:color-mix(in srgb,var(--gal-color) 58%,#fff)!important;
+  transition:filter .12s ease,transform .12s ease,opacity .12s ease!important;
 }
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>span{
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day:hover .rym-p2-bar-track i,
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day:focus .rym-p2-bar-track i,
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day.active .rym-p2-bar-track i{
+  filter:saturate(1.2) brightness(.95)!important;
+  transform:scaleX(1.08)!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-label{
   display:block!important;
   text-align:center!important;
-  color:#7a8da6!important;
-  font-size:9px!important;
+  color:#6f84a1!important;
+  font-size:10px!important;
   line-height:1!important;
-  font-weight:800!important;
+  font-weight:900!important;
   text-transform:uppercase!important;
 }
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-tooltip{
+  position:absolute!important;
+  left:50%!important;
+  bottom:calc(100% + 8px)!important;
+  z-index:20!important;
+  display:none!important;
+  min-width:126px!important;
+  transform:translateX(-50%)!important;
+  padding:9px 10px!important;
+  border:1px solid color-mix(in srgb,var(--gal-color) 24%,#d9e5f3)!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  box-shadow:0 10px 24px rgba(25,54,93,.16)!important;
+  text-align:left!important;
+  pointer-events:none!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day:hover .rym-p2-bar-tooltip,
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day:focus .rym-p2-bar-tooltip,
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day.active .rym-p2-bar-tooltip{display:block!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-tooltip b{display:block!important;color:var(--gal-color)!important;font-size:10px!important;text-transform:uppercase!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-tooltip em{display:block!important;margin-top:4px!important;color:#153b72!important;font-size:13px!important;font-style:normal!important;font-weight:900!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-tooltip small{display:block!important;margin-top:3px!important;color:#74869d!important;font-size:9px!important}
+
 body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot{min-height:42px!important;padding:10px 14px!important;font-size:10px!important}
-body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot strong{font-size:12px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot strong{font-size:13px!important}
 
 @media(max-width:1280px){
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-hero{grid-template-columns:1fr!important}
@@ -159,7 +212,7 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot s
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-mid{grid-template-columns:1fr 1fr!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-alert{grid-column:1/-1!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-visual{grid-template-columns:1fr!important}
-  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{height:92px!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bars{height:104px!important}
 }
 @media(max-width:900px){
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-primary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
@@ -170,6 +223,7 @@ body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-foot s
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-primary-kpis,
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-mini-stack{grid-template-columns:1fr!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric b{font-size:22px!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-galera .rym-gal-metric small{font-size:11px!important}
   body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-gal-visual{padding-left:10px!important;padding-right:10px!important}
-  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>strong{font-size:8px!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #view .rym-p2-bar-day>strong{font-size:9px!important}
 }
