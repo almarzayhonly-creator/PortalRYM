@@ -1,6 +1,6 @@
 /* Portal RYM · Panapass Dashboard Ops V3
    Adds business-phase intelligence (AM/PM), operational performance callouts,
-   and compact 7/30/90-day historical chart controls on top of Proposal 2. */
+   and compact historical chart controls on top of Proposal 2. */
 (function(w,d){
   'use strict';
   if(w.__RYM_PANAPASS_OPS_V3__) return;
@@ -17,6 +17,7 @@
   const moneyNum=s=>{const m=String(s||'').replace(/,/g,'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):0};
 
   function context(){return w.RYM_CONTEXT&&typeof w.RYM_CONTEXT.create==='function'?w.RYM_CONTEXT.create('panapass-dashboard-ops-v3'):null}
+  function currentRole(){return norm(context()?.session?.role||'')}
   function isPan(){return d.body?.dataset?.rymModule==='panapass'&&d.body?.classList.contains('rym-panapass-proposal2')}
 
   function panamaISO(){
@@ -24,6 +25,12 @@
       const p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).reduce((a,x)=>(a[x.type]=x.value,a),{});
       return `${p.year}-${p.month}-${p.day}`;
     }catch(_){return new Date().toISOString().slice(0,10)}
+  }
+  function panamaHour(){
+    try{
+      const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Panama',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+      return Number(p.find(x=>x.type==='hour')?.value||0);
+    }catch(_){return new Date().getHours()}
   }
   function shiftISO(iso,days){
     const [y,m,day]=String(iso).split('-').map(Number),dt=new Date(Date.UTC(y,m-1,day+Number(days||0)));
@@ -57,7 +64,13 @@
     const out={};cards.forEach(c=>{if(c.dataset.opsKind)out[c.dataset.opsKind]=c});return out;
   }
 
-  function phaseFrom(cards){return num(txt(cards.paid,'strong'))>0?'pm':'am'}
+  /* AM/PM is an operational stage, not a consequence of having payments.
+     Default PM starts at noon Panama time; the hour can be overridden if operations changes. */
+  function phaseFrom(){
+    const configured=Number(w.RYM_PANAPASS_PM_START_HOUR);
+    const cutoff=Number.isFinite(configured)&&configured>=0&&configured<=23?configured:12;
+    return panamaHour()>=cutoff?'pm':'am';
+  }
 
   function setPhaseBadge(header,phase){
     const left=header?.firstElementChild;if(!left)return;
@@ -71,7 +84,7 @@
     if(!top)return null;
     const cards=cardKinds(top),primary=top.querySelector('.rym-p2-primary-kpis'),mini=top.querySelector('.rym-p2-mini-stack'),header=top.querySelector('.rym-p2-header');
     if(!cards.active||!cards.negative||!cards.paid||!cards.missing||!cards.bajas||!cards.recurrent||!primary||!mini)return null;
-    const phase=phaseFrom(cards);top.dataset.opsPhase=phase;d.body.dataset.rymPanapassPhase=phase;
+    const phase=phaseFrom();top.dataset.opsPhase=phase;d.body.dataset.rymPanapassPhase=phase;
     setPhaseBadge(header,phase);
     const subtitle=header?.querySelector('p');
     const negLabel=cards.negative.querySelector('.label'),negSmall=cards.negative.querySelector('small');
@@ -83,13 +96,13 @@
       if(negSmall)negSmall.textContent='Referencia del inicio del día';
       primary.append(cards.active,cards.paid,cards.missing,cards.bajas);
       mini.append(cards.recurrent,cards.negative);
-      if(subtitle)subtitle.textContent='Cierre PM · compara pagos y rendimiento de gestión';
+      if(subtitle)subtitle.textContent='Cierre PM · resultado de cobranza y ahorro operativo';
       const alert=top.querySelector('.rym-p2-alert');
       if(alert){
         alert.classList.add('is-pm');
         const title=alert.querySelector('.rym-p2-alert-head>div>strong'),small=alert.querySelector('.rym-p2-alert-head>div>small'),button=alert.querySelector('.rym-p2-alert-head>button');
-        if(title)title.textContent='Pendientes secundarios';
-        if(small)small.textContent='Con pagos registrados, los negativos AM quedan solo como referencia del día.';
+        if(title)title.textContent='Resultado del día';
+        if(small)small.textContent='Los negativos AM quedan como referencia. En PM, menos unidades pagadas significa mejor gestión.';
         alert.querySelector('.rym-p2-alert-item.negative')?.classList.add('ops-hidden');
         if(button){button.textContent='Ver bajas →';button.onclick=()=>cards.bajas.click()}
       }
@@ -153,7 +166,18 @@
       strip.innerHTML=`<div class="rym-p3-phase-lead"><span>FASE AM</span><strong>Cobranza en curso</strong><small>La prioridad es resolver las unidades negativas detectadas por ENA hoy.</small></div><div class="rym-p3-am-metric"><b>${negatives}</b><span>negativas detectadas</span><small>Este dato pertenece al día de hoy; no se arrastra como rendimiento histórico.</small></div>`;
       return;
     }
+
     const perf=galeraPerformance(root);if(!perf.best||!perf.worst)return;
+
+    /* A supervisor only sees her own galera. Zero paid in PM is a success state,
+       not an AM/no-activity state. */
+    if(currentRole()==='SUPERVISORA'&&perf.rows.length===1){
+      const r=perf.rows[0],negatives=num(txt(cards.negative,'strong'));
+      strip.className=`rym-p3-performance-strip pm supervisor ${r.paid===0?'perfect':''}`;
+      strip.innerHTML=`<div class="rym-p3-phase-lead"><span>CIERRE PM</span><strong>${r.paid===0?'Excelente gestión':'Resultado de cobranza'}</strong><small>${r.paid===0?'Ninguna de tus unidades requirió pago hoy. Para la empresa, este es el mejor resultado posible.':'El objetivo es reducir al mínimo las unidades que terminan requiriendo pago.'}</small></div><article class="rym-p3-perf-card ${r.paid===0?'best':'worst'}"><span>${r.paid===0?'🏆 Gestión destacada':'Resultado PM'}</span><strong>${esc(r.name)}</strong><b>${r.paid} pagadas · B/. ${r.amount.toFixed(2)}</b><small>${negatives} negativas detectadas en AM · resultado PM consolidado</small></article>`;
+      return;
+    }
+
     strip.className='rym-p3-performance-strip pm';
     strip.innerHTML=`<div class="rym-p3-phase-lead"><span>CIERRE PM</span><strong>Rendimiento de cobranza</strong><small>Menos unidades que requirieron pago = mejor gestión y menor incidencia de pago.</small></div><article class="rym-p3-perf-card best"><span>🏆 Mejor gestión</span><strong>${esc(perf.best.name)}</strong><b>${perf.best.paid} pagadas · B/. ${perf.best.amount.toFixed(2)}</b><small data-ops-best-sup>Calculando mejor supervisora…</small></article><article class="rym-p3-perf-card worst"><span>⚠ Mayor incidencia</span><strong>${esc(perf.worst.name)}</strong><b>${perf.worst.paid} pagadas · B/. ${perf.worst.amount.toFixed(2)}</b><small data-ops-worst-sup>Calculando supervisora con mayor incidencia…</small></article>`;
     void hydrateSupervisorPerformance(strip);
