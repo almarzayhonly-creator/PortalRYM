@@ -26,7 +26,7 @@
   async function mount(ctx){
     const context=normalizeContext(ctx);
     if(!context)throw new Error('Panapass context unavailable');
-    if(!context.api?.panapass)throw new Error('Panapass API contract unavailable');
+    if(!context.api||!context.api.panapass)throw new Error('Panapass API contract unavailable');
     d.body.dataset.rymModule='panapass';
     d.body.classList.add('rym-panapass-dashboard-native');
     lastContext=context;
@@ -36,9 +36,8 @@
     await ensureNativeDashboard();
     if(!mounted)return null;
 
-    /* The global authenticated shell remains the owner of permissions/navigation.
-       Its dashboard callback is now the native V2 renderer, so no legacy Panapass
-       dashboard markup is ever mounted before V2. */
+    /* The authenticated shell owns permissions/navigation. Its dashboard callback
+       is native V2, so no legacy Panapass dashboard markup is mounted first. */
     const result=context.router.open('dashboard');
     w.RYM_PANAPASS_SIDEBAR_V2?.render?.();
     return await result;
