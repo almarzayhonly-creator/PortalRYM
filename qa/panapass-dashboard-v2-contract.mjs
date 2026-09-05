@@ -56,5 +56,15 @@ for(const f of css){
   if(!selectors.length)fail('CSS vacio: '+f);
 }
 
+const loader=read('modules/v171-loader.js');
+const styleManager=read('modules/core/style-manager.js');
+const boundary=read('modules/panapass/index.js');
+if(!loader.includes('panapassDashboardV2'))fail('loader no expone query flag de preview');else ok('loader expone query flag de preview');
+for(const f of js){if(!loader.includes('/'+f))fail('loader no registra '+f);else ok('loader registra '+f)}
+for(const f of css){if(!styleManager.includes('/'+f))fail('style-manager no registra '+f);else ok('style-manager registra '+f)}
+if(!loader.includes('legacyDashboard')||!loader.includes('dashboardV2'))fail('loader no separa dashboard legacy y V2');else ok('loader separa legacy/V2');
+if(!boundary.includes('RYM_PANAPASS_DASHBOARD_V2.mount')&&!boundary.includes('dashboard.mount'))fail('boundary Panapass no monta V2');else ok('boundary Panapass monta V2');
+if(!boundary.includes("includeCompanyCompare:role==='ADMIN'||role==='GERENTE_GALERA'"))fail('boundary no limita comparativo agregado a Admin/Gerente');else ok('comparativo agregado se solicita solo para Admin/Gerente');
+
 if(process.exitCode)process.exit(process.exitCode);
 console.log('PANAPASS_DASH_V2_RESULT: PASS');

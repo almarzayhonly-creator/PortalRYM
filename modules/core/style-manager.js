@@ -3,8 +3,33 @@
   'use strict';
   if(w.RYM_STYLES) return;
 
+  const panapassBase=Object.freeze([
+    '/css/panapass.css',
+    '/css/panapass-bajas.css',
+    '/css/panapass-sidebar-v6-restored.css'
+  ]);
+  const panapassLegacyDashboard=Object.freeze([
+    '/css/panapass-proposal2.css',
+    '/css/panapass-proposal2-final.css',
+    '/css/panapass-proposal2-polish.css',
+    '/css/panapass-ops-v3.css',
+    '/css/panapass-ops-v3-patch.css',
+    '/css/panapass-date-window-v4.css'
+  ]);
+  const panapassDashboardV2=Object.freeze([
+    '/css/panapass/dashboard-v2/base.css',
+    '/css/panapass/dashboard-v2/panels.css',
+    '/css/panapass/dashboard-v2/galeras-ranking.css',
+    '/css/panapass/dashboard-v2/role-views.css',
+    '/css/panapass/dashboard-v2/responsive.css'
+  ]);
+  const panapassStyles=Object.freeze([
+    ...panapassBase,
+    ...(w.RYM_PANAPASS_DASHBOARD_V2_ENABLED===true?panapassDashboardV2:panapassLegacyDashboard)
+  ]);
+
   const manifests = Object.freeze({
-    panapass: Object.freeze(['/css/panapass.css','/css/panapass-proposal2.css','/css/panapass-proposal2-final.css','/css/panapass-proposal2-polish.css','/css/panapass-ops-v3.css','/css/panapass-ops-v3-patch.css','/css/panapass-bajas.css','/css/panapass-date-window-v4.css','/css/panapass-sidebar-v6-restored.css']),
+    panapass: panapassStyles,
     revisados: Object.freeze(['/css/revisados.css']),
     'control-auto': Object.freeze(['/css/control-auto.css']),
     gps: Object.freeze(['/css/gps.css']),
@@ -59,18 +84,12 @@
   }
 
   function disableOthers(domain){
-    for(const link of loaded.values()){
-      link.disabled = link.dataset.rymStyleDomain !== domain;
-    }
+    for(const link of loaded.values()) link.disabled = link.dataset.rymStyleDomain !== domain;
   }
 
   async function activate(moduleId){
     const domain=domainOf(moduleId);
-    if(!domain){
-      disableOthers('');
-      activeDomain='';
-      return '';
-    }
+    if(!domain){disableOthers('');activeDomain='';return '';}
     const files=manifests[domain]||[];
     for(const href of files) await ensure(href,domain);
     disableOthers(domain);

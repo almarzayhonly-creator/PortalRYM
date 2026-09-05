@@ -1,4 +1,4 @@
-/* Portal RYM - Panapass Dashboard V2 orchestrator. Prepared and OFF by default. */
+/* Portal RYM - Panapass Dashboard V2 canonical preview orchestrator. */
 (function(w,d){
   'use strict';
   if(w.RYM_PANAPASS_DASHBOARD_V2) return;
@@ -24,13 +24,24 @@
   }
 
   function bind(target,context,vm,options){
-    target.onclick=e=>{
+    target.onclick=async e=>{
       const refresh=e.target.closest('[data-pd2-action="refresh"]');
-      if(refresh){mount(context,{...options,target,force:true,forceData:true});return}
+      if(refresh){
+        if(target.dataset.pd2Busy==='1')return;
+        target.dataset.pd2Busy='1';
+        try{await mount(context,{...options,target,force:true,forceData:true})}
+        catch(error){console.error('Panapass Dashboard V2 refresh',error)}
+        finally{delete target.dataset.pd2Busy}
+        return;
+      }
       const route=e.target.closest('[data-pd2-route]');
       if(route&&context?.router?.open){context.router.open(route.dataset.pd2Route);return}
       const gal=e.target.closest('[data-pd2-open-galera]');
-      if(gal&&vm.policy.canOpenOtherGaleras&&typeof options?.openGalera==='function')options.openGalera(gal.dataset.pd2OpenGalera);
+      if(gal&&vm.policy.canOpenOtherGaleras){
+        const name=gal.dataset.pd2OpenGalera;
+        if(typeof options?.openGalera==='function')options.openGalera(name);
+        else context?.events?.emit('panapass:dashboard:open-galera',{galera:name,source:'dashboard-v2'});
+      }
     };
   }
 
@@ -40,13 +51,20 @@
     const target=typeof opts.target==='string'?d.querySelector(opts.target):opts.target;
     if(!target)throw new Error('Panapass Dashboard V2 requiere target explicito');
     const vm=await build(context,opts);
-    target.innerHTML=html(vm);target.dataset.rymPanapassDashboardV2='1';bind(target,context,vm,opts);
+    target.innerHTML=html(vm);
+    target.dataset.rymPanapassDashboardV2='1';
+    bind(target,context,vm,opts);
     return Object.freeze({status:'mounted',view:vm.view,role:vm.role,vm});
   }
 
   function unmount(target){
     const node=typeof target==='string'?d.querySelector(target):target;
-    if(node?.dataset?.rymPanapassDashboardV2==='1'){node.replaceChildren();delete node.dataset.rymPanapassDashboardV2;node.onclick=null}
+    if(node?.dataset?.rymPanapassDashboardV2==='1'){
+      node.replaceChildren();
+      delete node.dataset.rymPanapassDashboardV2;
+      delete node.dataset.pd2Busy;
+      node.onclick=null;
+    }
   }
 
   w.RYM_PANAPASS_DASHBOARD_V2=Object.freeze({ready,build,html,mount,unmount});
