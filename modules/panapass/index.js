@@ -15,6 +15,19 @@
     return null;
   }
 
+  function wait(ms){ return new Promise(resolve=>w.setTimeout(resolve,ms)); }
+
+  async function ensureNativeDashboard(){
+    const deadline=Date.now()+5000;
+    while(Date.now()<deadline){
+      if(w.__RYM_PANAPASS_DASHBOARD_NATIVE_INSTALLED__ &&
+         w.RYM_PANAPASS_DASHBOARD_V2?.native===true &&
+         typeof w.dashboard==='function') return true;
+      await wait(25);
+    }
+    throw new Error('Panapass native dashboard did not become ready');
+  }
+
   async function mount(ctx){
     const context = normalizeContext(ctx);
     if(!context) throw new Error('Panapass context unavailable');
@@ -27,6 +40,7 @@
     const legacy=w.RYM_LEGACY_ROUTES&&w.RYM_LEGACY_ROUTES.get('panapass');
     if(typeof legacy!=='function')throw new Error('Panapass canonical entrypoint unavailable');
     try{
+      await ensureNativeDashboard();
       return await legacy.apply(w,context.extra?.legacyArgs||[]);
     }catch(e){
       d.body.classList.remove('rym-panapass-booting');
@@ -37,7 +51,7 @@
   async function unmount(){
     if(!mounted) return;
     mounted = false;
-    d.body.classList.remove('rym-panapass-booting','rym-panapass-proposal2');
+    d.body.classList.remove('rym-panapass-booting','rym-panapass-proposal2','rym-panapass-dashboard-native');
     if(d.body.dataset.rymModule === 'panapass') delete d.body.dataset.rymModule;
     if(lastContext && lastContext.events) lastContext.events.emit('module:unmounted', {moduleId:'panapass'});
     lastContext = null;
