@@ -4,7 +4,7 @@
   if(w.RYM_STYLES) return;
 
   const manifests = Object.freeze({
-    panapass: Object.freeze(['/css/panapass.css','/css/panapass-dashboard-v2.css','/css/panapass-dashboard-v7.css','/css/panapass-dashboard-readability.css','/css/panapass-bajas.css']),
+    panapass: Object.freeze(['/css/panapass.css','/css/panapass-dashboard-v2.css','/css/panapass-dashboard-v7.css','/css/panapass-dashboard-readability.css','/css/panapass-bajas.css','/css/panapass-sidebar-rym.css']),
     revisados: Object.freeze(['/css/revisados.css']),
     'control-auto': Object.freeze(['/css/control-auto.css']),
     gps: Object.freeze(['/css/gps.css']),
