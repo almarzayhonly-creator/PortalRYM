@@ -12,8 +12,16 @@
   function dashboardV2Enabled(){
     if(typeof w.RYM_PANAPASS_DASHBOARD_V2_ENABLED==='boolean')return w.RYM_PANAPASS_DASHBOARD_V2_ENABLED;
     try{
-      const raw=String(new URL(w.location.href).searchParams.get('panapassDashboardV2')||'').toLowerCase();
-      return raw==='1'||raw==='true'||raw==='yes';
+      const url=new URL(w.location.href);
+      const rawParam=url.searchParams.get('panapassDashboardV2');
+      if(rawParam!==null){
+        const raw=String(rawParam||'').toLowerCase();
+        const on=raw==='1'||raw==='true'||raw==='yes';
+        if(on) w.sessionStorage?.setItem('rym.panapassDashboardV2','1');
+        else w.sessionStorage?.removeItem('rym.panapassDashboardV2');
+        return on;
+      }
+      return w.sessionStorage?.getItem('rym.panapassDashboardV2')==='1';
     }catch(_){return false}
   }
   w.RYM_PANAPASS_DASHBOARD_V2_ENABLED=dashboardV2Enabled();
