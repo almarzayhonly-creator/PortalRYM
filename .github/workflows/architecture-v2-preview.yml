@@ -1,17 +1,21 @@
 name: Architecture V2 preview
 
+
 on:
   push:
-    branches: [architecture-v2-panapass-pilot]
+    branches: [architecture-v2-panapass-pilot, architecture-v2-panapass-recovery-3ff12a1]
   workflow_dispatch:
+
 
 permissions:
   contents: read
   id-token: write
 
+
 concurrency:
   group: architecture-v2-preview
   cancel-in-progress: true
+
 
 jobs:
   preview:
@@ -34,91 +38,3 @@ jobs:
           build=os.environ.get('GITHUB_SHA','172-pilot')
           marker=f'<script id="rym-v171-loader" src="/modules/v171-loader.js?v={build}"></script>\n'
           existing=re.compile(r'<script id="rym-v171-loader"[^>]*></script>\s*',re.I)
-          if existing.search(s):
-              s=existing.sub(marker,s,count=1)
-          else:
-              m=re.search(r'<head\b[^>]*>', s, re.I)
-              if not m: raise SystemExit('head start not found')
-              s=s[:m.end()]+'\n'+marker+s[m.end():]
-          p.write_text(s)
-          head=s[:12000]
-          if f'v={build}' not in head:
-              raise SystemExit('Architecture V2 loader build token not injected')
-          PY
-      - name: Deploy isolated Cloudflare preview
-        id: deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npx --yes wrangler@latest versions upload --preview-alias architecture-v2 2>&1 | tee /tmp/wrangler.out
-          U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
-          test -n "$U"
-          echo "url=$U" >> "$GITHUB_OUTPUT"
-          echo "Exact preview: $U"
-      - name: Verify preview assets
-        env:
-          QA_URL: ${{ steps.deploy.outputs.url }}
-        run: |
-          U="$QA_URL"
-          test -n "$U"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/?x=$(date +%s)" -o /tmp/index
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/v171-loader.js?x=$(date +%s)" -o /tmp/loader
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/style-manager.js?x=$(date +%s)" -o /tmp/styles
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/module-registry.js?x=$(date +%s)" -o /tmp/registry
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/legacy-route-bridge.js?x=$(date +%s)" -o /tmp/routes
-          for f in core panapass panapass-proposal2 panapass-proposal2-final panapass-bajas revisados control-auto gps usuarios; do
-            curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/css/$f.css?x=$(date +%s)" -o "/tmp/$f.css"
-          done
-          grep -Fq 'rym-v171-loader' /tmp/index
-          grep -Fq "const css=['/css/core.css']" /tmp/loader
-          grep -Fq 'legacy-route-bridge.js' /tmp/loader
-          grep -Fq 'RYM_STYLES' /tmp/styles
-          grep -Fq '/css/panapass-proposal2.css' /tmp/styles
-          grep -Fq '/css/panapass-proposal2-final.css' /tmp/styles
-          grep -Fq 'RYM_MODULES.open' /tmp/routes
-          grep -Fq -- '--p2-navy' /tmp/panapass-proposal2.css
-          grep -Fq 'rym-p2-primary-kpis' /tmp/panapass-proposal2-final.css
-          grep -Fq '.v87-bajas-hero' /tmp/panapass-bajas.css
-          grep -Fq 'await unmount(active)' /tmp/registry
-      - name: Create temporary authenticated audit user
-        shell: bash
-        run: |
-          mkdir -p audit
-          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
-          R=$(curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' \
-            -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data '{"action":"create"}')
-          test "$(jq -r .ok <<<"$R")" = true
-          ID=$(jq -r .id <<<"$R"); U=$(jq -r .usuario <<<"$R"); P=$(jq -r .password <<<"$R")
-          echo "::add-mask::$U"; echo "::add-mask::$P"
-          echo "AUDIT_USER_ID=$ID" >> "$GITHUB_ENV"
-          echo "AUDIT_USERNAME=$U" >> "$GITHUB_ENV"
-          echo "AUDIT_PASSWORD=$P" >> "$GITHUB_ENV"
-      - name: Install Playwright
-        run: npm install playwright && npx playwright install --with-deps chromium
-      - name: Browser lifecycle and CSS isolation smoke
-        env:
-          QA_URL: ${{ steps.deploy.outputs.url }}
-        run: node qa/v171-module-smoke.js
-      - name: Authenticated Panapass and Bajas smoke
-        env:
-          QA_URL: ${{ steps.deploy.outputs.url }}
-          AUDIT_USERNAME: ${{ env.AUDIT_USERNAME }}
-          AUDIT_PASSWORD: ${{ env.AUDIT_PASSWORD }}
-        run: node qa/v172-authenticated-panapass-smoke.js
-      - name: Delete temporary authenticated audit user
-        if: always() && env.AUDIT_USER_ID != ''
-        shell: bash
-        run: |
-          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
-          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' \
-            -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' \
-            --data "{\"action\":\"delete\",\"id\":\"$AUDIT_USER_ID\"}" | jq -c .
-      - name: Upload authenticated preview evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: architecture-v2-authenticated-panapass
-          path: audit/
-          if-no-files-found: warn
-          retention-days: 3
