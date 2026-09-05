@@ -17,6 +17,14 @@
 
   function wait(ms){ return new Promise(resolve=>w.setTimeout(resolve,ms)); }
 
+  function ensureBootGuard(){
+    if(d.getElementById('rym-panapass-native-boot-guard')) return;
+    const style=d.createElement('style');
+    style.id='rym-panapass-native-boot-guard';
+    style.textContent='body[data-rym-module="panapass"].rym-panapass-booting #view>*{visibility:hidden!important}body[data-rym-module="panapass"].rym-panapass-booting #view:before{content:"Cargando Dashboard Panapass…";display:grid;place-items:center;min-height:240px;color:#0d2e5f;font:800 15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}';
+    d.head.appendChild(style);
+  }
+
   async function ensureNativeDashboard(){
     const deadline=Date.now()+5000;
     while(Date.now()<deadline){
@@ -32,6 +40,7 @@
     const context = normalizeContext(ctx);
     if(!context) throw new Error('Panapass context unavailable');
     if(!context.api || !context.api.panapass) throw new Error('Panapass API contract unavailable');
+    ensureBootGuard();
     d.body.dataset.rymModule = 'panapass';
     d.body.classList.add('rym-panapass-booting');
     lastContext = context;
@@ -41,10 +50,8 @@
     if(typeof legacy!=='function')throw new Error('Panapass canonical entrypoint unavailable');
     try{
       await ensureNativeDashboard();
-      /* The legacy entrypoint is still responsible for creating the Panapass shell,
-         permissions and navigation. Once that shell exists, hand the view explicitly
-         to the native V2 dashboard. Do not rely on the legacy entrypoint calling the
-         global dashboard function; some mobile paths render their own legacy dashboard. */
+      /* Legacy only prepares the authenticated Panapass shell/navigation.
+         Its view stays hidden while native V2 takes ownership explicitly. */
       await legacy.apply(w,context.extra?.legacyArgs||[]);
       if(!mounted) return null;
       return await w.RYM_PANAPASS_DASHBOARD_V2.dashboard(false);
