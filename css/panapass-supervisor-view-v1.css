@@ -1,0 +1,322 @@
+/* Portal RYM · Panapass Supervisor View V1
+   Scoped visual layer for supervisor-only personal performance and ranking. */
+body[data-rym-module="panapass"].rym-panapass-proposal2 #phase4GaleraKpis.rym-supervisor-dashboard-v1 .rym-sup-two-card-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr)!important;
+  gap:16px!important;
+  align-items:stretch!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 #phase4GaleraKpis.rym-supervisor-dashboard-v1 .rym-p2-galera{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-card{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  border:1px solid #d8e4f1!important;
+  border-radius:18px!important;
+  background:linear-gradient(160deg,#fff 0%,#f8fbff 100%)!important;
+  box-shadow:0 12px 28px rgba(18,55,100,.08)!important;
+  overflow:hidden!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-head{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  gap:11px!important;
+  align-items:center!important;
+  padding:15px 16px!important;
+  border-bottom:1px solid #e7eef7!important;
+  background:linear-gradient(115deg,#f4f8ff,#fff)!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-avatar{
+  display:grid!important;
+  place-items:center!important;
+  width:42px!important;
+  height:42px!important;
+  border-radius:13px!important;
+  background:linear-gradient(135deg,#154f95,#2c72c8)!important;
+  color:#fff!important;
+  font-size:13px!important;
+  font-weight:950!important;
+  box-shadow:0 8px 16px rgba(21,79,149,.16)!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-title>span{
+  display:block!important;
+  font-size:8px!important;
+  font-weight:950!important;
+  letter-spacing:.1em!important;
+  color:#7990ad!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-title>strong{
+  display:block!important;
+  margin-top:3px!important;
+  font-size:17px!important;
+  line-height:1.1!important;
+  color:#10386e!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-title>small{
+  display:block!important;
+  margin-top:3px!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  color:#7186a0!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-status{
+  display:inline-flex!important;
+  align-items:center!important;
+  min-height:27px!important;
+  padding:0 9px!important;
+  border-radius:999px!important;
+  font-size:8px!important;
+  font-weight:950!important;
+  white-space:nowrap!important;
+  background:#edf3fa!important;
+  color:#5f7897!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-status.good{background:#eaf8f0!important;color:#087548!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-status.steady{background:#eef5ff!important;color:#1757a6!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-status.watch{background:#fff5e8!important;color:#9a5a00!important}
+
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:1px!important;
+  background:#e3ebf5!important;
+  border-bottom:1px solid #e3ebf5!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero>div{
+  padding:18px 16px!important;
+  background:#fff!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero span,
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-stats span{
+  display:block!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  color:#6e829d!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero strong{
+  display:block!important;
+  margin-top:6px!important;
+  font-size:27px!important;
+  line-height:1!important;
+  color:#10386f!important;
+  letter-spacing:-.03em!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero>div:first-child strong{color:#1266c8!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero small{
+  display:block!important;
+  margin-top:6px!important;
+  font-size:8px!important;
+  color:#8495aa!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-stats{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+  padding:12px 16px 6px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-stats>div{
+  padding:10px 11px!important;
+  border:1px solid #e3ebf5!important;
+  border-radius:12px!important;
+  background:#f8fbff!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-stats strong{
+  display:block!important;
+  margin-top:3px!important;
+  font-size:18px!important;
+  color:#153d70!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-stats strong small{
+  font-size:9px!important;
+  font-weight:850!important;
+  color:#7990aa!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-position-progress{
+  margin-top:auto!important;
+  padding:8px 16px 15px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-position-progress>span{
+  display:block!important;
+  height:6px!important;
+  border-radius:999px!important;
+  overflow:hidden!important;
+  background:#e7eef7!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-position-progress i{
+  display:block!important;
+  height:100%!important;
+  border-radius:inherit!important;
+  background:linear-gradient(90deg,#1c67c8,#4aa2ff)!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-position-progress small{
+  display:block!important;
+  margin-top:6px!important;
+  font-size:8px!important;
+  color:#7c8fa7!important;
+}
+
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-title{
+  margin-top:18px!important;
+  padding:0 2px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-title h3{
+  margin:0!important;
+  font-size:18px!important;
+  color:#10386e!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-title span{
+  display:block!important;
+  margin-top:3px!important;
+  font-size:10px!important;
+  color:#71849d!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-card{
+  width:100%!important;
+  box-sizing:border-box!important;
+  margin:9px 0 0!important;
+  padding:13px!important;
+  border:1px solid #d9e4ef!important;
+  border-radius:18px!important;
+  background:#fff!important;
+  box-shadow:0 12px 28px rgba(18,55,100,.07)!important;
+  overflow:hidden!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(220px,.35fr)!important;
+  gap:12px!important;
+  align-items:stretch!important;
+  margin-bottom:12px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary>div:first-child{
+  padding:15px 17px!important;
+  border-radius:14px!important;
+  background:linear-gradient(120deg,#123c74,#1f67b9)!important;
+  color:#fff!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary span{
+  display:block!important;
+  font-size:8px!important;
+  font-weight:950!important;
+  letter-spacing:.08em!important;
+  color:#cfe2f8!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary strong{
+  display:block!important;
+  margin-top:4px!important;
+  font-size:27px!important;
+  color:#fff!important;
+  line-height:1!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary strong small{
+  font-size:11px!important;
+  color:#d9e8f8!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary p{
+  margin:7px 0 0!important;
+  font-size:10px!important;
+  color:#e1ecfa!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-rule{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  padding:13px 15px!important;
+  border:1px solid #e0e8f2!important;
+  border-radius:14px!important;
+  background:#f8fbff!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-rule span{color:#7489a2!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-rule strong{font-size:17px!important;color:#163f72!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-rule small{margin-top:5px!important;font-size:9px!important;color:#8092a9!important}
+
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-list{
+  display:grid!important;
+  gap:7px!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-row{
+  display:grid!important;
+  grid-template-columns:52px minmax(0,1fr) 92px 116px!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-height:55px!important;
+  padding:8px 12px!important;
+  border:1px solid #e4ebf3!important;
+  border-radius:12px!important;
+  background:#fbfdff!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-row.me{
+  border-color:#9cc1ea!important;
+  background:linear-gradient(90deg,#edf5ff,#fbfdff)!important;
+  box-shadow:inset 4px 0 0 #1d6ccc!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-row.top-1{background:#f5fbf7!important;border-color:#cae8d6!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-pos{
+  font-size:17px!important;
+  font-weight:950!important;
+  color:#1b5ca5!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-name strong{
+  display:block!important;
+  font-size:11px!important;
+  color:#173d6c!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-name small{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:8px!important;
+  color:#8091a7!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-units,
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-money{
+  text-align:right!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-units strong,
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-money strong{
+  display:block!important;
+  font-size:12px!important;
+  color:#133c70!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-units span,
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-money span{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:7px!important;
+  color:#8796a9!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-foot{
+  display:flex!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  padding:10px 4px 1px!important;
+  font-size:8px!important;
+  font-weight:800!important;
+  color:#8092aa!important;
+}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-empty{
+  padding:20px!important;
+  border:1px dashed #d5e1ee!important;
+  border-radius:12px!important;
+  text-align:center!important;
+  font-size:10px!important;
+  color:#7b8ea6!important;
+}
+
+@media(max-width:1050px){
+  body[data-rym-module="panapass"].rym-panapass-proposal2 #phase4GaleraKpis.rym-supervisor-dashboard-v1 .rym-sup-two-card-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:760px){
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-head{grid-template-columns:auto minmax(0,1fr)!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-status{grid-column:1/-1!important;width:max-content!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-hero,
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-personal-stats{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-ranking-summary{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-row{grid-template-columns:44px minmax(0,1fr) 80px!important}
+  body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-sup-rank-money{display:none!important}
+}
