@@ -114,16 +114,12 @@
     return {phase,cards};
   }
 
-  function galeraPerformance(root){
-    const rows=[...root.querySelectorAll('.rym-p2-galera')].map(card=>({
-      card,
-      name:txt(card,'.rym-p2-gal-name')||'GALERA',
-      paid:num(txt(card,'.rym-gal-metric.pay b')),
-      amount:moneyNum(txt(card,'.rym-gal-metric.pay small'))
-    })).filter(x=>x.name);
-    if(!rows.length)return {rows,best:null,worst:null};
-    rows.sort((a,b)=>a.paid-b.paid||a.amount-b.amount||a.name.localeCompare(b.name));
-    return {rows,best:rows[0],worst:rows[rows.length-1]};
+  function supervisorOrder(rows){
+    return [...rows].filter(x=>String(x?.supervisora_nombre||x?.supervisora||'').trim()).sort((a,b)=>
+      Number(a.unidades_pagadas||0)-Number(b.unidades_pagadas||0)||
+      Number(a.monto_pagado||0)-Number(b.monto_pagado||0)||
+      String(a.supervisora_nombre||a.supervisora).localeCompare(String(b.supervisora_nombre||b.supervisora),'es')
+    );
   }
 
   async function hydrateSupervisorPerformance(strip){
@@ -133,11 +129,11 @@
       const c=context();if(!c?.api?.panapass?.ranking)return;
       if(!rankingPromise)rankingPromise=Promise.resolve(c.api.panapass.ranking('DIA')).catch(e=>{rankingPromise=null;throw e});
       const rows=await rankingPromise;if(!Array.isArray(rows)||!rows.length)return;
-      const sorted=[...rows].sort((a,b)=>Number(a.posicion_global||999)-Number(b.posicion_global||999)||Number(a.unidades_pagadas||0)-Number(b.unidades_pagadas||0));
-      const best=sorted[0],worst=[...sorted].sort((a,b)=>Number(b.posicion_global||0)-Number(a.posicion_global||0)||Number(b.unidades_pagadas||0)-Number(a.unidades_pagadas||0))[0];
+      const sorted=supervisorOrder(rows);if(!sorted.length)return;
+      const best=sorted[0],worst=sorted[sorted.length-1];
       const bestEl=strip.querySelector('[data-ops-best-sup]'),worstEl=strip.querySelector('[data-ops-worst-sup]');
-      if(bestEl&&best)bestEl.textContent=`Supervisora: ${best.supervisora_nombre||'—'} · ${Number(best.unidades_pagadas||0)} pagadas`;
-      if(worstEl&&worst)worstEl.textContent=`Supervisora: ${worst.supervisora_nombre||'—'} · ${Number(worst.unidades_pagadas||0)} pagadas`;
+      if(bestEl&&best)bestEl.innerHTML=`<span>🏆 Mejor gestión · empresa</span><strong>${esc(best.supervisora_nombre||best.supervisora||'—')}</strong><b>${esc(best.galera||'Sin galera')} · ${Number(best.unidades_pagadas||0)} pagadas · B/. ${Number(best.monto_pagado||0).toFixed(2)}</b>`;
+      if(worstEl&&worst)worstEl.innerHTML=`<span>⚠ Mayor incidencia · empresa</span><strong>${esc(worst.supervisora_nombre||worst.supervisora||'—')}</strong><b>${esc(worst.galera||'Sin galera')} · ${Number(worst.unidades_pagadas||0)} pagadas · B/. ${Number(worst.monto_pagado||0).toFixed(2)}</b>`;
       strip.dataset.supLoaded='1';
     }catch(e){console.warn('Panapass PM ranking',e)}finally{delete strip.dataset.supLoading}
   }
@@ -153,9 +149,8 @@
       strip.innerHTML=`<div class="rym-p3-phase-lead"><span>FASE AM</span><strong>Cobranza en curso</strong><small>La prioridad es resolver las unidades negativas detectadas por ENA hoy.</small></div><div class="rym-p3-am-metric"><b>${negatives}</b><span>negativas detectadas</span><small>Este dato pertenece al día de hoy; no se arrastra como rendimiento histórico.</small></div>`;
       return;
     }
-    const perf=galeraPerformance(root);if(!perf.best||!perf.worst)return;
     strip.className='rym-p3-performance-strip pm';
-    strip.innerHTML=`<div class="rym-p3-phase-lead"><span>CIERRE PM</span><strong>Rendimiento de cobranza</strong><small>Menos unidades que requirieron pago = mejor gestión y menor incidencia de pago.</small></div><article class="rym-p3-perf-card best"><span>🏆 Mejor gestión</span><strong>${esc(perf.best.name)}</strong><b>${perf.best.paid} pagadas · B/. ${perf.best.amount.toFixed(2)}</b><small data-ops-best-sup>Calculando mejor supervisora…</small></article><article class="rym-p3-perf-card worst"><span>⚠ Mayor incidencia</span><strong>${esc(perf.worst.name)}</strong><b>${perf.worst.paid} pagadas · B/. ${perf.worst.amount.toFixed(2)}</b><small data-ops-worst-sup>Calculando supervisora con mayor incidencia…</small></article>`;
+    strip.innerHTML=`<div class="rym-p3-phase-lead"><span>CIERRE PM</span><strong>Rendimiento de supervisoras</strong><small>Comparación global de la empresa: menos unidades pagadas y luego menor monto representa mejor gestión.</small></div><article class="rym-p3-perf-card best" data-ops-best-sup><span>Calculando ranking global…</span></article><article class="rym-p3-perf-card worst" data-ops-worst-sup><span>Calculando ranking global…</span></article>`;
     void hydrateSupervisorPerformance(strip);
   }
 
