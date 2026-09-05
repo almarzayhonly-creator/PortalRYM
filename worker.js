@@ -16,11 +16,23 @@ export default {
       headers.set("expires", "0");
     }
 
+    let body = response.body;
+
     if (isHtml) {
-      headers.set("x-portal-build", "panapass-dashboard-pilot-20260905-1054");
+      // The monolithic legacy index still contains an embedded V11 Panapass dashboard.
+      // Architecture V2 owns this view now. Remove that one inline owner at delivery
+      // time so it cannot repaint #phase4GaleraKpis after the modular dashboard renders.
+      const html = await response.text();
+      body = html.replace(
+        /<script\s+id=["']rym-dashboard-payments-inline["'][^>]*>[\s\S]*?<\/script>/i,
+        '<script id="rym-dashboard-payments-inline" data-disabled-by="architecture-v2"></script>'
+      );
+      headers.delete("content-length");
+      headers.set("x-portal-build", "panapass-dashboard-pilot-20260905-legacy-owner-off");
+      headers.set("x-portal-legacy-dashboard", "disabled");
     }
 
-    return new Response(response.body, {
+    return new Response(body, {
       status: response.status,
       statusText: response.statusText,
       headers,
