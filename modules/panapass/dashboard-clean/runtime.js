@@ -6,6 +6,7 @@
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const norm=s=>String(s||'').trim().toUpperCase();
 
+  function legacyRpc(){return typeof w.rpc==='function'?w.rpc:null}
   function profile(){return w.state?.profile||null}
   function session(){
     const p=profile()||{};
@@ -15,13 +16,13 @@
       profile:p
     });
   }
-  function rpc(name,params){
-    const fn=w.rpc||(typeof rpc==='function'?rpc:null);
-    if(typeof fn!=='function') throw new Error('RPC no disponible');
+  function call(name,params){
+    const fn=legacyRpc();
+    if(!fn) throw new Error('RPC no disponible');
     return fn(name,params||{});
   }
   function root(){return d.querySelector('#view')}
-  function ready(){return Boolean(profile()&&root()&&typeof (w.rpc||(typeof rpc==='function'?rpc:null))==='function')}
+  function ready(){return Boolean(profile()&&root()&&legacyRpc())}
   async function waitReady(timeoutMs){
     const until=Date.now()+(timeoutMs||60000);
     while(Date.now()<until){if(ready())return true;await sleep(120)}
@@ -35,5 +36,5 @@
     return null;
   }
 
-  w.RYM_PANAPASS_CLEAN_RUNTIME=Object.freeze({profile,session,rpc,root,ready,waitReady,openRoute,norm});
+  w.RYM_PANAPASS_CLEAN_RUNTIME=Object.freeze({profile,session,rpc:call,root,ready,waitReady,openRoute,norm});
 })(window,document);
