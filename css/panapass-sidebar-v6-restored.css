@@ -49,30 +49,34 @@ body[data-rym-module="panapass"] .rym-p6-nav{
 body[data-rym-module="panapass"] .rym-p6-nav-group{
   display:block!important;
   padding:10px 10px 3px!important;
-  color:#a9c5df!important;
+  color:#c5d9eb!important;
   font-size:7px!important;
   line-height:1!important;
   font-weight:850!important;
   letter-spacing:.12em!important;
-  opacity:.92!important;
+  opacity:1!important;
 }
 
-body[data-rym-module="panapass"] .rym-p6-nav button{
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button{
   position:relative!important;
   min-height:35px!important;
   padding:7px 9px 7px 36px!important;
   border:1px solid transparent!important;
   border-radius:9px!important;
   background:transparent!important;
-  color:#dce8f4!important;
+  color:#edf5fc!important;
   box-shadow:none!important;
   font-size:10px!important;
   font-weight:700!important;
   text-align:left!important;
+  opacity:1!important;
+  filter:none!important;
+  -webkit-filter:none!important;
+  visibility:visible!important;
   transition:background .14s ease,color .14s ease,border-color .14s ease!important;
 }
 
-body[data-rym-module="panapass"] .rym-p6-nav button:before{
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button:before{
   content:attr(data-rym-icon)!important;
   position:absolute!important;
   left:12px!important;
@@ -81,30 +85,32 @@ body[data-rym-module="panapass"] .rym-p6-nav button:before{
   width:16px!important;
   text-align:center!important;
   font-size:12px!important;
-  color:#9dc9ee!important;
-  opacity:.95!important;
+  color:#b7d9f4!important;
+  opacity:1!important;
 }
 
-body[data-rym-module="panapass"] .rym-p6-nav button:hover{
-  background:rgba(255,255,255,.055)!important;
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button:hover:not(:disabled){
+  background:rgba(255,255,255,.075)!important;
   color:#fff!important;
-  border-color:rgba(255,255,255,.06)!important;
+  border-color:rgba(255,255,255,.09)!important;
   transform:none!important;
 }
 
-body[data-rym-module="panapass"] .rym-p6-nav button.active{
-  background:rgba(255,255,255,.13)!important;
-  color:#fff!important;
-  border-color:rgba(255,255,255,.11)!important;
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button.active{
+  background:#eef5ff!important;
+  color:#0e4c8f!important;
+  border-color:#d7e6f5!important;
   box-shadow:none!important;
-  font-weight:800!important;
+  font-weight:850!important;
+  opacity:1!important;
+  filter:none!important;
 }
 
-body[data-rym-module="panapass"] .rym-p6-nav button.active:before{
-  color:#fff!important;
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button.active:before{
+  color:#1c65ad!important;
 }
 
-body[data-rym-module="panapass"] .rym-p6-nav button.active:after{
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button.active:after{
   content:""!important;
   display:block!important;
   position:absolute!important;
@@ -115,6 +121,12 @@ body[data-rym-module="panapass"] .rym-p6-nav button.active:after{
   height:auto!important;
   border-radius:0 4px 4px 0!important;
   background:#ff9b2f!important;
+}
+
+body[data-rym-module="panapass"] .side.rym-p6-side .rym-p6-nav button:disabled{
+  opacity:.58!important;
+  filter:none!important;
+  -webkit-filter:none!important;
 }
 
 body[data-rym-module="panapass"] .side.rym-p6-side .user{
@@ -133,12 +145,12 @@ body[data-rym-module="panapass"] .side.rym-p6-side .user strong{
 }
 
 body[data-rym-module="panapass"] .side.rym-p6-side .user span{
-  color:#b7cbe0!important;
+  color:#c6d8e9!important;
   font-size:9px!important;
 }
 
 body[data-rym-module="panapass"] .side.rym-p6-side .logout{
-  background:rgba(255,255,255,.94)!important;
+  background:rgba(255,255,255,.96)!important;
   color:#9d2a31!important;
   border:0!important;
   border-radius:9px!important;
