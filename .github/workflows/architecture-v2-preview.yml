@@ -89,9 +89,10 @@ jobs:
           grep -Fq 'RYM_MODULES.open' /tmp/routes
           grep -Fq '__RYM_PANAPASS_DASHBOARD_NATIVE_V2__' /tmp/dashboard-v2.js
           grep -Fq 'rym-d2-galera' /tmp/dashboard-v2.js
-          grep -Fq '__RYM_PANAPASS_SIDEBAR_V2__' /tmp/sidebar-v2.js
+          grep -Fq 'RYM_PANAPASS_SIDEBAR_V2' /tmp/sidebar-v2.js
           grep -Fq -- '--d2-navy' /tmp/panapass-dashboard-v2.css
           grep -Fq '.rym-d2-galera' /tmp/panapass-dashboard-v2.css
+          grep -Fq '.rym-d2-nav-group' /tmp/panapass-dashboard-v2.css
           grep -Fq '.v87-bajas-hero' /tmp/panapass-bajas.css
           grep -Fq 'await unmount(active)' /tmp/registry
       - name: Create temporary authenticated audit user
