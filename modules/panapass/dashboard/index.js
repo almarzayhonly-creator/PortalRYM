@@ -290,7 +290,8 @@
   }
 
   function nativeDashboard(force=false){
-    if(!supported()&&legacyDashboard)return legacyDashboard.apply(this,arguments);
+    const activePanapass=d.body?.dataset?.rymModule==='panapass'||w.RYM_MODULES?.current?.()==='panapass';
+    if(!activePanapass&&!supported()&&legacyDashboard)return legacyDashboard.apply(this,arguments);
     const view=d.querySelector('#view');if(!view)return null;
     return renderNative(view,force===true);
   }
