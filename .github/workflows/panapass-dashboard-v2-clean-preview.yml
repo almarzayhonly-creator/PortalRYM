@@ -1,0 +1,94 @@
+name: Panapass Dashboard V2 Clean preview
+on:
+  push:
+    branches: [panapass-dashboard-v2-clean]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: panapass-dashboard-v2-clean-preview
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax
+        run: |
+          for f in modules/panapass/dashboard-clean/*.js modules/panapass/dashboard-clean/views/*.js; do node --check "$f"; done
+      - name: Clean architecture contract
+        run: node qa/panapass-dashboard-v2-clean-contract.mjs
+      - name: Inject clean preview loader in build only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,re
+          p=Path('index.html');s=p.read_text();build=os.environ.get('GITHUB_SHA','clean')
+          marker=f'<script id="rym-panapass-clean-loader" src="/modules/panapass/dashboard-clean/loader.js?v={build}" defer></script>\n'
+          old=re.compile(r'<script id="rym-panapass-clean-loader"[^>]*></script>\s*',re.I)
+          s=old.sub('',s)
+          m=re.search(r'<head\b[^>]*>',s,re.I)
+          if not m: raise SystemExit('head not found')
+          s=s[:m.end()]+'\n'+marker+s[m.end():];p.write_text(s)
+          PY
+      - name: Deploy isolated Cloudflare preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest versions upload --preview-alias panapass-v2-clean 2>&1 | tee /tmp/wrangler.out
+          U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$U"
+          echo "url=$U" >> "$GITHUB_OUTPUT"
+          echo "Exact preview: $U"
+      - name: Verify clean assets
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          U="$QA_URL";test -n "$U"
+          curl -fsSL --max-time 25 "$U/?panapassClean=1&x=$(date +%s)" -o /tmp/index
+          curl -fsSL --max-time 25 "$U/modules/panapass/dashboard-clean/loader.js?x=$(date +%s)" -o /tmp/loader
+          curl -fsSL --max-time 25 "$U/modules/panapass/dashboard-clean/index.js?x=$(date +%s)" -o /tmp/dashboard
+          curl -fsSL --max-time 25 "$U/css/panapass/dashboard-clean/base.css?x=$(date +%s)" -o /tmp/css
+          grep -Fq 'rym-panapass-clean-loader' /tmp/index
+          grep -Fq 'panapassClean' /tmp/loader
+          grep -Fq 'RYM_PANAPASS_DASHBOARD_CLEAN' /tmp/dashboard
+          grep -Fq '.rym-pdc' /tmp/css
+      - name: Create temporary authenticated audit user
+        shell: bash
+        run: |
+          mkdir -p audit
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          R=$(curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data '{"action":"create"}')
+          test "$(jq -r .ok <<<"$R")" = true
+          ID=$(jq -r .id <<<"$R");U=$(jq -r .usuario <<<"$R");P=$(jq -r .password <<<"$R")
+          echo "::add-mask::$U";echo "::add-mask::$P";echo "AUDIT_USER_ID=$ID" >> "$GITHUB_ENV";echo "AUDIT_USERNAME=$U" >> "$GITHUB_ENV";echo "AUDIT_PASSWORD=$P" >> "$GITHUB_ENV"
+      - name: Browser clean dashboard smoke
+        env:
+          QA_URL: ${{ steps.deploy.outputs.url }}
+          AUDIT_USERNAME: ${{ env.AUDIT_USERNAME }}
+          AUDIT_PASSWORD: ${{ env.AUDIT_PASSWORD }}
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+          node qa/panapass-dashboard-v2-clean-browser.js
+      - name: Delete temporary authenticated audit user
+        if: always() && env.AUDIT_USER_ID != ''
+        shell: bash
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=portal-rym-v169-audit" | jq -r .value)
+          curl -fsSL -X POST 'https://avczyvcpmicpuhdkmxzx.supabase.co/functions/v1/rym-audit-bootstrap' -H "Authorization: Bearer $OIDC" -H 'Content-Type: application/json' --data "{\"action\":\"delete\",\"id\":\"$AUDIT_USER_ID\"}" | jq -c .
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: panapass-dashboard-v2-clean
+          path: audit/
+          if-no-files-found: warn
+          retention-days: 3

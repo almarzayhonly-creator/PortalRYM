@@ -1,0 +1,6 @@
+/* Portal RYM - Panapass Dashboard V2 Clean Supervisora view. */
+(function(w){
+  'use strict';
+  const V=w.RYM_PANAPASS_CLEAN_VIEWS||(w.RYM_PANAPASS_CLEAN_VIEWS={});
+  V.supervisora=function(vm){const C=w.RYM_PANAPASS_CLEAN_COMPONENTS,id=vm.policy.identity.supervisoraId;const s=vm.supervisorComparison||{};return `<main class="rym-pdc rym-pdc-supervisora" data-pdc-role="SUPERVISORA">${C.header(vm,'Mi Dashboard Panapass','Tus unidades · comparacion galera y posicion global')}${C.supervisorHero(vm)}${C.kpiStrip(vm)}<div class="rym-pdc-two-col rym-pdc-super-main">${C.attentionTable(vm)}<section class="rym-pdc-card rym-pdc-global-position">${C.sectionTitle('Empresa','Tu posicion global, sin acceso operativo a otras supervisoras.')}<div><small>Posicion global</small><strong>#${C.integer(s.globalPosition||0)}</strong><span>de ${C.integer(s.globalTotal||0)} supervisoras</span></div></section></div><section class="rym-pdc-card rym-pdc-ranking-section">${C.sectionTitle('Mi ranking en la galera',`Companeras de ${vm.galera||'tu galera'}.`)}${C.rankTable(vm.ranking.local,{position:'posicion_galera',meId:id})}</section><div class="rym-pdc-two-col rym-pdc-bottom">${C.trendPanel('Tendencia personal',vm.scopeTrend)}${C.supervisorComparison(vm)}</div></main>`};
+})(window);
