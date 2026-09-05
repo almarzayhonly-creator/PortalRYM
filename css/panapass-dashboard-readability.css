@@ -1,0 +1,97 @@
+/* Portal RYM · Panapass Dashboard Readability
+   Concern-specific layer: contrast, density and accessibility for the native D2 dashboard.
+   No business logic. No sibling-module selectors. */
+
+/* Secondary KPI cards must not inherit the white text used by primary color cards. */
+body[data-rym-module="panapass"] .rym-d2-kpi.is-mini .rym-d2-kpi-label{
+  color:#4d6787!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+body[data-rym-module="panapass"] .rym-d2-kpi.is-mini>strong{
+  color:#0d376f!important;
+  font-size:25px!important;
+  font-weight:950!important;
+  text-shadow:none!important;
+}
+body[data-rym-module="panapass"] .rym-d2-kpi.is-mini>small{
+  color:#657d9b!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  text-shadow:none!important;
+}
+body[data-rym-module="panapass"] .rym-d2-kpi.is-mini .rym-d2-kpi-icon{
+  color:#176fe8!important;
+  background:#eaf4ff!important;
+}
+
+/* Keep inactive navigation clearly readable on the dark sidebar. */
+body[data-rym-module="panapass"] .side[data-rym-sidebar="v2"] .rym-d2-nav-group{
+  color:#8fb7e6!important;
+}
+body[data-rym-module="panapass"] .side[data-rym-sidebar="v2"] .nav button:not(.active){
+  color:#c8dcf5!important;
+  opacity:1!important;
+}
+body[data-rym-module="panapass"] .side[data-rym-sidebar="v2"] .nav button:not(.active)::before{
+  color:#91bff2!important;
+  opacity:1!important;
+}
+body[data-rym-module="panapass"] .side[data-rym-sidebar="v2"] .nav button:not(.active):hover{
+  color:#fff!important;
+}
+
+/* Stronger executive title contrast on bright displays. */
+body[data-rym-module="panapass"] .rym-d2-header h1{
+  background:linear-gradient(110deg,#082956 0%,#0d4f9d 62%,#176fd8 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+  text-shadow:none!important;
+}
+body[data-rym-module="panapass"] .rym-d2-header p{
+  color:#496b92!important;
+  font-weight:650;
+}
+
+/* Slightly denser galera cards: preserve charts but remove unnecessary vertical air. */
+body[data-rym-module="panapass"] .rym-d2-metrics{
+  min-height:112px!important;
+}
+body[data-rym-module="panapass"] .rym-d2-metrics>div{
+  padding-top:13px!important;
+  padding-bottom:13px!important;
+}
+body[data-rym-module="panapass"] .rym-d2-chart{
+  min-height:120px!important;
+  padding-top:4px!important;
+}
+body[data-rym-module="panapass"] .rym-d2-spark,
+body[data-rym-module="panapass"] .rym-d2-spark svg{
+  height:78px!important;
+}
+body[data-rym-module="panapass"] .rym-d2-bars{
+  height:90px!important;
+}
+
+/* Date selector and footer actions need to read as interactive controls. */
+body[data-rym-module="panapass"] .rym-d2-range{
+  border-color:#c8daed!important;
+}
+body[data-rym-module="panapass"] .rym-d2-range input{
+  color:#0d376f!important;
+  font-weight:950!important;
+}
+body[data-rym-module="panapass"] .rym-d2-galera>footer>strong{
+  color:#0e396f!important;
+  font-weight:900!important;
+}
+body[data-rym-module="panapass"] .rym-d2-galera>footer>button{
+  background:#fff!important;
+  font-weight:950!important;
+}
+
+@media(max-width:900px){
+  body[data-rym-module="panapass"] .rym-d2-metrics{min-height:0!important}
+  body[data-rym-module="panapass"] .rym-d2-chart{min-height:0!important}
+}
