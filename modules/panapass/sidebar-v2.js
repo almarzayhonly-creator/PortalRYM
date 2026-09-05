@@ -1,11 +1,10 @@
 /* Portal RYM · Panapass Sidebar V2
-   Single sidebar controller for all Panapass roles. It preserves existing
-   permission-filtered buttons and handlers while normalizing structure and labels. */
+   Canonical sidebar renderer for all Panapass roles.
+   Uses the permission-filtered buttons already produced by the authenticated shell,
+   but renders one Panapass navigation structure exactly once per shell render. */
 (function(w,d){
   'use strict';
-  if(w.__RYM_PANAPASS_SIDEBAR_V2__) return;
-  w.__RYM_PANAPASS_SIDEBAR_V2__=true;
-  let raf=0;
+  if(w.RYM_PANAPASS_SIDEBAR_V2) return;
 
   const META=[
     {test:/^dashboard$/i,group:'OPERACIÓN',icon:'▦',label:'Dashboard',order:10},
@@ -21,38 +20,42 @@
     {test:/operaci[oó]n/i,group:'ANÁLISIS',icon:'⚙',label:'Operación diaria',order:110}
   ];
 
-  function isPan(){return d.body?.dataset?.rymModule==='panapass'}
-  function meta(button,index){
-    const text=String(button.dataset.rymOriginalLabel||button.textContent||'').trim();
-    if(!button.dataset.rymOriginalLabel)button.dataset.rymOriginalLabel=text;
-    const found=META.find(x=>x.test.test(text));
-    return found||{group:'MÁS',icon:'•',label:text,order:900+index};
+  function descriptor(button,index){
+    const original=String(button.dataset.rymOriginalLabel||button.textContent||'').trim();
+    if(!button.dataset.rymOriginalLabel)button.dataset.rymOriginalLabel=original;
+    return META.find(x=>x.test.test(original))||{group:'MÁS',icon:'•',label:original,order:900+index};
   }
-  function normalize(){
-    if(!isPan())return;
-    const nav=d.querySelector('.side .nav');if(!nav)return;
-    const buttons=[...nav.querySelectorAll('button')].filter(b=>!b.classList.contains('rym-d2-nav-group'));
-    if(!buttons.length)return;
-    const signature=buttons.map(b=>`${b.dataset.m||''}:${String(b.dataset.rymOriginalLabel||b.textContent||'').trim()}`).join('|');
-    if(nav.dataset.rymSidebarV2===signature&&nav.querySelector('.rym-d2-nav-group'))return;
-    const entries=buttons.map((button,index)=>({button,index,meta:meta(button,index)})).sort((a,b)=>a.meta.order-b.meta.order||a.index-b.index);
-    const frag=d.createDocumentFragment();let group='';
+
+  function render(){
+    if(d.body?.dataset?.rymModule!=='panapass')return false;
+    const side=d.querySelector('.side'),nav=side?.querySelector('.nav');
+    if(!side||!nav)return false;
+    const buttons=[...nav.querySelectorAll('button')];
+    if(!buttons.length)return false;
+    const entries=buttons.map((button,index)=>({button,index,meta:descriptor(button,index)})).sort((a,b)=>a.meta.order-b.meta.order||a.index-b.index);
+    const frag=d.createDocumentFragment();let current='';
     for(const item of entries){
-      if(item.meta.group!==group){
-        group=item.meta.group;
-        const label=d.createElement('span');label.className='rym-d2-nav-group';label.textContent=group;frag.appendChild(label);
+      if(item.meta.group!==current){
+        current=item.meta.group;
+        const group=d.createElement('span');
+        group.className='rym-d2-nav-group';
+        group.textContent=current;
+        frag.appendChild(group);
       }
       item.button.textContent=item.meta.label;
       item.button.dataset.rymIcon=item.meta.icon;
       frag.appendChild(item.button);
     }
     nav.replaceChildren(frag);
-    nav.dataset.rymSidebarV2=signature;
+    nav.dataset.rymSidebar='v2';
+    side.dataset.rymSidebar='v2';
+    return true;
   }
-  function schedule(){if(raf)return;raf=w.requestAnimationFrame(()=>{raf=0;normalize()})}
-  const observer=new MutationObserver(schedule);
-  observer.observe(d.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['data-rym-module','class']});
-  d.addEventListener('click',schedule,true);
-  w.addEventListener('load',schedule,{once:true});
-  schedule();
+
+  function clear(){
+    const side=d.querySelector('.side');
+    if(side)delete side.dataset.rymSidebar;
+  }
+
+  w.RYM_PANAPASS_SIDEBAR_V2=Object.freeze({render,clear});
 })(window,document);
