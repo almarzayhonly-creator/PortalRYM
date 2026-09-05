@@ -13,12 +13,15 @@
     return null;
   }
 
+  function liveViewRoot(){return d.querySelector('#view')}
+
   async function mountDashboardV2(context){
     if(w.RYM_PANAPASS_DASHBOARD_V2_ENABLED!==true) return null;
     const dashboard=w.RYM_PANAPASS_DASHBOARD_V2;
     if(!dashboard || typeof dashboard.mount!=='function') throw new Error('Panapass Dashboard V2 preview unavailable');
     const role=String(context.session?.role||'').trim().toUpperCase();
-    const target=context.root||d.querySelector('#view');
+    const target=liveViewRoot();
+    if(!target) throw new Error('Panapass Dashboard V2 target #view unavailable');
     return dashboard.mount(context,{
       target,
       includeCompanyCompare:role==='ADMIN'||role==='GERENTE_GALERA',
@@ -53,8 +56,9 @@
 
   async function unmount(){
     if(!mounted) return;
-    if(w.RYM_PANAPASS_DASHBOARD_V2_ENABLED===true&&w.RYM_PANAPASS_DASHBOARD_V2&&lastContext?.root){
-      w.RYM_PANAPASS_DASHBOARD_V2.unmount(lastContext.root);
+    if(w.RYM_PANAPASS_DASHBOARD_V2_ENABLED===true&&w.RYM_PANAPASS_DASHBOARD_V2){
+      const target=liveViewRoot();
+      if(target) w.RYM_PANAPASS_DASHBOARD_V2.unmount(target);
     }
     mounted = false;
     if(d.body.dataset.rymModule === 'panapass') delete d.body.dataset.rymModule;
