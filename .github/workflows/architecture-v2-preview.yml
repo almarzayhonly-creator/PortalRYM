@@ -67,18 +67,31 @@ jobs:
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/style-manager.js?x=$(date +%s)" -o /tmp/styles
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/module-registry.js?x=$(date +%s)" -o /tmp/registry
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/core/legacy-route-bridge.js?x=$(date +%s)" -o /tmp/routes
-          for f in core panapass panapass-proposal2 panapass-proposal2-final panapass-bajas revisados control-auto gps usuarios; do
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/panapass/dashboard/index.js?x=$(date +%s)" -o /tmp/dashboard-v2.js
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/modules/panapass/sidebar-v2.js?x=$(date +%s)" -o /tmp/sidebar-v2.js
+          for f in core panapass panapass-dashboard-v2 panapass-bajas revisados control-auto gps usuarios; do
             curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$U/css/$f.css?x=$(date +%s)" -o "/tmp/$f.css"
           done
           grep -Fq 'rym-v171-loader' /tmp/index
           grep -Fq "const css=['/css/core.css']" /tmp/loader
           grep -Fq 'legacy-route-bridge.js' /tmp/loader
+          grep -Fq '/modules/panapass/dashboard/index.js' /tmp/loader
+          grep -Fq '/modules/panapass/sidebar-v2.js' /tmp/loader
+          ! grep -Fq '/modules/panapass/dashboard/experience-v2.js' /tmp/loader
+          ! grep -Fq '/modules/panapass/dashboard/ops-v3.js' /tmp/loader
+          ! grep -Fq '/modules/panapass/dashboard/date-window-v4.js' /tmp/loader
+          ! grep -Fq '/modules/panapass/dashboard/supervisor-polish-v5.js' /tmp/loader
+          ! grep -Fq '/modules/panapass/dashboard/ui-v6.js' /tmp/loader
           grep -Fq 'RYM_STYLES' /tmp/styles
-          grep -Fq '/css/panapass-proposal2.css' /tmp/styles
-          grep -Fq '/css/panapass-proposal2-final.css' /tmp/styles
+          grep -Fq '/css/panapass-dashboard-v2.css' /tmp/styles
+          ! grep -Fq '/css/panapass-proposal2.css' /tmp/styles
+          ! grep -Fq '/css/panapass-dashboard-v6.css' /tmp/styles
           grep -Fq 'RYM_MODULES.open' /tmp/routes
-          grep -Fq -- '--p2-navy' /tmp/panapass-proposal2.css
-          grep -Fq 'rym-p2-primary-kpis' /tmp/panapass-proposal2-final.css
+          grep -Fq '__RYM_PANAPASS_DASHBOARD_NATIVE_V2__' /tmp/dashboard-v2.js
+          grep -Fq 'rym-d2-galera' /tmp/dashboard-v2.js
+          grep -Fq '__RYM_PANAPASS_SIDEBAR_V2__' /tmp/sidebar-v2.js
+          grep -Fq -- '--d2-navy' /tmp/panapass-dashboard-v2.css
+          grep -Fq '.rym-d2-galera' /tmp/panapass-dashboard-v2.css
           grep -Fq '.v87-bajas-hero' /tmp/panapass-bajas.css
           grep -Fq 'await unmount(active)' /tmp/registry
       - name: Create temporary authenticated audit user
