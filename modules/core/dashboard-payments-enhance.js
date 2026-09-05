@@ -1,10 +1,16 @@
 /* Portal RYM Architecture V2 - compatibility shim only */
 (function(w,d){'use strict';
-  if(w.__RYM_ADMIN_DASH_V11__) return;
-  const src='/modules/panapass/dashboard/index.js?v=172-pilot';
-  if(d.querySelector(`script[src^="${src.split('?')[0]}"]`)) return;
+  if(w.__RYM_ADMIN_DASH_V12__) return;
+
+  // Architecture V2 owns the dashboard whenever its loader is present.
+  // Do not race it with a second request carrying an old fixed cache token.
+  if(d.querySelector('#rym-v171-loader')) return;
+
+  const base='/modules/panapass/dashboard/index.js';
+  if(d.querySelector(`script[src^="${base}"]`)) return;
+  const build=w.RYM_BUILD_VERSION||'173-supervisor';
   const s=d.createElement('script');
-  s.src=src;
+  s.src=base+'?v='+encodeURIComponent(build);
   s.async=false;
   (d.head||d.documentElement).appendChild(s);
 })(window,document);
