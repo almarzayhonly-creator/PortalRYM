@@ -20,17 +20,24 @@
     if(!context) throw new Error('Panapass context unavailable');
     if(!context.api || !context.api.panapass) throw new Error('Panapass API contract unavailable');
     d.body.dataset.rymModule = 'panapass';
+    d.body.classList.add('rym-panapass-booting');
     lastContext = context;
     mounted = true;
     context.events && context.events.emit('module:mounted', {moduleId:'panapass'});
     const legacy=w.RYM_LEGACY_ROUTES&&w.RYM_LEGACY_ROUTES.get('panapass');
     if(typeof legacy!=='function')throw new Error('Panapass canonical entrypoint unavailable');
-    return legacy.apply(w,context.extra?.legacyArgs||[]);
+    try{
+      return await legacy.apply(w,context.extra?.legacyArgs||[]);
+    }catch(e){
+      d.body.classList.remove('rym-panapass-booting');
+      throw e;
+    }
   }
 
   async function unmount(){
     if(!mounted) return;
     mounted = false;
+    d.body.classList.remove('rym-panapass-booting','rym-panapass-proposal2');
     if(d.body.dataset.rymModule === 'panapass') delete d.body.dataset.rymModule;
     if(lastContext && lastContext.events) lastContext.events.emit('module:unmounted', {moduleId:'panapass'});
     lastContext = null;
