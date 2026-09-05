@@ -16,6 +16,7 @@ const bajas = read('modules/panapass/bajas/index.js');
 const pagos = read('modules/panapass/pagos/index.js');
 const negativos = read('modules/panapass/negativos/index.js');
 const dashboard = read('modules/panapass/dashboard/index.js');
+const dashboardV7Css = read('css/panapass-dashboard-v7.css');
 const negativosDate = read('modules/panapass/negativos/panama-date.js');
 const rankingFinalTabs = read('modules/panapass/ranking/final-tabs.js');
 const rankingCriteria = read('modules/panapass/ranking/criteria-final.js');
@@ -58,10 +59,13 @@ for (const css of ['/css/panapass.css','/css/panapass-bajas.css','/css/revisados
 if (!/RYM_STYLES/.test(loader)) fail('Loader no exige style manager'); else ok('Loader exige style manager');
 
 for (const [domain, css] of [
-  ['panapass','/css/panapass.css'],['panapass','/css/panapass-bajas.css'],['gps','/css/gps.css'],['revisados','/css/revisados.css'],['control-auto','/css/control-auto.css'],['usuarios','/css/usuarios.css']
+  ['panapass','/css/panapass.css'],['panapass','/css/panapass-dashboard-v7.css'],['panapass','/css/panapass-bajas.css'],['gps','/css/gps.css'],['revisados','/css/revisados.css'],['control-auto','/css/control-auto.css'],['usuarios','/css/usuarios.css']
 ]) {
   if (!styleManager.includes(css)) fail(`Style manager no registra ${css}`); else ok(`Style manager registra ${domain}: ${css}`);
 }
+const dashboardV2Pos=styleManager.indexOf('/css/panapass-dashboard-v2.css');
+const dashboardV7Pos=styleManager.indexOf('/css/panapass-dashboard-v7.css');
+if (dashboardV2Pos<0 || dashboardV7Pos<0 || dashboardV7Pos<dashboardV2Pos) fail('Dashboard V7 no se carga despues del renderer visual V2'); else ok('Dashboard V7 se carga como capa final despues de V2');
 if (!/disableOthers/.test(styleManager) || !/link\.disabled/.test(styleManager)) fail('Style manager no desactiva CSS de dominios inactivos'); else ok('Style manager desactiva CSS de dominios inactivos');
 if (!/panapass-ranking/.test(styleManager) || !/panapass-recurrentes/.test(styleManager)) fail('Style manager no mapea submodulos Panapass'); else ok('Submodulos Panapass comparten dominio CSS');
 
@@ -158,6 +162,15 @@ const panapassCss = read('css/panapass.css');
 const gpsCss = read('css/gps.css');
 if (!/data-rym-module=["']panapass["']|\.v171-rank|\.v171-rec/.test(panapassCss)) fail('CSS Panapass no tiene scope/prefijo reconocible'); else ok('CSS Panapass usa scope o prefijos propios');
 if (!/data-rym-module=["']gps["']/.test(gpsCss)) fail('CSS GPS no esta scoped al modulo GPS'); else ok('CSS GPS esta scoped al modulo GPS');
+
+if (!dashboardV7Css.trim()) fail('CSS dashboard V7 esta vacio'); else ok('CSS dashboard V7 existe');
+if (!/body\[data-rym-module=["']panapass["']\]/.test(dashboardV7Css) || !/\.rym-d2\b/.test(dashboardV7Css)) fail('Dashboard V7 no esta scoped al Panapass nativo'); else ok('Dashboard V7 esta scoped al Panapass nativo');
+for (const other of ['gps','revisados','control-auto','usuarios']) {
+  const bodyRef = new RegExp(`data-rym-module=["']${other}["']`, 'i');
+  const classRef = new RegExp(`\\.rym-${other.replace(/-/g,'\\-')}\\b`, 'i');
+  if (bodyRef.test(dashboardV7Css) || classRef.test(dashboardV7Css)) fail(`Dashboard V7 invade el dominio ${other}`);
+}
+if (/rym-p2|rym-p3|phase4|proposal2|proposal-?2/i.test(dashboardV7Css)) fail('Dashboard V7 reintroduce selectores legacy de Proposal 2'); else ok('Dashboard V7 no reintroduce selectores legacy');
 
 if (process.exitCode) process.exit(process.exitCode);
 console.log('ARCH_V2_RESULT: PASS');
