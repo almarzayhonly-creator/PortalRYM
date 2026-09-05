@@ -1,0 +1,58 @@
+/* Portal RYM · Panapass Dashboard V6 final integration */
+
+/* Prevent the legacy dashboard from flashing while Proposal 2 hydrates. */
+body[data-rym-module="panapass"].rym-panapass-booting #view{visibility:hidden!important}
+body[data-rym-module="panapass"].rym-panapass-booting .main{position:relative!important;min-height:100vh!important}
+body[data-rym-module="panapass"].rym-panapass-booting .main:after{content:"Cargando Dashboard Panapass…";position:absolute;left:50%;top:120px;transform:translateX(-50%);padding:12px 18px;border:1px solid #d8e6f5;border-radius:14px;background:#fff;color:#174a8b;font-size:12px;font-weight:900;box-shadow:0 10px 26px rgba(18,60,110,.08)}
+
+/* Sidebar: same visual system for every Panapass role. Permission-based items may differ, appearance may not. */
+body[data-rym-module="panapass"] .shell{grid-template-columns:232px minmax(0,1fr)!important}
+body[data-rym-module="panapass"] .side{background:linear-gradient(180deg,#ffffff 0%,#f4f8fd 100%)!important;color:#173b73!important;border-right:1px solid #d8e4f1!important;box-shadow:10px 0 30px rgba(18,55,100,.06)!important;padding:14px 12px!important;gap:12px!important}
+body[data-rym-module="panapass"] .brand-logo-app{background:#fff!important;border:1px solid #dbe6f2!important;border-radius:18px!important;box-shadow:0 8px 20px rgba(20,58,104,.06)!important;padding:9px!important;margin:0!important}
+body[data-rym-module="panapass"] .portal-name-side{margin:2px 0 5px!important;text-align:center!important;color:#0f376f!important;font-size:14px!important;font-weight:950!important;letter-spacing:.04em!important}
+body[data-rym-module="panapass"] .nav{display:grid!important;gap:6px!important;padding:2px 0!important}
+body[data-rym-module="panapass"] .nav button{position:relative!important;min-height:43px!important;padding:10px 11px 10px 40px!important;border:1px solid #e2eaf4!important;border-radius:13px!important;background:#f8fbff!important;color:#455d7a!important;box-shadow:none!important;font-size:11px!important;font-weight:850!important;text-align:left!important;transition:.15s ease!important}
+body[data-rym-module="panapass"] .nav button:hover{background:#eef5ff!important;color:#174a8b!important;border-color:#cfdef0!important;transform:translateX(2px)!important}
+body[data-rym-module="panapass"] .nav button.active{background:linear-gradient(90deg,#0f4fa8,#285fb1)!important;color:#fff!important;border-color:#0f4fa8!important;box-shadow:0 9px 18px rgba(15,79,168,.18)!important}
+body[data-rym-module="panapass"] .nav button.active:after{display:none!important}
+body[data-rym-module="panapass"] .nav button.active:before{color:#fff!important}
+body[data-rym-module="panapass"] .nav button:before{color:#1e5aa5!important}
+body[data-rym-module="panapass"] .user{margin-top:auto!important;padding:12px!important;border:1px solid #dbe6f2!important;border-radius:14px!important;background:#fff!important;box-shadow:0 8px 20px rgba(20,58,104,.05)!important;color:#173b73!important}
+body[data-rym-module="panapass"] .user span{color:#73859c!important}
+body[data-rym-module="panapass"] .side .logout{background:#fff3f4!important;color:#b42318!important;border:1px solid #fecdd3!important;border-radius:11px!important;box-shadow:none!important}
+
+/* Internal phase logic stays internal. */
+body[data-rym-module="panapass"] .rym-p3-phase-badge{display:none!important}
+
+/* Monetary values need to read as data, not micro-copy. */
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p2-galera .rym-gal-metric small{display:block!important;margin-top:7px!important;font-size:17px!important;line-height:1.1!important;font-weight:950!important;letter-spacing:-.02em!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p2-galera .rym-gal-metric.bad small{color:#c9162d!important;font-size:18px!important}
+body[data-rym-module="panapass"].rym-panapass-proposal2 .rym-p2-galera .rym-gal-metric.pay small{color:#c76a00!important;font-size:18px!important}
+
+/* Result strip: compact, useful, no AM/PM jargon. */
+body[data-rym-module="panapass"] .rym-p3-performance-strip{margin-bottom:14px!important}
+body[data-rym-module="panapass"] .rym-p3-phase-lead>span{font-size:9px!important;letter-spacing:.08em!important;color:#71849d!important}
+
+/* Supervisor performance: outcome-first, not ordinal-first. */
+body[data-rym-module="panapass"] .rym-rank-panel .rym-rank-hero{position:relative!important}
+body[data-rym-module="panapass"] .rym-p6-performance{padding:14px!important}
+body[data-rym-module="panapass"] .rym-p6-result-hero{display:grid!important;grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr)!important;gap:16px!important;align-items:stretch!important;padding:0!important;background:transparent!important;color:inherit!important;box-shadow:none!important}
+body[data-rym-module="panapass"] .rym-p6-result-main{display:flex!important;flex-direction:column!important;justify-content:center!important;padding:18px 20px!important;border-radius:15px!important;background:linear-gradient(135deg,#087a45,#13a966)!important;color:#fff!important;box-shadow:0 10px 24px rgba(8,122,69,.16)!important}
+body[data-rym-module="panapass"] .rym-p6-result-main>span{font-size:9px!important;font-weight:950!important;letter-spacing:.08em!important;color:#d8f7e7!important}
+body[data-rym-module="panapass"] .rym-p6-result-main>strong{margin-top:5px!important;font-size:34px!important;line-height:1!important;color:#fff!important}
+body[data-rym-module="panapass"] .rym-p6-result-main>small{margin-top:7px!important;font-size:11px!important;line-height:1.4!important;color:#e7fff1!important}
+body[data-rym-module="panapass"] .rym-p6-result-stats{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+body[data-rym-module="panapass"] .rym-p6-result-stats>div{display:flex!important;flex-direction:column!important;justify-content:center!important;padding:14px!important;border:1px solid #dce8f3!important;border-radius:14px!important;background:#f8fbff!important}
+body[data-rym-module="panapass"] .rym-p6-result-stats b{font-size:22px!important;color:#0f3b75!important}
+body[data-rym-module="panapass"] .rym-p6-result-stats span{margin-top:4px!important;font-size:9px!important;font-weight:850!important;color:#6d829d!important}
+body[data-rym-module="panapass"] .rym-p6-best-result{background:#f1fff6!important;border-color:#bfe7ce!important}
+body[data-rym-module="panapass"] .rym-p6-best-result .rym-rank-value{color:#087a45!important}
+
+/* Do not let absolute result chips escape their panel and overlap the header. */
+body[data-rym-module="panapass"] .rym-p5-result-badge{position:static!important;display:inline-flex!important;margin-top:8px!important;align-self:flex-start!important}
+
+@media(max-width:900px){
+  body[data-rym-module="panapass"] .shell{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .rym-p6-result-hero{grid-template-columns:1fr!important}
+  body[data-rym-module="panapass"] .rym-p6-result-stats{grid-template-columns:1fr 1fr!important}
+}
