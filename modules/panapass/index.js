@@ -22,7 +22,7 @@
     while(Date.now()<deadline){
       if(w.__RYM_PANAPASS_DASHBOARD_NATIVE_INSTALLED__ &&
          w.RYM_PANAPASS_DASHBOARD_V2?.native===true &&
-         typeof w.dashboard==='function') return true;
+         typeof w.RYM_PANAPASS_DASHBOARD_V2?.dashboard==='function') return true;
       await wait(25);
     }
     throw new Error('Panapass native dashboard did not become ready');
@@ -41,7 +41,13 @@
     if(typeof legacy!=='function')throw new Error('Panapass canonical entrypoint unavailable');
     try{
       await ensureNativeDashboard();
-      return await legacy.apply(w,context.extra?.legacyArgs||[]);
+      /* The legacy entrypoint is still responsible for creating the Panapass shell,
+         permissions and navigation. Once that shell exists, hand the view explicitly
+         to the native V2 dashboard. Do not rely on the legacy entrypoint calling the
+         global dashboard function; some mobile paths render their own legacy dashboard. */
+      await legacy.apply(w,context.extra?.legacyArgs||[]);
+      if(!mounted) return null;
+      return await w.RYM_PANAPASS_DASHBOARD_V2.dashboard(false);
     }catch(e){
       d.body.classList.remove('rym-panapass-booting');
       throw e;
