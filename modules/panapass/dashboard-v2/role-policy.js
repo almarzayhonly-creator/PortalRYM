@@ -42,13 +42,24 @@
     return [...new Set(source.map(cleanGalera).filter(Boolean))];
   }
 
+  function visibleRole(){
+    if(typeof document==='undefined')return '';
+    const roles=[...document.querySelectorAll('.user span,.top .pill')].map(x=>norm(x.textContent));
+    return roles.find(x=>Object.prototype.hasOwnProperty.call(RULES,x))||'';
+  }
+
+  function visibleName(){
+    if(typeof document==='undefined')return '';
+    return String(document.querySelector('.user strong')?.textContent||'').trim();
+  }
+
   function identity(session){
-    const s=session||{},p=s.profile||{},role=norm(s.role||p.rol);
+    const s=session||{},p=s.profile||{},role=norm(s.role||p.rol)||visibleRole();
     return Object.freeze({
       role,
       userId:String(s.userId||p.id||p.user_id||''),
       supervisoraId:String(p.supervisora_id||''),
-      name:String(p.nombre||p.name||'').trim(),
+      name:String(p.nombre||p.name||visibleName()).trim(),
       galeras:Object.freeze(galerasFromProfile(p))
     });
   }
