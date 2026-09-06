@@ -52,8 +52,10 @@
   w.RYM_PANAPASS_CLEAN_READY=(async()=>{
     for(const href of styles) await style(href);
     for(const src of files) await script(src);
-    if(!w.RYM_PANAPASS_DASHBOARD_CLEAN?.autoMount) throw new Error('Dashboard Panapass Clean no disponible');
-    const result=await w.RYM_PANAPASS_DASHBOARD_CLEAN.autoMount();
-    return Object.freeze({enabled:true,build,result});
+    const dashboard=w.RYM_PANAPASS_DASHBOARD_CLEAN;
+    if(!dashboard?.installOwnership||!dashboard?.mountIfCurrent)throw new Error('Dashboard Panapass Clean no disponible');
+    const ownership=dashboard.installOwnership();
+    const result=await dashboard.mountIfCurrent();
+    return Object.freeze({enabled:true,build,ownership,result});
   })();
 })(window,document);
