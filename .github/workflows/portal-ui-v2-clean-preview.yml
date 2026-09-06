@@ -1,0 +1,80 @@
+name: Portal UI V2 clean preview
+
+on:
+  push:
+    branches: [portal-ui-v2-clean]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portal-ui-v2-clean-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate UI architecture
+        run: |
+          node --check modules/v171-loader.js
+          node --check qa/ui-isolation-contract.mjs
+          node qa/ui-isolation-contract.mjs
+
+      - name: Verify modular CSS files
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            css/core/tokens.css css/core/reset.css css/core/layout.css css/core/sidebar.css css/core/components.css
+            css/panapass/base.css css/panapass/dashboard.css css/panapass/ranking.css css/panapass/pagos.css
+            css/panapass/negativos.css css/panapass/recurrentes.css css/panapass/bajas.css
+            css/gps/base.css css/revisados/base.css css/control-auto/base.css css/usuarios/base.css
+          )
+          for file in "${files[@]}"; do test -f "$file"; done
+
+      - name: Upload isolated preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest versions upload --preview-alias portal-ui-v2-clean 2>&1 | tee /tmp/wrangler.out
+          urls=$(grep -Eo 'https://[a-z0-9-]+\.workers\.dev' /tmp/wrangler.out | sort -u)
+          exact=$(printf '%s\n' "$urls" | grep -v '^https://portal-ui-v2-clean-' | head -1 || true)
+          alias=$(printf '%s\n' "$urls" | grep '^https://portal-ui-v2-clean-' | head -1 || true)
+          test -n "$exact"
+          test -n "$alias"
+          echo "exact_url=$exact" >> "$GITHUB_OUTPUT"
+          echo "alias_url=$alias" >> "$GITHUB_OUTPUT"
+          echo "Exact preview URL: $exact"
+          echo "Stable preview alias URL: $alias"
+
+      - name: Verify preview assets
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.exact_url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PREVIEW_URL"
+          test -n "$ALIAS_URL"
+          curl -fsSL --max-time 20 "$PREVIEW_URL/" -o /tmp/index.html
+          curl -fsSL --max-time 20 "$PREVIEW_URL/modules/v171-loader.js" -o /tmp/v171-loader.js
+          for file in css/core/tokens.css css/core/reset.css css/core/layout.css css/core/sidebar.css css/core/components.css css/panapass/base.css css/panapass/dashboard.css css/panapass/ranking.css css/panapass/pagos.css css/panapass/negativos.css css/panapass/recurrentes.css css/panapass/bajas.css css/gps/base.css css/revisados/base.css css/control-auto/base.css css/usuarios/base.css; do
+            curl -fsSL --max-time 20 "$PREVIEW_URL/$file" -o "/tmp/$(basename "$file")"
+          done
+          grep -Fq 'rym-v171-loader' /tmp/index.html
+          for file in css/core/tokens.css css/core/reset.css css/core/layout.css css/core/sidebar.css css/core/components.css css/panapass/base.css css/panapass/dashboard.css css/panapass/ranking.css css/panapass/pagos.css css/panapass/negativos.css css/panapass/recurrentes.css css/panapass/bajas.css css/gps/base.css css/revisados/base.css css/control-auto/base.css css/usuarios/base.css; do
+            grep -Fq "/$file" /tmp/index.html
+          done
+          curl -fsSIL --max-time 20 "$ALIAS_URL/" | head -n 1
