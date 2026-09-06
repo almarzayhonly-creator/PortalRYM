@@ -1,0 +1,8 @@
+/* Prefixed shared components. Do not add module-specific selectors here. */
+.rym-card, .rym-panel { background: var(--rym-surface); border: 1px solid var(--rym-border); border-radius: var(--rym-radius-lg); box-shadow: var(--rym-shadow-sm); }
+.rym-module-root { color: var(--rym-text); }
+.rym-grid { display: grid; gap: var(--rym-gap); }
+.rym-muted { color: var(--rym-muted); }
+.rym-button { border: 0; border-radius: var(--rym-radius-sm); padding: 12px 15px; background: var(--rym-blue); color: #fff; font-weight: 900; cursor: pointer; }
+.rym-input { width: 100%; border: 1px solid var(--rym-border); border-radius: var(--rym-radius-sm); padding: 12px 14px; background: var(--rym-surface); }
+.rym-table { width: 100%; border-collapse: collapse; }

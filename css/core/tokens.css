@@ -1,0 +1,31 @@
+:root {
+  --rym-navy: #0A1B4D;
+  --rym-blue: #244AA5;
+  --rym-sky: #53B7E8;
+  --rym-orange: #F47C20;
+  --rym-green: #047857;
+  --rym-danger: #dc2626;
+  --rym-warning: #b54708;
+  --rym-bg: #F4F7FB;
+  --rym-surface: #fff;
+  --rym-border: #D8E3F2;
+  --rym-text: #10224E;
+  --rym-muted: #62708C;
+  --rym-radius-sm: 10px;
+  --rym-radius-md: 14px;
+  --rym-radius-lg: 18px;
+  --rym-shadow-sm: 0 8px 24px rgba(10, 27, 77, .08);
+  --rym-shadow-md: 0 14px 34px rgba(10, 27, 77, .08);
+  --rym-space-1: 8px;
+  --rym-space-2: 12px;
+  --rym-space-3: 16px;
+  --rym-space-4: 24px;
+  /* V171 compatibility aliases used by existing isolated module styles. */
+  --rym-radius: var(--rym-radius-md);
+  --rym-gap: var(--rym-space-3);
+  --rym-shadow: var(--rym-shadow-sm);
+  --rym-panapass: var(--rym-blue);
+  --rym-revisados: #f97316;
+  --rym-control: #16a34a;
+  --rym-gps: #0f766e;
+}

@@ -1,0 +1,2 @@
+.rym-sidebar { background: linear-gradient(180deg, var(--rym-navy), #102B73); color: #fff; }
+.rym-sidebar__nav { display: grid; gap: var(--rym-space-1); }

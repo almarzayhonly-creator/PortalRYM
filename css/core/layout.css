@@ -1,0 +1,4 @@
+/* Shared layout hooks for new UI; legacy layout remains in core.css during migration. */
+.rym-layout { min-height: 100vh; }
+.rym-main { min-width: 0; }
+.rym-stack { display: grid; gap: var(--rym-space-3); }

@@ -1,0 +1,4 @@
+/* Global defaults only. Domain-specific rules belong in their module directory. */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--rym-bg); color: var(--rym-text); }
+button, input, select, textarea { font: inherit; }
