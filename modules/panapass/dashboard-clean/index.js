@@ -13,7 +13,7 @@
   function bind(root,vm){
     root.onclick=async e=>{
       const refresh=e.target.closest('[data-pdc-action="refresh"]');
-      if(refresh){refresh.disabled=true;try{D().clear();await mount({force:true,source:'refresh'})}finally{refresh.disabled=false}return}
+      if(refresh){refresh.disabled=true;try{D().clear();await mount({force:true,source:'refresh',target:root})}finally{refresh.disabled=false}return}
       const route=e.target.closest('[data-pdc-route]');if(route){R().openRoute(route.dataset.pdcRoute);return}
       const gal=e.target.closest('[data-pdc-galera]');if(gal&&vm.role==='ADMIN_TOTAL'){root.dispatchEvent(new CustomEvent('rym:panapass:galera',{bubbles:true,detail:{galera:gal.dataset.pdcGalera}}))}
     };
@@ -28,7 +28,7 @@
     mounting=(async()=>{
       await R().waitReady();
       if(!R().isDashboardRoute())return Object.freeze({status:'not-dashboard'});
-      const target=R().root();if(!target)throw new Error('#view no disponible');
+      const target=opts.target||R().root();if(!target)throw new Error('#view no disponible');
       target.dataset.rymPanapassClean='1';d.body.dataset.rymPanapassClean='1';loading(target);
       try{
         const vm=await build(opts);
@@ -49,7 +49,7 @@
   }
   function installOwnership(){
     if(ownershipInstalled)return R().ownership();
-    const result=R().installDashboardOwner({renderDashboard:mount,leaveDashboard:unmount});
+    const result=R().installDashboardOwner({renderDashboard:mount});
     ownershipInstalled=true;
     return result;
   }

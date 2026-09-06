@@ -14,7 +14,9 @@ const policy=read('modules/panapass/dashboard-clean/role-policy.js');for(const r
 for(const f of css){const c=read(f);if(!c.includes('.rym-pdc'))fail('CSS sin scope .rym-pdc: '+f);else ok('CSS scoped '+f)}
 const runtime=read('modules/panapass/dashboard-clean/runtime.js');
 if(!runtime.includes('installDashboardOwner')||!runtime.includes('__rymPanapassCleanOwner'))fail('runtime no instala ownership exclusivo del dashboard');else ok('ownership exclusivo presente');
-if(!runtime.includes("String(s.active||'')==='dashboard'"))fail('render gate no limita ownership a dashboard');else ok('ownership limitado a dashboard');
+if(!runtime.includes('w.dashboard=cleanDashboard')||!runtime.includes('legacyDashboard'))fail('ownership no sustituye el handler dashboard');else ok('handler dashboard sustituido directamente');
+if(runtime.includes('w.render=gatedRender'))fail('ownership vuelve a parchear render global');else ok('render global no se intercepta');
+if(!runtime.includes("String(s.active||'')==='dashboard'"))fail('handler no limita ownership a dashboard');else ok('ownership limitado a dashboard');
 const index=read('modules/panapass/dashboard-clean/index.js');if(index.includes('v70OpenPanapass'))fail('renderer clean llama entrypoint legacy');else ok('renderer independiente del dashboard legacy');
 if(!index.includes('installOwnership')||!index.includes('mountIfCurrent'))fail('renderer no arma ownership clean');else ok('renderer arma ownership clean');
 const loader=read('modules/panapass/dashboard-clean/loader.js');if(!loader.includes('panapassClean'))fail('loader no tiene flag clean');else ok('preview flag presente');

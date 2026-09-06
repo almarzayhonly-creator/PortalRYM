@@ -7,8 +7,7 @@
   const norm=s=>String(s||'').trim().toUpperCase();
   const PANAPASS_ROUTES=Object.freeze(['dashboard','negativos_hoy','ranking','pagos_hoy','cargar_pagos','historial','recurrentes','operaciones','operacion_am','operacion_pm','reportes','bajas_panapass']);
   let ownerInstalled=false;
-  let legacyRender=null;
-  let legacyOpenPanapass=null;
+  let legacyDashboard=null;
 
   function legacyRpc(){return typeof w.rpc==='function'?w.rpc:null}
   function state(){return w.state&&typeof w.state==='object'?w.state:null}
@@ -51,40 +50,30 @@
     const s=state();if(s)s.active=String(route);
     if(typeof w.shell==='function')w.shell();
     if(typeof w.render==='function')return w.render();
+    try{if(typeof render==='function')return render()}catch(_){}
     return null;
   }
 
   function installDashboardOwner(handlers){
-    if(ownerInstalled)return Object.freeze({installed:true,reused:true});
+    if(ownerInstalled)return Object.freeze({installed:true,reused:true,dashboardGate:Boolean(w.dashboard?.__rymPanapassCleanOwner)});
     const renderDashboard=handlers?.renderDashboard;
-    const leaveDashboard=handlers?.leaveDashboard;
     if(typeof renderDashboard!=='function')throw new Error('renderDashboard requerido');
 
-    legacyRender=typeof w.render==='function'?w.render:null;
-    const gatedRender=async function(){
-      if(isDashboardRoute())return renderDashboard({source:'render-gate'});
-      if(typeof leaveDashboard==='function')leaveDashboard();
-      if(typeof legacyRender==='function')return legacyRender.apply(this,arguments);
+    legacyDashboard=typeof w.dashboard==='function'?w.dashboard:null;
+    const cleanDashboard=async function(target){
+      if(isDashboardRoute())return renderDashboard({target:target||root(),source:'dashboard-handler'});
+      if(typeof legacyDashboard==='function')return legacyDashboard.apply(this,arguments);
       return null;
     };
-    gatedRender.__rymPanapassCleanOwner=true;
-    w.render=gatedRender;
-
-    legacyOpenPanapass=typeof w.v70OpenPanapass==='function'?w.v70OpenPanapass:null;
-    if(legacyOpenPanapass){
-      const openClean=async function(){
-        w.__RYM_PANAPASS_CLEAN_ROUTE__='PANAPASS';
-        return legacyOpenPanapass.apply(this,arguments);
-      };
-      openClean.__rymPanapassCleanOwner=true;
-      w.v70OpenPanapass=openClean;
-    }
+    cleanDashboard.__rymPanapassCleanOwner=true;
+    w.dashboard=cleanDashboard;
+    try{dashboard=cleanDashboard}catch(_){}
 
     ownerInstalled=true;
-    return Object.freeze({installed:true,reused:false,renderGate:Boolean(legacyRender),routeGate:Boolean(legacyOpenPanapass)});
+    return Object.freeze({installed:true,reused:false,dashboardGate:true,legacyDashboard:Boolean(legacyDashboard)});
   }
 
-  function ownership(){return Object.freeze({installed:ownerInstalled,renderGate:Boolean(w.render?.__rymPanapassCleanOwner),routeGate:Boolean(w.v70OpenPanapass?.__rymPanapassCleanOwner),dashboard:isDashboardRoute()})}
+  function ownership(){return Object.freeze({installed:ownerInstalled,dashboardGate:Boolean(w.dashboard?.__rymPanapassCleanOwner),dashboard:isDashboardRoute()})}
 
   w.RYM_PANAPASS_CLEAN_RUNTIME=Object.freeze({profile,session,rpc:call,root,ready,waitReady,openRoute,norm,allModules,hasPanapassScope,isDashboardRoute,installDashboardOwner,ownership});
 })(window,document);
