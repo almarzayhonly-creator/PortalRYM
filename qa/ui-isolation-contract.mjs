@@ -138,8 +138,15 @@ for (const file of files(cssRoot, path => path.endsWith('.css'))) {
   const path = relative(root, file).replaceAll('\\', '/');
   if (read(file).includes('@import') && !permittedBridges.has(path)) fail(`Unauthorized CSS bridge: ${path}`);
 }
-for (const path of ['css/panapass/dashboard.css', 'css/panapass/ranking.css', 'css/panapass/pagos.css', 'css/panapass/negativos.css', 'css/panapass/recurrentes.css']) {
+for (const path of ['css/panapass/ranking.css', 'css/panapass/pagos.css', 'css/panapass/negativos.css', 'css/panapass/recurrentes.css']) {
   if (!read(join(root, path)).includes('RESERVED FOR ISOLATED MIGRATION AFTER BASELINE APPROVAL')) fail(`Invalid Panapass placeholder: ${path}`);
+}
+const dashboardCss = read(join(root, 'css/panapass/dashboard.css'));
+if (dashboardCss.includes('RESERVED FOR ISOLATED MIGRATION AFTER BASELINE APPROVAL') || dashboardCss.includes('@import')) {
+  fail('Panapass dashboard CSS must be active and self-contained');
+}
+if (!dashboardCss.includes('body[data-rym-module="panapass"]') || !dashboardCss.includes('.rym-pdc')) {
+  fail('Panapass dashboard CSS must be namespaced');
 }
 
 for (const file of files(join(cssRoot, 'core'), path => path.endsWith('.css'))) {
