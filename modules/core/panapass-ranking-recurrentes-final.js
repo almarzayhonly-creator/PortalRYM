@@ -131,8 +131,7 @@ function install(){
 
   try{
     if(typeof render==='function'&&!w.__RYM_FINAL_RENDER_WRAPPED__){
-      const oldRender=render;
-      const wrapped=async function(){const v=d.querySelector('#view');if(state?.active==='recurrentes')return finalRecurrentes(v);const canonical=w.__RYM_CANONICAL_RENDER__||oldRender;return canonical.apply(this,arguments)};
+      const wrapped=async function(){const v=d.querySelector('#view');if(state?.active==='recurrentes')return finalRecurrentes(v);return w.RYM_CANONICAL_RENDER.apply(this,arguments)};
       render=wrapped;w.render=wrapped;w.__RYM_FINAL_RENDER_WRAPPED__=true;
     }
   }catch(_){}
