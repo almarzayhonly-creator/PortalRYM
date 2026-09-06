@@ -12,13 +12,18 @@
 
   function shift(ymd,days){const x=new Date(`${ymd}T12:00:00-05:00`);x.setDate(x.getDate()+days);return x.toISOString().slice(0,10)}
   function dates7(hoy){return Array.from({length:7},(_,i)=>shift(hoy,i-6))}
-  function phase(){const h=Number(new Intl.DateTimeFormat('en-US',{timeZone:'America/Panama',hour:'2-digit',hour12:false}).format(new Date()));return h>=12?'PM':'AM'}
 
   function paymentsToday(raw){
     const dated=(raw.pagos||[]).filter(x=>dateOf(x)===raw.hoy),rows=dated.length?dated:[];
     const units=new Set();let amount=0;
     rows.forEach(x=>{const u=unitOf(x);if(u)units.add(norm(u));amount+=amountOf(x)});
     return {units:units.size,amount};
+  }
+  function phase(raw){
+    const s=raw.summary||{},pay=paymentsToday(raw);
+    const paidUnits=pay.units||num(pick(s,['pagos_hoy','requieren_pago','requirieron_pago','unidades_pagadas_hoy']));
+    const paidAmount=pay.amount||num(pick(s,['monto_pagado_hoy','monto_pagado']));
+    return paidUnits>0||paidAmount>0?'PM':'AM';
   }
   function trendFor(raw,galera){
     const dates=dates7(raw.hoy),g=norm(galera),map=new Map(dates.map(d=>[d,{date:d,units:new Set(),amount:0}]));
@@ -91,7 +96,7 @@
     const allGaleras=galeraRows(raw),galera=resolvedGalera(policy,allGaleras,raw.rankingDay||[]),rank=ranking(raw,policy,galera);
     const visibleGaleras=policy.scope==='company'?allGaleras:allGaleras.filter(x=>!galera||x.galera===galera);
     return Object.freeze({
-      version:'2-clean',role:policy.role,scope:policy.scope,view:policy.view,policy,date:raw.hoy,phase:phase(),
+      version:'2-clean',role:policy.role,scope:policy.scope,view:policy.view,policy,date:raw.hoy,phase:phase(raw),
       name:policy.identity.name||'Usuario',galera,kpis:kpis(raw),
       galeras:Object.freeze(visibleGaleras),allGaleras:Object.freeze(allGaleras),ranking:rank,
       performance:performance(allGaleras,rank,policy),alerts:Object.freeze(alerts(raw)),
