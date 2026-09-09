@@ -5269,6 +5269,7 @@ body.v157-gps .v163-gal-table td.bad{color:#A72B2B;background:#FFF4F2}body.v157-
 
 
 
+
 <style id="rym-profile-top-only">#rymLoveFab,#rymYhAlertBadge{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 <script id="rym-aracelys-messages-inline">
 /* Portal RYM - Yhonly private profile + Aracelys welcome + ENA change alerts */
@@ -5557,7 +5558,7 @@ async function lastPayDate(){try{const x=await rpc('panapass_ultima_fecha_pago')
 function bounds(date){const x=new Date(String(date).slice(0,10)+'T12:00:00');return{desde:`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-01`,hasta:String(date).slice(0,10),month:MONTHS[x.getMonth()]+' '+x.getFullYear()}}
 function scopeLabel(s){return s==='GLOBAL'?'Todas las supervisoras':s==='TODAS'?'4 galeras':s}
 const assignmentCache=new Map();
-async function hasAssignedTerminations(x){const id=x?.supervisora_id||x?.id;if(!id)return true;if(!assignmentCache.has(id))assignmentCache.set(id,rpc('panapass_supervisora_perfil',{p_supervisora_id:id}).then(d=>Number(d?.kpis?.unidades||0)>0).catch(()=>true));return assignmentCache.get(id)}
+async function hasAssignedTerminations(x){const id=x?.supervisora_id||x?.id;if(!id)return true;if(!assignmentCache.has(id))assignmentCache.set(id,rpc('panapass_supervisora_perfil',{p_supervisora_id:id}).then(d=>(d?.unidades||[]).some(u=>String(u?.panapass_numero||u?.panapass||'').trim())).catch(()=>true));return assignmentCache.get(id)}
 async function rankRowsWithAssignments(rows,scope){if(scope==='TODAS')return rows||[];return Promise.all((rows||[]).map(async x=>({...x,rankEligible:await hasAssignedTerminations(x)})))}
 const hasRankMovement=x=>x?.rankEligible??!!x?.participa;
 const activeRankRows=rows=>(rows||[]).filter(hasRankMovement).map((x,index)=>({...x,puesto:index+1}));
