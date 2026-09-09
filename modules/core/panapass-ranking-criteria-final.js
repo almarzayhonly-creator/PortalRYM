@@ -18,7 +18,10 @@ async function lastPayDate(){try{const x=await rpc('panapass_ultima_fecha_pago')
 function bounds(date){const x=new Date(String(date).slice(0,10)+'T12:00:00');return{desde:`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-01`,hasta:String(date).slice(0,10),month:MONTHS[x.getMonth()]+' '+x.getFullYear()}}
 function scopeLabel(s){return s==='GLOBAL'?'Todas las supervisoras':s==='TODAS'?'4 galeras':s}
 const assignmentCache=new Map();
-async function hasAssignedTerminations(x){const id=x?.supervisora_id||x?.id;if(!id)return true;if(!assignmentCache.has(id))assignmentCache.set(id,rpc('panapass_supervisora_perfil',{p_supervisora_id:id}).then(d=>(d?.unidades||[]).some(u=>String(u?.panapass_numero||u?.panapass||'').trim())).catch(()=>true));return assignmentCache.get(id)}
+const normal=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
+let supervisorsPromise;
+async function supervisorId(x){const direct=x?.supervisora_id||x?.entidad_id||x?.cobrador_id||x?.id;if(direct)return direct;supervisorsPromise??=rpc('panapass_mis_supervisoras').catch(()=>[]);const all=await supervisorsPromise,n=normal(x?.entidad),g=normal(x?.galera),found=(all||[]).find(s=>normal(s?.nombre)===n&&normal(s?.galera)===g)||(all||[]).find(s=>normal(s?.nombre)===n);return found?.id||''}
+async function hasAssignedTerminations(x){const id=await supervisorId(x);if(!id)return true;if(!assignmentCache.has(id))assignmentCache.set(id,rpc('panapass_supervisora_perfil',{p_supervisora_id:id}).then(d=>(d?.unidades||[]).some(u=>{const v=String(u?.panapass_numero||u?.panapass||'').trim();return !!v&&!/^(0+|N\/?A|SIN ASIGNAR|PENDIENTE|[-—])$/i.test(v)})).catch(()=>true));return assignmentCache.get(id)}
 async function rankRowsWithAssignments(rows,scope){if(scope==='TODAS')return rows||[];return Promise.all((rows||[]).map(async x=>({...x,rankEligible:await hasAssignedTerminations(x)})))}
 const hasRankMovement=x=>x?.rankEligible??!!x?.participa;
 const activeRankRows=rows=>(rows||[]).filter(hasRankMovement).map((x,index)=>({...x,puesto:index+1}));
