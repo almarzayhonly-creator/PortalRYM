@@ -11,11 +11,10 @@ export default {
       const html = await response.text();
       const staleInline = /<script\b[^>]*\bid=["']rym-dashboard-payments-inline["'][^>]*>[\s\S]*?<\/script\s*>/gi;
       const staleExternal = /<script\b[^>]*\bsrc=["'][^"']*\/modules\/core\/dashboard-payments-enhance\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script\s*>/gi;
-      const staleRanking = /<script\b[^>]*\bid=["']rym-ranking-criteria-inline["'][^>]*>[\s\S]*?<\/script\s*>/gi;
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
 
-      let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "");
+      let body = html.replace(staleInline, "").replace(staleExternal, "");
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
         ? body.slice(0, bodyEnd) + owner + rankingOwner + body.slice(bodyEnd)
