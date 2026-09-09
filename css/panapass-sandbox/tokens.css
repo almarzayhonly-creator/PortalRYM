@@ -1,0 +1,3 @@
+/* Cargado solo por el preview sandbox: no afecta main. */
+:root{--pps-navy:#103d79;--pps-blue:#2476f3;--pps-surface:#f5f9ff;--pps-border:#d8e5f3;--pps-radius:18px}
+.pps-sandbox-badge{position:fixed;right:14px;bottom:14px;z-index:2147483647;padding:8px 11px;border:1px solid #b9d6ff;border-radius:999px;background:#103d79;color:#fff;font:800 11px/1 system-ui,sans-serif;box-shadow:0 8px 22px rgba(16,61,121,.22);letter-spacing:.04em}
