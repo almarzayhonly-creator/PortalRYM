@@ -1,0 +1,47 @@
+name: Architecture V2 Phase 1 preview
+
+on:
+  push:
+    branches: [codex/architecture-v2-phase1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: architecture-v2-phase1-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify Phase 1 boundaries
+        run: |
+          node --check modules/core/bootstrap.js
+          node --check modules/core/module-registry.js
+          node --check modules/core/legacy-route-bridge.js
+          node --check modules/panapass/index.js
+          node --check modules/v171-loader.js
+      - name: Inject isolated preview bootstrap
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('index.html')
+          s=p.read_text()
+          build=os.environ['GITHUB_SHA']
+          marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n<script src="/modules/v171-loader.js?v={build}" defer></script>\n'
+          pos=s.lower().rfind('</body>')
+          if pos < 0: raise SystemExit('body end not found')
+          p.write_text(s[:pos]+marker+s[pos:])
+          PY
+      - name: Deploy isolated Cloudflare preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@latest versions upload --preview-alias architecture-v2-phase1

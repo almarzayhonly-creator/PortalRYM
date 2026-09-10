@@ -16,6 +16,13 @@
 
   function get(key){return originals.get(String(key))||null}
 
+  /* The only supported path from Architecture V2 modules to legacy routes. */
+  function open(key,args,scope){
+    const canonical=get(key);
+    if(typeof canonical!=='function')throw new Error('Legacy route unavailable: '+String(key));
+    return canonical.apply(scope||w,Array.isArray(args)?args:[]);
+  }
+
   function moduleContext(moduleId,args){
     const extra={legacyArgs:Array.from(args||[]),source:'legacy-entrypoint'};
     if(w.RYM_CONTEXT&&typeof w.RYM_CONTEXT.create==='function'){
@@ -67,7 +74,9 @@
     if(!originalHome) originalHome=current;
     homeWrapper=async function(...args){
       if(w.RYM_MODULES&&typeof w.RYM_MODULES.unmount==='function')await w.RYM_MODULES.unmount();
-      return originalHome.apply(this,args);
+      const result=await originalHome.apply(this,args);
+      if(d.body) d.body.dataset.rymModule='portal';
+      return result;
     };
     Object.defineProperty(homeWrapper,'__rymV2RouteBridge',{value:'home'});
     w.v36PortalHome=homeWrapper;
@@ -81,6 +90,7 @@
 
   const api=Object.freeze({
     get,
+    open,
     install:installAll,
     isBridged(globalName){
       const fn=w[String(globalName||'')];
@@ -102,4 +112,3 @@
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
 })(window,document);
-

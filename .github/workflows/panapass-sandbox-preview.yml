@@ -25,6 +25,9 @@ jobs:
           node --check worker.js
           node --check modules/panapass-sandbox/dashboard/index.js
           node --check modules/v171-loader.js
+          node --check modules/core/bootstrap.js
+          node --check modules/core/legacy-route-bridge.js
+          node --check modules/panapass/index.js
           test -s css/panapass-sandbox/tokens.css
       - name: Inject sandbox bootstrap into preview build only
         run: |
