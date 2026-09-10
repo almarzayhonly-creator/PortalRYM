@@ -1,0 +1,13 @@
+/* Portal RYM - Panapass Dashboard V2 Admin/Gerente galera view. Prepared, not wired. */
+(function(w){
+  'use strict';
+  const V=w.RYM_PANAPASS_DASHBOARD_V2_VIEWS||(w.RYM_PANAPASS_DASHBOARD_V2_VIEWS={});
+  if(V.galera)return;
+  V.galera=function(vm){
+    const C=w.RYM_PANAPASS_DASHBOARD_V2_COMPONENTS,gal=vm.galera||'Tu galera';
+    const comp=vm.companyComparison||[],mine=comp.find(x=>x.galera===gal),avgPaid=comp.length?comp.reduce((a,x)=>a+Number(x.paidUnits||0),0)/comp.length:0;
+    const compare=comp.length?`<section class="rym-pd2-company-compare">${C.sectionTitle('Comparativo con la empresa','Vista agregada; no habilita acceso a otras galeras.')}<div class="rym-pd2-compare-card"><div><small>${C.esc(gal)}</small><strong>${C.integer(mine?.paidUnits||0)}</strong><span>unidades pagadas hoy</span></div><div><small>Promedio empresa</small><strong>${avgPaid.toFixed(1)}</strong><span>por galera</span></div></div></section>`:`<section class="rym-pd2-company-compare unavailable">${C.sectionTitle('Comparativo con la empresa','Pendiente habilitar RPC agregado V2; no se ampliaran permisos para simularlo.')}</section>`;
+    return `<main class="rym-pd2 rym-pd2-galera-view">${C.header(vm,'Dashboard de galera',`Gestion operativa de Panapass · ${gal}`)}<section class="rym-pd2-kpi-grid six">${C.kpi('Unidades activas',C.integer(vm.kpis.active),gal,'blue','▦')}${C.kpi('Negativos hoy',C.integer(vm.kpis.negatives),gal,'red','!')}${C.kpi('Requirieron pago',C.integer(vm.kpis.paidUnits),gal,'green','$')}${C.kpi('Sin Panapass',C.integer(vm.kpis.noPanapass),gal,'orange','—')}${C.kpi('Bajas Panapass',C.integer(vm.kpis.bajas),gal,'purple','↓')}${C.kpi('Monto pagado hoy',`B/. ${C.money(vm.kpis.paidAmount)}`,gal,'white','$')}</section>${C.alertCards(vm)}<div class="rym-pd2-two-col"><section class="rym-pd2-ranking">${C.sectionTitle(`Supervisoras de la galera · ${gal}`,'Ranking local.')} ${C.rankTable(vm.ranking.local,{position:'posicion_galera'})}</section>${C.trendPanel(`Resumen de la galera · ${gal}`,vm.scopeTrend)}</div>${compare}<section class="rym-pd2-quick">${C.sectionTitle('Acciones rapidas','Vistas operativas de tu galera.')}<div><button data-pd2-route="${C.esc(vm.actions.negatives)}">! Ver negativos hoy</button><button data-pd2-route="${C.esc(vm.actions.payments)}">$ Ver pagos hoy</button><button data-pd2-route="${C.esc(vm.actions.bajas)}">↓ Ver bajas Panapass</button><button data-pd2-route="${C.esc(vm.actions.recurrentes)}">↻ Ver recurrentes</button></div></section></main>`;
+  };
+})(window);
+

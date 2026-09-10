@@ -1,0 +1,12 @@
+/* Portal RYM - Panapass Dashboard V2 Admin Total view. Prepared, not wired. */
+(function(w){
+  'use strict';
+  const V=w.RYM_PANAPASS_DASHBOARD_V2_VIEWS||(w.RYM_PANAPASS_DASHBOARD_V2_VIEWS={});
+  if(V['admin-total'])return;
+  V['admin-total']=function(vm){
+    const C=w.RYM_PANAPASS_DASHBOARD_V2_COMPONENTS,p=vm.performance||{};
+    const sup=x=>x?`${C.esc(x.supervisora_nombre||x.supervisora||'—')} · ${C.integer(x.unidades_pagadas)} pagadas`:'—';
+    return `<main class="rym-pd2 rym-pd2-admin-total">${C.header(vm,'Dashboard Panapass','Compara pagos y rendimiento de gestion por galera y supervisora')}<section class="rym-pd2-kpi-grid six">${C.kpi('Unidades activas',C.integer(vm.kpis.active),'4 galeras','blue','▦')}${C.kpi('Negativos hoy',C.integer(vm.kpis.negatives),'Referencia del dia','red','!')}${C.kpi('Requirieron pago',C.integer(vm.kpis.paidUnits),`B/. ${C.money(vm.kpis.paidAmount)}`,'amber','$')}${C.kpi('Monto pagado hoy',`B/. ${C.money(vm.kpis.paidAmount)}`,'Movimiento operativo','green','$')}${C.kpi('Sin Panapass',C.integer(vm.kpis.noPanapass),'Unidades sin numero','orange','—')}${C.kpi('Bajas Panapass',C.integer(vm.kpis.bajas),'Gestion de bajas','purple','↓')}</section><section class="rym-pd2-performance">${C.sectionTitle('Rendimiento destacado de hoy','Balance entre desempeno e incidencias.')}<div class="rym-pd2-performance-grid"><article><small>Mejor galera</small><strong>${C.esc(p.bestGalera?.galera||'—')}</strong><span>${C.integer(p.bestGalera?.paidUnits||0)} pagadas</span></article><article><small>Mayor incidencia</small><strong>${C.esc(p.worstGalera?.galera||'—')}</strong><span>${C.integer(p.worstGalera?.paidUnits||0)} pagadas</span></article><article><small>Mejor supervisora</small><strong>${sup(p.bestSupervisor)}</strong></article><article><small>Supervisora con mayor incidencia</small><strong>${sup(p.worstSupervisor)}</strong></article></div></section>${C.alertCards(vm)}<section class="rym-pd2-galeras">${C.sectionTitle('Resumen por galera','Pagos y tendencia de los ultimos 7 dias.')}<div class="rym-pd2-galera-grid">${vm.galeras.map(C.galeraCard).join('')}</div></section><section class="rym-pd2-ranking">${C.sectionTitle('Ranking de supervisoras · empresa','Comparacion global: menos unidades pagadas obtiene mejor posicion.')} ${C.rankTable(vm.ranking.global,{position:'posicion_global'})}</section></main>`;
+  };
+})(window);
+

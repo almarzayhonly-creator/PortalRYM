@@ -24,6 +24,7 @@ jobs:
         run: |
           node --check worker.js
           node --check modules/panapass-sandbox/dashboard/index.js
+          node --check modules/v171-loader.js
           test -s css/panapass-sandbox/tokens.css
       - name: Inject sandbox bootstrap into preview build only
         run: |
@@ -33,7 +34,7 @@ jobs:
           p=Path('index.html')
           s=p.read_text()
           build=os.environ['GITHUB_SHA']
-          marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n'
+          marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n<script src="/modules/v171-loader.js?v={build}" defer></script>\n'
           pos=s.lower().rfind('</body>')
           if pos < 0: raise SystemExit('body end not found')
           p.write_text(s[:pos]+marker+s[pos:])
@@ -55,5 +56,7 @@ jobs:
         run: |
           curl -fsSL "$QA_URL/?sandbox=1" -o /tmp/index.html
           curl -fsSL "$QA_URL/modules/panapass-sandbox/dashboard/index.js" -o /tmp/sandbox.js
+          curl -fsSL "$QA_URL/modules/v171-loader.js" -o /tmp/loader.js
           grep -Fq 'panapass-sandbox/tokens.css' /tmp/index.html
           grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
+          grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
