@@ -64,3 +64,25 @@ No se mueve código desde el HTML durante Fase 1: extraerlo sin pruebas de regre
 2. Migrar el renderer de Panapass Dashboard detrás del flag, conservando el legacy como fallback.
 3. Extraer CSS del dashboard únicamente a css/panapass/dashboard/ y validar navegación cruzada.
 4. Repetir el patrón para Ranking, Pagos y Negativos antes de tocar GPS o Revisados.
+
+## Validación funcional Fase 1 (2026-09-10)
+
+Preview probado: https://architecture-v2-phase1-portal-ena-rym.almarzayhonly.workers.dev/?phase1=9e56f65
+
+Perfil probado: ADMIN_TOTAL (Yhonly Almarza).
+
+| Paso | Resultado | Evidencia |
+|---|---|---|
+| Portal -> Panapass | PASS | Dashboard Panapass cargó con datos y sidebar Panapass. |
+| Panapass -> Portal -> GPS | PASS | GPS Centro de Control cargó; sesión y perfil se conservaron. |
+| GPS -> Portal -> Panapass | PASS | Panapass volvió a cargar; los enlaces CSS de GPS quedaron disabled y los de Panapass activos. |
+| Portal -> Usuarios | BLOCKED | El shell actual no expone una ruta UI de Usuarios en este perfil. |
+| Portal -> Revisados | FAIL | El botón Gestionar revisados no cambió de vista en el preview. |
+| Portal -> Control Auto | FAIL | El botón Ver flota no cambió de vista en el preview. |
+| Roles ADMIN/GERENTE_GALERA/SUPERVISORA | BLOCKED | No se proporcionaron sesiones de esos roles; no se crearon usuarios ni se alteró Auth. |
+
+Consola: sin errores o warnings nuevos relacionados con RYM_MODULES, RYM_STYLES, RYM_CONTEXT, RYM_LEGACY_ROUTES, bootstrap, recursos CSS o módulos faltantes.
+
+Contaminación CSS observada: no se detectó CSS GPS activo al regresar a Panapass. El atributo body data-rym-module permaneció como panapass al volver al portal; los estilos Panapass sí quedaron disabled. Es un residuo de estado legacy de riesgo medio, no corregido para no modificar el shell funcional durante Fase 1.
+
+Conclusión de validación: NOT READY TO MERGE TO SANDBOX. Se requiere resolver o demostrar preexistentes las rutas Portal -> Revisados y Portal -> Control Auto, exponer una ruta verificable para Usuarios y repetir la prueba con ADMIN/GERENTE_GALERA/SUPERVISORA.
