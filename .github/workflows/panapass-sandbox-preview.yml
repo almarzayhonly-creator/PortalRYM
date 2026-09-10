@@ -34,8 +34,8 @@ jobs:
           s=p.read_text()
           build=os.environ['GITHUB_SHA']
           marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n'
-          pos=s.lower().rfind('</head>')
-          if pos < 0: raise SystemExit('head end not found')
+          pos=s.lower().rfind('</body>')
+          if pos < 0: raise SystemExit('body end not found')
           p.write_text(s[:pos]+marker+s[pos:])
           PY
       - name: Deploy isolated Cloudflare preview
