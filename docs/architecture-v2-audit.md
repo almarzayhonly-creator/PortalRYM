@@ -85,4 +85,50 @@ Consola: sin errores o warnings nuevos relacionados con RYM_MODULES, RYM_STYLES,
 
 Contaminación CSS observada: no se detectó CSS GPS activo al regresar a Panapass. El atributo body data-rym-module permaneció como panapass al volver al portal; los estilos Panapass sí quedaron disabled. Es un residuo de estado legacy de riesgo medio, no corregido para no modificar el shell funcional durante Fase 1.
 
-Conclusión de validación: NOT READY TO MERGE TO SANDBOX. Se requiere resolver o demostrar preexistentes las rutas Portal -> Revisados y Portal -> Control Auto, exponer una ruta verificable para Usuarios y repetir la prueba con ADMIN/GERENTE_GALERA/SUPERVISORA.
+Conclusión inicial: bloqueos pendientes de clasificación antes de decidir integración.
+
+## Cierre de bloqueos Fase 1 (2026-09-10)
+
+### Comparación con sandbox/panapass-v2
+
+- index.html no cambió entre sandbox/panapass-v2 y esta rama. Sus rutas legacy, botones y entrypoints son los mismos.
+- Las únicas diferencias de routing en Fase 1 están en modules/core/: bootstrap, bridge y module-registry.
+- No fue posible abrir una sesión autenticada independiente en el subdominio sandbox estable. La evidencia estática confirma que el supuesto FAIL no fue introducido por Fase 1.
+
+### Causa raíz
+
+| Hallazgo inicial | Causa raíz | Estado |
+|---|---|---|
+| Portal -> Revisados FAIL | El primer recorrido usó un botón de navegación heredada oculto. La ruta visible #v99Rev llama al entrypoint real v60OpenRevisados y abre Revisados. | PASS |
+| Portal -> Control Auto FAIL | Mismo problema de selector inicial. La ruta visible #v99Control llama a v70OpenControl y abre Control Auto. | PASS |
+| Usuarios BLOCKED | Existe modules/usuarios/index.js y v70OpenUsers; el entrypoint exige ADMIN_TOTAL y admin.usuarios. En el shell actual su control está oculto y no hay una ruta visible verificable. | N/A para esta validación |
+| Estado body residual | module-registry no limpiaba data-rym-module en unmount y el bridge no identificaba el portal. | FIXED |
+
+### Corrección de arquitectura
+
+- modules/core/module-registry.js limpia data-rym-module al desmontar y lo actualiza solo después de abrir con éxito.
+- modules/core/legacy-route-bridge.js limpia el módulo al volver al shell/portal.
+- No se modificó index.html, datos, RPC, RLS, Auth, permisos ni lógica de negocio.
+
+### Pruebas posteriores (ADMIN_TOTAL)
+
+| Secuencia | Resultado |
+|---|---|
+| Portal -> Panapass -> Portal | PASS: atributo de módulo vacío en portal y CSS Panapass disabled. |
+| Portal -> Control Auto -> Portal -> Panapass | PASS: CSS Control Auto disabled al salir, CSS Panapass activo al volver. |
+| Portal -> Revisados | PASS: CSS Panapass disabled, CSS Revisados activo y dashboard visible. |
+| Consola | PASS: sin errors/warnings nuevos de core, estilos, bridge o módulos. |
+| Sesión entre módulos | PASS: perfil ADMIN_TOTAL se conservó en navegación SPA. |
+
+Limitación legacy: el botón de retorno de Revisados (#v66Back) está oculto en el shell observado. No fue introducido por Fase 1 y no se alteró para evitar un cambio visual/funcional fuera de alcance.
+
+Roles ADMIN, GERENTE_GALERA y SUPERVISORA: BLOCKED por falta de sesiones disponibles. Requisito de QA antes de promover a producción, pero no bloquea la integración al sandbox estable.
+
+Archivos modificados en este cierre:
+
+- modules/core/module-registry.js
+- modules/core/legacy-route-bridge.js
+- .github/workflows/architecture-v2-phase1-preview.yml
+- docs/architecture-v2-audit.md
+
+main permanece intacto. Conclusión: READY TO MERGE TO SANDBOX.
