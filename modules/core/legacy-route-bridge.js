@@ -72,12 +72,12 @@
     if(typeof current!=='function')return false;
     if(current&&current.__rymV2RouteBridge==='home')return true;
     if(!originalHome) originalHome=current;
-  homeWrapper=async function(...args){
-    if(w.RYM_MODULES&&typeof w.RYM_MODULES.unmount==='function')await w.RYM_MODULES.unmount();
-    const result=await originalHome.apply(this,args);
-    if(d.body) d.body.dataset.rymModule='portal';
-    return result;
-  };
+    homeWrapper=async function(...args){
+      if(w.RYM_MODULES&&typeof w.RYM_MODULES.unmount==='function')await w.RYM_MODULES.unmount();
+      const result=await originalHome.apply(this,args);
+      if(d.body) d.body.dataset.rymModule='portal';
+      return result;
+    };
     Object.defineProperty(homeWrapper,'__rymV2RouteBridge',{value:'home'});
     w.v36PortalHome=homeWrapper;
     return true;

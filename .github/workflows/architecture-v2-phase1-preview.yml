@@ -23,6 +23,7 @@ jobs:
       - name: Verify Phase 1 boundaries
         run: |
           node --check modules/core/bootstrap.js
+          node --check modules/core/module-registry.js
           node --check modules/core/legacy-route-bridge.js
           node --check modules/panapass/index.js
           node --check modules/v171-loader.js
