@@ -1,5 +1,5 @@
 /* Portal RYM V171 modular runtime */
-(function(w){
+(function(w,d){
   'use strict';
   if(w.RYM_MODULES) return;
   const registry=new Map();
@@ -17,6 +17,7 @@
     const mod=registry.get(id);
     if(mod&&typeof mod.unmount==='function') await mod.unmount();
     if(w.RYM_STYLES&&typeof w.RYM_STYLES.deactivate==='function') w.RYM_STYLES.deactivate(id);
+    if(d.body?.dataset.rymModule===id) delete d.body.dataset.rymModule;
     if(active===id) active='';
   }
 
@@ -30,8 +31,10 @@
       await mod.init(ctx||{});
       loaded.add(id);
     }
+    const result=typeof mod.open==='function'?await mod.open(ctx||{}):undefined;
     active=id;
-    if(typeof mod.open==='function') return mod.open(ctx||{});
+    if(d.body) d.body.dataset.rymModule=id;
+    return result;
   }
 
   function has(name){return registry.has(String(name))}
@@ -39,5 +42,4 @@
   function current(){return active}
 
   w.RYM_MODULES=Object.freeze({register,open,unmount,has,list,current});
-})(window);
-
+})(window,document);
