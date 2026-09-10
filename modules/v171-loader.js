@@ -71,7 +71,8 @@
     '/modules/control-auto/index.js',
     '/modules/gps/index.js',
     '/modules/usuarios/index.js',
-    '/modules/core/legacy-route-bridge.js'
+    '/modules/core/legacy-route-bridge.js',
+    '/modules/core/bootstrap.js'
   ];
 
   function style(href){
@@ -100,8 +101,8 @@
     const missing=expected.filter(x=>!w.RYM_MODULES?.has(x));
     if(missing.length)throw new Error('Modulos V171 faltantes: '+missing.join(','));
     if(!w.RYM_CONTEXT||!w.RYM_EVENTS||!w.RYM_STYLES||!w.RYM_LEGACY_ROUTES)throw new Error('Architecture V2 core no disponible');
+    await w.RYM_BOOTSTRAP?.start?.();
     if(w.RYM_PANAPASS_DASHBOARD_V2_ENABLED&&!w.RYM_PANAPASS_DASHBOARD_V2?.ready?.())throw new Error('Panapass Dashboard V2 preview incompleto');
     return Object.freeze({version:build,modules:w.RYM_MODULES.list(),css:css.slice(),architecture:'v2-pilot',styles:'lazy-by-domain',routes:'registry-bridge',panapassDashboard:w.RYM_PANAPASS_DASHBOARD_V2_ENABLED?'v2-preview':'legacy'});
   })();
 })(window,document);
-

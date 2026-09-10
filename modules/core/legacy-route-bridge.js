@@ -16,6 +16,13 @@
 
   function get(key){return originals.get(String(key))||null}
 
+  /* The only supported path from Architecture V2 modules to legacy routes. */
+  function open(key,args,scope){
+    const canonical=get(key);
+    if(typeof canonical!=='function')throw new Error('Legacy route unavailable: '+String(key));
+    return canonical.apply(scope||w,Array.isArray(args)?args:[]);
+  }
+
   function moduleContext(moduleId,args){
     const extra={legacyArgs:Array.from(args||[]),source:'legacy-entrypoint'};
     if(w.RYM_CONTEXT&&typeof w.RYM_CONTEXT.create==='function'){
@@ -81,6 +88,7 @@
 
   const api=Object.freeze({
     get,
+    open,
     install:installAll,
     isBridged(globalName){
       const fn=w[String(globalName||'')];
@@ -102,4 +110,3 @@
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
 })(window,document);
-
