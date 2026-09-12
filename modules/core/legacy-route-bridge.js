@@ -101,6 +101,11 @@
 
   function start(){
     installAll();
+    /* Legacy presentation scripts can replace a window.v* entrypoint after
+       this bridge starts. Reinstall immediately before an UI navigation so
+       the click is still routed through RYM_MODULES.open(...). */
+    d.addEventListener('pointerdown',installAll,true);
+    d.addEventListener('keydown',installAll,true);
     let attempts=0;
     const timer=w.setInterval(()=>{
       installAll();

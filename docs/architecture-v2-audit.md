@@ -132,3 +132,9 @@ Archivos modificados en este cierre:
 - docs/architecture-v2-audit.md
 
 main permanece intacto. Conclusión: READY TO MERGE TO SANDBOX.
+
+## Corrección de estado Revisados (2026-09-12)
+
+- Causa raíz: scripts legacy de presentación pueden reasignar los entrypoints globales `v*` después de la instalación inicial del bridge. El botón visible de Revisados seguía abriendo su renderer, pero podía eludir `RYM_MODULES.open('revisados')`; por eso el DOM y el CSS podían quedar correctos sin actualizar el estado compartido.
+- Corrección mínima: `modules/core/legacy-route-bridge.js` vuelve a instalar los adaptadores justo antes de navegación de interfaz (`pointerdown` o teclado). Conserva el entrypoint legacy canónico y enruta el clic por `RYM_MODULES.open(...)`.
+- Alcance: sin cambios a Revisados, UI, lógica de negocio, Supabase, Auth, RPC, RLS ni consultas.
