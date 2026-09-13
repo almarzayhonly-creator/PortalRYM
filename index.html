@@ -1172,7 +1172,7 @@ async function operaciones(v){
     ${!s.fuente_es_hoy?'<div class="alert"><b>AM/PM BLOQUEADOS:</b> la fuente validada todavía no corresponde a un corte aceptado de hoy. Espera que ENA termine y que el verificador automático registre el corte.</div>':''}
 
     <div class="ops-grid-v9">
-      <div class="ops-card-v9"><h3>Verificar fuente</h3><p>Aprueba la fuente válida de hoy antes de procesar.</p><div class="op-actions"><button id="vfy">Verificar</button><button id="refreshOps" class="soft-btn">Actualizar pantalla</button></div></div>
+      <div class="ops-card-v9"><h3>Verificar fuente</h3><p>Revisa nuevamente ENA y aprueba el corte válido de hoy sin relanzar el actualizador.</p><div class="op-actions"><button id="vfy">Verificar ahora</button><button id="refreshOps" class="soft-btn">Actualizar pantalla</button></div></div>
       <div class="ops-card-v9"><h3>Operación AM</h3><p>Crea el snapshot inicial de deuda usando el corte AM validado.</p><button id="procAM" ${s.puede_am?'':'disabled'}>Procesar AM</button><p>${esc(s.motivo_am||'')}</p></div>
       <div class="ops-card-v9"><h3>Operación PM</h3><p>Compara el corte nuevo de las 11AM contra el snapshot AM.</p><button id="procPM" ${s.puede_pm?'':'disabled'}>Procesar PM</button><p>${esc(s.motivo_pm||'')}</p></div>
       <div class="ops-card-v9"><h3>Resultado</h3><div class="metric-inline"><div><span>AM negativos</span><b>${s.am_negativos||0}</b></div><div><span>PM pendientes</span><b>${s.pm_pendientes||0}</b></div><div><span>Pagados</span><b>${s.pm_pagados||0}</b></div></div></div>
@@ -1192,7 +1192,36 @@ async function operaciones(v){
       }
     };
 
-    document.querySelector('#vfy').onclick=()=>run('panapass_v10_verificar');
+    const verifyNow=async()=>{
+      const o=document.querySelector('#opMsg');
+      o.innerHTML='<div class="card">Revisando la fuente ENA sin relanzar el actualizador...</div>';
+      try{
+        const pending=[c11,c6].find(c=>c&&['DISPARADO','ESPERANDO','OBSERVANDO','FUENTE_INCOMPLETA','ERROR'].includes(c.estado));
+        if(pending){
+          const {data:d}=await req('/functions/v1/panapass-ena-finalize',{method:'POST',body:JSON.stringify({tipo:pending.tipo,modo:'MANUAL_VERIFICAR'})});
+          if(d?.estado==='LISTO'){
+            const verified=await rpc('panapass_v10_verificar');
+            await load();
+            document.querySelector('#opMsg').innerHTML=`<div class="success">${esc(verified?.[0]?.mensaje||('Corte '+pending.tipo+' validado.'))}</div>`;
+            return;
+          }
+          if(d?.estado==='OBSERVANDO'){
+            o.innerHTML='<div class="alert">Fuente nueva detectada. Por seguridad se necesita una segunda lectura igual; espera 3 minutos y presiona Verificar ahora nuevamente.</div>';
+            return;
+          }
+          const detail=d?.mensaje||d?.error||(d?.estado==='FUENTE_INCOMPLETA'?'ENA todavía no tiene una fuente completa de hoy.':d?.estado==='ESPERANDO_NUEVA_FUENTE'?'ENA todavía muestra el mismo corte del AM.':'La fuente aún no puede aceptarse.');
+          o.innerHTML=`<div class="alert">${esc(detail)}</div>`;
+          return;
+        }
+        const verified=await rpc('panapass_v10_verificar');
+        await load();
+        document.querySelector('#opMsg').innerHTML=`<div class="success">${esc(verified?.[0]?.mensaje||'Fuente verificada.')}</div>`;
+      }catch(x){
+        o.innerHTML=`<div class="alert">${esc(x.message)}</div>`;
+      }
+    };
+
+    document.querySelector('#vfy').onclick=verifyNow;
     document.querySelector('#procAM').onclick=()=>run('panapass_v10_procesar_am','¿Procesar AM con el corte válido de hoy?');
     document.querySelector('#procPM').onclick=()=>run('panapass_v10_procesar_pm','¿Procesar PM contra el corte nuevo de las 11AM?');
     document.querySelector('#refreshOps').onclick=load;
