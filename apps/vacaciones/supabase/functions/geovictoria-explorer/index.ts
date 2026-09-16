@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 type Json = Record<string, unknown>;
 
 type CatalogEntry = {
@@ -123,10 +125,14 @@ function countRecords(value: unknown): number | null {
   if (Array.isArray(value)) return value.length;
   if (!value || typeof value !== 'object') return null;
   const row = value as Json;
-  for (const key of ['Users', 'Punches', 'Response', 'Data', 'data', 'Items', 'items']) {
+  for (const key of ['Users', 'Punches', 'Response', 'Data', 'data', 'Items', 'items', 'Weeks', 'TimeOffs']) {
     if (Array.isArray(row[key])) return (row[key] as unknown[]).length;
   }
   return null;
+}
+
+function dateOnly(value: string) {
+  return value.replace(/[^0-9]/g, '').slice(0, 8);
 }
 
 function buildBody(entry: CatalogEntry, input: Json) {
@@ -148,10 +154,27 @@ function buildBody(entry: CatalogEntry, input: Json) {
   }
 
   if (entry.body === 'period-users-overtime') {
-    return { StartDate: startDate, EndDate: endDate, UserIdentifiers: userIds };
+    return {
+      StartDate: dateOnly(startDate),
+      EndDate: dateOnly(endDate),
+      UserIdentifiers: userIds,
+    };
   }
 
   return { StartDate: startDate, EndDate: endDate, UserIds: userIds };
+}
+
+function ymd(date: Date) {
+  return `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, '0')}${String(date.getUTCDate()).padStart(2, '0')}`;
+}
+
+function defaultPeriod() {
+  const end = new Date();
+  const start = new Date(end.getTime() - 6 * 24 * 60 * 60 * 1000);
+  return {
+    start_date: `${ymd(start)}000000`,
+    end_date: `${ymd(end)}235959`,
+  };
 }
 
 async function geoLogin(apiKey: string, apiSecret: string) {
@@ -170,7 +193,7 @@ async function geoLogin(apiKey: string, apiSecret: string) {
 }
 
 async function invokeGeo(entry: CatalogEntry, token: string, body?: Json) {
-  return fetch(`${API_BASE}${entry.path}`, {
+  const gv = await fetch(`${API_BASE}${entry.path}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -179,6 +202,84 @@ async function invokeGeo(entry: CatalogEntry, token: string, body?: Json) {
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+  const raw = await gv.text();
+  return { gv, raw, payload: parseJson(raw) };
+}
+
+function summarizeCall(action: string, result: { gv: Response; payload: unknown }) {
+  return {
+    action,
+    ok: result.gv.ok,
+    status: result.gv.status,
+    count: result.gv.ok ? countRecords(result.payload) : null,
+    response_shape: shapeOf(result.payload),
+  };
+}
+
+function getAdminClient() {
+  let secretKey = '';
+  try {
+    const keys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}') as Record<string, string>;
+    secretKey = keys.default || '';
+  } catch {
+    secretKey = '';
+  }
+  secretKey ||= Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  if (!secretKey) throw new Error('Supabase admin key unavailable');
+  return createClient(Deno.env.get('SUPABASE_URL') || '', secretKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+async function getSampleUserId() {
+  const admin = getAdminClient();
+  const { data, error } = await admin
+    .from('employees')
+    .select('geovictoria_id')
+    .eq('active', true)
+    .not('geovictoria_id', 'is', null)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  const userId = asString(data?.geovictoria_id);
+  if (!userId) throw new Error('No hay empleado activo sincronizado para la prueba');
+  return userId;
+}
+
+async function probeCore(token: string) {
+  const userId = await getSampleUserId();
+  const period = defaultPeriod();
+  const requests: Array<[string, CatalogEntry, Json | undefined]> = [
+    ['shifts', catalog.shifts, undefined],
+    ['profiles', catalog.profiles, undefined],
+    ['positions', catalog.positions, undefined],
+    ['groups', catalog.groups, undefined],
+    ['timeoff_types', catalog.timeoff_types, undefined],
+    ['overtime_reasons', catalog.overtime_reasons, undefined],
+    ['attendance_book', catalog.attendance_book, buildBody(catalog.attendance_book, { ...period, user_ids: [userId] })],
+    ['punches_by_users', catalog.punches_by_users, buildBody(catalog.punches_by_users, { ...period, user_ids: [userId] })],
+    ['timeoff', catalog.timeoff, buildBody(catalog.timeoff, { ...period, user_ids: [userId] })],
+    ['overtime', catalog.overtime, buildBody(catalog.overtime, { ...period, user_ids: [userId] })],
+  ];
+
+  const results = [];
+  for (const [action, entry, body] of requests) {
+    try {
+      results.push(summarizeCall(action, await invokeGeo(entry, token, body)));
+    } catch (error) {
+      results.push({ action, ok: false, status: null, error: error instanceof Error ? error.message : 'Unexpected request error' });
+    }
+  }
+
+  return {
+    ok: true,
+    read_only: true,
+    period,
+    sample_user: 'empleado activo sincronizado',
+    successful: results.filter((item) => item.ok).length,
+    attempted: results.length,
+    results,
+  };
 }
 
 Deno.serve(async (req: Request) => {
@@ -207,12 +308,11 @@ Deno.serve(async (req: Request) => {
         request: item.body,
         description: item.description,
       }])),
+      utilities: {
+        probe_core: 'Prueba en una sola llamada los principales endpoints de solo lectura usando un empleado activo sincronizado y los ultimos 7 dias.',
+      },
     });
   }
-
-  const action = asString(input.action);
-  const entry = catalog[action];
-  if (!entry) return response({ error: 'Accion no permitida', allowed_actions: Object.keys(catalog) }, 400);
 
   const apiKey = Deno.env.get('GEOVICTORIA_API_KEY');
   const apiSecret = Deno.env.get('GEOVICTORIA_API_SECRET');
@@ -222,19 +322,26 @@ Deno.serve(async (req: Request) => {
 
   try {
     const token = await geoLogin(apiKey, apiSecret);
-    const body = buildBody(entry, input);
-    const gv = await invokeGeo(entry, token, body);
-    const raw = await gv.text();
-    const payload = parseJson(raw);
 
-    if (!gv.ok) {
+    if (input.action === 'probe_core') {
+      return response(await probeCore(token));
+    }
+
+    const action = asString(input.action);
+    const entry = catalog[action];
+    if (!entry) return response({ error: 'Accion no permitida', allowed_actions: [...Object.keys(catalog), 'probe_core'] }, 400);
+
+    const body = buildBody(entry, input);
+    const result = await invokeGeo(entry, token, body);
+
+    if (!result.gv.ok) {
       return response({
         ok: false,
         action,
         endpoint: entry.path,
-        status: gv.status,
-        content_type: gv.headers.get('content-type'),
-        response_shape: shapeOf(payload),
+        status: result.gv.status,
+        content_type: result.gv.headers.get('content-type'),
+        response_shape: shapeOf(result.payload),
       }, 502);
     }
 
@@ -242,9 +349,9 @@ Deno.serve(async (req: Request) => {
       ok: true,
       action,
       endpoint: entry.path,
-      status: gv.status,
-      count: countRecords(payload),
-      response_shape: shapeOf(payload),
+      status: result.gv.status,
+      count: countRecords(result.payload),
+      response_shape: shapeOf(result.payload),
     });
   } catch (error) {
     return response({ error: error instanceof Error ? error.message : 'Unexpected explorer error' }, 500);
