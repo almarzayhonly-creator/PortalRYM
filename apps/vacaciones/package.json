@@ -1,7 +1,7 @@
 {
-  "name": "@rym/vacaciones",
+  "name": "rym-vacaciones",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name portal-vacaciones-rym"
+    "deploy": "npm run build && wrangler pages deploy dist --project-name rym-vacaciones"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.116.0",

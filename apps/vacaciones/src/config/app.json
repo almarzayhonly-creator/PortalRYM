@@ -5,9 +5,9 @@
   "timezone": "America/Panama",
   "navigation": [
     { "id": "dashboard", "label": "Resumen" },
-    { "id": "request", "label": "Solicitar vacaciones" },
-    { "id": "approvals", "label": "Aprobaciones" },
-    { "id": "calendar", "label": "Calendario del equipo" }
+    { "id": "request", "label": "Solicitar" },
+    { "id": "history", "label": "Historial" },
+    { "id": "approvals", "label": "Aprobaciones", "roles": ["supervisor", "hr", "admin"] }
   ],
   "statusLabels": {
     "pending": "Pendiente",
@@ -18,8 +18,7 @@
   "features": {
     "availabilityCheck": true,
     "approvalQueue": true,
-    "teamCalendar": true,
-    "realtimeUpdates": true,
+    "balanceSummary": true,
     "geovictoriaSync": true
   }
 }

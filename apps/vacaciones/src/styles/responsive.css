@@ -1,0 +1,30 @@
+@media (max-width: 1120px) {
+  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .approval-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 940px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .nav-list { display: flex; overflow-x: auto; }
+  .sidebar-profile, .sidebar > .button { display: none; }
+  .two-column { grid-template-columns: 1fr; }
+  .login-shell { grid-template-columns: 1fr; }
+  .login-visual { min-height: 52vh; }
+  .login-card-wrap { padding: 24px; }
+}
+
+@media (max-width: 680px) {
+  .content { padding: 24px 16px 54px; }
+  .topbar { display: grid; }
+  .profile-pill { text-align: left; }
+  .metric-grid, .approval-grid, .date-grid { grid-template-columns: 1fr; }
+  .metric-card { min-height: 128px; }
+  .panel { padding: 18px; }
+  .action-row { align-items: stretch; }
+  .action-row .button { flex: 1 1 auto; }
+  .mini-copy { flex-basis: 100%; }
+  .login-visual { padding: 34px 24px; min-height: 46vh; }
+  .login-copy h1 { font-size: clamp(2.8rem, 15vw, 4.8rem); }
+  .login-card { padding: 24px; }
+}

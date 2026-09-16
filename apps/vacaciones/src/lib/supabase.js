@@ -1,13 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import backendConfig from '../config/backend.json';
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || backendConfig.supabaseUrl;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || backendConfig.supabasePublishableKey;
 
-if (!url || !publishableKey) {
-  console.warn('Supabase no está configurado. Copia .env.example a .env.local.');
+if (!supabaseUrl || !supabasePublishableKey) {
+  throw new Error('Falta la configuracion publica de Supabase.');
 }
 
-export const supabase = createClient(url || 'https://example.supabase.co', publishableKey || 'sb_publishable_placeholder', {
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
