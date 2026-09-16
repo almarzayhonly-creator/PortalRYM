@@ -1,6 +1,35 @@
 import { useState } from 'react';
 import { formatDate } from '../utils/formatters.js';
 
+function CoverageStrip({ availability }) {
+  const coverage = availability?.coverage;
+  if (!coverage?.scope) return null;
+
+  return (
+    <div className="approval-coverage">
+      <div className="approval-coverage__top">
+        <span>{coverage.scope.label || 'Equipo'}</span>
+        <strong>{coverage.projected_available_min ?? 0} disponibles min.</strong>
+      </div>
+      <div className="approval-coverage__meta">
+        <span>{coverage.scope.active_employees || 0} activos</span>
+        <span>{coverage.known_absent_max_without_request || 0} ausentes conocidos</span>
+        <span>{coverage.pending_competition_max || 0} solicitudes pendientes</span>
+      </div>
+      {availability.warnings?.length > 0 && (
+        <ul className="approval-warning-list">
+          {availability.warnings.map((warning) => <li key={warning}>{warning}</li>)}
+        </ul>
+      )}
+      {availability.reasons?.length > 0 && (
+        <ul className="approval-blocker-list">
+          {availability.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function ApprovalCard({ request, onDecision }) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
@@ -10,6 +39,8 @@ function ApprovalCard({ request, onDecision }) {
     await onDecision(request.id, decision, note);
     setBusy(false);
   }
+
+  const approvalBlocked = request.availability && request.availability.available === false;
 
   return (
     <article className="approval-card">
@@ -24,11 +55,19 @@ function ApprovalCard({ request, onDecision }) {
         <span>{formatDate(request.start_date)} → {formatDate(request.end_date)}</span>
         <strong>{request.business_days} dias</strong>
       </div>
+      <CoverageStrip availability={request.availability} />
       {request.employee_note && <p className="employee-note">“{request.employee_note}”</p>}
       <input type="text" maxLength="300" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Nota opcional para la decision" />
       <div className="action-row action-row--compact">
         <button className="button button--ghost-danger" disabled={busy} onClick={() => decide('rejected')}>Rechazar</button>
-        <button className="button button--primary" disabled={busy} onClick={() => decide('approved')}>Aprobar</button>
+        <button
+          className="button button--primary"
+          disabled={busy || approvalBlocked}
+          title={approvalBlocked ? 'Hay condiciones que impiden aprobar esta solicitud.' : undefined}
+          onClick={() => decide('approved')}
+        >
+          Aprobar
+        </button>
       </div>
     </article>
   );
