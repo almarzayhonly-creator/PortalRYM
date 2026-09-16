@@ -30,7 +30,13 @@ npm run build
 
 ## GeoVictoria
 
-La sincronizacion de empleados y supervisores se conectara en una etapa posterior mediante una Edge Function. No se deben poner tokens de GeoVictoria ni claves secretas en este directorio.
+La integracion con GeoVictoria ya esta activa en el proyecto Supabase dedicado.
+
+- `geovictoria-sync`: sincroniza empleados desde GeoVictoria hacia `public.employees`.
+- `geovictoria-explorer`: explorador de solo lectura para validar modulos adicionales de la API antes de modelarlos en la base.
+- Credenciales y secretos se almacenan como secretos de Edge Functions; nunca deben escribirse en el repositorio ni enviarse al frontend.
+
+La exploracion validada incluye usuarios, turnos, perfiles, cargos, grupos, tipos de permisos, libro de asistencia, marcas, permisos y horas extra. Ver `docs/GEOVICTORIA_CAPABILITIES.md`.
 
 ## Regla de aislamiento
 
