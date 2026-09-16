@@ -1,25 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
+type Row = Record<string, unknown>;
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sync-secret',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-type Row = Record<string, unknown>;
-
-type EmployeeRecord = {
-  geovictoria_id: string;
-  email: string | null;
-  full_name: string;
-  department: string | null;
-  position: string | null;
-  supervisor_geovictoria_id: string | null;
-  active: boolean;
-  role: string;
-  synced_at: string;
-  updated_at: string;
-};
+const DEFAULT_OAUTH_BASE = 'https://apiv3.geovictoria.com';
+const DEFAULT_TOKEN_BASE = 'https://customerapi.geovictoria.com';
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -28,46 +18,44 @@ function json(data: unknown, status = 200) {
   });
 }
 
-function envJsonMap(name: string) {
-  const raw = Deno.env.get(name);
-  if (!raw) return {} as Record<string, string>;
+function envMap(name: string) {
   try {
-    return JSON.parse(raw) as Record<string, string>;
+    return JSON.parse(Deno.env.get(name) || '{}') as Record<string, string>;
   } catch {
     return {} as Record<string, string>;
   }
 }
 
-function text(value: unknown) {
-  if (value === null || value === undefined) return null;
-  const result = String(value).trim();
+function value(input: unknown) {
+  if (input === null || input === undefined) return null;
+  const result = String(input).trim();
   return result || null;
 }
 
-function normalized(value: unknown) {
-  return (text(value) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function normalized(input: unknown) {
+  return (value(input) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function isEnabled(value: unknown) {
-  if (value === null || value === undefined || value === '') return true;
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'number') return value !== 0;
+function enabled(input: unknown) {
+  if (input === null || input === undefined || input === '') return true;
+  if (typeof input === 'boolean') return input;
+  if (typeof input === 'number') return input !== 0;
   return !['0', 'false', 'no', 'inactive', 'disabled', 'inactivo', 'deshabilitado']
-    .includes(String(value).trim().toLowerCase());
+    .includes(String(input).trim().toLowerCase());
 }
 
-function rfc3986(value: string) {
-  return encodeURIComponent(value).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+function encodeOAuth(input: string) {
+  return encodeURIComponent(input).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 
-function base64(bytes: ArrayBuffer) {
+function toBase64(bytes: ArrayBuffer) {
   let binary = '';
   for (const byte of new Uint8Array(bytes)) binary += String.fromCharCode(byte);
   return btoa(binary);
 }
 
-async function oauthHeader(method: string, url: string, consumerKey: string, consumerSecret: string) {
-  const params: Record<string, string> = {
+async function oauthAuthorization(method: string, url: string, consumerKey: string, consumerSecret: string) {
+  const oauth: Record<string, string> = {
     oauth_consumer_key: consumerKey,
     oauth_nonce: crypto.randomUUID().replaceAll('-', ''),
     oauth_signature_method: 'HMAC-SHA1',
@@ -75,111 +63,32 @@ async function oauthHeader(method: string, url: string, consumerKey: string, con
     oauth_version: '1.0',
   };
 
-  const normalizedParams = Object.entries(params)
+  const normalizedParameters = Object.entries(oauth)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${rfc3986(key)}=${rfc3986(value)}`)
+    .map(([key, val]) => `${encodeOAuth(key)}=${encodeOAuth(val)}`)
     .join('&');
 
-  const baseString = [method.toUpperCase(), rfc3986(url), rfc3986(normalizedParams)].join('&');
-  const signingKey = `${rfc3986(consumerSecret)}&`;
-  const key = await crypto.subtle.importKey(
+  const signatureBase = [method.toUpperCase(), encodeOAuth(url), encodeOAuth(normalizedParameters)].join('&');
+  const signingKey = `${encodeOAuth(consumerSecret)}&`;
+  const cryptoKey = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(signingKey),
     { name: 'HMAC', hash: 'SHA-1' },
     false,
     ['sign'],
   );
-  const signature = base64(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(baseString)));
+  const signature = toBase64(await crypto.subtle.sign('HMAC', cryptoKey, new TextEncoder().encode(signatureBase)));
 
-  return `OAuth ${Object.entries({ ...params, oauth_signature: signature })
+  return `OAuth ${Object.entries({ ...oauth, oauth_signature: signature })
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${rfc3986(key)}="${rfc3986(value)}"`)
+    .map(([key, val]) => `${encodeOAuth(key)}="${encodeOAuth(val)}"`)
     .join(', ')}`;
 }
 
-function parseStructured(value: unknown): unknown {
-  let current = value;
-  for (let i = 0; i < 4 && typeof current === 'string'; i += 1) {
-    const candidate = current.replace(/^\uFEFF/, '').trim();
-    if (!candidate) return candidate;
-    try {
-      current = JSON.parse(candidate);
-      continue;
-    } catch {
-      return candidate;
-    }
-  }
-  return current;
-}
-
-function rowHasAnyKey(row: unknown, keys: string[]) {
-  if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
-  return keys.some((key) => Object.prototype.hasOwnProperty.call(row, key));
-}
-
-function findRecordArray(input: unknown, preferredKeys: string[], signatureKeys: string[], depth = 0): Row[] {
-  if (depth > 8) return [];
-  const payload = parseStructured(input);
-
-  if (Array.isArray(payload)) {
-    if (payload.some((item) => rowHasAnyKey(item, signatureKeys))) return payload as Row[];
-    for (const item of payload) {
-      const nested = findRecordArray(item, preferredKeys, signatureKeys, depth + 1);
-      if (nested.length) return nested;
-    }
-    return [];
-  }
-
-  if (!payload || typeof payload !== 'object') return [];
-  const obj = payload as Row;
-
-  for (const key of preferredKeys) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const found = findRecordArray(obj[key], preferredKeys, signatureKeys, depth + 1);
-      if (found.length) return found;
-    }
-  }
-
-  for (const value of Object.values(obj)) {
-    const found = findRecordArray(value, preferredKeys, signatureKeys, depth + 1);
-    if (found.length) return found;
-  }
-  return [];
-}
-
-function safeUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return `${url.origin}${url.pathname}`;
-  } catch {
-    return value;
-  }
-}
-
-function htmlTitle(raw: string) {
-  return raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]
-    ?.replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim() || null;
-}
-
-function visibleHtmlText(raw: string) {
-  return raw
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 260);
-}
-
 async function oauthPost(baseUrl: string, path: string, apiKey: string, apiSecret: string) {
-  const requestUrl = new URL(path, baseUrl).toString();
-  const authorization = await oauthHeader('POST', requestUrl, apiKey, apiSecret);
-  const response = await fetch(requestUrl, {
+  const url = new URL(path, baseUrl).toString();
+  const authorization = await oauthAuthorization('POST', url, apiKey, apiSecret);
+  const response = await fetch(url, {
     method: 'POST',
     redirect: 'follow',
     headers: {
@@ -190,97 +99,63 @@ async function oauthPost(baseUrl: string, path: string, apiKey: string, apiSecre
     body: '{}',
   });
   const raw = await response.text();
-  return {
-    ok: response.ok,
-    status: response.status,
-    contentType: response.headers.get('content-type'),
-    redirected: response.redirected,
-    requestUrl: safeUrl(requestUrl),
-    finalUrl: safeUrl(response.url),
-    raw,
-    payload: parseStructured(raw),
-  };
+  let body: unknown = raw;
+  try { body = raw ? JSON.parse(raw) : null; } catch { /* keep raw */ }
+  return { response, body, raw, url };
 }
 
-async function loginProbe(baseUrl: string, apiKey: string, apiSecret: string) {
-  const requestUrl = new URL('/api/v1/Login', baseUrl).toString();
-  try {
-    const response = await fetch(requestUrl, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ User: apiKey, Password: apiSecret }),
-    });
-    const raw = await response.text();
-    const parsed = parseStructured(raw);
-    const token = typeof parsed === 'string' ? parsed : text((parsed as Row | null)?.token ?? (parsed as Row | null)?.Token);
-    return {
-      status: response.status,
-      ok: response.ok,
-      content_type: response.headers.get('content-type'),
-      redirected: response.redirected,
-      request_url: safeUrl(requestUrl),
-      final_url: safeUrl(response.url),
-      token_like: Boolean(token && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token.replace(/^"|"$/g, ''))),
-      html_title: /<html/i.test(raw) ? htmlTitle(raw) : null,
-      html_text: /<html/i.test(raw) ? visibleHtmlText(raw) : null,
-    };
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : 'Login probe failed' };
+function findRows(input: unknown, depth = 0): Row[] {
+  if (depth > 7) return [];
+  if (Array.isArray(input)) {
+    if (input.some((item) => item && typeof item === 'object' && !Array.isArray(item) && (
+      'Identifier' in (item as Row) || 'identifier' in (item as Row) || 'Name' in (item as Row)
+    ))) return input as Row[];
+    for (const item of input) {
+      const found = findRows(item, depth + 1);
+      if (found.length) return found;
+    }
+    return [];
   }
-}
-
-function supervisorMap(groups: Row[]) {
-  const byDepartment = new Map<string, string[]>();
-  const supervisorIds = new Set<string>();
-  for (const group of groups) {
-    const department = normalized(group.Description ?? group.description ?? group.GroupDescription);
-    if (!department) continue;
-    const supervisors = findRecordArray(
-      group.Supervisors ?? group.supervisors ?? group.GroupLeaders ?? group.groupLeaders,
-      ['Supervisors', 'supervisors', 'GroupLeaders', 'groupLeaders', 'Users', 'users', 'data'],
-      ['Identifier', 'identifier', 'Id', 'id'],
-    );
-    const ids = supervisors
-      .map((item) => text(item.Identifier ?? item.identifier ?? item.Id ?? item.id))
-      .filter((value): value is string => Boolean(value));
-    if (ids.length) byDepartment.set(department, ids);
-    ids.forEach((id) => supervisorIds.add(id));
+  if (!input || typeof input !== 'object') return [];
+  for (const key of ['data', 'users', 'Users', 'result', 'Result', 'response', 'Response']) {
+    if (key in (input as Row)) {
+      const found = findRows((input as Row)[key], depth + 1);
+      if (found.length) return found;
+    }
   }
-  return { byDepartment, supervisorIds };
+  for (const child of Object.values(input as Row)) {
+    const found = findRows(child, depth + 1);
+    if (found.length) return found;
+  }
+  return [];
 }
 
 async function authorize(req: Request) {
   const configuredSyncSecret = Deno.env.get('GEOVICTORIA_SYNC_SECRET');
   const suppliedSyncSecret = req.headers.get('x-sync-secret');
-  if (configuredSyncSecret && suppliedSyncSecret && suppliedSyncSecret === configuredSyncSecret) {
+  if (configuredSyncSecret && suppliedSyncSecret === configuredSyncSecret) {
     return { ok: true, actor: 'sync-secret' };
   }
 
   const authorization = req.headers.get('Authorization') || '';
   if (!authorization.startsWith('Bearer ')) return { ok: false, reason: 'Missing authorization' };
 
-  const publishableKey = envJsonMap('SUPABASE_PUBLISHABLE_KEYS').default || Deno.env.get('SUPABASE_ANON_KEY') || '';
-  if (!publishableKey) return { ok: false, reason: 'Supabase publishable key unavailable' };
-
-  const userClient = createClient(Deno.env.get('SUPABASE_URL') || '', publishableKey, {
+  const publishableKey = envMap('SUPABASE_PUBLISHABLE_KEYS').default || Deno.env.get('SUPABASE_ANON_KEY') || '';
+  const client = createClient(Deno.env.get('SUPABASE_URL') || '', publishableKey, {
     global: { headers: { Authorization: authorization } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
-
-  const { data: userData, error: userError } = await userClient.auth.getUser(authorization.slice(7));
+  const { data: userData, error: userError } = await client.auth.getUser(authorization.slice(7));
   if (userError || !userData.user) return { ok: false, reason: 'Invalid user session' };
 
-  const { data: employee, error: employeeError } = await userClient
+  const { data: employee } = await client
     .from('employees')
     .select('id, role, active')
     .eq('auth_user_id', userData.user.id)
     .eq('active', true)
     .maybeSingle();
 
-  if (employeeError || !employee || !['hr', 'admin'].includes(employee.role)) {
-    return { ok: false, reason: 'Admin or HR role required' };
-  }
+  if (!employee || !['hr', 'admin'].includes(employee.role)) return { ok: false, reason: 'Admin or HR role required' };
   return { ok: true, actor: employee.id };
 }
 
@@ -292,124 +167,107 @@ Deno.serve(async (req: Request) => {
     const access = await authorize(req);
     if (!access.ok) return json({ error: access.reason || 'Unauthorized' }, 401);
 
-    const apiBase = Deno.env.get('GEOVICTORIA_API_BASE_URL');
     const apiKey = Deno.env.get('GEOVICTORIA_API_KEY');
     const apiSecret = Deno.env.get('GEOVICTORIA_API_SECRET');
-    const usersPath = Deno.env.get('GEOVICTORIA_USERS_PATH') || '/api/User/List';
-    const groupsPath = Deno.env.get('GEOVICTORIA_GROUPS_PATH');
+    if (!apiKey || !apiSecret) return json({ error: 'Faltan GEOVICTORIA_API_KEY o GEOVICTORIA_API_SECRET' }, 503);
 
-    if (!apiBase || !apiKey || !apiSecret) {
-      return json({ error: 'Faltan GEOVICTORIA_API_BASE_URL, GEOVICTORIA_API_KEY o GEOVICTORIA_API_SECRET' }, 503);
+    // GeoVictoria documents OAuth 1.0 endpoints under apiv3. The old portal
+    // host (clients.geovictoria.com) is intentionally not used for API calls.
+    const oauthBase = Deno.env.get('GEOVICTORIA_OAUTH_BASE_URL') || DEFAULT_OAUTH_BASE;
+    const usersPath = Deno.env.get('GEOVICTORIA_USERS_PATH') || '/api/User/List';
+    const groupsPath = Deno.env.get('GEOVICTORIA_GROUPS_PATH') || '/api/Group/ListGroup';
+
+    const usersCall = await oauthPost(oauthBase, usersPath, apiKey, apiSecret);
+    if (!usersCall.response.ok) {
+      return json({
+        error: `GeoVictoria User/List respondio HTTP ${usersCall.response.status}`,
+        endpoint: usersCall.url,
+        final_url: usersCall.response.url,
+        content_type: usersCall.response.headers.get('content-type'),
+      }, 502);
     }
 
-    const adminKey = envJsonMap('SUPABASE_SECRET_KEYS').default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    if (/text\/html/i.test(usersCall.response.headers.get('content-type') || '') || /<html/i.test(usersCall.raw)) {
+      return json({
+        error: 'El endpoint OAuth de GeoVictoria devolvio HTML en lugar de JSON',
+        endpoint: usersCall.url,
+        final_url: usersCall.response.url,
+      }, 502);
+    }
+
+    const users = findRows(usersCall.body);
+    if (!users.length) {
+      return json({
+        error: 'GeoVictoria respondio JSON, pero no se encontro una lista de usuarios',
+        response_type: Array.isArray(usersCall.body) ? 'array' : typeof usersCall.body,
+        response_keys: usersCall.body && typeof usersCall.body === 'object' && !Array.isArray(usersCall.body)
+          ? Object.keys(usersCall.body as Row).slice(0, 30)
+          : [],
+      }, 502);
+    }
+
+    const adminKey = envMap('SUPABASE_SECRET_KEYS').default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     if (!adminKey) return json({ error: 'Supabase admin key unavailable' }, 503);
     const admin = createClient(Deno.env.get('SUPABASE_URL') || '', adminKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const usersResponse = await oauthPost(apiBase, usersPath, apiKey, apiSecret);
-    if (!usersResponse.ok) {
-      return json({
-        error: `GeoVictoria ${usersPath} respondio HTTP ${usersResponse.status}`,
-        endpoint: {
-          request_url: usersResponse.requestUrl,
-          final_url: usersResponse.finalUrl,
-          redirected: usersResponse.redirected,
-          content_type: usersResponse.contentType,
-        },
-      }, 502);
-    }
-
-    const users = findRecordArray(
-      usersResponse.payload,
-      ['data', 'users', 'Users', 'userList', 'UserList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
-      ['Identifier', 'identifier', 'Name', 'name', 'Email', 'email', 'GroupIdentifier', 'GroupDescription'],
-    );
-
-    if (!users.length) {
-      const isHtml = /text\/html/i.test(usersResponse.contentType || '') || /<html/i.test(usersResponse.raw);
-      return json({
-        error: isHtml
-          ? 'La URL configurada esta devolviendo una pagina web HTML, no la API de usuarios de GeoVictoria'
-          : 'GeoVictoria respondio, pero aun no pude extraer la lista de usuarios',
-        endpoint: {
-          request_url: usersResponse.requestUrl,
-          final_url: usersResponse.finalUrl,
-          redirected: usersResponse.redirected,
-          content_type: usersResponse.contentType,
-          html_title: isHtml ? htmlTitle(usersResponse.raw) : null,
-          html_text: isHtml ? visibleHtmlText(usersResponse.raw) : null,
-        },
-        login_probe: await loginProbe(apiBase, apiKey, apiSecret),
-      }, 502);
-    }
-
-    let groups: Row[] = [];
-    let groupsWarning: string | null = null;
-    if (groupsPath) {
-      try {
-        const groupsResponse = await oauthPost(apiBase, groupsPath, apiKey, apiSecret);
-        if (groupsResponse.ok) {
-          groups = findRecordArray(
-            groupsResponse.payload,
-            ['data', 'groups', 'Groups', 'groupList', 'GroupList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
-            ['Description', 'description', 'CostCenter', 'Path', 'Identifier'],
-          );
-        } else {
-          groupsWarning = `GeoVictoria ${groupsPath} respondio HTTP ${groupsResponse.status}`;
-        }
-      } catch (error) {
-        groupsWarning = error instanceof Error ? error.message : 'No se pudo consultar grupos';
-      }
-    }
-
     const ids = users
-      .map((u) => text(u.Identifier ?? u.identifier ?? u.Id ?? u.id))
-      .filter((v): v is string => Boolean(v));
+      .map((user) => value(user.Identifier ?? user.identifier ?? user.Id ?? user.id))
+      .filter((id): id is string => Boolean(id));
 
     const existingRoles = new Map<string, string>();
     if (ids.length) {
-      const { data: existing, error } = await admin
-        .from('employees')
-        .select('geovictoria_id, role')
-        .in('geovictoria_id', ids);
+      const { data: existing, error } = await admin.from('employees').select('geovictoria_id, role').in('geovictoria_id', ids);
       if (error) throw error;
-      for (const row of existing || []) {
-        if (row.geovictoria_id) existingRoles.set(row.geovictoria_id, row.role);
-      }
+      for (const row of existing || []) if (row.geovictoria_id) existingRoles.set(row.geovictoria_id, row.role);
     }
 
-    const { byDepartment, supervisorIds } = supervisorMap(groups);
+    let groups: Row[] = [];
+    let groupWarning: string | null = null;
+    try {
+      const groupCall = await oauthPost(oauthBase, groupsPath, apiKey, apiSecret);
+      if (groupCall.response.ok) groups = findRows(groupCall.body);
+      else groupWarning = `Group/ListGroup HTTP ${groupCall.response.status}`;
+    } catch (error) {
+      groupWarning = error instanceof Error ? error.message : 'No se pudieron consultar grupos';
+    }
+
+    const supervisors = new Map<string, string[]>();
+    const supervisorIds = new Set<string>();
+    for (const group of groups) {
+      const department = normalized(group.Description ?? group.description ?? group.GroupDescription);
+      const rawSupervisors = Array.isArray(group.Supervisors) ? group.Supervisors as Row[] : [];
+      const groupSupervisorIds = rawSupervisors
+        .map((user) => value(user.Identifier ?? user.identifier ?? user.Id ?? user.id))
+        .filter((id): id is string => Boolean(id));
+      if (department && groupSupervisorIds.length) supervisors.set(department, groupSupervisorIds);
+      groupSupervisorIds.forEach((id) => supervisorIds.add(id));
+    }
+
     const now = new Date().toISOString();
-    const records: EmployeeRecord[] = users.map((u) => {
-      const externalId = text(u.Identifier ?? u.identifier ?? u.Id ?? u.id) || '';
-      const department = text(u.GroupDescription ?? u.groupDescription ?? u.Department ?? u.department);
-      const candidates = byDepartment.get(normalized(department)) || [];
+    const records = users.map((user) => {
+      const externalId = value(user.Identifier ?? user.identifier ?? user.Id ?? user.id) || '';
+      const department = value(user.GroupDescription ?? user.groupDescription ?? user.Department ?? user.department);
+      const candidateSupervisors = supervisors.get(normalized(department)) || [];
       const preservedRole = existingRoles.get(externalId);
       return {
         geovictoria_id: externalId,
-        email: text(u.Email ?? u.email)?.toLowerCase() || null,
-        full_name: `${text(u.Name ?? u.name) || ''} ${text(u.LastName ?? u.lastName) || ''}`.trim() || externalId,
+        email: value(user.Email ?? user.email)?.toLowerCase() || null,
+        full_name: `${value(user.Name ?? user.name) || ''} ${value(user.LastName ?? user.lastName) || ''}`.trim() || externalId,
         department,
-        position: text(u.positionName ?? u.PositionName ?? u.PositionDescription ?? u.positionDescription ?? u.positionIdentifier ?? u.UserProfile ?? u.userProfile),
-        supervisor_geovictoria_id: candidates.find((id) => id !== externalId) || null,
-        active: isEnabled(u.Enabled ?? u.enabled ?? u.Active ?? u.active),
+        position: value(user.positionName ?? user.PositionName ?? user.PositionDescription ?? user.positionDescription ?? user.positionIdentifier ?? user.UserProfile ?? user.userProfile),
+        supervisor_geovictoria_id: candidateSupervisors.find((id) => id !== externalId) || null,
+        active: enabled(user.Enabled ?? user.enabled ?? user.Active ?? user.active),
         role: ['hr', 'admin'].includes(preservedRole || '')
-          ? preservedRole!
-          : supervisorIds.has(externalId)
-            ? 'supervisor'
-            : 'employee',
+          ? preservedRole
+          : supervisorIds.has(externalId) ? 'supervisor' : 'employee',
         synced_at: now,
         updated_at: now,
       };
     }).filter((row) => row.geovictoria_id);
 
-    if (!records.length) return json({ error: 'La lista no contiene Identifier utilizable' }, 502);
-
-    const { error: upsertError } = await admin
-      .from('employees')
-      .upsert(records, { onConflict: 'geovictoria_id' });
+    const { error: upsertError } = await admin.from('employees').upsert(records, { onConflict: 'geovictoria_id' });
     if (upsertError) throw upsertError;
 
     const { data: relinked, error: relinkError } = await admin.rpc('relink_geovictoria_supervisors');
@@ -417,13 +275,15 @@ Deno.serve(async (req: Request) => {
 
     return json({
       ok: true,
+      source: DEFAULT_OAUTH_BASE,
       synced: records.length,
       active: records.filter((row) => row.active).length,
       groups: groups.length,
-      groups_warning: groupsWarning,
+      groups_warning: groupWarning,
       supervisors_detected: supervisorIds.size,
       supervisors_relinked: relinked,
       actor: access.actor,
+      token_api_hint: DEFAULT_TOKEN_BASE,
     });
   } catch (error) {
     console.error('GeoVictoria sync failed', error);
