@@ -6,8 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-type GeoUser = Record<string, unknown>;
-type GeoGroup = Record<string, unknown>;
+type Row = Record<string, unknown>;
 
 type EmployeeRecord = {
   geovictoria_id: string;
@@ -80,16 +79,6 @@ async function oauthHeader(method: string, url: string, consumerKey: string, con
     .join(', ')}`;
 }
 
-function asArray(payload: unknown, keys: string[]) {
-  if (Array.isArray(payload)) return payload as Record<string, unknown>[];
-  if (!payload || typeof payload !== 'object') return [];
-  const obj = payload as Record<string, unknown>;
-  for (const key of keys) {
-    if (Array.isArray(obj[key])) return obj[key] as Record<string, unknown>[];
-  }
-  return [];
-}
-
 function text(value: unknown) {
   if (value === null || value === undefined) return null;
   const result = String(value).trim();
@@ -108,6 +97,91 @@ function isEnabled(value: unknown) {
   return !['0', 'false', 'no', 'inactive', 'disabled', 'inactivo', 'deshabilitado'].includes(lowered);
 }
 
+function parseJsonString(value: unknown): unknown {
+  let current = value;
+  for (let i = 0; i < 3 && typeof current === 'string'; i += 1) {
+    const candidate = current.trim();
+    if (!candidate || (!candidate.startsWith('{') && !candidate.startsWith('[') && !candidate.startsWith('"'))) break;
+    try {
+      current = JSON.parse(candidate);
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function rowHasAnyKey(row: unknown, keys: string[]) {
+  if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+  return keys.some((key) => Object.prototype.hasOwnProperty.call(row, key));
+}
+
+function findRecordArray(
+  input: unknown,
+  preferredKeys: string[],
+  signatureKeys: string[],
+  depth = 0,
+): Row[] {
+  if (depth > 6) return [];
+  const payload = parseJsonString(input);
+
+  if (Array.isArray(payload)) {
+    if (!payload.length) return [];
+    if (payload.some((item) => rowHasAnyKey(item, signatureKeys))) return payload as Row[];
+    for (const item of payload) {
+      const nested = findRecordArray(item, preferredKeys, signatureKeys, depth + 1);
+      if (nested.length) return nested;
+    }
+    return [];
+  }
+
+  if (!payload || typeof payload !== 'object') return [];
+  const obj = payload as Row;
+
+  for (const key of preferredKeys) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const found = findRecordArray(obj[key], preferredKeys, signatureKeys, depth + 1);
+      if (found.length) return found;
+    }
+  }
+
+  for (const value of Object.values(obj)) {
+    const found = findRecordArray(value, preferredKeys, signatureKeys, depth + 1);
+    if (found.length) return found;
+  }
+
+  return [];
+}
+
+function describePayload(input: unknown, depth = 0): unknown {
+  if (depth > 3) return 'max-depth';
+  const payload = parseJsonString(input);
+  if (Array.isArray(payload)) {
+    return {
+      type: 'array',
+      length: payload.length,
+      first_keys: payload[0] && typeof payload[0] === 'object' && !Array.isArray(payload[0])
+        ? Object.keys(payload[0] as Row).slice(0, 30)
+        : [],
+    };
+  }
+  if (payload && typeof payload === 'object') {
+    const obj = payload as Row;
+    const keys = Object.keys(obj).slice(0, 30);
+    const children: Record<string, unknown> = {};
+    for (const key of keys.slice(0, 10)) {
+      const value = obj[key];
+      if (Array.isArray(value) || (value && typeof value === 'object') || typeof value === 'string') {
+        children[key] = describePayload(value, depth + 1);
+      } else {
+        children[key] = typeof value;
+      }
+    }
+    return { type: 'object', keys, children };
+  }
+  return { type: typeof payload };
+}
+
 async function geoPost(baseUrl: string, path: string, apiKey: string, apiSecret: string) {
   const url = new URL(path, baseUrl).toString();
   const authorization = await oauthHeader('POST', url, apiKey, apiSecret);
@@ -122,27 +196,26 @@ async function geoPost(baseUrl: string, path: string, apiKey: string, apiSecret:
   });
 
   const bodyText = await response.text();
-  let payload: unknown = null;
-  try {
-    payload = bodyText ? JSON.parse(bodyText) : null;
-  } catch {
-    payload = bodyText;
-  }
+  const payload = parseJsonString(bodyText);
 
   if (!response.ok) {
-    throw new Error(`GeoVictoria ${path} respondio ${response.status}: ${typeof payload === 'string' ? payload.slice(0, 240) : JSON.stringify(payload).slice(0, 240)}`);
+    throw new Error(`GeoVictoria ${path} respondio ${response.status}`);
   }
   return payload;
 }
 
-function supervisorMap(groups: GeoGroup[]) {
+function supervisorMap(groups: Row[]) {
   const byDepartment = new Map<string, string[]>();
   const supervisorIds = new Set<string>();
 
   for (const group of groups) {
-    const department = normalized(group.Description ?? group.description);
+    const department = normalized(group.Description ?? group.description ?? group.GroupDescription);
     if (!department) continue;
-    const supervisors = asArray(group.Supervisors ?? group.supervisors, ['data', 'users']);
+    const supervisors = findRecordArray(
+      group.Supervisors ?? group.supervisors ?? group.GroupLeaders ?? group.groupLeaders,
+      ['Supervisors', 'supervisors', 'GroupLeaders', 'groupLeaders', 'Users', 'users', 'data'],
+      ['Identifier', 'identifier', 'Id', 'id'],
+    );
     const ids = supervisors
       .map((item) => text(item.Identifier ?? item.identifier ?? item.Id ?? item.id))
       .filter((value): value is string => Boolean(value));
@@ -227,9 +300,23 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const users = asArray(usersPayload, ['data', 'users', 'Users', 'result', 'Result']);
-    const groups = asArray(groupsPayload, ['data', 'groups', 'Groups', 'result', 'Result']);
-    if (!users.length) return json({ error: 'GeoVictoria no devolvio usuarios en un formato reconocido' }, 502);
+    const users = findRecordArray(
+      usersPayload,
+      ['data', 'users', 'Users', 'userList', 'UserList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
+      ['Identifier', 'identifier', 'Name', 'name', 'Email', 'email', 'GroupIdentifier', 'GroupDescription'],
+    );
+    const groups = findRecordArray(
+      groupsPayload,
+      ['data', 'groups', 'Groups', 'groupList', 'GroupList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
+      ['Description', 'description', 'CostCenter', 'Path', 'GroupIdentifier'],
+    );
+
+    if (!users.length) {
+      return json({
+        error: 'GeoVictoria respondio correctamente, pero la lista de usuarios viene en una estructura no reconocida',
+        diagnostic: describePayload(usersPayload),
+      }, 502);
+    }
 
     const { byDepartment, supervisorIds } = supervisorMap(groups);
     const ids = users
@@ -250,11 +337,10 @@ Deno.serve(async (req: Request) => {
 
     const now = new Date().toISOString();
     const records: EmployeeRecord[] = users
-      .map((user: GeoUser) => {
+      .map((user) => {
         const externalId = text(user.Identifier ?? user.identifier ?? user.Id ?? user.id) || '';
         const department = text(user.GroupDescription ?? user.groupDescription ?? user.Department ?? user.department);
-        const departmentKey = normalized(department);
-        const candidates = byDepartment.get(departmentKey) || [];
+        const candidates = byDepartment.get(normalized(department)) || [];
         const supervisorExternalId = candidates.find((candidate) => candidate !== externalId) || null;
         const preservedRole = existingRoles.get(externalId);
         const role = ['hr', 'admin'].includes(preservedRole || '')
@@ -267,6 +353,8 @@ Deno.serve(async (req: Request) => {
         const fullName = `${firstName} ${lastName}`.trim() || externalId;
         const email = text(user.Email ?? user.email)?.toLowerCase() || null;
         const position = text(
+          user.positionName ??
+          user.PositionName ??
           user.PositionDescription ??
           user.positionDescription ??
           user.positionIdentifier ??
@@ -288,6 +376,13 @@ Deno.serve(async (req: Request) => {
         };
       })
       .filter((row) => row.geovictoria_id);
+
+    if (!records.length) {
+      return json({
+        error: 'Se encontro una lista, pero no contiene Identifier utilizable',
+        diagnostic: describePayload(usersPayload),
+      }, 502);
+    }
 
     const { error: upsertError } = await admin
       .from('employees')
