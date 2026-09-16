@@ -55,7 +55,7 @@ export function useVacationPortal() {
       const [myBalance, myRequests, pending] = await Promise.all([
         getMyBalance(currentEmployee.id, currentYear()),
         listMyRequests(currentEmployee.id),
-        listPendingApprovals(),
+        listPendingApprovals(currentEmployee.id),
       ]);
       setEmployee(currentEmployee);
       setBalance(myBalance);
