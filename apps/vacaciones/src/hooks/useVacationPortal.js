@@ -57,10 +57,27 @@ export function useVacationPortal() {
         listMyRequests(currentEmployee.id),
         listPendingApprovals(currentEmployee.id),
       ]);
+
+      let pendingWithCoverage = pending;
+      if (['supervisor', 'hr', 'admin'].includes(currentEmployee.role) && pending.length) {
+        pendingWithCoverage = await Promise.all(pending.map(async (request) => {
+          try {
+            const requestAvailability = await checkAvailability(
+              request.employee_id,
+              request.start_date,
+              request.end_date,
+            );
+            return { ...request, availability: requestAvailability };
+          } catch {
+            return { ...request, availability: null };
+          }
+        }));
+      }
+
       setEmployee(currentEmployee);
       setBalance(myBalance);
       setRequests(myRequests);
-      setApprovals(pending);
+      setApprovals(pendingWithCoverage);
     } catch (err) {
       setEmployee(null);
       setBalance(null);
