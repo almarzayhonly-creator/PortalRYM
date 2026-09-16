@@ -42,11 +42,12 @@ export async function listMyRequests(employeeId) {
   return data || [];
 }
 
-export async function listPendingApprovals() {
+export async function listPendingApprovals(currentEmployeeId) {
   const { data, error } = await supabase
     .from('vacation_requests')
     .select('id, employee_id, start_date, end_date, business_days, status, employee_note, requested_at, employees!vacation_requests_employee_id_fkey(full_name, department, position)')
     .eq('status', 'pending')
+    .neq('employee_id', currentEmployeeId)
     .order('requested_at', { ascending: true });
   throwIfError(error);
   return data || [];
