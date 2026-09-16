@@ -1,0 +1,25 @@
+{
+  "appName": "RYM Vacaciones",
+  "companyName": "RYM",
+  "locale": "es-PA",
+  "timezone": "America/Panama",
+  "navigation": [
+    { "id": "dashboard", "label": "Resumen" },
+    { "id": "request", "label": "Solicitar vacaciones" },
+    { "id": "approvals", "label": "Aprobaciones" },
+    { "id": "calendar", "label": "Calendario del equipo" }
+  ],
+  "statusLabels": {
+    "pending": "Pendiente",
+    "approved": "Aprobada",
+    "rejected": "Rechazada",
+    "cancelled": "Cancelada"
+  },
+  "features": {
+    "availabilityCheck": true,
+    "approvalQueue": true,
+    "teamCalendar": true,
+    "realtimeUpdates": true,
+    "geovictoriaSync": true
+  }
+}
