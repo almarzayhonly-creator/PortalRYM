@@ -38,6 +38,24 @@ function envJsonMap(name: string) {
   }
 }
 
+function text(value: unknown) {
+  if (value === null || value === undefined) return null;
+  const result = String(value).trim();
+  return result || null;
+}
+
+function normalized(value: unknown) {
+  return (text(value) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function isEnabled(value: unknown) {
+  if (value === null || value === undefined || value === '') return true;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  return !['0', 'false', 'no', 'inactive', 'disabled', 'inactivo', 'deshabilitado']
+    .includes(String(value).trim().toLowerCase());
+}
+
 function rfc3986(value: string) {
   return encodeURIComponent(value).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
 }
@@ -79,33 +97,16 @@ async function oauthHeader(method: string, url: string, consumerKey: string, con
     .join(', ')}`;
 }
 
-function text(value: unknown) {
-  if (value === null || value === undefined) return null;
-  const result = String(value).trim();
-  return result || null;
-}
-
-function normalized(value: unknown) {
-  return (text(value) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-function isEnabled(value: unknown) {
-  if (value === null || value === undefined || value === '') return true;
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'number') return value !== 0;
-  const lowered = String(value).trim().toLowerCase();
-  return !['0', 'false', 'no', 'inactive', 'disabled', 'inactivo', 'deshabilitado'].includes(lowered);
-}
-
-function parseJsonString(value: unknown): unknown {
+function parseStructured(value: unknown): unknown {
   let current = value;
-  for (let i = 0; i < 3 && typeof current === 'string'; i += 1) {
-    const candidate = current.trim();
-    if (!candidate || (!candidate.startsWith('{') && !candidate.startsWith('[') && !candidate.startsWith('"'))) break;
+  for (let i = 0; i < 4 && typeof current === 'string'; i += 1) {
+    const candidate = current.replace(/^\uFEFF/, '').trim();
+    if (!candidate) return candidate;
     try {
       current = JSON.parse(candidate);
+      continue;
     } catch {
-      break;
+      return candidate;
     }
   }
   return current;
@@ -116,17 +117,11 @@ function rowHasAnyKey(row: unknown, keys: string[]) {
   return keys.some((key) => Object.prototype.hasOwnProperty.call(row, key));
 }
 
-function findRecordArray(
-  input: unknown,
-  preferredKeys: string[],
-  signatureKeys: string[],
-  depth = 0,
-): Row[] {
-  if (depth > 6) return [];
-  const payload = parseJsonString(input);
+function findRecordArray(input: unknown, preferredKeys: string[], signatureKeys: string[], depth = 0): Row[] {
+  if (depth > 8) return [];
+  const payload = parseStructured(input);
 
   if (Array.isArray(payload)) {
-    if (!payload.length) return [];
     if (payload.some((item) => rowHasAnyKey(item, signatureKeys))) return payload as Row[];
     for (const item of payload) {
       const nested = findRecordArray(item, preferredKeys, signatureKeys, depth + 1);
@@ -149,44 +144,44 @@ function findRecordArray(
     const found = findRecordArray(value, preferredKeys, signatureKeys, depth + 1);
     if (found.length) return found;
   }
-
   return [];
 }
 
-function describePayload(input: unknown, depth = 0): unknown {
-  if (depth > 3) return 'max-depth';
-  const payload = parseJsonString(input);
-  if (Array.isArray(payload)) {
-    return {
-      type: 'array',
-      length: payload.length,
-      first_keys: payload[0] && typeof payload[0] === 'object' && !Array.isArray(payload[0])
-        ? Object.keys(payload[0] as Row).slice(0, 30)
-        : [],
-    };
+function safeUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return `${url.origin}${url.pathname}`;
+  } catch {
+    return value;
   }
-  if (payload && typeof payload === 'object') {
-    const obj = payload as Row;
-    const keys = Object.keys(obj).slice(0, 30);
-    const children: Record<string, unknown> = {};
-    for (const key of keys.slice(0, 10)) {
-      const value = obj[key];
-      if (Array.isArray(value) || (value && typeof value === 'object') || typeof value === 'string') {
-        children[key] = describePayload(value, depth + 1);
-      } else {
-        children[key] = typeof value;
-      }
-    }
-    return { type: 'object', keys, children };
-  }
-  return { type: typeof payload };
 }
 
-async function geoPost(baseUrl: string, path: string, apiKey: string, apiSecret: string) {
-  const url = new URL(path, baseUrl).toString();
-  const authorization = await oauthHeader('POST', url, apiKey, apiSecret);
-  const response = await fetch(url, {
+function htmlTitle(raw: string) {
+  return raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]
+    ?.replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim() || null;
+}
+
+function visibleHtmlText(raw: string) {
+  return raw
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 260);
+}
+
+async function oauthPost(baseUrl: string, path: string, apiKey: string, apiSecret: string) {
+  const requestUrl = new URL(path, baseUrl).toString();
+  const authorization = await oauthHeader('POST', requestUrl, apiKey, apiSecret);
+  const response = await fetch(requestUrl, {
     method: 'POST',
+    redirect: 'follow',
     headers: {
       Authorization: authorization,
       Accept: 'application/json',
@@ -194,20 +189,50 @@ async function geoPost(baseUrl: string, path: string, apiKey: string, apiSecret:
     },
     body: '{}',
   });
+  const raw = await response.text();
+  return {
+    ok: response.ok,
+    status: response.status,
+    contentType: response.headers.get('content-type'),
+    redirected: response.redirected,
+    requestUrl: safeUrl(requestUrl),
+    finalUrl: safeUrl(response.url),
+    raw,
+    payload: parseStructured(raw),
+  };
+}
 
-  const bodyText = await response.text();
-  const payload = parseJsonString(bodyText);
-
-  if (!response.ok) {
-    throw new Error(`GeoVictoria ${path} respondio ${response.status}`);
+async function loginProbe(baseUrl: string, apiKey: string, apiSecret: string) {
+  const requestUrl = new URL('/api/v1/Login', baseUrl).toString();
+  try {
+    const response = await fetch(requestUrl, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ User: apiKey, Password: apiSecret }),
+    });
+    const raw = await response.text();
+    const parsed = parseStructured(raw);
+    const token = typeof parsed === 'string' ? parsed : text((parsed as Row | null)?.token ?? (parsed as Row | null)?.Token);
+    return {
+      status: response.status,
+      ok: response.ok,
+      content_type: response.headers.get('content-type'),
+      redirected: response.redirected,
+      request_url: safeUrl(requestUrl),
+      final_url: safeUrl(response.url),
+      token_like: Boolean(token && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token.replace(/^"|"$/g, ''))),
+      html_title: /<html/i.test(raw) ? htmlTitle(raw) : null,
+      html_text: /<html/i.test(raw) ? visibleHtmlText(raw) : null,
+    };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : 'Login probe failed' };
   }
-  return payload;
 }
 
 function supervisorMap(groups: Row[]) {
   const byDepartment = new Map<string, string[]>();
   const supervisorIds = new Set<string>();
-
   for (const group of groups) {
     const department = normalized(group.Description ?? group.description ?? group.GroupDescription);
     if (!department) continue;
@@ -222,7 +247,6 @@ function supervisorMap(groups: Row[]) {
     if (ids.length) byDepartment.set(department, ids);
     ids.forEach((id) => supervisorIds.add(id));
   }
-
   return { byDepartment, supervisorIds };
 }
 
@@ -236,8 +260,7 @@ async function authorize(req: Request) {
   const authorization = req.headers.get('Authorization') || '';
   if (!authorization.startsWith('Bearer ')) return { ok: false, reason: 'Missing authorization' };
 
-  const publishableKeys = envJsonMap('SUPABASE_PUBLISHABLE_KEYS');
-  const publishableKey = publishableKeys.default || Deno.env.get('SUPABASE_ANON_KEY') || '';
+  const publishableKey = envJsonMap('SUPABASE_PUBLISHABLE_KEYS').default || Deno.env.get('SUPABASE_ANON_KEY') || '';
   if (!publishableKey) return { ok: false, reason: 'Supabase publishable key unavailable' };
 
   const userClient = createClient(Deno.env.get('SUPABASE_URL') || '', publishableKey, {
@@ -245,8 +268,7 @@ async function authorize(req: Request) {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const token = authorization.slice('Bearer '.length);
-  const { data: userData, error: userError } = await userClient.auth.getUser(token);
+  const { data: userData, error: userError } = await userClient.auth.getUser(authorization.slice(7));
   if (userError || !userData.user) return { ok: false, reason: 'Invalid user session' };
 
   const { data: employee, error: employeeError } = await userClient
@@ -259,7 +281,6 @@ async function authorize(req: Request) {
   if (employeeError || !employee || !['hr', 'admin'].includes(employee.role)) {
     return { ok: false, reason: 'Admin or HR role required' };
   }
-
   return { ok: true, actor: employee.id };
 }
 
@@ -281,108 +302,110 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'Faltan GEOVICTORIA_API_BASE_URL, GEOVICTORIA_API_KEY o GEOVICTORIA_API_SECRET' }, 503);
     }
 
-    const secretKeys = envJsonMap('SUPABASE_SECRET_KEYS');
-    const supabaseSecret = secretKeys.default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    if (!supabaseSecret) return json({ error: 'Supabase admin key unavailable in function environment' }, 503);
-
-    const admin = createClient(Deno.env.get('SUPABASE_URL') || '', supabaseSecret, {
+    const adminKey = envJsonMap('SUPABASE_SECRET_KEYS').default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    if (!adminKey) return json({ error: 'Supabase admin key unavailable' }, 503);
+    const admin = createClient(Deno.env.get('SUPABASE_URL') || '', adminKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const usersPayload = await geoPost(apiBase, usersPath, apiKey, apiSecret);
-    let groupsPayload: unknown = [];
+    const usersResponse = await oauthPost(apiBase, usersPath, apiKey, apiSecret);
+    if (!usersResponse.ok) {
+      return json({
+        error: `GeoVictoria ${usersPath} respondio HTTP ${usersResponse.status}`,
+        endpoint: {
+          request_url: usersResponse.requestUrl,
+          final_url: usersResponse.finalUrl,
+          redirected: usersResponse.redirected,
+          content_type: usersResponse.contentType,
+        },
+      }, 502);
+    }
+
+    const users = findRecordArray(
+      usersResponse.payload,
+      ['data', 'users', 'Users', 'userList', 'UserList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
+      ['Identifier', 'identifier', 'Name', 'name', 'Email', 'email', 'GroupIdentifier', 'GroupDescription'],
+    );
+
+    if (!users.length) {
+      const isHtml = /text\/html/i.test(usersResponse.contentType || '') || /<html/i.test(usersResponse.raw);
+      return json({
+        error: isHtml
+          ? 'La URL configurada esta devolviendo una pagina web HTML, no la API de usuarios de GeoVictoria'
+          : 'GeoVictoria respondio, pero aun no pude extraer la lista de usuarios',
+        endpoint: {
+          request_url: usersResponse.requestUrl,
+          final_url: usersResponse.finalUrl,
+          redirected: usersResponse.redirected,
+          content_type: usersResponse.contentType,
+          html_title: isHtml ? htmlTitle(usersResponse.raw) : null,
+          html_text: isHtml ? visibleHtmlText(usersResponse.raw) : null,
+        },
+        login_probe: await loginProbe(apiBase, apiKey, apiSecret),
+      }, 502);
+    }
+
+    let groups: Row[] = [];
     let groupsWarning: string | null = null;
     if (groupsPath) {
       try {
-        groupsPayload = await geoPost(apiBase, groupsPath, apiKey, apiSecret);
+        const groupsResponse = await oauthPost(apiBase, groupsPath, apiKey, apiSecret);
+        if (groupsResponse.ok) {
+          groups = findRecordArray(
+            groupsResponse.payload,
+            ['data', 'groups', 'Groups', 'groupList', 'GroupList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
+            ['Description', 'description', 'CostCenter', 'Path', 'Identifier'],
+          );
+        } else {
+          groupsWarning = `GeoVictoria ${groupsPath} respondio HTTP ${groupsResponse.status}`;
+        }
       } catch (error) {
         groupsWarning = error instanceof Error ? error.message : 'No se pudo consultar grupos';
       }
     }
 
-    const users = findRecordArray(
-      usersPayload,
-      ['data', 'users', 'Users', 'userList', 'UserList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
-      ['Identifier', 'identifier', 'Name', 'name', 'Email', 'email', 'GroupIdentifier', 'GroupDescription'],
-    );
-    const groups = findRecordArray(
-      groupsPayload,
-      ['data', 'groups', 'Groups', 'groupList', 'GroupList', 'result', 'Result', 'response', 'Response', '_message', 'message'],
-      ['Description', 'description', 'CostCenter', 'Path', 'GroupIdentifier'],
-    );
-
-    if (!users.length) {
-      return json({
-        error: 'GeoVictoria respondio correctamente, pero la lista de usuarios viene en una estructura no reconocida',
-        diagnostic: describePayload(usersPayload),
-      }, 502);
-    }
-
-    const { byDepartment, supervisorIds } = supervisorMap(groups);
     const ids = users
-      .map((user) => text(user.Identifier ?? user.identifier ?? user.Id ?? user.id))
-      .filter((value): value is string => Boolean(value));
+      .map((u) => text(u.Identifier ?? u.identifier ?? u.Id ?? u.id))
+      .filter((v): v is string => Boolean(v));
 
     const existingRoles = new Map<string, string>();
     if (ids.length) {
-      const { data: existing, error: existingError } = await admin
+      const { data: existing, error } = await admin
         .from('employees')
         .select('geovictoria_id, role')
         .in('geovictoria_id', ids);
-      if (existingError) throw existingError;
+      if (error) throw error;
       for (const row of existing || []) {
         if (row.geovictoria_id) existingRoles.set(row.geovictoria_id, row.role);
       }
     }
 
+    const { byDepartment, supervisorIds } = supervisorMap(groups);
     const now = new Date().toISOString();
-    const records: EmployeeRecord[] = users
-      .map((user) => {
-        const externalId = text(user.Identifier ?? user.identifier ?? user.Id ?? user.id) || '';
-        const department = text(user.GroupDescription ?? user.groupDescription ?? user.Department ?? user.department);
-        const candidates = byDepartment.get(normalized(department)) || [];
-        const supervisorExternalId = candidates.find((candidate) => candidate !== externalId) || null;
-        const preservedRole = existingRoles.get(externalId);
-        const role = ['hr', 'admin'].includes(preservedRole || '')
+    const records: EmployeeRecord[] = users.map((u) => {
+      const externalId = text(u.Identifier ?? u.identifier ?? u.Id ?? u.id) || '';
+      const department = text(u.GroupDescription ?? u.groupDescription ?? u.Department ?? u.department);
+      const candidates = byDepartment.get(normalized(department)) || [];
+      const preservedRole = existingRoles.get(externalId);
+      return {
+        geovictoria_id: externalId,
+        email: text(u.Email ?? u.email)?.toLowerCase() || null,
+        full_name: `${text(u.Name ?? u.name) || ''} ${text(u.LastName ?? u.lastName) || ''}`.trim() || externalId,
+        department,
+        position: text(u.positionName ?? u.PositionName ?? u.PositionDescription ?? u.positionDescription ?? u.positionIdentifier ?? u.UserProfile ?? u.userProfile),
+        supervisor_geovictoria_id: candidates.find((id) => id !== externalId) || null,
+        active: isEnabled(u.Enabled ?? u.enabled ?? u.Active ?? u.active),
+        role: ['hr', 'admin'].includes(preservedRole || '')
           ? preservedRole!
           : supervisorIds.has(externalId)
             ? 'supervisor'
-            : 'employee';
-        const firstName = text(user.Name ?? user.name) || '';
-        const lastName = text(user.LastName ?? user.lastName) || '';
-        const fullName = `${firstName} ${lastName}`.trim() || externalId;
-        const email = text(user.Email ?? user.email)?.toLowerCase() || null;
-        const position = text(
-          user.positionName ??
-          user.PositionName ??
-          user.PositionDescription ??
-          user.positionDescription ??
-          user.positionIdentifier ??
-          user.UserProfile ??
-          user.userProfile,
-        );
+            : 'employee',
+        synced_at: now,
+        updated_at: now,
+      };
+    }).filter((row) => row.geovictoria_id);
 
-        return {
-          geovictoria_id: externalId,
-          email,
-          full_name: fullName,
-          department,
-          position,
-          supervisor_geovictoria_id: supervisorExternalId,
-          active: isEnabled(user.Enabled ?? user.enabled ?? user.Active ?? user.active),
-          role,
-          synced_at: now,
-          updated_at: now,
-        };
-      })
-      .filter((row) => row.geovictoria_id);
-
-    if (!records.length) {
-      return json({
-        error: 'Se encontro una lista, pero no contiene Identifier utilizable',
-        diagnostic: describePayload(usersPayload),
-      }, 502);
-    }
+    if (!records.length) return json({ error: 'La lista no contiene Identifier utilizable' }, 502);
 
     const { error: upsertError } = await admin
       .from('employees')
