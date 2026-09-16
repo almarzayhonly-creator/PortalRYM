@@ -63,17 +63,12 @@ export async function checkAvailability(employeeId, startDate, endDate) {
   return data;
 }
 
-export async function createVacationRequest(employeeId, startDate, endDate, note) {
-  const { data, error } = await supabase
-    .from('vacation_requests')
-    .insert({
-      employee_id: employeeId,
-      start_date: startDate,
-      end_date: endDate,
-      employee_note: note?.trim() || null,
-    })
-    .select('id, start_date, end_date, business_days, status, requested_at')
-    .single();
+export async function createVacationRequest(_employeeId, startDate, endDate, note) {
+  const { data, error } = await supabase.rpc('create_vacation_request', {
+    p_start_date: startDate,
+    p_end_date: endDate,
+    p_note: note?.trim() || null,
+  });
   throwIfError(error);
   return data;
 }
