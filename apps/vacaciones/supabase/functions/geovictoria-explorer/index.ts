@@ -149,8 +149,11 @@ function apiErrorDetails(payload: unknown) {
   return null;
 }
 
-function dateOnly(value: string) {
-  return value.replace(/[^0-9]/g, '').slice(0, 8);
+function dateTime(value: string, endOfDay = false) {
+  const digits = value.replace(/[^0-9]/g, '');
+  if (digits.length >= 14) return digits.slice(0, 14);
+  if (digits.length === 8) return `${digits}${endOfDay ? '235959' : '000000'}`;
+  throw new Error("Las fechas deben usar 'yyyyMMddHHmmss' o 'yyyyMMdd'");
 }
 
 function buildBody(entry: CatalogEntry, input: Json) {
@@ -173,8 +176,8 @@ function buildBody(entry: CatalogEntry, input: Json) {
 
   if (entry.body === 'period-users-overtime') {
     return {
-      StartDate: dateOnly(startDate),
-      EndDate: dateOnly(endDate),
+      StartDate: dateTime(startDate, false),
+      EndDate: dateTime(endDate, true),
       UserIdentifiers: userIds,
     };
   }
@@ -326,8 +329,8 @@ async function probeOvertime(token: string) {
     ok: true,
     read_only: true,
     period: {
-      start_date: dateOnly(period.start_date),
-      end_date: dateOnly(period.end_date),
+      start_date: dateTime(period.start_date, false),
+      end_date: dateTime(period.end_date, true),
     },
     attempted: results.length,
     successful: results.filter((item) => item.ok).length,
