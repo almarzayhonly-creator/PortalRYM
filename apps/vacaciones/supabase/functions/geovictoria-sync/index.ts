@@ -202,7 +202,7 @@ Deno.serve(async (req: Request) => {
     const apiKey = Deno.env.get('GEOVICTORIA_API_KEY');
     const apiSecret = Deno.env.get('GEOVICTORIA_API_SECRET');
     const usersPath = Deno.env.get('GEOVICTORIA_USERS_PATH') || '/api/User/List';
-    const groupsPath = Deno.env.get('GEOVICTORIA_GROUPS_PATH') || '/api/Group/ListGroup';
+    const groupsPath = Deno.env.get('GEOVICTORIA_GROUPS_PATH');
 
     if (!apiBase || !apiKey || !apiSecret) {
       return json({ error: 'Faltan GEOVICTORIA_API_BASE_URL, GEOVICTORIA_API_KEY o GEOVICTORIA_API_SECRET' }, 503);
@@ -216,10 +216,16 @@ Deno.serve(async (req: Request) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const [usersPayload, groupsPayload] = await Promise.all([
-      geoPost(apiBase, usersPath, apiKey, apiSecret),
-      geoPost(apiBase, groupsPath, apiKey, apiSecret),
-    ]);
+    const usersPayload = await geoPost(apiBase, usersPath, apiKey, apiSecret);
+    let groupsPayload: unknown = [];
+    let groupsWarning: string | null = null;
+    if (groupsPath) {
+      try {
+        groupsPayload = await geoPost(apiBase, groupsPath, apiKey, apiSecret);
+      } catch (error) {
+        groupsWarning = error instanceof Error ? error.message : 'No se pudo consultar grupos';
+      }
+    }
 
     const users = asArray(usersPayload, ['data', 'users', 'Users', 'result', 'Result']);
     const groups = asArray(groupsPayload, ['data', 'groups', 'Groups', 'result', 'Result']);
@@ -296,6 +302,7 @@ Deno.serve(async (req: Request) => {
       synced: records.length,
       active: records.filter((row) => row.active).length,
       groups: groups.length,
+      groups_warning: groupsWarning,
       supervisors_detected: supervisorIds.size,
       supervisors_relinked: relinked,
       actor: access.actor,
