@@ -1,12 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 type Row = Record<string, unknown>;
-
-type SyncResult = {
-  module: string;
-  processed: number;
-  stored: number;
-};
+type SyncResult = { module: string; processed: number; stored: number };
 
 const API_BASE = 'https://customerapi.geovictoria.com';
 const DEFAULT_DAYS = 7;
@@ -31,8 +26,7 @@ function envMap(name: string) {
 }
 
 function str(value: unknown) {
-  if (value === null || value === undefined) return '';
-  return String(value).trim();
+  return value === null || value === undefined ? '' : String(value).trim();
 }
 
 function bool(value: unknown) {
@@ -71,13 +65,9 @@ function parseTimestamp(value: unknown): string | null {
   if (!raw) return null;
   const digits = dateDigits(raw);
   if (digits.length >= 14) {
-    const y = digits.slice(0, 4);
-    const m = digits.slice(4, 6);
-    const d = digits.slice(6, 8);
-    const hh = digits.slice(8, 10);
-    const mm = digits.slice(10, 12);
-    const ss = digits.slice(12, 14);
-    const parsed = new Date(`${y}-${m}-${d}T${hh}:${mm}:${ss}Z`);
+    const parsed = new Date(
+      `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}T${digits.slice(8, 10)}:${digits.slice(10, 12)}:${digits.slice(12, 14)}Z`,
+    );
     if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
   }
   const parsed = new Date(raw);
@@ -90,8 +80,7 @@ function parseDate(value: unknown): string | null {
   const digits = dateDigits(raw);
   if (digits.length >= 8) return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
   const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toISOString().slice(0, 10);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
 }
 
 function ymd(date: Date) {
@@ -101,11 +90,13 @@ function ymd(date: Date) {
 function periodFromDays(days: number) {
   const end = new Date();
   const start = new Date(end.getTime() - Math.max(0, days - 1) * 24 * 60 * 60 * 1000);
+  const startYmd = ymd(start);
+  const endYmd = ymd(end);
   return {
-    start: `${ymd(start)}000000`,
-    end: `${ymd(end)}235959`,
-    startDate: `${ymd(start).slice(0, 4)}-${ymd(start).slice(4, 6)}-${ymd(start).slice(6, 8)}`,
-    endDate: `${ymd(end).slice(0, 4)}-${ymd(end).slice(4, 6)}-${ymd(end).slice(6, 8)}`,
+    start: `${startYmd}000000`,
+    end: `${endYmd}235959`,
+    startDate: `${startYmd.slice(0, 4)}-${startYmd.slice(4, 6)}-${startYmd.slice(6, 8)}`,
+    endDate: `${endYmd.slice(0, 4)}-${endYmd.slice(4, 6)}-${endYmd.slice(6, 8)}`,
   };
 }
 
@@ -125,31 +116,31 @@ function dedupe<T extends Record<string, unknown>>(items: T[], key: keyof T) {
 }
 
 async function sha256(input: string) {
-  const bytes = new TextEncoder().encode(input);
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 function scrubPunchRaw(row: Row) {
   const clean = { ...row };
-  delete clean.Longitude;
-  delete clean.longitude;
-  delete clean.Latitude;
-  delete clean.latitude;
-  delete clean.Accuracy;
-  delete clean.accuracy;
+  for (const key of ['Longitude', 'longitude', 'Latitude', 'latitude', 'Accuracy', 'accuracy']) delete clean[key];
   return clean;
 }
 
 function rowsFromPayload(payload: unknown, keys: string[] = []) {
-  if (Array.isArray(payload)) return payload.filter((item): item is Row => Boolean(item && typeof item === 'object' && !Array.isArray(item)));
+  if (Array.isArray(payload)) {
+    return payload.filter((item): item is Row => Boolean(item && typeof item === 'object' && !Array.isArray(item)));
+  }
   if (!payload || typeof payload !== 'object') return [] as Row[];
   const row = payload as Row;
   for (const key of keys) {
-    if (Array.isArray(row[key])) return (row[key] as unknown[]).filter((item): item is Row => Boolean(item && typeof item === 'object' && !Array.isArray(item)));
+    if (Array.isArray(row[key])) {
+      return (row[key] as unknown[]).filter((item): item is Row => Boolean(item && typeof item === 'object' && !Array.isArray(item)));
+    }
   }
   for (const value of Object.values(row)) {
-    if (Array.isArray(value)) return value.filter((item): item is Row => Boolean(item && typeof item === 'object' && !Array.isArray(item)));
+    if (Array.isArray(value)) {
+      return value.filter((item): item is Row => Boolean(item && typeof item === 'object' && !Array.isArray(item)));
+    }
   }
   return [] as Row[];
 }
@@ -196,13 +187,13 @@ function adminClient() {
 
 async function authorize(req: Request) {
   const configured = Deno.env.get('GEOVICTORIA_SYNC_SECRET');
-  const supplied = req.headers.get('x-sync-secret');
-  if (configured && supplied === configured) return { ok: true, actor: 'sync-secret' };
+  if (configured && req.headers.get('x-sync-secret') === configured) return { ok: true, actor: 'sync-secret' };
 
   const authorization = req.headers.get('Authorization') || '';
   if (!authorization.startsWith('Bearer ')) return { ok: false, reason: 'Missing authorization' };
   const publishable = envMap('SUPABASE_PUBLISHABLE_KEYS').default || Deno.env.get('SUPABASE_ANON_KEY') || '';
   if (!publishable) return { ok: false, reason: 'Supabase publishable key unavailable' };
+
   const client = createClient(Deno.env.get('SUPABASE_URL') || '', publishable, {
     global: { headers: { Authorization: authorization } },
     auth: { persistSession: false, autoRefreshToken: false },
@@ -335,8 +326,7 @@ async function upsertOperational(
     overtime: { module: 'overtime', processed: 0, stored: 0 },
   };
 
-  const externalIds = [...ids.keys()];
-  for (const batch of chunk(externalIds, USER_BATCH_SIZE)) {
+  for (const batch of chunk([...ids.keys()], USER_BATCH_SIZE)) {
     const joined = batch.join(',');
 
     const attendancePayload = await geoPost(token, '/api/v1/AttendanceBook', {
@@ -350,8 +340,7 @@ async function upsertOperational(
       : [];
     totals.attendance.processed += attendanceUsers.length;
     const attendanceRows = attendanceUsers.map((r) => {
-      const externalId = str(r.Identifier);
-      const employeeId = ids.get(externalId);
+      const employeeId = ids.get(str(r.Identifier));
       if (!employeeId) return null;
       return {
         employee_id: employeeId,
@@ -377,7 +366,9 @@ async function upsertOperational(
       };
     }).filter(Boolean);
     if (attendanceRows.length) {
-      const { error } = await admin.from('geovictoria_attendance_periods').upsert(attendanceRows, { onConflict: 'employee_id,period_start,period_end' });
+      const { error } = await admin.from('geovictoria_attendance_periods').upsert(attendanceRows, {
+        onConflict: 'employee_id,period_start,period_end',
+      });
       if (error) throw error;
       totals.attendance.stored += attendanceRows.length;
     }
@@ -389,7 +380,7 @@ async function upsertOperational(
     });
     const punches = rowsFromPayload(punchPayload);
     totals.punches.processed += punches.length;
-    const punchRows = [] as Row[];
+    const punchRows: Row[] = [];
     for (const r of punches) {
       const externalId = str(r.UserIdentifier);
       const employeeId = ids.get(externalId);
@@ -432,20 +423,24 @@ async function upsertOperational(
     });
     const timeOffs = rowsFromPayload(timeOffPayload, ['TimeOffs', 'Response', 'Data']);
     totals.time_off.processed += timeOffs.length;
-    const timeOffRows = [] as Row[];
+    const timeOffRows: Row[] = [];
     for (const r of timeOffs) {
       const externalId = str(r.UserIdentifier ?? r.Identifier ?? r.UserId);
       const employeeId = ids.get(externalId) || null;
       const externalRowId = str(r.Id ?? r.ExternalId ?? r.TimeOffId);
-      const startRaw = str(r.StartDate ?? r.Start ?? r.FromDate ?? r.DateFrom);
-      const endRaw = str(r.EndDate ?? r.End ?? r.ToDate ?? r.DateTo);
-      const fingerprint = await sha256(`${externalId}|${externalRowId}|${startRaw}|${endRaw}|${str(r.TypeId ?? r.TimeOffTypeId)}`);
+      const legacyStartRaw = str(r.StartDate ?? r.Start ?? r.FromDate ?? r.DateFrom);
+      const legacyEndRaw = str(r.EndDate ?? r.End ?? r.ToDate ?? r.DateTo);
+      const startRaw = str(r.Starts ?? legacyStartRaw);
+      const endRaw = str(r.Ends ?? legacyEndRaw);
+      const fingerprint = await sha256(
+        `${externalId}|${externalRowId}|${legacyStartRaw}|${legacyEndRaw}|${str(r.TypeId ?? r.TimeOffTypeId)}`,
+      );
       timeOffRows.push({
         fingerprint,
         employee_id: employeeId,
         external_id: externalRowId || null,
         type_id: str(r.TypeId ?? r.TimeOffTypeId ?? r.TimeOffType) || null,
-        type_description: str(r.TypeDescription ?? r.Description ?? r.TranslatedDescription) || null,
+        type_description: str(r.TimeOffTypeDescription ?? r.TypeDescription ?? r.Description ?? r.TranslatedDescription) || null,
         start_at_raw: startRaw || null,
         end_at_raw: endRaw || null,
         start_at: parseTimestamp(startRaw),
@@ -469,7 +464,7 @@ async function upsertOperational(
     });
     const overtime = rowsFromPayload(overtimePayload, ['Response', 'Data']);
     totals.overtime.processed += overtime.length;
-    const overtimeRows = [] as Row[];
+    const overtimeRows: Row[] = [];
     for (const r of overtime) {
       const externalId = str(r.UserIdentifier);
       const employeeId = ids.get(externalId);
@@ -516,6 +511,7 @@ Deno.serve(async (req: Request) => {
   try { input = await req.json(); } catch { input = {}; }
   const mode = str(input.mode || 'all').toLowerCase();
   if (!['all', 'catalogs', 'operational'].includes(mode)) return json({ error: 'mode debe ser all, catalogs u operational' }, 400);
+
   const requestedDays = Math.min(31, Math.max(1, intValue(input.days) || DEFAULT_DAYS));
   const period = periodFromDays(requestedDays);
   const syncedAt = new Date().toISOString();
@@ -525,10 +521,7 @@ Deno.serve(async (req: Request) => {
     const token = await geoLogin(apiKey, apiSecret);
     const results: SyncResult[] = [];
 
-    if (mode === 'all' || mode === 'catalogs') {
-      results.push(...await upsertCatalogs(admin, token, syncedAt));
-    }
-
+    if (mode === 'all' || mode === 'catalogs') results.push(...await upsertCatalogs(admin, token, syncedAt));
     if (mode === 'all' || mode === 'operational') {
       const ids = await employeeMap(admin);
       results.push(...await upsertOperational(admin, token, ids, period, syncedAt));
