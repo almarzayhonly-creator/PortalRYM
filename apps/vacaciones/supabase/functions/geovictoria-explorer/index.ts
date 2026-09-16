@@ -131,6 +131,24 @@ function countRecords(value: unknown): number | null {
   return null;
 }
 
+function apiErrorDetails(payload: unknown) {
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    const row = payload as Json;
+    const details = {
+      code: asString(row.Code ?? row.code) || null,
+      category: asString(row.CategoryException ?? row.categoryException ?? row.Category) || null,
+      description: asString(row.Description ?? row.description ?? row.Message ?? row.message) || null,
+      possible_solution: asString(row.PossibleSolution ?? row.possibleSolution) || null,
+      success: typeof row.Success === 'boolean' ? row.Success : null,
+    };
+    return Object.fromEntries(Object.entries(details).filter(([, value]) => value !== null));
+  }
+  if (typeof payload === 'string') {
+    return { description: payload.trim().slice(0, 300) };
+  }
+  return null;
+}
+
 function dateOnly(value: string) {
   return value.replace(/[^0-9]/g, '').slice(0, 8);
 }
@@ -212,6 +230,7 @@ function summarizeCall(action: string, result: { gv: Response; payload: unknown 
     ok: result.gv.ok,
     status: result.gv.status,
     count: result.gv.ok ? countRecords(result.payload) : null,
+    ...(result.gv.ok ? {} : { api_error: apiErrorDetails(result.payload) }),
     response_shape: shapeOf(result.payload),
   };
 }
@@ -231,23 +250,22 @@ function getAdminClient() {
   });
 }
 
-async function getSampleUserId() {
+async function getSampleUserIds(limit = 1) {
   const admin = getAdminClient();
   const { data, error } = await admin
     .from('employees')
     .select('geovictoria_id')
     .eq('active', true)
     .not('geovictoria_id', 'is', null)
-    .limit(1)
-    .maybeSingle();
+    .limit(limit);
   if (error) throw error;
-  const userId = asString(data?.geovictoria_id);
-  if (!userId) throw new Error('No hay empleado activo sincronizado para la prueba');
-  return userId;
+  const ids = (data || []).map((row) => asString(row.geovictoria_id)).filter(Boolean);
+  if (!ids.length) throw new Error('No hay empleados activos sincronizados para la prueba');
+  return ids;
 }
 
 async function probeCore(token: string) {
-  const userId = await getSampleUserId();
+  const [userId] = await getSampleUserIds(1);
   const period = defaultPeriod();
   const requests: Array<[string, CatalogEntry, Json | undefined]> = [
     ['shifts', catalog.shifts, undefined],
@@ -282,6 +300,41 @@ async function probeCore(token: string) {
   };
 }
 
+async function probeOvertime(token: string) {
+  const userIds = await getSampleUserIds(3);
+  const period = defaultPeriod();
+  const results = [];
+
+  for (let index = 0; index < userIds.length; index += 1) {
+    const body = buildBody(catalog.overtime, { ...period, user_ids: [userIds[index]] });
+    try {
+      const result = await invokeGeo(catalog.overtime, token, body);
+      results.push({
+        sample: index + 1,
+        ok: result.gv.ok,
+        status: result.gv.status,
+        count: result.gv.ok ? countRecords(result.payload) : null,
+        ...(result.gv.ok ? {} : { api_error: apiErrorDetails(result.payload) }),
+        response_shape: shapeOf(result.payload),
+      });
+    } catch (error) {
+      results.push({ sample: index + 1, ok: false, status: null, error: error instanceof Error ? error.message : 'Unexpected request error' });
+    }
+  }
+
+  return {
+    ok: true,
+    read_only: true,
+    period: {
+      start_date: dateOnly(period.start_date),
+      end_date: dateOnly(period.end_date),
+    },
+    attempted: results.length,
+    successful: results.filter((item) => item.ok).length,
+    results,
+  };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return response({ error: 'Method not allowed' }, 405);
@@ -309,7 +362,8 @@ Deno.serve(async (req: Request) => {
         description: item.description,
       }])),
       utilities: {
-        probe_core: 'Prueba en una sola llamada los principales endpoints de solo lectura usando un empleado activo sincronizado y los ultimos 7 dias.',
+        probe_core: 'Prueba los principales endpoints de solo lectura usando un empleado activo sincronizado y los ultimos 7 dias.',
+        overtime_probe: 'Prueba GetOvertime con hasta 3 empleados activos y devuelve el detalle seguro del error sin exponer identificadores.',
       },
     });
   }
@@ -327,9 +381,13 @@ Deno.serve(async (req: Request) => {
       return response(await probeCore(token));
     }
 
+    if (input.action === 'overtime_probe') {
+      return response(await probeOvertime(token));
+    }
+
     const action = asString(input.action);
     const entry = catalog[action];
-    if (!entry) return response({ error: 'Accion no permitida', allowed_actions: [...Object.keys(catalog), 'probe_core'] }, 400);
+    if (!entry) return response({ error: 'Accion no permitida', allowed_actions: [...Object.keys(catalog), 'probe_core', 'overtime_probe'] }, 400);
 
     const body = buildBody(entry, input);
     const result = await invokeGeo(entry, token, body);
@@ -341,6 +399,7 @@ Deno.serve(async (req: Request) => {
         endpoint: entry.path,
         status: result.gv.status,
         content_type: result.gv.headers.get('content-type'),
+        api_error: apiErrorDetails(result.payload),
         response_shape: shapeOf(result.payload),
       }, 502);
     }
