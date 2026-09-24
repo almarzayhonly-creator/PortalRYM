@@ -8410,3 +8410,85 @@ body.v66-revisados .v166-v2-manual{padding:12px 14px!important;margin-bottom:10p
 @media(max-width:1050px){body.v66-revisados .v84-history-filters{grid-template-columns:repeat(3,minmax(0,1fr))}body.v66-revisados .v168-month-summary{grid-template-columns:repeat(3,minmax(0,1fr))}body.v66-revisados .v168-galera-head,body.v66-revisados .v168-galera-row{min-width:730px}.v168-coverage-card{overflow:hidden}.v168-galera-list,.v168-galera-head{overflow-x:auto}}
 @media(max-width:700px){body.v66-revisados .v66-main{padding:10px}body.v66-revisados .v66-kpi{min-height:0}body.v66-revisados .v84-history-filters{grid-template-columns:1fr}body.v66-revisados .v168-month-intro{display:block}body.v66-revisados .v168-month-intro p{margin-top:7px}body.v66-revisados .v168-month-summary{grid-template-columns:1fr}body.v66-revisados .v168-total-strip{display:grid;grid-template-columns:1fr 1fr}body.v66-revisados .v168-total-strip strong{margin-left:0}body.v66-revisados .v166-v2-tools{grid-template-columns:1fr!important;max-width:none}body.v66-revisados .v66-recent-grid{grid-template-columns:1fr!important}.v168-today-actions{align-items:flex-start;flex-direction:column}.v168-today-actions button{width:100%}}
 </style>
+
+
+<!-- RYM BUILD V169 ECARCHECK OPERATIONS LIVE -->
+<style id="rym-v169-ecar-ops-css">
+body.v66-revisados .v169-ecar-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;white-space:normal}
+body.v66-revisados .v169-ecar-main{display:flex;gap:3px;flex-wrap:wrap}
+body.v66-revisados .v169-ecar-chip{display:inline-flex;align-items:center;padding:4px 6px;border-radius:999px;font-size:7px;font-weight:1000;border:1px solid #d4dfeb;background:#edf4fb;color:#254d79;white-space:nowrap}
+body.v66-revisados .v169-ecar-chip.ok{background:#e9f8ef;border-color:#b7e4c8;color:#17663a}
+body.v66-revisados .v169-ecar-chip.warn{background:#fff3df;border-color:#f1cf91;color:#8b5200}
+body.v66-revisados .v169-ecar-chip.bad{background:#feeceb;border-color:#f3b9b5;color:#a52b22}
+body.v66-revisados .v169-ecar-chip.neutral{background:#f4f6f8;border-color:#dfe4e9;color:#687786}
+body.v66-revisados .v169-ecar-time{font-size:7px;color:#71839a;font-weight:800;line-height:1.25}
+body.v66-revisados .v169-ecar-detail{font-size:7px;color:#405a76;line-height:1.35;white-space:normal;max-width:205px}
+body.v66-revisados .v169-ecar-detail b{color:#173f75}
+</style>
+<script id="rym-v169-ecar-ops-js">
+(function(){
+  let cache=null,cacheAt=0,busy=null,timer=null;
+  const E=v=>typeof esc==='function'?esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const N=v=>String(v??'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  const labels={BOLETA_PLACA:'Boleta placa',BOLETA_DOCUMENTO:'Boleta documento',INFRACCION_ENA:'Infracción ENA',HURTO:'Hurto',COLISION_FUGA:'Colisión y fuga',COLISION:'Colisión',FUGA:'Fuga',ERROR_RESPUESTA:'Error respuesta'};
+  const fmtPA=v=>{if(!v)return'—';try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}).format(new Date(v))}catch{return String(v)}};
+  async function load(){
+    if(cache&&Date.now()-cacheAt<30000)return cache;
+    if(busy)return busy;
+    busy=(async()=>{try{
+      const z=await req('/functions/v1/revisados-final',{method:'POST',body:'{}'});
+      if(!z?.data?.ok)throw Error(z?.data?.error||'No se pudo leer eCarCheck');
+      const map=new Map((z.data.rows||[]).map(r=>[N(r.unidad),r]));
+      cache={map,raw:z.data};cacheAt=Date.now();return cache;
+    }finally{busy=null}})();
+    return busy;
+  }
+  function cats(r){return Array.isArray(r?.ecarcheck_categorias)?r.ecarcheck_categorias:[]}
+  function statusHtml(r){
+    const cs=cats(r),st=N(r?.ecarcheck_estado),at=r?.ecarcheck_ultima_consulta_at;
+    let main='';
+    if(cs.length)main=cs.map(c=>'<span class="v169-ecar-chip '+(N(c.tipo)==='ERROR_RESPUESTA'?'bad':'warn')+'">'+E(labels[N(c.tipo)]||c.tipo)+(Number(c.cantidad)>1?' · '+E(c.cantidad):'')+'</span>').join('');
+    else if(!at)main='<span class="v169-ecar-chip neutral">Sin consulta</span>';
+    else if(st==='OK')main='<span class="v169-ecar-chip ok">OK</span>';
+    else if(st==='ERROR'||st==='SESION_REQUERIDA')main='<span class="v169-ecar-chip bad">'+E(st)+'</span>';
+    else main='<span class="v169-ecar-chip neutral">'+E(st||'Sin resultado')+'</span>';
+    return '<div class="v169-ecar-cell"><div class="v169-ecar-main">'+main+'</div><div class="v169-ecar-time">Última: '+E(fmtPA(at))+'</div></div>';
+  }
+  function detailHtml(r){
+    const p=Number(r?.ecarcheck_boletas_placa||0),d=Number(r?.ecarcheck_boletas_documento||0),e=Number(r?.ecarcheck_infracciones_ena||0),txt=String(r?.ecarcheck_detalle||'').trim();
+    const parts=[];if(p)parts.push('Placa: '+p);if(d)parts.push('Documento: '+d);if(e)parts.push('ENA: '+e);
+    let s=parts.length?'<b>'+E(parts.join(' · '))+'</b>':'';
+    if(txt){const short=txt.length>145?txt.slice(0,142)+'…':txt;s+=(s?'<br>':'')+E(short)}
+    if(!s)s='Sin alertas reportadas en la última consulta.';
+    return '<div class="v169-ecar-detail">'+s+'</div>';
+  }
+  async function decorate(){
+    if(!document.body.classList.contains('v66-revisados'))return;
+    const host=document.querySelector('.v66-ops-wrap');if(!host)return;
+    let data;try{data=await load()}catch{return}
+    const head=host.querySelector('.v66-ops-head');
+    if(head)[...head.children].forEach(x=>{const t=N(x.textContent);if(t==='SITUACION'||t==='SITUACIÓN')x.textContent='eCarCheck actual';if(t==='ALERTAS')x.textContent='Detalle / última consulta'});
+    const rendered=[];
+    host.querySelectorAll('.v66-ops-row').forEach(row=>{
+      const unit=N(row.querySelector('.v66-unit b')?.textContent),r=data.map.get(unit);if(!r)return;
+      const cells=[...row.children];
+      const sit=cells.find(x=>['SITUACION','SITUACIÓN'].includes(N(x.getAttribute('data-label'))));
+      const al=cells.find(x=>N(x.getAttribute('data-label'))==='ALERTAS');
+      if(sit){sit.setAttribute('data-label','eCarCheck actual');sit.innerHTML=statusHtml(r)}
+      if(al){al.setAttribute('data-label','Detalle / última consulta');al.innerHTML=detailHtml(r)}
+      rendered.push(r);
+    });
+    const count=document.querySelector('#v66OCount');
+    if(count&&rendered.length){
+      const alert=rendered.filter(r=>cats(r).length>0).length,ok=rendered.filter(r=>r.ecarcheck_ultima_consulta_at&&cats(r).length===0&&N(r.ecarcheck_estado)==='OK').length,noq=rendered.filter(r=>!r.ecarcheck_ultima_consulta_at).length,photos=rendered.filter(r=>!r.fotos_disponibles).length;
+      count.textContent=rendered.length+' pendientes · '+ok+' eCarCheck OK · '+alert+' con alerta eCarCheck · '+noq+' sin consulta · '+photos+' sin fotos';
+    }
+  }
+  function schedule(){clearTimeout(timer);timer=setTimeout(decorate,80)}
+  const mo=new MutationObserver(schedule);mo.observe(document.documentElement,{subtree:true,childList:true});
+  setInterval(()=>{cache=null;schedule()},30000);
+  setTimeout(schedule,200);
+})();
+</script>
+<!-- RYM BUILD V169 ECARCHECK OPERATIONS LIVE END -->
+
