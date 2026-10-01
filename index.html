@@ -8466,3 +8466,144 @@ body.v66-revisados .v176-history-current .v66-history-row{
 </style>
 
 <style id="rym-v177-history-revisado-css">body.v66-revisados .v176-rev-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;line-height:1.15}body.v66-revisados .v176-rev-state{display:inline-flex;border-radius:999px;padding:4px 7px;font-size:7px;font-weight:1000;letter-spacing:.04em}body.v66-revisados .v176-rev-cell.ok .v176-rev-state{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}body.v66-revisados .v176-rev-cell.pending .v176-rev-state{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}body.v66-revisados .v176-rev-cell b{font-size:10px;color:#17365e}body.v66-revisados .v176-rev-cell small{font-size:8px;color:#7b8798}</style>
+
+<style id="rym-v178-month-visual-fix-css">
+/* Revisados > Avance mensual: corrección visual aislada.
+   Mantiene la paleta azul/blanco/gris del portal y usa verde/amarillo/rojo solo como estado. */
+body.v66-revisados .v178-hero{
+  background:linear-gradient(135deg,#ffffff 0%,#f5f9ff 100%)!important;
+  border:1px solid #d7e4f3!important;
+  color:#173f75!important;
+  box-shadow:0 8px 24px rgba(31,70,115,.055)!important;
+}
+body.v66-revisados .v178-kicker{color:#568cdd!important}
+body.v66-revisados .v178-hero h2{color:#173f75!important}
+body.v66-revisados .v178-hero p{color:#647b94!important}
+body.v66-revisados .v178-meta span{
+  background:#eef5ff!important;
+  border-color:#d3e2f5!important;
+  color:#426ea8!important;
+}
+body.v66-revisados .v178-meta b{color:#315f9d!important}
+body.v66-revisados .v178-actions button{
+  background:#eef5ff!important;
+  color:#426fae!important;
+  border-color:#d3e2f5!important;
+}
+body.v66-revisados .v178-actions button.primary{
+  background:linear-gradient(90deg,#568cdd,#78a9f4)!important;
+  color:#fff!important;
+  border-color:#568cdd!important;
+}
+body.v66-revisados .v178-score article{
+  background:#fff!important;
+  border-color:#dce7f4!important;
+}
+body.v66-revisados .v178-score article:before{background:#568cdd!important}
+body.v66-revisados .v178-score article.danger:before{background:#d84b3a!important}
+body.v66-revisados .v178-score article.good:before{background:#2b9560!important}
+body.v66-revisados .v178-score span,
+body.v66-revisados .v178-score small{color:#71839a!important}
+body.v66-revisados .v178-score strong{color:#173f75!important}
+body.v66-revisados .v178-score article.danger strong{color:#b9382d!important}
+
+body.v66-revisados .v178-report{
+  background:#fff!important;
+  border-color:#d8e4f1!important;
+}
+body.v66-revisados .v178-report-head{
+  background:#f7faff!important;
+  border-color:#dfe9f4!important;
+}
+body.v66-revisados .v178-report-head h3{color:#173f75!important}
+body.v66-revisados .v178-report-head p{color:#71839a!important}
+
+/* Neutraliza los estilos globales de table/th que estaban pintando la matriz azul oscuro. */
+body.v66-revisados .v178-table thead th{
+  position:sticky!important;
+  top:0!important;
+  background:#edf4fd!important;
+  background-image:none!important;
+  color:#365f94!important;
+  border-right:1px solid #d7e4f4!important;
+  border-bottom:1px solid #d7e4f4!important;
+  text-shadow:none!important;
+}
+body.v66-revisados .v178-table thead th:first-child{
+  background:#edf4fd!important;
+  color:#365f94!important;
+}
+body.v66-revisados .v178-table tbody th,
+body.v66-revisados .v178-table tfoot th{
+  background:#f7faff!important;
+  background-image:none!important;
+  color:#365f94!important;
+  border-right:1px solid #dfe8f3!important;
+  border-bottom:1px solid #e4ebf2!important;
+  text-shadow:none!important;
+}
+body.v66-revisados .v178-table tbody tr:nth-child(even) th{background:#f3f7fc!important}
+body.v66-revisados .v178-table td{
+  background:#fff!important;
+  border-right:1px solid #e4ebf2!important;
+  border-bottom:1px solid #e4ebf2!important;
+}
+body.v66-revisados .v178-table tbody tr:nth-child(even) td{background:#fbfdff!important}
+body.v66-revisados .v178-table tfoot td{background:#f7faff!important}
+
+/* Semáforo suave, similar al reporte gerencial original. */
+body.v66-revisados .v178-cell{
+  background:#f8fbff!important;
+  border-color:#dce7f4!important;
+  color:#24435f!important;
+}
+body.v66-revisados .v178-cell.ok{
+  background:#f2faf5!important;
+  border-color:#c9e5d4!important;
+}
+body.v66-revisados .v178-cell.warn{
+  background:#fff9ea!important;
+  border-color:#ead9a9!important;
+}
+body.v66-revisados .v178-cell.bad{
+  background:#fff1ee!important;
+  border-color:#efc5bf!important;
+}
+body.v66-revisados .v178-cell-top b{color:#17324c!important}
+body.v66-revisados .v178-cell-top span,
+body.v66-revisados .v178-cell>small{color:#71839a!important}
+body.v66-revisados .v178-cell.ok>strong{color:#24754a!important}
+body.v66-revisados .v178-cell.warn>strong{color:#986000!important}
+body.v66-revisados .v178-cell.bad>strong{color:#b63d32!important}
+body.v66-revisados .v178-cell>i{color:#568cdd!important}
+body.v66-revisados .v178-cell.empty{
+  background:#f8fafc!important;
+  border-color:#e2e9f1!important;
+  color:#9aa7b5!important;
+}
+
+body.v66-revisados .v178-total-card{
+  background:#fff!important;
+  border-color:#dce7f4!important;
+}
+body.v66-revisados .v178-total-card.ok{
+  background:#f2faf5!important;
+  border-color:#c9e5d4!important;
+}
+body.v66-revisados .v178-total-card.warn{
+  background:#fff9ea!important;
+  border-color:#ead9a9!important;
+}
+body.v66-revisados .v178-total-card.bad{
+  background:#fff1ee!important;
+  border-color:#efc5bf!important;
+}
+body.v66-revisados .v178-total-card strong{color:#173f75!important}
+body.v66-revisados .v178-total-card span{color:#71839a!important}
+body.v66-revisados .v178-note{
+  background:#f7faff!important;
+  border-color:#dfe8f3!important;
+  color:#71839a!important;
+}
+body.v66-revisados .v178-note b{color:#365f94!important}
+</style>
