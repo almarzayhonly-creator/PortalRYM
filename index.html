@@ -2235,7 +2235,7 @@ phase2Allowed=function(roleName,moduleName){
   return false;
 };
 
-function phase3CanScopeFilter(){return ['ADMIN_TOTAL','SISTEMA','ADMIN','PAGADOR','GERENTE_GALERA'].includes(role())}
+function phase3CanScopeFilter(){return ['ADMIN_TOTAL','SISTEMA','ADMIN','PAGADOR','GERENTE_GALERA','SUPERVISORA'].includes(role())}
 async function phase3ScopeData(){
   if(!phase3CanScopeFilter())return {sups:[],gals:[]};
   const rows=await rpc('panapass_mis_supervisoras').catch(()=>[]);
@@ -2251,11 +2251,17 @@ function phase3ScopeMarkup(prefix,scope){
 function phase3BindScope(prefix,scope,onChange){
   const g=document.querySelector(`#${prefix}Galera`),s=document.querySelector(`#${prefix}Supervisora`);
   if(!g||!s)return;
+  let firstFill=true;
   const refill=()=>{
     const keep=s.value,gal=String(g.value||'').toUpperCase();
     const list=scope.sups.filter(x=>!gal||String(x.galera||'').toUpperCase()===gal);
     s.innerHTML='<option value="">Todas las visibles</option>'+list.map(x=>`<option value="${esc(x.id)}">${esc(x.nombre)}${x.galera?' · '+esc(x.galera):''}</option>`).join('');
     if(list.some(x=>x.id===keep))s.value=keep;
+    else if(firstFill&&role()==='SUPERVISORA'){
+      const mine=String(state.profile?.supervisora_id||'');
+      if(mine&&list.some(x=>String(x.id)===mine))s.value=mine;
+    }
+    firstFill=false;
   };
   refill();
   g.onchange=()=>{refill();onChange?.()};
