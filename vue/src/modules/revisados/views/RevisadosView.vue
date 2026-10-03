@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import type { RevisadoRecord } from '../types/revisados.types'
-import { revisadosService } from '../services/revisados.service'
+import { revisadosService, type RevisadosNavItem } from '../services/revisados.service'
 import { useRevisados } from '../composables/useRevisados'
 import MissionControlSummary from '../components/MissionControlSummary.vue'
 import GaleraComparison from '../components/GaleraComparison.vue'
@@ -11,7 +11,7 @@ import RevisadosTable from '../components/RevisadosTable.vue'
 const records = ref<RevisadoRecord[]>([])
 const loading = ref(true)
 const error = ref('')
-const previewMode = ref(false)
+const previewMode = ref(false)\nconst profileName = ref('Portal RYM')\nconst profileRole = ref('')\nconst scopeLabel = ref('')\nconst navItems = ref<RevisadosNavItem[]>([{id:'dashboard',label:'Dashboard',icon:'⌂'}])\nconst logoUrl = 'https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000'
 
 const demoRows: RevisadoRecord[] = [
   { id:'demo-1', unidad:'CU9475', placa:'CU9475', galera:'VCARS', supervisora:'Michelle', estado:'vigente', fechaUltimoRevisado:'2026-09-28', prioridad:'NORMAL', detalleEstado:'Ciclo vigente cubierto', vigente:true, requiereAtencion:false, cambioColor:false, tieneAlertas:false },
@@ -28,7 +28,7 @@ async function load() {
   error.value = ''
   previewMode.value = false
   try {
-    records.value = await revisadosService.list()
+    records.value = await revisadosService.list()\n    const context = revisadosService.context()\n    profileName.value = context.profile?.nombre || 'Portal RYM'\n    profileRole.value = context.profile?.rol || ''\n    scopeLabel.value = context.profile?.scope_label || ''\n    navItems.value = context.tabs
   } catch (cause) {
     previewMode.value = true
     records.value = demoRows
@@ -38,28 +38,28 @@ async function load() {
   }
 }
 
-onMounted(load)
+function openTab(id:string){\n  if(id==='dashboard') return\n  revisadosService.navigate(id)\n}\n\nonMounted(load)
 </script>
 
 <template>
   <main class="app-shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">RYM</div>
+        <img class="brand-logo" :src="logoUrl" alt="RYM">
         <div><strong>Revisados RYM</strong><small>Control legal vehicular</small></div>
       </div>
 
-      <div class="env-card">
-        <span class="dot"></span>
-        <div><b>{{ previewMode ? 'SANDBOX' : 'DATOS REALES' }}</b><small>{{ previewMode ? 'Vista de diseño' : 'Sesión autenticada' }}</small></div>
+      <div class="user-card">
+        <strong>{{ profileName }}</strong>
+        <span>{{ profileRole }}</span>
+        <small>{{ scopeLabel }}</small>
       </div>
 
       <nav>
-        <span class="nav-label">GENERAL</span>
-        <button class="active"><span class="nav-icon">⌂</span>Mission Control</button>
-        <button><span class="nav-icon">≡</span>Operaciones</button>
-        <button><span class="nav-icon">▦</span>Avance y Auditoría</button>
-        <button><span class="nav-icon">□</span>Ficha de Unidad</button>
+        <span class="nav-label">REVISADOS</span>
+        <button v-for="item in navItems" :key="item.id" :class="{active:item.id==='dashboard'}" @click="openTab(item.id)">
+          <span class="nav-icon">{{ item.icon }}</span>{{ item.label }}
+        </button>
       </nav>
 
       <div class="sidebar-foot">
@@ -73,13 +73,13 @@ onMounted(load)
         <div class="product-left">
           <strong>Revisados RYM</strong>
           <span></span>
-          <button class="top-link active">Inicio</button>
-          <button class="top-link">Operaciones</button>
-          <button class="top-link">Auditoría</button>
+          <button class="top-link active">Dashboard</button>
+          <button v-if="navItems.some(x=>x.id==='operations')" class="top-link" @click="openTab('operations')">Operaciones</button>
+          <button v-if="navItems.some(x=>x.id==='monthly')" class="top-link" @click="openTab('monthly')">Avance mensual</button>
         </div>
         <div class="product-right">
           <span class="status-pill">SANDBOX</span>
-          <span class="user-pill">Portal RYM</span>
+          <span class="user-pill">{{ profileName }}</span>
         </div>
       </header>
 
@@ -146,7 +146,7 @@ nav{display:grid;gap:4px}.nav-label{padding:0 9px 6px;font-size:9px;font-weight:
 .product-bar{height:58px;display:flex;justify-content:space-between;align-items:center;padding:0 26px;background:#fff;border-bottom:1px solid #e6e9ef;box-shadow:0 1px 0 rgba(16,24,40,.02)}
 .product-left,.product-right{display:flex;align-items:center;gap:14px}.product-left>strong{font-size:13px;color:#17243a}.product-left>span{width:1px;height:24px;background:#e4e8ee}.top-link{height:58px;border:0;background:transparent;color:#66758b;font-size:11px;font-weight:700;position:relative}.top-link.active{color:#c65c13}.top-link.active:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#ff9800}.status-pill{padding:5px 10px;border:1px solid #f4c889;border-radius:999px;background:#fff7e8;color:#a65c12;font-size:9px;font-weight:850}.user-pill{padding:7px 10px;border-radius:999px;background:#f2f4f8;color:#526075;font-size:10px;font-weight:750}
 .workspace{padding:26px 30px 42px;min-width:0;display:grid;gap:12px}
-.topbar{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:4px}.breadcrumb{margin:0 0 17px;color:#54637a;font-size:10px}.eyebrow{margin:0 0 5px;color:#c65c13;font-size:9px;font-weight:900;letter-spacing:.11em}.topbar h1{margin:0;font-size:36px;letter-spacing:-.045em}.topbar p:last-child{margin:5px 0 0;color:#66758b;font-size:13px}.actions{display:flex;gap:8px}.actions button{height:38px;padding:0 13px;border-radius:9px;font-weight:800;font-size:11px}.ghost{border:1px solid #d8dee8;background:#fff;color:#41506a}.primary{border:1px solid #0062ff;background:#0062ff;color:#fff;box-shadow:0 7px 18px rgba(0,98,255,.16)}.primary:disabled{opacity:.6;cursor:progress}
+.topbar{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:4px}.breadcrumb{margin:0 0 17px;color:#54637a;font-size:10px}.eyebrow{margin:0 0 5px;color:#0062ff;font-size:9px;font-weight:900;letter-spacing:.11em}.topbar h1{margin:0;font-size:36px;letter-spacing:-.045em}.topbar p:last-child{margin:5px 0 0;color:#66758b;font-size:13px}.actions{display:flex;gap:8px}.actions button{height:38px;padding:0 13px;border-radius:9px;font-weight:800;font-size:11px}.ghost{border:1px solid #d8dee8;background:#fff;color:#41506a}.primary{border:1px solid #0062ff;background:#0062ff;color:#fff;box-shadow:0 7px 18px rgba(0,98,255,.16)}.primary:disabled{opacity:.6;cursor:progress}
 .preview-banner{padding:10px 13px;border:1px solid #d7e5ff;border-radius:10px;background:#f7faff}.preview-banner>div{display:flex;gap:8px;align-items:center}.preview-banner strong{font-size:10px;color:#0062ff}.preview-banner span{font-size:10px;color:#6c7a90}
 .attention-strip{display:flex;justify-content:space-between;align-items:end;gap:20px;padding:14px 16px;border:1px solid #e1e5ec;border-radius:12px;background:#fff}.attention-strip>div:first-child{display:flex;align-items:end;gap:8px}.attention-strip span{font-size:9px;font-weight:900;letter-spacing:.11em;color:#69778d}.attention-strip strong{font-size:25px;letter-spacing:-.04em}.attention-strip small{padding-bottom:3px;color:#96a1b1}.attention-copy{display:grid;justify-items:end}.attention-copy b{font-size:10px;color:#16a34a}.attention-copy span{font-size:9px;letter-spacing:0;text-transform:none;font-weight:600;color:#98a3b3}
 .loading-card,.error-card{padding:14px;border-radius:12px}.loading-card{border:1px solid #e2e8f0;background:#fff;color:#64748b}.error-card{border:1px solid #fecaca;background:#fff1f2;color:#b91c1c}
