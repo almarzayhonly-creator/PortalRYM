@@ -3,10 +3,15 @@ import path from 'node:path';
 import process from 'node:process';
 import { stitch, StitchError } from '@google/stitch-sdk';
 
-const projectId = String(process.env.STITCH_PROJECT_ID || '').trim();
-if (!projectId) throw new Error('STITCH_PROJECT_ID is required');
-
 const root = path.resolve(process.cwd(), '../..');
+const activeProjectPath = path.join(root, '.stitch', 'active-project.json');
+let projectId = String(process.env.STITCH_PROJECT_ID || '').trim();
+if (!projectId) {
+  const active = JSON.parse(await fs.readFile(activeProjectPath, 'utf8'));
+  projectId = String(active?.projectId || '').trim();
+}
+if (!projectId) throw new Error('No Stitch project ID found in env or .stitch/active-project.json');
+
 const contractPath = path.join(process.cwd(), 'revisados-dashboard-contract.md');
 const mainHtmlPath = process.env.MAIN_INDEX_HTML || path.join(root, '.stitch', 'main-index-reference.html');
 
