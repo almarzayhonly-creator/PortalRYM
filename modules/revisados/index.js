@@ -20,6 +20,15 @@
     }catch(_){return false}
   }
 
+  function legacyVisible(){
+    return !!(
+      d.body.classList.contains('v60-revisados') ||
+      d.body.classList.contains('v63-revisados') ||
+      d.body.classList.contains('v66-revisados') ||
+      d.querySelector('.v66-app')
+    );
+  }
+
   w.RYM_REVISADOS_BRIDGE={
     async load(){
       if(typeof w.v66PrefetchRevisados!=='function'){
@@ -37,6 +46,7 @@
   async function openVue(){
     const app=d.querySelector('#app');
     if(!app)throw new Error('Portal app root unavailable');
+    if(d.querySelector('#rymRevisadosVueHost'))return;
 
     d.body.dataset.rymModule='revisados';
     d.body.classList.remove('v60-revisados','v63-revisados','v66-revisados');
@@ -45,7 +55,7 @@
     app.innerHTML=
       '<main id="rymRevisadosVueHost" style="min-height:100vh;background:#f6f8fb">'+
       '<div style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #e2e7ee;background:#fff;font-family:Inter,system-ui">'+
-      '<strong style="color:#172033">Revisados · Vista Vue piloto</strong>'+
+      '<strong style="color:#172033">Revisados · VUE PILOT ACTIVO</strong>'+
       '<div style="display:flex;gap:8px">'+
       '<button id="rymRevisadosLegacy" style="border:1px solid #cfd6df;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer">Vista anterior</button>'+
       '<button id="rymRevisadosBack" style="border:1px solid #172033;background:#172033;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer">Volver al Portal</button>'+
@@ -90,4 +100,17 @@
 
   w.v60OpenRevisados=open;
   w.RYM_MODULES.register('revisados',{open});
+
+  if(enabled()){
+    let tries=0;
+    const activate=()=>{
+      if(d.querySelector('#rymRevisadosVueHost'))return;
+      if(legacyVisible()){
+        openVue().catch(()=>{});
+        return;
+      }
+      if(++tries<20)setTimeout(activate,150);
+    };
+    setTimeout(activate,0);
+  }
 })(window,document);
