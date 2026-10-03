@@ -100,10 +100,10 @@ function getBridge(): RevisadosBridge | undefined {
 }
 
 export const revisadosService = {
-  async list(): Promise<RevisadoRecord[]> {
+  async list(source?: CanonicalRevisadosResponse): Promise<RevisadoRecord[]> {
     const bridge=getBridge()
     if(!bridge)throw new Error('El bridge de Revisados no está disponible. Abre esta vista desde el shell autenticado del Portal RYM.')
-    const response=await bridge.load()
+    const response=source ?? await bridge.load()
     return (response.rows ?? []).map(mapRow)
   },
   async load(force=false): Promise<CanonicalRevisadosResponse> {
@@ -122,6 +122,27 @@ export const revisadosService = {
     const bridge=getBridge()
     if(!bridge?.request) throw new Error('El cliente de datos del Portal no está disponible.')
     return bridge.request(path, init)
+  },
+  async post(path:string, body:Record<string, unknown>) {
+    return await revisadosService.request(path, {method:'POST', body:JSON.stringify(body)})
+  },
+  async ficha(placa:string, unidad?:string) {
+    return await revisadosService.post('/functions/v1/revisados-ficha', {placa, unidad:unidad ?? ''}) as Record<string, any>
+  },
+  async crearIncidencia(input:{unidad_id:string|number; tipo_codigo:string; tipo_personalizado?:string; nota?:string}) {
+    return await revisadosService.post('/functions/v1/revisados-incidencias', {action:'CREATE', ...input}) as Record<string, any>
+  },
+  async iniciarConsultaEcarcheck(placa:string) {
+    return await revisadosService.post('/functions/v1/revisados-ecarcheck-v2-manual', {action:'START', placa}) as Record<string, any>
+  },
+  async estadoConsultaEcarcheck(queueId:string) {
+    return await revisadosService.post('/functions/v1/revisados-ecarcheck-v2-manual', {action:'STATUS', queue_id:queueId}) as Record<string, any>
+  },
+  async iniciarSyncEcarcheck() {
+    return await revisadosService.post('/functions/v1/revisados-ecarcheck-v2-sync', {action:'START'}) as Record<string, any>
+  },
+  async estadoSyncEcarcheck(runId:string) {
+    return await revisadosService.post('/functions/v1/revisados-ecarcheck-v2-sync', {action:'STATUS', run_id:runId}) as Record<string, any>
   },
   back() {
     getBridge()?.back?.()
