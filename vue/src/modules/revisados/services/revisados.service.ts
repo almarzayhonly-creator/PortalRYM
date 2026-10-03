@@ -19,11 +19,7 @@ declare global {
 }
 
 function normalize(value: unknown) {
-  return String(value ?? '')
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
+  return String(value ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()
 }
 
 function incidentLabel(incident: CanonicalIncident) {
@@ -34,41 +30,41 @@ function incidentLabel(incident: CanonicalIncident) {
 
 function alertLabel(alert: CanonicalAlert) {
   const labels: Record<string, string> = {
-    BOLETA_EMPRESA: 'Boleta empresa',
-    BOLETA_PLACA: 'Boleta unidad',
+    BOLETA_EMPRESA: 'Boleta empresa/documento',
+    BOLETA_UNIDAD: 'Boleta placa',
+    BOLETA_PLACA: 'Boleta placa',
     SIN_CUPO: 'Sin cupo',
     PROPIETARIO: 'Cambio dueño',
     CUPO: 'Cambio cupo',
     COLOR: 'Cambio color',
+    CAMBIO_COLOR_REHACER: 'Cambio de color',
   }
   return labels[normalize(alert.tipo)] || alert.texto || alert.tipo || 'Alerta'
 }
 
-function statusFor(row: CanonicalRevisadoRow): RevisadoEstado {
-  if (row.emitido) return 'vigente'
+function primaryStatus(row: CanonicalRevisadoRow): RevisadoEstado {
+  const backendState = normalize(row.estado)
+  const pendingType = normalize(row.pendiente_tipo)
 
-  const incidents = row.incidencias_abiertas ?? []
-  if (incidents.some((item) => normalize(item.tipo_codigo) === 'CAMBIO_COLOR_REVISADO_TAXI')) {
-    return 'pendiente_cambio_color'
-  }
-
-  const nonTaxiIncidents = incidents.filter(
-    (item) => normalize(item.tipo_codigo) !== 'CAMBIO_COLOR_REVISADO_TAXI',
-  )
-  if (nonTaxiIncidents.length || (row.alertas_auto?.length ?? 0) > 0) {
-    return 'incidencia'
-  }
-
-  return 'pendiente_ciclo'
+  if (backendState === 'VIGENTE') return 'vigente'
+  if (pendingType === 'CAMBIO_COLOR') return 'pendiente_cambio_color'
+  if (row.requiere_atencion) return 'pendiente_ciclo'
+  if (backendState === 'SIN_MES') return 'no_aplica'
+  return row.emitido ? 'vigente' : 'no_aplica'
 }
 
 function detailFor(row: CanonicalRevisadoRow) {
   const incidents = (row.incidencias_abiertas ?? []).map(incidentLabel)
-  const alerts = (row.alertas_auto ?? []).map(alertLabel)
+  const alerts = (row.alerts ?? []).map(alertLabel)
   return [...incidents, ...alerts].filter(Boolean).join(' · ')
 }
 
 function mapRow(row: CanonicalRevisadoRow, index: number): RevisadoRecord {
+  const vigente = normalize(row.estado) === 'VIGENTE'
+  const requiereAtencion = row.requiere_atencion === true
+  const cambioColor = requiereAtencion && normalize(row.pendiente_tipo) === 'CAMBIO_COLOR'
+  const tieneAlertas = (row.alerts?.length ?? 0) > 0
+
   return {
     id: String(row.unidad_id ?? row.placa ?? row.unidad ?? index),
     unidad: String(row.unidad ?? '—'),
@@ -76,10 +72,14 @@ function mapRow(row: CanonicalRevisadoRow, index: number): RevisadoRecord {
     galera: String(row.galera ?? '—'),
     empresa: row.empresa ? String(row.empresa) : undefined,
     supervisora: row.supervisora ? String(row.supervisora) : undefined,
-    estado: statusFor(row),
+    estado: primaryStatus(row),
     fechaUltimoRevisado: row.ultimo_revisado ? String(row.ultimo_revisado) : undefined,
     prioridad: row.prioridad ? String(row.prioridad) : undefined,
     detalleEstado: detailFor(row) || undefined,
+    vigente,
+    requiereAtencion,
+    cambioColor,
+    tieneAlertas,
   }
 }
 
@@ -98,9 +98,7 @@ export const revisadosService = {
   async list(): Promise<RevisadoRecord[]> {
     const bridge = getBridge()
     if (!bridge) {
-      throw new Error(
-        'El bridge de Revisados no está disponible. Abre esta vista desde el shell autenticado del Portal RYM.',
-      )
+      throw new Error('El bridge de Revisados no está disponible. Abre esta vista desde el shell autenticado del Portal RYM.')
     }
 
     const response = await bridge.load()
