@@ -28,7 +28,17 @@ jobs:
           node --check modules/core/bootstrap.js
           node --check modules/core/legacy-route-bridge.js
           node --check modules/panapass/index.js
+          node --check modules/revisados/index.js
           test -s css/panapass-sandbox/tokens.css
+          test -s vue/package.json
+          test -s vue/vite.config.ts
+      - name: Build Vue Revisados pilot
+        working-directory: vue
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          test -s dist/index.html
+          test -d dist/assets
       - name: Inject sandbox bootstrap into preview build only
         run: |
           python3 - <<'PY'
@@ -57,9 +67,13 @@ jobs:
         env:
           QA_URL: ${{ steps.deploy.outputs.url }}
         run: |
-          curl -fsSL "$QA_URL/?sandbox=1" -o /tmp/index.html
+          curl -fsSL "$QA_URL/?sandbox=1&revisadosVue=1" -o /tmp/index.html
           curl -fsSL "$QA_URL/modules/panapass-sandbox/dashboard/index.js" -o /tmp/sandbox.js
           curl -fsSL "$QA_URL/modules/v171-loader.js" -o /tmp/loader.js
+          curl -fsSL "$QA_URL/modules/revisados/index.js" -o /tmp/revisados.js
+          curl -fsSL "$QA_URL/vue/dist/index.html" -o /tmp/vue.html
           grep -Fq 'panapass-sandbox/tokens.css' /tmp/index.html
           grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
           grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
+          grep -Fq 'rym.revisadosVuePilot' /tmp/revisados.js
+          grep -Fq '/vue/dist/assets/' /tmp/vue.html
