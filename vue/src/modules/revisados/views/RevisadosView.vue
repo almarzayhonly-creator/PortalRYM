@@ -15,6 +15,7 @@ const {filters,filtered,metrics,options,clearFilters}=useRevisados(records)
 const rawRows=computed(()=>Array.isArray(data.value?.rows)?data.value.rows as CanonicalRevisadoRow[]:[])
 const pending=computed(()=>rawRows.value.filter(r=>!r.emitido))
 const emitted=computed(()=>Array.isArray((data.value?.emitidos_hoy as {rows?:CanonicalRevisadoRow[]}|undefined)?.rows)?(data.value?.emitidos_hoy as {rows:CanonicalRevisadoRow[]}).rows:[])
+const emittedToday=computed(()=>data.value?.emitidos_hoy as {emitidos?:number; limite?:number}|undefined)
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
 const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all'), opsView=ref<'cards'|'table'>('cards')
@@ -90,11 +91,18 @@ const attentionItems=computed(()=>[
   {label:'Sin fotos',value:Number(kpis.value.sin_fotos||0),tone:'neutral'},
   {label:'Boletas',value:Number(kpis.value.con_boleta||kpis.value.con_boleta_empresa||0),tone:'red'},
 ].filter(x=>x.value>0))
+const taxiCount=computed(()=>rawRows.value.filter(r=>(r.incidencias_abiertas||[]).some(i=>String(i.tipo_codigo||'').toUpperCase()==='CAMBIO_COLOR_REVISADO_TAXI')).length)
+const hero=computed(()=>{
+  const pendingCount=metrics.value.pendientesCiclo
+  const alerts=metrics.value.incidencias
+  if(!pendingCount)return {title:'Todo al día',detail:alerts?`${alerts} alerta${alerts===1?'':'s'} requiere${alerts===1?'':'n'} revisión.`:'Sin pendientes ni alertas detectadas.',action:'history',label:'Ver detalle'}
+  return {title:`${pendingCount} unidades necesitan atención`,detail:`${metrics.value.vigentes} unidades están al día dentro de tu alcance.`,action:'operations',label:'Atender pendientes'}
+})
 const galeras=computed(()=>[...new Set(rawRows.value.map(r=>text(r.galera)).filter(x=>x!=='—'))].sort())
 const statuses=computed(()=>[...new Set(pending.value.map(r=>text(r.status2)).filter(x=>x!=='—'))].sort())
 async function load(force=false){loading.value=true;error.value='';try{const response=await revisadosService.load(force);data.value=response;records.value=await revisadosService.list(response);profile.value={nombre:response.profile?.nombre||'Portal RYM',rol:response.profile?.rol||'',scope_label:response.profile?.scope_label||''};navItems.value=revisadosService.context().tabs; if(!navItems.value.some(x=>x.id===active.value))active.value='dashboard'}catch(e){error.value=e instanceof Error?e.message:String(e)}finally{loading.value=false}}
 async function loadCupos(){if(cupos.value.length||cuposLoading.value)return;cuposLoading.value=true;cuposError.value='';try{const result=await revisadosService.request('/rest/v1/revisados_compras_cupos?select=id_pago,tipo_comprado,cantidad,monto,estado,fecha_compra_local,comprado_por,taller,metodo&order=fecha_compra_local.desc&limit=100');cupos.value=Array.isArray(result)?result as Array<Record<string,unknown>>:[]}catch(e){cuposError.value=e instanceof Error?e.message:String(e)}finally{cuposLoading.value=false}}
-function open(id:string){if(!navItems.value.some(x=>x.id===id))return;active.value=id;if(id==='cupos')void loadCupos();if(id==='daily'&&isAdminTotal.value)void prepareDailyMail();if(id==='boletas')void resumeBoletasV2()}
+function open(id:string){if(!navItems.value.some(x=>x.id===id))return;if(id==='dashboard')clearFilters();active.value=id;if(id==='cupos')void loadCupos();if(id==='daily'&&isAdminTotal.value)void prepareDailyMail();if(id==='boletas')void resumeBoletasV2()}
 function copyPending(){navigator.clipboard?.writeText(visibleRows.value.map(r=>[r.unidad,r.placa,r.galera,r.supervisora,status(r)].join(' | ')).join('\n'))}
 const wait=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms))
 async function openFicha(r:CanonicalRevisadoRow){fichaOpen.value=true;fichaLoading.value=true;fichaError.value='';ficha.value=null;fichaRow.value=r;incidentType.value='';incidentCustom.value='';incidentNote.value='';try{const x=await revisadosService.ficha(text(r.placa)==='—'?'':text(r.placa),text(r.unidad)==='—'?'':text(r.unidad));if(!x?.ok)throw new Error(String(x?.error||'No se pudo cargar la ficha'));ficha.value=x}catch(e){fichaError.value=e instanceof Error?e.message:String(e)}finally{fichaLoading.value=false}}
@@ -145,7 +153,6 @@ onMounted(()=>load())
         <span>Control legal vehicular · datos operativos en tiempo real</span>
       </div>
       <div class="rv-top-actions">
-        <div class="rv-live-pill"><i></i><span>ECARCHECK</span><b>ONLINE</b></div>
         <button class="ghost" @click="clearFilters">Limpiar filtros</button>
         <button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button>
       </div>
@@ -154,11 +161,9 @@ onMounted(()=>load())
     <template v-else>
       <section v-if="active==='dashboard'" class="rv-stack rv-stitch-dashboard">
         <div class="rv-module-strip">
-          <div><span>RESUMEN OPERATIVO</span><b>Qué requiere atención hoy</b><small>{{num(metrics.total)}} unidades visibles</small></div>
-          <div class="rv-module-actions"><span v-if="criticalCount" class="rv-critical-chip"><RymIcon name="notifications_active"/>{{num(criticalCount)}} alertas</span><button class="primary" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync"/>{{syncBusy?'Actualizando…':'Actualizar eCarCheck'}}</button></div>
+          <div><span>REVISADOS · CONTROL LEGAL</span><b>{{hero.title}}</b><small>{{hero.detail}}</small></div>
+          <div class="rv-module-actions"><button class="primary" @click="open(hero.action)">{{hero.label}}</button><button v-if="criticalCount" class="ghost" @click="open(canOperate?'operations':'history')">Revisar alertas</button></div>
         </div>
-
-        <RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/>
 
         <section class="rv-global-control">
           <div class="rv-global-head rv-global-head-compact">
@@ -169,10 +174,13 @@ onMounted(()=>load())
             <article data-tone="blue"><header><span>PENDIENTES</span><RymIcon name="schedule"/></header><b>{{num(metrics.pendientesCiclo)}}</b><small>Requieren gestión del ciclo</small></article>
             <article data-tone="amber"><header><span>CAMBIO DE COLOR</span><RymIcon name="palette"/></header><b>{{num(metrics.cambiosColor)}}</b><small>Requieren nuevo revisado</small></article>
             <article data-tone="red"><header><span>ALERTAS REALES</span><RymIcon name="gavel"/></header><b>{{num(criticalCount)}}</b><small>Impedimentos que requieren acción</small></article>
+            <article v-if="taxiCount" data-tone="amber"><header><span>PENDIENTE REVISADO TAXI</span><RymIcon name="schedule"/></header><b>{{num(taxiCount)}}</b><small>Cambio a amarillo</small></article>
+            <article data-tone="neutral"><header><span>SIN FOTOS</span><RymIcon name="image"/></header><b>{{num(kpis.sin_fotos)}}</b><small>Unidades sin evidencia fotográfica</small></article>
+            <article data-tone="blue"><header><span>EMITIDOS HOY</span><RymIcon name="verified"/></header><b>{{num(emittedToday?.emitidos)}}</b><small>{{isAdminTotal?'de '+num(emittedToday?.limite)+' cupos diarios':'Dentro de tu alcance'}}</small></article>
           </div>
         </section>
 
-        <GaleraComparison :rows="filtered"/>
+        <GaleraComparison :rows="records"/>
 
         <div class="rv-dashboard-lower">
           <section class="rv-focus-panel">

@@ -14,13 +14,13 @@
       : role==='ADMIN_TOTAL';
 
     return [
-      {id:'dashboard',label:'1. Mission Control',icon:'M'},
-      ...(c.monthly?[{id:'monthly',label:'2. Avance y Auditoría',icon:'A'}]:[]),
-      ...(c.operations?[{id:'operations',label:'3. Operaciones',icon:'O'}]:[]),
+      {id:'dashboard',label:'Dashboard',icon:'M'},
+      ...(c.operations?[{id:'operations',label:'Operaciones',icon:'O'}]:[]),
+      ...(c.monthly?[{id:'monthly',label:'Avance mensual',icon:'A'}]:[]),
       ...(daily?[{id:'daily',label:'Reporte diario',icon:'R'}]:[]),
-      ...(c.history?[{id:'history',label:'Historial & Trazabilidad',icon:'H'}]:[]),
-      ...(c.stats?[{id:'stats',label:'Auditoría Forense',icon:'F'}]:[]),
-      ...(c.boletas?[{id:'boletas',label:'Boletas y Retenciones',icon:'B'}]:[]),
+      ...(c.history?[{id:'history',label:'Historial',icon:'H'}]:[]),
+      ...(c.stats?[{id:'stats',label:'Estadísticas',icon:'F'}]:[]),
+      ...(c.boletas?[{id:'boletas',label:'Boletas',icon:'B'}]:[]),
       ...(c.cupos?[{id:'cupos',label:'Cupos',icon:'C'}]:[])
     ];
   };
