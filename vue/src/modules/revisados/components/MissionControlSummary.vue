@@ -4,40 +4,48 @@ defineProps<{ total:number; vigentes:number; pendientes:number; cambiosColor:num
 
 <template>
   <section class="summary">
-    <article class="coverage">
-      <div class="coverage-copy">
-        <span class="kicker">COBERTURA DEL ALCANCE</span>
-        <div class="big"><strong>{{ total }}</strong><div><b>unidades</b><small>{{ vigentes }} al día</small></div></div>
-      </div>
-      <div class="coverage-meter">
-        <strong>{{ total ? Math.round((vigentes/total)*100) : 0 }}%</strong>
-        <div class="track"><i :style="{width:total ? Math.round((vigentes/total)*100)+'%' : '0%'}"></i></div>
-        <span>cobertura filtrada</span>
-      </div>
+    <article class="metric-card coverage">
+      <div class="metric-top"><span>Unidades en tu alcance</span><span class="icon blue">▣</span></div>
+      <strong>{{ total }}</strong>
+      <small>{{ vigentes }} al día</small>
+      <div class="meter-row"><div class="track"><i :style="{width:total ? Math.round((vigentes/total)*100)+'%' : '0%'}"></i></div><b>{{ total ? Math.round((vigentes/total)*100) : 0 }}%</b></div>
     </article>
 
-    <article class="attention">
-      <div class="attention-item pending">
-        <span>PENDIENTES AHORA</span><strong>{{ pendientes }}</strong><small>requieren gestión</small>
-      </div>
-      <div class="divider"></div>
-      <div class="attention-item color">
-        <span>CAMBIO DE COLOR</span><strong>{{ cambiosColor }}</strong><small>subconjunto de pendientes</small>
-      </div>
-      <div class="divider"></div>
-      <div class="attention-item incident">
-        <span>ALERTAS REALES</span><strong>{{ incidencias }}</strong><small>pueden superponerse</small>
-      </div>
+    <article class="metric-card">
+      <div class="metric-top"><span>Vigentes</span><span class="icon green">✓</span></div>
+      <strong>{{ vigentes }}</strong>
+      <small>Ciclo cubierto</small>
+      <div class="footer-note success">Cobertura actual</div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-top"><span>Pendientes ahora</span><span class="icon orange">!</span></div>
+      <strong>{{ pendientes }}</strong>
+      <small>Requieren gestión</small>
+      <div class="footer-note">Dentro del filtro activo</div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-top"><span>Cambio de color</span><span class="icon amber">↻</span></div>
+      <strong>{{ cambiosColor }}</strong>
+      <small>Subconjunto de pendientes</small>
+      <div class="footer-note warning">Nuevo revisado requerido</div>
+    </article>
+
+    <article class="metric-card">
+      <div class="metric-top"><span>Alertas reales</span><span class="icon red">⚠</span></div>
+      <strong>{{ incidencias }}</strong>
+      <small>Bloqueos o alertas</small>
+      <div class="footer-note danger">Revisar detalle</div>
     </article>
   </section>
 </template>
 
 <style scoped>
-.summary{display:grid;grid-template-columns:1.15fr 1.85fr;gap:10px}
-.coverage,.attention{border:1px solid #e2e8f0;border-radius:15px;background:#fff}
-.coverage{display:grid;grid-template-columns:1fr 150px;gap:18px;align-items:center;padding:18px}
-.kicker{font-size:9px;font-weight:900;letter-spacing:.14em;color:#0062ff}.big{display:flex;align-items:end;gap:10px;margin-top:6px}.big>strong{font-size:43px;line-height:.9;letter-spacing:-.06em}.big div{display:grid;padding-bottom:2px}.big b{font-size:12px}.big small{font-size:10px;color:#94a3b8}
-.coverage-meter{display:grid;gap:5px}.coverage-meter>strong{font-size:25px;letter-spacing:-.04em;color:#16a34a}.coverage-meter>span{font-size:9px;color:#94a3b8}.track{height:6px;border-radius:999px;background:#e9eef5;overflow:hidden}.track i{display:block;height:100%;border-radius:999px;background:#16a34a}
-.attention{display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;padding:0 16px;align-items:stretch}.attention-item{display:grid;align-content:center;padding:16px 14px}.attention-item span{font-size:9px;font-weight:900;letter-spacing:.08em;color:#64748b}.attention-item strong{margin:3px 0 1px;font-size:30px;letter-spacing:-.05em}.attention-item small{font-size:10px;color:#94a3b8}.pending strong{color:#0062ff}.color strong{color:#ea580c}.incident strong{color:#dc2626}.divider{width:1px;background:#edf2f7;margin:14px 0}
-@media(max-width:900px){.summary{grid-template-columns:1fr}.attention{grid-template-columns:1fr 1px 1fr 1px 1fr}}@media(max-width:620px){.coverage{grid-template-columns:1fr}.attention{grid-template-columns:1fr}.divider{display:none}}
+.summary{display:grid;grid-template-columns:1.15fr repeat(4,1fr);gap:10px}
+.metric-card{min-width:0;padding:17px 18px 14px;border:1px solid #e0e5ec;border-radius:13px;background:#fff;box-shadow:0 2px 10px rgba(16,24,40,.025)}
+.metric-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.metric-top>span:first-child{font-size:10px;font-weight:800;color:#5f6d82}.icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:900}.icon.blue{background:#edf5ff;color:#0062ff}.icon.green{background:#ebfaf3;color:#13a36e}.icon.orange{background:#fff4ea;color:#d8650c}.icon.amber{background:#fff7e7;color:#d98800}.icon.red{background:#fff0f0;color:#dc2626}
+.metric-card>strong{display:block;margin:12px 0 4px;font-size:31px;line-height:1;letter-spacing:-.045em;color:#17243a}.metric-card>small{display:block;color:#98a3b3;font-size:10px}.footer-note{margin-top:14px;padding-top:9px;border-top:1px solid #edf0f4;font-size:9px;color:#69778b}.footer-note.success{color:#15966a}.footer-note.warning{color:#c56e12}.footer-note.danger{color:#c73b3b}
+.meter-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:14px}.meter-row b{font-size:10px;color:#16a34a}.track{height:5px;border-radius:999px;background:#e9edf3;overflow:hidden}.track i{display:block;height:100%;border-radius:999px;background:#16a34a}
+@media(max-width:1150px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.coverage{grid-column:span 2}}@media(max-width:650px){.summary{grid-template-columns:1fr}.coverage{grid-column:auto}}
 </style>
