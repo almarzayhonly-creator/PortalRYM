@@ -75,17 +75,19 @@
     }
   }
 
-  w.RYM_MODULES.register('revisados',{
-    open:function(){
-      d.body.dataset.rymModule='revisados';
-      if(enabled()){
-        return openVue().catch(()=>{
-          if(typeof LEGACY_OPEN!=='function')throw new Error('Revisados canonical entrypoint unavailable');
-          return LEGACY_OPEN();
-        });
+  async function open(){
+    d.body.dataset.rymModule='revisados';
+    if(enabled()){
+      try{return await openVue()}
+      catch(_){
+        if(typeof LEGACY_OPEN!=='function')throw new Error('Revisados canonical entrypoint unavailable');
+        return LEGACY_OPEN();
       }
-      if(typeof LEGACY_OPEN!=='function')throw new Error('Revisados canonical entrypoint unavailable');
-      return LEGACY_OPEN();
     }
-  });
+    if(typeof LEGACY_OPEN!=='function')throw new Error('Revisados canonical entrypoint unavailable');
+    return LEGACY_OPEN();
+  }
+
+  w.v60OpenRevisados=open;
+  w.RYM_MODULES.register('revisados',{open});
 })(window,document);
