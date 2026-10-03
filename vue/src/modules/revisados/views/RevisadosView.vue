@@ -17,6 +17,7 @@ const emitted=computed(()=>Array.isArray((data.value?.emitidos_hoy as {rows?:Can
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
 const selectedGalera=ref(''), selectedStatus=ref('')
+const cupos=ref<Array<Record<string,unknown>>>([]), cuposLoading=ref(false), cuposError=ref('')
 function text(v:unknown){return String(v??'—')}
 function num(v:unknown){return new Intl.NumberFormat('es-PA').format(Number(v)||0)}
 function date(v:unknown){try{return v?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium'}).format(new Date(String(v))):'—'}catch{return text(v)}}
@@ -26,7 +27,8 @@ const visibleRows=computed(()=>pending.value.filter(r=>(!selectedGalera.value||t
 const galeras=computed(()=>[...new Set(rawRows.value.map(r=>text(r.galera)).filter(x=>x!=='—'))].sort())
 const statuses=computed(()=>[...new Set(pending.value.map(r=>text(r.status2)).filter(x=>x!=='—'))].sort())
 async function load(force=false){loading.value=true;error.value='';try{const response=await revisadosService.load(force);data.value=response;records.value=await revisadosService.list();profile.value={nombre:response.profile?.nombre||'Portal RYM',rol:response.profile?.rol||'',scope_label:response.profile?.scope_label||''};navItems.value=revisadosService.context().tabs; if(!navItems.value.some(x=>x.id===active.value))active.value='dashboard'}catch(e){error.value=e instanceof Error?e.message:String(e)}finally{loading.value=false}}
-function open(id:string){if(navItems.value.some(x=>x.id===id))active.value=id}
+async function loadCupos(){if(cupos.value.length||cuposLoading.value)return;cuposLoading.value=true;cuposError.value='';try{const result=await revisadosService.request('/rest/v1/revisados_compras_cupos?select=id_pago,tipo_comprado,cantidad,monto,estado,fecha_compra_local,comprado_por,taller,metodo&order=fecha_compra_local.desc&limit=100');cupos.value=Array.isArray(result)?result as Array<Record<string,unknown>>:[]}catch(e){cuposError.value=e instanceof Error?e.message:String(e)}finally{cuposLoading.value=false}}
+function open(id:string){if(!navItems.value.some(x=>x.id===id))return;active.value=id;if(id==='cupos')void loadCupos()}
 function copyPending(){navigator.clipboard?.writeText(visibleRows.value.map(r=>[r.unidad,r.placa,r.galera,r.supervisora,status(r)].join(' | ')).join('\n'))}
 onMounted(()=>load())
 </script>
@@ -44,7 +46,7 @@ onMounted(()=>load())
       <section v-else-if="active==='history'" class="rv-stack"><RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/><RevisadosTable :rows="filtered"/></section>
       <section v-else-if="active==='stats'" class="rv-stack"><div class="rv-grid"><article class="rv-card"><b>Cobertura</b><strong>{{metrics.total?Math.round(metrics.vigentes/metrics.total*100):0}}%</strong></article><article class="rv-card"><b>Alertas reales</b><strong>{{metrics.incidencias}}</strong></article><article class="rv-card"><b>Cambio de color</b><strong>{{metrics.cambiosColor}}</strong></article></div><GaleraComparison :rows="filtered"/></section>
       <section v-else-if="active==='boletas'" class="rv-stack"><p class="rv-note">Boletas y restricciones reales detectadas por la fuente canónica.</p><div class="rv-table"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Empresa</th><th>Galera</th><th>Restricción</th></tr></thead><tbody><tr v-for="r in rawRows.filter(x=>Array.isArray(x.alerts)&&x.alerts.length)" :key="String(r.unidad_id||r.placa)"><td>{{r.unidad}}</td><td>{{r.placa}}</td><td>{{r.empresa}}</td><td>{{r.galera}}</td><td>{{(r.alerts||[]).map(x=>x.tipo||x.texto).join(' · ')}}</td></tr></tbody></table></div></section>
-      <section v-else class="rv-state"><b>Cupos</b><span>La información de compras de cupos se mantiene en su fuente canónica. Esta pantalla queda disponible sin cambiar a legacy.</span></section>
+      <section v-else class="rv-stack"><div v-if="cuposLoading" class="rv-state">Cargando compras de cupos…</div><div v-else-if="cuposError" class="rv-state error"><b>No fue posible cargar Cupos.</b><span>{{cuposError}}</span></div><template v-else><p class="rv-note">{{num(cupos.length)}} compras visibles de la fuente canónica.</p><div class="rv-table"><table><thead><tr><th>Fecha</th><th>ID</th><th>Tipo</th><th>Cantidad</th><th>Monto</th><th>Estado</th><th>Taller</th><th>Método</th></tr></thead><tbody><tr v-for="c in cupos" :key="String(c.id_pago)"><td>{{date(c.fecha_compra_local)}}</td><td>{{c.id_pago||'—'}}</td><td>{{c.tipo_comprado||'—'}}</td><td>{{num(c.cantidad)}}</td><td>{{c.monto||'—'}}</td><td>{{c.estado||'—'}}</td><td>{{c.taller||'—'}}</td><td>{{c.metodo||'—'}}</td></tr></tbody></table></div></template></section>
     </template>
   </section>
 </main>
