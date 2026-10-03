@@ -41,31 +41,32 @@ if (!paletteMatch) {
 }
 
 const prompt = `
-You are visually redesigning an EXISTING, WORKING enterprise dashboard.
+Redesign ONLY the existing Portal RYM Revisados Dashboard. This is a visual reskin of a working production screen, not a product redesign.
 
-The production codebase is the source of truth. Do not invent product behavior.
-This generation is VISUAL ONLY.
-
-${contract}
-
-Additional hard constraints verified directly from production main:
-- All labels listed in the contract exist in main today.
-- Portal RYM main uses the exact palette declared in the contract.
-- Preserve the same business meaning and navigation.
-- Use realistic placeholder counts only to demonstrate hierarchy; do not create new metrics.
+HARD RULES:
+- Preserve existing business logic, processes, labels, actions, metrics and navigation.
+- Do not invent data, KPIs, filters, states, buttons, workflows, sources or terminology.
 - Light sidebar is mandatory.
-- Do not use dark shell, terminal aesthetics, telemetry, command-center language or technical decorative status panels.
-- Do not add any control that is not in the contract.
-- Make the screen feel like the same Portal RYM product, only significantly more polished.
+- No dark shell, Mission Control, RUV, Gateway, Telemetry, Node, Station, Dispatch, Core Online or command-center language.
+- Keep the existing navigation names: Dashboard, Operaciones, Avance mensual, Reporte diario, Historial, Estadísticas, Boletas, Cupos.
+- Existing Dashboard content only: hero state "{N} unidades necesitan atención" or "Todo al día"; hero detail for pendientes antiguos, mes anterior, mes actual and unidades al día; actions Atender pendientes/Ver detalle and Revisar alertas when applicable.
+- Existing KPI labels only: Unidades en tu alcance, Al día, Pendientes ahora, Alertas reales/Sin alertas, Pendientes Revisado Taxi when applicable, Sin fotos, Emitidos hoy.
+- Existing sections only: Estado por galera/Tu avance, Avance por mes, Qué atender primero when applicable.
+- Existing actions only: Abrir Operaciones, Ver completo, Abrir cola de trabajo and the current KPI drill-down actions.
+- Use realistic placeholder numbers only for layout. Never create a new metric.
 
-Create ONE desktop Dashboard screen only.
+PORTAL RYM VISUAL IDENTITY:
+Navy #0A1B4D, blue #244AA5, sky #53B7E8, orange accent #F47C20, background #F4F7FB, border #D8E3F2, text #10224E, muted #62708C, green #047857, red #DC2626.
+Use white surfaces, subtle shadows, 14-18px radii, strong hierarchy, restrained enterprise styling, desktop 1366-1920. Blue is primary interaction color; orange is only an accent.
+
+Goal: the same functional Portal RYM Dashboard, significantly more polished and easier to scan. Generate ONE desktop Dashboard screen only.
 `.trim();
 
 const project = stitch.project(projectId);
 
 async function generateWithClarification(p) {
   try {
-    return await project.generate(p, { deviceType: 'DESKTOP' });
+    return await project.generate(p);
   } catch (error) {
     if (error instanceof StitchError && error.code === 'CLARIFICATION_REQUIRED') {
       const reply = [
@@ -74,7 +75,7 @@ async function generateWithClarification(p) {
         'Use a light sidebar and the supplied Portal RYM palette.',
         'Do not add any new data, controls, metrics, workflows or terminology.'
       ].join(' ');
-      return await project.generate(reply, { deviceType: 'DESKTOP' });
+      return await project.generate(reply);
     }
     throw error;
   }
