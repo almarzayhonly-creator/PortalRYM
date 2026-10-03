@@ -53,23 +53,26 @@
     app.innerHTML='<main class="rym-revisados-loading" aria-live="polite">Cargando Revisados…</main>';
 
     mounting=(async()=>{
-      const html=await fetch('/vue/dist/index.html',{cache:'no-store'}).then(r=>{
+      const build=encodeURIComponent(String(w.RYM_BUILD_VERSION||new URL(w.location.href).searchParams.get('build')||Date.now()));
+      const bust=url=>url+(url.includes('?')?'&':'?')+'v='+build;
+      const html=await fetch('/vue/dist/index.html?v='+build,{cache:'no-store'}).then(r=>{
         if(!r.ok)throw new Error('No se pudo cargar Revisados Vue');
         return r.text();
       });
 
       for(const href of [...html.matchAll(/<link[^>]+href=["']([^"']+\.css[^"']*)/gi)].map(m=>m[1])){
-        if(d.querySelector('link[data-rym-revisados-vue="'+href+'"]'))continue;
+        const keyed=href+'@'+build;
+        if(d.querySelector('link[data-rym-revisados-vue="'+keyed+'"]'))continue;
         const l=d.createElement('link');
         l.rel='stylesheet';
-        l.href=href;
-        l.dataset.rymRevisadosVue=href;
+        l.href=bust(href);
+        l.dataset.rymRevisadosVue=keyed;
         d.head.appendChild(l);
       }
 
       const src=html.match(/<script[^>]+type=["']module["'][^>]+src=["']([^"']+)["']/i)?.[1];
       if(!src)throw new Error('Bundle Vue de Revisados no encontrado');
-      await import(src);
+      await import(bust(src));
     })().finally(()=>{mounting=null});
 
     return mounting;
