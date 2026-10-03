@@ -18,7 +18,7 @@ const emitted=computed(()=>Array.isArray((data.value?.emitidos_hoy as {rows?:Can
 const emittedToday=computed(()=>data.value?.emitidos_hoy as {emitidos?:number; limite?:number}|undefined)
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
-const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all'), opsView=ref<'cards'|'table'>('cards')
+const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all')
 const cupos=ref<Array<Record<string,unknown>>>([]), cuposLoading=ref(false), cuposError=ref('')
 const fichaOpen=ref(false), fichaLoading=ref(false), fichaError=ref(''), ficha=ref<Record<string,any>|null>(null), fichaRow=ref<CanonicalRevisadoRow|null>(null)
 const incidentBusy=ref(false), incidentType=ref(''), incidentCustom=ref(''), incidentNote=ref('')
@@ -199,10 +199,9 @@ onMounted(()=>load())
 
       </section>
       <section v-else-if="active==='operations'" class="rv-stack rv-ops-workspace">
-        <div class="rv-section-title"><div><span>MÓDULO 03</span><h2>Operaciones · Vehicle Operations Workspace</h2><p>Gestión visual del padrón completo, estados legales y consultas puntuales eCarCheck.</p></div><small>Fuente: Stitch Production Final</small></div>
+        <div class="rv-section-title"><div><span>OPERACIONES</span><h2>Qué debes atender primero</h2><p>Unidades pendientes, bloqueos y datos de eCarCheck dentro de tu alcance.</p></div></div>
         <div class="rv-ops-summary">
           <div><span>{{num(rawRows.length)}} UDS TOTAL</span><i></i><b>{{num(metrics.vigentes)}} AL DÍA</b></div>
-          <div class="rv-view-toggle"><button :class="{active:opsView==='cards'}" @click="opsView='cards'"><RymIcon name="grid_view"/>CARDS</button><button :class="{active:opsView==='table'}" @click="opsView='table'"><RymIcon name="table_rows"/>TABLE</button></div>
         </div>
 
         <div class="rv-ops-search-row">
@@ -214,10 +213,8 @@ onMounted(()=>load())
         </div>
 
         <div class="rv-ops-filters">
-          <label>Galera:<select v-model="selectedGalera"><option value="">Todas (VCARS, VINDU…)</option><option v-for="x in galeras" :key="x">{{x}}</option></select></label>
-          <label>Supervisión:<select><option>Todas las Bahías</option></select></label>
-          <label>Período:<select><option>Ciclo actual</option></select></label>
-          <label>Severidad:<select v-model="selectedStatus"><option value="">Cualquier Estado</option><option v-for="x in statuses" :key="x">{{x}}</option></select></label>
+          <label>Galera:<select v-model="selectedGalera"><option value="">Todas las galeras</option><option v-for="x in galeras" :key="x">{{x}}</option></select></label>
+          <label>Estatus 2:<select v-model="selectedStatus"><option value="">Todos los estatus</option><option v-for="x in statuses" :key="x">{{x}}</option></select></label>
         </div>
 
         <div class="rv-ops-tools">
@@ -233,14 +230,10 @@ onMounted(()=>load())
 
         <div class="rv-ops-meta"><div><b>{{num(visibleRows.length)}}</b> unidades visibles</div><span>Selecciona una unidad para abrir su ficha legal completa.</span><button class="ghost" @click="copyPending">Copiar lista</button></div>
 
-        <div v-if="opsView==='cards'" class="rv-vehicle-grid">
-          <VehicleBadge v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" :row="r" @open="openFicha"/>
-        </div>
-
-        <div v-else class="rv-table rv-ops-table"><table><thead><tr><th>Unidad / vehículo</th><th>Placa</th><th>Galera & Bahía</th><th>Estado legal</th><th>Desglose normativo</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha completa</button></td></tr></tbody></table></div>
+        <div class="rv-table rv-ops-table"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Galera</th><th>Estado</th><th>Alertas y validaciones</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha</button></td></tr></tbody></table></div>
       </section>
       <section v-else-if="active==='monthly'" class="rv-stack rv-monthly">
-        <div class="rv-monthly-head"><div><span class="rv-module-pill">MÓDULO 02</span><span class="rv-eyebrow">CONTROL REGISTRAL & AUDITORÍA</span><h2>Avance y Auditoría de Flota</h2><p>Fiscalización por ciclo y galera contra los registros canónicos del Portal RYM.</p></div><div class="rv-monthly-actions"><button class="ghost" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="15"/>{{syncBusy?'Sincronizando…':'Sincronizar RUV'}}</button><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div></div>
+        <div class="rv-monthly-head"><div><span class="rv-module-pill">AVANCE MENSUAL</span><h2>Cobertura por ciclo y galera</h2><p>Datos canónicos de Revisados dentro de tu alcance.</p></div><div class="rv-monthly-actions"><button class="ghost" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="15"/>{{syncBusy?'Sincronizando…':'Actualizar eCarCheck'}}</button><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div></div>
         <div class="rv-cycle-grid">
           <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
             <header><div><span>CICLO OPERATIVO</span><h3>{{m.mes_nombre||('Mes '+m.mes_num)}}</h3></div><b>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</b></header>

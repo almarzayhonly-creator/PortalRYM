@@ -37,6 +37,10 @@ Do not add:
 - Station
 - Dispatch / Despacho Fiscal
 - Core Online
+- Vehicle Operations Workspace
+- Bahías, estaciones, servidor, telemetría o infraestructura ficticia
+- RUV, fiscalización, retenciones, trazabilidad o auditoría forense
+- columnas, filtros o acciones que no existan en `main`
 - new KPIs
 - new filters
 - new statuses

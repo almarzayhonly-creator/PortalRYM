@@ -47,7 +47,7 @@ HARD RULES:
 - Preserve existing business logic, processes, labels, actions, metrics and navigation.
 - Do not invent data, KPIs, filters, states, buttons, workflows, sources or terminology.
 - Light sidebar is mandatory.
-- No dark shell, Mission Control, RUV, Gateway, Telemetry, Node, Station, Dispatch, Core Online or command-center language.
+- No dark shell, Mission Control, RUV, Gateway, Telemetry, Node, Station, Dispatch, Core Online, Vehicle Operations Workspace, Bahías, fiscalización, trazabilidad or command-center language.
 - Keep the existing navigation names: Dashboard, Operaciones, Avance mensual, Reporte diario, Historial, Estadísticas, Boletas, Cupos.
 - Existing Dashboard content only: hero state "{N} unidades necesitan atención" or "Todo al día"; hero detail for pendientes antiguos, mes anterior, mes actual and unidades al día; actions Atender pendientes/Ver detalle and Revisar alertas when applicable.
 - Existing KPI labels only: Unidades en tu alcance, Al día, Pendientes ahora, Alertas reales/Sin alertas, Pendientes Revisado Taxi when applicable, Sin fotos, Emitidos hoy.
