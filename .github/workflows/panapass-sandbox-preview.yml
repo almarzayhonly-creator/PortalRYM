@@ -44,7 +44,7 @@ jobs:
           test -s ".${VUE_ASSET#/vue}"
           grep -Fq 'data-ui-source' ".${VUE_ASSET#/vue}"
           grep -Fq 'rv-brand-dark' ".${VUE_ASSET#/vue}"
-          grep -Fq 'Mission Control' ".${VUE_ASSET#/vue}"
+          grep -Fq 'rv-global-control' ".${VUE_ASSET#/vue}"
       - name: Inject sandbox bootstrap into preview build only
         run: |
           python3 - <<'PY'
@@ -94,7 +94,7 @@ jobs:
           curl -fsSL "$VERSION_URL$EXPECTED_ASSET?v=$GITHUB_SHA" -o /tmp/vue-bundle.js
           grep -Fq 'data-ui-source' /tmp/vue-bundle.js
           grep -Fq 'rv-brand-dark' /tmp/vue-bundle.js
-          grep -Fq 'Mission Control' /tmp/vue-bundle.js
+          grep -Fq 'rv-global-control' /tmp/vue-bundle.js
           curl -fsSI "$VERSION_URL$EXPECTED_ASSET?v=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
       - name: Verify canonical alias propagation
         env:
@@ -115,7 +115,7 @@ jobs:
               BUNDLE_OK=0
               grep -Fq 'data-ui-source' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
               grep -Fq 'rv-brand-dark' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
-              grep -Fq 'Mission Control' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              grep -Fq 'rv-global-control' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
               if [ "$BUNDLE_OK" -eq 3 ]; then
                 echo "Alias root + Stitch Vue bundle propagated on attempt $attempt"
                 curl -fsSI "$ALIAS_URL$EXPECTED_ASSET?v=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
