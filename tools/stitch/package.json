@@ -8,6 +8,7 @@
   "scripts": {
     "catalog": "node sync.mjs --catalog",
     "sync": "node sync.mjs",
-    "generate:revisados-dashboard": "node generate-revisados-dashboard.mjs"
+    "generate:revisados-dashboard": "node generate-revisados-dashboard.mjs",
+    "stitch:revisados-from-main": "node stitch-revisados-from-main.mjs"
   }
 }
