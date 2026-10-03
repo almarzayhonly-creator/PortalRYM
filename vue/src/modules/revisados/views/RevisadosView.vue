@@ -11,7 +11,12 @@ import RevisadosTable from '../components/RevisadosTable.vue'
 const records = ref<RevisadoRecord[]>([])
 const loading = ref(true)
 const error = ref('')
-const previewMode = ref(false)\nconst profileName = ref('Portal RYM')\nconst profileRole = ref('')\nconst scopeLabel = ref('')\nconst navItems = ref<RevisadosNavItem[]>([{id:'dashboard',label:'Dashboard',icon:'⌂'}])\nconst logoUrl = 'https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000'
+const previewMode = ref(false)
+const profileName = ref('Portal RYM')
+const profileRole = ref('')
+const scopeLabel = ref('')
+const navItems = ref<RevisadosNavItem[]>([{id:'dashboard',label:'Dashboard',icon:'⌂'}])
+const logoUrl = 'https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000'
 
 const demoRows: RevisadoRecord[] = [
   { id:'demo-1', unidad:'CU9475', placa:'CU9475', galera:'VCARS', supervisora:'Michelle', estado:'vigente', fechaUltimoRevisado:'2026-09-28', prioridad:'NORMAL', detalleEstado:'Ciclo vigente cubierto', vigente:true, requiereAtencion:false, cambioColor:false, tieneAlertas:false },
@@ -28,7 +33,12 @@ async function load() {
   error.value = ''
   previewMode.value = false
   try {
-    records.value = await revisadosService.list()\n    const context = revisadosService.context()\n    profileName.value = context.profile?.nombre || 'Portal RYM'\n    profileRole.value = context.profile?.rol || ''\n    scopeLabel.value = context.profile?.scope_label || ''\n    navItems.value = context.tabs
+    records.value = await revisadosService.list()
+    const context = revisadosService.context()
+    profileName.value = context.profile?.nombre || 'Portal RYM'
+    profileRole.value = context.profile?.rol || ''
+    scopeLabel.value = context.profile?.scope_label || ''
+    navItems.value = context.tabs
   } catch (cause) {
     previewMode.value = true
     records.value = demoRows
@@ -38,7 +48,12 @@ async function load() {
   }
 }
 
-function openTab(id:string){\n  if(id==='dashboard') return\n  revisadosService.navigate(id)\n}\n\nonMounted(load)
+function openTab(id:string){
+  if(id==='dashboard') return
+  revisadosService.navigate(id)
+}
+
+onMounted(load)
 </script>
 
 <template>
