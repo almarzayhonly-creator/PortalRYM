@@ -7,12 +7,14 @@ import type {
   RevisadoEstado,
 } from '../types/revisados.types'
 
+type RevisadosBridge = {
+  load(): Promise<CanonicalRevisadosResponse>
+  profile(): unknown
+}
+
 declare global {
   interface Window {
-    RYM_REVISADOS_BRIDGE?: {
-      load(): Promise<CanonicalRevisadosResponse>
-      profile(): unknown
-    }
+    RYM_REVISADOS_BRIDGE?: RevisadosBridge
   }
 }
 
@@ -81,9 +83,20 @@ function mapRow(row: CanonicalRevisadoRow, index: number): RevisadoRecord {
   }
 }
 
+function getBridge(): RevisadosBridge | undefined {
+  if (window.RYM_REVISADOS_BRIDGE) return window.RYM_REVISADOS_BRIDGE
+  try {
+    if (window.parent && window.parent !== window) {
+      return (window.parent as Window & { RYM_REVISADOS_BRIDGE?: RevisadosBridge }).RYM_REVISADOS_BRIDGE
+    }
+  } catch {
+    return undefined
+  }
+}
+
 export const revisadosService = {
   async list(): Promise<RevisadoRecord[]> {
-    const bridge = window.RYM_REVISADOS_BRIDGE
+    const bridge = getBridge()
     if (!bridge) {
       throw new Error(
         'El bridge de Revisados no está disponible. Abre esta vista desde el shell autenticado del Portal RYM.',
