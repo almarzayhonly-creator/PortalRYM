@@ -75,5 +75,9 @@ jobs:
           grep -Fq 'panapass-sandbox/tokens.css' /tmp/index.html
           grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
           grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
-          grep -Fq 'rym.revisadosVuePilot' /tmp/revisados.js
+          grep -Fq 'RYM_REVISADOS_BRIDGE' /tmp/revisados.js
           grep -Fq '/vue/dist/assets/' /tmp/vue.html
+          ASSET=$(grep -Eo '/vue/dist/assets/[^\" ]+\.js' /tmp/vue.html | head -1)
+          test -n "$ASSET"
+          curl -fsSL "$QA_URL$ASSET" -o /tmp/vue.js
+          grep -Fq 'Mission Control' /tmp/vue.js
