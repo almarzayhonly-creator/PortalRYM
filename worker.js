@@ -22,12 +22,15 @@ export default {
       const staleExternal = /<script\b[^>]*\bsrc=["'][^"']*\/modules\/core\/dashboard-payments-enhance\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script\s*>/gi;
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
+      const sandboxRuntime = isSandbox
+        ? '<script id="rym-v171-loader" src="/modules/v171-loader.js?v=172" defer></script><script id="rym-sandbox-v2-guard" src="/modules/panapass-sandbox/dashboard/index.js?v=2" defer></script>'
+        : '';
 
       let body = html.replace(staleInline, "").replace(staleExternal, "");
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
-        ? body.slice(0, bodyEnd) + owner + rankingOwner + body.slice(bodyEnd)
-        : body + owner + rankingOwner;
+        ? body.slice(0, bodyEnd) + owner + rankingOwner + sandboxRuntime + body.slice(bodyEnd)
+        : body + owner + rankingOwner + sandboxRuntime;
 
       return new Response(body, {
         status: response.status,
