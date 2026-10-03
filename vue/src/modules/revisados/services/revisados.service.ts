@@ -7,9 +7,17 @@ import type {
   RevisadoEstado,
 } from '../types/revisados.types'
 
+export type RevisadosNavItem = { id:string; label:string; icon:string }
+export type RevisadosContext = {
+  profile?: { nombre?:string; rol?:string; scope_label?:string }
+  tabs: RevisadosNavItem[]
+}
+
 type RevisadosBridge = {
   load(): Promise<CanonicalRevisadosResponse>
-  profile(): unknown
+  profile(): RevisadosContext['profile']
+  tabs?(): RevisadosNavItem[]
+  navigate?(tab:string): void
 }
 
 declare global {
@@ -45,7 +53,6 @@ function alertLabel(alert: CanonicalAlert) {
 function primaryStatus(row: CanonicalRevisadoRow): RevisadoEstado {
   const backendState = normalize(row.estado)
   const pendingType = normalize(row.pendiente_tipo)
-
   if (backendState === 'VIGENTE') return 'vigente'
   if (pendingType === 'CAMBIO_COLOR') return 'pendiente_cambio_color'
   if (row.requiere_atencion) return 'pendiente_ciclo'
@@ -64,7 +71,6 @@ function mapRow(row: CanonicalRevisadoRow, index: number): RevisadoRecord {
   const requiereAtencion = row.requiere_atencion === true
   const cambioColor = requiereAtencion && normalize(row.pendiente_tipo) === 'CAMBIO_COLOR'
   const tieneAlertas = (row.alerts?.length ?? 0) > 0
-
   return {
     id: String(row.unidad_id ?? row.placa ?? row.unidad ?? index),
     unidad: String(row.unidad ?? '—'),
@@ -89,19 +95,26 @@ function getBridge(): RevisadosBridge | undefined {
     if (window.parent && window.parent !== window) {
       return (window.parent as Window & { RYM_REVISADOS_BRIDGE?: RevisadosBridge }).RYM_REVISADOS_BRIDGE
     }
-  } catch {
-    return undefined
-  }
+  } catch { return undefined }
 }
 
 export const revisadosService = {
   async list(): Promise<RevisadoRecord[]> {
-    const bridge = getBridge()
-    if (!bridge) {
-      throw new Error('El bridge de Revisados no está disponible. Abre esta vista desde el shell autenticado del Portal RYM.')
-    }
-
-    const response = await bridge.load()
+    const bridge=getBridge()
+    if(!bridge)throw new Error('El bridge de Revisados no está disponible. Abre esta vista desde el shell autenticado del Portal RYM.')
+    const response=await bridge.load()
     return (response.rows ?? []).map(mapRow)
+  },
+  context(): RevisadosContext {
+    const bridge=getBridge()
+    return {
+      profile: bridge?.profile?.(),
+      tabs: bridge?.tabs?.() ?? [{id:'dashboard',label:'Dashboard',icon:'⌂'}],
+    }
+  },
+  navigate(tab:string) {
+    const bridge=getBridge()
+    if(tab==='dashboard') return
+    bridge?.navigate?.(tab)
   },
 }
