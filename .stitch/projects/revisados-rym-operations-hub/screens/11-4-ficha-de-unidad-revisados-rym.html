@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary": "#006398", "tertiary-fixed-dim": "#6cd3f7", "error-container": "#ffdad6", "error": "#ba1a1a", "secondary-fixed-dim": "#93ccff", "tertiary": "#000000", "on-tertiary-fixed-variant": "#004e61", "secondary-container": "#5bb8fe", "on-tertiary-container": "#028fb0", "outline-variant": "#c6c6cd", "tertiary-container": "#001f28", "on-surface-variant": "#45464d", "background": "#f8f9ff", "inverse-surface": "#213145", "surface-bright": "#f8f9ff", "on-background": "#0b1c30", "on-error": "#ffffff", "on-primary": "#ffffff", "on-secondary-container": "#00476e", "tertiary-fixed": "#b7eaff", "primary-fixed": "#dae2fd", "surface-tint": "#565e74", "inverse-primary": "#bec6e0", "surface-container-lowest": "#ffffff", "primary-fixed-dim": "#bec6e0", "primary": "#000000", "surface-container-highest": "#d3e4fe", "surface-container-low": "#eff4ff", "outline": "#76777d", "on-secondary-fixed-variant": "#004b73", "on-error-container": "#93000a", "surface-container-high": "#dce9ff", "on-secondary-fixed": "#001d31", "surface-container": "#e5eeff", "on-tertiary": "#ffffff", "on-surface": "#0b1c30", "primary-container": "#131b2e", "on-tertiary-fixed": "#001f28", "inverse-on-surface": "#eaf1ff", "surface": "#f8f9ff", "on-primary-fixed": "#131b2e", "surface-variant": "#d3e4fe", "surface-dim": "#cbdbf5", "on-primary-container": "#7c839b", "secondary-fixed": "#cce5ff", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#3f465c" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-lg": "1.25rem", "space-xl": "1.75rem", "gutter": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.875rem", "margin": "1.5rem" }, "fontFamily": { "headline-lg": [ "Inter" ], "body-lg": [ "Inter" ], "body-sm": [ "Inter" ], "headline-sm": [ "Inter" ], "label-caps": [ "Inter" ], "data-mono-sm": [ "JetBrains Mono" ], "data-mono-lg": [ "JetBrains Mono" ], "headline-xl": [ "Inter" ], "data-mono-md": [ "JetBrains Mono" ], "body-md": [ "Inter" ] }, "fontSize": { "headline-lg": [ "1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-lg": [ "0.9375rem", { "lineHeight": "1.5rem", "fontWeight": "400" } ], "body-sm": [ "0.8125rem", { "lineHeight": "1.125rem", "fontWeight": "400" } ], "headline-sm": [ "1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "label-caps": [ "0.6875rem", { "lineHeight": "1rem", "letterSpacing": "0.06em", "fontWeight": "700" } ], "data-mono-sm": [ "0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.015em", "fontWeight": "500" } ], "data-mono-lg": [ "0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0.025em", "fontWeight": "600" } ], "headline-xl": [ "1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "data-mono-md": [ "0.8125rem", { "lineHeight": "1.125rem", "letterSpacing": "0.02em", "fontWeight": "500" } ], "body-md": [ "0.875rem", { "lineHeight": "1.25rem", "fontWeight": "400" } ] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest flex flex-col z-50 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-space-md flex items-center justify-between bg-surface-container-low"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-headline-sm"><span class="material-symbols-outlined text-[20px]">verified_user</span></div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface">PORTAL RYM</span></div><span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant uppercase">Revisados Ops</span></div></div><span class="font-label-caps text-label-caps px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed uppercase tracking-wider">2k+ UDS</span></div><div class="px-space-md py-space-xs bg-surface-container-low/50"><p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Control Legal &amp; Fiscalización</p></div><div class="flex-1 overflow-y-auto px-space-sm py-space-md flex flex-col gap-space-md"><div class="flex flex-col gap-1"><div class="px-space-xs py-1"><span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Control Operativo</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary rounded-lg font-headline-sm"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="mission-control" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-body-sm text-body-sm">1. Mission Control</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="avance-y-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="font-body-sm text-body-sm">2. Avance y Auditoría</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="operaciones" href="#"><span class="material-symbols-outlined text-[20px]">table_chart</span><span class="font-body-sm text-body-sm">3. Operaciones</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-sm py-2 transition-colors bg-primary-container text-on-primary rounded-lg font-headline-sm" data-path="ficha-de-unidad" href="#"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span class="font-body-sm text-body-sm">4. Ficha de Unidad</span></a></nav></div><div class="flex flex-col gap-1"><div class="px-space-xs py-1"><span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Instalaciones &amp; Cumplimiento</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary rounded-lg font-headline-sm"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="galeras-y-bahias" href="#"><span class="material-symbols-outlined text-[20px]">garage_home</span><span class="font-body-sm text-body-sm">Galeras y Bahías</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="boletas-y-retenciones" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span><span class="font-body-sm text-body-sm">Boletas y Retenciones</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="auditoria-forense" href="#"><span class="material-symbols-outlined text-[20px]">policy</span><span class="font-body-sm text-body-sm">Auditoría Forense</span></a></nav></div></div><div class="p-space-sm bg-surface-container-low"><div class="flex items-center justify-between px-space-xs py-1 rounded bg-surface-container-lowest"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-data-mono-sm text-data-mono-sm text-on-surface">#01 Node Telemetry</span></div><span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">24ms</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-xl z-40 flex items-center justify-between px-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg w-72 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-outline">search</span><input class="bg-transparent border-0 outline-none w-full font-body-sm text-body-sm placeholder:text-outline text-on-surface" placeholder="Buscar VIN, placa o expediente..." readonly="" type="text"/><kbd class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant shadow-sm">⌘K</kbd></div><div class="h-6 w-px bg-surface-container-highest"></div><div class="flex items-center gap-space-xs"><div class="flex items-center gap-1 px-space-xs py-1 rounded bg-surface-container-low text-on-surface"><span class="material-symbols-outlined text-[16px] text-secondary">warehouse</span><span class="font-body-sm text-body-sm font-semibold">Galera Central B - Metro</span><span class="material-symbols-outlined text-[16px] text-outline">expand_more</span></div><div class="flex items-center gap-1 px-space-xs py-1 rounded bg-surface-container-low text-on-surface"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">badge</span><span class="font-body-sm text-body-sm">Sup: Lic. Marcela Vega</span><span class="material-symbols-outlined text-[16px] text-outline">expand_more</span></div></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-xs py-1 rounded-full bg-surface-container-low"><span class="relative flex h-2 w-2 ml-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-data-mono-sm text-data-mono-sm text-on-secondary-container font-semibold uppercase pr-1">ATTT GATEWAY 0.4s</span></div><div class="flex items-center p-0.5 rounded-full bg-surface-container-high h-8"><div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest shadow-sm text-on-surface"><span class="material-symbols-outlined text-[14px]">light_mode</span><span class="font-label-caps text-label-caps font-semibold">Claro</span></div><div class="flex items-center gap-1 px-2 py-1 rounded-full text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[14px]">dark_mode</span></div></div><div class="h-6 w-px bg-surface-container-highest"></div><div class="flex items-center gap-space-xs"><div class="flex flex-col text-right"><span class="font-headline-sm text-body-sm text-on-surface leading-tight">Ing. C. Navarro</span><span class="font-label-caps text-label-caps text-secondary font-bold uppercase tracking-wider">SUPERVISOR MÁSTER</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Sub-header / Breadcrumb Bar & Quick Unit Switcher -->
+<div class="bg-surface-container-low px-margin py-3 flex flex-wrap items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant flex-wrap">
+<span class="font-body-sm text-body-sm text-outline">Portal RYM</span>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<span class="font-body-sm text-body-sm text-outline">Operaciones</span>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<span class="font-body-sm text-body-sm text-outline">Flota</span>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-secondary">Ficha RYM-7102</span>
+<span class="ml-2 font-label-caps text-label-caps px-2 py-0.5 rounded-full bg-error-container text-on-error-container uppercase font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+        BLOQUEADO - REQUIERE SUBSANACIÓN
+      </span>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-2 text-[16px] text-outline">swap_horiz</span>
+<input class="bg-surface-container-lowest text-on-surface pl-7 pr-3 py-1 text-body-sm font-data-mono-sm rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-secondary w-44" placeholder="Buscar otra unidad / VIN..." type="text" value="Unidad #412"/>
+</div>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded text-on-surface-variant font-data-mono-sm text-data-mono-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">sync</span>
+<span>Sinc: ATTT 09:14</span>
+</div>
+</div>
+</div>
+<div class="p-margin flex flex-col gap-space-lg">
+<!-- Banner de Cabecera del Vehículo -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg relative overflow-hidden">
+<div class="flex flex-col md:flex-row items-start md:items-center gap-space-lg min-w-0">
+<!-- Visual Snapshot / Photo Asset -->
+<div class="relative w-36 h-28 rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0 shadow-inner group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="White and navy blue corporate Hino 300 Series medium-duty truck parked inside modern high-tech automotive inspection bay with telemetry sensors and clean industrial lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxz3137nJSO72Y6ttIP9YqIVpxYkmyzlLG3dBSGoHU_5sXz2AB8dpWEhV_delV-nYgQ7_pt33UXlQuxzPZONgIo4mm7Vq-z4B5c6JHSzAmBD-ZpC3pVPwDUFu9SVTVcczdUCjx2XKxg7ESnF3NjEwIBCz7N8J2iaoOwgd3qkiUqkijauqSNfOuorIeIIXNbM3D6LwxvXzl61bmkWpKnecsa4PHI22Qt2bDBjeTmJpGbqTSffPh9raL"/>
+<div class="absolute bottom-1 left-1 bg-primary/80 backdrop-blur text-on-primary font-data-mono-sm text-[10px] px-1.5 py-0.5 rounded">
+            #412
+          </div>
+</div>
+<!-- Vehicle Core Identification -->
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center gap-space-sm flex-wrap">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">RYM-7102</h1>
+<span class="font-label-caps text-label-caps px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed uppercase font-semibold">
+              Camión Liviano Chasis Cabina 6.5T
+            </span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">
+              Modelo 2022
+            </span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface-variant font-medium">
+            Hino 300 Series (Euro IV) • <span class="font-data-mono-md text-data-mono-md text-on-surface font-semibold">142,850 km</span>
+</p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-1 mt-1 text-on-surface-variant font-data-mono-sm text-data-mono-sm">
+<div><span class="text-outline uppercase text-[10px]">VIN:</span> <span class="text-on-surface font-semibold">3HNJB88182901928</span></div>
+<div><span class="text-outline uppercase text-[10px]">Motor:</span> <span class="text-on-surface font-semibold">N04C-UV-8192</span></div>
+<div><span class="text-outline uppercase text-[10px]">Combustible:</span> <span class="text-on-surface font-semibold">Diésel B5 Nacional</span></div>
+</div>
+</div>
+</div>
+<!-- Legal Titular & Logistics Location Pill -->
+<div class="flex flex-col sm:flex-row lg:flex-col gap-space-sm bg-surface-container-low p-space-md rounded-lg flex-shrink-0 lg:w-80">
+<div class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">apartment</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-caps text-label-caps text-outline uppercase">Empresa Titular</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Logística y Carga RYM S.A.</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">RUC 15572910-2-2019 DV: 44</span>
+</div>
+</div>
+<div class="h-px bg-surface-container-highest w-full"></div>
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">garage_home</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Galera Central B</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Bahía 11 • Cupo 48/50</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-outline uppercase block">Supervisión</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Lic. M. Vega (402)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Matriz de Estado Legal y Operativo (4 Bloques) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- BLOQUE A: REVISADO TÉCNICO Y ECARCHECK 2025 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">engineering</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface tracking-wider font-bold">1. Revisado Técnico 2025</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm px-2 py-0.5 rounded bg-error-container text-on-error-container font-semibold">Expirado 3d</span>
+</div>
+<div class="bg-surface-container-low p-space-xs rounded-lg flex items-center justify-between">
+<span class="font-data-mono-sm text-data-mono-sm text-outline">Certificado:</span>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-on-surface">#REV-81921</span>
+</div>
+<!-- Micro Metricas Banco de Prueba -->
+<div class="flex flex-col gap-2 mt-1">
+<div>
+<div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant mb-1">
+<span>Eficiencia Frenado</span>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-secondary">89% (APROBADO)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[89%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant mb-1">
+<span>Emisión CO2 (0.8% Máx 2.5%)</span>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-secondary">0.8% (ÓPTIMO)</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[32%]"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm pt-1">
+<span class="text-on-surface-variant">Holgura de Dirección:</span>
+<span class="font-data-mono-sm text-data-mono-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">0 Fallas</span>
+</div>
+</div>
+</div>
+<div class="mt-3 pt-2 bg-surface-container-low/60 p-2 rounded text-on-surface-variant font-body-sm text-body-sm">
+<p class="text-[11px] leading-snug">
+<span class="font-semibold text-secondary">Dictamen:</span> Inspección mecánica 100% aprobada. Calcomanía retenida exclusivamente por bloqueo administrativo.
+          </p>
+</div>
+</div>
+<!-- BLOQUE B: COLOR Y REGISTRO RUV -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px] text-on-surface">palette</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface tracking-wider font-bold">2. Homologación Color</span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">Peritaje DIJ OK</span>
+</div>
+<div class="flex flex-col gap-2 mt-1">
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-outline uppercase">Ruta Actual:</span>
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm font-semibold text-on-surface">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span>Blanco / Azul RYM</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-outline uppercase">Padrón RUV 2022:</span>
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm font-semibold text-on-surface">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span>Rojo Bermellón</span>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-1.5 p-2 rounded bg-surface-container text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-medium">Peritaje DIJ Certificado</span>
+<span class="font-data-mono-sm text-[11px] text-on-surface-variant">Expediente #DIJ-2025-0182A</span>
+</div>
+</div>
+</div>
+<div class="mt-3 pt-2 bg-surface-container-low/60 p-2 rounded text-on-surface-variant font-body-sm text-body-sm">
+<p class="text-[11px] leading-snug">
+<span class="font-semibold text-on-surface">Acción:</span> Requiere firma de minuta notarial para actualización definitiva en Municipio de Panamá.
+          </p>
+</div>
+</div>
+<!-- BLOQUE C: DESGLOSE DE DEUDAS Y GRAVÁMENES -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-error text-[20px]">account_balance_wallet</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface tracking-wider font-bold">3. Desglose Gravámenes</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-error">$150.00 USD</span>
+</div>
+<!-- Triple Separación Inequívoca -->
+<div class="flex flex-col gap-1.5">
+<!-- 1. Boleta Empresa -->
+<div class="p-2 rounded bg-error-container/40 flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-[10px] text-on-error-container font-bold uppercase">1. Deuda Operador / RUC</span>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-error">$150.00</span>
+</div>
+<span class="font-data-mono-sm text-[11px] text-on-surface">ATTT #EMP-2025-991 • Sobrecarga Eje</span>
+</div>
+<!-- 2. Boleta Asociada a Placa -->
+<div class="p-2 rounded bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-[10px] text-outline font-bold uppercase">2. Boletas de Placa</span>
+<span class="font-data-mono-sm text-[11px] text-on-surface">Paz y Salvo Tránsito</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-secondary">$0.00</span>
+</div>
+<!-- 3. Restricción Jurídica Placa -->
+<div class="p-2 rounded bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-[10px] text-outline font-bold uppercase">3. Reserva / Secuestro</span>
+<span class="font-data-mono-sm text-[11px] text-on-surface">Dominio y Registro</span>
+</div>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-surface text-secondary font-bold">LIMPIO</span>
+</div>
+</div>
+</div>
+<div class="mt-2 pt-2 bg-secondary-fixed/30 p-2 rounded text-on-secondary-fixed font-body-sm text-body-sm">
+<p class="text-[11px] leading-snug">
+<span class="font-bold">Aviso Legal:</span> La placa está limpia. La retención proviene del RUC patronal general.
+          </p>
+</div>
+</div>
+<!-- BLOQUE D: CUPO Y LOGÍSTICA DE BAHÍA -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[20px]">pin_drop</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface tracking-wider font-bold">4. Cupo &amp; Bahía</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm px-2 py-0.5 rounded bg-surface-container text-on-surface font-semibold">Bahía 11</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="p-2.5 rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase">Ocupación Galera</span>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">Cupo 48 de 50</span>
+</div>
+<div class="text-right">
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-bold">96%</span>
+<span class="font-label-caps text-label-caps text-outline block">Saturación</span>
+</div>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline uppercase">Próxima Calibración de Sensores</span>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">calendar_clock</span>
+<span class="font-data-mono-sm text-data-mono-sm font-bold">24-Mar-2025 09:00 AM</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-3 flex items-center justify-between pt-2 bg-surface-container-low/60 p-2 rounded">
+<span class="font-label-caps text-label-caps text-outline uppercase">Módulo Dinamómetro</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">Listo y Verificado</span>
+</div>
+</div>
+</div>
+<!-- Split Section: Historial de Auditoría & Centro de Acciones -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Columna Izquierda: Historial Cronológico (Timeline 7 Cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-2 bg-surface-container-lowest">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[22px]">history_edu</span>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Historial Cronológico de Revisiones y Auditorías</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Trazabilidad inmutable de peritajes e interconexiones ATTT</span>
+</div>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">4 eventos</span>
+</div>
+<!-- Vertical Timeline List -->
+<div class="relative pl-6 flex flex-col gap-space-md before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-high">
+<!-- Timeline Item 1 -->
+<div class="relative flex flex-col gap-1 bg-surface-container-low/70 p-space-sm rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="absolute -left-[27px] top-3 w-3 h-3 rounded-full bg-secondary ring-4 ring-surface-container-lowest"></div>
+<div class="flex items-center justify-between flex-wrap gap-1">
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-secondary">18-Feb-2025 • 14:32</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-surface">Inspección Mecánica</span>
+</div>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">eCarCheck Físico Concluido en Galera Central B</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[13px]">
+              Inspección en Bahía 11 por Ing. Rodrigo Solís. Frenos, tren delantero y prueba dinamométrica superados con holgura cero. Bloqueo automático del sistema por caducidad de calcomanía anual previa.
+            </p>
+</div>
+<!-- Timeline Item 2 -->
+<div class="relative flex flex-col gap-1 bg-error-container/30 p-space-sm rounded-lg">
+<div class="absolute -left-[27px] top-3 w-3 h-3 rounded-full bg-error ring-4 ring-surface-container-lowest"></div>
+<div class="flex items-center justify-between flex-wrap gap-1">
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-error">12-Feb-2025 • 08:05</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-error-container text-on-error-container font-semibold">Incidencia Regulatoria</span>
+</div>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Detección de Boleta Patronal ATTT #EMP-2025-991</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[13px]">
+              La pasarela ATTT reportó infracción por exceso de peso (eje posterior en Autopista Central). Monto: $150.00 USD emitido a Logística y Carga RYM S.A.
+            </p>
+</div>
+<!-- Timeline Item 3 -->
+<div class="relative flex flex-col gap-1 bg-surface-container-low/70 p-space-sm rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="absolute -left-[27px] top-3 w-3 h-3 rounded-full bg-surface-container-highest ring-4 ring-surface-container-lowest"></div>
+<div class="flex items-center justify-between flex-wrap gap-1">
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-on-surface-variant">10-Ene-2025 • 11:20</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-surface">Inspección Visual</span>
+</div>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Alerta de Discrepancia de Pintura y Rotulación</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[13px]">
+              Se detectó esquema azul corporativo contrastante con el Rojo Bermellón de registro 2022. Se abrió trámite de homologación DIJ.
+            </p>
+</div>
+<!-- Timeline Item 4 -->
+<div class="relative flex flex-col gap-1 bg-surface-container-low/70 p-space-sm rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="absolute -left-[27px] top-3 w-3 h-3 rounded-full bg-secondary-container ring-4 ring-surface-container-lowest"></div>
+<div class="flex items-center justify-between flex-wrap gap-1">
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-on-surface-variant">14-Mar-2024 • 16:45</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed">Histórico</span>
+</div>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Emisión de Revisado Anual 2024</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[13px]">
+              Expediente archivado conforme, sellado en Notaría Novena de Circuito sin discrepancias previas.
+            </p>
+</div>
+</div>
+</div>
+<!-- Columna Derecha: Centro de Acciones y Subsanación Operativa (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Action Card: Subsanación Inmediata -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[22px]">gavel</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Subsanación y Liberación</h3>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">1 Acción Crítica</span>
+</div>
+<!-- Balance Operativo de Galera -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase font-semibold">Fondo Operativo Galera Central</span>
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">$4,820.00 <span class="text-body-sm font-normal text-on-surface-variant">USD</span></span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">Saldo Disponible</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[13px]">
+            Para desbloquear la emisión de la calcomanía 2025, liquide la boleta patronal <strong class="text-on-surface">ATTT #EMP-2025-991 ($150.00 USD)</strong> debitando del fondo preautorizado de contingencias operativas.
+          </p>
+<button class="w-full bg-primary text-on-primary py-2.5 px-space-md rounded-lg font-headline-sm text-body-sm flex items-center justify-center gap-2 hover:bg-inverse-surface transition-all shadow-sm" id="btnPayBoleta">
+<span class="material-symbols-outlined text-[18px]">credit_card</span>
+<span>Liquidar Boleta Patronal ($150.00)</span>
+</button>
+<!-- Divider -->
+<div class="h-px bg-surface-container-high w-full my-1"></div>
+<!-- Secondary Operational Actions -->
+<div class="flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-outline uppercase font-bold tracking-wider">Trámites y Certificados</span>
+<button class="w-full bg-surface-container hover:bg-surface-container-high text-on-surface py-2 px-space-md rounded-lg font-body-sm text-body-sm flex items-center justify-between transition-colors" id="btnEmitCalcomania">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified</span>
+<span>Emitir Calcomanía 2025 con Firma Digital</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline">arrow_forward</span>
+</button>
+<button class="w-full bg-surface-container-lowest hover:bg-surface-container-low text-on-surface py-2 px-space-md rounded-lg font-body-sm text-body-sm flex items-center justify-between transition-colors" onclick="window.print()">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">print</span>
+<span>Imprimir Expediente Completo (PDF Oficial)</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">9 págs</span>
+</button>
+<button class="w-full bg-surface-container-lowest hover:bg-surface-container-low text-on-surface py-2 px-space-md rounded-lg font-body-sm text-body-sm flex items-center justify-between transition-colors" id="btnReasignar">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">move_up</span>
+<span>Reasignar a otra Galera / Bahía de Espera</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline">tune</span>
+</button>
+</div>
+</div>
+<!-- Mini Telemetry Diagnostics Panel -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-outline uppercase font-bold tracking-wider">Cotejo Municipal Panamá Centro</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">En línea</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-[12px] font-data-mono-sm">
+<div class="p-2 rounded bg-surface-container-low flex flex-col">
+<span class="text-outline text-[10px]">Impuesto Circulación:</span>
+<span class="text-on-surface font-bold">AL DÍA (Feb-2025)</span>
+</div>
+<div class="p-2 rounded bg-surface-container-low flex flex-col">
+<span class="text-outline text-[10px]">Seguro Comercial:</span>
+<span class="text-on-surface font-bold">VENCE 15-NOV-2025</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Modal / Notification Trigger Simulation (Vanilla JS) -->
+<script>
+    (function() {
+      const btnPay = document.getElementById('btnPayBoleta');
+      const btnCalcomania = document.getElementById('btnEmitCalcomania');
+
+      if (btnPay) {
+        btnPay.addEventListener('click', function() {
+          const originalText = btnPay.innerHTML;
+          btnPay.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Procesando débito bancario ATTT...';
+          btnPay.disabled = true;
+
+          setTimeout(() => {
+            btnPay.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Boleta Liquidada Exitosamente';
+            btnPay.classList.remove('bg-primary');
+            btnPay.classList.add('bg-secondary', 'text-on-primary');
+            alert('Trámite Exitoso: Se aplicó el pago de $150.00 USD desde el Fondo de Galera. Boleta #EMP-2025-991 subsanada en pasarela ATTT. El vehículo ya está habilitado para retiro de calcomanía.');
+          }, 1200);
+        });
+      }
+
+      if (btnCalcomania) {
+        btnCalcomania.addEventListener('click', function() {
+          alert('Generando token criptográfico SHA-256 para emisión de calcomanía física 2025 con QR antifraude.');
+        });
+      }
+    })();
+  </script>
+</div></main></div></body></html>
