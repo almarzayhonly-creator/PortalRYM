@@ -61,8 +61,8 @@ jobs:
           npx --yes wrangler@latest versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
           U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
           test -n "$U"
-          echo "url=$U" >> "$GITHUB_OUTPUT"
-          echo "Exact preview: $U"
+          echo "url=https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev" >> "$GITHUB_OUTPUT"
+          echo "Exact preview: https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev"
       - name: Verify preview isolation
         env:
           QA_URL: ${{ steps.deploy.outputs.url }}
