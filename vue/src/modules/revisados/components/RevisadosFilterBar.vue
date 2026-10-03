@@ -19,45 +19,48 @@ function toggle<T>(values: T[], value: T) {
 <template>
   <section class="filters" aria-label="Filtros globales de revisados">
     <div class="filter-head">
-      <div>
-        <span>FILTROS GLOBALES</span>
-        <h3>Explorar flota</h3>
-      </div>
-      <small>KPIs, galeras y tabla usan el mismo filtro</small>
+      <div><span>FILTROS GLOBALES</span><h3>Explorar flota</h3></div>
+      <small>Resumen, galeras y tabla usan el mismo filtro</small>
     </div>
 
-    <div class="top-grid">
+    <div class="search-row">
       <label class="search">
-        <span>Unidad o placa</span>
+        <span>Unidad, placa o supervisora</span>
         <input v-model="model.search" type="search" placeholder="Buscar unidad, placa o supervisora" />
       </label>
+    </div>
 
+    <div class="groups">
       <div class="filter-group">
-        <span class="filter-label">Galera</span>
+        <span class="filter-label">Galera <b v-if="model.galeras.length">{{ model.galeras.length }}</b></span>
         <div class="chips">
-          <button
-            v-for="galera in galeras"
-            :key="galera"
-            type="button"
+          <button v-for="galera in galeras" :key="galera" type="button"
             :aria-pressed="model.galeras.includes(galera)"
-            @click="model.galeras = toggle(model.galeras, galera)"
-          >
+            @click="model.galeras = toggle(model.galeras, galera)">
             {{ galera }}
           </button>
         </div>
       </div>
 
       <div class="filter-group">
-        <span class="filter-label">Estatus</span>
+        <span class="filter-label">Supervisora <b v-if="model.supervisoras.length">{{ model.supervisoras.length }}</b></span>
         <div class="chips">
-          <button
-            v-for="option in estadoOptions"
-            :key="option.value"
-            type="button"
+          <button v-for="supervisora in supervisoras" :key="supervisora" type="button"
+            :aria-pressed="model.supervisoras.includes(supervisora)"
+            @click="model.supervisoras = toggle(model.supervisoras, supervisora)">
+            {{ supervisora }}
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Estatus <b v-if="model.estados.length">{{ model.estados.length }}</b></span>
+        <div class="chips status-chips">
+          <button v-for="option in estadoOptions" :key="option.value" type="button"
+            :data-status="option.value"
             :aria-pressed="model.estados.includes(option.value)"
-            @click="model.estados = toggle(model.estados, option.value)"
-          >
-            {{ option.label }}
+            @click="model.estados = toggle(model.estados, option.value)">
+            <i></i>{{ option.label }}
           </button>
         </div>
       </div>
@@ -66,18 +69,22 @@ function toggle<T>(values: T[], value: T) {
 </template>
 
 <style scoped>
-.filters{padding:18px;border:1px solid #e2e8f0;border-radius:16px;background:#fff}
-.filter-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:14px}
+.filters{padding:17px;border:1px solid #e2e8f0;border-radius:15px;background:#fff}
+.filter-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:12px}
 .filter-head span{font-size:9px;font-weight:900;letter-spacing:.14em;color:#64748b}
-.filter-head h3{margin:3px 0 0;font-size:19px;letter-spacing:-.03em}
-.filter-head small{color:#94a3b8}
-.top-grid{display:grid;grid-template-columns:1.35fr 1fr 1.6fr;gap:12px}
-.search,.filter-group{display:grid;gap:7px;align-content:start}
+.filter-head h3{margin:3px 0 0;font-size:18px;letter-spacing:-.03em}
+.filter-head small{color:#94a3b8;font-size:10px}
+.search-row{max-width:520px;margin-bottom:13px}.search{display:grid;gap:6px}
 .search span,.filter-label{font-size:10px;font-weight:850;color:#475569}
-.search input{height:42px;border:1px solid #d7dee8;border-radius:10px;padding:0 12px;outline:none;background:#fff;color:#0f172a}
+.search input{height:40px;border:1px solid #d7dee8;border-radius:9px;padding:0 12px;outline:none;background:#fff;color:#0f172a}
 .search input:focus{border-color:#0062ff;box-shadow:0 0 0 3px rgba(0,98,255,.08)}
+.groups{display:grid;grid-template-columns:.8fr 1.15fr 1.2fr;gap:14px}
+.filter-group{display:grid;gap:7px;align-content:start;min-width:0}
+.filter-label{display:flex;gap:6px;align-items:center}.filter-label b{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#eaf2ff;color:#0062ff;font-size:9px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips button{min-height:32px;padding:0 10px;border:1px solid #dbe3ec;border-radius:9px;background:#fff;color:#475569;font-size:11px;font-weight:750}
-.chips button[aria-pressed="true"]{background:#0062ff;border-color:#0062ff;color:#fff}
-@media(max-width:980px){.top-grid{grid-template-columns:1fr}.filter-head{align-items:start;flex-direction:column}}
+.chips button{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 9px;border:1px solid #dbe3ec;border-radius:8px;background:#fff;color:#475569;font-size:10px;font-weight:750}
+.chips button[aria-pressed="true"]{background:#eaf2ff;border-color:#8eb8ff;color:#0054db;box-shadow:inset 0 0 0 1px #8eb8ff}
+.status-chips i{width:6px;height:6px;border-radius:50%;background:#94a3b8}
+.status-chips button[data-status="vigente"] i{background:#16a34a}.status-chips button[data-status="pendiente_ciclo"] i{background:#0062ff}.status-chips button[data-status="pendiente_cambio_color"] i{background:#ea580c}.status-chips button[data-status="incidencia"] i{background:#dc2626}
+@media(max-width:1050px){.groups{grid-template-columns:1fr 1fr}}@media(max-width:760px){.groups{grid-template-columns:1fr}.filter-head{align-items:start;flex-direction:column}}
 </style>
