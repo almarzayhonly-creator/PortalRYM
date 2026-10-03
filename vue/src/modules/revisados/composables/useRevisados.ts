@@ -1,9 +1,14 @@
 import { computed, ref, type Ref } from 'vue'
-import type {
-  RevisadoRecord,
-  RevisadosFilters,
-  RevisadosMetrics,
-} from '../types/revisados.types'
+import type { RevisadoRecord, RevisadosFilters, RevisadosMetrics, RevisadoEstado } from '../types/revisados.types'
+
+function matchesStatus(row: RevisadoRecord, status: RevisadoEstado) {
+  if (status === 'vigente') return row.vigente
+  if (status === 'pendiente_ciclo') return row.requiereAtencion
+  if (status === 'pendiente_cambio_color') return row.cambioColor
+  if (status === 'incidencia') return row.tieneAlertas
+  if (status === 'no_aplica') return !row.vigente && !row.requiereAtencion
+  return false
+}
 
 export function useRevisados(records: Ref<RevisadoRecord[]>) {
   const filters = ref<RevisadosFilters>({
@@ -18,14 +23,11 @@ export function useRevisados(records: Ref<RevisadoRecord[]>) {
 
     return records.value.filter((row) => {
       if (filters.value.galeras.length && !filters.value.galeras.includes(row.galera)) return false
-      if (
-        filters.value.supervisoras.length &&
-        !filters.value.supervisoras.includes(row.supervisora ?? '')
-      ) return false
-      if (filters.value.estados.length && !filters.value.estados.includes(row.estado)) return false
+      if (filters.value.supervisoras.length && !filters.value.supervisoras.includes(row.supervisora ?? '')) return false
+      if (filters.value.estados.length && !filters.value.estados.some((status) => matchesStatus(row, status))) return false
       if (
         q &&
-        ![row.unidad, row.placa, row.galera, row.supervisora ?? '']
+        ![row.unidad, row.placa, row.galera, row.supervisora ?? '', row.detalleEstado ?? '']
           .join(' ')
           .toLowerCase()
           .includes(q)
@@ -38,10 +40,10 @@ export function useRevisados(records: Ref<RevisadoRecord[]>) {
     const rows = filtered.value
     return {
       total: rows.length,
-      vigentes: rows.filter((row) => row.estado === 'vigente').length,
-      pendientesCiclo: rows.filter((row) => row.estado === 'pendiente_ciclo').length,
-      cambiosColor: rows.filter((row) => row.estado === 'pendiente_cambio_color').length,
-      incidencias: rows.filter((row) => row.estado === 'incidencia').length,
+      vigentes: rows.filter((row) => row.vigente).length,
+      pendientesCiclo: rows.filter((row) => row.requiereAtencion).length,
+      cambiosColor: rows.filter((row) => row.cambioColor).length,
+      incidencias: rows.filter((row) => row.tieneAlertas).length,
     }
   })
 
