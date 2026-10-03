@@ -7,6 +7,7 @@ import MissionControlSummary from '../components/MissionControlSummary.vue'
 import GaleraComparison from '../components/GaleraComparison.vue'
 import RevisadosFilterBar from '../components/RevisadosFilterBar.vue'
 import RevisadosTable from '../components/RevisadosTable.vue'
+import VehicleBadge from '../components/VehicleBadge.vue'
 
 const data=ref<CanonicalRevisadosResponse>(), records=ref<RevisadoRecord[]>([]), loading=ref(true), error=ref(''), active=ref('dashboard')
 const profile=ref({nombre:'Portal RYM',rol:'',scope_label:''}), navItems=ref<RevisadosNavItem[]>([])
@@ -56,6 +57,16 @@ function vehicleSignals(r:CanonicalRevisadoRow){
   out.push({label:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'Sin cupo':'Cupo OK',tone:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'warn':'info'})
   return out.slice(0,3)
 }
+const kpis=computed(()=>data.value?.kpis||{})
+const coveragePct=computed(()=>metrics.value.total?Math.round(metrics.value.vigentes*100/metrics.value.total):0)
+const focusRows=computed(()=>[...pending.value].sort((a,b)=>Number(Boolean(b.bloqueado))-Number(Boolean(a.bloqueado))).slice(0,4))
+const attentionItems=computed(()=>[
+  {label:'Pendientes de ciclo',value:metrics.value.pendientesCiclo,tone:'blue'},
+  {label:'Cambio de color',value:metrics.value.cambiosColor,tone:'amber'},
+  {label:'Alertas reales',value:metrics.value.incidencias,tone:'red'},
+  {label:'Sin fotos',value:Number(kpis.value.sin_fotos||0),tone:'neutral'},
+  {label:'Boletas',value:Number(kpis.value.con_boleta||kpis.value.con_boleta_empresa||0),tone:'red'},
+].filter(x=>x.value>0))
 const galeras=computed(()=>[...new Set(rawRows.value.map(r=>text(r.galera)).filter(x=>x!=='—'))].sort())
 const statuses=computed(()=>[...new Set(pending.value.map(r=>text(r.status2)).filter(x=>x!=='—'))].sort())
 async function load(force=false){loading.value=true;error.value='';try{const response=await revisadosService.load(force);data.value=response;records.value=await revisadosService.list(response);profile.value={nombre:response.profile?.nombre||'Portal RYM',rol:response.profile?.rol||'',scope_label:response.profile?.scope_label||''};navItems.value=revisadosService.context().tabs; if(!navItems.value.some(x=>x.id===active.value))active.value='dashboard'}catch(e){error.value=e instanceof Error?e.message:String(e)}finally{loading.value=false}}
@@ -90,7 +101,34 @@ onMounted(()=>load())
   <section class="rv-main"><header><div><small>REVISADOS / {{ active.toUpperCase() }}</small><h1>{{navItems.find(x=>x.id===active)?.label}}</h1></div><div><button class="ghost" @click="clearFilters">Limpiar filtros</button><button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button></div></header>
     <div v-if="loading" class="rv-state">Cargando datos reales de Revisados…</div><div v-else-if="error" class="rv-state error"><b>No fue posible cargar Revisados.</b><span>{{error}}</span><button class="primary" @click="load(true)">Reintentar</button></div>
     <template v-else>
-      <section v-if="active==='dashboard'" class="rv-stack"><div class="rv-intro"><span>MISSION CONTROL</span><h2>Control legal de la flota</h2><p>Indicadores y prioridades de tu alcance autorizado.</p></div><MissionControlSummary :total="metrics.total" :vigentes="metrics.vigentes" :pendientes="metrics.pendientesCiclo" :cambios-color="metrics.cambiosColor" :incidencias="metrics.incidencias"/><RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/><GaleraComparison :rows="filtered"/><RevisadosTable :rows="filtered"/></section>
+      <section v-if="active==='dashboard'" class="rv-stack rv-mission">
+        <div class="rv-mission-head">
+          <div><span class="rv-eyebrow">MISSION CONTROL · ECARCHECK</span><h2>Control legal de la flota</h2><p>Prioridades, cobertura y unidades que requieren acción dentro de tu alcance.</p></div>
+          <div class="rv-mission-summary"><b>{{num(metrics.total)}}</b><span>unidades</span><i></i><b>{{num(metrics.vigentes)}}</b><span>al día</span></div>
+        </div>
+        <div class="rv-mission-grid">
+          <article class="rv-fleet-radar">
+            <div class="rv-panel-title"><div><span>FLEET READINESS</span><h3>Estado general</h3></div><small>{{coveragePct}}% cobertura</small></div>
+            <div class="rv-radar-body">
+              <div class="rv-ring" :style="{'--pct':coveragePct+'%'}"><div><strong>{{coveragePct}}%</strong><span>VIGENTE</span><small>{{num(metrics.vigentes)}} / {{num(metrics.total)}}</small></div></div>
+              <div class="rv-radar-stats"><div><span>Requieren atención</span><b>{{num(metrics.pendientesCiclo)}}</b></div><div><span>Cambio de color</span><b>{{num(metrics.cambiosColor)}}</b></div><div><span>Alertas reales</span><b>{{num(metrics.incidencias)}}</b></div></div>
+            </div>
+          </article>
+          <article class="rv-attention">
+            <div class="rv-panel-title"><div><span>ATTENTION QUEUE</span><h3>Cola de atención</h3></div><small>datos reales</small></div>
+            <button v-for="item in attentionItems" :key="item.label" type="button" :data-tone="item.tone">
+              <i></i><span>{{item.label}}</span><b>{{num(item.value)}}</b><em>→</em>
+            </button>
+            <div v-if="!attentionItems.length" class="rv-attention-empty">Sin alertas dentro del filtro activo.</div>
+          </article>
+        </div>
+        <RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/>
+        <GaleraComparison :rows="filtered"/>
+        <section class="rv-focus-panel">
+          <div class="rv-panel-title"><div><span>VEHICLES IN FOCUS</span><h3>Unidades que requieren atención</h3></div><button type="button" @click="open('operations')">Abrir Operaciones →</button></div>
+          <div class="rv-focus-grid"><VehicleBadge v-for="r in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" :row="r" compact @open="openFicha"/></div>
+        </section>
+      </section>
       <section v-else-if="active==='operations'" class="rv-stack rv-ops-workspace">
         <div class="rv-ops-hero">
           <div>
@@ -136,18 +174,7 @@ onMounted(()=>load())
         <div class="rv-ops-meta"><div><b>{{num(visibleRows.length)}}</b> unidades visibles</div><span>Selecciona una unidad para abrir su ficha legal completa.</span></div>
 
         <div v-if="opsView==='cards'" class="rv-vehicle-grid">
-          <article v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" class="rv-vehicle-badge" :class="'tone-'+vehicleStateTone(r)" @click="openFicha(r)">
-            <div class="rv-badge-top"><span>{{r.galera||'SIN GALERA'}}</span><b :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</b></div>
-            <div class="rv-plate-zone">
-              <small>UNIDAD {{r.unidad||'—'}}</small>
-              <strong>{{r.placa||r.unidad||'—'}}</strong>
-              <span>PANAMÁ · RYM</span>
-            </div>
-            <div class="rv-vehicle-copy"><b>{{vehicleModel(r)}}</b><span>{{r.supervisora||'Sin supervisora'}} · {{r.prioridad||'Prioridad actual'}}</span></div>
-            <div class="rv-review-date"><span>Último revisado</span><b>{{date(r.ultimo_revisado)}}</b></div>
-            <div class="rv-signal-row"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div>
-            <div class="rv-badge-footer"><span>{{status(r)}}</span><button @click.stop="openFicha(r)">Abrir ficha →</button></div>
-          </article>
+          <VehicleBadge v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" :row="r" @open="openFicha"/>
         </div>
 
         <div v-else class="rv-table rv-ops-table"><table><thead><tr><th>Unidad / vehículo</th><th>Placa</th><th>Galera</th><th>Estado legal</th><th>Alertas</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha</button></td></tr></tbody></table></div>
@@ -237,6 +264,13 @@ onMounted(()=>load())
 .rv-plate-zone{background:#f8fafc}.rv-plate-zone strong{color:#0f2c4b}
 .rv-vehicle-badge:before{background:var(--rv-blue)}
 .rv-state-chip,.rv-badge-top>b{background:#eef5ff;color:#175fae}
+
+/* Stitch-connected Mission Control */
+.rv-mission{gap:12px}.rv-mission-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:2px 2px 7px}.rv-mission-head h2{font-size:27px;letter-spacing:-.035em;color:var(--rv-navy)}.rv-mission-head p{margin:4px 0 0;color:#738398}.rv-mission-summary{display:flex;align-items:baseline;gap:6px;padding:8px 10px;border:1px solid var(--rv-border);border-radius:10px;background:#fff}.rv-mission-summary b{font-size:17px;color:var(--rv-navy)}.rv-mission-summary span{font-size:9px;color:#8190a3;text-transform:uppercase}.rv-mission-summary i{width:1px;height:22px;background:#e2e8f0;margin:0 4px}
+.rv-mission-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.75fr);gap:10px}.rv-fleet-radar,.rv-attention,.rv-focus-panel{border:1px solid var(--rv-border);border-radius:12px;background:#fff;box-shadow:0 5px 18px rgba(28,58,91,.035)}.rv-fleet-radar,.rv-attention{padding:14px}.rv-panel-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}.rv-panel-title>div>span{font-size:8px;font-weight:900;letter-spacing:.1em;color:var(--rv-blue)}.rv-panel-title h3{margin:2px 0 0;font-size:16px;letter-spacing:-.02em;color:#19324f}.rv-panel-title small{color:#8794a6;font-size:9px}.rv-radar-body{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:18px;padding:16px 8px 5px}.rv-ring{--pct:0%;width:168px;height:168px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--rv-blue) 0 var(--pct),#e8eef5 var(--pct) 100%);position:relative}.rv-ring:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#fff}.rv-ring>div{position:relative;z-index:1;display:grid;justify-items:center}.rv-ring strong{font-size:32px;line-height:1;color:#123252;letter-spacing:-.05em}.rv-ring span{margin-top:4px;font-size:8px;font-weight:900;letter-spacing:.1em;color:#6f8197}.rv-ring small{margin-top:4px;font-size:9px;color:#98a5b5}.rv-radar-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.rv-radar-stats div{padding:11px;border:1px solid #e2e8f0;border-radius:9px;background:#f9fbfd}.rv-radar-stats span{display:block;font-size:8px;color:#7e8ea2}.rv-radar-stats b{display:block;margin-top:4px;font-size:20px;color:#173451}
+.rv-attention{display:grid;align-content:start;gap:7px}.rv-attention .rv-panel-title{margin-bottom:3px}.rv-attention>button{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:8px;width:100%;padding:9px 10px;border:1px solid #e3e9f0!important;border-radius:8px;background:#fff!important;color:#40536a!important;text-align:left;box-shadow:none!important;cursor:pointer}.rv-attention>button:hover{background:#f8fbff!important}.rv-attention>button i{width:7px;height:7px;border-radius:50%;background:#0b63f6}.rv-attention>button[data-tone="amber"] i{background:#d89514}.rv-attention>button[data-tone="red"] i{background:#d94843}.rv-attention>button[data-tone="neutral"] i{background:#94a3b8}.rv-attention>button span{font-size:10px}.rv-attention>button b{font-size:14px;color:#173451}.rv-attention>button em{font-style:normal;color:#9aa7b6}.rv-attention-empty{padding:14px;border:1px dashed #d6e0eb;border-radius:8px;color:#8190a3;font-size:10px}
+.rv-focus-panel{padding:14px}.rv-focus-panel>.rv-panel-title{margin-bottom:10px}.rv-focus-panel>.rv-panel-title button{border:0!important;background:transparent!important;color:var(--rv-blue)!important;font-size:9px;font-weight:900;box-shadow:none!important;cursor:pointer}.rv-focus-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media(max-width:1180px){.rv-mission-grid{grid-template-columns:1fr}.rv-focus-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.rv-radar-body{grid-template-columns:1fr}.rv-ring{margin:auto}.rv-radar-stats{grid-template-columns:1fr}.rv-focus-grid{grid-template-columns:1fr}}
 
 /* Operations Hub / eCarCheck-inspired visual system */
 .rv-ops-workspace{gap:12px}.rv-ops-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:2px 2px 10px}.rv-eyebrow{display:block;color:#0062ff;font-size:9px;font-weight:900;letter-spacing:.12em}.rv-ops-hero h2{font-size:26px;letter-spacing:-.03em}.rv-ops-hero p{margin:4px 0 0;color:#718097}.rv-ops-kpis{display:flex;gap:8px}.rv-ops-kpis span{min-width:92px;padding:9px 12px;border:1px solid #dce5f0;border-radius:11px;background:#fff}.rv-ops-kpis b{display:block;font-size:17px;color:#102b55}.rv-ops-kpis small{display:block;margin-top:2px;color:#7d8ba0;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
