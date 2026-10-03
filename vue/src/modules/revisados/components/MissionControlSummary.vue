@@ -7,7 +7,7 @@ defineProps<{ total:number; vigentes:number; pendientes:number; cambiosColor:num
     <article class="coverage">
       <div class="coverage-copy">
         <span class="kicker">COBERTURA DEL ALCANCE</span>
-        <div class="big"><strong>{{ total }}</strong><div><b>unidades</b><small>{{ vigentes }} vigentes</small></div></div>
+        <div class="big"><strong>{{ total }}</strong><div><b>unidades</b><small>{{ vigentes }} al día</small></div></div>
       </div>
       <div class="coverage-meter">
         <strong>{{ total ? Math.round((vigentes/total)*100) : 0 }}%</strong>
@@ -18,15 +18,15 @@ defineProps<{ total:number; vigentes:number; pendientes:number; cambiosColor:num
 
     <article class="attention">
       <div class="attention-item pending">
-        <span>PENDIENTE DE CICLO</span><strong>{{ pendientes }}</strong><small>gestión operativa</small>
+        <span>PENDIENTES AHORA</span><strong>{{ pendientes }}</strong><small>requieren gestión</small>
       </div>
       <div class="divider"></div>
       <div class="attention-item color">
-        <span>CAMBIO DE COLOR</span><strong>{{ cambiosColor }}</strong><small>nuevo revisado</small>
+        <span>CAMBIO DE COLOR</span><strong>{{ cambiosColor }}</strong><small>subconjunto de pendientes</small>
       </div>
       <div class="divider"></div>
       <div class="attention-item incident">
-        <span>INCIDENCIAS REALES</span><strong>{{ incidencias }}</strong><small>bloqueos o alertas</small>
+        <span>ALERTAS REALES</span><strong>{{ incidencias }}</strong><small>pueden superponerse</small>
       </div>
     </article>
   </section>
