@@ -58,26 +58,47 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          EXPECTED_ASSET=$(grep -Eo '/vue/dist/assets/[^" ]+\.js' vue/dist/index.html | head -1)
+          test -n "$EXPECTED_ASSET"
           npx --yes wrangler@latest versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
-          U=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
-          test -n "$U"
-          echo "url=https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev" >> "$GITHUB_OUTPUT"
-          echo "Exact preview: https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev"
-      - name: Verify preview isolation
+          VERSION_URL=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$VERSION_URL"
+          echo "version_url=$VERSION_URL" >> "$GITHUB_OUTPUT"
+          echo "alias_url=https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev" >> "$GITHUB_OUTPUT"
+          echo "expected_asset=$EXPECTED_ASSET" >> "$GITHUB_OUTPUT"
+          echo "Version preview: $VERSION_URL"
+          echo "Alias preview: https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev"
+      - name: Verify immutable version preview
         env:
-          QA_URL: ${{ steps.deploy.outputs.url }}
+          VERSION_URL: ${{ steps.deploy.outputs.version_url }}
+          EXPECTED_ASSET: ${{ steps.deploy.outputs.expected_asset }}
         run: |
-          curl -fsSL "$QA_URL/?sandbox=1&revisadosVue=1" -o /tmp/index.html
-          curl -fsSL "$QA_URL/modules/panapass-sandbox/dashboard/index.js" -o /tmp/sandbox.js
-          curl -fsSL "$QA_URL/modules/v171-loader.js" -o /tmp/loader.js
-          curl -fsSL "$QA_URL/modules/revisados/index.js" -o /tmp/revisados.js
-          curl -fsSL "$QA_URL/vue/dist/index.html" -o /tmp/vue.html
+          curl -fsSL "$VERSION_URL/?sandbox=1&revisadosVue=1" -o /tmp/index.html
+          curl -fsSL "$VERSION_URL/modules/panapass-sandbox/dashboard/index.js" -o /tmp/sandbox.js
+          curl -fsSL "$VERSION_URL/modules/v171-loader.js" -o /tmp/loader.js
+          curl -fsSL "$VERSION_URL/modules/revisados/index.js" -o /tmp/revisados.js
+          curl -fsSL "$VERSION_URL/vue/dist/index.html" -o /tmp/vue.html
           grep -Fq 'panapass-sandbox/tokens.css' /tmp/index.html
           grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
           grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
           grep -Fq 'RYM_REVISADOS_BRIDGE' /tmp/revisados.js
-          grep -Fq '/vue/dist/assets/' /tmp/vue.html
-          ASSET=$(grep -Eo '/vue/dist/assets/[^\" ]+\.js' /tmp/vue.html | head -1)
-          test -n "$ASSET"
-          curl -fsSL "$QA_URL$ASSET" -o /tmp/vue.js
-          grep -Fq 'Mission Control' /tmp/vue.js
+          grep -Fq "$EXPECTED_ASSET" /tmp/vue.html
+          curl -fsSI "$VERSION_URL$EXPECTED_ASSET" | grep -qi '^HTTP/.* 200'
+      - name: Verify canonical alias propagation
+        env:
+          ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
+          EXPECTED_ASSET: ${{ steps.deploy.outputs.expected_asset }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          for attempt in $(seq 1 12); do
+            curl -fsSL "$ALIAS_URL/vue/dist/index.html?build=$GITHUB_SHA" -o /tmp/alias-vue.html || true
+            if grep -Fq "$EXPECTED_ASSET" /tmp/alias-vue.html; then
+              echo "Alias propagated on attempt $attempt"
+              curl -fsSI "$ALIAS_URL$EXPECTED_ASSET" | grep -qi '^HTTP/.* 200'
+              exit 0
+            fi
+            echo "Alias has not propagated (attempt $attempt/12)"
+            sleep 5
+          done
+          echo "Alias did not reference expected asset: $EXPECTED_ASSET" >&2
+          exit 1
