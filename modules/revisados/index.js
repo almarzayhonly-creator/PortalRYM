@@ -28,7 +28,7 @@
     let tries=0;
     const clickTab=()=>{
       const b=d.querySelector('[data-v66-tab="'+String(tab||'dashboard')+'"]');
-      if(b){b.click();setTimeout(injectLauncher,250);return}
+      if(b){b.click();return}
       if(++tries<20)setTimeout(clickTab,100);
     };
     setTimeout(clickTab,80);
@@ -51,12 +51,9 @@
     navigate(tab){openLegacyTab(tab)}
   };
 
-  function removeLauncher(){d.querySelector('#rymVueMissionLauncher')?.remove()}
-
-  function openVueMission(){
+  function openVueRevisados(){
     const app=d.querySelector('#app');
     if(!app)throw new Error('Portal app root unavailable');
-    removeLauncher();
     d.body.dataset.rymModule='revisados-vue';
     d.body.classList.remove('v60-revisados','v63-revisados','v66-revisados');
     d.body.classList.add('rym-revisados-vue');
@@ -67,37 +64,11 @@
       '</main>';
   }
 
-  function injectLauncher(){
-    if(d.querySelector('#rymVueMissionLauncher'))return;
-    if(d.body.classList.contains('rym-revisados-vue'))return;
-    const legacyVisible=
-      d.body.classList.contains('v60-revisados')||
-      d.body.classList.contains('v63-revisados')||
-      d.body.classList.contains('v66-revisados')||
-      !!d.querySelector('.v66-app');
-    if(!legacyVisible)return;
-
-    const b=d.createElement('button');
-    b.id='rymVueMissionLauncher';
-    b.type='button';
-    b.textContent='Probar nuevo Revisados';
-    b.style.cssText='position:fixed;right:18px;bottom:18px;z-index:99999;height:38px;padding:0 14px;border:1px solid #0062ff;border-radius:10px;background:#0062ff;color:#fff;font:800 12px Inter,system-ui;box-shadow:0 10px 24px rgba(0,98,255,.22);cursor:pointer';
-    b.onclick=openVueMission;
-    d.body.appendChild(b);
-  }
-
-  w.RYM_REVISADOS_VUE={open:openVueMission,navigate:openLegacyTab};
+  w.RYM_REVISADOS_VUE={open:openVueRevisados,navigate:openLegacyTab};
 
   w.RYM_MODULES.register('revisados',{
     open:function(){
-      d.body.dataset.rymModule='revisados';
-      if(typeof LEGACY_OPEN!=='function')throw new Error('Revisados canonical entrypoint unavailable');
-      const result=LEGACY_OPEN();
-      setTimeout(injectLauncher,250);
-      return result;
+      return openVueRevisados();
     }
   });
-
-  new MutationObserver(()=>injectLauncher()).observe(d.documentElement,{childList:true,subtree:true});
-  setTimeout(injectLauncher,500);
 })(window,document);
