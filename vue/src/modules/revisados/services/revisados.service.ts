@@ -144,6 +144,21 @@ export const revisadosService = {
   async estadoSyncEcarcheck(runId:string) {
     return await revisadosService.post('/functions/v1/revisados-ecarcheck-v2-sync', {action:'STATUS', run_id:runId}) as Record<string, any>
   },
+  async iniciarBoletasV2() {
+    return await revisadosService.post('/functions/v1/revisados-boletas-v2', {action:'START'}) as Record<string, any>
+  },
+  async estadoBoletasV2(runId:string) {
+    return await revisadosService.post('/functions/v1/revisados-boletas-v2', {action:'STATUS', run_id:runId}) as Record<string, any>
+  },
+  async destinatariosReporteDiario() {
+    return await revisadosService.post('/functions/v1/revisados-reporte-diario-email', {action:'recipients'}) as Record<string, any>
+  },
+  async enviarReporteDiario(to:string[]) {
+    return await revisadosService.post('/functions/v1/revisados-reporte-diario-email', {action:'send', to}) as Record<string, any>
+  },
+  async emitidosHoy() {
+    return await revisadosService.request('/rest/v1/rpc/revisados_emitidos_hoy_v1', {method:'POST', body:'{}'})
+  },
   back() {
     getBridge()?.back?.()
   },
