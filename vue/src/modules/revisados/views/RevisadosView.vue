@@ -17,7 +17,7 @@ const pending=computed(()=>rawRows.value.filter(r=>!r.emitido))
 const emitted=computed(()=>Array.isArray((data.value?.emitidos_hoy as {rows?:CanonicalRevisadoRow[]}|undefined)?.rows)?(data.value?.emitidos_hoy as {rows:CanonicalRevisadoRow[]}).rows:[])
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
-const selectedGalera=ref(''), selectedStatus=ref(''), opsView=ref<'cards'|'table'>('cards')
+const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all'), opsView=ref<'cards'|'table'>('cards')
 const cupos=ref<Array<Record<string,unknown>>>([]), cuposLoading=ref(false), cuposError=ref('')
 const fichaOpen=ref(false), fichaLoading=ref(false), fichaError=ref(''), ficha=ref<Record<string,any>|null>(null), fichaRow=ref<CanonicalRevisadoRow|null>(null)
 const incidentBusy=ref(false), incidentType=ref(''), incidentCustom=ref(''), incidentNote=ref('')
@@ -36,12 +36,21 @@ const fichaOpenIncidents=computed(()=>{const id=ficha.value?.unidad?.id;if(id==n
 function text(v:unknown){return String(v??'—')}
 function num(v:unknown){return new Intl.NumberFormat('es-PA').format(Number(v)||0)}
 function date(v:unknown){try{return v?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium'}).format(new Date(String(v))):'—'}catch{return text(v)}}
+function share(v:unknown){return metrics.value.total?Math.max(0,Math.min(100,Number(v||0)*100/metrics.value.total)):0}
 function state(r:CanonicalRevisadoRow){return r.emitido?'Vigente':r.requiere_atencion?'Pendiente':'Sin ciclo'}
 function status(r:CanonicalRevisadoRow){return r.bloqueado?'Bloqueo real':String(r.pendiente_tipo||r.status2||state(r))}
-const visibleRows=computed(()=>pending.value.filter(r=>{
+const visibleRows=computed(()=>rawRows.value.filter(r=>{
   const q=String(filters.value.search||'').trim().toLowerCase()
   const matchesSearch=!q||[r.unidad,r.placa,r.empresa,r.supervisora,r.status2,r.pendiente_tipo].some(x=>String(x||'').toLowerCase().includes(q))
-  return matchesSearch&&(!selectedGalera.value||text(r.galera)===selectedGalera.value)&&(!selectedStatus.value||text(r.status2)===selectedStatus.value)
+  const p=String(r.pendiente_tipo||r.status2||'').toUpperCase()
+  const cupo=String(r.cupo_ecarcheck||r.cupo_control||'').trim().toUpperCase()
+  const quick=quickFilter.value==='all'
+    ||(quickFilter.value==='vigente'&&Boolean(r.emitido))
+    ||(quickFilter.value==='pendiente'&&!r.emitido&&!p.includes('COLOR')&&!r.bloqueado)
+    ||(quickFilter.value==='color'&&p.includes('COLOR'))
+    ||(quickFilter.value==='boleta'&&Boolean(r.boleta_empresa||r.boleta_pendiente))
+    ||(quickFilter.value==='cupo'&&(!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)))
+  return matchesSearch&&quick&&(!selectedGalera.value||text(r.galera)===selectedGalera.value)&&(!selectedStatus.value||text(r.status2)===selectedStatus.value)
 }))
 function vehicleStateTone(r:CanonicalRevisadoRow){if(r.bloqueado)return'incident';const p=String(r.pendiente_tipo||r.status2||'').toUpperCase();if(p.includes('COLOR'))return'color';return'pending'}
 function vehicleStateLabel(r:CanonicalRevisadoRow){if(r.bloqueado)return'Incidencia';const p=String(r.pendiente_tipo||r.status2||'').trim();return p||'Pendiente'}
@@ -57,8 +66,8 @@ function vehicleSignals(r:CanonicalRevisadoRow){
   out.push({label:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'Sin cupo':'Cupo OK',tone:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'warn':'info'})
   return out.slice(0,3)
 }
-function navIcon(id:string){return ({dashboard:'dashboard',operations:'directions_car',monthly:'calendar_month',daily:'description',history:'history',stats:'query_stats',boletas:'gavel',cupos:'confirmation_number'} as Record<string,string>)[id]||'circle'}
-function navLabel(id:string,label:string){return ({dashboard:'Mission Control',history:'Historial & Trazabilidad',stats:'Estadísticas Forenses'} as Record<string,string>)[id]||label}
+function navIcon(id:string){return ({dashboard:'dashboard',monthly:'fact_check',operations:'table_chart',daily:'description',history:'history',stats:'policy',boletas:'gavel',cupos:'confirmation_number'} as Record<string,string>)[id]||'circle'}
+function navLabel(id:string,label:string){return ({dashboard:'1. Mission Control',monthly:'2. Avance y Auditoría',operations:'3. Operaciones',history:'Historial & Trazabilidad',stats:'Auditoría Forense',boletas:'Boletas y Retenciones'} as Record<string,string>)[id]||label}
 const criticalCount=computed(()=>Number(kpis.value.bloqueadas||kpis.value.pendientes_criticos||metrics.value.incidencias||0))
 const boletaCount=computed(()=>Number(kpis.value.con_boleta||kpis.value.con_boleta_empresa||0))
 const sinCupoCount=computed(()=>rawRows.value.filter(r=>String(r.cupo_ecarcheck||r.cupo_control||'').trim().toUpperCase()==='SIN CUPO').length)
@@ -110,15 +119,15 @@ onMounted(()=>load())
 </script>
 
 <template>
-<main class="rym-revisados-vue">
+<main class="rym-revisados-vue" data-ui-source="stitch-api" data-stitch-project="1412531415043982793">
   <aside class="rv-side">
     <div class="rv-brand-dark">
       <div class="rv-brand-mark"><RymIcon name="verified_user"/></div>
-      <div class="rv-brand-copy"><b>PORTAL RYM</b><small>REVISADOS VEHICULARES</small></div>
-      <span class="rv-version">v2.4</span>
+      <div class="rv-brand-copy"><b>PORTAL RYM</b><small>eCarCheck Ops</small></div>
+      <span class="rv-version">{{num(metrics.total)}} UDS</span>
     </div>
     <div class="rv-station"><i></i><span>ESTACIÓN OPERATIVA</span><b>T-01 RYM</b></div>
-    <div class="rv-nav-label">MÓDULOS DE LÍNEA</div>
+    <div class="rv-nav-label">CONTROL OPERATIVO</div>
     <nav>
       <button v-for="item in navItems" :key="item.id" :class="{active:active===item.id}" @click="open(item.id)">
         <RymIcon :name="navIcon(item.id)" :size="17"/>
@@ -126,7 +135,7 @@ onMounted(()=>load())
         <small v-if="item.id==='dashboard'">LIVE</small>
       </button>
     </nav>
-    <div class="rv-nav-label rv-nav-label-secondary">INCIDENCIAS & BLOQUEOS</div>
+    <div class="rv-nav-label rv-nav-label-secondary">INSTALACIONES & CUMPLIMIENTO</div>
     <div class="rv-side-shortcuts">
       <button type="button" @click="open('boletas')"><RymIcon name="gavel"/><em>Boletas Pendientes</em><b>{{num(boletaCount)}}</b></button>
       <button type="button" @click="open('cupos')"><RymIcon name="confirmation_number"/><em>Cupos Asignados</em><b>{{num(sinCupoCount)}}</b></button>
@@ -138,17 +147,21 @@ onMounted(()=>load())
     <button class="rv-back" @click="revisadosService.back()">← Volver al Portal</button>
   </aside>
   <section class="rv-main"><header class="rv-topbar">
-      <div class="rv-page-heading">
-        <small>PATIO OPERATIVO CENTRAL · Línea RYM</small>
-        <h1>{{navLabel(active,navItems.find(x=>x.id===active)?.label||'Revisados')}}</h1>
-        <span v-if="active==='operations'">Control operativo de revisados, incidencias y estado legal vehicular en tiempo real.</span>
-        <span v-else-if="active==='dashboard'">Monitoreo continuo de homologación vehicular y prioridades de despacho.</span>
-        <span v-else>Control legal vehicular RYM.</span>
+      <div class="rv-command-search">
+        <RymIcon name="search" :size="18"/>
+        <input v-model="filters.search" type="search" placeholder="Buscar VIN, placa, unidad o expediente…">
+        <kbd>⌘K</kbd>
+      </div>
+      <div class="rv-top-context">
+        <span>{{filters.galeras.length?filters.galeras.join(', '):'Todas las galeras'}}</span>
+        <i></i>
+        <span>{{filters.supervisoras.length?filters.supervisoras.join(', '):'Todas las supervisoras'}}</span>
       </div>
       <div class="rv-top-actions">
-        <div class="rv-live-pill"><i></i><span>ECARCHECK: ONLINE</span><b>0.3s</b></div>
-        <button class="ghost" @click="clearFilters">Limpiar filtros</button>
-        <button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button>
+        <div class="rv-live-pill"><i></i><span>ECARCHECK GATEWAY</span><b>ONLINE</b></div>
+        <button class="ghost" @click="clearFilters">Limpiar</button>
+        <button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar'}}</button>
+        <div class="rv-top-profile"><span>{{profile.nombre}}</span><b>{{profile.rol}}</b></div>
       </div>
     </header>
     <div v-if="loading" class="rv-state">Cargando datos reales de Revisados…</div><div v-else-if="error" class="rv-state error"><b>No fue posible cargar Revisados.</b><span>{{error}}</span><button class="primary" @click="load(true)">Reintentar</button></div>
@@ -166,7 +179,7 @@ onMounted(()=>load())
             <div><span>CONTROL GLOBAL</span><small>ECARCHECK</small><strong>{{num(metrics.total)}}</strong><em>Unidades registradas en padrón activo</em></div>
             <div class="rv-global-meta"><span><b>{{coveragePct}}%</b> cobertura vigente</span><span><b>{{num(metrics.pendientesCiclo)}}</b> requieren atención</span></div>
           </div>
-          <div class="rv-global-meter"><i :style="{width:coveragePct+'%'}"></i></div>
+          <div class="rv-global-meter rv-segmented-meter" aria-label="Composición del estado global"><i data-tone="green" :style="{width:share(metrics.vigentes)+'%'}"></i><i data-tone="blue" :style="{width:share(metrics.pendientesCiclo)+'%'}"></i><i data-tone="amber" :style="{width:share(metrics.cambiosColor)+'%'}"></i><i data-tone="red" :style="{width:share(criticalCount)+'%'}"></i></div>
           <div class="rv-kpi-deck">
             <article data-tone="green"><header><span>VIGENTE ECARCHECK</span><RymIcon name="verified"/></header><b>{{num(metrics.vigentes)}}</b><small>{{coveragePct}}% del padrón visible</small><footer>Auditoría RUV conciliada</footer></article>
             <article data-tone="blue"><header><span>PENDIENTE POR CICLO</span><RymIcon name="schedule"/></header><b>{{num(metrics.pendientesCiclo)}}</b><small>Unidades que requieren gestión</small><footer>Cola operativa activa</footer></article>
@@ -198,6 +211,7 @@ onMounted(()=>load())
         </section>
       </section>
       <section v-else-if="active==='operations'" class="rv-stack rv-ops-workspace">
+        <div class="rv-section-title"><div><span>MÓDULO 03</span><h2>Operaciones · Vehicle Operations Workspace</h2><p>Gestión visual del padrón completo, estados legales y consultas puntuales eCarCheck.</p></div><small>Fuente: Stitch Production Final</small></div>
         <div class="rv-ops-summary">
           <div><span>{{num(rawRows.length)}} UDS TOTAL</span><i></i><b>{{num(metrics.vigentes)}} AL DÍA</b></div>
           <div class="rv-view-toggle"><button :class="{active:opsView==='cards'}" @click="opsView='cards'"><RymIcon name="grid_view"/>CARDS</button><button :class="{active:opsView==='table'}" @click="opsView='table'"><RymIcon name="table_rows"/>TABLE</button></div>
@@ -208,7 +222,7 @@ onMounted(()=>load())
         </div>
 
         <div class="rv-quick-chips">
-          <span v-for="q in quickOps" :key="q.key" :data-tone="q.tone" :class="{active:q.key==='all'}"><i></i>{{q.label}} <b>{{num(q.value)}}</b></span>
+          <button v-for="q in quickOps" :key="q.key" type="button" :data-tone="q.tone" :class="{active:quickFilter===q.key}" @click="quickFilter=q.key"><i></i>{{q.label}} <b>{{num(q.value)}}</b></button>
         </div>
 
         <div class="rv-ops-filters">
@@ -238,7 +252,7 @@ onMounted(()=>load())
         <div v-else class="rv-table rv-ops-table"><table><thead><tr><th>Unidad / vehículo</th><th>Placa</th><th>Galera & Bahía</th><th>Estado legal</th><th>Desglose normativo</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha completa</button></td></tr></tbody></table></div>
       </section>
       <section v-else-if="active==='monthly'" class="rv-stack rv-monthly">
-        <div class="rv-monthly-head"><div><span class="rv-eyebrow">CYCLE TRACKER · AUDITORÍA</span><h2>Avance mensual</h2><p>Seguimiento por ciclo, galera y pendientes reales.</p></div><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div>
+        <div class="rv-monthly-head"><div><span class="rv-module-pill">MÓDULO 02</span><span class="rv-eyebrow">CONTROL REGISTRAL & AUDITORÍA</span><h2>Avance y Auditoría de Flota</h2><p>Fiscalización por ciclo y galera contra los registros canónicos del Portal RYM.</p></div><div class="rv-monthly-actions"><button class="ghost" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="15"/>{{syncBusy?'Sincronizando…':'Sincronizar RUV'}}</button><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div></div>
         <div class="rv-cycle-grid">
           <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
             <header><div><span>CICLO OPERATIVO</span><h3>{{m.mes_nombre||('Mes '+m.mes_num)}}</h3></div><b>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</b></header>
@@ -282,7 +296,7 @@ onMounted(()=>load())
   </section>
   <div v-if="fichaOpen" class="rv-modal" @click.self="closeFicha">
     <section class="rv-drawer">
-      <header class="rv-drawer-hero"><div><small>RYM VEHICLE PASSPORT</small><h2>{{ficha?.unidad?.unidad||fichaRow?.unidad||fichaRow?.placa}}</h2><div class="rv-drawer-plate">{{ficha?.unidad?.placa_unica||fichaRow?.placa}}</div><span>{{ficha?.unidad?.galera||fichaRow?.galera}} · {{[ficha?.unidad?.marca,ficha?.unidad?.modelo].filter(Boolean).join(' ')||'Ficha vehicular'}}</span></div><button class="rv-close" @click="closeFicha">×</button></header>
+      <header class="rv-drawer-hero"><div><small>FICHA DE UNIDAD · ECARCHECK OPS</small><div class="rv-drawer-id"><h2>{{ficha?.unidad?.unidad||fichaRow?.unidad||fichaRow?.placa}}</h2><span class="rv-drawer-status">{{fichaRow?.emitido?'VIGENTE':'REQUIERE ATENCIÓN'}}</span></div><div class="rv-drawer-plate">{{ficha?.unidad?.placa_unica||fichaRow?.placa}}</div><span>{{ficha?.unidad?.galera||fichaRow?.galera}} · {{[ficha?.unidad?.marca,ficha?.unidad?.modelo].filter(Boolean).join(' ')||'Ficha vehicular'}}</span></div><button class="rv-close" @click="closeFicha">×</button></header>
       <div v-if="fichaLoading" class="rv-state">Cargando ficha guardada en Supabase…</div>
       <div v-else-if="fichaError" class="rv-state error"><b>No fue posible cargar la ficha.</b><span>{{fichaError}}</span></div>
       <template v-else-if="ficha">
@@ -364,29 +378,25 @@ onMounted(()=>load())
 @media(max-width:1280px){.rym-revisados-vue{grid-template-columns:200px minmax(0,1fr)!important}.rv-kpi-deck{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-focus-grid,.rv-vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.rv-dashboard-lower{grid-template-columns:1fr}.rv-ops-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-ops-tools{grid-template-columns:1fr}}
 @media(max-width:800px){.rym-revisados-vue{grid-template-columns:1fr!important}.rv-side{position:relative;height:auto;min-height:auto!important}.rv-main{padding:0 12px 20px!important}.rv-topbar{margin:0 -12px 12px!important;flex-direction:column}.rv-top-actions{width:100%;flex-wrap:wrap}.rv-global-head,.rv-module-strip,.rv-ops-summary,.rv-monthly-head{align-items:flex-start;flex-direction:column}.rv-kpi-deck,.rv-focus-grid,.rv-vehicle-grid,.rv-cycle-grid,.rv-ops-filters{grid-template-columns:1fr!important}.rv-tool-lookup{grid-template-columns:auto 1fr}.rv-tool-lookup input,.rv-tool-lookup button{grid-column:2}.rv-global-meta{flex-wrap:wrap}}
 
-/* Approved Stitch shell: light sidebar + local SVG icons */
-.rv-side{background:#fff!important;color:#475569!important;border-right:1px solid #e2e8f0!important}
-.rv-brand-dark{background:#fff!important;border-bottom:1px solid #e2e8f0!important}
-.rv-brand-copy b{color:#0f172a!important}.rv-brand-copy small{color:#64748b!important}
-.rv-version{background:#eff6ff!important;color:#1d4ed8!important}
-.rv-station{background:#f8fafc!important;border-bottom:1px solid #e2e8f0!important}
-.rv-station span{color:#64748b!important}.rv-station b{color:#0062ff!important}
-.rv-nav-label{color:#94a3b8!important}
-.rv-side nav button{color:#475569!important;background:transparent!important}
-.rv-side nav button:hover{background:#f1f5f9!important;color:#0f172a!important}
-.rv-side nav button.active{background:#0062ff!important;color:#fff!important;box-shadow:0 5px 14px rgba(0,98,255,.16)!important}
-.rv-side-shortcuts button{background:#f8fafc!important;color:#334155!important;border:1px solid #e2e8f0!important}
-.rv-side-shortcuts .rym-icon{color:#0ea5e9!important}
-.rv-side-shortcuts b{background:#e0f2fe!important;color:#0369a1!important}
-.rv-side-profile{background:#fff!important;border-top:1px solid #e2e8f0!important}
-.rv-side-profile span{color:#0f172a!important}.rv-side-profile b{color:#0062ff!important}.rv-side-profile small{color:#94a3b8!important}
-.rv-node{background:#f8fafc!important;border:1px solid #e2e8f0!important}
-.rv-node span{color:#475569!important}.rv-node b{color:#0891b2!important}
-.rv-back{background:#f8fafc!important;color:#475569!important;border:1px solid #e2e8f0!important}
-.rv-brand-mark .rym-icon{width:19px;height:19px}
-.rv-side nav button .rym-icon{width:17px;height:17px}
-.rv-module-actions .rym-icon{width:14px;height:14px}
-.rv-kpi-deck header .rym-icon{width:15px;height:15px}
-.rv-tool-action>.rym-icon,.rv-tool-lookup>.rym-icon{width:30px;height:30px;padding:7px;border-radius:6px;background:#e8f1ff;color:#0062ff}
+/* STITCH API SOURCE: Vue 3 Ready shell + Production Final workspaces */
+.rym-revisados-vue{--stitch-blue:#0062ff;--stitch-blue-dark:#004cca;--stitch-dark:#0a1120;--stitch-darker:#070d18;--stitch-surface:#f4f6fa;--stitch-card:#fff;--stitch-border:#e2e8f0;--stitch-text:#0f172a;--stitch-muted:#64748b;grid-template-columns:256px minmax(0,1fr)!important;background:var(--stitch-surface)!important}
+.rv-side{position:sticky!important;top:0;height:100vh!important;min-height:100vh!important;padding:0!important;background:var(--stitch-dark)!important;border-right:1px solid #1e293b!important;color:#cbd5e1!important;overflow:hidden}
+.rv-brand-dark{height:64px;padding:0 18px!important;background:var(--stitch-darker)!important;border-bottom:1px solid #1e293b!important}.rv-brand-copy b{color:#fff!important;font-family:"Space Grotesk",Inter,sans-serif!important}.rv-brand-copy small{color:#38bdf8!important;font-family:"JetBrains Mono",monospace!important;text-transform:uppercase}.rv-version{background:#172033!important;color:#cbd5e1!important;border:1px solid #28354a!important}
+.rv-station{padding:10px 18px!important;background:#0d1728!important;border-bottom:1px solid #1e293b!important}.rv-station span{color:#94a3b8!important}.rv-station b{color:#38bdf8!important}.rv-nav-label{padding:16px 16px 6px!important;color:#64748b!important;letter-spacing:.09em!important}.rv-nav-label-secondary{padding-top:20px!important}
+.rv-side nav{padding:0 12px!important;gap:4px!important}.rv-side nav button{grid-template-columns:24px 1fr auto!important;padding:10px 12px!important;color:#94a3b8!important;background:transparent!important;border-radius:8px!important}.rv-side nav button em{font-size:12px!important}.rv-side nav button:hover{background:#162238!important;color:#fff!important}.rv-side nav button.active{background:var(--stitch-blue)!important;color:#fff!important;box-shadow:0 8px 20px rgba(0,98,255,.24)!important}
+.rv-side-shortcuts{padding:0 12px!important}.rv-side-shortcuts button{background:transparent!important;color:#94a3b8!important;border:0!important;border-radius:8px!important}.rv-side-shortcuts button:hover{background:#162238!important;color:#fff!important}.rv-side-shortcuts .rym-icon{color:#94a3b8!important}.rv-side-shortcuts b{background:#172033!important;color:#cbd5e1!important}
+.rv-side-profile{background:#0d1728!important;border-top:1px solid #1e293b!important}.rv-side-profile span{color:#fff!important}.rv-side-profile b{color:#38bdf8!important}.rv-side-profile small{color:#64748b!important}.rv-node{background:#0b1322!important;border-color:#1e293b!important}.rv-node span{color:#cbd5e1!important}.rv-node b{color:#38bdf8!important}.rv-back{background:#111c2d!important;color:#94a3b8!important;border-color:#1e293b!important}
+.rv-main{padding:64px 24px 32px!important;background:var(--stitch-surface)!important}.rv-topbar{position:fixed!important;top:0;left:256px;right:0;height:64px;z-index:40;margin:0!important;padding:0 24px!important;display:flex!important;align-items:center!important;gap:14px!important;background:rgba(255,255,255,.96)!important;border-bottom:1px solid var(--stitch-border)!important;backdrop-filter:blur(12px)}.rv-command-search{width:min(340px,34vw);height:36px;display:flex;align-items:center;gap:8px;padding:0 11px;border:1px solid var(--stitch-border);border-radius:8px;background:#f8fafc;color:#94a3b8}.rv-command-search input{min-width:0;flex:1;border:0;outline:0;background:transparent;font-size:11px;color:var(--stitch-text)}.rv-command-search kbd{padding:3px 5px;border:1px solid var(--stitch-border);border-radius:4px;background:#fff;color:#64748b;font:700 8px/1 "JetBrains Mono",monospace}.rv-top-context{display:flex;align-items:center;gap:9px;min-width:0;color:#475569;font-size:10px}.rv-top-context span{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rv-top-context i{width:1px;height:20px;background:var(--stitch-border)}.rv-top-actions{margin-left:auto!important}.rv-top-profile{display:grid;padding-left:4px;text-align:right}.rv-top-profile span{font-size:10px;font-weight:800;color:#0f172a}.rv-top-profile b{font-size:8px;color:#0062ff;text-transform:uppercase}.rv-live-pill{background:#ecfdf5!important;border-color:#a7f3d0!important;color:#166534!important}
+.rv-stack{gap:18px!important}.rv-module-strip{padding-top:18px!important}.rv-module-strip>div:first-child>b{font-size:18px!important;font-family:"Space Grotesk",Inter,sans-serif!important}.rv-module-strip>div:first-child>small{font-size:9px!important}
+.rv-global-control{padding:22px!important;border-radius:12px!important;box-shadow:0 2px 10px rgba(15,23,42,.025)!important}.rv-global-head strong{font:700 30px/1 "JetBrains Mono",monospace!important}.rv-global-head em{font-size:13px!important}.rv-global-meta span{min-width:130px;padding:10px 12px!important}.rv-segmented-meter{display:flex!important;gap:2px!important;padding:2px!important;height:12px!important;background:#f1f5f9!important;border:1px solid #e2e8f0}.rv-segmented-meter i{height:100%!important;border-radius:2px!important;background:#cbd5e1!important}.rv-segmented-meter i[data-tone="green"]{background:#16a34a!important}.rv-segmented-meter i[data-tone="blue"]{background:#0ea5e9!important}.rv-segmented-meter i[data-tone="amber"]{background:#ea580c!important}.rv-segmented-meter i[data-tone="red"]{background:#dc2626!important}
+.rv-kpi-deck{gap:14px!important}.rv-kpi-deck article{padding:16px!important;border-radius:10px!important}.rv-kpi-deck article>b{font-size:26px!important}.rv-kpi-deck article>small{font-size:10px!important}.rv-kpi-deck article>footer{font-size:9px!important}
+.rv-panel-title h3{font-family:"Space Grotesk",Inter,sans-serif!important}.rv-dashboard-lower{gap:16px!important}.rv-focus-panel,.rv-cycle-panel,.rv-dispatch-panel,.rv-monthly-table{border-radius:12px!important}.rv-focus-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.rv-cycle-panel article{grid-template-columns:1fr 120px 42px!important}
+.rv-section-title{display:flex;justify-content:space-between;gap:14px;align-items:end;padding-top:18px;padding-bottom:10px;border-bottom:1px solid var(--stitch-border)}.rv-section-title>div>span,.rv-module-pill{display:inline-flex;padding:4px 7px;border-radius:5px;background:#0062ff;color:#fff;font:800 9px/1 "JetBrains Mono",monospace;letter-spacing:.06em}.rv-section-title h2{margin:7px 0 2px;font:700 24px/1.15 "Space Grotesk",Inter,sans-serif;color:#0b1c30}.rv-section-title p{margin:0;color:#64748b;font-size:11px}.rv-section-title>small{color:#94a3b8;font:700 8px/1 "JetBrains Mono",monospace}
+.rv-ops-summary{margin-top:-4px!important}.rv-search-shell{height:44px!important;border-radius:12px!important}.rv-view-toggle button{min-height:34px!important}.rv-quick-chips button{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid #e2e8f0;border-radius:999px;background:#fff;color:#334155;font-size:10px;font-weight:700;cursor:pointer}.rv-quick-chips button i{width:6px;height:6px;border-radius:50%;background:#cbd5e1}.rv-quick-chips button.active{background:#0062ff;color:#fff;border-color:#0062ff}.rv-quick-chips button[data-tone="green"] i{background:#16a34a}.rv-quick-chips button[data-tone="amber"] i{background:#ea580c}.rv-quick-chips button[data-tone="red"] i{background:#dc2626}.rv-ops-filters label{border-radius:8px!important}.rv-ops-tools{gap:12px!important}.rv-tool-action,.rv-tool-lookup{border-radius:10px!important;min-height:60px!important}
+.rv-vehicle-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
+.rv-monthly-head{padding-top:18px!important;border-bottom:1px solid var(--stitch-border);padding-bottom:14px}.rv-monthly-head>div:first-child{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:5px 8px}.rv-monthly-head h2{grid-column:1/-1;margin:2px 0 0!important;font:700 25px/1.15 "Space Grotesk",Inter,sans-serif}.rv-monthly-head p{grid-column:1/-1}.rv-monthly-actions{display:flex;align-items:center;gap:10px}.rv-monthly-actions .ghost{display:inline-flex;align-items:center;gap:6px}.rv-monthly-total{min-width:130px}.rv-cycle-grid{gap:14px!important}.rv-cycle-grid article{border-radius:10px!important;padding:16px!important}
+.rv-modal{z-index:5000!important;background:rgba(7,13,24,.48)!important;backdrop-filter:blur(2px)}.rv-drawer{width:min(520px,96vw)!important;padding:0!important;border-left:1px solid #dbe3ed!important;box-shadow:-24px 0 60px rgba(15,23,42,.18)!important}.rv-drawer-hero{padding:18px 20px!important;background:#fff!important}.rv-drawer-id{display:flex;align-items:center;gap:9px}.rv-drawer-id h2{font-family:"Space Grotesk",Inter,sans-serif!important}.rv-drawer-status{display:inline-flex!important;padding:5px 8px;border-radius:999px;background:#dcfce7;color:#15803d!important;font-size:8px!important;font-weight:900!important}.rv-drawer-plate{font-size:22px!important}.rv-drawer>.rv-diffs,.rv-drawer>.rv-source-grid,.rv-drawer>.rv-incident{margin-left:18px!important;margin-right:18px!important}.rv-source-grid article{background:#f8fafc!important;border-radius:10px!important}.rv-source-grid h3{font-family:"Space Grotesk",Inter,sans-serif!important}
+@media(max-width:1280px){.rym-revisados-vue{grid-template-columns:224px minmax(0,1fr)!important}.rv-topbar{left:224px!important}.rv-vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.rv-focus-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:900px){.rym-revisados-vue{grid-template-columns:1fr!important}.rv-side{position:relative!important;height:auto!important;min-height:auto!important}.rv-topbar{position:sticky!important;left:auto!important;height:auto!important;min-height:64px;padding:10px 12px!important;flex-wrap:wrap}.rv-main{padding:0 12px 20px!important}.rv-command-search{width:100%}.rv-top-context{display:none}.rv-vehicle-grid,.rv-focus-grid{grid-template-columns:1fr!important}.rv-section-title,.rv-monthly-head{align-items:flex-start;flex-direction:column}.rv-monthly-actions{width:100%;justify-content:space-between}}
 
 </style>
