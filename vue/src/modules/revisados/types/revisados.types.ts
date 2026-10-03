@@ -16,6 +16,10 @@ export interface RevisadoRecord {
   fechaUltimoRevisado?: string
   prioridad?: string
   detalleEstado?: string
+  vigente: boolean
+  requiereAtencion: boolean
+  cambioColor: boolean
+  tieneAlertas: boolean
 }
 
 export interface CanonicalIncident {
@@ -37,12 +41,15 @@ export interface CanonicalRevisadoRow {
   galera?: string
   empresa?: string
   supervisora?: string
+  estado?: string
   emitido?: boolean
+  requiere_atencion?: boolean
+  pendiente_tipo?: string | null
   ultimo_revisado?: string
   prioridad?: string
   bloqueado?: boolean
   incidencias_abiertas?: CanonicalIncident[]
-  alertas_auto?: CanonicalAlert[]
+  alerts?: CanonicalAlert[]
 }
 
 export interface CanonicalRevisadosResponse {
@@ -55,7 +62,21 @@ export interface CanonicalRevisadosResponse {
     scope_label?: string
     can?: Record<string, boolean>
   }
-  kpis?: Record<string, number>
+  kpis?: {
+    activas?: number
+    cubiertas?: number
+    pendientes?: number
+    pendientes_normales?: number
+    pendientes_externos?: number
+    pendientes_color?: number
+    pendientes_criticos?: number
+    sin_fotos?: number
+    con_boleta?: number
+    con_boleta_empresa?: number
+    con_alertas?: number
+    bloqueadas?: number
+    emitidos_hoy?: number
+  }
 }
 
 export interface RevisadosFilters {
