@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue'
 import { revisadosService, type RevisadosNavItem } from '../services/revisados.service'
 import type { CanonicalRevisadoRow, CanonicalRevisadosResponse, RevisadoRecord } from '../types/revisados.types'
 import { useRevisados } from '../composables/useRevisados'
-import MissionControlSummary from '../components/MissionControlSummary.vue'
 import GaleraComparison from '../components/GaleraComparison.vue'
 import RevisadosFilterBar from '../components/RevisadosFilterBar.vue'
 import RevisadosTable from '../components/RevisadosTable.vue'
@@ -57,6 +56,20 @@ function vehicleSignals(r:CanonicalRevisadoRow){
   out.push({label:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'Sin cupo':'Cupo OK',tone:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'warn':'info'})
   return out.slice(0,3)
 }
+function navIcon(id:string){return ({dashboard:'dashboard',operations:'directions_car',monthly:'calendar_month',daily:'description',history:'history',stats:'query_stats',boletas:'gavel',cupos:'confirmation_number'} as Record<string,string>)[id]||'circle'}
+function navLabel(id:string,label:string){return ({dashboard:'Mission Control',history:'Historial & Trazabilidad',stats:'Estadísticas Forenses'} as Record<string,string>)[id]||label}
+const criticalCount=computed(()=>Number(kpis.value.bloqueadas||kpis.value.pendientes_criticos||metrics.value.incidencias||0))
+const boletaCount=computed(()=>Number(kpis.value.con_boleta||kpis.value.con_boleta_empresa||0))
+const sinCupoCount=computed(()=>rawRows.value.filter(r=>String(r.cupo_ecarcheck||r.cupo_control||'').trim().toUpperCase()==='SIN CUPO').length)
+const quickOps=computed(()=>[
+  {key:'all',label:'Todos',value:rawRows.value.length,tone:'blue'},
+  {key:'vigente',label:'Vigente',value:metrics.value.vigentes,tone:'green'},
+  {key:'pendiente',label:'Pendiente',value:metrics.value.pendientesCiclo,tone:'neutral'},
+  {key:'color',label:'Cambio de color',value:metrics.value.cambiosColor,tone:'amber'},
+  {key:'boleta',label:'Boleta',value:boletaCount.value,tone:'red'},
+  {key:'cupo',label:'Sin cupo',value:sinCupoCount.value,tone:'neutral'},
+].filter(x=>x.key==='all'||x.value>0))
+
 const kpis=computed(()=>data.value?.kpis||{})
 const coveragePct=computed(()=>metrics.value.total?Math.round(metrics.value.vigentes*100/metrics.value.total):0)
 const focusRows=computed(()=>[...pending.value].sort((a,b)=>Number(Boolean(b.bloqueado))-Number(Boolean(a.bloqueado))).slice(0,4))
@@ -97,64 +110,116 @@ onMounted(()=>load())
 
 <template>
 <main class="rym-revisados-vue">
-  <aside class="rv-side"><div class="rv-brand"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="RYM"><div><b>Revisados RYM</b><small>Control legal vehicular</small></div></div><div class="rv-user"><b>{{profile.nombre}}</b><span>{{profile.rol}}</span><small>{{profile.scope_label}}</small></div><nav><button v-for="item in navItems" :key="item.id" :class="{active:active===item.id}" @click="open(item.id)"><i>{{item.icon}}</i>{{item.label}}</button></nav><button class="rv-back" @click="revisadosService.back()">← Volver al Portal</button></aside>
-  <section class="rv-main"><header><div><small>REVISADOS / {{ active.toUpperCase() }}</small><h1>{{navItems.find(x=>x.id===active)?.label}}</h1></div><div><button class="ghost" @click="clearFilters">Limpiar filtros</button><button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button></div></header>
+  <aside class="rv-side">
+    <div class="rv-brand-dark">
+      <div class="rv-brand-mark"><span class="material-symbols-outlined">verified_user</span></div>
+      <div class="rv-brand-copy"><b>PORTAL RYM</b><small>REVISADOS VEHICULARES</small></div>
+      <span class="rv-version">v2.4</span>
+    </div>
+    <div class="rv-station"><i></i><span>ESTACIÓN OPERATIVA</span><b>T-01 RYM</b></div>
+    <div class="rv-nav-label">MÓDULOS DE LÍNEA</div>
+    <nav>
+      <button v-for="item in navItems" :key="item.id" :class="{active:active===item.id}" @click="open(item.id)">
+        <span class="material-symbols-outlined">{{navIcon(item.id)}}</span>
+        <em>{{navLabel(item.id,item.label)}}</em>
+        <small v-if="item.id==='dashboard'">LIVE</small>
+      </button>
+    </nav>
+    <div class="rv-nav-label rv-nav-label-secondary">INCIDENCIAS & BLOQUEOS</div>
+    <div class="rv-side-shortcuts">
+      <button type="button" @click="open('boletas')"><span class="material-symbols-outlined">gavel</span><em>Boletas Pendientes</em><b>{{num(boletaCount)}}</b></button>
+      <button type="button" @click="open('cupos')"><span class="material-symbols-outlined">confirmation_number</span><em>Cupos Asignados</em><b>{{num(sinCupoCount)}}</b></button>
+    </div>
+    <div class="rv-side-profile">
+      <span>{{profile.nombre}}</span><b>{{profile.rol}}</b><small>{{profile.scope_label}}</small>
+    </div>
+    <div class="rv-node"><i></i><span>#01 Node Telemetry</span><b>ACTIVO</b></div>
+    <button class="rv-back" @click="revisadosService.back()">← Volver al Portal</button>
+  </aside>
+  <section class="rv-main"><header class="rv-topbar">
+      <div class="rv-page-heading">
+        <small>PATIO OPERATIVO CENTRAL · Línea RYM</small>
+        <h1>{{navLabel(active,navItems.find(x=>x.id===active)?.label||'Revisados')}}</h1>
+        <span v-if="active==='operations'">Control operativo de revisados, incidencias y estado legal vehicular en tiempo real.</span>
+        <span v-else-if="active==='dashboard'">Monitoreo continuo de homologación vehicular y prioridades de despacho.</span>
+        <span v-else>Control legal vehicular RYM.</span>
+      </div>
+      <div class="rv-top-actions">
+        <div class="rv-live-pill"><i></i><span>ECARCHECK: ONLINE</span><b>0.3s</b></div>
+        <button class="ghost" @click="clearFilters">Limpiar filtros</button>
+        <button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button>
+      </div>
+    </header>
     <div v-if="loading" class="rv-state">Cargando datos reales de Revisados…</div><div v-else-if="error" class="rv-state error"><b>No fue posible cargar Revisados.</b><span>{{error}}</span><button class="primary" @click="load(true)">Reintentar</button></div>
     <template v-else>
-      <section v-if="active==='dashboard'" class="rv-stack rv-mission">
-        <div class="rv-mission-head">
-          <div><span class="rv-eyebrow">MISSION CONTROL · ECARCHECK</span><h2>Control legal de la flota</h2><p>Prioridades, cobertura y unidades que requieren acción dentro de tu alcance.</p></div>
-          <div class="rv-mission-summary"><b>{{num(metrics.total)}}</b><span>unidades</span><i></i><b>{{num(metrics.vigentes)}}</b><span>al día</span></div>
+      <section v-if="active==='dashboard'" class="rv-stack rv-stitch-dashboard">
+        <div class="rv-module-strip">
+          <div><span>MÓDULO 01</span><b>Mission Control & Despacho Fiscal</b><small>REVISADOS-CORE: ONLINE</small></div>
+          <div class="rv-module-actions"><span class="rv-cycle-chip"><span class="material-symbols-outlined">calendar_month</span>CICLO ACTIVO</span><span class="rv-critical-chip"><span class="material-symbols-outlined">notifications_active</span>{{num(criticalCount)}} BLOQUEOS</span><button class="primary" :disabled="syncBusy" @click="runSyncEcarcheck"><span class="material-symbols-outlined">sync</span>{{syncBusy?'Sincronizando…':'Sincronizar RUV'}}</button></div>
         </div>
-        <div class="rv-mission-grid">
-          <article class="rv-fleet-radar">
-            <div class="rv-panel-title"><div><span>FLEET READINESS</span><h3>Estado general</h3></div><small>{{coveragePct}}% cobertura</small></div>
-            <div class="rv-radar-body">
-              <div class="rv-ring" :style="{'--pct':coveragePct+'%'}"><div><strong>{{coveragePct}}%</strong><span>VIGENTE</span><small>{{num(metrics.vigentes)}} / {{num(metrics.total)}}</small></div></div>
-              <div class="rv-radar-stats"><div><span>Requieren atención</span><b>{{num(metrics.pendientesCiclo)}}</b></div><div><span>Cambio de color</span><b>{{num(metrics.cambiosColor)}}</b></div><div><span>Alertas reales</span><b>{{num(metrics.incidencias)}}</b></div></div>
-            </div>
-          </article>
-          <article class="rv-attention">
-            <div class="rv-panel-title"><div><span>ATTENTION QUEUE</span><h3>Cola de atención</h3></div><small>datos reales</small></div>
-            <button v-for="item in attentionItems" :key="item.label" type="button" :data-tone="item.tone">
-              <i></i><span>{{item.label}}</span><b>{{num(item.value)}}</b><em>→</em>
-            </button>
-            <div v-if="!attentionItems.length" class="rv-attention-empty">Sin alertas dentro del filtro activo.</div>
-          </article>
-        </div>
+
         <RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/>
+
+        <section class="rv-global-control">
+          <div class="rv-global-head">
+            <div><span>CONTROL GLOBAL</span><small>ECARCHECK</small><strong>{{num(metrics.total)}}</strong><em>Unidades registradas en padrón activo</em></div>
+            <div class="rv-global-meta"><span><b>{{coveragePct}}%</b> cobertura vigente</span><span><b>{{num(metrics.pendientesCiclo)}}</b> requieren atención</span></div>
+          </div>
+          <div class="rv-global-meter"><i :style="{width:coveragePct+'%'}"></i></div>
+          <div class="rv-kpi-deck">
+            <article data-tone="green"><header><span>VIGENTE ECARCHECK</span><span class="material-symbols-outlined">verified</span></header><b>{{num(metrics.vigentes)}}</b><small>{{coveragePct}}% del padrón visible</small><footer>Auditoría RUV conciliada</footer></article>
+            <article data-tone="blue"><header><span>PENDIENTE POR CICLO</span><span class="material-symbols-outlined">schedule</span></header><b>{{num(metrics.pendientesCiclo)}}</b><small>Unidades que requieren gestión</small><footer>Cola operativa activa</footer></article>
+            <article data-tone="amber"><header><span>CAMBIO DE COLOR</span><span class="material-symbols-outlined">palette</span></header><b>{{num(metrics.cambiosColor)}}</b><small>Requieren nuevo revisado</small><footer>Validación RUV pendiente</footer></article>
+            <article data-tone="red"><header><span>BLOQUEOS CRÍTICOS</span><span class="material-symbols-outlined">gavel</span></header><b>{{num(criticalCount)}}</b><small>Alertas o impedimentos reales</small><footer>Acción prioritaria</footer></article>
+          </div>
+        </section>
+
         <GaleraComparison :rows="filtered"/>
-        <section class="rv-focus-panel">
-          <div class="rv-panel-title"><div><span>VEHICLES IN FOCUS</span><h3>Unidades que requieren atención</h3></div><button type="button" @click="open('operations')">Abrir Operaciones →</button></div>
-          <div class="rv-focus-grid"><VehicleBadge v-for="r in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" :row="r" compact @open="openFicha"/></div>
+
+        <div class="rv-dashboard-lower">
+          <section class="rv-focus-panel">
+            <div class="rv-panel-title"><div><span>VEHÍCULOS EN FOCO</span><h3>Unidades críticas & inspecciones activas</h3></div><button type="button" @click="open('operations')">Abrir Operaciones →</button></div>
+            <div class="rv-focus-grid"><VehicleBadge v-for="r in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" :row="r" compact @open="openFicha"/></div>
+          </section>
+          <section class="rv-cycle-panel">
+            <div class="rv-panel-title"><div><span>RITMO DE CIERRE</span><h3>Avance mensual</h3></div><button type="button" @click="open('monthly')">Ver ciclos →</button></div>
+            <article v-for="m in monthly.slice(0,4)" :key="String(m.mes_num)">
+              <div><b>{{m.mes_nombre||('Mes '+m.mes_num)}}</b><span>{{num(m.cubiertas)}} / {{num(m.total||m.activas)}} al día</span></div>
+              <div class="rv-cycle-bar"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
+              <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
+            </article>
+          </section>
+        </div>
+
+        <section class="rv-dispatch-panel">
+          <div class="rv-panel-title"><div><span>MESA CENTRAL DE DESPACHO</span><h3>Prioridades visibles</h3></div><small>{{Math.min(filtered.length,5)}} de {{num(filtered.length)}} unidades</small></div>
+          <RevisadosTable :rows="filtered.slice(0,5)"/>
         </section>
       </section>
       <section v-else-if="active==='operations'" class="rv-stack rv-ops-workspace">
-        <div class="rv-ops-hero">
-          <div>
-            <span class="rv-eyebrow">VEHICLE OPERATIONS WORKSPACE</span>
-            <h2>Operaciones</h2>
-            <p>Control operativo de revisados, incidencias y estado legal vehicular.</p>
-          </div>
-          <div class="rv-ops-kpis">
-            <span><b>{{num(rawRows.length)}}</b><small>unidades</small></span>
-            <span><b>{{num(rawRows.length-pending.length)}}</b><small>al día</small></span>
-            <span><b>{{num(pending.length)}}</b><small>pendientes</small></span>
-          </div>
+        <div class="rv-ops-summary">
+          <div><span>{{num(rawRows.length)}} UDS TOTAL</span><i></i><b>{{num(metrics.vigentes)}} AL DÍA</b></div>
+          <div class="rv-view-toggle"><button :class="{active:opsView==='cards'}" @click="opsView='cards'"><span class="material-symbols-outlined">grid_view</span>CARDS</button><button :class="{active:opsView==='table'}" @click="opsView='table'"><span class="material-symbols-outlined">table_rows</span>TABLE</button></div>
         </div>
 
-        <div class="rv-command-strip">
-          <article class="rv-command rv-command-sync">
-            <div class="rv-command-icon">↻</div>
-            <div class="rv-command-copy"><b>Sincronizar eCarCheck</b><span>Últimos revisados + fichas oficiales V2</span><small>{{syncState}}</small></div>
-            <button class="rv-action-main" :disabled="syncBusy" @click="runSyncEcarcheck">{{syncBusy?'Actualizando…':'Actualizar'}}</button>
-            <div v-if="syncProgress.total" class="rv-command-progress"><i :style="{width: Math.min(100,Math.round(syncProgress.procesadas*100/syncProgress.total))+'%'}"></i></div>
-          </article>
-          <article class="rv-command rv-command-lookup">
-            <div class="rv-command-icon">⌕</div>
-            <div class="rv-command-copy"><b>Consulta puntual V2</b><span>Ficha + ENA + boletas por documento y placa</span><small>{{manualState}}</small></div>
-            <div class="rv-command-input"><input v-model="manualPlate" maxlength="12" placeholder="PLACA" @keydown.enter="runManualEcarcheck"><button :disabled="manualBusy" @click="runManualEcarcheck">{{manualBusy?'…':'Consultar'}}</button></div>
-          </article>
+        <div class="rv-ops-search-row">
+          <div class="rv-search-shell"><span class="material-symbols-outlined">search</span><input v-model="filters.search" placeholder="Buscar unidad, placa, galera o supervisora… (Ctrl+K)"><kbd>⌘K</kbd></div>
+        </div>
+
+        <div class="rv-quick-chips">
+          <span v-for="q in quickOps" :key="q.key" :data-tone="q.tone" :class="{active:q.key==='all'}"><i></i>{{q.label}} <b>{{num(q.value)}}</b></span>
+        </div>
+
+        <div class="rv-ops-filters">
+          <label>Galera:<select v-model="selectedGalera"><option value="">Todas (VCARS, VINDU…)</option><option v-for="x in galeras" :key="x">{{x}}</option></select></label>
+          <label>Supervisión:<select><option>Todas las Bahías</option></select></label>
+          <label>Período:<select><option>Ciclo actual</option></select></label>
+          <label>Severidad:<select v-model="selectedStatus"><option value="">Cualquier Estado</option><option v-for="x in statuses" :key="x">{{x}}</option></select></label>
+        </div>
+
+        <div class="rv-ops-tools">
+          <button class="rv-tool-action" :disabled="syncBusy" @click="runSyncEcarcheck"><span class="material-symbols-outlined">sync</span><div><b>{{syncBusy?'Actualizando eCarCheck…':'Actualizar eCarCheck'}}</b><small>{{syncState}}</small></div></button>
+          <div class="rv-tool-lookup"><span class="material-symbols-outlined">manage_search</span><div><b>Consulta puntual V2</b><small>{{manualState}}</small></div><input v-model="manualPlate" maxlength="12" placeholder="PLACA" @keydown.enter="runManualEcarcheck"><button :disabled="manualBusy" @click="runManualEcarcheck">{{manualBusy?'…':'Consultar'}}</button></div>
         </div>
 
         <div v-if="manualResult?.result" class="rv-query-result">
@@ -163,23 +228,25 @@ onMounted(()=>load())
           <p v-if="manualResult.result?.vehiculo">{{manualResult.result.vehiculo?.nombrePropietario||'—'}} · {{manualResult.result.vehiculo?.colorVehiculo||'—'}} · Revisado {{manualResult.result.vehiculo?.fechaRevisado||'—'}}</p>
         </div>
 
-        <div class="rv-ops-toolbar">
-          <div class="rv-search-shell"><span>⌕</span><input v-model="filters.search" placeholder="Buscar unidad, placa, empresa o supervisora…"></div>
-          <select v-model="selectedGalera"><option value="">Galera · Todas</option><option v-for="x in galeras" :key="x">{{x}}</option></select>
-          <select v-model="selectedStatus"><option value="">Estatus · Todos</option><option v-for="x in statuses" :key="x">{{x}}</option></select>
-          <div class="rv-view-toggle"><button :class="{active:opsView==='cards'}" @click="opsView='cards'">▦ Cards</button><button :class="{active:opsView==='table'}" @click="opsView='table'">☷ Tabla</button></div>
-          <button class="rv-copy-btn" @click="copyPending">Copiar</button>
-        </div>
-
-        <div class="rv-ops-meta"><div><b>{{num(visibleRows.length)}}</b> unidades visibles</div><span>Selecciona una unidad para abrir su ficha legal completa.</span></div>
+        <div class="rv-ops-meta"><div><b>{{num(visibleRows.length)}}</b> unidades visibles</div><span>Selecciona una unidad para abrir su ficha legal completa.</span><button class="ghost" @click="copyPending">Copiar lista</button></div>
 
         <div v-if="opsView==='cards'" class="rv-vehicle-grid">
           <VehicleBadge v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" :row="r" @open="openFicha"/>
         </div>
 
-        <div v-else class="rv-table rv-ops-table"><table><thead><tr><th>Unidad / vehículo</th><th>Placa</th><th>Galera</th><th>Estado legal</th><th>Alertas</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha</button></td></tr></tbody></table></div>
+        <div v-else class="rv-table rv-ops-table"><table><thead><tr><th>Unidad / vehículo</th><th>Placa</th><th>Galera & Bahía</th><th>Estado legal</th><th>Desglose normativo</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha completa</button></td></tr></tbody></table></div>
       </section>
-      <section v-else-if="active==='monthly'" class="rv-stack"><div class="rv-grid"><article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)" class="rv-card"><b>{{m.mes_nombre||`Mes ${m.mes_num}`}}</b><strong>{{num(m.cubiertas)}} / {{num(m.total||m.activas)}} al día</strong><span>{{num(m.pendientes)}} pendientes</span></article></div><div class="rv-table"><table><thead><tr><th>Galera</th><th>Total</th><th>Al día</th><th>Pendientes</th></tr></thead><tbody><tr v-for="g in gallery" :key="String(g.galera)"><td>{{g.galera}}</td><td>{{num(g.total)}}</td><td>{{num(g.cubiertas)}}</td><td>{{num(g.pendientes)}}</td></tr></tbody></table></div></section>
+      <section v-else-if="active==='monthly'" class="rv-stack rv-monthly">
+        <div class="rv-monthly-head"><div><span class="rv-eyebrow">CYCLE TRACKER · AUDITORÍA</span><h2>Avance mensual</h2><p>Seguimiento por ciclo, galera y pendientes reales.</p></div><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div>
+        <div class="rv-cycle-grid">
+          <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
+            <header><div><span>CICLO OPERATIVO</span><h3>{{m.mes_nombre||('Mes '+m.mes_num)}}</h3></div><b>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</b></header>
+            <div class="rv-cycle-bigbar"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
+            <div class="rv-cycle-stats"><span><b>{{num(m.cubiertas)}}</b> al día</span><span><b>{{num(m.pendientes)}}</b> pendientes</span><span><b>{{num(m.total||m.activas)}}</b> total</span></div>
+          </article>
+        </div>
+        <section class="rv-monthly-table"><div class="rv-panel-title"><div><span>MATRIZ POR GALERA</span><h3>Avance y pendientes</h3></div><small>{{gallery.length}} galeras</small></div><div class="rv-table"><table><thead><tr><th>Galera</th><th>Total</th><th>Al día</th><th>Pendientes</th><th>Cobertura</th></tr></thead><tbody><tr v-for="g in gallery" :key="String(g.galera)"><td><b>{{g.galera}}</b></td><td>{{num(g.total)}}</td><td>{{num(g.cubiertas)}}</td><td>{{num(g.pendientes)}}</td><td><div class="rv-mini-meter"><i :style="{width:(Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0)+'%'}"></i></div><b>{{Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0}}%</b></td></tr></tbody></table></div></section>
+      </section>
       <section v-else-if="active==='daily'" class="rv-stack">
         <div class="rv-grid"><article class="rv-card"><b>Emitidos hoy</b><strong>{{num(emitted.length)}}</strong></article><article class="rv-card"><b>Pendientes</b><strong>{{num(pending.length)}}</strong></article><article class="rv-card"><b>Galera con más pendientes</b><strong>{{dailyPendingGroups[0]?.galera||'—'}}</strong><span>{{dailyPendingGroups[0]?num(dailyPendingGroups[0].rows.length)+' pendientes':'Sin pendientes'}}</span></article></div>
         <div class="rv-daily-layout">
@@ -281,4 +348,19 @@ onMounted(()=>load())
 .rv-plate-zone{display:grid;justify-items:center;padding:10px 12px;border:1px solid #d8e1eb;border-radius:10px;background:linear-gradient(180deg,#fbfcfe,#f4f7fa)}.rv-plate-zone small{font-size:8px;color:#718097;letter-spacing:.1em}.rv-plate-zone strong{font-size:24px;letter-spacing:.14em;color:#0e2a4f;line-height:1.25}.rv-plate-zone span{font-size:7px;color:#9aa6b5;letter-spacing:.11em}.rv-vehicle-copy{display:grid;gap:2px}.rv-vehicle-copy b{font-size:12px;color:#173354}.rv-vehicle-copy span{font-size:9px;color:#7c8a9c}.rv-review-date{display:flex;justify-content:space-between;align-items:end;gap:10px;padding-top:8px;border-top:1px solid #edf1f5}.rv-review-date span{font-size:9px;color:#7d8b9d}.rv-review-date b{font-size:11px;color:#1b3658}.rv-signal-row,.rv-table-signals{display:flex;gap:5px;flex-wrap:wrap}.rv-signal-row span,.rv-table-signals span{padding:4px 6px;border-radius:6px;font-size:8px;font-weight:800;border:1px solid transparent}.sig-ok{background:#edf9f3;color:#14704d;border-color:#d0ecdf!important}.sig-warn{background:#fff7e7;color:#936100;border-color:#f0dfb7!important}.sig-bad{background:#fff0ef;color:#b33b35;border-color:#f0cbc8!important}.sig-info{background:#edf5ff;color:#145ba8;border-color:#d2e4fb!important}.rv-badge-footer{display:flex;justify-content:space-between;align-items:center;gap:8px}.rv-badge-footer>span{font-size:9px;color:#7c8a9c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rv-badge-footer button{border:0;background:transparent;color:#0062ff;font-size:9px;font-weight:900;cursor:pointer}.rv-ops-table td small{display:block;margin-top:3px;color:#8190a2;font-size:9px}.rv-plate-mini{display:inline-flex;padding:5px 7px;border:1px solid #d6dfeb;border-radius:7px;background:#f7f9fc;font-weight:900;letter-spacing:.08em;color:#173354}
 .rv-drawer{width:min(520px,96vw);padding:0}.rv-drawer-hero{padding:20px;background:linear-gradient(180deg,#f6faff,#fff);border-bottom:1px solid #dfe7f1!important}.rv-drawer-plate{display:inline-flex;margin:7px 0 5px;padding:7px 10px;border:1px solid #d4deea;border-radius:8px;background:#fff;font-size:18px;font-weight:900;letter-spacing:.13em;color:#102c50}.rv-drawer>.rv-state,.rv-drawer>template,.rv-drawer>.rv-diffs,.rv-drawer>.rv-source-grid,.rv-drawer>.rv-incident{margin-left:18px;margin-right:18px}.rv-drawer>.rv-state{margin-top:18px}.rv-drawer>.rv-diffs{margin-top:18px}.rv-drawer>.rv-source-grid{margin-top:0}.rv-drawer>.rv-incident{margin-bottom:18px}
 .danger{color:#c2352b}.rv-state{display:grid;gap:9px;place-items:start}.error{border-color:#efb7b2}@media(max-width:1180px){.rv-vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-ops-toolbar{grid-template-columns:minmax(220px,1fr) 140px 150px auto}.rv-copy-btn{display:none}}@media(max-width:1100px){.rv-daily-layout{grid-template-columns:1fr}.rv-mailer{position:static}.rv-command-strip{grid-template-columns:1fr}}@media(max-width:980px){.rv-op-tools,.rv-source-grid{grid-template-columns:1fr}.rv-ops-toolbar{grid-template-columns:1fr 1fr}.rv-search-shell{grid-column:1/-1}.rv-view-toggle{justify-self:end}}@media(max-width:780px){.rym-revisados-vue{grid-template-columns:1fr}.rv-side{min-height:auto}.rv-main{padding:16px}.rv-main>header{align-items:flex-start;flex-direction:column}}
+
+/* === STITCH EXPORT SYNC: Portal RYM Revisados === */
+.rym-revisados-vue{--stitch-blue:#0062ff;--stitch-blue-hover:#004ecc;--stitch-cyan:#0ea5e9;--stitch-navy:#0a1120;--stitch-navy-2:#070d18;--stitch-bg:#f4f6fa;--stitch-card:#fff;--stitch-border:#e2e8f0;--stitch-text:#0f172a;--stitch-muted:#64748b;--stitch-green:#16a34a;--stitch-amber:#ea580c;--stitch-red:#dc2626;grid-template-columns:220px minmax(0,1fr)!important;background:var(--stitch-bg)!important;color:var(--stitch-text)!important;font-family:Inter,system-ui,sans-serif!important}
+.rv-side{position:sticky;top:0;height:100vh;min-height:100vh!important;padding:0!important;background:var(--stitch-navy)!important;border-right:1px solid #1e293b!important;color:#cbd5e1;display:flex!important;flex-direction:column!important;overflow:hidden}
+.rv-brand-dark{height:64px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--stitch-navy-2);border-bottom:1px solid #1e293b}.rv-brand-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:7px;background:var(--stitch-blue);color:#fff;box-shadow:0 6px 16px rgba(0,98,255,.25)}.rv-brand-mark .material-symbols-outlined{font-size:19px}.rv-brand-copy{display:grid;min-width:0}.rv-brand-copy b{font-size:13px;color:#fff}.rv-brand-copy small{font-size:8px;letter-spacing:.06em;color:#38bdf8;font-weight:800}.rv-version{margin-left:auto;padding:3px 5px;border-radius:4px;background:#172033;color:#cbd5e1;font:700 8px/1 "JetBrains Mono",monospace}.rv-station{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:7px;padding:9px 14px;border-bottom:1px solid #1e293b;background:#0d1728}.rv-station i{width:7px;height:7px;border-radius:50%;background:#06b6d4}.rv-station span{font:700 8px/1 Inter,sans-serif;letter-spacing:.06em;color:#94a3b8}.rv-station b{font:700 9px/1 "JetBrains Mono",monospace;color:#38bdf8}.rv-nav-label{padding:16px 14px 6px;font-size:8px;font-weight:800;letter-spacing:.08em;color:#64748b}.rv-nav-label-secondary{padding-top:20px}.rv-side nav{display:grid!important;gap:3px;padding:0 8px}.rv-side nav button{display:grid!important;grid-template-columns:24px 1fr auto;align-items:center;gap:6px;width:100%;padding:9px 10px!important;border-radius:6px!important;color:#94a3b8!important;background:transparent!important;text-align:left}.rv-side nav button .material-symbols-outlined{font-size:17px}.rv-side nav button em{font-style:normal;font-size:10px;font-weight:600}.rv-side nav button small{font:800 7px/1 "JetBrains Mono",monospace;letter-spacing:.07em}.rv-side nav button:hover{background:#172033!important;color:#fff!important}.rv-side nav button.active{background:var(--stitch-blue)!important;color:#fff!important;box-shadow:0 5px 14px rgba(0,98,255,.20)!important}.rv-side-shortcuts{display:grid;gap:5px;padding:0 8px}.rv-side-shortcuts button{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:6px;padding:9px 10px;border:0;border-radius:5px;background:#111c2d;color:#cbd5e1;text-align:left}.rv-side-shortcuts .material-symbols-outlined{font-size:16px;color:#38bdf8}.rv-side-shortcuts em{font-style:normal;font-size:10px}.rv-side-shortcuts b{padding:3px 5px;border-radius:4px;background:#1e2f4a;color:#e2e8f0;font:700 9px/1 "JetBrains Mono",monospace}.rv-side-profile{margin-top:auto;display:grid;gap:2px;padding:10px 14px;border-top:1px solid #1e293b;background:#0d1728}.rv-side-profile span{font-size:10px;color:#fff;font-weight:700}.rv-side-profile b{font-size:8px;color:#38bdf8}.rv-side-profile small{font-size:8px;color:#64748b}.rv-node{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:7px;margin:8px;padding:8px 9px;border:1px solid #1e293b;border-radius:6px;background:#0b1322}.rv-node i{width:7px;height:7px;border-radius:50%;background:#16a34a}.rv-node span{font:600 8px/1 "JetBrains Mono",monospace;color:#cbd5e1}.rv-node b{font:700 8px/1 "JetBrains Mono",monospace;color:#38bdf8}.rv-back{margin:0 8px 8px!important;padding:8px 10px!important;border:1px solid #1e293b!important;border-radius:6px!important;background:#111c2d!important;color:#94a3b8!important;font-size:9px!important}
+.rv-main{padding:0 18px 28px!important;min-width:0;background:var(--stitch-bg)}.rv-topbar{position:sticky;top:0;z-index:20;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:16px;margin:0 -18px 14px!important;padding:15px 18px 12px!important;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--stitch-border)!important}.rv-page-heading small{display:block!important;color:#0062ff!important;font:800 8px/1 Inter,sans-serif!important;letter-spacing:.08em!important}.rv-page-heading h1{margin:3px 0 2px!important;font-size:25px!important;line-height:1.1!important;letter-spacing:-.03em;color:#0f172a!important}.rv-page-heading>span{font-size:10px;color:#64748b}.rv-top-actions{display:flex;align-items:center;gap:7px}.rv-live-pill{display:flex;align-items:center;gap:5px;padding:7px 9px;border:1px solid #a7f3d0;border-radius:999px;background:#ecfdf5;color:#166534}.rv-live-pill i{width:7px;height:7px;border-radius:50%;background:#16a34a}.rv-live-pill span,.rv-live-pill b{font:700 8px/1 "JetBrains Mono",monospace}.rv-top-actions .ghost,.rv-top-actions .primary{min-height:32px;border-radius:6px!important;padding:0 10px!important;font-size:9px!important}
+.rv-module-strip{display:flex;justify-content:space-between;gap:12px;align-items:center}.rv-module-strip>div:first-child{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.rv-module-strip>div:first-child>span{font-size:8px;color:#0062ff;font-weight:900}.rv-module-strip>div:first-child>b{font-size:13px;color:#172033}.rv-module-strip>div:first-child>small{padding:4px 7px;border:1px solid #bfdbfe;border-radius:999px;background:#eff6ff;color:#1d4ed8;font:700 8px/1 "JetBrains Mono",monospace}.rv-module-actions{display:flex;align-items:center;gap:6px}.rv-module-actions>span{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid #dbe3ed;border-radius:6px;background:#fff;font-size:8px;font-weight:700}.rv-module-actions .material-symbols-outlined{font-size:14px}.rv-critical-chip{background:#fff1f2!important;border-color:#fecdd3!important;color:#be123c!important}.rv-module-actions .primary{display:inline-flex;align-items:center;gap:5px;border-radius:6px!important;padding:7px 10px!important;font-size:9px!important}.rv-module-actions .primary .material-symbols-outlined{font-size:14px}
+.rv-global-control{padding:16px;border:1px solid var(--stitch-border);border-radius:8px;background:#fff}.rv-global-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end}.rv-global-head>div:first-child{display:grid;grid-template-columns:auto auto;align-items:baseline;gap:2px 7px}.rv-global-head>div:first-child>span{font-size:8px;font-weight:900;letter-spacing:.08em;color:#0062ff}.rv-global-head>div:first-child>small{font-size:8px;color:#0ea5e9;font-weight:800}.rv-global-head strong{grid-column:1;font-size:25px;letter-spacing:-.04em;color:#0f172a}.rv-global-head em{font-style:normal;font-size:11px;color:#334155}.rv-global-meta{display:flex;gap:8px}.rv-global-meta span{display:grid;gap:2px;padding:9px 10px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;font-size:8px;color:#64748b}.rv-global-meta b{font-size:12px;color:#0f172a}.rv-global-meter{height:5px;margin:13px 0 14px;border-radius:999px;background:#e2e8f0;overflow:hidden}.rv-global-meter i{display:block;height:100%;background:linear-gradient(90deg,#16a34a 0 72%,#0ea5e9 72% 86%,#f59e0b 86% 94%,#dc2626 94%);border-radius:999px}.rv-kpi-deck{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.rv-kpi-deck article{padding:12px;border:1px solid #e2e8f0;border-top:2px solid #0062ff;border-radius:7px;background:#fbfcfe}.rv-kpi-deck article[data-tone="green"]{border-top-color:#16a34a}.rv-kpi-deck article[data-tone="amber"]{border-top-color:#f59e0b}.rv-kpi-deck article[data-tone="red"]{border-top-color:#dc2626;background:#fffafa}.rv-kpi-deck header{display:flex;justify-content:space-between;gap:6px}.rv-kpi-deck header span:first-child{font-size:8px;font-weight:900;letter-spacing:.06em}.rv-kpi-deck header .material-symbols-outlined{font-size:15px}.rv-kpi-deck article>b{display:block;margin-top:8px;font:700 22px/1 "JetBrains Mono",monospace;color:#0f172a}.rv-kpi-deck article>small{display:block;margin-top:5px;min-height:24px;font-size:9px;color:#64748b}.rv-kpi-deck article>footer{margin-top:10px;padding-top:7px;border-top:1px solid #e2e8f0;font-size:8px;color:#64748b}
+.rv-dashboard-lower{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.7fr);gap:12px}.rv-focus-panel,.rv-cycle-panel,.rv-dispatch-panel,.rv-monthly-table{padding:14px;border:1px solid var(--stitch-border);border-radius:8px;background:#fff}.rv-focus-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}.rv-cycle-panel{display:grid;align-content:start;gap:9px}.rv-cycle-panel article{display:grid;grid-template-columns:1fr 90px 38px;align-items:center;gap:7px}.rv-cycle-panel article>div:first-child{display:grid}.rv-cycle-panel article>div:first-child b{font-size:9px}.rv-cycle-panel article>div:first-child span{font-size:8px;color:#64748b}.rv-cycle-bar,.rv-cycle-bigbar,.rv-mini-meter{height:5px;border-radius:999px;background:#e2e8f0;overflow:hidden}.rv-cycle-bar i,.rv-cycle-bigbar i,.rv-mini-meter i{display:block;height:100%;border-radius:999px;background:#0062ff}.rv-cycle-panel article>strong{font:700 9px/1 "JetBrains Mono",monospace;color:#0062ff}.rv-dispatch-panel .rv-table{margin-top:10px;border-radius:6px}
+.rv-ops-summary{display:flex;align-items:center;justify-content:space-between;gap:12px}.rv-ops-summary>div:first-child{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;font:800 8px/1 "JetBrains Mono",monospace}.rv-ops-summary>div:first-child i{width:1px;height:14px;background:#dbe3ed}.rv-ops-summary>div:first-child span{color:#0f172a}.rv-ops-summary>div:first-child b{color:#0062ff}.rv-ops-search-row{display:grid}.rv-search-shell{height:42px!important;background:#fff!important;border-radius:7px!important}.rv-search-shell kbd{padding:3px 5px;border:1px solid #e2e8f0;border-radius:4px;background:#f8fafc;color:#475569;font:700 8px/1 "JetBrains Mono",monospace}.rv-quick-chips{display:flex;gap:7px;flex-wrap:wrap}.rv-quick-chips>span{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:999px;background:#fff;font-size:9px;color:#334155}.rv-quick-chips>span i{width:6px;height:6px;border-radius:50%;background:#cbd5e1}.rv-quick-chips>span b{font:700 9px/1 "JetBrains Mono",monospace}.rv-quick-chips>span.active{background:#0062ff;color:#fff;border-color:#0062ff}.rv-quick-chips>span[data-tone="green"] i{background:#16a34a}.rv-quick-chips>span[data-tone="amber"] i{background:#f59e0b}.rv-quick-chips>span[data-tone="red"] i{background:#dc2626}.rv-ops-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.rv-ops-filters label{display:flex;align-items:center;gap:6px;padding:0 9px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;font-size:9px;font-weight:600;color:#475569}.rv-ops-filters select{min-width:0;flex:1;border:0;background:transparent;padding:9px 0;outline:0;color:#0f172a;font-size:9px;font-weight:700}.rv-ops-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rv-tool-action,.rv-tool-lookup{min-height:54px;display:grid;align-items:center;gap:9px;padding:9px 11px;border:1px solid #dbe3ed;border-radius:7px;background:#fff}.rv-tool-action{grid-template-columns:auto 1fr;text-align:left}.rv-tool-lookup{grid-template-columns:auto 1fr 90px auto}.rv-tool-action>.material-symbols-outlined,.rv-tool-lookup>.material-symbols-outlined{width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:#e8f1ff;color:#0062ff}.rv-tool-action div,.rv-tool-lookup div{display:grid}.rv-tool-action b,.rv-tool-lookup b{font-size:10px}.rv-tool-action small,.rv-tool-lookup small{font-size:8px;color:#64748b}.rv-tool-lookup input{min-width:0;padding:7px;border:1px solid #dbe3ed;border-radius:5px;font:700 9px/1 "JetBrains Mono",monospace}.rv-tool-lookup button{padding:7px 9px;border:0;border-radius:5px;background:#0062ff;color:#fff;font-size:9px;font-weight:800}.rv-vehicle-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}.rv-ops-meta{padding:7px 0!important;border-bottom:1px solid #e2e8f0}.rv-ops-meta .ghost{margin-left:auto}
+.rv-monthly-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.rv-monthly-head h2{font-size:26px}.rv-monthly-head p{margin:3px 0 0;color:#64748b}.rv-monthly-total{display:grid;justify-items:end;padding:9px 11px;border:1px solid #e2e8f0;border-radius:7px;background:#fff}.rv-monthly-total b{font:700 20px/1 "JetBrains Mono",monospace;color:#0f172a}.rv-monthly-total span{font-size:8px;color:#64748b}.rv-cycle-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rv-cycle-grid article{padding:14px;border:1px solid #e2e8f0;border-radius:8px;background:#fff}.rv-cycle-grid header{display:flex;justify-content:space-between;gap:8px}.rv-cycle-grid header span{font-size:8px;color:#0062ff;font-weight:900}.rv-cycle-grid h3{margin:2px 0;font-size:15px}.rv-cycle-grid header>b{font:700 22px/1 "JetBrains Mono",monospace;color:#0062ff}.rv-cycle-bigbar{margin:11px 0}.rv-cycle-stats{display:flex;gap:12px;flex-wrap:wrap}.rv-cycle-stats span{font-size:9px;color:#64748b}.rv-cycle-stats b{color:#0f172a}.rv-monthly-table>.rv-panel-title{margin-bottom:10px}.rv-monthly-table td:last-child{display:flex;align-items:center;gap:7px}.rv-mini-meter{width:90px}.rv-monthly-table td:last-child>b{font-size:9px}
+.rv-modal{background:rgba(7,13,24,.35)!important}.rv-drawer{width:min(470px,96vw)!important;background:#fff!important;border-left:1px solid #dbe3ed!important;box-shadow:-18px 0 42px rgba(15,23,42,.12)!important}.rv-drawer-hero{background:#fff!important;border-bottom:1px solid #e2e8f0!important}.rv-drawer-hero small{color:#0062ff!important}.rv-drawer-plate{border:2px solid #0f172a!important;border-radius:6px!important;background:#f8fafc!important;font-family:"JetBrains Mono",monospace!important;letter-spacing:.12em!important}.rv-source-grid article,.rv-incident,.rv-diffs{border-radius:7px!important;background:#f1f5f9!important}.rv-source-grid dt{font-size:9px!important}.rv-source-grid dd{font-size:10px!important}
+@media(max-width:1280px){.rym-revisados-vue{grid-template-columns:200px minmax(0,1fr)!important}.rv-kpi-deck{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-focus-grid,.rv-vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.rv-dashboard-lower{grid-template-columns:1fr}.rv-ops-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-ops-tools{grid-template-columns:1fr}}
+@media(max-width:800px){.rym-revisados-vue{grid-template-columns:1fr!important}.rv-side{position:relative;height:auto;min-height:auto!important}.rv-main{padding:0 12px 20px!important}.rv-topbar{margin:0 -12px 12px!important;flex-direction:column}.rv-top-actions{width:100%;flex-wrap:wrap}.rv-global-head,.rv-module-strip,.rv-ops-summary,.rv-monthly-head{align-items:flex-start;flex-direction:column}.rv-kpi-deck,.rv-focus-grid,.rv-vehicle-grid,.rv-cycle-grid,.rv-ops-filters{grid-template-columns:1fr!important}.rv-tool-lookup{grid-template-columns:auto 1fr}.rv-tool-lookup input,.rv-tool-lookup button{grid-column:2}.rv-global-meta{flex-wrap:wrap}}
+
 </style>

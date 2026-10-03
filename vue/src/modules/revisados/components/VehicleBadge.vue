@@ -4,72 +4,38 @@ import type { CanonicalRevisadoRow } from '../types/revisados.types'
 
 const props=withDefaults(defineProps<{row:CanonicalRevisadoRow;compact?:boolean}>(),{compact:false})
 const emit=defineEmits<{open:[row:CanonicalRevisadoRow]}>()
-
 function s(v:unknown){return String(v??'').trim()}
 function norm(v:unknown){return s(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
-function fmt(v:unknown){if(!v)return'—';try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',day:'2-digit',month:'short',year:'numeric'}).format(new Date(String(v)))}catch{return s(v)||'—'}}
-
-const tone=computed(()=>{
-  if(props.row.bloqueado)return'incident'
-  const p=norm(props.row.pendiente_tipo||props.row.status2)
-  if(p.includes('COLOR'))return'color'
-  if(props.row.emitido)return'good'
-  return'pending'
-})
-const label=computed(()=>{
-  if(props.row.bloqueado)return'Incidencia'
-  const p=s(props.row.pendiente_tipo||props.row.status2)
-  if(p)return p
-  return props.row.emitido?'Vigente':'Pendiente'
-})
+function fmt(v:unknown){if(!v)return'—';try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',day:'2-digit',month:'short',year:'numeric'}).format(new Date(String(v))).toUpperCase()}catch{return s(v)||'—'}}
+const tone=computed(()=>props.row.bloqueado?'incident':norm(props.row.pendiente_tipo||props.row.status2).includes('COLOR')?'color':props.row.emitido?'good':'pending')
+const label=computed(()=>props.row.bloqueado?'INCIDENCIA':s(props.row.pendiente_tipo||props.row.status2)|| (props.row.emitido?'VIGENTE':'PENDIENTE'))
 const model=computed(()=>[s(props.row.marca),s(props.row.modelo)].filter(Boolean).join(' ')||s(props.row.empresa)||'Vehículo RYM')
 const signals=computed(()=>{
-  const out:{label:string;tone:string}[]=[]
-  if(props.row.boleta_empresa)out.push({label:'Boleta empresa',tone:'bad'})
-  else if(props.row.boleta_pendiente)out.push({label:'Boleta placa',tone:'bad'})
-  else out.push({label:'Sin boleta',tone:'ok'})
+  const out:{label:string;tone:string;icon:string}[]=[]
+  if(props.row.boleta_empresa)out.push({label:'BOLETA EMPRESA',tone:'bad',icon:'gavel'})
+  else if(props.row.boleta_pendiente)out.push({label:'BOLETA PLACA',tone:'bad',icon:'gavel'})
+  else out.push({label:'SIN BOLETAS',tone:'ok',icon:'verified'})
   const diff=Boolean(props.row.ficha_ecarcheck_at&&props.row.color_control&&props.row.color_ecarcheck&&norm(props.row.color_control)!==norm(props.row.color_ecarcheck))
-  out.push({label:diff?'Color difiere':'Color OK',tone:diff?'warn':'ok'})
+  out.push({label:diff?'DISCREPANCIA':'COLOR OK',tone:diff?'warn':'ok',icon:'palette'})
   const cupo=norm(props.row.cupo_ecarcheck||props.row.cupo_control)
   const sin=!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)
-  out.push({label:sin?'Sin cupo':'Cupo OK',tone:sin?'warn':'info'})
+  out.push({label:sin?'SIN CUPO':'CUPO OK',tone:sin?'warn':'info',icon:'confirmation_number'})
   return out
 })
 </script>
 
 <template>
-<article class="vehicle-badge" :class="['tone-'+tone,{compact}]" @click="emit('open',row)">
-  <div class="accent"></div>
-  <header>
-    <span>{{ row.galera || 'SIN GALERA' }}</span>
-    <b :class="'tone-'+tone">{{ label }}</b>
-  </header>
-  <div class="plate">
-    <small>UNIDAD {{ row.unidad || '—' }}</small>
-    <strong>{{ row.placa || row.unidad || '—' }}</strong>
-    <span>PANAMÁ · RYM</span>
-  </div>
-  <div class="identity">
-    <b>{{ model }}</b>
-    <span>{{ row.supervisora || 'Sin supervisora' }}</span>
-  </div>
-  <div class="review">
-    <span>Último revisado</span>
-    <b>{{ fmt(row.ultimo_revisado) }}</b>
-  </div>
-  <div class="signals">
-    <span v-for="item in signals" :key="item.label" :class="'sig-'+item.tone">{{ item.label }}</span>
-  </div>
-  <footer>
-    <span>{{ row.prioridad || row.status2 || 'Seguimiento operativo' }}</span>
-    <button type="button" @click.stop="emit('open',row)">Ficha →</button>
-  </footer>
+<article class="stitch-vehicle-card" :class="['tone-'+tone,{compact}]" @click="emit('open',row)">
+  <header><span>{{row.galera||'SIN GALERA'}} · {{row.supervisora||'SIN SUPERVISORA'}}</span><b :class="'tone-'+tone"><i></i>{{label}}</b></header>
+  <div class="plate-line">{{row.placa||row.unidad||'—'}}</div>
+  <a class="model" href="#" @click.prevent.stop="emit('open',row)">{{model}}</a>
+  <div class="review"><span>Último Revisado</span><b>{{fmt(row.ultimo_revisado)}}</b></div>
+  <div class="signals"><span v-for="x in signals" :key="x.label" :data-tone="x.tone"><span class="material-symbols-outlined">{{x.icon}}</span>{{x.label}}</span></div>
+  <footer v-if="!compact"><span>{{row.prioridad||'Seguimiento operativo'}}</span><button type="button" @click.stop="emit('open',row)">Ficha →</button></footer>
 </article>
 </template>
 
 <style scoped>
-.vehicle-badge{--blue:#0b63f6;--navy:#102a46;position:relative;display:grid;gap:10px;padding:13px 13px 12px 16px;border:1px solid #dce5ef;border-radius:12px;background:#fff;box-shadow:0 6px 18px rgba(26,55,88,.035);cursor:pointer;overflow:hidden;transition:.16s ease}.vehicle-badge:hover{transform:translateY(-2px);border-color:#c7d8eb;box-shadow:0 12px 26px rgba(26,55,88,.085)}.accent{position:absolute;inset:0 auto 0 0;width:3px;background:var(--blue)}.tone-color .accent{background:#d89514}.tone-incident .accent{background:#d94843}.tone-good .accent{background:#18a66b}
-header,footer,.review{display:flex;align-items:center;justify-content:space-between;gap:8px}header>span{font-size:8px;font-weight:900;letter-spacing:.09em;color:#6d7d91}header>b{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:4px 7px;border-radius:999px;background:#eef5ff;color:#175fae;font-size:8px;text-transform:uppercase}.tone-color header>b{background:#fff7e8;color:#9b650d}.tone-incident header>b{background:#fff1f0;color:#b33e38}.tone-good header>b{background:#edf9f3;color:#187a58}
-.plate{display:grid;justify-items:center;padding:9px 11px;border:1px solid #d8e2ec;border-radius:9px;background:#f8fafc}.plate small{font-size:7px;letter-spacing:.09em;color:#8492a5}.plate strong{font-size:22px;line-height:1.25;letter-spacing:.13em;color:var(--navy)}.plate span{font-size:7px;letter-spacing:.1em;color:#a0abba}.identity{display:grid;gap:2px}.identity b{font-size:11px;color:#173554}.identity span,.review span{font-size:9px;color:#7c8b9f}.review{padding-top:8px;border-top:1px solid #edf1f5}.review b{font-size:10px;color:#1b3859}.signals{display:flex;gap:5px;flex-wrap:wrap}.signals span{padding:4px 6px;border-radius:6px;border:1px solid transparent;font-size:8px;font-weight:800}.sig-ok{background:#edf9f3;color:#14704d;border-color:#d0ecdf!important}.sig-warn{background:#fff7e8;color:#936100;border-color:#f0dfb7!important}.sig-bad{background:#fff1f0;color:#b33b35;border-color:#f0cbc8!important}.sig-info{background:#edf5ff;color:#145ba8;border-color:#d2e4fb!important}footer>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#7a899d;font-size:8px}footer button{border:0!important;background:transparent!important;color:var(--blue)!important;font-size:9px;font-weight:900;cursor:pointer;box-shadow:none!important}
-.compact{gap:7px;padding:10px 10px 9px 13px}.compact .plate{padding:6px 8px}.compact .plate strong{font-size:18px}.compact .signals{display:none}.compact footer{display:none}.compact .review{padding-top:6px}
+.stitch-vehicle-card{--blue:#0062ff;min-width:0;display:grid;align-content:start;gap:10px;padding:14px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.03);cursor:pointer;transition:.16s ease}.stitch-vehicle-card:hover{border-color:#93c5fd;box-shadow:0 8px 24px rgba(0,98,255,.10);transform:translateY(-1px)}.stitch-vehicle-card.tone-pending{border-left:2px solid #6366f1}.stitch-vehicle-card.tone-color{border-left:2px solid #f59e0b}.stitch-vehicle-card.tone-incident{border-left:2px solid #ef4444}.stitch-vehicle-card.tone-good{border-left:2px solid #10b981}
+header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}header>span{font:700 9px/1.35 Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#475569}header>b{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border-radius:6px;background:#e0f2fe;color:#0369a1;font:800 9px/1 Inter,sans-serif;white-space:nowrap}header>b i{width:6px;height:6px;border-radius:50%;background:currentColor}.tone-good header>b{background:#dcfce7;color:#15803d}.tone-color header>b{background:#ffedd5;color:#c2410c}.tone-incident header>b{background:#fee2e2;color:#b91c1c}.plate-line{font:700 25px/1.15 "JetBrains Mono",monospace;letter-spacing:.12em;color:#0f172a}.model{font:700 12px/1.3 Inter,sans-serif;color:#004cca;text-decoration:none}.review{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;background:#f1f5f9;border-radius:5px}.review span{font:500 10px/1.35 Inter,sans-serif;color:#475569}.review b{font:700 10px/1.35 "JetBrains Mono",monospace;color:#0f172a;text-align:right}.signals{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}.signals>span{display:inline-flex;align-items:center;gap:4px;padding:6px 8px;border-radius:6px;background:#e0f2fe;color:#0369a1;font:800 9px/1 Inter,sans-serif}.signals>span[data-tone="ok"]{background:#cffafe;color:#155e75}.signals>span[data-tone="warn"]{background:#fef3c7;color:#92400e}.signals>span[data-tone="bad"]{background:#fee2e2;color:#b91c1c}.signals .material-symbols-outlined{font-size:13px}footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid #eef2f7}footer>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 9px/1.2 Inter,sans-serif;color:#64748b}footer button{border:0!important;background:transparent!important;color:#0062ff!important;font:800 9px/1 Inter,sans-serif;box-shadow:none!important;cursor:pointer}.compact{padding:11px;gap:7px}.compact .plate-line{font-size:20px}.compact .review{padding:7px}.compact .signals{display:none}
 </style>
