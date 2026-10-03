@@ -1,0 +1,76 @@
+name: Stitch generate Revisados dashboard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [sandbox/panapass-v2]
+    paths:
+      - 'tools/stitch/generate-revisados-dashboard.mjs'
+      - 'tools/stitch/revisados-dashboard-contract.md'
+      - 'tools/stitch/package.json'
+      - '.github/workflows/stitch-generate-revisados-dashboard.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stitch-generate-revisados-dashboard
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sandbox/panapass-v2
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Fetch production main reference
+        run: |
+          git fetch --depth=1 origin main
+          mkdir -p .stitch
+          git show FETCH_HEAD:index.html > .stitch/main-index-reference.html
+          test -s .stitch/main-index-reference.html
+          grep -Fq 'Unidades en tu alcance' .stitch/main-index-reference.html
+          grep -Fq 'Estado por galera' .stitch/main-index-reference.html
+          grep -Fq 'Avance por mes' .stitch/main-index-reference.html
+
+      - name: Install Stitch SDK
+        working-directory: tools/stitch
+        run: npm install --no-audit --no-fund --package-lock=false
+
+      - name: Generate Dashboard from main-locked contract
+        working-directory: tools/stitch
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+          MAIN_INDEX_HTML: ${{ github.workspace }}/.stitch/main-index-reference.html
+        run: npm run generate:revisados-dashboard
+
+      - name: Sync complete Stitch project
+        working-directory: tools/stitch
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+          STITCH_PROJECT_TITLE: ${{ vars.STITCH_PROJECT_TITLE || 'Revisados RYM Operations Hub' }}
+        run: npm run sync
+
+      - name: Remove transient main reference
+        run: rm -f .stitch/main-index-reference.html
+
+      - name: Commit generated Stitch assets
+        run: |
+          if git diff --quiet -- .stitch && [ -z "$(git status --porcelain .stitch)" ]; then
+            echo "No Stitch changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .stitch
+          git commit -m "chore(stitch): generate main-locked Revisados dashboard"
+          git push origin HEAD:sandbox/panapass-v2
