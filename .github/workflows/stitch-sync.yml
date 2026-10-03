@@ -1,0 +1,52 @@
+name: Stitch design sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [sandbox/panapass-v2]
+    paths:
+      - 'tools/stitch/**'
+      - '.github/workflows/stitch-sync.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stitch-design-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sandbox/panapass-v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Stitch SDK
+        working-directory: tools/stitch
+        run: npm install --no-audit --no-fund --package-lock=false
+
+      - name: Pull Stitch catalog and selected project
+        working-directory: tools/stitch
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+          STITCH_PROJECT_TITLE: ${{ vars.STITCH_PROJECT_TITLE || 'Revisados RYM Operations Hub' }}
+        run: npm run sync
+
+      - name: Commit Stitch snapshot
+        run: |
+          if git diff --quiet -- .stitch && [ -z "$(git status --porcelain .stitch)" ]; then
+            echo "No Stitch changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .stitch
+          git commit -m "chore(stitch): sync design source"
+          git push origin HEAD:sandbox/panapass-v2
