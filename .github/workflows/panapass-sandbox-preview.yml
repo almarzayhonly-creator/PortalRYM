@@ -47,7 +47,7 @@ jobs:
           p=Path('index.html')
           s=p.read_text()
           build=os.environ['GITHUB_SHA']
-          marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n<script src="/modules/v171-loader.js?v={build}" defer></script>\n'
+          marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<div class="pps-sandbox-badge" data-sandbox-build="{build}">PANAPASS · SANDBOX V2 · {build[:7]}</div>\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n<script src="/modules/v171-loader.js?v={build}" defer></script>\n'
           pos=s.lower().rfind('</body>')
           if pos < 0: raise SystemExit('body end not found')
           p.write_text(s[:pos]+marker+s[pos:])
@@ -91,14 +91,20 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: |
           for attempt in $(seq 1 12); do
+            curl -fsSL "$ALIAS_URL/?sandboxBuild=$GITHUB_SHA" -o /tmp/alias-root.html || true
             curl -fsSL "$ALIAS_URL/vue/dist/index.html?build=$GITHUB_SHA" -o /tmp/alias-vue.html || true
-            if grep -Fq "$EXPECTED_ASSET" /tmp/alias-vue.html; then
-              echo "Alias propagated on attempt $attempt"
+            ROOT_OK=0
+            VUE_OK=0
+            grep -Fq "PANAPASS · SANDBOX V2 · ${GITHUB_SHA:0:7}" /tmp/alias-root.html && ROOT_OK=1 || true
+            grep -Fq "/modules/v171-loader.js?v=$GITHUB_SHA" /tmp/alias-root.html && ROOT_OK=$((ROOT_OK+1)) || true
+            grep -Fq "$EXPECTED_ASSET" /tmp/alias-vue.html && VUE_OK=1 || true
+            if [ "$ROOT_OK" -eq 2 ] && [ "$VUE_OK" -eq 1 ]; then
+              echo "Alias root + Vue propagated on attempt $attempt"
               curl -fsSI "$ALIAS_URL$EXPECTED_ASSET" | grep -qi '^HTTP/.* 200'
               exit 0
             fi
-            echo "Alias has not propagated (attempt $attempt/12)"
+            echo "Alias has not fully propagated (attempt $attempt/12, root=$ROOT_OK/2, vue=$VUE_OK/1)"
             sleep 5
           done
-          echo "Alias did not reference expected asset: $EXPECTED_ASSET" >&2
+          echo "Alias root or Vue bundle did not propagate correctly." >&2
           exit 1
