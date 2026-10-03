@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { RevisadoRecord } from '../types/revisados.types'
 import { revisadosService } from '../services/revisados.service'
 import { useRevisados } from '../composables/useRevisados'
@@ -14,15 +14,14 @@ const error = ref('')
 const previewMode = ref(false)
 
 const demoRows: RevisadoRecord[] = [
-  { id:'demo-1', unidad:'CU9475', placa:'CU9475', galera:'VCARS', supervisora:'Michelle', estado:'vigente', fechaUltimoRevisado:'2026-09-28', prioridad:'BAJA', detalleEstado:'Ciclo vigente cubierto' },
-  { id:'demo-2', unidad:'I236', placa:'I236', galera:'VINDU', supervisora:'Yani', estado:'pendiente_cambio_color', fechaUltimoRevisado:'2026-09-11', prioridad:'ALTA', detalleEstado:'Cambio de color · requiere nuevo revisado' },
-  { id:'demo-3', unidad:'CK7588', placa:'CK7588', galera:'VCOMP', supervisora:'Aracelys', estado:'incidencia', fechaUltimoRevisado:'2026-09-19', prioridad:'CRITICA', detalleEstado:'Boleta asociada a placa' },
-  { id:'demo-4', unidad:'EU2460', placa:'EU2460', galera:'VIPCO', supervisora:'Yani', estado:'pendiente_ciclo', fechaUltimoRevisado:'2026-08-14', prioridad:'ACTUAL', detalleEstado:'Pendiente por ciclo' },
-  { id:'demo-5', unidad:'AB1023', placa:'AB1023', galera:'VCARS', supervisora:'Michelle', estado:'pendiente_ciclo', fechaUltimoRevisado:'2026-08-31', prioridad:'ACTUAL', detalleEstado:'Pendiente por ciclo' },
+  { id:'demo-1', unidad:'CU9475', placa:'CU9475', galera:'VCARS', supervisora:'Michelle', estado:'vigente', fechaUltimoRevisado:'2026-09-28', prioridad:'NORMAL', detalleEstado:'Ciclo vigente cubierto', vigente:true, requiereAtencion:false, cambioColor:false, tieneAlertas:false },
+  { id:'demo-2', unidad:'I236', placa:'I236', galera:'VINDU', supervisora:'Yani', estado:'pendiente_cambio_color', fechaUltimoRevisado:'2026-09-11', prioridad:'ALTA', detalleEstado:'Cambio de color · requiere nuevo revisado', vigente:false, requiereAtencion:true, cambioColor:true, tieneAlertas:true },
+  { id:'demo-3', unidad:'CK7588', placa:'CK7588', galera:'VCOMP', supervisora:'Aracelys', estado:'pendiente_ciclo', fechaUltimoRevisado:'2026-09-19', prioridad:'CRITICA', detalleEstado:'Boleta asociada a placa', vigente:false, requiereAtencion:true, cambioColor:false, tieneAlertas:true },
+  { id:'demo-4', unidad:'EU2460', placa:'EU2460', galera:'VIPCO', supervisora:'Yani', estado:'pendiente_ciclo', fechaUltimoRevisado:'2026-08-14', prioridad:'ACTUAL', detalleEstado:'Pendiente por ciclo', vigente:false, requiereAtencion:true, cambioColor:false, tieneAlertas:false },
+  { id:'demo-5', unidad:'AB1023', placa:'AB1023', galera:'VCARS', supervisora:'Michelle', estado:'pendiente_ciclo', fechaUltimoRevisado:'2026-08-31', prioridad:'ACTUAL', detalleEstado:'Pendiente por ciclo', vigente:false, requiereAtencion:true, cambioColor:false, tieneAlertas:false },
 ]
 
 const { filters, filtered, metrics, options, clearFilters } = useRevisados(records)
-const attention = computed(() => metrics.value.pendientesCiclo + metrics.value.cambiosColor + metrics.value.incidencias)
 
 async function load() {
   loading.value = true
@@ -49,14 +48,12 @@ onMounted(load)
         <div class="brand-mark">RYM</div>
         <div><strong>Revisados</strong><small>Control legal</small></div>
       </div>
-
       <nav>
         <button class="active"><span>01</span>Mission Control</button>
         <button><span>02</span>Operaciones</button>
         <button><span>03</span>Avance y Auditoría</button>
         <button><span>04</span>Ficha de Unidad</button>
       </nav>
-
       <div class="sidebar-foot">
         <small>{{ previewMode ? 'VISTA DE DISEÑO' : 'DATOS REALES' }}</small>
         <strong>Vue 3 · Sandbox</strong>
@@ -84,12 +81,12 @@ onMounted(load)
       <section class="attention-strip">
         <div>
           <span>REQUIEREN ATENCIÓN</span>
-          <strong>{{ attention }}</strong>
+          <strong>{{ metrics.pendientesCiclo }}</strong>
           <small>unidades en el filtro actual</small>
         </div>
         <div class="attention-copy">
-          <b>{{ metrics.vigentes }} vigentes</b>
-          <span>Los filtros afectan simultáneamente resumen, galeras y tabla.</span>
+          <b>{{ metrics.vigentes }} al día</b>
+          <span>Cambio de color y alertas pueden ser subconjuntos de los pendientes.</span>
         </div>
       </section>
 
@@ -101,17 +98,11 @@ onMounted(load)
         :incidencias="metrics.incidencias"
       />
 
-      <RevisadosFilterBar
-        v-model="filters"
-        :galeras="options.galeras"
-        :supervisoras="options.supervisoras"
-      />
-
+      <RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras" />
       <GaleraComparison :rows="filtered" />
 
       <div v-if="loading" class="loading-card">Cargando Revisados…</div>
       <RevisadosTable v-else :rows="filtered" />
-
       <div v-if="error && !previewMode" class="error-card">{{ error }}</div>
     </section>
   </main>
@@ -120,8 +111,7 @@ onMounted(load)
 <style>
 *{box-sizing:border-box}
 html,body,#app{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f4f6fa;color:#0f172a}
-button,input,select{font:inherit}
-button{cursor:pointer}
+button,input,select{font:inherit}button{cursor:pointer}
 .app-shell{min-height:100vh;display:grid;grid-template-columns:220px minmax(0,1fr)}
 .sidebar{position:sticky;top:0;height:100vh;padding:20px 13px;background:#0a1120;color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.04)}
 .brand{display:flex;align-items:center;gap:10px;padding:3px 8px 24px}.brand-mark{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#0062ff;color:#fff;font-size:12px;font-weight:950}.brand strong{display:block;font-size:14px}.brand small{display:block;margin-top:2px;color:#71849f;font-size:9px;text-transform:uppercase;letter-spacing:.08em}
