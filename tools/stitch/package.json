@@ -1,0 +1,12 @@
+{
+  "name": "portal-rym-stitch-sync",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@google/stitch-sdk": "latest"
+  },
+  "scripts": {
+    "catalog": "node sync.mjs --catalog",
+    "sync": "node sync.mjs"
+  }
+}
