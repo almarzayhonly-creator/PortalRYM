@@ -4007,7 +4007,7 @@ body.v66-revisados button:focus-visible{outline:3px solid rgba(242,140,0,.28)!im
   function ecarCats(r){return Array.isArray(r?.ecarcheck_categorias)?r.ecarcheck_categorias:[]}
   function ecarDate(v){if(!v)return'—';try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}).format(new Date(v))}catch{return String(v)}}
   function ecarFilterValue(r){const cs=ecarCats(r),st=N(r?.ecarcheck_estado),at=r?.ecarcheck_ultima_consulta_at;if(!at)return'SIN_CONSULTA';if(cs.length)return'ALERTA';if(st==='OK')return'OK';if(st==='ERROR'||st==='SESION_REQUERIDA')return'ERROR';return st||'OTRO'}
-  function ecarLabel(t){const m={BOLETA_PLACA:'Boleta por placa',BOLETA_DOCUMENTO:'Boleta por documento',INFRACCION_ENA:'Infracción ENA',HURTO:'Hurto',COLISION_FUGA:'Colisión y fuga',COLISION:'Colisión',FUGA:'Fuga',ERROR_RESPUESTA:'Error de respuesta'};return m[N(t)]||String(t||'Alerta eCarCheck')}
+  function ecarLabel(t){const m={BOLETA_PLACA:'Boleta de esta placa',ENA_EMPRESA_DOCUMENTO:'ENA empresa/documento',RESTRICCION_PLACA_HURTO:'Restricción de esta placa · Hurto',RESTRICCION_PLACA_COLISION_FUGA:'Restricción de esta placa · Colisión y fuga',RESTRICCION_PLACA_COLISION:'Restricción de esta placa · Colisión',RESTRICCION_PLACA_FUGA:'Restricción de esta placa · Fuga',BOLETA_DOCUMENTO:'ENA empresa/documento',INFRACCION_ENA:'ENA empresa/documento',HURTO:'Restricción de esta placa · Hurto',COLISION_FUGA:'Restricción de esta placa · Colisión y fuga',COLISION:'Restricción de esta placa · Colisión',FUGA:'Restricción de esta placa · Fuga',ERROR_RESPUESTA:'Error de respuesta'};return m[N(t)]||String(t||'Alerta eCarCheck')}
   function ecarCard(r){
     const cs=ecarCats(r),st=N(r?.ecarcheck_estado),at=r?.ecarcheck_ultima_consulta_at,p=Number(r?.ecarcheck_boletas_placa||0),d=Number(r?.ecarcheck_boletas_documento||0),e=Number(r?.ecarcheck_infracciones_ena||0),detail=String(r?.ecarcheck_detalle||'').trim(),kind=!at?'none':cs.some(x=>N(x.tipo)==='ERROR_RESPUESTA')||st==='ERROR'||st==='SESION_REQUERIDA'?'error':cs.length?'alert':'ok';
     let badges='';
@@ -4016,8 +4016,8 @@ body.v66-revisados button:focus-visible{outline:3px solid rgba(242,140,0,.28)!im
     else if(st==='OK')badges='<span class="v66-chip ready">OK</span>';
     else if(st==='ERROR'||st==='SESION_REQUERIDA')badges=`<span class="v66-chip blocked">${E(st)}</span>`;
     else badges=`<span class="v66-chip log">${E(st||'SIN RESULTADO')}</span>`;
-    const counts=[];if(p)counts.push(`<span class="v170-ecar-count">Placa: ${num(p)}</span>`);if(d)counts.push(`<span class="v170-ecar-count">Documento: ${num(d)}</span>`);if(e)counts.push(`<span class="v170-ecar-count">ENA: ${num(e)}</span>`);
-    const short=detail.length>220?detail.slice(0,217)+'…':detail;
+    const counts=[];if(p)counts.push(`<span class="v170-ecar-count">Boleta placa: ${num(p)}</span>`);if(d||e)counts.push(`<span class="v170-ecar-count">ENA empresa/documento: ${num(Math.max(d,e))}</span>`);
+    const normalizedDetail=(cs.some(x=>N(x.tipo)==='ENA_EMPRESA_DOCUMENTO')&&detail)?detail.replace(/El propietario mantiene/gi,'La empresa/documento mantiene'):detail;const short=normalizedDetail.length>220?normalizedDetail.slice(0,217)+'…':normalizedDetail;
     const detailHtml=short?`<div class="v170-ecar-detail">${E(short)}</div>`:(kind==='ok'?'<div class="v170-ecar-oktext">Sin alertas en la última consulta.</div>':'');
     return `<div class="v170-ecar ${kind}"><div class="v170-ecar-top"><div class="v170-ecar-badges">${badges}</div><span class="v170-ecar-date">Última consulta: ${E(ecarDate(at))}</span></div>${counts.length?`<div class="v170-ecar-counts">${counts.join('')}</div>`:''}${detailHtml}</div>`
   }
