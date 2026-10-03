@@ -14,10 +14,11 @@ export type RevisadosContext = {
 }
 
 type RevisadosBridge = {
-  load(): Promise<CanonicalRevisadosResponse>
+  load(force?: boolean): Promise<CanonicalRevisadosResponse>
   profile(): RevisadosContext['profile']
   tabs?(): RevisadosNavItem[]
-  navigate?(tab:string): void
+  request?(path:string, init?: RequestInit): Promise<unknown>
+  back?(): void
 }
 
 declare global {
@@ -105,6 +106,11 @@ export const revisadosService = {
     const response=await bridge.load()
     return (response.rows ?? []).map(mapRow)
   },
+  async load(force=false): Promise<CanonicalRevisadosResponse> {
+    const bridge=getBridge()
+    if(!bridge) throw new Error('El bridge de Revisados no está disponible.')
+    return bridge.load(force)
+  },
   context(): RevisadosContext {
     const bridge=getBridge()
     return {
@@ -112,9 +118,12 @@ export const revisadosService = {
       tabs: bridge?.tabs?.() ?? [{id:'dashboard',label:'Dashboard',icon:'⌂'}],
     }
   },
-  navigate(tab:string) {
+  async request(path:string, init?: RequestInit) {
     const bridge=getBridge()
-    if(tab==='dashboard') return
-    bridge?.navigate?.(tab)
+    if(!bridge?.request) throw new Error('El cliente de datos del Portal no está disponible.')
+    return bridge.request(path, init)
+  },
+  back() {
+    getBridge()?.back?.()
   },
 }

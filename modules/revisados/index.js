@@ -1,74 +1,11 @@
-/* Portal RYM V171 - Revisados module boundary */
+/* Revisados Vue boundary: legacy is data-only; Vue owns every visible screen. */
 (function(w,d){
   'use strict';
   if(!w.RYM_MODULES)return;
-
-  const LEGACY_OPEN=w.v60OpenRevisados;
-  let lastData=null;
-
-  function availableTabs(){
-    const c=lastData?.profile?.can||{};
-    const role=String(lastData?.profile?.rol||w.state?.profile?.rol||'').trim().toUpperCase();
-    const daily=(typeof w.rymHasModule==='function'?w.rymHasModule('revisados.reporte_diario'):role==='ADMIN_TOTAL');
-    const tabs=[{id:'dashboard',label:'Dashboard',icon:'⌂'}];
-    if(c.operations)tabs.push({id:'operations',label:'Operaciones',icon:'⚑'});
-    if(c.monthly)tabs.push({id:'monthly',label:'Avance mensual',icon:'▦'});
-    if(daily)tabs.push({id:'daily',label:'Reporte diario',icon:'✉'});
-    if(c.history)tabs.push({id:'history',label:'Historial',icon:'≡'});
-    if(c.stats)tabs.push({id:'stats',label:'Estadísticas',icon:'▥'});
-    if(c.boletas)tabs.push({id:'boletas',label:'Boletas',icon:'●'});
-    if(c.cupos)tabs.push({id:'cupos',label:'Cupos',icon:'$'});
-    return tabs;
-  }
-
-  function openLegacyTab(tab){
-    d.body.classList.remove('rym-revisados-vue');
-    if(typeof LEGACY_OPEN!=='function')throw new Error('Revisados canonical entrypoint unavailable');
-    LEGACY_OPEN();
-    let tries=0;
-    const clickTab=()=>{
-      const b=d.querySelector('[data-v66-tab="'+String(tab||'dashboard')+'"]');
-      if(b){b.click();return}
-      if(++tries<20)setTimeout(clickTab,100);
-    };
-    setTimeout(clickTab,80);
-  }
-
-  w.RYM_REVISADOS_BRIDGE={
-    async load(){
-      if(typeof w.v66PrefetchRevisados!=='function'){
-        throw new Error('Revisados canonical data loader unavailable');
-      }
-      const data=await w.v66PrefetchRevisados();
-      if(!data?.ok)throw new Error(data?.error||'No se pudo cargar Revisados');
-      lastData=data;
-      return data;
-    },
-    profile(){
-      return lastData?.profile || ((typeof w.state!=='undefined'&&w.state?.profile)?w.state.profile:null);
-    },
-    tabs(){return availableTabs()},
-    navigate(tab){openLegacyTab(tab)}
-  };
-
-  function openVueRevisados(){
-    const app=d.querySelector('#app');
-    if(!app)throw new Error('Portal app root unavailable');
-    d.body.dataset.rymModule='revisados-vue';
-    d.body.classList.remove('v60-revisados','v63-revisados','v66-revisados');
-    d.body.classList.add('rym-revisados-vue');
-
-    app.innerHTML=
-      '<main style="min-height:100vh;background:#f6f7fb">'+
-        '<iframe title="Revisados RYM Vue" src="/vue/dist/index.html?embedded=1" style="display:block;width:100%;height:100vh;border:0;background:#f6f7fb"></iframe>'+
-      '</main>';
-  }
-
-  w.RYM_REVISADOS_VUE={open:openVueRevisados,navigate:openLegacyTab};
-
-  w.RYM_MODULES.register('revisados',{
-    open:function(){
-      return openVueRevisados();
-    }
-  });
+  let lastData=null,mounting=null;
+  const tabs=()=>{const c=lastData?.profile?.can||{},role=String(lastData?.profile?.rol||w.state?.profile?.rol||'').trim().toUpperCase(),daily=typeof w.rymHasModule==='function'?w.rymHasModule('revisados.reporte_diario'):role==='ADMIN_TOTAL';return [{id:'dashboard',label:'Dashboard',icon:'⌂'},...(c.operations?[{id:'operations',label:'Operaciones',icon:'⚑'}]:[]),...(c.monthly?[{id:'monthly',label:'Avance mensual',icon:'▦'}]:[]),...(daily?[{id:'daily',label:'Reporte diario',icon:'✉'}]:[]),...(c.history?[{id:'history',label:'Historial',icon:'≡'}]:[]),...(c.stats?[{id:'stats',label:'Estadísticas',icon:'▥'}]:[]),...(c.boletas?[{id:'boletas',label:'Boletas',icon:'●'}]:[]),...(c.cupos?[{id:'cupos',label:'Cupos',icon:'$'}]:[])];};
+  w.RYM_REVISADOS_BRIDGE={async load(force){if(typeof w.v66PrefetchRevisados!=='function')throw new Error('Revisados canonical data loader unavailable');const data=await w.v66PrefetchRevisados(force===true);if(!data?.ok)throw new Error(data?.error||'No se pudo cargar Revisados');lastData=data;return data},profile(){return lastData?.profile||w.state?.profile||null},tabs,async request(path,init){if(typeof w.req!=='function')throw new Error('Portal request client unavailable');return (await w.req(path,init))?.data},back(){return w.v36PortalHome?.()}};
+  async function mountVue(){const app=d.querySelector('#app');if(!app)throw new Error('Portal app root unavailable');if(mounting)return mounting;d.body.dataset.rymModule='revisados';d.body.classList.remove('v60-revisados','v63-revisados','v66-revisados');d.body.classList.add('rym-revisados-vue');app.innerHTML='<main class="rym-revisados-loading" aria-live="polite">Cargando Revisados…</main>';mounting=(async()=>{const html=await fetch('/vue/dist/index.html',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('No se pudo cargar Revisados Vue');return r.text()});for(const href of [...html.matchAll(/<link[^>]+href=["']([^"']+\.css[^"']*)/gi)].map(m=>m[1]))if(!d.querySelector('link[data-rym-revisados-vue="'+href+'"]')){const l=d.createElement('link');l.rel='stylesheet';l.href=href;l.dataset.rymRevisadosVue=href;d.head.appendChild(l)}const src=html.match(/<script[^>]+type=["']module["'][^>]+src=["']([^"']+)["']/i)?.[1];if(!src)throw new Error('Bundle Vue de Revisados no encontrado');await import(src)})().finally(()=>{mounting=null});return mounting}
+  w.RYM_REVISADOS_VUE={open:mountVue};
+  w.RYM_MODULES.register('revisados',{open:mountVue});
 })(window,document);

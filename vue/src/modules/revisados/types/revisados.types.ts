@@ -35,6 +35,7 @@ export interface CanonicalAlert {
 }
 
 export interface CanonicalRevisadoRow {
+  [key: string]: unknown
   unidad_id?: string | number
   unidad?: string
   placa?: string
@@ -53,6 +54,7 @@ export interface CanonicalRevisadoRow {
 }
 
 export interface CanonicalRevisadosResponse {
+  [key: string]: unknown
   ok: boolean
   error?: string
   rows?: CanonicalRevisadoRow[]
