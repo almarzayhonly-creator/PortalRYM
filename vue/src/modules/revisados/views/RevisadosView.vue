@@ -38,7 +38,7 @@ function date(v:unknown){try{return v?new Intl.DateTimeFormat('es-PA',{dateStyle
 function state(r:CanonicalRevisadoRow){return r.emitido?'Vigente':r.requiere_atencion?'Pendiente':'Sin ciclo'}
 function status(r:CanonicalRevisadoRow){return r.bloqueado?'Bloqueo real':String(r.pendiente_tipo||r.status2||state(r))}
 const visibleRows=computed(()=>pending.value.filter(r=>{
-  const q=String(filters.search||'').trim().toLowerCase()
+  const q=String(filters.value.search||'').trim().toLowerCase()
   const matchesSearch=!q||[r.unidad,r.placa,r.empresa,r.supervisora,r.status2,r.pendiente_tipo].some(x=>String(x||'').toLowerCase().includes(q))
   return matchesSearch&&(!selectedGalera.value||text(r.galera)===selectedGalera.value)&&(!selectedStatus.value||text(r.status2)===selectedStatus.value)
 }))
