@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary":"#ffffff","on-error-container":"#93000a","inverse-surface":"#213145","surface-variant":"#d3e4fe","on-error":"#ffffff","on-background":"#0b1c30","on-primary-container":"#f3f3ff","surface-container-highest":"#d3e4fe","surface-dim":"#cbdbf5","surface":"#f8f9ff","on-secondary-fixed-variant":"#004e60","on-primary-fixed":"#00174b","surface-bright":"#f8f9ff","surface-container-low":"#eff4ff","outline":"#737687","on-tertiary-fixed-variant":"#3f465c","tertiary-fixed":"#dae2fd","surface-container-high":"#dce9ff","tertiary":"#4f576d","on-surface-variant":"#424656","inverse-on-surface":"#eaf1ff","secondary-fixed-dim":"#47d6ff","on-secondary-fixed":"#001f28","primary":"#004cca","on-secondary-container":"#00566a","tertiary-fixed-dim":"#bec6e0","on-primary":"#ffffff","on-primary-fixed-variant":"#003ea8","primary-fixed":"#dbe1ff","surface-container":"#e5eeff","error":"#ba1a1a","secondary-container":"#00d2ff","outline-variant":"#c2c6d9","tertiary-container":"#676f86","error-container":"#ffdad6","on-tertiary-container":"#f2f3ff","on-tertiary":"#ffffff","background":"#f8f9ff","secondary-fixed":"#b6ebff","primary-container":"#0062ff","on-surface":"#0b1c30","on-tertiary-fixed":"#131b2e","inverse-primary":"#b4c5ff","surface-tint":"#0053da","surface-container-lowest":"#ffffff","primary-fixed-dim":"#b4c5ff","secondary":"#00677f"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin":"1rem","gutter":"1rem","gutter-desktop":"1.5rem","space-lg":"1.5rem","margin-tablet":"1.5rem","margin-desktop":"2.5rem","space-xl":"2.5rem","space-xs":"0.25rem","space-sm":"0.5rem","space-md":"1rem"},fontFamily:{"headline-sm":["Space Grotesk"],"label-plate":["JetBrains Mono"],"headline-xl":["Space Grotesk"],"body-md":["Inter"],"body-lg":["Inter"],"headline-xl-mobile":["Space Grotesk"],"headline-lg":["Space Grotesk"],"label-data-metric":["JetBrains Mono"],"headline-md":["Space Grotesk"],"label-vin":["JetBrains Mono"],"label-tag":["Space Grotesk"],"body-sm":["Inter"]},fontSize:{"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"0em",fontWeight:"600"}],"label-plate":["22px",{lineHeight:"24px",letterSpacing:"0.12em",fontWeight:"700"}],"headline-xl":["36px",{lineHeight:"44px",letterSpacing:"-0.03em",fontWeight:"700"}],"body-md":["14px",{lineHeight:"22px",fontWeight:"400"}],"body-lg":["16px",{lineHeight:"26px",fontWeight:"400"}],"headline-xl-mobile":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"600"}],"label-data-metric":["14px",{lineHeight:"20px",letterSpacing:"-0.01em",fontWeight:"500"}],"headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-vin":["13px",{lineHeight:"18px",letterSpacing:"0.08em",fontWeight:"600"}],"label-tag":["11px",{lineHeight:"14px",letterSpacing:"0.06em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"18px",fontWeight:"400"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center justify-between bg-surface-container-lowest"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">verified</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface">PORTAL RYM</span><span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Revisados Vehiculares</span></div></div><span class="px-space-xs py-0.5 rounded-DEFAULT bg-surface-container-high text-on-surface-variant font-label-tag text-label-tag">v2.4</span></div><div class="px-space-md py-space-sm"><div class="flex items-center justify-between px-space-sm py-space-xs rounded-lg bg-surface-container-low"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span><span class="font-label-data-metric text-body-sm text-on-surface-variant uppercase">Estación Operativa</span></div><span class="font-label-data-metric text-body-sm font-semibold text-primary">T-01 RYM</span></div></div><div class="px-space-md pt-space-xs pb-space-xs"><span class="font-label-tag text-label-tag uppercase text-on-surface-variant">Módulos de Línea</span></div><nav class="flex flex-col gap-space-xs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-[0_0_12px_rgba(0,98,255,0.3)]"><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="mission-control" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">terminal</span><span class="font-body-md text-body-md">Mission Control</span></div><span class="font-label-tag text-label-tag text-on-surface-variant">LIVE</span></a><a aria-current="page" class="flex items-center justify-between px-space-md py-space-sm transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-[0_0_12px_rgba(0,98,255,0.3)]" data-path="operaciones" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">car_repair</span><span class="font-body-md text-body-md">Operaciones</span></div><span class="w-2 h-2 rounded-full bg-secondary-container"></span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="avance-mensual" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">calendar_month</span><span class="font-body-md text-body-md">Avance Mensual</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="reporte-diario" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">description</span><span class="font-body-md text-body-md">Reporte Diario</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="historial-y-trazabilidad" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">history_toggle_off</span><span class="font-body-md text-body-md">Historial &amp; Trazabilidad</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="estadisticas-forenses" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">query_stats</span><span class="font-body-md text-body-md">Estadísticas Forenses</span></div></a></nav><div class="px-space-md pt-space-lg pb-space-xs"><span class="font-label-tag text-label-tag uppercase text-on-surface-variant">Incidencias &amp; Bloqueos</span></div><div class="flex flex-col gap-space-xs px-space-md"><div class="flex items-center justify-between px-space-md py-space-sm rounded-lg bg-surface-container-low text-on-surface"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-error text-[18px]">gavel</span><span class="font-body-md text-body-md">Boletas Pendientes</span></div><span class="px-space-xs py-0.5 rounded-DEFAULT bg-error-container text-on-error-container font-label-data-metric text-body-sm font-semibold">34</span></div><div class="flex items-center justify-between px-space-md py-space-sm rounded-lg bg-surface-container-low text-on-surface"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-secondary text-[18px]">confirmation_number</span><span class="font-body-md text-body-md">Cupos Asignados</span></div><span class="px-space-xs py-0.5 rounded-DEFAULT bg-surface-container-high text-on-secondary-container font-label-data-metric text-body-sm font-semibold">25</span></div></div></div><div class="p-space-md bg-surface-container-lowest"><div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[18px]">speed</span><span class="font-label-data-metric text-body-sm text-on-surface-variant">OBD-II Telemetría</span></div><span class="font-label-tag text-label-tag text-secondary font-semibold uppercase">Activo</span></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-md flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-full bg-surface-container-low"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary-container animate-ping"></span><span class="w-2 h-2 rounded-full bg-secondary-container -ml-2"></span></div><span class="font-label-data-metric text-label-data-metric font-semibold text-on-surface">ECARCHECK: ONLINE (0.3s)</span></div><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-secondary">sync</span><span class="font-label-tag text-label-tag uppercase">Sync Servidor Central: Activo</span></div></div><div class="flex items-center gap-space-md"><div class="relative flex items-center"><div class="flex items-center gap-space-sm w-72 px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">search</span><input class="bg-transparent border-0 outline-none w-full text-body-sm font-body-sm placeholder:text-on-surface-variant/70 text-on-surface" placeholder="Buscar VIN, Placa o Cédula..." type="text"/><kbd class="px-space-xs py-0.5 rounded-DEFAULT bg-surface-container-lowest text-on-surface font-label-data-metric text-label-tag font-semibold">Ctrl+K</kbd></div></div><div class="flex items-center gap-space-xs"><button class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Alertas Forenses"><span class="material-symbols-outlined text-[20px]">notifications</span></button><button class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface-variant" title="Imprimir Lote de Certificados"><span class="material-symbols-outlined text-[20px]">print</span></button></div><div class="flex items-center gap-space-sm pl-space-sm"><div class="flex flex-col text-right"><span class="font-headline-sm text-body-sm font-semibold text-on-surface leading-tight">Ing. M. Carrizo</span><span class="font-label-tag text-label-tag text-primary font-bold uppercase tracking-wider">SUPERVISOR MASTER</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 px-gutter-desktop min-h-screen bg-surface"><div class="flex flex-col w-full pb-space-xl">
+<!-- PAGE HEADER -->
+<section class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md py-space-lg">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-sm flex-wrap">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Operaciones</h1>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-data-metric text-label-data-metric font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>2,202 UDS TOTAL · 1,749 AL DÍA</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Control operativo de revisados, incidencias y estado legal vehicular.</p>
+</div>
+<!-- Quick Stats Telemetry Mini-Strip -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest p-1.5 rounded-xl shadow-sm self-start lg:self-auto">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-[18px] text-secondary">domain</span>
+<div class="flex flex-col">
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Galeras Activas</span>
+<span class="font-label-data-metric text-body-sm font-bold text-on-surface">4 Centros</span>
+</div>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
+<div class="flex flex-col">
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Efectividad RUV</span>
+<span class="font-label-data-metric text-body-sm font-bold text-primary">98.4%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- COMMAND & FILTER BAR -->
+<section class="flex flex-col gap-space-md bg-surface-container-lowest p-space-md rounded-xl shadow-sm mb-space-lg">
+<!-- Row 1: Search & Controls -->
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<!-- Search Input -->
+<div class="relative flex-1 flex items-center bg-surface-container-low rounded-lg px-space-md py-2.5 text-on-surface-variant focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant mr-space-sm">search</span>
+<input class="w-full bg-transparent border-none outline-none font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70" id="unitSearch" placeholder="Buscar unidad, placa, galera o supervisora... (Ctrl+K)" type="text"/>
+<kbd class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-data-metric text-label-tag font-semibold">Ctrl+K</kbd>
+</div>
+<!-- Secondary Filters & Switch -->
+<div class="flex items-center gap-space-sm flex-wrap sm:flex-nowrap justify-between lg:justify-end">
+<!-- Secondary Dropdowns -->
+<div class="flex items-center gap-space-xs">
+<div class="relative">
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="text-on-surface-variant font-label-tag uppercase text-label-tag">Galera:</span>
+<span class="font-semibold">Todas</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+</button>
+</div>
+<div class="relative">
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="text-on-surface-variant font-label-tag uppercase text-label-tag">Supervisora:</span>
+<span class="font-semibold">Todos</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+</button>
+</div>
+<div class="relative hidden xl:block">
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="text-on-surface-variant font-label-tag uppercase text-label-tag">Ciclo:</span>
+<span class="font-semibold">2026-Q1</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+</button>
+</div>
+</div>
+<!-- View Switcher -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-lg">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[16px]">grid_view</span>
+<span class="font-headline-sm text-label-tag">CARDS</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-on-primary font-headline-sm text-label-tag shadow-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-[16px]">view_list</span>
+<span>TABLE</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Row 2: Smart Badges Filter Row -->
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 text-nowrap">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-container text-on-primary-container font-headline-sm text-label-tag tracking-wider uppercase font-bold shadow-sm">
+<span>Todos</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/30 text-on-primary-container font-label-data-metric text-label-tag">2,202</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline-sm text-label-tag tracking-wider uppercase font-semibold transition-colors">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span>Vigente</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-data-metric text-label-tag">1,749</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline-sm text-label-tag tracking-wider uppercase font-semibold transition-colors">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span>Pendiente</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-data-metric text-label-tag">369</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline-sm text-label-tag tracking-wider uppercase font-semibold transition-colors">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span>Cambio de color</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-data-metric text-label-tag">44</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline-sm text-label-tag tracking-wider uppercase font-semibold transition-colors">
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+<span>Boleta</span>
+<span class="px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-label-data-metric text-label-tag font-bold">34</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline-sm text-label-tag tracking-wider uppercase font-semibold transition-colors">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span>ENA</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-data-metric text-label-tag">18</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline-sm text-label-tag tracking-wider uppercase font-semibold transition-colors">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+<span>Sin cupo</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-data-metric text-label-tag">25</span>
+</button>
+</div>
+</section>
+<!-- TABLE VIEW (SPACIOUS HIGH-DENSITY ENTERPRISE MODULE) -->
+<section class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col mb-space-md">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<!-- Table Head -->
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-tag text-label-tag uppercase tracking-wider">
+<th class="py-3.5 px-4 w-12 text-center">
+<input class="w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" id="selectAllCheckbox" type="checkbox"/>
+</th>
+<th class="py-3.5 px-4 font-bold">Unidad &amp; Modelo</th>
+<th class="py-3.5 px-4 font-bold">Placa Visual</th>
+<th class="py-3.5 px-4 font-bold">Galera &amp; Bahía</th>
+<th class="py-3.5 px-4 font-bold">Estado Legal</th>
+<th class="py-3.5 px-4 font-bold">Desglose Normativo</th>
+<th class="py-3.5 px-4 font-bold">Último Revisado</th>
+<th class="py-3.5 px-4 text-right font-bold pr-6">Acciones</th>
+</tr>
+</thead>
+<!-- Table Body -->
+<tbody class="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
+<!-- Row 1: Vigente -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="unit-check w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary font-label-data-metric font-bold text-body-md">
+                  #104
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-md font-bold text-on-surface truncate">Honda Series 714</span>
+<span class="font-label-vin text-body-sm text-on-surface-variant tracking-wider">VIN: 1HGBH41...8921</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<!-- Metallic Plate Representation -->
+<div class="inline-flex flex-col items-center justify-center px-3 py-1 rounded bg-surface-container-high shadow-inner">
+<span class="font-headline-sm text-[9px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">PANAMÁ</span>
+<span class="font-label-plate text-label-plate text-on-surface tracking-widest font-bold">CU · 9475</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-semibold text-on-surface">VCARS</span>
+<span class="inline-flex items-center gap-1 font-label-data-metric text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Bahía 04
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-secondary font-label-data-metric text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                Vigente
+              </span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> ENA Ok
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Sin Multas
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-label-tag text-label-tag">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span> Color RUV
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-label-data-metric text-body-md font-semibold text-on-surface">28 SEP 2026</span>
+<span class="font-label-tag text-label-tag text-secondary uppercase font-bold">Cert. Emitido</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right pr-6">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-headline-sm text-body-sm font-semibold transition-colors">
+<span>Ver Ficha</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Boleta Báscula (Red Blocking State) -->
+<tr class="bg-error-container/20 hover:bg-error-container/30 transition-colors">
+<td class="py-4 px-4 text-center">
+<input checked="" class="unit-check w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-on-error-container font-label-data-metric font-bold text-body-md">
+                  #088
+                </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-body-md font-bold text-on-surface truncate">Mack Granite HD-T</span>
+<span class="px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-label-tag text-label-tag uppercase font-bold">Retención</span>
+</div>
+<span class="font-label-vin text-body-sm text-on-surface-variant tracking-wider">VIN: 1M2AX14...3104</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex flex-col items-center justify-center px-3 py-1 rounded bg-surface-container-high shadow-inner">
+<span class="font-headline-sm text-[9px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">PANAMÁ</span>
+<span class="font-label-plate text-label-plate text-on-surface tracking-widest font-bold">RYM · 7102</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-semibold text-on-surface">Patios Tocumen</span>
+<span class="inline-flex items-center gap-1 font-label-data-metric text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                  Bahía 01
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-data-metric text-body-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+                Boleta Báscula
+              </span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> ENA Ok
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-error text-on-error font-label-tag text-label-tag font-bold shadow-sm">
+<span class="material-symbols-outlined text-[13px]">gavel</span> ATTT #440-B ($150)
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-label-tag text-label-tag">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span> Color RUV
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-label-data-metric text-body-md font-semibold text-error">12 OCT 2025</span>
+<span class="font-label-tag text-label-tag text-error uppercase font-bold">Vencido</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right pr-6">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error text-on-error hover:bg-error-container hover:text-on-error-container font-headline-sm text-body-sm font-semibold transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+<span>Subsanar Boleta</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Cambio de Color (Amber Warning State) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="unit-check w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-secondary-fixed-variant font-label-data-metric font-bold text-body-md">
+                  #219
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-md font-bold text-on-surface truncate">Toyota Hilux 2.8 D-C</span>
+<span class="font-label-vin text-body-sm text-on-surface-variant tracking-wider">VIN: MR0HA82...9902</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex flex-col items-center justify-center px-3 py-1 rounded bg-surface-container-high shadow-inner">
+<span class="font-headline-sm text-[9px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">PANAMÁ</span>
+<span class="font-label-plate text-label-plate text-on-surface tracking-widest font-bold">BC · 3091</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-semibold text-on-surface">Galera Central</span>
+<span class="inline-flex items-center gap-1 font-label-data-metric text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                  Bahía 03
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-data-metric text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>
+                Cambio de Color
+              </span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> ENA Ok
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Sin Multas
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed-variant font-label-tag text-label-tag font-bold">
+<span class="material-symbols-outlined text-[13px]">warning</span> Peritaje DIJ Pendiente
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-label-data-metric text-body-md font-semibold text-on-surface">15 AGO 2026</span>
+<span class="font-label-tag text-label-tag text-on-secondary-fixed-variant uppercase font-bold">En Revisión</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right pr-6">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-body-sm font-semibold transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">compare</span>
+<span>Cotejar Minuta</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Pendiente Ciclo -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="unit-check w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary font-label-data-metric font-bold text-body-md">
+                  #055
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-md font-bold text-on-surface truncate">Mercedes Sprinter 516</span>
+<span class="font-label-vin text-body-sm text-on-surface-variant tracking-wider">VIN: WDB9066...1183</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex flex-col items-center justify-center px-3 py-1 rounded bg-surface-container-high shadow-inner">
+<span class="font-headline-sm text-[9px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">PANAMÁ</span>
+<span class="font-label-plate text-label-plate text-on-surface tracking-widest font-bold">MB · 9021</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-semibold text-on-surface">VCARS</span>
+<span class="inline-flex items-center gap-1 font-label-data-metric text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Bahía 01
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-data-metric text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                Pendiente Ciclo
+              </span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> ENA Ok
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Sin Multas
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-label-tag text-label-tag">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span> Color RUV
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-label-data-metric text-body-md font-bold text-primary">Vence en 3d</span>
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Prioridad Alta</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right pr-6">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-headline-sm text-body-sm font-semibold transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>Iniciar Check</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Calcomanía Lista -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="unit-check w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface font-label-data-metric font-bold text-body-md">
+                  #340
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-md font-bold text-on-surface truncate">Isuzu NPR 75L</span>
+<span class="font-label-vin text-body-sm text-on-surface-variant tracking-wider">VIN: JAAPR75...5510</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex flex-col items-center justify-center px-3 py-1 rounded bg-surface-container-high shadow-inner">
+<span class="font-headline-sm text-[9px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">PANAMÁ</span>
+<span class="font-label-plate text-label-plate text-on-surface tracking-widest font-bold">TR · 5541</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-semibold text-on-surface">VCARS</span>
+<span class="inline-flex items-center gap-1 font-label-data-metric text-body-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Bahía 02
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-data-metric text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                Calcomanía Lista
+              </span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> ENA Ok
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Sin Multas
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-label-tag text-label-tag">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span> Color RUV
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-label-data-metric text-body-md font-semibold text-on-surface">26 SEP 2026</span>
+<span class="font-label-tag text-label-tag text-secondary uppercase font-bold">Aprobado</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right pr-6">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-headline-sm text-body-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span>Imprimir Sticker</span>
+</button>
+</td>
+</tr>
+<!-- Row 6: Sin Cupo Bahía -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="unit-check w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-outline font-label-data-metric font-bold text-body-md">
+                  #412
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-md font-bold text-on-surface truncate">Nissan Frontier Pro-4X</span>
+<span class="font-label-vin text-body-sm text-on-surface-variant tracking-wider">VIN: 1N6ED2E...0491</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="inline-flex flex-col items-center justify-center px-3 py-1 rounded bg-surface-container-high shadow-inner">
+<span class="font-headline-sm text-[9px] uppercase font-bold tracking-widest text-on-surface-variant leading-none">PANAMÁ</span>
+<span class="font-label-plate text-label-plate text-on-surface tracking-widest font-bold">PL · 8812</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-md font-semibold text-on-surface">Patios VCARS</span>
+<span class="inline-flex items-center gap-1 font-label-data-metric text-body-sm text-outline">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                  Sin asignación
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-data-metric text-body-sm font-semibold">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+                Sin Cupo Bahía
+              </span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> ENA Ok
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-tag text-label-tag font-semibold">
+<span class="material-symbols-outlined text-[13px]">check_circle</span> Sin Multas
+                </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant font-label-tag text-label-tag">
+<span class="material-symbols-outlined text-[13px] text-secondary">check</span> Color RUV
+                </span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-label-data-metric text-body-md font-medium text-on-surface-variant">En Espera</span>
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Patios de acceso</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right pr-6">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface font-headline-sm text-body-sm font-semibold transition-colors">
+<span class="material-symbols-outlined text-[16px] text-primary">add_road</span>
+<span>Asignar Cupo</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- BOTTOM ACTIONS & PAGINATION -->
+<section class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md p-space-md bg-surface-container-lowest rounded-xl shadow-sm">
+<!-- Batch Action Bar -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-headline-sm text-body-md font-semibold text-on-surface" id="selectedCountText">1 unidad seleccionada</span>
+</div>
+<div class="h-4 w-px bg-surface-container-high hidden sm:block"></div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-tag text-label-tag uppercase text-on-surface-variant mr-1 font-bold">Acciones Masivas:</span>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[16px] text-primary">download</span>
+<span>Exportar Lista CSV</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">sync</span>
+<span>Sincronizar eCarCheck</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-container text-on-primary-container hover:bg-primary font-body-sm text-body-sm font-medium transition-colors">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span>Imprimir Calcomanías en Lote</span>
+</button>
+</div>
+</div>
+<!-- Clean Pagination -->
+<div class="flex items-center justify-between sm:justify-end gap-space-md pt-space-xs lg:pt-0">
+<span class="font-label-data-metric text-body-sm text-on-surface-variant font-medium">
+        Mostrando <span class="text-on-surface font-semibold">1–6</span> de <span class="text-on-surface font-semibold">2,202</span> unidades  |  Pág. 1 de 367
+      </span>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high disabled:opacity-40 transition-colors" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary font-label-data-metric text-body-sm font-bold shadow-sm">
+          1
+        </button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-data-metric text-body-sm transition-colors">
+          2
+        </button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-data-metric text-body-sm transition-colors">
+          3
+        </button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<script>
+  // Dynamic batch selection count handler
+  const selectAll = document.getElementById('selectAllCheckbox');
+  const unitChecks = document.querySelectorAll('.unit-check');
+  const countText = document.getElementById('selectedCountText');
+
+  function updateCount() {
+    const selected = document.querySelectorAll('.unit-check:checked').length;
+    if (selected === 0) {
+      countText.textContent = 'Ninguna unidad seleccionada';
+    } else if (selected === 1) {
+      countText.textContent = '1 unidad seleccionada';
+    } else {
+      countText.textContent = `${selected} unidades seleccionadas`;
+    }
+  }
+
+  if (selectAll) {
+    selectAll.addEventListener('change', (e) => {
+      unitChecks.forEach(cb => {
+        cb.checked = e.target.checked;
+      });
+      updateCount();
+    });
+  }
+
+  unitChecks.forEach(cb => {
+    cb.addEventListener('change', () => {
+      updateCount();
+      if (!cb.checked && selectAll) {
+        selectAll.checked = false;
+      }
+    });
+  });
+
+  // Keyboard shortcut Ctrl+K focus
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      const input = document.getElementById('unitSearch');
+      if (input) input.focus();
+    }
+  });
+</script></main></div></body></html>

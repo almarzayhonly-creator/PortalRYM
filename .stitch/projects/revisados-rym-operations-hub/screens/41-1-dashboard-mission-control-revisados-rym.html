@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"tertiary-container":"#e79400","surface-dim":"#031427","surface-container-low":"#0b1c30","on-tertiary-container":"#563400","on-secondary-fixed-variant":"#005236","inverse-on-surface":"#213145","error":"#ffb4ab","surface":"#031427","tertiary-fixed":"#ffddb8","error-container":"#93000a","on-primary-container":"#00424f","on-secondary":"#003824","surface-bright":"#2a3a4f","on-tertiary-fixed-variant":"#653e00","secondary-fixed-dim":"#4edea3","secondary-container":"#00a572","on-secondary-fixed":"#002113","outline-variant":"#3d494c","on-tertiary":"#472a00","on-background":"#d3e4fe","on-error":"#690005","tertiary-fixed-dim":"#ffb95f","primary-container":"#06b6d4","secondary-fixed":"#6ffbbe","on-surface":"#d3e4fe","tertiary":"#ffb95f","background":"#031427","inverse-surface":"#d3e4fe","primary":"#4cd7f6","on-primary":"#003640","on-secondary-container":"#00311f","secondary":"#4edea3","on-tertiary-fixed":"#2a1700","on-primary-fixed-variant":"#004e5c","surface-container-lowest":"#000f21","surface-variant":"#26364a","primary-fixed":"#acedff","on-surface-variant":"#bcc9cd","surface-container":"#102034","on-error-container":"#ffdad6","outline":"#869397","inverse-primary":"#00687a","on-primary-fixed":"#001f26","primary-fixed-dim":"#4cd7f6","surface-container-highest":"#26364a","surface-tint":"#4cd7f6","surface-container-high":"#1b2b3f"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-xs":"0.25rem","gutter-dense":"0.5rem","margin":"1.5rem","space-sm":"0.375rem","space-2xl":"1.5rem","space-xxs":"0.125rem","space-lg":"0.75rem","gutter":"1rem","space-md":"0.5rem","space-xl":"1rem"},"fontFamily":{"headline-xl":["Inter"],"label-caps":["Inter"],"mono-data":["JetBrains Mono"],"body-strong":["Inter"],"headline-lg":["Inter"],"body-default":["Inter"],"mono-badge":["JetBrains Mono"],"headline-md":["Inter"],"body-compact":["Inter"]},"fontSize":{"headline-xl":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"label-caps":["10px",{"lineHeight":"12px","letterSpacing":"0.06em","fontWeight":"700"}],"mono-data":["12px",{"lineHeight":"16px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-strong":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-default":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"400"}],"mono-badge":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-compact":["12px",{"lineHeight":"16px","letterSpacing":"0em","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-default text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.45)]"><div class="flex flex-col"><div class="h-14 px-margin bg-surface-container-low flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-2.5 h-2.5 rounded-DEFAULT bg-primary"></div><span class="font-headline-md text-headline-md tracking-tight text-on-surface uppercase">Portal RYM</span></div><span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-primary font-bold">FLOTA 2K+</span></div><div class="px-margin py-space-sm bg-surface-container"><div class="flex items-center justify-between text-on-surface-variant font-label-caps text-label-caps uppercase"><span>Red Operativa</span><span class="text-secondary font-mono-badge text-mono-badge flex items-center gap-space-xxs"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-secondary inline-block animate-pulse"></span>ONLINE</span></div><div class="mt-space-xs flex items-center justify-between text-on-surface font-body-compact text-body-compact"><span class="truncate">Sede Central - Galera 04</span><span class="material-symbols-outlined text-primary text-[14px]">expand_more</span></div></div><div class="px-margin pt-space-lg pb-space-xs text-on-surface-variant font-label-caps text-label-caps uppercase">Módulos de Inspección</div><nav class="flex flex-col gap-space-xxs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-headline-md text-headline-md"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT transition-colors bg-primary-container text-on-primary-container font-headline-md text-headline-md" data-path="mission-control" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Dashboard / Mission Control</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="avance-auditoria" href="#"><span class="material-symbols-outlined text-[18px]">fact_check</span><span>Avance y Auditoría</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="operaciones-mesa" href="#"><span class="material-symbols-outlined text-[18px]">assignment_late</span><span>Operaciones (Mesa de Trabajo)</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="galeras-bahias" href="#"><span class="material-symbols-outlined text-[18px]">warehouse</span><span>Galeras y Bahías</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="reportes-exportacion" href="#"><span class="material-symbols-outlined text-[18px]">summarize</span><span>Reportes y Exportación</span></a></nav><div class="px-margin pt-space-lg pb-space-xs text-on-surface-variant font-label-caps text-label-caps uppercase">Administración</div><nav class="flex flex-col gap-space-xxs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-headline-md text-headline-md"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="supervisor-dispatch" href="#"><span class="material-symbols-outlined text-[18px]">badge</span><span>Supervisores y Turnos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="compliance-analytics" href="#"><span class="material-symbols-outlined text-[18px]">query_stats</span><span>Métricas Ejecutivas</span></a></nav></div><div class="p-space-md bg-surface-container-low flex flex-col gap-space-xs"><div class="flex items-center justify-between font-label-caps text-label-caps text-on-surface-variant uppercase"><span>Servidor Sede #01</span><span class="font-mono-data text-mono-data text-secondary">24ms</span></div><div class="flex items-center gap-space-sm pt-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col min-w-0"><span class="font-body-strong text-body-strong text-on-surface truncate">Ing. C. Navarro</span><span class="font-mono-badge text-mono-badge text-on-surface-variant uppercase truncate">Sup. Fiscalización</span></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-14 bg-surface-container-low z-40 flex items-center justify-between px-space-xl shadow-[0_1px_8px_rgba(0,0,0,0.35)]"><div class="flex items-center gap-space-xl flex-1 max-w-3xl"><div class="flex items-center gap-space-xs font-mono-data text-mono-data text-on-surface-variant shrink-0"><span class="text-on-surface font-body-strong text-body-strong">Portal RYM</span><span class="text-outline">/</span><span class="text-primary font-bold">Revisados RYM Operations Hub</span><span class="text-outline">/</span><span class="text-on-surface-variant">Mission Control</span></div><div class="relative flex-1"><span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span><input class="w-full h-8 pl-8 pr-space-lg bg-surface-container-lowest text-on-surface font-mono-data text-mono-data placeholder:text-outline rounded-DEFAULT outline-none focus:bg-surface-container-high transition-colors" placeholder="Búsqueda rápida por Placa (e.g. AB1234), VIN o Boleta..." type="text"/></div></div><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-sm bg-surface-container px-space-md py-space-xs rounded-DEFAULT"><span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Supervisor:</span><span class="font-body-strong text-body-strong text-on-surface">Ing. Navarro (T-A)</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">unfold_more</span></div><div class="flex items-center gap-space-sm bg-surface-container px-space-md py-space-xs rounded-DEFAULT"><span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Galera:</span><span class="font-body-strong text-body-strong text-secondary">G-04 Metro</span><span class="material-symbols-outlined text-on-surface-variant text-[16px]">expand_more</span></div><div class="flex items-center gap-space-xs bg-surface-container-high px-space-sm py-space-xs rounded-DEFAULT"><div class="w-2 h-2 rounded-DEFAULT bg-secondary animate-ping"></div><span class="font-mono-badge text-mono-badge text-secondary font-bold uppercase">Live Sync</span></div><button class="w-8 h-8 rounded-DEFAULT bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors"><span class="material-symbols-outlined text-[18px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-14 bg-surface px-space-xl"><div class="flex flex-col w-full">
+<div class="flex flex-col gap-space-md py-space-md"><!-- BARRA DE FILTROS GLOBALES SINCRONIZADOS -->
+<section class="flex flex-col gap-space-sm bg-surface-container-low p-space-md rounded-DEFAULT shadow-md">
+<div class="flex flex-wrap items-center justify-between gap-space-md border-b border-surface-container-high/60 pb-space-sm">
+<!-- Galeras y Supervisora -->
+<div class="flex flex-wrap items-center gap-space-md">
+<!-- Filtro Galera -->
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-space-xxs"><span class="material-symbols-outlined text-[14px] text-primary">warehouse</span>Galera:</span>
+<div class="flex items-center bg-surface-container-lowest p-space-xxs rounded-DEFAULT font-mono-badge text-mono-badge">
+<button class="px-space-sm py-space-xxs rounded-DEFAULT bg-primary text-on-primary font-bold shadow-sm transition-all" type="button">Todas (2,148)</button>
+<button class="px-space-sm py-space-xxs text-on-surface-variant hover:text-on-surface transition-colors" type="button">Norte A (740)</button>
+<button class="px-space-sm py-space-xxs text-on-surface-variant hover:text-on-surface transition-colors" type="button">Central B (890)</button>
+<button class="px-space-sm py-space-xxs text-on-surface-variant hover:text-on-surface transition-colors" type="button">Sur Express (518)</button>
+</div>
+</div>
+<div class="h-5 w-px bg-surface-container-high hidden md:block"></div>
+<!-- Filtro Supervisora -->
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-sm py-space-xxs rounded-DEFAULT">
+<span class="material-symbols-outlined text-[15px] text-secondary">shield_person</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Supervisora:</span>
+<select aria-label="Supervisora" class="bg-transparent font-body-compact text-body-compact text-on-surface outline-none cursor-pointer">
+<option class="bg-surface-container-high text-on-surface">Todas las Supervisoras</option>
+<option class="bg-surface-container-high text-on-surface" selected="">Lic. Marcela Vega (Turno A)</option>
+<option class="bg-surface-container-high text-on-surface">Ing. Carlos Mendoza (Turno B)</option>
+<option class="bg-surface-container-high text-on-surface">Lic. Elena Ortiz (Soporte ATTT)</option>
+</select>
+</div>
+<!-- Filtro Periodo -->
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-sm py-space-xxs rounded-DEFAULT">
+<span class="material-symbols-outlined text-[15px] text-tertiary">event</span>
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Periodo:</span>
+<span class="font-mono-data text-mono-data text-tertiary font-bold text-[12px]">Ciclo Q1 2025 (Marzo)</span>
+</div>
+</div>
+<!-- Input rápido por Unidad o Placa -->
+<div class="relative min-w-[260px]">
+<span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[15px]">search</span>
+<input class="w-full h-7 pl-7 pr-space-md bg-surface-container-lowest text-on-surface font-mono-data text-mono-data placeholder:text-outline rounded-DEFAULT outline-none focus:bg-surface-container-high transition-colors text-[12px]" placeholder="Filtrar Unidad o Placa (p.ej. RYM-1029)..." type="text"/>
+</div>
+</div>
+<!-- Filtros de Estatus Multi-select Interactivo -->
+<div class="flex flex-wrap items-center gap-space-xs pt-space-xxs">
+<span class="font-label-caps text-label-caps uppercase text-outline mr-space-xs">Filtro Estatus:</span>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-secondary font-mono-badge text-mono-badge flex items-center gap-space-xxs border border-secondary/40 font-bold" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Vigente (1,492)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-on-surface-variant font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Pendiente por ciclo (284)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-tertiary-container/30 text-tertiary font-mono-badge text-mono-badge flex items-center gap-space-xxs border border-tertiary/40 font-bold" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Pend. cambio color (76)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-tertiary font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Diferencia color (42)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-error-container/40 text-error font-mono-badge text-mono-badge flex items-center gap-space-xxs border border-error/40 font-bold" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>Boleta empresa / doc (64)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-error font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Boleta asociada a placa (48)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-error font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Restricción placa (21)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-on-surface-variant font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Sin cupo (17)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-on-surface-variant font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Diferencia de propietario (18)
+    </button>
+<button class="px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container text-error font-mono-badge text-mono-badge flex items-center gap-space-xxs hover:text-on-surface" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Incidencias Mec/Gases (146)
+    </button>
+</div>
+</section>
+<!-- 1. BARRA DE TRIAJE Y MÉTRICAS OPERACIONALES COMPACTAS (DENSIDAD ALTA) -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-space-sm">
+<!-- Card 1: Total Universo -->
+<div class="bg-surface-container-low p-space-sm rounded-DEFAULT shadow-sm flex flex-col justify-between border-l-2 border-primary">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Universo Total</span>
+<div class="flex items-baseline justify-between mt-space-xxs">
+<span class="font-mono-data text-mono-data text-[18px] font-bold text-on-surface">2,148</span>
+<span class="font-mono-badge text-mono-badge text-primary">100% FLOTA</span>
+</div>
+<span class="font-body-compact text-body-compact text-outline text-[11px]">3 Galeras activas</span>
+</div>
+<!-- Card 2: Vigentes -->
+<div class="bg-surface-container-low p-space-sm rounded-DEFAULT shadow-sm flex flex-col justify-between border-l-2 border-secondary">
+<span class="font-label-caps text-label-caps uppercase text-secondary font-bold flex items-center gap-space-xxs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Vigentes eCarCheck</span>
+<div class="flex items-baseline justify-between mt-space-xxs">
+<span class="font-mono-data text-mono-data text-[18px] font-bold text-secondary">1,492</span>
+<span class="font-mono-badge text-mono-badge text-secondary font-bold">69.5%</span>
+</div>
+<span class="font-body-compact text-body-compact text-on-surface-variant text-[11px]">Conforme circulación</span>
+</div>
+<!-- Card 3: Pendiente por ciclo -->
+<div class="bg-surface-container-low p-space-sm rounded-DEFAULT shadow-sm flex flex-col justify-between border-l-2 border-outline">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Pendiente Ciclo</span>
+<div class="flex items-baseline justify-between mt-space-xxs">
+<span class="font-mono-data text-mono-data text-[18px] font-bold text-on-surface">284</span>
+<span class="font-mono-badge text-mono-badge text-on-surface-variant">13.2%</span>
+</div>
+<span class="font-body-compact text-body-compact text-outline text-[11px]">Cierre Q1 en 04 días</span>
+</div>
+<!-- Card 4: Cambio de Color -->
+<div class="bg-surface-container-low p-space-sm rounded-DEFAULT shadow-sm flex flex-col justify-between border-l-2 border-tertiary">
+<span class="font-label-caps text-label-caps uppercase text-tertiary font-bold">Pend. Color / Dif.</span>
+<div class="flex items-baseline justify-between mt-space-xxs">
+<span class="font-mono-data text-mono-data text-[18px] font-bold text-tertiary">76</span>
+<span class="font-mono-badge text-mono-badge text-tertiary font-bold">3.5%</span>
+</div>
+<span class="font-body-compact text-body-compact text-on-surface-variant text-[11px]">42 con dic. notarial pend.</span>
+</div>
+<!-- Card 5: Boletas Placa & Empresa -->
+<div class="bg-surface-container-low p-space-sm rounded-DEFAULT shadow-sm flex flex-col justify-between border-l-2 border-error">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold flex items-center gap-space-xxs"><span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>Boletas Placa/Emp.</span>
+<div class="flex items-baseline justify-between mt-space-xxs">
+<span class="font-mono-data text-mono-data text-[18px] font-bold text-error">112</span>
+<span class="font-mono-badge text-mono-badge text-error font-bold">$18,420 MORA</span>
+</div>
+<span class="font-body-compact text-body-compact text-on-surface-variant text-[11px]">64 Empresa | 48 Placa</span>
+</div>
+<!-- Card 6: Restricciones & Incidencias -->
+<div class="bg-surface-container-low p-space-sm rounded-DEFAULT shadow-sm flex flex-col justify-between border-l-2 border-surface-variant">
+<span class="font-label-caps text-label-caps uppercase text-on-surface">Restricción / Gases</span>
+<div class="flex items-baseline justify-between mt-space-xxs">
+<span class="font-mono-data text-mono-data text-[18px] font-bold text-error">184</span>
+<span class="font-mono-badge text-mono-badge text-on-surface-variant">38 Cupo / 146 Téc</span>
+</div>
+<span class="font-body-compact text-body-compact text-outline text-[11px]">Opacidad &amp; frenómetro</span>
+</div>
+</div>
+<!-- 2. MATRIZ TÁCTICA DE BLOQUEOS CRÍTICOS (4 CARRILES DE TRIAJE PRIORITARIO) -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Carril 1: Boletas & Restricciones Placa -->
+<div class="flex flex-col bg-surface-container-low p-space-md rounded-DEFAULT shadow-md justify-between border-t-2 border-error">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold flex items-center gap-space-xxs">
+<span class="material-symbols-outlined text-[16px]">gavel</span>
+          Boletas &amp; Restricciones Placa
+        </span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-error-container text-on-error-container font-bold rounded-DEFAULT">112 CASOS</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant">Mora acumulada impide emisión de calcomanía en Municipio y ATTT.</p>
+<div class="mt-space-xs flex flex-col gap-space-xxs bg-surface-container-lowest p-space-xs rounded-DEFAULT font-mono-data text-mono-data text-[11px]">
+<div class="flex justify-between py-space-xxs border-b border-surface-container-high/40">
+<span class="text-on-surface-variant">Boleta Empresa:</span>
+<span class="text-error font-bold">64 uds ($12,180.00)</span>
+</div>
+<div class="flex justify-between py-space-xxs border-b border-surface-container-high/40">
+<span class="text-on-surface-variant">Boleta Asociada a Placa:</span>
+<span class="text-error font-bold">48 uds ($6,240.00)</span>
+</div>
+<div class="flex justify-between py-space-xxs text-tertiary">
+<span>Restricción Judicial/Tránsito:</span>
+<span class="font-bold">21 uds Bloqueadas</span>
+</div>
+</div>
+</div>
+<div class="flex gap-space-xs mt-space-md">
+<button class="flex-1 py-space-xs bg-error hover:bg-error/90 text-on-error font-body-strong text-body-strong rounded-DEFAULT transition-all flex items-center justify-center gap-space-xxs shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]">account_balance</span>
+<span>Liberar Lote Pago</span>
+</button>
+<button class="px-space-sm py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface font-body-compact text-body-compact rounded-DEFAULT transition-colors" title="Consultar ATTT" type="button">
+        ATTT Directo
+      </button>
+</div>
+</div>
+<!-- Carril 2: Cambio de Color & Diferencia Registral -->
+<div class="flex flex-col bg-surface-container-low p-space-md rounded-DEFAULT shadow-md justify-between border-t-2 border-tertiary">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-tertiary font-bold flex items-center gap-space-xxs">
+<span class="material-symbols-outlined text-[16px]">format_paint</span>
+          Cambio Color &amp; Dif. Registral
+        </span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-tertiary-container/30 text-tertiary font-bold rounded-DEFAULT">76 CASOS</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant">Color físico rotulado difiere del Registro Único Vehicular oficial.</p>
+<div class="mt-space-xs bg-surface-container-lowest p-space-xs rounded-DEFAULT flex flex-col gap-space-xs font-mono-data text-mono-data text-[11px]">
+<div class="flex items-center justify-between">
+<span class="text-outline">Color Anterior: <strong class="text-on-surface">Blanco Polar</strong></span>
+<span class="text-primary">Actual: <strong class="text-primary">Azul Corp RYM</strong></span>
+</div>
+<div class="flex justify-between py-space-xxs border-t border-surface-container-high/40 text-on-surface-variant">
+<span>Minuta notarial cargada:</span>
+<span class="text-secondary font-bold">34 aprobadas</span>
+</div>
+<div class="flex justify-between text-tertiary font-bold">
+<span>Pendiente peritaje visual:</span>
+<span>42 unidades</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md">
+<button class="w-full py-space-xs bg-tertiary text-on-tertiary font-body-strong text-body-strong rounded-DEFAULT hover:opacity-90 transition-opacity flex items-center justify-center gap-space-xs shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]">description</span>
+<span>Adjuntar Minuta &amp; Dictamen</span>
+</button>
+</div>
+</div>
+<!-- Carril 3: Sin Cupo & Diferencia Propietario -->
+<div class="flex flex-col bg-surface-container-low p-space-md rounded-DEFAULT shadow-md justify-between border-t-2 border-primary">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold flex items-center gap-space-xxs">
+<span class="material-symbols-outlined text-[16px]">badge</span>
+          Sin Cupo &amp; Dif. Propietario
+        </span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-primary-container/20 text-primary font-bold rounded-DEFAULT">38 CASOS</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant">Discrepancia entre la Razón Social operadora y el Certificado de Operación.</p>
+<div class="mt-space-xs bg-surface-container-lowest p-space-xs rounded-DEFAULT flex flex-col gap-space-xxs font-mono-data text-mono-data text-[11px]">
+<div class="flex justify-between text-on-surface-variant py-space-xxs border-b border-surface-container-high/40">
+<span>Cupo no reasignado ATTT:</span>
+<span class="text-tertiary font-bold">17 unidades</span>
+</div>
+<div class="flex justify-between text-on-surface-variant py-space-xxs border-b border-surface-container-high/40">
+<span>Traspaso RUV sin finiquito:</span>
+<span class="text-error font-bold">18 unidades</span>
+</div>
+<div class="flex justify-between text-secondary">
+<span>En verificación de personería:</span>
+<span class="font-bold">3 unidades</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md">
+<button class="w-full py-space-xs bg-surface-container-high hover:bg-surface-container-highest text-primary font-body-strong text-body-strong rounded-DEFAULT transition-colors flex items-center justify-center gap-space-xs shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]">sync_alt</span>
+<span>Regularizar Personería Jurídica</span>
+</button>
+</div>
+</div>
+<!-- Carril 4: Incidencias Técnicas & eCarCheck Vencido -->
+<div class="flex flex-col bg-surface-container-low p-space-md rounded-DEFAULT shadow-md justify-between border-t-2 border-surface-variant">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-error font-bold flex items-center gap-space-xxs">
+<span class="material-symbols-outlined text-[16px]">build_circle</span>
+          Incidencias &amp; eCarCheck
+        </span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-surface-container-highest text-error font-bold rounded-DEFAULT">146 FALLAS</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant">Rechazados en banco de prueba físico de galera o certificado expirado.</p>
+<div class="mt-space-xs bg-surface-container-lowest p-space-xs rounded-DEFAULT flex flex-col gap-space-xxs font-mono-data text-mono-data text-[11px]">
+<div class="flex justify-between text-on-surface-variant">
+<span>Opacidad Gases &gt; Norma:</span>
+<span class="text-error font-bold">82 uds</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Frenómetro Eje Tracción:</span>
+<span class="text-tertiary font-bold">41 uds</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>eCarCheck Expirado &gt;30d:</span>
+<span class="text-error font-bold">23 uds</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md">
+<button class="w-full py-space-xs bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-strong text-body-strong rounded-DEFAULT transition-colors flex items-center justify-center gap-space-xs shadow-sm" type="button">
+<span class="material-symbols-outlined text-[15px]">directions_car</span>
+<span>Derivar a Taller / Fosa</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 3. TABLA CENTRAL DE DESPACHO INMEDIATO -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md text-on-surface">Mesa Central de Despacho Inmediato</span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-surface-container-high text-primary rounded-DEFAULT font-bold">VISTA OPERATIVA ACTIVA</span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-surface-container-highest text-on-surface-variant rounded-DEFAULT">PÁG 1 / 43</span>
+</div>
+<div class="flex items-center gap-space-xs font-mono-data text-mono-data text-[12px]">
+<span class="text-on-surface-variant">Sincronización ATTT:</span>
+<span class="text-secondary flex items-center gap-space-xxs font-bold"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>CONECTADO (0.4s)</span>
+</div>
+</div>
+<div class="w-full overflow-x-auto bg-surface-container-low rounded-DEFAULT shadow-lg border border-surface-container-high/40">
+<table class="w-full text-left border-collapse min-w-[1300px]">
+<thead>
+<tr class="bg-surface-container-lowest text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider border-b border-surface-container-high">
+<th class="py-space-sm px-space-md w-10 text-center">
+<input class="rounded-DEFAULT accent-primary cursor-pointer" id="checkAll" type="checkbox"/>
+</th>
+<th class="py-space-sm px-space-md">Unidad</th>
+<th class="py-space-sm px-space-md">Placa</th>
+<th class="py-space-sm px-space-md">Galera</th>
+<th class="py-space-sm px-space-md">Empresa Titular</th>
+<th class="py-space-sm px-space-md">Supervisora</th>
+<th class="py-space-sm px-space-md">Estado Legal</th>
+<th class="py-space-sm px-space-md">Último eCarCheck</th>
+<th class="py-space-sm px-space-md text-right">Acciones Rápidas</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high/40 font-body-default text-body-default">
+<!-- FILA 1: Boleta Empresa Impaga -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md text-center">
+<input checked="" class="row-select rounded-DEFAULT accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data font-bold text-on-surface">Unidad #104</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xxs bg-surface-container-lowest text-primary font-mono-data text-mono-data font-bold rounded-DEFAULT">RYM-8492</span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-on-surface-variant">Norte A (Bahía 02)</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Transportes Logísticos RYM S.A.</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Lic. Marcela Vega</td>
+<td class="py-space-sm px-space-md">
+<span class="inline-flex items-center gap-space-xxs px-space-xs py-space-xxs bg-error-container text-error font-mono-badge text-mono-badge font-bold rounded-DEFAULT">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>BOLETA DE EMPRESA ($150.00)
+            </span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-[11px] text-on-surface-variant">
+<div>02-Mar-2024</div>
+<span class="text-error font-bold">EXPIRADO (-18d)</span>
+</td>
+<td class="py-space-sm px-space-md text-right">
+<div class="inline-flex items-center gap-space-xxs">
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-primary font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Verificar ATTT" type="button">Verif. ATTT</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-error hover:text-on-error text-error font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Generar Pago" type="button">Gen. Pago</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-surface-bright text-on-surface-variant font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Derivar a Taller" type="button">Derivar</button>
+</div>
+</td>
+</tr>
+<!-- FILA 2: Diferencia de Color / Pendiente Color -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md text-center">
+<input checked="" class="row-select rounded-DEFAULT accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data font-bold text-on-surface">Unidad #088</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xxs bg-surface-container-lowest text-primary font-mono-data text-mono-data font-bold rounded-DEFAULT">RYM-1029</span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-on-surface-variant">Central B (Bahía 05)</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">RYM Carga Express del Istmo</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Ing. Carlos Mendoza</td>
+<td class="py-space-sm px-space-md">
+<span class="inline-flex items-center gap-space-xxs px-space-xs py-space-xxs bg-tertiary-container/30 text-tertiary font-mono-badge text-mono-badge font-bold rounded-DEFAULT">
+<span class="material-symbols-outlined text-[13px]">palette</span>DIFERENCIA DE COLOR (RUV)
+            </span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-[11px] text-on-surface-variant">
+<div>05-Mar-2024</div>
+<span class="text-tertiary font-bold">EXPIRA EN 24H</span>
+</td>
+<td class="py-space-sm px-space-md text-right">
+<div class="inline-flex items-center gap-space-xxs">
+<button class="px-space-xs py-space-xxs bg-tertiary text-on-tertiary font-mono-badge text-mono-badge rounded-DEFAULT hover:opacity-90 transition-opacity font-bold" title="Minuta Color" type="button">Minuta Color</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-on-surface font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Verificar ATTT" type="button">Verif. ATTT</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-surface-bright text-on-surface-variant font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Derivar" type="button">Derivar</button>
+</div>
+</td>
+</tr>
+<!-- FILA 3: Restricción asociada a placa & Boleta -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md text-center">
+<input checked="" class="row-select rounded-DEFAULT accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data font-bold text-on-surface">Unidad #211</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xxs bg-surface-container-lowest text-primary font-mono-data text-mono-data font-bold rounded-DEFAULT">RYM-4019</span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-on-surface-variant">Sur Express (Bahía 01)</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Flota Central Panamá S.A.</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Lic. Marcela Vega</td>
+<td class="py-space-sm px-space-md">
+<span class="inline-flex items-center gap-space-xxs px-space-xs py-space-xxs bg-error text-on-error font-mono-badge text-mono-badge font-bold rounded-DEFAULT">
+              RESTRICCIÓN ASOCIADA A PLACA
+            </span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-[11px] text-on-surface-variant">
+<div>12-Mar-2024</div>
+<span class="text-error font-bold">BLOQUEO ATTT</span>
+</td>
+<td class="py-space-sm px-space-md text-right">
+<div class="inline-flex items-center gap-space-xxs">
+<button class="px-space-xs py-space-xxs bg-error hover:bg-error/90 text-on-error font-mono-badge text-mono-badge rounded-DEFAULT transition-all font-bold" title="Generar Pago" type="button">Gen. Pago</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-primary font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Verificar ATTT" type="button">Verif. ATTT</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-surface-bright text-on-surface-variant font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Derivar" type="button">Derivar</button>
+</div>
+</td>
+</tr>
+<!-- FILA 4: Pendiente por ciclo / Sin cupo -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md text-center">
+<input class="row-select rounded-DEFAULT accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data font-bold text-on-surface">Unidad #119</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xxs bg-surface-container-lowest text-primary font-mono-data text-mono-data font-bold rounded-DEFAULT">RYM-5521</span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-on-surface-variant">Norte A (Bahía 06)</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Servicios Frigoríficos RYM Corp</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Lic. Elena Ortiz</td>
+<td class="py-space-sm px-space-md">
+<span class="inline-flex items-center gap-space-xxs px-space-xs py-space-xxs bg-surface-container-highest text-on-surface-variant font-mono-badge text-mono-badge rounded-DEFAULT">
+              PENDIENTE POR CICLO (TURNO ASIG.)
+            </span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-[11px] text-on-surface-variant">
+<div>18-Mar-2024</div>
+<span class="text-secondary font-bold">PAZ Y SALVO OK</span>
+</td>
+<td class="py-space-sm px-space-md text-right">
+<div class="inline-flex items-center gap-space-xxs">
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-on-surface font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Verificar ATTT" type="button">Verif. ATTT</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-surface-bright text-on-surface-variant font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Derivar" type="button">Derivar</button>
+</div>
+</td>
+</tr>
+<!-- FILA 5: Vigente Conforme -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md text-center">
+<input class="row-select rounded-DEFAULT accent-primary cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data font-bold text-on-surface">Unidad #015</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xxs bg-surface-container-lowest text-primary font-mono-data text-mono-data font-bold rounded-DEFAULT">RYM-9912</span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-on-surface-variant">Central B (Bahía 01)</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Distribuidora Metropolitana RYM</td>
+<td class="py-space-sm px-space-md font-body-compact text-body-compact text-on-surface">Ing. Carlos Mendoza</td>
+<td class="py-space-sm px-space-md">
+<span class="inline-flex items-center gap-space-xxs px-space-xs py-space-xxs bg-secondary/20 text-secondary font-mono-badge text-mono-badge font-bold rounded-DEFAULT">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>VIGENTE (NOV 2025)
+            </span>
+</td>
+<td class="py-space-sm px-space-md font-mono-data text-mono-data text-[11px] text-on-surface-variant">
+<div>01-Nov-2024</div>
+<span class="text-secondary font-bold">VALIDADO RYM-04</span>
+</td>
+<td class="py-space-sm px-space-md text-right">
+<div class="inline-flex items-center gap-space-xxs">
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-secondary hover:text-on-secondary text-secondary font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Ver Calcomanía" type="button">Calcomanía</button>
+<button class="px-space-xs py-space-xxs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-on-surface font-mono-badge text-mono-badge rounded-DEFAULT transition-all" title="Verificar ATTT" type="button">Verif. ATTT</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 4. MICRO-PANELES INFERIORES: AVANCE POR GALERA Y FISCALIZACIÓN -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md mt-space-xs">
+<!-- Micro-panel: Avance por Galera segmentado -->
+<div class="bg-surface-container-low p-space-md rounded-DEFAULT shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface">Avance por Galera de Revisado</span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-primary-container text-on-primary-container font-bold rounded-DEFAULT">EN CURSO</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant mb-space-sm">Progreso de revisión técnica y emisión de certificado eCarCheck.</p>
+<div class="flex flex-col gap-space-sm bg-surface-container-lowest p-space-sm rounded-DEFAULT">
+<!-- Norte A -->
+<div class="flex flex-col gap-space-xxs">
+<div class="flex justify-between font-mono-data text-mono-data text-[12px]">
+<span class="text-on-surface">Galera Norte A (740 uds)</span>
+<span class="text-secondary font-bold">562 listas (76%)</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-DEFAULT overflow-hidden flex">
+<div class="bg-secondary h-full" style="width: 76%"></div>
+<div class="bg-tertiary h-full" style="width: 14%"></div>
+<div class="bg-error h-full" style="width: 10%"></div>
+</div>
+</div>
+<!-- Central B -->
+<div class="flex flex-col gap-space-xxs">
+<div class="flex justify-between font-mono-data text-mono-data text-[12px]">
+<span class="text-on-surface">Galera Central B (890 uds)</span>
+<span class="text-secondary font-bold">632 listas (71%)</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-DEFAULT overflow-hidden flex">
+<div class="bg-secondary h-full" style="width: 71%"></div>
+<div class="bg-tertiary h-full" style="width: 18%"></div>
+<div class="bg-error h-full" style="width: 11%"></div>
+</div>
+</div>
+<!-- Sur Express -->
+<div class="flex flex-col gap-space-xxs">
+<div class="flex justify-between font-mono-data text-mono-data text-[12px]">
+<span class="text-on-surface">Galera Sur Express (518 uds)</span>
+<span class="text-secondary font-bold">298 listas (57%)</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-DEFAULT overflow-hidden flex">
+<div class="bg-secondary h-full" style="width: 57%"></div>
+<div class="bg-tertiary h-full" style="width: 25%"></div>
+<div class="bg-error h-full" style="width: 18%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-space-sm flex items-center justify-between font-mono-data text-mono-data text-[11px] text-on-surface-variant">
+<span class="flex items-center gap-space-xxs"><span class="w-2 h-2 rounded-full bg-secondary"></span> Vigentes</span>
+<span class="flex items-center gap-space-xxs"><span class="w-2 h-2 rounded-full bg-tertiary"></span> Trámite/Color</span>
+<span class="flex items-center gap-space-xxs"><span class="w-2 h-2 rounded-full bg-error"></span> Bloqueadas</span>
+</div>
+</div>
+<!-- Peritaje Fotográfico Forense -->
+<div class="bg-surface-container-low p-space-md rounded-DEFAULT shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface">Peritaje Forense de Rotulación</span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-tertiary-container/30 text-tertiary font-bold rounded-DEFAULT">EN REVISIÓN</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant mb-space-xs">Unidad <strong class="text-primary font-mono-data text-mono-data">RYM-1029</strong> (Bahía 05). Disconformidad con RUV en color de carrocería.</p>
+<div class="relative w-full h-32 bg-surface-container-lowest rounded-DEFAULT overflow-hidden mb-space-xs">
+<img class="w-full h-full object-cover opacity-85 hover:opacity-100 transition-opacity" data-alt="Foto pericial del camión Isuzu con rotulación azul sobre base blanca en bahía técnica" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfh-WrZJp3VjzFxO53wQyeLVQizyH0TGrtB-DN8PG2j4KJFFUHYkYz7UHi-6A6FLSiMLIgijJl4-3O0MhWtKhVgx6WqczgwHvuj4WtAd-6HUGYFVnkQswtuXCs-rR7C_tyLUyWjfbXfqfZ8mZqN6oiNIrTUXahmpXXjIm9t36SUic2m5D3j8qQGy1exqLRAlnOw6Ym1nfjLBRmMIFq0WN95qcleJC6wKIm2gDf-jmBMDIMZuIDKOyv"/>
+<div class="absolute bottom-2 left-2 bg-surface-container-lowest/90 px-space-xs py-space-xxs rounded-DEFAULT font-mono-badge text-mono-badge text-primary font-bold">
+          MINUTA NOTARIAL ADJUNTA
+        </div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs mt-space-xs">
+<button class="flex-1 py-space-xs bg-primary hover:bg-primary/90 text-on-primary font-body-strong text-body-strong rounded-DEFAULT transition-all text-center text-[12px]" type="button">
+        Aprobar Dictamen y Liberar
+      </button>
+<button class="px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-error font-body-strong text-body-strong rounded-DEFAULT transition-colors text-[12px]" type="button">
+        Rechazar
+      </button>
+</div>
+</div>
+<!-- Resumen de Cumplimiento Fiscal & ATTT -->
+<div class="bg-surface-container-low p-space-md rounded-DEFAULT shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface">Embudo de Calcomanías ATTT</span>
+<span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs bg-surface-container-highest text-secondary font-bold rounded-DEFAULT">MARZO 2025</span>
+</div>
+<p class="font-body-compact text-body-compact text-on-surface-variant mb-space-xs">Requisitos completos para emisión de calcomanía de circulación.</p>
+<div class="flex items-center justify-around bg-surface-container-lowest p-space-sm rounded-DEFAULT mb-space-xs">
+<div class="relative w-20 h-20 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="69.5, 100" stroke-linecap="round" stroke-width="3.5"></path>
+<path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="8.5, 100" stroke-dashoffset="-69.5" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-mono-data text-mono-data text-on-surface font-bold text-[14px]">69.5%</span>
+<span class="font-label-caps text-label-caps text-outline uppercase text-[9px]">Conforme</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xxs font-mono-data text-mono-data text-[11px]">
+<div class="flex items-center gap-space-xs text-secondary font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>1,492 Calcomanías Listas</span>
+</div>
+<div class="flex items-center gap-space-xs text-tertiary">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span><span>472 En Gestión / Color</span>
+</div>
+<div class="flex items-center gap-space-xs text-error font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span><span>184 Bloqueadas / Mora</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-mono-data text-mono-data text-[11px]">
+<span>Paz y Salvo Corporativo:</span>
+<span class="text-secondary font-bold">AL DÍA (VENCE 30-ABR-2025)</span>
+</div>
+</div>
+</div>
+<!-- 4B. BARRA INFERIOR DE ACCIONES MASIVAS -->
+<div class="sticky bottom-4 z-30 mt-space-md w-full bg-surface-container-lowest/95 backdrop-blur-md p-space-md rounded-DEFAULT shadow-[0_4px_24px_rgba(0,0,0,0.85)] flex flex-col md:flex-row items-center justify-between gap-space-md border border-surface-container-high/60" id="batchActionTray">
+<div class="flex items-center gap-space-md w-full md:w-auto">
+<div class="flex items-center gap-space-xs bg-surface-container-high px-space-md py-space-xs rounded-DEFAULT">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono-badge text-mono-badge text-primary font-bold" id="selectedCount">3 UNIDADES SELECCIONADAS</span>
+</div>
+<span class="font-body-compact text-body-compact text-on-surface-variant hidden sm:inline">Acciones masivas de despacho:</span>
+</div>
+<div class="flex flex-wrap items-center gap-space-xs w-full md:w-auto justify-end">
+<button class="px-space-md py-space-xs bg-tertiary text-on-tertiary font-body-strong text-body-strong rounded-DEFAULT hover:opacity-90 transition-opacity flex items-center gap-space-xs shadow-sm text-[12px]" type="button">
+<span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+<span>Generar Lote Pago Boletas</span>
+</button>
+<button class="px-space-md py-space-xs bg-surface-container-high hover:bg-surface-bright text-secondary font-body-strong text-body-strong rounded-DEFAULT transition-colors flex items-center gap-space-xs text-[12px]" type="button">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span>Imprimir Calcomanías en Lote</span>
+</button>
+<button class="px-space-md py-space-xs bg-primary hover:bg-primary/90 text-on-primary font-body-strong text-body-strong rounded-DEFAULT transition-all flex items-center gap-space-xs shadow-sm text-[12px]" type="button">
+<span class="material-symbols-outlined text-[16px]">export_notes</span>
+<span>Exportar Acta de Fiscalización</span>
+</button>
+</div>
+</div></div>
+<!-- INLINE VANILLA JS FOR CHECKBOX BATCH SELECTION SYNC -->
+<script>
+    (function initMissionControl() {
+      const checkAll = document.getElementById('checkAll');
+      const rowSelects = document.querySelectorAll('.row-select');
+      const selectedCountBadge = document.getElementById('selectedCount');
+      const tray = document.getElementById('batchActionTray');
+
+      function updateCount() {
+        const checked = document.querySelectorAll('.row-select:checked');
+        const count = checked.length;
+        if (selectedCountBadge) {
+          selectedCountBadge.textContent = `${count} UNIDAD${count === 1 ? '' : 'ES'} SELECCIONADA${count === 1 ? '' : 'S'}`;
+        }
+        if (tray) {
+          tray.style.opacity = count > 0 ? '1' : '0.4';
+          tray.style.pointerEvents = count > 0 ? 'auto' : 'none';
+        }
+        if (checkAll) {
+          checkAll.checked = count === rowSelects.length && rowSelects.length > 0;
+          checkAll.indeterminate = count > 0 && count < rowSelects.length;
+        }
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', (e) => {
+          rowSelects.forEach(cb => {
+            cb.checked = e.target.checked;
+          });
+          updateCount();
+        });
+      }
+
+      rowSelects.forEach(cb => {
+        cb.addEventListener('change', updateCount);
+      });
+
+      updateCount();
+    })();
+  </script>
+</div></main></div></body></html>
