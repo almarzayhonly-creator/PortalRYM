@@ -1,12 +1,11 @@
-name: Stitch generate Revisados dashboard
+name: Stitch refine Revisados from main
 
 on:
   workflow_dispatch:
   push:
     branches: [sandbox/panapass-v2]
     paths:
-      - 'tools/stitch/generate-revisados-dashboard.mjs'
-      - 'tools/stitch/revisados-dashboard-contract.md'
+      - 'tools/stitch/stitch-revisados-from-main.mjs'
       - 'tools/stitch/package.json'
       - '.github/workflows/stitch-generate-revisados-dashboard.yml'
 
@@ -14,7 +13,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: stitch-generate-revisados-dashboard
+  group: stitch-refine-revisados-main
   cancel-in-progress: true
 
 jobs:
@@ -44,13 +43,13 @@ jobs:
         working-directory: tools/stitch
         run: npm install --no-audit --no-fund --package-lock=false
 
-      - name: Generate Dashboard from main-locked contract
+      - name: Upload main reference and refine Avance mensual in Stitch
         working-directory: tools/stitch
         env:
           STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
           STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
           MAIN_INDEX_HTML: ${{ github.workspace }}/.stitch/main-index-reference.html
-        run: npm run generate:revisados-dashboard
+        run: npm run stitch:revisados-from-main
 
       - name: Sync complete Stitch project
         working-directory: tools/stitch
