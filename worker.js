@@ -3,6 +3,15 @@ export default {
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     const contentType = headers.get("content-type") || "";
+    const host = new URL(request.url).hostname;
+    const isSandbox = host.startsWith("sandbox-panapass-v2-") || host.includes("-portal-ena-rym.almarzayhonly.workers.dev");
+
+    if (isSandbox) {
+      headers.set("cache-control", "no-store, no-cache, must-revalidate, max-age=0");
+      headers.set("pragma", "no-cache");
+      headers.set("expires", "0");
+      headers.set("x-rym-sandbox", "panapass-v2");
+    }
 
     if (contentType.includes("text/html")) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
