@@ -39,6 +39,12 @@ jobs:
           npm run build
           test -s dist/index.html
           test -d dist/assets
+          VUE_ASSET=$(grep -Eo '/vue/dist/assets/[^" ]+\.js' dist/index.html | head -1)
+          test -n "$VUE_ASSET"
+          test -s ".${VUE_ASSET#/vue}"
+          grep -Fq 'data-ui-source' ".${VUE_ASSET#/vue}"
+          grep -Fq 'rv-brand-dark' ".${VUE_ASSET#/vue}"
+          grep -Fq 'Mission Control' ".${VUE_ASSET#/vue}"
       - name: Inject sandbox bootstrap into preview build only
         run: |
           python3 - <<'PY'
@@ -72,6 +78,7 @@ jobs:
         env:
           VERSION_URL: ${{ steps.deploy.outputs.version_url }}
           EXPECTED_ASSET: ${{ steps.deploy.outputs.expected_asset }}
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           curl -fsSL "$VERSION_URL/?sandbox=1&revisadosVue=1" -o /tmp/index.html
           curl -fsSL "$VERSION_URL/modules/panapass-sandbox/dashboard/index.js" -o /tmp/sandbox.js
@@ -82,8 +89,13 @@ jobs:
           grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
           grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
           grep -Fq 'RYM_REVISADOS_BRIDGE' /tmp/revisados.js
+          grep -Fq 'bust(src)' /tmp/revisados.js
           grep -Fq "$EXPECTED_ASSET" /tmp/vue.html
-          curl -fsSI "$VERSION_URL$EXPECTED_ASSET" | grep -qi '^HTTP/.* 200'
+          curl -fsSL "$VERSION_URL$EXPECTED_ASSET?v=$GITHUB_SHA" -o /tmp/vue-bundle.js
+          grep -Fq 'data-ui-source' /tmp/vue-bundle.js
+          grep -Fq 'rv-brand-dark' /tmp/vue-bundle.js
+          grep -Fq 'Mission Control' /tmp/vue-bundle.js
+          curl -fsSI "$VERSION_URL$EXPECTED_ASSET?v=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
       - name: Verify canonical alias propagation
         env:
           ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
@@ -99,9 +111,16 @@ jobs:
             grep -Fq "/modules/v171-loader.js?v=$GITHUB_SHA" /tmp/alias-root.html && ROOT_OK=$((ROOT_OK+1)) || true
             grep -Fq "$EXPECTED_ASSET" /tmp/alias-vue.html && VUE_OK=1 || true
             if [ "$ROOT_OK" -eq 2 ] && [ "$VUE_OK" -eq 1 ]; then
-              echo "Alias root + Vue propagated on attempt $attempt"
-              curl -fsSI "$ALIAS_URL$EXPECTED_ASSET" | grep -qi '^HTTP/.* 200'
-              exit 0
+              curl -fsSL "$ALIAS_URL$EXPECTED_ASSET?v=$GITHUB_SHA" -o /tmp/alias-vue-bundle.js || true
+              BUNDLE_OK=0
+              grep -Fq 'data-ui-source' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              grep -Fq 'rv-brand-dark' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              grep -Fq 'Mission Control' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              if [ "$BUNDLE_OK" -eq 3 ]; then
+                echo "Alias root + Stitch Vue bundle propagated on attempt $attempt"
+                curl -fsSI "$ALIAS_URL$EXPECTED_ASSET?v=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
+                exit 0
+              fi
             fi
             echo "Alias has not fully propagated (attempt $attempt/12, root=$ROOT_OK/2, vue=$VUE_OK/1)"
             sleep 5
