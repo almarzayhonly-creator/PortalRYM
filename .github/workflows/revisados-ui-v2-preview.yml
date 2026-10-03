@@ -1,0 +1,82 @@
+name: Revisados UI V2 preview
+
+on:
+  push:
+    branches: [sandbox/revisados-ui-v2]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revisados-ui-v2-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify visual-only scope
+        run: |
+          test -s css/revisados.css
+          test -s modules/revisados/index.js
+          grep -Fq 'Visual-only layer over the stable main implementation' css/revisados.css
+          grep -Fq "v60OpenRevisados" modules/revisados/index.js
+
+      - name: Inject modular loader into preview build only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          marker='<script id="rym-v171-loader" src="/modules/v171-loader.js?v=revisados-ui-v2"></script>\n'
+          if 'id="rym-v171-loader"' not in s:
+              m=re.search(r'<head\b[^>]*>', s, re.I)
+              if not m: raise SystemExit('head start not found')
+              s=s[:m.end()]+'\n'+marker+s[m.end():]
+              p.write_text(s)
+          PY
+
+      - name: Deploy isolated Cloudflare preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@latest versions upload --preview-alias revisados-ui-v2 2>&1 | tee /tmp/wrangler.out
+          VERSION_URL=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$VERSION_URL"
+          echo "version_url=$VERSION_URL" >> "$GITHUB_OUTPUT"
+          echo "alias_url=https://revisados-ui-v2-portal-ena-rym.almarzayhonly.workers.dev" >> "$GITHUB_OUTPUT"
+
+      - name: Verify deployed visual layer
+        env:
+          VERSION_URL: ${{ steps.deploy.outputs.version_url }}
+        run: |
+          curl -fsSL "$VERSION_URL/css/revisados.css?sha=$GITHUB_SHA" -o /tmp/revisados.css
+          grep -Fq -- '--rev-blue:#244aa5' /tmp/revisados.css
+          grep -Fq 'body.v66-revisados .v66-side' /tmp/revisados.css
+          grep -Fq 'body.v66-revisados .v178-report' /tmp/revisados.css
+          curl -fsSL "$VERSION_URL/modules/revisados/index.js?sha=$GITHUB_SHA" -o /tmp/revisados.js
+          grep -Fq 'v60OpenRevisados' /tmp/revisados.js
+
+      - name: Verify canonical alias
+        env:
+          ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsSL "$ALIAS_URL/css/revisados.css?sha=$GITHUB_SHA" -o /tmp/alias.css &&
+               grep -Fq -- '--rev-blue:#244aa5' /tmp/alias.css; then
+              echo "Alias propagated on attempt $i"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Preview alias did not propagate" >&2
+          exit 1
