@@ -305,3 +305,49 @@ function detail(r:CanonicalRevisadoRow){
 .ecar-alerts span{background:#FFE9C8;color:#9B5200}
 .queue-table tbody tr:hover{background:#EEF5FF}
 </style>
+
+
+<style scoped>
+/* table overflow hardening */
+.queue-table-shell{
+  width:100%;
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+  overscroll-behavior-x:contain;
+  scrollbar-gutter:stable;
+}
+.queue-table{
+  width:max(100%,1380px);
+}
+.queue-table td,
+.queue-table th{
+  min-width:0;
+}
+.unit-company,
+.plate-cupo,
+.location,
+.review,
+.ecar{
+  min-width:0;
+  max-width:100%;
+}
+.ecar-alerts{
+  max-width:100%;
+}
+.ecar-alerts span{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.status2{
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.action-head{
+  box-shadow:-12px 0 18px -16px rgba(10,31,72,.8);
+}
+@media(max-width:900px){
+  .queue-table{min-width:1240px;width:1240px}
+}
+</style>
