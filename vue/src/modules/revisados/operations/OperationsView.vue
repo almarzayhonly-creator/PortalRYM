@@ -414,95 +414,153 @@ function exportPdf(){
   const rows=exportRows()
   if(!rows.length)return
 
-  const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'})
-  const pageWidth=pdf.internal.pageSize.getWidth()
-  const pageHeight=pdf.internal.pageSize.getHeight()
-  const left=28
-  const right=28
-  const usable=pageWidth-left-right
-  const headers=['Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora','Últ. revisado','Estatus 2','eCarCheck']
-  const widths=[48,44,92,50,50,50,46,58,66,66,76,56]
-  const totalWidth=widths.reduce((sum,w)=>sum+w,0)
-  const scale=usable/totalWidth
-  const scaled=widths.map(w=>w*scale)
-  const rowH=25
-  let y=0
-  let pageNo=1
+  try{
+    const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'})
+    const pageWidth=pdf.internal.pageSize.getWidth()
+    const pageHeight=pdf.internal.pageSize.getHeight()
+    const left=28
+    const right=28
+    const bottom=28
+    const usable=pageWidth-left-right
 
-  function drawPageHeader(){
-    pdf.setFillColor(12,70,158)
-    pdf.roundedRect(left,24,usable,54,8,8,'F')
-    pdf.setTextColor(255,255,255)
-    pdf.setFont('helvetica','bold')
-    pdf.setFontSize(15)
-    pdf.text('Portal RYM · Revisados · Operaciones',left+16,47)
-    pdf.setFont('helvetica','normal')
-    pdf.setFontSize(8.5)
-    pdf.text(`${rows.length} registros · ${localExportDate()}`,left+16,64)
+    const headers=[
+      'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera',
+      'Supervisora','Último revisado','Estatus 2','eCarCheck'
+    ]
+    const baseWidths=[56,48,104,58,58,58,54,68,78,76,86,88]
+    const totalWidth=baseWidths.reduce((sum,w)=>sum+w,0)
+    const scale=usable/totalWidth
+    const widths=baseWidths.map(w=>w*scale)
 
-    pdf.setTextColor(44,65,92)
-    pdf.setFontSize(8)
-    const context=pdf.splitTextToSize(`Contexto: ${exportContext()}`,usable-8)
-    pdf.text(context,left+4,96)
-    y=112+(context.length-1)*9
-  }
-  function drawTableHeader(){
-    let x=left
-    pdf.setFillColor(30,84,163)
-    pdf.setTextColor(255,255,255)
-    pdf.setFont('helvetica','bold')
-    pdf.setFontSize(7)
-    for(let i=0;i<headers.length;i++){
-      const w=scaled[i]
-      pdf.rect(x,y,w,rowH,'F')
-      const label=pdf.splitTextToSize(headers[i],w-6).slice(0,2)
-      pdf.text(label,x+3,y+10)
-      x+=w
+    let y=0
+    let pageNo=1
+
+    function linesFor(value:unknown,width:number,maxLines=3){
+      const text=String(value??'').replace(/\s+/g,' ').trim()
+      if(!text)return ['—']
+      return pdf.splitTextToSize(text,Math.max(12,width-10)).slice(0,maxLines)
     }
-    y+=rowH
-  }
-  function drawDataRow(values:string[],index:number){
-    let x=left
-    const fill=index%2===0 ? [248,250,253] : [255,255,255]
-    pdf.setFillColor(fill[0],fill[1],fill[2])
-    pdf.setTextColor(29,48,78)
-    pdf.setFont('helvetica','normal')
-    pdf.setFontSize(6.7)
-    for(let i=0;i<values.length;i++){
-      const w=scaled[i]
-      pdf.rect(x,y,w,rowH,'F')
-      pdf.setDrawColor(218,226,237)
-      pdf.rect(x,y,w,rowH,'S')
-      const value=pdf.splitTextToSize(String(values[i]??''),w-6).slice(0,2)
-      pdf.text(value,x+3,y+9)
-      x+=w
+    function rowHeight(values:string[]){
+      let maxLines=1
+      for(let i=0;i<values.length;i++){
+        const lines=linesFor(values[i],widths[i],i===11?3:2)
+        maxLines=Math.max(maxLines,lines.length)
+      }
+      return Math.max(24,10+maxLines*8)
     }
-    y+=rowH
-  }
-  function drawFooter(){
-    pdf.setTextColor(110,126,148)
-    pdf.setFontSize(7)
-    pdf.text('Portal RYM · Exportación de la selección actual',left,pageHeight-16)
-    pdf.text(`Página ${pageNo}`,pageWidth-right-34,pageHeight-16)
-  }
+    function drawPageHeader(){
+      pdf.setFillColor(12,70,158)
+      pdf.setDrawColor(12,70,158)
+      pdf.roundedRect(left,22,usable,54,8,8,'FD')
 
-  drawPageHeader()
-  drawTableHeader()
-  rows.forEach((row,index)=>{
-    if(y+rowH>pageHeight-34){
+      pdf.setTextColor(255,255,255)
+      pdf.setFont('helvetica','bold')
+      pdf.setFontSize(15)
+      pdf.text('Portal RYM · Revisados · Operaciones',left+16,45)
+
+      pdf.setFont('helvetica','normal')
+      pdf.setFontSize(8.5)
+      pdf.text(`${rows.length} registros · ${localExportDate()}`,left+16,62)
+
+      pdf.setTextColor(55,76,104)
+      pdf.setFontSize(8)
+      const context=pdf.splitTextToSize(`Contexto: ${exportContext()}`,usable-8)
+      pdf.text(context,left+4,94)
+      y=108+(context.length-1)*9
+    }
+    function drawTableHeader(){
+      let x=left
+      const headerH=28
+      pdf.setFont('helvetica','bold')
+      pdf.setFontSize(7)
+      for(let i=0;i<headers.length;i++){
+        const w=widths[i]
+        pdf.setFillColor(30,84,163)
+        pdf.setDrawColor(255,255,255)
+        pdf.rect(x,y,w,headerH,'FD')
+
+        pdf.setTextColor(255,255,255)
+        const label=linesFor(headers[i],w,2)
+        const textY=y+10+(label.length===1?4:0)
+        pdf.text(label,x+5,textY)
+        x+=w
+      }
+      y+=headerH
+    }
+    function drawDataRow(values:string[],index:number){
+      const h=rowHeight(values)
+      let x=left
+      const fill=index%2===0 ? [248,250,253] : [255,255,255]
+
+      pdf.setFont('helvetica','normal')
+      pdf.setFontSize(7)
+
+      for(let i=0;i<values.length;i++){
+        const w=widths[i]
+
+        pdf.setFillColor(fill[0],fill[1],fill[2])
+        pdf.setDrawColor(216,226,238)
+        pdf.rect(x,y,w,h,'FD')
+
+        pdf.setTextColor(29,48,78)
+        const lines=linesFor(values[i],w,i===11?3:2)
+        const textY=y+(h-(lines.length*8))/2+7
+        pdf.text(lines,x+5,textY)
+
+        x+=w
+      }
+      y+=h
+    }
+    function drawFooter(){
+      pdf.setTextColor(110,126,148)
+      pdf.setFont('helvetica','normal')
+      pdf.setFontSize(7)
+      pdf.text('Portal RYM · Exportación de la selección actual',left,pageHeight-14)
+      pdf.text(`Página ${pageNo}`,pageWidth-right-36,pageHeight-14)
+    }
+    function newPage(){
       drawFooter()
       pdf.addPage('a4','landscape')
       pageNo++
       drawPageHeader()
       drawTableHeader()
     }
-    drawDataRow([
-      row.Prioridad,row.Unidad,row.Empresa,row.Color,row.Placa,row.Cupo,row.Mes,row.Galera,
-      row.Supervisora,row['Último revisado'],row['Estatus 2'],row.eCarCheck
-    ],index)
-  })
-  drawFooter()
-  pdf.save(exportFilename('pdf'))
+
+    drawPageHeader()
+    drawTableHeader()
+
+    rows.forEach((row,index)=>{
+      const ecarQuery=String(row['Última consulta eCarCheck']??'').trim()
+      const ecarValue=ecarQuery&&ecarQuery!=='—'
+        ? `${row.eCarCheck}\n${ecarQuery}`
+        : String(row.eCarCheck??'—')
+
+      const values=[
+        String(row.Prioridad??'—'),
+        String(row.Unidad??'—'),
+        String(row.Empresa??'—'),
+        String(row.Color??'—'),
+        String(row.Placa??'—'),
+        String(row.Cupo??'—'),
+        String(row.Mes??'—'),
+        String(row.Galera??'—'),
+        String(row.Supervisora??'—'),
+        String(row['Último revisado']??'—'),
+        String(row['Estatus 2']??'—'),
+        ecarValue
+      ]
+
+      const needed=rowHeight(values)
+      if(y+needed>pageHeight-bottom-18)newPage()
+      drawDataRow(values,index)
+    })
+
+    drawFooter()
+    pdf.save(exportFilename('pdf'))
+  }catch(error){
+    console.error('No se pudo generar el PDF de Revisados',error)
+    window.alert('No se pudo generar el archivo PDF: '+String((error as Error)?.message||error))
+  }
 }
 
 </script>
