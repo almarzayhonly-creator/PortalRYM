@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import jsPDF from 'jspdf'
 import type { CanonicalRevisadoRow } from '../types/revisados.types'
 import RymIcon from '../components/RymIcon.vue'
@@ -242,37 +242,77 @@ function downloadBlob(blob:Blob,filename:string){
     URL.revokeObjectURL(url)
   },1500)
 }
-function exportExcel(){
+async function exportExcel(){
   const rows=exportRows()
   if(!rows.length)return
+
   const headers=[
     'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora',
     'Último revisado','Estatus 2','eCarCheck','Última consulta eCarCheck'
   ]
-  const body=rows.map(row=>headers.map(key=>String((row as Record<string,string>)[key]??'')))
-  const aoa=[
-    ['PORTAL RYM · REVISADOS · OPERACIONES'],
-    [`Exportado: ${localExportDate()} · Registros: ${rows.length}`],
-    [`Contexto: ${exportContext()}`],
-    [],
-    headers,
-    ...body
-  ]
-  const ws=XLSX.utils.aoa_to_sheet(aoa)
-  ws['!merges']=[
-    {s:{r:0,c:0},e:{r:0,c:12}},
-    {s:{r:1,c:0},e:{r:1,c:12}},
-    {s:{r:2,c:0},e:{r:2,c:12}}
-  ]
-  ws['!cols']=[
-    {wch:12},{wch:10},{wch:25},{wch:13},{wch:12},{wch:12},{wch:12},
-    {wch:16},{wch:18},{wch:18},{wch:22},{wch:14},{wch:24}
-  ]
-  ws['!rows']=[{hpt:28},{hpt:20},{hpt:28},{hpt:8},{hpt:22}]
-  ws['!autofilter']={ref:`A5:M${rows.length+5}`}
-  const wb=XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb,ws,'Operaciones')
-  const buffer=XLSX.write(wb,{bookType:'xlsx',type:'array'})
+
+  const workbook=new ExcelJS.Workbook()
+  workbook.creator='Portal RYM'
+  workbook.created=new Date()
+
+  const sheet=workbook.addWorksheet('Operaciones',{
+    views:[{state:'frozen',ySplit:5}]
+  })
+
+  sheet.mergeCells('A1:M1')
+  sheet.getCell('A1').value='PORTAL RYM · REVISADOS · OPERACIONES'
+  sheet.getCell('A1').font={bold:true,size:16,color:{argb:'FFFFFFFF'}}
+  sheet.getCell('A1').fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0C469E'}}
+  sheet.getCell('A1').alignment={vertical:'middle',horizontal:'left'}
+  sheet.getRow(1).height=28
+
+  sheet.mergeCells('A2:M2')
+  sheet.getCell('A2').value=`Exportado: ${localExportDate()} · Registros: ${rows.length}`
+  sheet.getCell('A2').font={bold:true,color:{argb:'FF244468'}}
+
+  sheet.mergeCells('A3:M3')
+  sheet.getCell('A3').value=`Contexto: ${exportContext()}`
+  sheet.getCell('A3').font={color:{argb:'FF52677F'}}
+  sheet.getCell('A3').alignment={wrapText:true}
+  sheet.getRow(3).height=28
+
+  sheet.addRow([])
+  const headerRow=sheet.addRow(headers)
+  headerRow.font={bold:true,color:{argb:'FFFFFFFF'}}
+  headerRow.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1E54A3'}}
+  headerRow.alignment={vertical:'middle',horizontal:'left'}
+  headerRow.height=22
+
+  rows.forEach((row,index)=>{
+    const values=headers.map(key=>String((row as Record<string,string>)[key]??''))
+    const excelRow=sheet.addRow(values)
+    excelRow.alignment={vertical:'top',wrapText:true}
+    if(index%2===0){
+      excelRow.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFD'}}
+    }
+  })
+
+  const widths=[12,10,25,13,12,12,12,16,18,18,22,14,24]
+  sheet.columns.forEach((column,index)=>{
+    column.width=widths[index]||14
+  })
+
+  sheet.autoFilter={from:{row:5,column:1},to:{row:5+rows.length,column:13}}
+
+  sheet.eachRow((row,rowNumber)=>{
+    if(rowNumber>=5){
+      row.eachCell(cell=>{
+        cell.border={
+          top:{style:'thin',color:{argb:'FFD8E2ED'}},
+          left:{style:'thin',color:{argb:'FFD8E2ED'}},
+          bottom:{style:'thin',color:{argb:'FFD8E2ED'}},
+          right:{style:'thin',color:{argb:'FFD8E2ED'}}
+        }
+      })
+    }
+  })
+
+  const buffer=await workbook.xlsx.writeBuffer()
   downloadBlob(
     new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),
     exportFilename('xlsx')
