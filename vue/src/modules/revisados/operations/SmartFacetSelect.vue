@@ -114,3 +114,68 @@ onBeforeUnmount(()=>document.removeEventListener('click',clickOutside))
 .facet-options label:has(input:checked){background:#EEF5FF}.facet-options label:has(input:checked) span{color:#173A88;font-weight:800}.facet-options label:has(input:checked) b{background:#DDEBFF;color:#244AA5}
 .facet-empty{padding:18px 12px;color:#8290A4;font-size:9px;text-align:center}
 </style>
+
+<style scoped>
+/* darker, cleaner smart-select treatment + safer popover geometry */
+.facet{z-index:20}
+.facet:has(.facet-popover){z-index:90}
+.facet-label{color:#5F718B;font-size:8px}
+.facet-trigger{
+  min-height:46px!important;
+  border-color:#C6D5E8!important;
+  border-radius:11px!important;
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAFCFF 100%)!important;
+  box-shadow:0 3px 10px rgba(20,52,101,.035)!important;
+}
+.facet-trigger:hover,.facet-trigger.open{
+  border-color:#6F9FDC!important;
+  box-shadow:0 0 0 3px rgba(23,78,166,.09)!important;
+}
+.facet-trigger.active{
+  background:#EAF2FF!important;
+  border-color:#8DB1E1!important;
+}
+.facet-trigger-copy b{font-size:10px;color:#0B1F4D}
+.facet-trigger-copy small{color:#5E7089}
+.facet-count{background:#174EA6}
+.facet-popover{
+  width:min(360px,calc(100vw - 48px));
+  max-width:calc(100vw - 48px);
+  border-color:#B9CDE5;
+  border-radius:13px;
+  box-shadow:0 22px 56px rgba(9,31,73,.22);
+}
+.facet:nth-child(3n) .facet-popover{left:auto;right:0}
+.facet-popover header{
+  background:#EEF4FD;
+  border-bottom-color:#CAD8EA;
+}
+.facet-popover header small{color:#62748E}
+.facet-popover header b{color:#174EA6;font-size:11px}
+.facet-options{max-height:300px}
+.facet-options label{
+  min-height:38px;
+  border:1px solid transparent;
+}
+.facet-options label:hover{
+  background:#F2F6FB;border-color:#E1EAF4;
+}
+.facet-options label:has(input:checked){
+  background:#E9F1FF;border-color:#C6D9F1;
+}
+.facet-options span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#263B5C;
+}
+.facet-options b{background:#E8EEF6;color:#526681}
+@media(max-width:1080px){
+  .facet:nth-child(3n) .facet-popover{left:0;right:auto}
+  .facet:nth-child(2n) .facet-popover{left:auto;right:0}
+}
+@media(max-width:720px){
+  .facet-popover{position:fixed;left:16px!important;right:16px!important;top:18vh;width:auto;max-width:none}
+}
+</style>
