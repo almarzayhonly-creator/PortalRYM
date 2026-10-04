@@ -323,8 +323,8 @@ function xlsxColumn(index:number){
   return out
 }
 function inlineCell(ref:string,value:unknown,style=0){
-  const styleAttr=style?\` s="\${style}"\`:''
-  return \`<c r="\${ref}" t="inlineStr"\${styleAttr}><is><t xml:space="preserve">\${xmlEscape(value)}</t></is></c>\`
+  const styleAttr=style?` s="${style}"`:''
+  return `<c r="${ref}" t="inlineStr"${styleAttr}><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`
 }
 function exportExcel(){
   const rows=exportRows()
@@ -339,32 +339,32 @@ function exportExcel(){
     const widths=[12,10,25,13,12,12,12,16,18,18,22,14,24]
 
     const rowXml:string[]=[]
-    rowXml.push(\`<row r="1" ht="28" customHeight="1">\${inlineCell('A1','PORTAL RYM · REVISADOS · OPERACIONES',1)}</row>\`)
-    rowXml.push(\`<row r="2" ht="20" customHeight="1">\${inlineCell('A2',\`Exportado: \${localExportDate()} · Registros: \${rows.length}\`,5)}</row>\`)
-    rowXml.push(\`<row r="3" ht="28" customHeight="1">\${inlineCell('A3',\`Contexto: \${exportContext()}\`,5)}</row>\`)
+    rowXml.push(`<row r="1" ht="28" customHeight="1">${inlineCell('A1','PORTAL RYM · REVISADOS · OPERACIONES',1)}</row>`)
+    rowXml.push(`<row r="2" ht="20" customHeight="1">${inlineCell('A2',`Exportado: ${localExportDate()} · Registros: ${rows.length}`,5)}</row>`)
+    rowXml.push(`<row r="3" ht="28" customHeight="1">${inlineCell('A3',`Contexto: ${exportContext()}`,5)}</row>`)
     rowXml.push('<row r="4" ht="8" customHeight="1"></row>')
-    rowXml.push(\`<row r="5" ht="22" customHeight="1">\${headers.map((h,i)=>inlineCell(\`\${xlsxColumn(i)}5\`,h,2)).join('')}</row>\`)
+    rowXml.push(`<row r="5" ht="22" customHeight="1">${headers.map((h,i)=>inlineCell(`${xlsxColumn(i)}5`,h,2)).join('')}</row>`)
 
     rows.forEach((row,index)=>{
       const values=headers.map(key=>String((row as Record<string,string>)[key]??''))
       const r=index+6
       const style=index%2===0?4:3
-      rowXml.push(\`<row r="\${r}">\${values.map((value,i)=>inlineCell(\`\${xlsxColumn(i)}\${r}\`,value,style)).join('')}</row>\`)
+      rowXml.push(`<row r="${r}">${values.map((value,i)=>inlineCell(`${xlsxColumn(i)}${r}`,value,style)).join('')}</row>`)
     })
 
-    const cols=widths.map((width,i)=>\`<col min="\${i+1}" max="\${i+1}" width="\${width}" customWidth="1"/>\`).join('')
-    const sheet=\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    const cols=widths.map((width,i)=>`<col min="${i+1}" max="${i+1}" width="${width}" customWidth="1"/>`).join('')
+    const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <dimension ref="A1:M\${lastRow}"/>
+  <dimension ref="A1:M${lastRow}"/>
   <sheetViews><sheetView workbookViewId="0"><pane ySplit="5" topLeftCell="A6" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
   <sheetFormatPr defaultRowHeight="15"/>
-  <cols>\${cols}</cols>
-  <sheetData>\${rowXml.join('')}</sheetData>
+  <cols>${cols}</cols>
+  <sheetData>${rowXml.join('')}</sheetData>
   <mergeCells count="3"><mergeCell ref="A1:M1"/><mergeCell ref="A2:M2"/><mergeCell ref="A3:M3"/></mergeCells>
-  <autoFilter ref="A5:M\${lastRow}"/>
-</worksheet>\`
+  <autoFilter ref="A5:M${lastRow}"/>
+</worksheet>`
 
-    const styles=\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <fonts count="4">
     <font><sz val="11"/><name val="Calibri"/></font>
@@ -399,41 +399,41 @@ function exportExcel(){
     <xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center" horizontal="left" wrapText="1"/></xf>
   </cellXfs>
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
-</styleSheet>\`
+</styleSheet>`
 
     const files=[
       {
         name:'[Content_Types].xml',
-        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
   <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-</Types>\`
+</Types>`
       },
       {
         name:'_rels/.rels',
-        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-</Relationships>\`
+</Relationships>`
       },
       {
         name:'xl/workbook.xml',
-        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <sheets><sheet name="Operaciones" sheetId="1" r:id="rId1"/></sheets>
-</workbook>\`
+</workbook>`
       },
       {
         name:'xl/_rels/workbook.xml.rels',
-        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
   <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>\`
+</Relationships>`
       },
       {name:'xl/worksheets/sheet1.xml',content:sheet},
       {name:'xl/styles.xml',content:styles}
