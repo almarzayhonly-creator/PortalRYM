@@ -20,6 +20,7 @@ const emittedToday=computed(()=>data.value?.emitidos_hoy as {emitidos?:number; l
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
 const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all')
+const operationsResetKey=ref(0)
 const cupos=ref<Array<Record<string,unknown>>>([]), cuposLoading=ref(false), cuposError=ref('')
 const fichaOpen=ref(false), fichaLoading=ref(false), fichaError=ref(''), ficha=ref<Record<string,any>|null>(null), fichaRow=ref<CanonicalRevisadoRow|null>(null)
 const incidentBusy=ref(false), incidentType=ref(''), incidentCustom=ref(''), incidentNote=ref('')
@@ -67,6 +68,13 @@ function vehicleSignals(r:CanonicalRevisadoRow){
   const cupo=String(r.cupo_ecarcheck||r.cupo_control||'').trim().toUpperCase()
   out.push({label:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'Sin cupo':'Cupo OK',tone:!cupo||['NO APLICA','N/A','NA','SIN CUPO'].includes(cupo)?'warn':'info'})
   return out.slice(0,3)
+}
+function clearAllFilters(){
+  clearFilters()
+  selectedGalera.value=''
+  selectedStatus.value=''
+  quickFilter.value='all'
+  operationsResetKey.value++
 }
 function navIcon(id:string){return ({dashboard:'dashboard',monthly:'fact_check',operations:'table_chart',daily:'description',history:'history',stats:'policy',boletas:'gavel',cupos:'confirmation_number'} as Record<string,string>)[id]||'circle'}
 function navLabel(id:string,label:string){return ({dashboard:'Dashboard',monthly:'Avance mensual',operations:'Operaciones',history:'Historial',stats:'Estadísticas',boletas:'Boletas',cupos:'Cupos',daily:'Reporte diario'} as Record<string,string>)[id]||label}
@@ -154,7 +162,7 @@ onMounted(()=>load())
         <span>Control legal vehicular · datos operativos en tiempo real</span>
       </div>
       <div class="rv-top-actions">
-        <button class="ghost" @click="clearFilters">Limpiar filtros</button>
+        <button class="ghost" @click="clearAllFilters">Limpiar filtros</button>
         <button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button>
       </div>
     </header>
@@ -210,6 +218,7 @@ onMounted(()=>load())
         :manual-busy="manualBusy"
         :manual-state="manualState"
         :manual-result="manualResult"
+        :reset-key="operationsResetKey"
         @manual-plate-change="manualPlate=$event"
         @sync="runSyncEcarcheck"
         @lookup="runManualEcarcheck"
