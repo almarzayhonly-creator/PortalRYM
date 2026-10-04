@@ -66,6 +66,8 @@ jobs:
         run: |
           EXPECTED_ASSET=$(grep -Eo '/vue/dist/assets/[^" ]+\.js' vue/dist/index.html | head -1)
           test -n "$EXPECTED_ASSET"
+          sed -i "s/__RYM_SANDBOX_BUILD__/$GITHUB_SHA/g" worker.js
+          grep -Fq "$GITHUB_SHA" worker.js
           npx --yes wrangler@latest versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
           VERSION_URL=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
           test -n "$VERSION_URL"
