@@ -23,8 +23,11 @@ export default {
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
 
-      const embeddedBuild = html.match(/data-sandbox-build=["']([0-9a-f]{40})["']/i)?.[1] || "";
-      const verifiedBuild = embeddedBuild;
+      let assetBuild = "";
+      if (isSandbox) {
+        try { assetBuild = (await (await env.ASSETS.fetch(new URL("/sandbox-build.txt", request.url))).text()).trim(); } catch (_) {}
+      }
+      const verifiedBuild = /^[0-9a-f]{40}$/i.test(assetBuild) ? assetBuild : "";
       const safeBuild = verifiedBuild || "unknown";
       const shortBuild = verifiedBuild ? verifiedBuild.slice(0, 7) : "BUILD DESCONOCIDO";
       if (isSandbox) headers.set("x-rym-sandbox-build", safeBuild);

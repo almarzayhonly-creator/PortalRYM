@@ -4,7 +4,7 @@
   "compatibility_date": "2026-08-27",
   "main": "worker.js",
   "build": {
-    "command": "cd vue && npm install --no-audit --no-fund && npm run build"
+    "command": "cd vue && npm install --no-audit --no-fund && npm run build && cd .. && git rev-parse HEAD > sandbox-build.txt"
   },
   "assets": {
     "directory": "./",
