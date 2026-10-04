@@ -15,12 +15,44 @@ const vehicle=computed(()=>result.value?.vehiculo || {})
 const tickets=computed(()=>result.value?.boletas || {})
 const block=computed(()=>result.value?.bloqueo || {})
 const errors=computed(()=>Array.isArray(block.value?.errors) ? block.value.errors : [])
+const owner=computed(()=>{
+  const candidates=[result.value?.titular,result.value?.propietario,vehicle.value?.titular,vehicle.value?.propietario]
+  return candidates.find((value:any)=>value && typeof value==='object' && !Array.isArray(value)) || {}
+})
 
-function count(path:any){ return Number(path?.cantidad ?? 0) || 0 }
+function count(path:any){ return Number(path?.cantidad ?? path?.total ?? 0) || 0 }
 function available(path:any){ return path?.disponible !== false }
 function text(v:unknown,fallback='—'){
   const s=String(v ?? '').trim()
   return s || fallback
+}
+function first(...values:unknown[]){
+  for(const value of values){
+    const s=String(value ?? '').trim()
+    if(s && s!=='—' && s.toLowerCase()!=='null' && s.toLowerCase()!=='undefined') return s
+  }
+  return ''
+}
+function money(v:unknown){
+  const n=Number(v)
+  if(!Number.isFinite(n)) return first(v)
+  return new Intl.NumberFormat('es-PA',{style:'currency',currency:'PAB'}).format(n)
+}
+function compactItem(item:any){
+  if(item==null) return ''
+  if(typeof item!=='object') return first(item)
+  const parts=[
+    first(item.tipo,item.clase,item.concepto,item.descripcion,item.detalle),
+    first(item.numero,item.nroBoleta,item.boleta,item.id),
+    item.monto!=null ? money(item.monto) : '',
+    first(item.fecha,item.fechaBoleta,item.estado)
+  ].filter(Boolean)
+  return [...new Set(parts)].join(' · ')
+}
+function detailItems(source:any){
+  const candidates=[source?.items,source?.boletas,source?.infracciones,source?.resultados,source?.data,source?.detalle]
+  const list=candidates.find(Array.isArray)
+  return Array.isArray(list) ? list.map(compactItem).filter(Boolean).slice(0,8) : []
 }
 function dateText(v:unknown){
   if(!v) return '—'
@@ -43,27 +75,58 @@ onBeforeUnmount(()=>{
   if(typeof document!=='undefined') document.body.style.overflow=''
 })
 
-const summary=computed(()=>[
-  {label:'ENA',value:count(tickets.value?.infraccionesEna),available:available(tickets.value?.infraccionesEna)},
-  {label:'Documento',value:count(tickets.value?.boletasPorDocumento),available:available(tickets.value?.boletasPorDocumento)},
-  {label:'Placa',value:count(tickets.value?.boletasPorPlaca),available:available(tickets.value?.boletasPorPlaca)},
-])
+const vehicleFacts=computed(()=>[
+  {label:'Placa',value:first(vehicle.value?.nroPlaca,vehicle.value?.placa,result.value?.placa,props.plate)},
+  {label:'Marca',value:first(vehicle.value?.marca,vehicle.value?.marcaVehiculo,vehicle.value?.fabricante)},
+  {label:'Modelo',value:first(vehicle.value?.modelo,vehicle.value?.modeloVehiculo,vehicle.value?.linea)},
+  {label:'Año',value:first(vehicle.value?.anio,vehicle.value?.año,vehicle.value?.year)},
+  {label:'Color',value:first(vehicle.value?.colorVehiculo,vehicle.value?.color)},
+  {label:'Tipo',value:first(vehicle.value?.tipoVehiculo,vehicle.value?.tipo,vehicle.value?.clase)},
+  {label:'Chasis / VIN',value:first(vehicle.value?.chasis,vehicle.value?.vin,vehicle.value?.nroChasis)},
+  {label:'Motor',value:first(vehicle.value?.motor,vehicle.value?.nroMotor)},
+  {label:'Último revisado',value:first(vehicle.value?.fechaRevisado,vehicle.value?.revisado,vehicle.value?.ultimoRevisado)},
+].filter(item=>item.value))
 
+const ownerFacts=computed(()=>[
+  {label:'Nombre / razón social',value:first(
+    owner.value?.nombre,owner.value?.nombreCompleto,owner.value?.razonSocial,
+    vehicle.value?.nombrePropietario,typeof vehicle.value?.propietario==='string'?vehicle.value.propietario:''
+  )},
+  {label:'Documento',value:first(
+    owner.value?.documento,owner.value?.cedula,owner.value?.ruc,owner.value?.nroDocumento,
+    vehicle.value?.documentoPropietario,vehicle.value?.cedulaPropietario,vehicle.value?.rucPropietario
+  )},
+  {label:'Tipo de documento',value:first(owner.value?.tipoDocumento,owner.value?.tipo_documento,vehicle.value?.tipoDocumentoPropietario)},
+  {label:'Condición',value:first(owner.value?.condicion,owner.value?.tipoPersona,owner.value?.tipo_persona)},
+].filter(item=>item.value))
+
+const ticketSummary=computed(()=>[
+  {
+    key:'ena',label:'ENA / empresa',
+    value:count(tickets.value?.infraccionesEna),available:available(tickets.value?.infraccionesEna),
+    message:first(tickets.value?.infraccionesEna?.mensaje),details:detailItems(tickets.value?.infraccionesEna)
+  },
+  {
+    key:'documento',label:'Documento del titular',
+    value:count(tickets.value?.boletasPorDocumento),available:available(tickets.value?.boletasPorDocumento),
+    message:first(tickets.value?.boletasPorDocumento?.mensaje),details:detailItems(tickets.value?.boletasPorDocumento)
+  },
+  {
+    key:'placa',label:'Placa',
+    value:count(tickets.value?.boletasPorPlaca),available:available(tickets.value?.boletasPorPlaca),
+    message:first(tickets.value?.boletasPorPlaca?.mensaje),details:detailItems(tickets.value?.boletasPorPlaca)
+  },
+])
+const ticketTotal=computed(()=>ticketSummary.value.reduce((sum,item)=>sum+(item.available?item.value:0),0))
 const serviceMessages=computed(()=>{
   const out:Array<{label:string,message:string,tone:string}>=[]
-  const defs=[
-    ['ENA',tickets.value?.infraccionesEna],
-    ['Documento',tickets.value?.boletasPorDocumento],
-    ['Placa',tickets.value?.boletasPorPlaca],
-  ]
-  for(const [label,value] of defs as Array<[string,any]>){
-    const msg=text(value?.mensaje,'')
-    if(msg) out.push({label,message:msg,tone:value?.disponible===false?'warning':'neutral'})
+  for(const item of ticketSummary.value){
+    if(!item.available) out.push({label:item.label,message:item.message||'Este servicio no estuvo disponible en la consulta.',tone:'warning'})
   }
   for(const err of errors.value){
     out.push({
-      label:text(err?.title,'Error eCarCheck'),
-      message:text(err?.detail || err?.message,''),
+      label:first(err?.title,'Alerta eCarCheck'),
+      message:first(err?.detail,err?.message,'No fue posible validar este dato.'),
       tone:'danger'
     })
   }
@@ -75,9 +138,10 @@ const semanticStatusLabel=computed(()=>{
   const detail=text(result.value?.detalle,'').toUpperCase()
   const type=text(result.value?.tipo_resultado,'').toUpperCase()
   if(status>=500 || detail.includes('INTERMITEN') || detail.includes('NO ESTÁ DISPONIBLE') || detail.includes('SATURADO')) return 'Servicio ATTT no disponible'
-  if(type.includes('BLOQUEADO')) return 'Bloqueo reportado por eCarCheck'
-  if(type.includes('OK') || type.includes('FICHA') || status===200) return 'Consulta completada'
-  return text(result.value?.tipo_resultado || 'Resultado recibido')
+  if(ticketTotal.value>0) return `${ticketTotal.value} boleta${ticketTotal.value===1?'':'s'} detectada${ticketTotal.value===1?'':'s'}`
+  if(type.includes('BLOQUEADO')) return 'Restricción reportada por eCarCheck'
+  if(type.includes('OK') || type.includes('FICHA') || status===200) return 'Sin boletas detectadas en la consulta'
+  return 'Resultado recibido'
 })
 
 const statusTone=computed(()=>{
@@ -99,9 +163,9 @@ const statusTone=computed(()=>{
             <div class="modal-title-wrap">
               <span class="modal-icon"><RymIcon name="verified_user" :size="22"/></span>
               <div>
-                <small>ECARCHECK V2 · RESULTADO DE CONSULTA</small>
+                <small>ECARCHECK V2 · CONSULTA VEHICULAR</small>
                 <h2 id="ecar-modal-title">{{ text(vehicle?.nroPlaca || result?.placa || plate,'Placa consultada') }}</h2>
-                <p>{{ text(vehicle?.nombrePropietario || vehicle?.propietario || 'Resultado oficial de la consulta') }}</p>
+                <p>{{ first(vehicle?.nombrePropietario,typeof vehicle?.propietario==='string'?vehicle.propietario:'','Información oficial recibida de eCarCheck') }}</p>
               </div>
             </div>
             <button class="modal-close" type="button" aria-label="Cerrar" @click="emit('close')">
@@ -118,45 +182,69 @@ const statusTone=computed(()=>{
               <span>Consulta {{ dateText(result?.consultado_en || tickets?.consultadoEn) }}</span>
             </section>
 
-            <section class="vehicle-grid">
-              <article>
-                <small>Placa</small>
-                <b>{{ text(vehicle?.nroPlaca || result?.placa || plate) }}</b>
-              </article>
-              <article>
-                <small>Propietario</small>
-                <b>{{ text(vehicle?.nombrePropietario || vehicle?.propietario) }}</b>
-              </article>
-              <article>
-                <small>Color</small>
-                <b>{{ text(vehicle?.colorVehiculo || vehicle?.color) }}</b>
-              </article>
-              <article>
-                <small>Último revisado</small>
-                <b>{{ text(vehicle?.fechaRevisado || vehicle?.revisado) }}</b>
-              </article>
-            </section>
-
-            <section class="summary-grid">
-              <article v-for="item in summary" :key="item.label" :class="{unavailable:!item.available}">
-                <small>{{item.label}}</small>
-                <b>{{item.available ? item.value : '—'}}</b>
-                <span>{{item.available ? 'disponible' : 'servicio no disponible'}}</span>
-              </article>
-            </section>
-
-            <section v-if="text(result?.detalle,'')" class="detail-card">
-              <div class="section-title">
-                <RymIcon name="description" :size="17"/>
-                <b>Detalle de la consulta</b>
+            <section class="info-section">
+              <div class="section-heading">
+                <span class="section-icon"><RymIcon name="directions_car" :size="18"/></span>
+                <div><small>VEHÍCULO</small><b>Información del auto</b></div>
               </div>
-              <p>{{result.detalle}}</p>
+              <div class="facts-grid vehicle-facts">
+                <article v-for="item in vehicleFacts" :key="item.label">
+                  <small>{{item.label}}</small>
+                  <b>{{item.value}}</b>
+                </article>
+              </div>
+            </section>
+
+            <section class="info-section">
+              <div class="section-heading">
+                <span class="section-icon"><RymIcon name="person" :size="18"/></span>
+                <div><small>TITULAR REGISTRAL</small><b>Información del titular</b></div>
+              </div>
+              <div v-if="ownerFacts.length" class="facts-grid owner-facts">
+                <article v-for="item in ownerFacts" :key="item.label">
+                  <small>{{item.label}}</small>
+                  <b>{{item.value}}</b>
+                </article>
+              </div>
+              <p v-else class="empty-note">eCarCheck no devolvió datos adicionales del titular en esta consulta.</p>
+            </section>
+
+            <section class="tickets-section">
+              <div class="section-heading">
+                <span class="section-icon ticket-icon"><RymIcon name="receipt_long" :size="18"/></span>
+                <div><small>BOLETAS Y RESTRICCIONES</small><b>Qué se encontró y dónde</b></div>
+                <span class="ticket-total" :data-alert="ticketTotal>0">{{ticketTotal}} total</span>
+              </div>
+
+              <div class="ticket-grid">
+                <article
+                  v-for="item in ticketSummary"
+                  :key="item.key"
+                  class="ticket-card"
+                  :data-state="!item.available?'unavailable':item.value>0?'alert':'clear'"
+                >
+                  <header>
+                    <div>
+                      <small>TIPO</small>
+                      <b>{{item.label}}</b>
+                    </div>
+                    <strong>{{item.available ? item.value : '—'}}</strong>
+                  </header>
+                  <span class="ticket-state">
+                    {{!item.available ? 'Servicio no disponible' : item.value>0 ? (item.value===1?'1 boleta detectada':item.value+' boletas detectadas') : 'Sin boletas'}}
+                  </span>
+                  <p v-if="item.message">{{item.message}}</p>
+                  <ul v-if="item.details.length">
+                    <li v-for="(detail,index) in item.details" :key="index">{{detail}}</li>
+                  </ul>
+                </article>
+              </div>
             </section>
 
             <section v-if="serviceMessages.length" class="alerts-section">
               <div class="section-title">
                 <RymIcon name="notification_important" :size="17"/>
-                <b>Hallazgos y servicios</b>
+                <b>Datos que no pudieron validarse</b>
               </div>
               <div class="alerts-list">
                 <article v-for="(item,index) in serviceMessages" :key="index" :data-tone="item.tone">
@@ -165,16 +253,10 @@ const statusTone=computed(()=>{
                 </article>
               </div>
             </section>
-
-            <section class="meta-strip">
-              <span><small>HTTP</small><b>{{ text(result?.status) }}</b></span>
-              <span><small>Bridge</small><b>{{ text(result?.bridge_version) }}</b></span>
-              <span><small>Resultado técnico</small><b>{{ text(result?.tipo_resultado) }}</b></span>
-            </section>
           </div>
 
           <footer class="modal-footer">
-            <span>La información mostrada corresponde al resultado recibido por eCarCheck.</span>
+            <span>Vehículo, titular y boletas mostrados según la respuesta recibida de eCarCheck.</span>
             <div class="modal-actions">
               <button class="footer-close" type="button" @click="emit('close')">Cerrar</button>
               <button class="footer-retry" type="button" @click="emit('retry')"><RymIcon name="refresh" :size="16"/> Reintentar consulta</button>
@@ -225,6 +307,42 @@ const statusTone=computed(()=>{
 .status-banner[data-tone="warning"]{background:#FFF7E8;border-color:#F2C982}.status-banner[data-tone="warning"] b{color:#9A5B00}
 .status-banner[data-tone="danger"]{background:#FFF1F0;border-color:#F0B0AB}.status-banner[data-tone="danger"] b{color:#B52B23}
 
+.info-section,.tickets-section{
+  padding:15px;border:1px solid #D0DCE9;border-radius:14px;background:#fff;
+  box-shadow:0 5px 16px rgba(18,46,92,.04);
+}
+.section-heading{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.section-heading>div{display:grid;gap:1px;min-width:0}
+.section-heading small{font-size:8px;font-weight:900;letter-spacing:.06em;color:#71829A}
+.section-heading b{font-size:13px;color:#102A55}
+.section-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#EAF2FF;color:#1763D3;flex:0 0 34px}
+.ticket-icon{background:#FFF3E5;color:#C66A00}
+.facts-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.facts-grid article{min-width:0;padding:11px 12px;border:1px solid #D7E1EC;border-radius:11px;background:#F9FBFE}
+.facts-grid small{display:block;margin-bottom:4px;font-size:7px;font-weight:900;text-transform:uppercase;color:#78889D}
+.facts-grid b{display:block;font-size:11px;line-height:1.35;color:#142D53;overflow-wrap:anywhere}
+.owner-facts{grid-template-columns:repeat(3,minmax(0,1fr))}
+.owner-facts article:first-child{grid-column:span 2;background:linear-gradient(135deg,#F1F6FF,#fff)}
+.empty-note{margin:0;padding:10px 12px;border:1px dashed #CBD8E7;border-radius:10px;background:#FAFCFF;font-size:10px;color:#697B92}
+.ticket-total{margin-left:auto;padding:6px 9px;border-radius:999px;background:#ECF8F2;color:#08794C;font-size:9px;font-weight:900;white-space:nowrap}
+.ticket-total[data-alert="true"]{background:#FFF0EE;color:#B93229}
+.ticket-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ticket-card{min-width:0;padding:13px;border:1px solid #CFE0F2;border-radius:13px;background:linear-gradient(135deg,#F4F9FF,#fff)}
+.ticket-card[data-state="alert"]{border-color:#F1AAA2;background:linear-gradient(135deg,#FFF0EE,#fff);box-shadow:inset 4px 0 0 #DD4037}
+.ticket-card[data-state="clear"]{border-color:#B9E2CF;background:linear-gradient(135deg,#EFFAF5,#fff);box-shadow:inset 4px 0 0 #15A06A}
+.ticket-card[data-state="unavailable"]{border-color:#F0CE91;background:#FFF9EE;box-shadow:inset 4px 0 0 #E39A1D}
+.ticket-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ticket-card header>div{display:grid;gap:2px;min-width:0}
+.ticket-card header small{font-size:7px;font-weight:900;color:#7A899E}
+.ticket-card header b{font-size:11px;color:#16325B}
+.ticket-card strong{font-size:27px;line-height:1;color:#112C58}
+.ticket-card[data-state="alert"] strong{color:#BC342B}
+.ticket-card[data-state="clear"] strong{color:#0B8657}
+.ticket-state{display:block;margin-top:7px;font-size:9px;font-weight:850;color:#53677F}
+.ticket-card p{margin:6px 0 0;font-size:9px;line-height:1.45;color:#61738A}
+.ticket-card ul{margin:8px 0 0;padding:8px 0 0 16px;border-top:1px solid rgba(108,132,163,.18)}
+.ticket-card li{margin:3px 0;font-size:8px;line-height:1.4;color:#435873}
+
 .vehicle-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .vehicle-grid article,.summary-grid article{
   min-width:0;padding:12px;border:1px solid #D1DDEA;border-radius:12px;background:#fff;
@@ -265,8 +383,9 @@ const statusTone=computed(()=>{
 @media(max-width:760px){
   .modal-backdrop{padding:10px}
   .modal-card{width:100%;max-height:96vh;border-radius:15px}
-  .vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .summary-grid{grid-template-columns:1fr}
+  .facts-grid,.owner-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .owner-facts article:first-child{grid-column:span 2}
+  .ticket-grid{grid-template-columns:1fr}
   .status-banner,.modal-footer{align-items:flex-start;flex-direction:column}
 }
 </style>
@@ -461,9 +580,11 @@ const statusTone=computed(()=>{
   .modal-body{
     padding:14px;
   }
-  .vehicle-grid{
+  .facts-grid,.owner-facts{
     grid-template-columns:1fr 1fr;
   }
+  .owner-facts article:first-child{grid-column:span 2}
+  .ticket-grid{grid-template-columns:1fr}
   .status-banner{
     align-items:flex-start;
   }
@@ -481,9 +602,11 @@ const statusTone=computed(()=>{
   }
 }
 @media(max-width:520px){
-  .vehicle-grid{
+  .facts-grid,.owner-facts{
     grid-template-columns:1fr;
   }
+  .owner-facts article:first-child{grid-column:auto}
+
   .modal-title-wrap{
     gap:10px;
   }
