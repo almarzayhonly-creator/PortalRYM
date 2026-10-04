@@ -351,3 +351,42 @@ function detail(r:CanonicalRevisadoRow){
   .queue-table{min-width:1240px;width:1240px}
 }
 </style>
+
+
+<style scoped>
+/* column sizing fix: prevent sticky Acción from covering eCarCheck */
+.queue-table{
+  table-layout:fixed;
+}
+.queue-table th,
+.queue-table td{
+  box-sizing:border-box;
+}
+.queue-table th:nth-child(8),
+.queue-table td:nth-child(8){
+  width:360px;
+}
+.queue-table th:nth-child(9),
+.queue-table td:nth-child(9){
+  width:96px;
+}
+.ecar{
+  width:100%;
+  min-width:0;
+  overflow:hidden;
+}
+.ecar-alerts{
+  width:100%;
+}
+.ecar-alerts span,
+.ecar-detail,
+.ecar-time{
+  max-width:100%;
+}
+.action-head,
+.action-cell{
+  width:96px;
+  min-width:96px;
+  max-width:96px;
+}
+</style>
