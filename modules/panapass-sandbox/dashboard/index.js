@@ -44,7 +44,7 @@
       badge.className='pps-sandbox-badge';
       d.body.appendChild(badge);
     }
-    const shortBuild=runtimeBuild?runtimeBuild.slice(0,7):'SIN SHA';
+    const shortBuild=runtimeBuild?runtimeBuild.slice(0,7):'BUILD DESCONOCIDO';
     badge.setAttribute('data-sandbox-build',runtimeBuild||'unknown');
     badge.textContent='PANAPASS · SANDBOX V2 · '+shortBuild;
   };

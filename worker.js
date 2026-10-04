@@ -25,12 +25,9 @@ export default {
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
 
-      const embeddedBuild = html.match(/data-sandbox-build=["']([^"']+)["']/i)?.[1] || "";
-      const requestUrl = new URL(request.url);
       const compiledBuild = /^[0-9a-f]{40}$/i.test(SANDBOX_BUILD) ? SANDBOX_BUILD : "";
-      const requestedBuild = compiledBuild || embeddedBuild || requestUrl.searchParams.get("sandboxBuild") || "sandbox-live";
-      const safeBuild = String(requestedBuild).replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 80) || "sandbox-live";
-      const shortBuild = safeBuild.length > 7 ? safeBuild.slice(0, 7) : safeBuild;
+      const safeBuild = compiledBuild || "unknown";
+      const shortBuild = compiledBuild ? compiledBuild.slice(0, 7) : "BUILD DESCONOCIDO";
       if (isSandbox) headers.set("x-rym-sandbox-build", safeBuild);
 
       const staleSandboxCss = /<link\b[^>]*href=["'][^"']*\/css\/panapass-sandbox\/tokens\.css(?:\?[^"']*)?["'][^>]*>/gi;

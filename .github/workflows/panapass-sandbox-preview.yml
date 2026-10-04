@@ -45,19 +45,6 @@ jobs:
           grep -Fq 'data-ui-source' ".${VUE_ASSET#/vue}"
           grep -Fq 'rv-brand-dark' ".${VUE_ASSET#/vue}"
           grep -Fq 'rv-global-control' ".${VUE_ASSET#/vue}"
-      - name: Inject sandbox bootstrap into preview build only
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import os
-          p=Path('index.html')
-          s=p.read_text()
-          build=os.environ['GITHUB_SHA']
-          marker=f'<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v={build}">\n<div class="pps-sandbox-badge" data-sandbox-build="{build}">PANAPASS · SANDBOX V2 · {build[:7]}</div>\n<script src="/modules/panapass-sandbox/dashboard/index.js?v={build}" defer></script>\n<script src="/modules/v171-loader.js?v={build}" defer></script>\n'
-          pos=s.lower().rfind('</body>')
-          if pos < 0: raise SystemExit('body end not found')
-          p.write_text(s[:pos]+marker+s[pos:])
-          PY
       - name: Deploy isolated Cloudflare preview
         id: deploy
         env:
@@ -88,6 +75,8 @@ jobs:
           curl -fsSL "$VERSION_URL/modules/revisados/index.js" -o /tmp/revisados.js
           curl -fsSL "$VERSION_URL/vue/dist/index.html" -o /tmp/vue.html
           grep -Fq 'panapass-sandbox/tokens.css' /tmp/index.html
+          grep -Fq "data-sandbox-build=\"$GITHUB_SHA\"" /tmp/index.html
+          grep -Fq "PANAPASS · SANDBOX V2 · ${GITHUB_SHA:0:7}" /tmp/index.html
           grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
           grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
           grep -Fq 'RYM_REVISADOS_BRIDGE' /tmp/revisados.js
