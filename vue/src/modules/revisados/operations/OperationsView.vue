@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import ExcelJS from 'exceljs'
 import jsPDF from 'jspdf'
 import type { CanonicalRevisadoRow } from '../types/revisados.types'
 import RymIcon from '../components/RymIcon.vue'
@@ -242,81 +241,213 @@ function downloadBlob(blob:Blob,filename:string){
     URL.revokeObjectURL(url)
   },1500)
 }
-async function exportExcel(){
+function xmlEscape(v:unknown){
+  return String(v??'')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&apos;")
+}
+function le16(n:number){return new Uint8Array([n&255,(n>>>8)&255])}
+function le32(n:number){return new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255])}
+function joinBytes(parts:Uint8Array[]){
+  const size=parts.reduce((sum,part)=>sum+part.length,0)
+  const out=new Uint8Array(size)
+  let offset=0
+  for(const part of parts){out.set(part,offset);offset+=part.length}
+  return out
+}
+const crcTable=(()=>{
+  const table=new Uint32Array(256)
+  for(let i=0;i<256;i++){
+    let c=i
+    for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1)
+    table[i]=c>>>0
+  }
+  return table
+})()
+function crc32(data:Uint8Array){
+  let crc=0xFFFFFFFF
+  for(const byte of data)crc=crcTable[(crc^byte)&255]^(crc>>>8)
+  return (crc^0xFFFFFFFF)>>>0
+}
+function dosStamp(date=new Date()){
+  const year=Math.max(1980,date.getFullYear())
+  return {
+    time:((date.getHours()&31)<<11)|((date.getMinutes()&63)<<5)|Math.floor(date.getSeconds()/2),
+    date:(((year-1980)&127)<<9)|(((date.getMonth()+1)&15)<<5)|(date.getDate()&31)
+  }
+}
+function zipStored(files:Array<{name:string;content:string}>){
+  const enc=new TextEncoder()
+  const localParts:Uint8Array[]=[]
+  const centralParts:Uint8Array[]=[]
+  const stamp=dosStamp()
+  let offset=0
+
+  for(const file of files){
+    const name=enc.encode(file.name)
+    const data=enc.encode(file.content)
+    const crc=crc32(data)
+    const local=joinBytes([
+      new Uint8Array([0x50,0x4B,0x03,0x04]),
+      le16(20),le16(0),le16(0),le16(stamp.time),le16(stamp.date),
+      le32(crc),le32(data.length),le32(data.length),
+      le16(name.length),le16(0),name,data
+    ])
+    localParts.push(local)
+
+    const central=joinBytes([
+      new Uint8Array([0x50,0x4B,0x01,0x02]),
+      le16(20),le16(20),le16(0),le16(0),le16(stamp.time),le16(stamp.date),
+      le32(crc),le32(data.length),le32(data.length),
+      le16(name.length),le16(0),le16(0),le16(0),le16(0),le32(0),le32(offset),name
+    ])
+    centralParts.push(central)
+    offset+=local.length
+  }
+
+  const central=joinBytes(centralParts)
+  const end=joinBytes([
+    new Uint8Array([0x50,0x4B,0x05,0x06]),
+    le16(0),le16(0),le16(files.length),le16(files.length),
+    le32(central.length),le32(offset),le16(0)
+  ])
+  return joinBytes([...localParts,central,end])
+}
+function xlsxColumn(index:number){
+  let n=index+1
+  let out=''
+  while(n>0){n--;out=String.fromCharCode(65+(n%26))+out;n=Math.floor(n/26)}
+  return out
+}
+function inlineCell(ref:string,value:unknown,style=0){
+  const styleAttr=style?\` s="\${style}"\`:''
+  return \`<c r="\${ref}" t="inlineStr"\${styleAttr}><is><t xml:space="preserve">\${xmlEscape(value)}</t></is></c>\`
+}
+function exportExcel(){
   const rows=exportRows()
   if(!rows.length)return
 
-  const headers=[
-    'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora',
-    'Último revisado','Estatus 2','eCarCheck','Última consulta eCarCheck'
-  ]
+  try{
+    const headers=[
+      'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora',
+      'Último revisado','Estatus 2','eCarCheck','Última consulta eCarCheck'
+    ]
+    const lastRow=5+rows.length
+    const widths=[12,10,25,13,12,12,12,16,18,18,22,14,24]
 
-  const workbook=new ExcelJS.Workbook()
-  workbook.creator='Portal RYM'
-  workbook.created=new Date()
+    const rowXml:string[]=[]
+    rowXml.push(\`<row r="1" ht="28" customHeight="1">\${inlineCell('A1','PORTAL RYM · REVISADOS · OPERACIONES',1)}</row>\`)
+    rowXml.push(\`<row r="2" ht="20" customHeight="1">\${inlineCell('A2',\`Exportado: \${localExportDate()} · Registros: \${rows.length}\`,5)}</row>\`)
+    rowXml.push(\`<row r="3" ht="28" customHeight="1">\${inlineCell('A3',\`Contexto: \${exportContext()}\`,5)}</row>\`)
+    rowXml.push('<row r="4" ht="8" customHeight="1"></row>')
+    rowXml.push(\`<row r="5" ht="22" customHeight="1">\${headers.map((h,i)=>inlineCell(\`\${xlsxColumn(i)}5\`,h,2)).join('')}</row>\`)
 
-  const sheet=workbook.addWorksheet('Operaciones',{
-    views:[{state:'frozen',ySplit:5}]
-  })
+    rows.forEach((row,index)=>{
+      const values=headers.map(key=>String((row as Record<string,string>)[key]??''))
+      const r=index+6
+      const style=index%2===0?4:3
+      rowXml.push(\`<row r="\${r}">\${values.map((value,i)=>inlineCell(\`\${xlsxColumn(i)}\${r}\`,value,style)).join('')}</row>\`)
+    })
 
-  sheet.mergeCells('A1:M1')
-  sheet.getCell('A1').value='PORTAL RYM · REVISADOS · OPERACIONES'
-  sheet.getCell('A1').font={bold:true,size:16,color:{argb:'FFFFFFFF'}}
-  sheet.getCell('A1').fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0C469E'}}
-  sheet.getCell('A1').alignment={vertical:'middle',horizontal:'left'}
-  sheet.getRow(1).height=28
+    const cols=widths.map((width,i)=>\`<col min="\${i+1}" max="\${i+1}" width="\${width}" customWidth="1"/>\`).join('')
+    const sheet=\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <dimension ref="A1:M\${lastRow}"/>
+  <sheetViews><sheetView workbookViewId="0"><pane ySplit="5" topLeftCell="A6" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <sheetFormatPr defaultRowHeight="15"/>
+  <cols>\${cols}</cols>
+  <sheetData>\${rowXml.join('')}</sheetData>
+  <mergeCells count="3"><mergeCell ref="A1:M1"/><mergeCell ref="A2:M2"/><mergeCell ref="A3:M3"/></mergeCells>
+  <autoFilter ref="A5:M\${lastRow}"/>
+</worksheet>\`
 
-  sheet.mergeCells('A2:M2')
-  sheet.getCell('A2').value=`Exportado: ${localExportDate()} · Registros: ${rows.length}`
-  sheet.getCell('A2').font={bold:true,color:{argb:'FF244468'}}
+    const styles=\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="4">
+    <font><sz val="11"/><name val="Calibri"/></font>
+    <font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Calibri"/></font>
+    <font><b/><color rgb="FFFFFFFF"/><sz val="10"/><name val="Calibri"/></font>
+    <font><b/><color rgb="FF244468"/><sz val="10"/><name val="Calibri"/></font>
+  </fonts>
+  <fills count="5">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF0C469E"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF1E54A3"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFD"/><bgColor indexed="64"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border>
+      <left style="thin"><color rgb="FFD8E2ED"/></left>
+      <right style="thin"><color rgb="FFD8E2ED"/></right>
+      <top style="thin"><color rgb="FFD8E2ED"/></top>
+      <bottom style="thin"><color rgb="FFD8E2ED"/></bottom>
+      <diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="6">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center" horizontal="left"/></xf>
+    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" horizontal="left" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center" horizontal="left" wrapText="1"/></xf>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>\`
 
-  sheet.mergeCells('A3:M3')
-  sheet.getCell('A3').value=`Contexto: ${exportContext()}`
-  sheet.getCell('A3').font={color:{argb:'FF52677F'}}
-  sheet.getCell('A3').alignment={wrapText:true}
-  sheet.getRow(3).height=28
+    const files=[
+      {
+        name:'[Content_Types].xml',
+        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>\`
+      },
+      {
+        name:'_rels/.rels',
+        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>\`
+      },
+      {
+        name:'xl/workbook.xml',
+        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets><sheet name="Operaciones" sheetId="1" r:id="rId1"/></sheets>
+</workbook>\`
+      },
+      {
+        name:'xl/_rels/workbook.xml.rels',
+        content:\`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>\`
+      },
+      {name:'xl/worksheets/sheet1.xml',content:sheet},
+      {name:'xl/styles.xml',content:styles}
+    ]
 
-  sheet.addRow([])
-  const headerRow=sheet.addRow(headers)
-  headerRow.font={bold:true,color:{argb:'FFFFFFFF'}}
-  headerRow.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1E54A3'}}
-  headerRow.alignment={vertical:'middle',horizontal:'left'}
-  headerRow.height=22
-
-  rows.forEach((row,index)=>{
-    const values=headers.map(key=>String((row as Record<string,string>)[key]??''))
-    const excelRow=sheet.addRow(values)
-    excelRow.alignment={vertical:'top',wrapText:true}
-    if(index%2===0){
-      excelRow.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF8FAFD'}}
-    }
-  })
-
-  const widths=[12,10,25,13,12,12,12,16,18,18,22,14,24]
-  sheet.columns.forEach((column,index)=>{
-    column.width=widths[index]||14
-  })
-
-  sheet.autoFilter={from:{row:5,column:1},to:{row:5+rows.length,column:13}}
-
-  sheet.eachRow((row,rowNumber)=>{
-    if(rowNumber>=5){
-      row.eachCell(cell=>{
-        cell.border={
-          top:{style:'thin',color:{argb:'FFD8E2ED'}},
-          left:{style:'thin',color:{argb:'FFD8E2ED'}},
-          bottom:{style:'thin',color:{argb:'FFD8E2ED'}},
-          right:{style:'thin',color:{argb:'FFD8E2ED'}}
-        }
-      })
-    }
-  })
-
-  const buffer=await workbook.xlsx.writeBuffer()
-  downloadBlob(
-    new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),
-    exportFilename('xlsx')
-  )
+    const bytes=zipStored(files)
+    downloadBlob(
+      new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),
+      exportFilename('xlsx')
+    )
+  }catch(error){
+    console.error('No se pudo generar el Excel de Revisados',error)
+    window.alert('No se pudo generar el archivo Excel. Intenta nuevamente.')
+  }
 }
 function exportPdf(){
   const rows=exportRows()
