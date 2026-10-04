@@ -15,7 +15,7 @@ const groups=computed(()=>{
 
 <template>
 <section class="panel">
-  <div class="head"><div><span>RENDIMIENTO POR GALERA</span><h3>Pistas de cumplimiento operativo</h3></div><small>{{groups.length}} galeras visibles</small></div>
+  <div class="head"><div><span>ESTADO POR GALERA</span><h3>Tu avance</h3></div><small>{{groups.length}} galeras visibles</small></div>
   <div class="lanes">
     <article v-for="g in groups" :key="g.galera">
       <div class="lane-top"><div><strong>{{g.galera}}</strong><span>{{g.total}} unidades</span></div><b>{{g.cobertura}}%</b></div>
@@ -23,10 +23,10 @@ const groups=computed(()=>{
       <div class="lane-bottom"><span><b>{{g.vigentes}}</b> vigentes</span><span><b>{{g.pendientes}}</b> pendientes</span><span v-if="g.incidencias" class="danger"><b>{{g.incidencias}}</b> alertas</span></div>
     </article>
   </div>
-  <footer><span>Promedio visible</span><b>{{groups.length?Math.round(groups.reduce((a,g)=>a+g.cobertura,0)/groups.length):0}}%</b></footer>
+  <footer><span>Cobertura promedio</span><b>{{groups.length?Math.round(groups.reduce((a,g)=>a+g.cobertura,0)/groups.length):0}}%</b></footer>
 </section>
 </template>
 
 <style scoped>
-.panel{padding:18px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;box-shadow:0 2px 10px rgba(15,23,42,.025)}.head{display:flex;justify-content:space-between;align-items:end;padding-bottom:12px;border-bottom:1px solid #eef2f7}.head span{font-size:9px;font-weight:900;letter-spacing:.09em;color:#0062ff}.head h3{margin:3px 0 0;font:700 18px/1.2 "Space Grotesk",Inter,sans-serif;color:#0f172a}.head small{font-size:9px;color:#94a3b8}.lanes{display:grid;gap:12px;margin-top:14px}.lanes article{padding:12px 13px;border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc}.lane-top,.lane-bottom,footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.lane-top>div{display:flex;align-items:baseline;gap:8px}.lane-top strong{font-size:11px;color:#0f172a}.lane-top span{font-size:9px;color:#64748b}.lane-top>b{font:700 12px/1 "JetBrains Mono",monospace;color:#0062ff}.meter{height:7px;margin:9px 0;border-radius:999px;background:#e2e8f0;overflow:hidden}.meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0062ff,#0ea5e9)}.lane-bottom{justify-content:flex-start}.lane-bottom span{font-size:9px;color:#64748b}.lane-bottom b{color:#0f172a}.lane-bottom .danger,.lane-bottom .danger b{color:#dc2626}footer{margin-top:12px;padding-top:11px;border-top:1px solid #eef2f7;font-size:9px;color:#64748b}footer b{font:700 11px/1 "JetBrains Mono",monospace;color:#0f172a}
+.panel{padding:16px;border:1px solid #D8E3F2;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(10,27,77,.03)}.head{display:flex;justify-content:space-between;align-items:end;padding-bottom:12px;border-bottom:1px solid #D8E3F2}.head span{font-size:10px;font-weight:800;letter-spacing:.06em;color:#244AA5}.head h3{margin:3px 0 0;font:600 18px/1.25 Inter,system-ui,sans-serif;color:#0A1B4D}.head small{font-size:11px;color:#62708C}.lanes{display:grid;gap:8px;margin-top:12px}.lanes article{padding:10px 12px;border:1px solid #D8E3F2;border-radius:6px;background:#fff}.lane-top,.lane-bottom,footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.lane-top>div{display:flex;align-items:baseline;gap:8px}.lane-top strong{font-size:12px;color:#0A1B4D}.lane-top span{font-size:11px;color:#62708C}.lane-top>b{font:700 13px/1 Inter,system-ui,sans-serif;color:#244AA5;font-variant-numeric:tabular-nums}.meter{height:6px;margin:8px 0;border-radius:999px;background:#D8E3F2;overflow:hidden}.meter i{display:block;height:100%;border-radius:999px;background:#244AA5}.lane-bottom{justify-content:flex-start}.lane-bottom span{font-size:11px;color:#62708C}.lane-bottom b{color:#0A1B4D}.lane-bottom .danger,.lane-bottom .danger b{color:#DC2626}footer{margin-top:12px;padding-top:11px;border-top:1px solid #D8E3F2;font-size:11px;color:#62708C}footer b{font:700 12px/1 Inter,system-ui,sans-serif;color:#0A1B4D;font-variant-numeric:tabular-nums}
 </style>
