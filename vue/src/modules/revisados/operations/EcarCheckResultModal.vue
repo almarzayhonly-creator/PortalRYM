@@ -57,11 +57,23 @@ function detailItems(source:any){
 function dateText(v:unknown){
   if(!v) return '—'
   try{
-    return new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeStyle:'short'}).format(new Date(String(v)))
+    return new Intl.DateTimeFormat('es-PA',{
+      dateStyle:'medium',
+      timeStyle:'short',
+      timeZone:'America/Panama'
+    }).format(new Date(String(v)))
   }catch{
     return text(v)
   }
 }
+const consultationTime=computed(()=>first(
+  props.payload?.queue?.finished_at,
+  result.value?.created_at,
+  props.payload?.queue?.started_at,
+  props.payload?.queue?.requested_at,
+  result.value?.consultado_en,
+  tickets.value?.consultadoEn
+))
 function onKey(e:KeyboardEvent){
   if(props.open && e.key==='Escape') emit('close')
 }
@@ -179,7 +191,7 @@ const statusTone=computed(()=>{
                 <small>ESTADO GENERAL</small>
                 <b>{{ semanticStatusLabel }}</b>
               </div>
-              <span>Consulta {{ dateText(result?.consultado_en || tickets?.consultadoEn) }}</span>
+              <span>Consulta {{ dateText(consultationTime) }}</span>
             </section>
 
             <section class="info-section">
