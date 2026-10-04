@@ -8,7 +8,7 @@ const props=defineProps<{
   payload:Record<string,any>|null
 }>()
 
-const emit=defineEmits<{ close:[] }>()
+const emit=defineEmits<{ close:[]; retry:[] }>()
 
 const result=computed(()=>props.payload?.result || {})
 const vehicle=computed(()=>result.value?.vehiculo || {})
@@ -175,7 +175,10 @@ const statusTone=computed(()=>{
 
           <footer class="modal-footer">
             <span>La información mostrada corresponde al resultado recibido por eCarCheck.</span>
-            <button type="button" @click="emit('close')">Cerrar</button>
+            <div class="modal-actions">
+              <button class="footer-close" type="button" @click="emit('close')">Cerrar</button>
+              <button class="footer-retry" type="button" @click="emit('retry')"><RymIcon name="refresh" :size="16"/> Reintentar consulta</button>
+            </div>
           </footer>
         </section>
       </div>
@@ -265,5 +268,96 @@ const statusTone=computed(()=>{
   .vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .summary-grid{grid-template-columns:1fr}
   .status-banner,.modal-footer{align-items:flex-start;flex-direction:column}
+}
+</style>
+
+<style scoped>
+/* approved innovative modal skin */
+.modal-backdrop{
+  background:rgba(5,21,55,.66);
+  backdrop-filter:blur(7px) saturate(120%);
+}
+.modal-card{
+  width:min(900px,96vw);
+  border-radius:24px;
+  border:1px solid #8DB5F4;
+  box-shadow:0 36px 90px rgba(5,20,52,.36);
+}
+.modal-header{
+  padding:20px 22px;
+  border-bottom:0;
+  background:
+    radial-gradient(circle at 82% 35%,rgba(124,183,255,.34),transparent 27%),
+    linear-gradient(135deg,#0B3D96 0%,#0D63D8 58%,#2E7CE6 100%);
+}
+.modal-icon{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(145deg,#1468E6,#2357C6);
+}
+.modal-title-wrap small{font-size:10px;color:#D4E5FF}
+.modal-title-wrap h2{font-size:30px;color:#fff}
+.modal-title-wrap p{font-size:12px;color:#DFEAFA}
+.modal-close{
+  width:40px;height:40px;border:0!important;
+  background:rgba(255,255,255,.12)!important;
+  color:#fff!important;
+}
+.modal-body{
+  padding:20px 22px;
+  gap:16px;
+  background:
+    radial-gradient(circle at 86% 8%,rgba(134,190,255,.18),transparent 22%),
+    #F8FAFE;
+}
+.status-banner{
+  border-radius:14px;
+  padding:14px 16px;
+  box-shadow:0 5px 14px rgba(16,40,80,.04);
+}
+.vehicle-grid article,.summary-grid article{
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 5px 16px rgba(18,46,92,.05);
+}
+.summary-grid article:nth-child(1){background:linear-gradient(135deg,#F0F6FF,#fff);border-left-color:#2872E5}
+.summary-grid article:nth-child(2){background:linear-gradient(135deg,#F5F2FF,#fff);border-left-color:#7154E9}
+.summary-grid article:nth-child(3){background:linear-gradient(135deg,#ECFAF5,#fff);border-left-color:#18A66E}
+.summary-grid b{font-size:30px}
+.detail-card,.alerts-section{
+  border-radius:14px;
+  padding:16px;
+}
+.alerts-list article{
+  border-radius:11px;
+  padding:12px;
+}
+.modal-footer{
+  padding:15px 22px;
+}
+.modal-actions{display:flex;align-items:center;gap:10px}
+.footer-close{
+  min-width:100px;
+  padding:10px 14px!important;
+  border:1px solid #8FB0DA!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#173A71!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+.footer-retry{
+  min-width:170px;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  padding:10px 15px!important;
+  border:1px solid #1764DB!important;
+  border-radius:10px!important;
+  background:linear-gradient(135deg,#0E61DC,#2E78F0)!important;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  box-shadow:0 8px 18px rgba(18,97,220,.22)!important;
 }
 </style>

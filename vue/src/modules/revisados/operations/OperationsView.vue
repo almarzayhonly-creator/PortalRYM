@@ -305,6 +305,7 @@ async function copyList(){
     :plate="manualPlate"
     :payload="manualResult"
     @close="resultModalOpen=false"
+    @retry="emit('lookup')"
   />
 </section>
 </template>
@@ -397,4 +398,95 @@ async function copyList(){
 .queue-head span{font-size:7px}
 .queue-head b{font-size:12px}
 .queue-head small{font-size:8px}
+</style>
+
+<style scoped>
+/* approved premium operations skin */
+.operations-stitch{
+  background:
+    radial-gradient(circle at 82% 0%, rgba(103,167,255,.10), transparent 26%),
+    linear-gradient(180deg,#F3F7FC 0%,#F7FAFD 100%);
+  padding:14px;
+  border-radius:18px;
+}
+.ecar-command{
+  border-radius:18px;
+  border-color:#0F3E91;
+  background:
+    radial-gradient(circle at 76% 35%, rgba(103,167,255,.23), transparent 24%),
+    linear-gradient(135deg,#0A2D72 0%,#0D4AB6 55%,#0F65D8 100%);
+  box-shadow:0 18px 40px rgba(8,36,92,.18);
+}
+.command-head{padding:16px 18px 10px}
+.command-head h2{font-size:20px}
+.command-head p{font-size:11px;color:#D5E4FB}
+.command-actions{gap:10px;padding:0 12px 12px}
+.sync-card,.lookup-card{
+  min-height:88px;
+  border-radius:14px;
+  border-color:rgba(190,216,255,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+}
+.sync-card{
+  background:linear-gradient(135deg,#123D8B,#1B55BC 100%);
+}
+.lookup-card{
+  background:linear-gradient(135deg,#2E66C9,#3F7CDE 100%);
+}
+.action-icon{width:42px;height:42px;border-radius:12px}
+.action-copy small{font-size:8px}
+.action-copy b{font-size:13px}
+.action-copy em{font-size:10px;color:#E4EDFB}
+.action-button{
+  font-size:10px;
+  border-radius:10px;
+  padding:9px 12px;
+}
+.lookup-form input{
+  width:136px;
+  font-size:10px;
+  border-radius:9px;
+  padding:10px 11px;
+}
+.lookup-form button{
+  min-width:100px;
+  font-size:10px!important;
+  padding:10px 12px!important;
+  border-radius:9px!important;
+}
+.filters-panel{
+  border-radius:16px;
+  border-color:#CBD8E8;
+  box-shadow:0 10px 26px rgba(12,39,82,.06);
+  padding:14px;
+}
+.search-row{
+  height:44px;
+  border-radius:11px;
+  background:#FAFCFF;
+}
+.search-row input{font-size:11px}
+.facet-grid{gap:10px}
+.filter-foot{padding-top:5px}
+.chips button{
+  background:#EAF2FF!important;
+  border-color:#B8CEE9!important;
+  color:#174EA6!important;
+}
+.kpi-row{gap:10px}
+.kpi{
+  min-height:92px;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 8px 20px rgba(14,41,82,.06);
+}
+.kpi b{font-size:25px}
+.kpi small{font-size:8px}
+.kpi span{font-size:9px}
+.priority-strip{
+  border-radius:13px;
+  padding:11px 13px;
+  box-shadow:0 7px 18px rgba(14,41,82,.04);
+}
+.queue-head{padding:4px 2px}
 </style>

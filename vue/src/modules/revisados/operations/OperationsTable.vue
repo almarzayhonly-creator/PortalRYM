@@ -284,3 +284,24 @@ function detail(r:CanonicalRevisadoRow){
   font-size:9px!important;
 }
 </style>
+
+<style scoped>
+.queue-table-shell{
+  border-radius:14px;
+  border-color:#C4D4E8;
+  box-shadow:0 10px 24px rgba(13,37,81,.07);
+}
+.queue-table th{
+  background:linear-gradient(180deg,#1F5CB8,#174A98);
+  font-size:9px;
+}
+.priority,.status2,.pending-pill,.ecar-main,.ecar-alerts span{
+  border-radius:999px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34);
+}
+.priority[data-tone="high"]{background:#FFE4BE;color:#9B4B00}
+.status2{background:#E8F2FF;color:#1450A6}
+.ecar-main{background:#D9F8E8;color:#08784A}
+.ecar-alerts span{background:#FFE9C8;color:#9B5200}
+.queue-table tbody tr:hover{background:#EEF5FF}
+</style>
