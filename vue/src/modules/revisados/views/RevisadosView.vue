@@ -147,7 +147,7 @@ onMounted(()=>load())
 </script>
 
 <template>
-<main class="rym-revisados-vue" data-ui-source="stitch-api" data-stitch-project="1412531415043982793">
+<main class="rym-revisados-vue" data-ui-source="portal-rym-main-contract">
   <aside class="rv-side">
     <div class="rv-brand-dark">
       <div class="rv-brand-mark"><RymIcon name="verified_user"/></div>
