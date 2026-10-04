@@ -390,3 +390,29 @@ function detail(r:CanonicalRevisadoRow){
   max-width:96px;
 }
 </style>
+
+
+<style scoped>
+/* do not hide eCarCheck content behind the action column */
+.action-head,
+.action-cell{
+  position:static!important;
+  right:auto!important;
+  z-index:auto!important;
+  box-shadow:none!important;
+}
+.queue-table th:nth-child(8),
+.queue-table td:nth-child(8){
+  width:420px!important;
+}
+.queue-table th:nth-child(9),
+.queue-table td:nth-child(9){
+  width:110px!important;
+}
+.ecar-detail,
+.ecar-time{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+</style>
