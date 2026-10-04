@@ -1,9 +1,24 @@
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import type { CanonicalRevisadoRow } from '../types/revisados.types'
 import RymIcon from '../components/RymIcon.vue'
 
-defineProps<{ rows: CanonicalRevisadoRow[] }>()
+const props=defineProps<{ rows: CanonicalRevisadoRow[] }>()
 const emit=defineEmits<{ open:[row:CanonicalRevisadoRow] }>()
+
+const pageSize=50
+const page=ref(1)
+const totalPages=computed(()=>Math.max(1,Math.ceil(props.rows.length/pageSize)))
+const pageStart=computed(()=>props.rows.length ? (page.value-1)*pageSize+1 : 0)
+const pageEnd=computed(()=>Math.min(page.value*pageSize,props.rows.length))
+const pagedRows=computed(()=>props.rows.slice((page.value-1)*pageSize,page.value*pageSize))
+function goPage(next:number){
+  page.value=Math.min(totalPages.value,Math.max(1,next))
+}
+watch(()=>props.rows,()=>{
+  if(page.value>totalPages.value) page.value=totalPages.value
+  else page.value=1
+},{deep:false})
 
 function s(v:unknown){return String(v??'').trim()}
 function n(v:unknown){return s(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
@@ -67,7 +82,7 @@ function detail(r:CanonicalRevisadoRow){
   <th class="action-head">Acción</th>
 </tr></thead>
 <tbody>
-<tr v-for="r in rows" :key="String(r.unidad_id||r.placa||r.unidad)" :data-priority="priorityTone(rowPriority(r))" tabindex="0" @dblclick="emit('open',r)" @keydown.enter="emit('open',r)">
+<tr v-for="r in pagedRows" :key="String(r.unidad_id||r.placa||r.unidad)" :data-priority="priorityTone(rowPriority(r))" tabindex="0" @dblclick="emit('open',r)" @keydown.enter="emit('open',r)">
   <td><span class="priority" :data-tone="priorityTone(rowPriority(r))">{{rowPriority(r)}}</span></td>
   <td><div class="unit-company"><b>{{r.unidad||'—'}}</b><span>{{r.empresa||'—'}}</span></div></td>
   <td><div class="plate-cupo"><span class="plate">{{r.placa||'—'}}</span><small>{{rowCupo(r)}}</small></div></td>
@@ -95,6 +110,17 @@ function detail(r:CanonicalRevisadoRow){
 <tr v-if="!rows.length"><td colspan="9"><div class="empty"><RymIcon name="search_off" :size="22"/><span><b>No hay pendientes para estos filtros</b><small>Quita un filtro o cambia la búsqueda.</small></span></div></td></tr>
 </tbody>
 </table>
+  <div v-if="rows.length" class="queue-pagination">
+    <div class="pagination-summary">
+      <b>{{pageStart}}–{{pageEnd}}</b>
+      <span>de {{rows.length}} registros</span>
+    </div>
+    <div class="pagination-actions">
+      <button type="button" :disabled="page<=1" @click="goPage(page-1)">← Anterior</button>
+      <span>Página <b>{{page}}</b> de <b>{{totalPages}}</b></span>
+      <button type="button" :disabled="page>=totalPages" @click="goPage(page+1)">Siguiente →</button>
+    </div>
+  </div>
 </div>
 </template>
 
@@ -126,4 +152,27 @@ function detail(r:CanonicalRevisadoRow){
 .ecar-alerts span{max-width:156px}
 .ecar-detail{max-width:100%;font-size:7px}
 .action-cell{min-width:78px}
+</style>
+
+<style scoped>
+.queue-pagination{
+  position:sticky;left:0;
+  min-width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 12px;border-top:1px solid #D7E1EC;background:#fff;
+}
+.pagination-summary{display:flex;align-items:baseline;gap:4px;color:#65758A;font-size:9px}
+.pagination-summary b{color:#0B214E;font-size:10px}
+.pagination-actions{display:flex;align-items:center;gap:8px;color:#66758B;font-size:9px}
+.pagination-actions>span{white-space:nowrap}
+.pagination-actions>span b{color:#0B214E}
+.pagination-actions button{
+  min-height:32px;padding:7px 10px!important;border:1px solid #AFC7E5!important;border-radius:8px!important;
+  background:#F8FAFE!important;color:#174EA6!important;font-size:8px!important;font-weight:850!important;cursor:pointer!important;
+}
+.pagination-actions button:hover:not(:disabled){background:#EAF2FF!important;border-color:#7EA5D8!important}
+.pagination-actions button:disabled{opacity:.38!important;cursor:not-allowed!important}
+@media(max-width:680px){
+  .queue-pagination{align-items:flex-start;flex-direction:column}
+  .pagination-actions{width:100%;justify-content:space-between}
+}
 </style>

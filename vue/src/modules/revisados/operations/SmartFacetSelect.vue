@@ -34,9 +34,11 @@ function toggle(value:string){
   if(set.has(value)) set.delete(value)
   else set.add(value)
   emit('update:modelValue',[...set])
+  open.value=false
 }
 function clear(){
   emit('update:modelValue',[])
+  open.value=false
 }
 function clickOutside(e:MouseEvent){
   if(root.value && !root.value.contains(e.target as Node)) open.value=false
