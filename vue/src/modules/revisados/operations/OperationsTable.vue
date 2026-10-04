@@ -201,3 +201,86 @@ function detail(r:CanonicalRevisadoRow){
 .ecar-time{font-size:7px}
 .open-btn{font-size:8px!important}
 </style>
+
+<style scoped>
+/* final tactical-table readability pass */
+.queue-table{min-width:1380px}
+.queue-table th:nth-child(1){width:94px}
+.queue-table th:nth-child(2){width:178px}
+.queue-table th:nth-child(3){width:118px}
+.queue-table th:nth-child(4){width:76px}
+.queue-table th:nth-child(5){width:152px}
+.queue-table th:nth-child(6){width:145px}
+.queue-table th:nth-child(7){width:138px}
+.queue-table th:nth-child(8){width:360px}
+.queue-table th:nth-child(9){width:96px}
+
+.queue-table th{
+  font-size:9px;
+  line-height:1.15;
+  padding:12px 13px;
+}
+.queue-table td{
+  min-height:78px;
+  height:auto;
+  padding:12px 13px;
+  font-size:10px;
+}
+.unit-company b,.location b,.review b{font-size:12px;line-height:1.25}
+.unit-company span,.plate-cupo small,.location small,.review small{font-size:9px;line-height:1.25}
+.plate{font-size:10px;padding:6px 8px}
+.month{font-size:10px}
+.priority{font-size:9px;min-height:24px;padding:5px 8px}
+.pending-pill{font-size:8px;min-height:19px;padding:4px 7px}
+.status2{font-size:9px;min-height:24px;padding:5px 8px}
+
+.queue-table td:nth-child(8){
+  padding-right:18px;
+}
+.ecar{
+  gap:5px;
+  padding:0 4px 0 0;
+  overflow:visible;
+}
+.ecar-main{
+  font-size:9px;
+  min-height:23px;
+  padding:5px 8px;
+}
+.ecar-alerts{
+  gap:5px;
+  align-items:flex-start;
+}
+.ecar-alerts span{
+  max-width:210px;
+  font-size:8px;
+  min-height:23px;
+  padding:5px 8px;
+}
+.ecar-detail{
+  font-size:9px;
+  line-height:1.35;
+  color:#526178;
+  max-width:100%;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  overflow-wrap:anywhere;
+}
+.ecar-time{
+  font-size:8px;
+  color:#75849A;
+}
+.action-cell{
+  min-width:96px;
+  padding-left:10px!important;
+  padding-right:10px!important;
+  box-shadow:-14px 0 20px -18px rgba(10,31,72,.75);
+}
+.open-btn{
+  min-height:32px!important;
+  padding:7px 10px!important;
+  font-size:9px!important;
+}
+</style>
