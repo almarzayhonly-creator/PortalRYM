@@ -38,6 +38,7 @@ export default {
 
       const sandboxRuntime = isSandbox
         ? '<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v='+encodeURIComponent(safeBuild)+'">'
+          + '<div class="pps-sandbox-badge" data-sandbox-build="'+safeBuild+'">PANAPASS · SANDBOX V2 · '+shortBuild+'</div>'
           + '<script id="rym-v171-loader" src="/modules/v171-loader.js?v='+encodeURIComponent(safeBuild)+'" defer></script>'
           + '<script id="rym-sandbox-v2-guard" src="/modules/panapass-sandbox/dashboard/index.js?v='+encodeURIComponent(safeBuild)+'" defer></script>'
         : '';
