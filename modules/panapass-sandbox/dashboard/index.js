@@ -28,31 +28,17 @@
     setTimeout(()=>void enforceRevisadosVue(),0);
   };
 
-  const scriptSrc=d.currentScript&&d.currentScript.src?d.currentScript.src:'';
-  let runtimeBuild='';
-  try{
-    const fromScript=new URL(scriptSrc||w.location.href).searchParams.get('v')||'';
-    const fromLoader=String(w.RYM_BUILD_VERSION||'');
-    const candidate=/^[0-9a-f]{40}$/i.test(fromScript)?fromScript:/^[0-9a-f]{40}$/i.test(fromLoader)?fromLoader:'';
-    runtimeBuild=candidate;
-  }catch(_){runtimeBuild=''}
   const mark=()=>{
     d.body.dataset.panapassSandbox='v2';
-    let badge=d.querySelector('.pps-sandbox-badge');
-    if(!badge){
-      badge=d.createElement('div');
-      badge.className='pps-sandbox-badge';
-      d.body.appendChild(badge);
-    }
-
-    const embedded=String(badge.getAttribute('data-sandbox-build')||'').trim();
-    const verifiedEmbedded=/^[0-9a-f]{40}$/i.test(embedded)?embedded:'';
-    const verifiedRuntime=/^[0-9a-f]{40}$/i.test(runtimeBuild)?runtimeBuild:'';
-    const build=verifiedEmbedded||verifiedRuntime;
-    const shortBuild=build?build.slice(0,7):'BUILD DESCONOCIDO';
-
-    badge.setAttribute('data-sandbox-build',build||'unknown');
-    badge.textContent='PANAPASS · SANDBOX V2 · '+shortBuild;
+    /* The server-rendered badge is authoritative. Do not rewrite its SHA
+       in the browser. Only create a visible diagnostic fallback if the
+       server failed to inject the badge at all. */
+    if(d.querySelector('.pps-sandbox-badge'))return;
+    const badge=d.createElement('div');
+    badge.className='pps-sandbox-badge';
+    badge.setAttribute('data-sandbox-build','unknown');
+    badge.textContent='PANAPASS · SANDBOX V2 · BUILD DESCONOCIDO';
+    d.body.appendChild(badge);
   };
   d.readyState==='loading'?d.addEventListener('DOMContentLoaded',()=>{mark();startRevGuard()},{once:true}):(mark(),startRevGuard());
 })(window,document);
