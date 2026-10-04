@@ -202,6 +202,17 @@ function exportRows(){
     'Última consulta eCarCheck':rowLastQuery(r)||'—'
   }))
 }
+function exportContext(){
+  const parts:string[]=[]
+  if(search.value.trim())parts.push(`Búsqueda: ${search.value.trim()}`)
+  if(galeras.value.length)parts.push(`Galera: ${galeras.value.join(', ')}`)
+  if(statuses2.value.length)parts.push(`Estatus 2: ${statuses2.value.join(', ')}`)
+  if(priorities.value.length)parts.push(`Prioridad: ${priorities.value.join(', ')}`)
+  if(months.value.length)parts.push(`Mes: ${months.value.join(', ')}`)
+  if(supervisoras.value.length)parts.push(`Supervisora: ${supervisoras.value.join(', ')}`)
+  if(ecarStates.value.length)parts.push(`eCarCheck: ${ecarStates.value.join(', ')}`)
+  return parts.length?parts.join(' · '):'Sin filtros adicionales'
+}
 function exportFilename(ext:string){
   const now=new Date()
   const stamp=[
@@ -211,58 +222,157 @@ function exportFilename(ext:string){
   ].join('-')
   return `revisados_operaciones_${stamp}.${ext}`
 }
+function localExportDate(){
+  return new Intl.DateTimeFormat('es-PA',{
+    dateStyle:'medium',
+    timeStyle:'short',
+    timeZone:'America/Panama'
+  }).format(new Date())
+}
+function downloadBlob(blob:Blob,filename:string){
+  const url=URL.createObjectURL(blob)
+  const link=document.createElement('a')
+  link.href=url
+  link.download=filename
+  link.style.display='none'
+  document.body.appendChild(link)
+  link.click()
+  window.setTimeout(()=>{
+    link.remove()
+    URL.revokeObjectURL(url)
+  },1500)
+}
 function exportExcel(){
   const rows=exportRows()
   if(!rows.length)return
-  const ws=XLSX.utils.json_to_sheet(rows)
-  ws['!cols']=[
-    {wch:12},{wch:10},{wch:24},{wch:14},{wch:12},{wch:12},{wch:12},
-    {wch:18},{wch:18},{wch:16},{wch:22},{wch:14},{wch:22}
+  const headers=[
+    'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora',
+    'Último revisado','Estatus 2','eCarCheck','Última consulta eCarCheck'
   ]
+  const body=rows.map(row=>headers.map(key=>String((row as Record<string,string>)[key]??'')))
+  const aoa=[
+    ['PORTAL RYM · REVISADOS · OPERACIONES'],
+    [`Exportado: ${localExportDate()} · Registros: ${rows.length}`],
+    [`Contexto: ${exportContext()}`],
+    [],
+    headers,
+    ...body
+  ]
+  const ws=XLSX.utils.aoa_to_sheet(aoa)
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:12}},
+    {s:{r:1,c:0},e:{r:1,c:12}},
+    {s:{r:2,c:0},e:{r:2,c:12}}
+  ]
+  ws['!cols']=[
+    {wch:12},{wch:10},{wch:25},{wch:13},{wch:12},{wch:12},{wch:12},
+    {wch:16},{wch:18},{wch:18},{wch:22},{wch:14},{wch:24}
+  ]
+  ws['!rows']=[{hpt:28},{hpt:20},{hpt:28},{hpt:8},{hpt:22}]
+  ws['!autofilter']={ref:`A5:M${rows.length+5}`}
   const wb=XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb,ws,'Operaciones')
-  XLSX.writeFile(wb,exportFilename('xlsx'))
+  const buffer=XLSX.write(wb,{bookType:'xlsx',type:'array'})
+  downloadBlob(
+    new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),
+    exportFilename('xlsx')
+  )
 }
 function exportPdf(){
   const rows=exportRows()
   if(!rows.length)return
+
   const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'})
-  pdf.setFontSize(14)
-  pdf.text('Portal RYM · Revisados · Operaciones',36,36)
-  pdf.setFontSize(9)
-  pdf.text(`Registros exportados: ${rows.length}`,36,52)
-  const headers=['Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora','Estatus 2','eCarCheck']
-  const widths=[45,42,88,48,48,48,45,58,65,72,54]
-  let y=76
-  const rowH=20
-  const left=36
-  pdf.setFontSize(7)
-  function drawRow(values:string[],header=false){
+  const pageWidth=pdf.internal.pageSize.getWidth()
+  const pageHeight=pdf.internal.pageSize.getHeight()
+  const left=28
+  const right=28
+  const usable=pageWidth-left-right
+  const headers=['Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora','Últ. revisado','Estatus 2','eCarCheck']
+  const widths=[48,44,92,50,50,50,46,58,66,66,76,56]
+  const totalWidth=widths.reduce((sum,w)=>sum+w,0)
+  const scale=usable/totalWidth
+  const scaled=widths.map(w=>w*scale)
+  const rowH=25
+  let y=0
+  let pageNo=1
+
+  function drawPageHeader(){
+    pdf.setFillColor(12,70,158)
+    pdf.roundedRect(left,24,usable,54,8,8,'F')
+    pdf.setTextColor(255,255,255)
+    pdf.setFont('helvetica','bold')
+    pdf.setFontSize(15)
+    pdf.text('Portal RYM · Revisados · Operaciones',left+16,47)
+    pdf.setFont('helvetica','normal')
+    pdf.setFontSize(8.5)
+    pdf.text(`${rows.length} registros · ${localExportDate()}`,left+16,64)
+
+    pdf.setTextColor(44,65,92)
+    pdf.setFontSize(8)
+    const context=pdf.splitTextToSize(`Contexto: ${exportContext()}`,usable-8)
+    pdf.text(context,left+4,96)
+    y=112+(context.length-1)*9
+  }
+  function drawTableHeader(){
     let x=left
-    if(header)pdf.setFont('helvetica','bold')
-    else pdf.setFont('helvetica','normal')
-    for(let i=0;i<values.length;i++){
-      const w=widths[i]
-      const value=pdf.splitTextToSize(String(values[i]??''),w-6).slice(0,2)
-      pdf.rect(x,y-rowH+4,w,rowH)
-      pdf.text(value,x+3,y-7)
+    pdf.setFillColor(30,84,163)
+    pdf.setTextColor(255,255,255)
+    pdf.setFont('helvetica','bold')
+    pdf.setFontSize(7)
+    for(let i=0;i<headers.length;i++){
+      const w=scaled[i]
+      pdf.rect(x,y,w,rowH,'F')
+      const label=pdf.splitTextToSize(headers[i],w-6).slice(0,2)
+      pdf.text(label,x+3,y+10)
       x+=w
     }
     y+=rowH
   }
-  drawRow(headers,true)
-  for(const row of rows){
-    if(y>560){
-      pdf.addPage('a4','landscape')
-      y=40
-      drawRow(headers,true)
+  function drawDataRow(values:string[],index:number){
+    let x=left
+    const fill=index%2===0 ? [248,250,253] : [255,255,255]
+    pdf.setFillColor(fill[0],fill[1],fill[2])
+    pdf.setTextColor(29,48,78)
+    pdf.setFont('helvetica','normal')
+    pdf.setFontSize(6.7)
+    for(let i=0;i<values.length;i++){
+      const w=scaled[i]
+      pdf.rect(x,y,w,rowH,'F')
+      pdf.setDrawColor(218,226,237)
+      pdf.rect(x,y,w,rowH,'S')
+      const value=pdf.splitTextToSize(String(values[i]??''),w-6).slice(0,2)
+      pdf.text(value,x+3,y+9)
+      x+=w
     }
-    drawRow([
-      row.Prioridad,row.Unidad,row.Empresa,row.Color,row.Placa,row.Cupo,row.Mes,row.Galera,row.Supervisora,row['Estatus 2'],row.eCarCheck
-    ])
+    y+=rowH
   }
+  function drawFooter(){
+    pdf.setTextColor(110,126,148)
+    pdf.setFontSize(7)
+    pdf.text('Portal RYM · Exportación de la selección actual',left,pageHeight-16)
+    pdf.text(`Página ${pageNo}`,pageWidth-right-34,pageHeight-16)
+  }
+
+  drawPageHeader()
+  drawTableHeader()
+  rows.forEach((row,index)=>{
+    if(y+rowH>pageHeight-34){
+      drawFooter()
+      pdf.addPage('a4','landscape')
+      pageNo++
+      drawPageHeader()
+      drawTableHeader()
+    }
+    drawDataRow([
+      row.Prioridad,row.Unidad,row.Empresa,row.Color,row.Placa,row.Cupo,row.Mes,row.Galera,
+      row.Supervisora,row['Último revisado'],row['Estatus 2'],row.eCarCheck
+    ],index)
+  })
+  drawFooter()
   pdf.save(exportFilename('pdf'))
 }
+
 </script>
 
 <template>
@@ -379,7 +489,7 @@ function exportPdf(){
   </section>
 
   <div class="queue-head">
-    <div>
+    <div class="queue-copy">
       <span>COLA DE TRABAJO TÁCTICA</span>
       <b>{{num(filteredRows.length)}} unidades visibles</b>
       <small>Ordenada por prioridad y antigüedad.</small>
@@ -463,10 +573,12 @@ function exportPdf(){
 .priority-visual{display:grid;gap:6px}.priority-track{height:7px;display:flex;border-radius:999px;overflow:hidden;background:#EDF1F6}.priority-track span[data-rank="0"]{background:#E2473F}.priority-track span[data-rank="1"]{background:#F47D20}.priority-track span[data-rank="2"]{background:#F4BB3B}.priority-track span[data-rank="3"]{background:#4E75B9}
 .priority-legend{display:flex;flex-wrap:wrap;gap:12px}.priority-legend>div{display:flex;align-items:center;gap:4px;font-size:7px;color:#697990}.priority-legend i{width:6px;height:6px;border-radius:50%;background:#4E75B9}.priority-legend>div[data-rank="0"] i{background:#E2473F}.priority-legend>div[data-rank="1"] i{background:#F47D20}.priority-legend>div[data-rank="2"] i{background:#F4BB3B}.priority-legend b{color:#0B214E}
 
-.queue-head{display:flex;align-items:end;justify-content:space-between;gap:10px;padding:1px}.queue-head>div{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;align-items:baseline}.queue-head span{grid-column:1/-1;font-size:6px;font-weight:900;color:#174EA6;letter-spacing:.06em}.queue-head b{font-size:11px;color:#0B214E}.queue-head small{font-size:7px;color:#6A7990}.queue-head button{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:6px 8px!important;border:1px solid #B8CBE4!important;border-radius:7px!important;background:#fff!important;color:#174EA6!important;font-size:7px!important;font-weight:850!important}
+.queue-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:1px}
+.queue-copy{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;align-items:baseline;min-width:0}
+.queue-head span{grid-column:1/-1;font-size:6px;font-weight:900;color:#174EA6;letter-spacing:.06em}.queue-head b{font-size:11px;color:#0B214E}.queue-head small{font-size:7px;color:#6A7990}.queue-head button{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;padding:7px 10px!important;border:1px solid #B8CBE4!important;border-radius:8px!important;background:#fff!important;color:#174EA6!important;font-size:8px!important;font-weight:850!important;white-space:nowrap!important}
 
-.export-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.export-actions button{min-height:34px!important;padding:7px 10px!important;border-radius:8px!important;font-size:8px!important}
+.queue-head>.export-actions{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;justify-content:flex-end!important;flex:0 0 auto!important}
+.export-actions button{min-height:36px!important}
 .export-excel{border-color:#A7D4B4!important;color:#17663A!important;background:#F2FBF5!important}
 .export-pdf{border-color:#E9B3B3!important;color:#A32424!important;background:#FFF5F5!important}
 .app-mark{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;font-size:7px;font-weight:900;background:currentColor;color:#fff}
@@ -475,7 +587,7 @@ function exportPdf(){
 
 @media(max-width:1180px){.kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.facet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.command-actions{grid-template-columns:1fr}.priority-strip{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:680px){.facet-grid,.kpi-row{grid-template-columns:1fr}.command-head,.queue-head,.filter-foot{align-items:flex-start;flex-direction:column}.sync-card,.lookup-card{grid-template-columns:auto minmax(0,1fr)}.action-button,.lookup-form{grid-column:2}.lookup-form{flex-wrap:wrap}.kpi span{white-space:normal}}
+@media(max-width:680px){.facet-grid,.kpi-row{grid-template-columns:1fr}.command-head,.filter-foot{align-items:flex-start;flex-direction:column}.queue-head{align-items:center;flex-direction:row}.queue-copy{min-width:0}.queue-head>.export-actions{gap:5px!important}.export-actions button{padding:6px 8px!important;font-size:7px!important}.sync-card,.lookup-card{grid-template-columns:auto minmax(0,1fr)}.action-button,.lookup-form{grid-column:2}.lookup-form{flex-wrap:wrap}.kpi span{white-space:normal}}
 </style>
 
 <style scoped>
