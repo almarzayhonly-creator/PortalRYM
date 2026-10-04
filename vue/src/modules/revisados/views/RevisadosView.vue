@@ -8,6 +8,7 @@ import RevisadosFilterBar from '../components/RevisadosFilterBar.vue'
 import RevisadosTable from '../components/RevisadosTable.vue'
 import VehicleBadge from '../components/VehicleBadge.vue'
 import RymIcon from '../components/RymIcon.vue'
+import OperationsView from '../operations/OperationsView.vue'
 
 const data=ref<CanonicalRevisadosResponse>(), records=ref<RevisadoRecord[]>([]), loading=ref(true), error=ref(''), active=ref('dashboard')
 const profile=ref({nombre:'Portal RYM',rol:'',scope_label:''}), navItems=ref<RevisadosNavItem[]>([])
@@ -198,40 +199,34 @@ onMounted(()=>load())
         </div>
 
       </section>
-      <section v-else-if="active==='operations'" class="rv-stack rv-ops-workspace">
-        <div class="rv-section-title"><div><span>OPERACIONES</span><h2>Qué debes atender primero</h2><p>Unidades pendientes, bloqueos y datos de eCarCheck dentro de tu alcance.</p></div></div>
-        <div class="rv-ops-summary">
-          <div><span>{{num(rawRows.length)}} UDS TOTAL</span><i></i><b>{{num(metrics.vigentes)}} AL DÍA</b></div>
-        </div>
-
-        <div class="rv-ops-search-row">
-          <div class="rv-search-shell"><RymIcon name="search"/><input v-model="filters.search" placeholder="Buscar unidad, placa, galera o supervisora… (Ctrl+K)"><kbd>⌘K</kbd></div>
-        </div>
-
-        <div class="rv-quick-chips">
-          <button v-for="q in quickOps" :key="q.key" type="button" :data-tone="q.tone" :class="{active:quickFilter===q.key}" @click="quickFilter=q.key"><i></i>{{q.label}} <b>{{num(q.value)}}</b></button>
-        </div>
-
-        <div class="rv-ops-filters">
-          <label>Galera:<select v-model="selectedGalera"><option value="">Todas las galeras</option><option v-for="x in galeras" :key="x">{{x}}</option></select></label>
-          <label>Estatus 2:<select v-model="selectedStatus"><option value="">Todos los estatus</option><option v-for="x in statuses" :key="x">{{x}}</option></select></label>
-        </div>
-
-        <div class="rv-ops-tools">
-          <button class="rv-tool-action" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync"/><div><b>{{syncBusy?'Actualizando eCarCheck…':'Actualizar eCarCheck'}}</b><small>{{syncState}}</small></div></button>
-          <div class="rv-tool-lookup"><RymIcon name="manage_search"/><div><b>Consulta puntual V2</b><small>{{manualState}}</small></div><input v-model="manualPlate" maxlength="12" placeholder="PLACA" @keydown.enter="runManualEcarcheck"><button :disabled="manualBusy" @click="runManualEcarcheck">{{manualBusy?'…':'Consultar'}}</button></div>
-        </div>
-
-        <div v-if="manualResult?.result" class="rv-query-result">
-          <div><span>RESULTADO ECARCHECK</span><b>{{manualResult.result?.vehiculo?.nroPlaca||manualPlate}}</b></div>
-          <div class="rv-query-signals"><span>ENA <b>{{num(manualResult.result?.boletas?.infraccionesEna?.cantidad)}}</b></span><span>Documento <b>{{num(manualResult.result?.boletas?.boletasPorDocumento?.cantidad)}}</b></span><span>Placa <b>{{num(manualResult.result?.boletas?.boletasPorPlaca?.cantidad)}}</b></span></div>
-          <p v-if="manualResult.result?.vehiculo">{{manualResult.result.vehiculo?.nombrePropietario||'—'}} · {{manualResult.result.vehiculo?.colorVehiculo||'—'}} · Revisado {{manualResult.result.vehiculo?.fechaRevisado||'—'}}</p>
-        </div>
-
-        <div class="rv-ops-meta"><div><b>{{num(visibleRows.length)}}</b> unidades visibles</div><span>Selecciona una unidad para abrir su ficha legal completa.</span><button class="ghost" @click="copyPending">Copiar lista</button></div>
-
-        <div class="rv-table rv-ops-table"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Galera</th><th>Estado</th><th>Alertas y validaciones</th><th>Último revisado</th><th></th></tr></thead><tbody><tr v-for="r in visibleRows" :key="String(r.unidad_id||r.unidad)" @dblclick="openFicha(r)"><td><b>{{r.unidad||'—'}}</b><small>{{vehicleModel(r)}}</small></td><td><span class="rv-plate-mini">{{r.placa||'—'}}</span></td><td>{{r.galera||'—'}}<small>{{r.supervisora||'—'}}</small></td><td><span class="rv-state-chip" :class="'tone-'+vehicleStateTone(r)">{{vehicleStateLabel(r)}}</span></td><td><div class="rv-table-signals"><span v-for="s in vehicleSignals(r)" :key="s.label" :class="'sig-'+s.tone">{{s.label}}</span></div></td><td>{{date(r.ultimo_revisado)}}</td><td><button class="mini" @click.stop="openFicha(r)">Ficha</button></td></tr></tbody></table></div>
-      </section>
+      <OperationsView
+        v-else-if="active==='operations'"
+        :rows="visibleRows"
+        :total="rawRows.length"
+        :up-to-date="metrics.vigentes"
+        :galeras="galeras"
+        :statuses="statuses"
+        :selected-galera="selectedGalera"
+        :selected-status="selectedStatus"
+        :quick-filter="quickFilter"
+        :quick-ops="quickOps"
+        :search="filters.search"
+        :sync-busy="syncBusy"
+        :sync-state="syncState"
+        :manual-plate="manualPlate"
+        :manual-busy="manualBusy"
+        :manual-state="manualState"
+        :manual-result="manualResult"
+        @search-change="filters.search=$event"
+        @galera-change="selectedGalera=$event"
+        @status-change="selectedStatus=$event"
+        @quick-change="quickFilter=$event"
+        @manual-plate-change="manualPlate=$event"
+        @sync="runSyncEcarcheck"
+        @lookup="runManualEcarcheck"
+        @copy="copyPending"
+        @open="openFicha"
+      />
       <section v-else-if="active==='monthly'" class="rv-stack rv-monthly">
         <div class="rv-monthly-head"><div><span class="rv-module-pill">AVANCE MENSUAL</span><h2>Cobertura por ciclo y galera</h2><p>Datos canónicos de Revisados dentro de tu alcance.</p></div><div class="rv-monthly-actions"><button class="ghost" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="15"/>{{syncBusy?'Sincronizando…':'Actualizar eCarCheck'}}</button><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div></div>
         <div class="rv-cycle-grid">
