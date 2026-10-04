@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
 import type { CanonicalRevisadoRow } from '../types/revisados.types'
 import RymIcon from '../components/RymIcon.vue'
 import OperationsTable from './OperationsTable.vue'
@@ -42,6 +44,7 @@ function rowPriority(r:CanonicalRevisadoRow){return s(r.prioridad||r['priority']
 function rowMonth(r:CanonicalRevisadoRow){return s(r['mes_nombre']||r['mes']||r['mes_revisado']||r['mes_asignado']||r['ciclo_mes'])||'Sin mes'}
 function rowStatus2(r:CanonicalRevisadoRow){return s(r['status2']||r['estatus2']||r.estado)||'Sin Estatus 2'}
 function rowCupo(r:CanonicalRevisadoRow){return s(r['cupo_ecarcheck']||r['cupo_control']||r['cupo']||r['placa_comercial'])}
+function rowColor(r:CanonicalRevisadoRow){return s(r['color_ecarcheck']||r['color_control']||r['color'])}
 function rowLastQuery(r:CanonicalRevisadoRow){return s(r['ecarcheck_ultima_consulta_at']||r['ecarcheck_ultima_consulta']||r['ultima_consulta_ecarcheck']||r['ecarcheck_at'])}
 function rowEcarError(r:CanonicalRevisadoRow){return s(r['ecarcheck_detalle']||r['ecarcheck_error_detail']||r['ecarcheck_error'])}
 function rowEcarCategories(r:CanonicalRevisadoRow){
@@ -176,10 +179,89 @@ function retryLookup(){
 
 async function copyList(){
   const text=filteredRows.value.map(r=>[
-    rowPriority(r),s(r.unidad)||'—',s(r.empresa)||'—',s(r.placa)||'—',rowCupo(r)||'—',
+    rowPriority(r),s(r.unidad)||'—',s(r.empresa)||'—',rowColor(r)||'—',s(r.placa)||'—',rowCupo(r)||'—',
     rowMonth(r),s(r.galera)||'—',s(r.supervisora)||'—',rowStatus2(r),rowEcarState(r)
   ].join(' | ')).join('\n')
   try{await navigator.clipboard?.writeText(text)}catch{}
+}
+
+function exportRows(){
+  return filteredRows.value.map(r=>({
+    Prioridad:rowPriority(r),
+    Unidad:s(r.unidad)||'—',
+    Empresa:s(r.empresa)||'—',
+    Color:rowColor(r)||'—',
+    Placa:s(r.placa)||'—',
+    Cupo:rowCupo(r)||'—',
+    Mes:rowMonth(r),
+    Galera:s(r.galera)||'—',
+    Supervisora:s(r.supervisora)||'—',
+    'Último revisado':s(r.ultimo_revisado)||'—',
+    'Estatus 2':rowStatus2(r),
+    eCarCheck:rowEcarState(r),
+    'Última consulta eCarCheck':rowLastQuery(r)||'—'
+  }))
+}
+function exportFilename(ext:string){
+  const now=new Date()
+  const stamp=[
+    now.getFullYear(),
+    String(now.getMonth()+1).padStart(2,'0'),
+    String(now.getDate()).padStart(2,'0')
+  ].join('-')
+  return `revisados_operaciones_${stamp}.${ext}`
+}
+function exportExcel(){
+  const rows=exportRows()
+  if(!rows.length)return
+  const ws=XLSX.utils.json_to_sheet(rows)
+  ws['!cols']=[
+    {wch:12},{wch:10},{wch:24},{wch:14},{wch:12},{wch:12},{wch:12},
+    {wch:18},{wch:18},{wch:16},{wch:22},{wch:14},{wch:22}
+  ]
+  const wb=XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb,ws,'Operaciones')
+  XLSX.writeFile(wb,exportFilename('xlsx'))
+}
+function exportPdf(){
+  const rows=exportRows()
+  if(!rows.length)return
+  const pdf=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'})
+  pdf.setFontSize(14)
+  pdf.text('Portal RYM · Revisados · Operaciones',36,36)
+  pdf.setFontSize(9)
+  pdf.text(`Registros exportados: ${rows.length}`,36,52)
+  const headers=['Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora','Estatus 2','eCarCheck']
+  const widths=[45,42,88,48,48,48,45,58,65,72,54]
+  let y=76
+  const rowH=20
+  const left=36
+  pdf.setFontSize(7)
+  function drawRow(values:string[],header=false){
+    let x=left
+    if(header)pdf.setFont('helvetica','bold')
+    else pdf.setFont('helvetica','normal')
+    for(let i=0;i<values.length;i++){
+      const w=widths[i]
+      const value=pdf.splitTextToSize(String(values[i]??''),w-6).slice(0,2)
+      pdf.rect(x,y-rowH+4,w,rowH)
+      pdf.text(value,x+3,y-7)
+      x+=w
+    }
+    y+=rowH
+  }
+  drawRow(headers,true)
+  for(const row of rows){
+    if(y>560){
+      pdf.addPage('a4','landscape')
+      y=40
+      drawRow(headers,true)
+    }
+    drawRow([
+      row.Prioridad,row.Unidad,row.Empresa,row.Color,row.Placa,row.Cupo,row.Mes,row.Galera,row.Supervisora,row['Estatus 2'],row.eCarCheck
+    ])
+  }
+  pdf.save(exportFilename('pdf'))
 }
 </script>
 
@@ -302,7 +384,11 @@ async function copyList(){
       <b>{{num(filteredRows.length)}} unidades visibles</b>
       <small>Ordenada por prioridad y antigüedad.</small>
     </div>
-    <button type="button" @click="copyList"><RymIcon name="content_copy" :size="14"/> Copiar lista</button>
+    <div class="export-actions">
+      <button class="export-copy" type="button" @click="copyList"><RymIcon name="content_copy" :size="14"/> Copiar lista</button>
+      <button class="export-excel" type="button" @click="exportExcel"><span class="app-mark">X</span> Excel</button>
+      <button class="export-pdf" type="button" @click="exportPdf"><span class="app-mark">PDF</span> PDF</button>
+    </div>
   </div>
 
   <OperationsTable :rows="filteredRows" @open="emit('open',$event)"/>
@@ -378,6 +464,14 @@ async function copyList(){
 .priority-legend{display:flex;flex-wrap:wrap;gap:12px}.priority-legend>div{display:flex;align-items:center;gap:4px;font-size:7px;color:#697990}.priority-legend i{width:6px;height:6px;border-radius:50%;background:#4E75B9}.priority-legend>div[data-rank="0"] i{background:#E2473F}.priority-legend>div[data-rank="1"] i{background:#F47D20}.priority-legend>div[data-rank="2"] i{background:#F4BB3B}.priority-legend b{color:#0B214E}
 
 .queue-head{display:flex;align-items:end;justify-content:space-between;gap:10px;padding:1px}.queue-head>div{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;align-items:baseline}.queue-head span{grid-column:1/-1;font-size:6px;font-weight:900;color:#174EA6;letter-spacing:.06em}.queue-head b{font-size:11px;color:#0B214E}.queue-head small{font-size:7px;color:#6A7990}.queue-head button{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:6px 8px!important;border:1px solid #B8CBE4!important;border-radius:7px!important;background:#fff!important;color:#174EA6!important;font-size:7px!important;font-weight:850!important}
+
+.export-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.export-actions button{min-height:34px!important;padding:7px 10px!important;border-radius:8px!important;font-size:8px!important}
+.export-excel{border-color:#A7D4B4!important;color:#17663A!important;background:#F2FBF5!important}
+.export-pdf{border-color:#E9B3B3!important;color:#A32424!important;background:#FFF5F5!important}
+.app-mark{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;font-size:7px;font-weight:900;background:currentColor;color:#fff}
+.export-excel .app-mark{background:#1F7A43;color:#fff}
+.export-pdf .app-mark{background:#C93636;color:#fff}
 
 @media(max-width:1180px){.kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.facet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.command-actions{grid-template-columns:1fr}.priority-strip{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
