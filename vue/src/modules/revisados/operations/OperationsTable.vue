@@ -78,8 +78,7 @@ function detail(r:CanonicalRevisadoRow){
   <th>Galera / supervisora</th>
   <th>Último revisado</th>
   <th>Estatus 2</th>
-  <th>eCarCheck</th>
-  <th class="action-head">Acción</th>
+  <th>eCarCheck / acción</th>
 </tr></thead>
 <tbody>
 <tr v-for="r in pagedRows" :key="String(r.unidad_id||r.placa||r.unidad)" :data-priority="priorityTone(rowPriority(r))" tabindex="0" @dblclick="emit('open',r)" @keydown.enter="emit('open',r)">
@@ -91,23 +90,25 @@ function detail(r:CanonicalRevisadoRow){
   <td><div class="review"><span class="pending-pill">PENDIENTE</span><b>{{date(r.ultimo_revisado)}}</b><small v-if="r['ultimo_revisado_id']">ID {{r['ultimo_revisado_id']}}</small></div></td>
   <td><span class="status2" :title="rowStatus2(r)">{{rowStatus2(r)}}</span></td>
   <td>
-    <div class="ecar" :data-state="ecarState(r)">
-      <div class="ecar-top">
-        <span v-if="ecarState(r)==='ok'" class="ecar-main">OK</span>
-        <span v-else-if="ecarState(r)==='pending'" class="ecar-main">PENDIENTE</span>
-        <span v-else-if="ecarState(r)==='error'" class="ecar-main">ERROR</span>
-        <div v-else-if="ecarState(r)==='alert'" class="ecar-alerts">
-          <span v-for="c in categories(r)" :key="String(c.tipo)">{{categoryLabel(c)}}</span>
+    <div class="ecar-cell">
+      <div class="ecar" :data-state="ecarState(r)">
+        <div class="ecar-top">
+          <span v-if="ecarState(r)==='ok'" class="ecar-main">OK</span>
+          <span v-else-if="ecarState(r)==='pending'" class="ecar-main">PENDIENTE</span>
+          <span v-else-if="ecarState(r)==='error'" class="ecar-main">ERROR</span>
+          <div v-else-if="ecarState(r)==='alert'" class="ecar-alerts">
+            <span v-for="c in categories(r)" :key="String(c.tipo)">{{categoryLabel(c)}}</span>
+          </div>
+          <span v-else class="ecar-main">SIN CONSULTA</span>
         </div>
-        <span v-else class="ecar-main">SIN CONSULTA</span>
+        <small v-if="detail(r) && ecarState(r)!=='ok'" class="ecar-detail" :title="detail(r)">{{detail(r)}}</small>
+        <small v-if="rowLastQuery(r)" class="ecar-time">Consulta {{date(rowLastQuery(r))}}</small>
       </div>
-      <small v-if="detail(r) && ecarState(r)!=='ok'" class="ecar-detail" :title="detail(r)">{{detail(r)}}</small>
-      <small v-if="rowLastQuery(r)" class="ecar-time">Consulta {{date(rowLastQuery(r))}}</small>
+      <button class="open-btn" type="button" @click="emit('open',r)">Ficha <RymIcon name="arrow_forward" :size="14"/></button>
     </div>
   </td>
-  <td class="action-cell"><button class="open-btn" type="button" @click="emit('open',r)">Ficha <RymIcon name="arrow_forward" :size="14"/></button></td>
 </tr>
-<tr v-if="!rows.length"><td colspan="9"><div class="empty"><RymIcon name="search_off" :size="22"/><span><b>No hay pendientes para estos filtros</b><small>Quita un filtro o cambia la búsqueda.</small></span></div></td></tr>
+<tr v-if="!rows.length"><td colspan="8"><div class="empty"><RymIcon name="search_off" :size="22"/><span><b>No hay pendientes para estos filtros</b><small>Quita un filtro o cambia la búsqueda.</small></span></div></td></tr>
 </tbody>
 </table>
   <div v-if="rows.length" class="queue-pagination">
@@ -483,5 +484,47 @@ function detail(r:CanonicalRevisadoRow){
   .queue-table{
     min-width:1100px!important;
   }
+}
+</style>
+
+
+<style scoped>
+/* final no-overflow structure: action lives inside eCarCheck */
+.queue-table{
+  width:100%!important;
+  min-width:980px!important;
+  table-layout:fixed!important;
+}
+.queue-table th:nth-child(1),.queue-table td:nth-child(1){width:80px!important}
+.queue-table th:nth-child(2),.queue-table td:nth-child(2){width:165px!important}
+.queue-table th:nth-child(3),.queue-table td:nth-child(3){width:110px!important}
+.queue-table th:nth-child(4),.queue-table td:nth-child(4){width:70px!important}
+.queue-table th:nth-child(5),.queue-table td:nth-child(5){width:150px!important}
+.queue-table th:nth-child(6),.queue-table td:nth-child(6){width:150px!important}
+.queue-table th:nth-child(7),.queue-table td:nth-child(7){width:135px!important}
+.queue-table th:nth-child(8),.queue-table td:nth-child(8){width:auto!important}
+.ecar-cell{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+}
+.ecar-cell .ecar{
+  min-width:0;
+  overflow:hidden!important;
+}
+.ecar-cell .open-btn{
+  flex:0 0 auto;
+  width:auto!important;
+  min-width:70px!important;
+  white-space:nowrap;
+}
+@media(max-width:1180px){
+  .queue-table{min-width:920px!important}
+  .queue-table th:nth-child(2),.queue-table td:nth-child(2){width:145px!important}
+  .queue-table th:nth-child(5),.queue-table td:nth-child(5){width:135px!important}
+  .queue-table th:nth-child(6),.queue-table td:nth-child(6){width:140px!important}
+  .queue-table th:nth-child(7),.queue-table td:nth-child(7){width:120px!important}
 }
 </style>
