@@ -249,82 +249,8 @@ function xmlEscape(v:unknown){
     .replaceAll('"','&quot;')
     .replaceAll("'","&apos;")
 }
-function le16(n:number){return new Uint8Array([n&255,(n>>>8)&255])}
-function le32(n:number){return new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255])}
-function joinBytes(parts:Uint8Array[]){
-  const size=parts.reduce((sum,part)=>sum+part.length,0)
-  const out=new Uint8Array(size)
-  let offset=0
-  for(const part of parts){out.set(part,offset);offset+=part.length}
-  return out
-}
-const crcTable=(()=>{
-  const table=new Uint32Array(256)
-  for(let i=0;i<256;i++){
-    let c=i
-    for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1)
-    table[i]=c>>>0
-  }
-  return table
-})()
-function crc32(data:Uint8Array){
-  let crc=0xFFFFFFFF
-  for(const byte of data)crc=crcTable[(crc^byte)&255]^(crc>>>8)
-  return (crc^0xFFFFFFFF)>>>0
-}
-function dosStamp(date=new Date()){
-  const year=Math.max(1980,date.getFullYear())
-  return {
-    time:((date.getHours()&31)<<11)|((date.getMinutes()&63)<<5)|Math.floor(date.getSeconds()/2),
-    date:(((year-1980)&127)<<9)|(((date.getMonth()+1)&15)<<5)|(date.getDate()&31)
-  }
-}
-function zipStored(files:Array<{name:string;content:string}>){
-  const enc=new TextEncoder()
-  const localParts:Uint8Array[]=[]
-  const centralParts:Uint8Array[]=[]
-  const stamp=dosStamp()
-  let offset=0
-
-  for(const file of files){
-    const name=enc.encode(file.name)
-    const data=enc.encode(file.content)
-    const crc=crc32(data)
-    const local=joinBytes([
-      new Uint8Array([0x50,0x4B,0x03,0x04]),
-      le16(20),le16(0),le16(0),le16(stamp.time),le16(stamp.date),
-      le32(crc),le32(data.length),le32(data.length),
-      le16(name.length),le16(0),name,data
-    ])
-    localParts.push(local)
-
-    const central=joinBytes([
-      new Uint8Array([0x50,0x4B,0x01,0x02]),
-      le16(20),le16(20),le16(0),le16(0),le16(stamp.time),le16(stamp.date),
-      le32(crc),le32(data.length),le32(data.length),
-      le16(name.length),le16(0),le16(0),le16(0),le16(0),le32(0),le32(offset),name
-    ])
-    centralParts.push(central)
-    offset+=local.length
-  }
-
-  const central=joinBytes(centralParts)
-  const end=joinBytes([
-    new Uint8Array([0x50,0x4B,0x05,0x06]),
-    le16(0),le16(0),le16(files.length),le16(files.length),
-    le32(central.length),le32(offset),le16(0)
-  ])
-  return joinBytes([...localParts,central,end])
-}
-function xlsxColumn(index:number){
-  let n=index+1
-  let out=''
-  while(n>0){n--;out=String.fromCharCode(65+(n%26))+out;n=Math.floor(n/26)}
-  return out
-}
-function inlineCell(ref:string,value:unknown,style=0){
-  const styleAttr=style?` s="${style}"`:''
-  return `<c r="${ref}" t="inlineStr"${styleAttr}><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`
+function excelXmlCell(value:unknown,style='Cell'){
+  return `<Cell ss:StyleID="${style}"><Data ss:Type="String">${xmlEscape(value)}</Data></Cell>`
 }
 function exportExcel(){
   const rows=exportRows()
@@ -335,118 +261,107 @@ function exportExcel(){
       'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora',
       'Último revisado','Estatus 2','eCarCheck','Última consulta eCarCheck'
     ]
-    const lastRow=5+rows.length
-    const widths=[12,10,25,13,12,12,12,16,18,18,22,14,24]
+    const widths=[72,62,150,78,76,76,76,100,112,112,130,88,150]
 
-    const rowXml:string[]=[]
-    rowXml.push(`<row r="1" ht="28" customHeight="1">${inlineCell('A1','PORTAL RYM · REVISADOS · OPERACIONES',1)}</row>`)
-    rowXml.push(`<row r="2" ht="20" customHeight="1">${inlineCell('A2',`Exportado: ${localExportDate()} · Registros: ${rows.length}`,5)}</row>`)
-    rowXml.push(`<row r="3" ht="28" customHeight="1">${inlineCell('A3',`Contexto: ${exportContext()}`,5)}</row>`)
-    rowXml.push('<row r="4" ht="8" customHeight="1"></row>')
-    rowXml.push(`<row r="5" ht="22" customHeight="1">${headers.map((h,i)=>inlineCell(`${xlsxColumn(i)}5`,h,2)).join('')}</row>`)
+    const titleRow=`<Row ss:Height="28"><Cell ss:MergeAcross="12" ss:StyleID="Title"><Data ss:Type="String">PORTAL RYM · REVISADOS · OPERACIONES</Data></Cell></Row>`
+    const metaRow=`<Row ss:Height="20"><Cell ss:MergeAcross="12" ss:StyleID="Meta"><Data ss:Type="String">${xmlEscape(`Exportado: ${localExportDate()} · Registros: ${rows.length}`)}</Data></Cell></Row>`
+    const contextRow=`<Row ss:Height="28"><Cell ss:MergeAcross="12" ss:StyleID="Meta"><Data ss:Type="String">${xmlEscape(`Contexto: ${exportContext()}`)}</Data></Cell></Row>`
+    const headerRow=`<Row ss:Height="23">${headers.map(h=>excelXmlCell(h,'Header')).join('')}</Row>`
 
-    rows.forEach((row,index)=>{
+    const dataRows=rows.map((row,index)=>{
       const values=headers.map(key=>String((row as Record<string,string>)[key]??''))
-      const r=index+6
-      const style=index%2===0?4:3
-      rowXml.push(`<row r="${r}">${values.map((value,i)=>inlineCell(`${xlsxColumn(i)}${r}`,value,style)).join('')}</row>`)
-    })
+      const style=index%2===0?'Alt':'Cell'
+      return `<Row>${values.map(value=>excelXmlCell(value,style)).join('')}</Row>`
+    }).join('')
 
-    const cols=widths.map((width,i)=>`<col min="${i+1}" max="${i+1}" width="${width}" customWidth="1"/>`).join('')
-    const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <dimension ref="A1:M${lastRow}"/>
-  <sheetViews><sheetView workbookViewId="0"><pane ySplit="5" topLeftCell="A6" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
-  <sheetFormatPr defaultRowHeight="15"/>
-  <cols>${cols}</cols>
-  <sheetData>${rowXml.join('')}</sheetData>
-  <mergeCells count="3"><mergeCell ref="A1:M1"/><mergeCell ref="A2:M2"/><mergeCell ref="A3:M3"/></mergeCells>
-  <autoFilter ref="A5:M${lastRow}"/>
-</worksheet>`
+    const columns=widths.map(width=>`<Column ss:AutoFitWidth="0" ss:Width="${width}"/>`).join('')
 
-    const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <fonts count="4">
-    <font><sz val="11"/><name val="Calibri"/></font>
-    <font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Calibri"/></font>
-    <font><b/><color rgb="FFFFFFFF"/><sz val="10"/><name val="Calibri"/></font>
-    <font><b/><color rgb="FF244468"/><sz val="10"/><name val="Calibri"/></font>
-  </fonts>
-  <fills count="5">
-    <fill><patternFill patternType="none"/></fill>
-    <fill><patternFill patternType="gray125"/></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FF0C469E"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FF1E54A3"/><bgColor indexed="64"/></patternFill></fill>
-    <fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFD"/><bgColor indexed="64"/></patternFill></fill>
-  </fills>
-  <borders count="2">
-    <border><left/><right/><top/><bottom/><diagonal/></border>
-    <border>
-      <left style="thin"><color rgb="FFD8E2ED"/></left>
-      <right style="thin"><color rgb="FFD8E2ED"/></right>
-      <top style="thin"><color rgb="FFD8E2ED"/></top>
-      <bottom style="thin"><color rgb="FFD8E2ED"/></bottom>
-      <diagonal/>
-    </border>
-  </borders>
-  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="6">
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
-    <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center" horizontal="left"/></xf>
-    <xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" horizontal="left" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
-    <xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center" horizontal="left" wrapText="1"/></xf>
-  </cellXfs>
-  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
-</styleSheet>`
+    const workbook=`<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook
+ xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Top"/>
+   <Font ss:FontName="Calibri" ss:Size="10"/>
+  </Style>
+  <Style ss:ID="Title">
+   <Alignment ss:Vertical="Center" ss:Horizontal="Left"/>
+   <Font ss:FontName="Calibri" ss:Size="16" ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#0C469E" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="Meta">
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" ss:Size="10" ss:Color="#244468"/>
+  </Style>
+  <Style ss:ID="Header">
+   <Alignment ss:Vertical="Center" ss:Horizontal="Left" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#1E54A3" ss:Pattern="Solid"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="Cell">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="Alt">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior ss:Color="#F8FAFD" ss:Pattern="Solid"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+   </Borders>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Operaciones">
+  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="${rows.length+5}" x:FullColumns="1" x:FullRows="1">
+   ${columns}
+   ${titleRow}
+   ${metaRow}
+   ${contextRow}
+   <Row ss:Height="8"></Row>
+   ${headerRow}
+   ${dataRows}
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>5</SplitHorizontal>
+   <TopRowBottomPane>5</TopRowBottomPane>
+   <ActivePane>2</ActivePane>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>`
 
-    const files=[
-      {
-        name:'[Content_Types].xml',
-        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-</Types>`
-      },
-      {
-        name:'_rels/.rels',
-        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-</Relationships>`
-      },
-      {
-        name:'xl/workbook.xml',
-        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-  <sheets><sheet name="Operaciones" sheetId="1" r:id="rId1"/></sheets>
-</workbook>`
-      },
-      {
-        name:'xl/_rels/workbook.xml.rels',
-        content:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
-  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>`
-      },
-      {name:'xl/worksheets/sheet1.xml',content:sheet},
-      {name:'xl/styles.xml',content:styles}
-    ]
-
-    const bytes=zipStored(files)
-    downloadBlob(
-      new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),
-      exportFilename('xlsx')
-    )
+    const href='data:application/vnd.ms-excel;charset=utf-8,'+encodeURIComponent(workbook)
+    const link=document.createElement('a')
+    link.href=href
+    link.download=exportFilename('xls')
+    link.style.display='none'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
   }catch(error){
     console.error('No se pudo generar el Excel de Revisados',error)
-    window.alert('No se pudo generar el archivo Excel. Intenta nuevamente.')
+    window.alert('No se pudo generar el archivo Excel: '+String((error as Error)?.message||error))
   }
 }
 function exportPdf(){
