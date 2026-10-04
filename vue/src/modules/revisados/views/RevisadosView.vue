@@ -117,7 +117,18 @@ const wait=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms))
 async function openFicha(r:CanonicalRevisadoRow){fichaOpen.value=true;fichaLoading.value=true;fichaError.value='';ficha.value=null;fichaRow.value=r;incidentType.value='';incidentCustom.value='';incidentNote.value='';try{const x=await revisadosService.ficha(text(r.placa)==='—'?'':text(r.placa),text(r.unidad)==='—'?'':text(r.unidad));if(!x?.ok)throw new Error(String(x?.error||'No se pudo cargar la ficha'));ficha.value=x}catch(e){fichaError.value=e instanceof Error?e.message:String(e)}finally{fichaLoading.value=false}}
 function closeFicha(){fichaOpen.value=false;ficha.value=null;fichaRow.value=null;fichaError.value=''}
 async function saveIncident(){const unidadId=ficha.value?.unidad?.id??fichaRow.value?.unidad_id;if(!unidadId||!incidentType.value||incidentBusy.value)return;incidentBusy.value=true;try{const x=await revisadosService.crearIncidencia({unidad_id:unidadId,tipo_codigo:incidentType.value,tipo_personalizado:incidentCustom.value,nota:incidentNote.value});if(!x?.ok)throw new Error(String(x?.error||'No se pudo guardar la incidencia'));const current=fichaRow.value;await load(true);if(current)await openFicha(current)}catch(e){fichaError.value=e instanceof Error?e.message:String(e)}finally{incidentBusy.value=false}}
-async function runManualEcarcheck(){const placa=manualPlate.value.trim().toUpperCase().replace(/\s+/g,'');if(!/^[A-Z0-9-]{3,12}$/.test(placa)||manualBusy.value)return;manualBusy.value=true;manualResult.value=null;manualState.value='Encolando consulta…';try{const started=await revisadosService.iniciarConsultaEcarcheck(placa);if(!started?.ok||!started?.queue_id)throw new Error(String(started?.error||'No se pudo iniciar la consulta'));for(let i=0;i<45;i++){const d=await revisadosService.estadoConsultaEcarcheck(String(started.queue_id));if(!d?.ok)throw new Error(String(d?.error||'No se pudo consultar el estado'));const st=String(d?.queue?.estado||'').toUpperCase();manualState.value=st==='PENDIENTE'?'Esperando puente V2…':st==='PROCESANDO'?'Consultando eCarCheck V2…':st==='BLOQUEADO'?'Procesando resultado…':st||'Procesando…';if(d.done){manualResult.value=d;const result=d?.result||{};const http=Number(result?.status||0);const detail=String(result?.detalle||'').toUpperCase();if(http>=500||detail.includes('INTERMITEN'))manualState.value='Servicio ATTT no disponible · reintentar';else if(http===200)manualState.value='Consulta completada';else manualState.value='Resultado recibido';await load(true);return}await wait(2000)}throw new Error('La consulta sigue pendiente; verifica que el puente V2 esté conectado.')}catch(e){manualState.value=e instanceof Error?e.message:String(e)}finally{manualBusy.value=false}}
+async function refreshAfterManualLookup(){
+  try{
+    const response=await revisadosService.load(true)
+    data.value=response
+    records.value=await revisadosService.list(response)
+    profile.value={nombre:response.profile?.nombre||'Portal RYM',rol:response.profile?.rol||'',scope_label:response.profile?.scope_label||''}
+    navItems.value=revisadosService.context().tabs
+  }catch(e){
+    console.warn('No se pudo refrescar Revisados después de la consulta eCarCheck',e)
+  }
+}
+async function runManualEcarcheck(){const placa=manualPlate.value.trim().toUpperCase().replace(/\s+/g,'');if(!/^[A-Z0-9-]{3,12}$/.test(placa)||manualBusy.value)return;manualBusy.value=true;manualResult.value=null;manualState.value='Encolando consulta…';try{const started=await revisadosService.iniciarConsultaEcarcheck(placa);if(!started?.ok||!started?.queue_id)throw new Error(String(started?.error||'No se pudo iniciar la consulta'));for(let i=0;i<45;i++){const d=await revisadosService.estadoConsultaEcarcheck(String(started.queue_id));if(!d?.ok)throw new Error(String(d?.error||'No se pudo consultar el estado'));const st=String(d?.queue?.estado||'').toUpperCase();manualState.value=st==='PENDIENTE'?'Esperando puente V2…':st==='PROCESANDO'?'Consultando eCarCheck V2…':st==='BLOQUEADO'?'Procesando resultado…':st||'Procesando…';if(d.done){const result=d?.result||{};const http=Number(result?.status||0);const detail=String(result?.detalle||'').toUpperCase();if(http>=500||detail.includes('INTERMITEN'))manualState.value='Servicio ATTT no disponible · reintentar';else if(http===200)manualState.value='Consulta completada';else manualState.value='Resultado recibido';manualResult.value=d;void refreshAfterManualLookup();return}await wait(2000)}throw new Error('La consulta sigue pendiente; verifica que el puente V2 esté conectado.')}catch(e){manualState.value=e instanceof Error?e.message:String(e)}finally{manualBusy.value=false}}
 async function runSyncEcarcheck(){if(syncBusy.value||!confirm('¿Actualizar los últimos revisados usando eCarCheck V2?'))return;syncBusy.value=true;syncState.value='Solicitando listado V2…';syncProgress.value={procesadas:0,total:0,nuevos:0,fichas_ok:0};try{const started=await revisadosService.iniciarSyncEcarcheck();if(!started?.ok||!started?.run_id)throw new Error(String(started?.error||'No se pudo iniciar la actualización'));for(let i=0;i<120;i++){const d=await revisadosService.estadoSyncEcarcheck(String(started.run_id));if(!d?.ok)throw new Error(String(d?.error||'No se pudo consultar el estado'));syncProgress.value={procesadas:Number(d.procesadas||0),total:Number(d.total||0),nuevos:Number(d.nuevos||0),fichas_ok:Number(d.fichas_ok||0)};syncState.value=String(d.estado)==='ESPERANDO_LISTADO'?'Esperando puente V2…':`V2 · ${syncProgress.value.procesadas}/${syncProgress.value.total} · ${syncProgress.value.nuevos} nuevos`;if(d.done){syncState.value=`Listo V2 · ${syncProgress.value.nuevos} nuevos · ${syncProgress.value.fichas_ok} fichas`;await load(true);return}await wait(2500)}throw new Error('La actualización continúa pendiente.')}catch(e){syncState.value=e instanceof Error?e.message:String(e)}finally{syncBusy.value=false}}
 
 function boletaCompanyResult(g:Record<string,any>){const checks=Array.isArray(g.checks)?g.checks:[];return checks.some((x:Record<string,any>)=>Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0)?'CON BOLETA':'SIN BOLETA'}
@@ -444,4 +455,20 @@ onMounted(()=>load())
 .rv-focus-panel,.rv-cycle-panel{border-radius:16px!important;border-color:#D8E3F2!important;box-shadow:0 8px 22px rgba(10,27,77,.04)!important}
 @media(max-width:1280px){.rym-revisados-vue{grid-template-columns:220px minmax(0,1fr)!important}.rv-dashboard-lower{grid-template-columns:1fr!important}}
 @media(max-width:900px){.rym-revisados-vue{grid-template-columns:1fr!important}.rv-side{position:relative!important;height:auto!important;min-height:auto!important}.rv-main{padding:0 12px 20px!important}.rv-topbar{margin:0 -12px 14px!important;padding:12px!important;flex-direction:column!important;align-items:flex-start!important}.rv-top-actions{width:100%!important;flex-wrap:wrap!important}}
+</style>
+
+
+<style scoped>
+/* final viewport containment for Revisados */
+.rym-revisados-vue,
+.rv-main{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:hidden;
+}
+.rv-main>*{
+  min-width:0;
+  max-width:100%;
+}
 </style>
