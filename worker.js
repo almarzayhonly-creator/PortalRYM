@@ -26,8 +26,10 @@ export default {
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
 
       const compiledBuild = /^[0-9a-f]{40}$/i.test(SANDBOX_BUILD) ? SANDBOX_BUILD : "";
-      const safeBuild = compiledBuild || "unknown";
-      const shortBuild = compiledBuild ? compiledBuild.slice(0, 7) : "BUILD DESCONOCIDO";
+      const embeddedBuild = html.match(/data-sandbox-build=["']([0-9a-f]{40})["']/i)?.[1] || "";
+      const verifiedBuild = compiledBuild || embeddedBuild;
+      const safeBuild = verifiedBuild || "unknown";
+      const shortBuild = verifiedBuild ? verifiedBuild.slice(0, 7) : "BUILD DESCONOCIDO";
       if (isSandbox) headers.set("x-rym-sandbox-build", safeBuild);
 
       const staleSandboxCss = /<link\b[^>]*href=["'][^"']*\/css\/panapass-sandbox\/tokens\.css(?:\?[^"']*)?["'][^>]*>/gi;
