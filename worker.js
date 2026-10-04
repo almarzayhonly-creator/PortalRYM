@@ -27,7 +27,7 @@ export default {
 
       const embeddedBuild = html.match(/data-sandbox-build=["']([^"']+)["']/i)?.[1] || "";
       const requestUrl = new URL(request.url);
-      const compiledBuild = SANDBOX_BUILD !== "__RYM_SANDBOX_BUILD__" ? SANDBOX_BUILD : "";
+      const compiledBuild = /^[0-9a-f]{40}$/i.test(SANDBOX_BUILD) ? SANDBOX_BUILD : "";
       const requestedBuild = compiledBuild || embeddedBuild || requestUrl.searchParams.get("sandboxBuild") || "sandbox-live";
       const safeBuild = String(requestedBuild).replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 80) || "sandbox-live";
       const shortBuild = safeBuild.length > 7 ? safeBuild.slice(0, 7) : safeBuild;
