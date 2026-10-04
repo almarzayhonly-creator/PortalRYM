@@ -30,6 +30,7 @@ function rowPriority(r:CanonicalRevisadoRow){return s(r.prioridad||r['priority']
 function rowMonth(r:CanonicalRevisadoRow){return s(r['mes_nombre']||r['mes']||r['mes_revisado']||r['mes_asignado']||r['ciclo_mes'])||'—'}
 function rowStatus2(r:CanonicalRevisadoRow){return s(r['status2']||r['estatus2']||r.estado)||'—'}
 function rowCupo(r:CanonicalRevisadoRow){return s(r['cupo_ecarcheck']||r['cupo_control']||r['cupo']||r['placa_comercial'])||'No aplica'}
+function rowColor(r:CanonicalRevisadoRow){return s(r['color_ecarcheck']||r['color_control']||r['color'])}
 function rowLastQuery(r:CanonicalRevisadoRow){return s(r['ecarcheck_ultima_consulta_at']||r['ecarcheck_ultima_consulta']||r['ultima_consulta_ecarcheck']||r['ecarcheck_at'])}
 function rowEcarError(r:CanonicalRevisadoRow){return s(r['ecarcheck_detalle']||r['ecarcheck_error_detail']||r['ecarcheck_error'])}
 function priorityTone(v:string){const x=n(v);if(x.includes('CRIT')||x.includes('URG'))return'high';if(x.includes('ALTA'))return'mid';if(x.includes('ACTUAL'))return'current';return'neutral'}
@@ -83,7 +84,7 @@ function detail(r:CanonicalRevisadoRow){
 <tbody>
 <tr v-for="r in pagedRows" :key="String(r.unidad_id||r.placa||r.unidad)" :data-priority="priorityTone(rowPriority(r))" tabindex="0" @dblclick="emit('open',r)" @keydown.enter="emit('open',r)">
   <td><span class="priority" :data-tone="priorityTone(rowPriority(r))">{{rowPriority(r)}}</span></td>
-  <td><div class="unit-company"><b>{{r.unidad||'—'}}</b><span>{{r.empresa||'—'}}</span></div></td>
+  <td><div class="unit-company"><b>{{r.unidad||'—'}}</b><span>{{r.empresa||'—'}}</span><small v-if="rowColor(r)" class="vehicle-color">{{rowColor(r)}}</small></div></td>
   <td><div class="plate-cupo"><span class="plate">{{r.placa||'—'}}</span><small>{{rowCupo(r)}}</small></div></td>
   <td><span class="month">{{rowMonth(r)}}</span></td>
   <td><div class="location"><b>{{r.galera||'—'}}</b><small>{{r.supervisora||'—'}}</small></div></td>
@@ -133,7 +134,8 @@ function detail(r:CanonicalRevisadoRow){
 .queue-table td{height:68px;padding:9px 11px;border-bottom:1px solid #E3EAF3;color:#203454;font-size:9px;vertical-align:middle;background:inherit}
 .queue-table tbody tr:nth-child(even){background:#FBFCFE}.queue-table tbody tr:hover,.queue-table tbody tr:focus{background:#F1F6FD;outline:0}
 .queue-table tbody tr[data-priority="high"] td:first-child{box-shadow:inset 4px 0 0 #E2473F}.queue-table tbody tr[data-priority="mid"] td:first-child{box-shadow:inset 4px 0 0 #F2A11A}.queue-table tbody tr[data-priority="current"] td:first-child{box-shadow:inset 4px 0 0 #5A7FBC}
-.unit-company,.plate-cupo,.location,.review{display:grid;align-content:center;gap:2px;min-width:0;text-align:left}.unit-company b,.location b,.review b{color:#0B214E;font-size:10px;line-height:1.2}.unit-company span,.plate-cupo small,.location small,.review small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6A7C94;font-size:7px;line-height:1.2}
+.unit-company,.plate-cupo,.location,.review{display:grid;align-content:center;gap:2px;min-width:0;text-align:left}.unit-company b,.location b,.review b{color:#0B214E;font-size:10px;line-height:1.2}.unit-company span,.unit-company small,.plate-cupo small,.location small,.review small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6A7C94;font-size:7px;line-height:1.2}
+.vehicle-color{color:#3E6EAA!important;font-weight:800;text-transform:capitalize}
 .plate{width:max-content;max-width:100%;padding:5px 7px;border:1px solid #AFC6E3;border-radius:6px;background:#F7FAFF;color:#123E86;font:850 8px/1 ui-monospace,monospace;letter-spacing:.05em}.month{white-space:nowrap;color:#314864}
 .priority{display:inline-flex;align-items:center;min-height:22px;padding:4px 7px;border-radius:999px;font-size:7px;font-weight:900;line-height:1}.priority[data-tone="high"]{background:#FFE7C2;color:#994A00}.priority[data-tone="mid"]{background:#FFF0C9;color:#936000}.priority[data-tone="current"]{background:#E4EDF9;color:#466383}.priority[data-tone="neutral"]{background:#EEF2F6;color:#65758A}
 .pending-pill{width:max-content;min-height:18px;display:inline-flex;align-items:center;padding:3px 6px;border-radius:999px;background:#FFE1DE;color:#AD281F;font-size:6px;font-weight:900;line-height:1}.status2{display:inline-flex;align-items:center;min-height:22px;max-width:100%;padding:4px 7px;border:1px solid #AFC9E8;border-radius:999px;background:#E9F2FF;color:#174EA6;font-size:7px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
@@ -183,7 +185,7 @@ function detail(r:CanonicalRevisadoRow){
 .queue-table th{font-size:8px;padding:11px 12px}
 .queue-table td{height:72px;font-size:10px;padding:10px 12px}
 .unit-company b,.location b,.review b{font-size:11px}
-.unit-company span,.plate-cupo small,.location small,.review small{font-size:8px}
+.unit-company span,.unit-company small,.plate-cupo small,.location small,.review small{font-size:8px}
 .plate{font-size:9px}
 .priority{font-size:8px;min-height:23px}
 .pending-pill{font-size:7px}
@@ -228,7 +230,7 @@ function detail(r:CanonicalRevisadoRow){
   font-size:10px;
 }
 .unit-company b,.location b,.review b{font-size:12px;line-height:1.25}
-.unit-company span,.plate-cupo small,.location small,.review small{font-size:9px;line-height:1.25}
+.unit-company span,.unit-company small,.plate-cupo small,.location small,.review small{font-size:9px;line-height:1.25}
 .plate{font-size:10px;padding:6px 8px}
 .month{font-size:10px}
 .priority{font-size:9px;min-height:24px;padding:5px 8px}
