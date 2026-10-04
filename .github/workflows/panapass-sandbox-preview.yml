@@ -70,11 +70,10 @@ jobs:
           from pathlib import Path
           import os
           build=os.environ['GITHUB_SHA']
-          Path('.sandbox').mkdir(exist_ok=True)
           worker=Path('worker.js').read_text().replace('__RYM_SANDBOX_BUILD__', build)
           if build not in worker: raise SystemExit('worker SHA injection failed')
-          Path('.sandbox/worker.preview.js').write_text(worker)
-          config=Path('wrangler.jsonc').read_text().replace('"main": "worker.js"', '"main": ".sandbox/worker.preview.js"')
+          Path('worker.preview.js').write_text(worker)
+          config=Path('wrangler.jsonc').read_text().replace('"main": "worker.js"', '"main": "worker.preview.js"')
           if 'worker.preview.js' not in config: raise SystemExit('preview config injection failed')
           Path('wrangler.preview.jsonc').write_text(config)
           PY
