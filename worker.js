@@ -1,3 +1,5 @@
+const SANDBOX_BUILD = "__RYM_SANDBOX_BUILD__";
+
 export default {
   async fetch(request, env) {
     const response = await env.ASSETS.fetch(request);
@@ -25,9 +27,11 @@ export default {
 
       const embeddedBuild = html.match(/data-sandbox-build=["']([^"']+)["']/i)?.[1] || "";
       const requestUrl = new URL(request.url);
-      const requestedBuild = requestUrl.searchParams.get("sandboxBuild") || embeddedBuild || "sandbox-live";
+      const compiledBuild = SANDBOX_BUILD !== "__RYM_SANDBOX_BUILD__" ? SANDBOX_BUILD : "";
+      const requestedBuild = compiledBuild || embeddedBuild || requestUrl.searchParams.get("sandboxBuild") || "sandbox-live";
       const safeBuild = String(requestedBuild).replace(/[^a-zA-Z0-9._-]/g, "").slice(0, 80) || "sandbox-live";
       const shortBuild = safeBuild.length > 7 ? safeBuild.slice(0, 7) : safeBuild;
+      if (isSandbox) headers.set("x-rym-sandbox-build", safeBuild);
 
       const staleSandboxCss = /<link\b[^>]*href=["'][^"']*\/css\/panapass-sandbox\/tokens\.css(?:\?[^"']*)?["'][^>]*>/gi;
       const staleSandboxBadge = /<div\b[^>]*class=["'][^"']*pps-sandbox-badge[^"']*["'][^>]*>[\s\S]*?<\/div\s*>/gi;
