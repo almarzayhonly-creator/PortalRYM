@@ -41,14 +41,21 @@ function rowMonth(r:CanonicalRevisadoRow){ return s(r['mes_nombre'] || r['mes'] 
 function rowStatus2(r:CanonicalRevisadoRow){ return s(r['status2'] || r['estatus2'] || r.estado) || 'Sin Estatus 2' }
 function rowCupo(r:CanonicalRevisadoRow){ return s(r['cupo_ecarcheck'] || r['cupo_control'] || r['cupo'] || r['placa_comercial']) }
 function rowLastQuery(r:CanonicalRevisadoRow){ return s(r['ficha_ecarcheck_at'] || r['ecarcheck_ultima_consulta'] || r['ultima_consulta_ecarcheck'] || r['ecarcheck_at'] || r['ecarcheck_actualizado_at']) }
-function rowEcarError(r:CanonicalRevisadoRow){ return s(r['ecarcheck_error'] || r['ficha_ecarcheck_error'] || r['error_ecarcheck']) }
-function rowHasAlert(r:CanonicalRevisadoRow){
-  return Boolean(r.bloqueado || r['boleta_empresa'] || r['boleta_pendiente'] || (Array.isArray(r.alerts)&&r.alerts.length) || (Array.isArray(r.incidencias_abiertas)&&r.incidencias_abiertas.length))
+function rowEcarError(r:CanonicalRevisadoRow){ return s(r['ecarcheck_error_detail'] || r['ecarcheck_error'] || r['ficha_ecarcheck_error'] || r['error_ecarcheck']) }
+function rowEcarCategories(r:CanonicalRevisadoRow){
+  return Array.isArray(r['ecarcheck_categorias']) ? r['ecarcheck_categorias'] as Array<Record<string,unknown>> : []
 }
 function rowEcarState(r:CanonicalRevisadoRow){
-  if(rowEcarError(r)) return 'ERROR'
-  if(rowHasAlert(r)) return 'ALERTA'
-  if(rowLastQuery(r)) return 'OK'
+  const state=n(r['ecarcheck_estado'])
+  const cats=rowEcarCategories(r)
+  if(state==='ERROR' || cats.some(x=>n(x.tipo)==='ERROR_RESPUESTA')) return 'ERROR'
+  if(state==='PENDIENTE' || n(r['ecarcheck_tipo_resultado']).includes('PENDIENTE')) return 'PENDIENTE'
+  if(state==='BLOQUEADO' || cats.some(x=>[
+    'BOLETA_PLACA','ENA_EMPRESA_DOCUMENTO',
+    'RESTRICCION_PLACA_HURTO','RESTRICCION_PLACA_COLISION_FUGA',
+    'RESTRICCION_PLACA_COLISION','RESTRICCION_PLACA_FUGA'
+  ].includes(n(x.tipo)))) return 'ALERTA'
+  if(state==='OK' || rowLastQuery(r)) return 'OK'
   return 'SIN CONSULTA'
 }
 function matchesSearch(r:CanonicalRevisadoRow){
@@ -104,12 +111,16 @@ const filteredRows=computed(()=>props.rows.filter(r=>matchesFilters(r)).sort((a,
 }))
 
 const filteredCounters=computed(()=>{
-  let ok=0,alert=0,error=0,noQuery=0
+  let ok=0,alert=0,error=0,pendingEcar=0,noQuery=0
   for(const row of filteredRows.value){
     const state=rowEcarState(row)
-    if(state==='OK')ok++; else if(state==='ALERTA')alert++; else if(state==='ERROR')error++; else noQuery++
+    if(state==='OK')ok++
+    else if(state==='ALERTA')alert++
+    else if(state==='ERROR')error++
+    else if(state==='PENDIENTE')pendingEcar++
+    else noQuery++
   }
-  return {pending:filteredRows.value.length,ok,alert,error,noQuery}
+  return {pending:filteredRows.value.length,ok,alert,error,pendingEcar,noQuery}
 })
 
 const priorityCards=computed(()=>{
@@ -222,7 +233,8 @@ async function copyList(){
       <div class="summary-main"><small>COLA EN CONTEXTO</small><b>{{num(filteredCounters.pending)}}</b><span>unidades</span></div>
       <div class="summary-stat ok"><i></i><span><b>{{num(filteredCounters.ok)}}</b> eCarCheck OK</span></div>
       <div class="summary-stat warn"><i></i><span><b>{{num(filteredCounters.alert)}}</b> con alerta</span></div>
-      <div class="summary-stat danger"><i></i><span><b>{{num(filteredCounters.error)}}</b> con error</span></div>
+      <div v-if="filteredCounters.error" class="summary-stat danger"><i></i><span><b>{{num(filteredCounters.error)}}</b> con error</span></div>
+      <div v-if="filteredCounters.pendingEcar" class="summary-stat pending"><i></i><span><b>{{num(filteredCounters.pendingEcar)}}</b> por reconsultar</span></div>
       <div class="summary-stat neutral"><i></i><span><b>{{num(filteredCounters.noQuery)}}</b> sin consulta</span></div>
     </div>
   </section>
@@ -397,4 +409,9 @@ async function copyList(){
   .ops-heading-metrics{overflow:hidden}
   .summary-stat span{white-space:normal}
 }
+</style>
+
+<style scoped>
+.summary-stat.pending{border-left:3px solid #5B7BE8;background:#F1F5FF}
+.summary-stat.pending i{background:#5B7BE8}
 </style>
