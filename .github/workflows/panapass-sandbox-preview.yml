@@ -58,7 +58,7 @@ jobs:
           if pos < 0: raise SystemExit('body end not found')
           p.write_text(s[:pos]+marker+s[pos:])
           PY
-      - name: Deploy isolated Cloudflare Preview
+      - name: Deploy isolated Cloudflare preview
         id: deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -66,47 +66,64 @@ jobs:
         run: |
           EXPECTED_ASSET=$(grep -Eo '/vue/dist/assets/[^" ]+\.js' vue/dist/index.html | head -1)
           test -n "$EXPECTED_ASSET"
-          npx --yes wrangler@latest preview --name sandbox-panapass-v2 --message "sandbox ${GITHUB_SHA}"
-          echo "preview_url=https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev" >> "$GITHUB_OUTPUT"
+          npx --yes wrangler@latest versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
+          VERSION_URL=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
+          test -n "$VERSION_URL"
+          echo "version_url=$VERSION_URL" >> "$GITHUB_OUTPUT"
+          echo "alias_url=https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev" >> "$GITHUB_OUTPUT"
           echo "expected_asset=$EXPECTED_ASSET" >> "$GITHUB_OUTPUT"
-
-      - name: Verify stable Preview
+          echo "Version preview: $VERSION_URL"
+          echo "Alias preview: https://sandbox-panapass-v2-portal-ena-rym.almarzayhonly.workers.dev"
+      - name: Verify immutable version preview
         env:
-          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
+          VERSION_URL: ${{ steps.deploy.outputs.version_url }}
           EXPECTED_ASSET: ${{ steps.deploy.outputs.expected_asset }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          for attempt in $(seq 1 18); do
-            curl -fsSL "$PREVIEW_URL/?sandboxBuild=$GITHUB_SHA&revisadosVue=1" -o /tmp/preview-root.html || true
-            curl -fsSL "$PREVIEW_URL/modules/panapass-sandbox/dashboard/index.js?v=$GITHUB_SHA" -o /tmp/sandbox.js || true
-            curl -fsSL "$PREVIEW_URL/modules/v171-loader.js?v=$GITHUB_SHA" -o /tmp/loader.js || true
-            curl -fsSL "$PREVIEW_URL/modules/revisados/index.js?v=$GITHUB_SHA" -o /tmp/revisados.js || true
-            curl -fsSL "$PREVIEW_URL/vue/dist/index.html?build=$GITHUB_SHA" -o /tmp/vue.html || true
-
+          curl -fsSL "$VERSION_URL/?sandbox=1&revisadosVue=1" -o /tmp/index.html
+          curl -fsSL "$VERSION_URL/modules/panapass-sandbox/dashboard/index.js" -o /tmp/sandbox.js
+          curl -fsSL "$VERSION_URL/modules/v171-loader.js" -o /tmp/loader.js
+          curl -fsSL "$VERSION_URL/modules/revisados/index.js" -o /tmp/revisados.js
+          curl -fsSL "$VERSION_URL/vue/dist/index.html" -o /tmp/vue.html
+          grep -Fq 'panapass-sandbox/tokens.css' /tmp/index.html
+          grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js
+          grep -Fq 'dashboard-v2/index.js' /tmp/loader.js
+          grep -Fq 'RYM_REVISADOS_BRIDGE' /tmp/revisados.js
+          grep -Fq 'bust(src)' /tmp/revisados.js
+          grep -Fq "$EXPECTED_ASSET" /tmp/vue.html
+          curl -fsSL "$VERSION_URL$EXPECTED_ASSET?v=$GITHUB_SHA" -o /tmp/vue-bundle.js
+          grep -Fq 'data-ui-source' /tmp/vue-bundle.js
+          grep -Fq 'rv-brand-dark' /tmp/vue-bundle.js
+          grep -Fq 'rv-global-control' /tmp/vue-bundle.js
+          curl -fsSI "$VERSION_URL$EXPECTED_ASSET?v=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
+      - name: Verify canonical alias propagation
+        env:
+          ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
+          EXPECTED_ASSET: ${{ steps.deploy.outputs.expected_asset }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          for attempt in $(seq 1 12); do
+            curl -fsSL "$ALIAS_URL/?sandboxBuild=$GITHUB_SHA" -o /tmp/alias-root.html || true
+            curl -fsSL "$ALIAS_URL/vue/dist/index.html?build=$GITHUB_SHA" -o /tmp/alias-vue.html || true
             ROOT_OK=0
             VUE_OK=0
-            grep -Fq "PANAPASS · SANDBOX V2 · ${GITHUB_SHA:0:7}" /tmp/preview-root.html && ROOT_OK=$((ROOT_OK+1)) || true
-            grep -Fq "/modules/v171-loader.js?v=$GITHUB_SHA" /tmp/preview-root.html && ROOT_OK=$((ROOT_OK+1)) || true
-            grep -Fq 'PANAPASS_SANDBOX_V2' /tmp/sandbox.js && ROOT_OK=$((ROOT_OK+1)) || true
-            grep -Fq 'RYM_REVISADOS_BRIDGE' /tmp/revisados.js && ROOT_OK=$((ROOT_OK+1)) || true
-            grep -Fq "$EXPECTED_ASSET" /tmp/vue.html && VUE_OK=1 || true
-
-            if [ "$ROOT_OK" -eq 4 ] && [ "$VUE_OK" -eq 1 ]; then
-              curl -fsSL "$PREVIEW_URL$EXPECTED_ASSET?v=$GITHUB_SHA" -o /tmp/vue-bundle.js || true
+            grep -Fq "PANAPASS · SANDBOX V2 · ${GITHUB_SHA:0:7}" /tmp/alias-root.html && ROOT_OK=1 || true
+            grep -Fq "/modules/v171-loader.js?v=$GITHUB_SHA" /tmp/alias-root.html && ROOT_OK=$((ROOT_OK+1)) || true
+            grep -Fq "$EXPECTED_ASSET" /tmp/alias-vue.html && VUE_OK=1 || true
+            if [ "$ROOT_OK" -eq 2 ] && [ "$VUE_OK" -eq 1 ]; then
+              curl -fsSL "$ALIAS_URL$EXPECTED_ASSET?v=$GITHUB_SHA" -o /tmp/alias-vue-bundle.js || true
               BUNDLE_OK=0
-              grep -Fq 'data-ui-source' /tmp/vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
-              grep -Fq 'rv-brand-dark' /tmp/vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
-              grep -Fq 'rv-global-control' /tmp/vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              grep -Fq 'data-ui-source' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              grep -Fq 'rv-brand-dark' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
+              grep -Fq 'rv-global-control' /tmp/alias-vue-bundle.js && BUNDLE_OK=$((BUNDLE_OK+1)) || true
               if [ "$BUNDLE_OK" -eq 3 ]; then
-                echo "Stable Preview updated to $GITHUB_SHA on attempt $attempt"
+                echo "Alias root + Stitch Vue bundle propagated on attempt $attempt"
+                curl -fsSI "$ALIAS_URL$EXPECTED_ASSET?v=$GITHUB_SHA" | grep -qi '^HTTP/.* 200'
                 exit 0
               fi
             fi
-
-            echo "Preview not fully propagated yet (attempt $attempt/18, root=$ROOT_OK/4, vue=$VUE_OK/1)"
+            echo "Alias has not fully propagated (attempt $attempt/12, root=$ROOT_OK/2, vue=$VUE_OK/1)"
             sleep 5
           done
-
-          echo "Stable Preview did not propagate the requested build." >&2
+          echo "Alias root or Vue bundle did not propagate correctly." >&2
           exit 1
-
