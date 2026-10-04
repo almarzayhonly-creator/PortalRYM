@@ -44,8 +44,14 @@
       badge.className='pps-sandbox-badge';
       d.body.appendChild(badge);
     }
-    const shortBuild=runtimeBuild?runtimeBuild.slice(0,7):'BUILD DESCONOCIDO';
-    badge.setAttribute('data-sandbox-build',runtimeBuild||'unknown');
+
+    const embedded=String(badge.getAttribute('data-sandbox-build')||'').trim();
+    const verifiedEmbedded=/^[0-9a-f]{40}$/i.test(embedded)?embedded:'';
+    const verifiedRuntime=/^[0-9a-f]{40}$/i.test(runtimeBuild)?runtimeBuild:'';
+    const build=verifiedEmbedded||verifiedRuntime;
+    const shortBuild=build?build.slice(0,7):'BUILD DESCONOCIDO';
+
+    badge.setAttribute('data-sandbox-build',build||'unknown');
     badge.textContent='PANAPASS · SANDBOX V2 · '+shortBuild;
   };
   d.readyState==='loading'?d.addEventListener('DOMContentLoaded',()=>{mark();startRevGuard()},{once:true}):(mark(),startRevGuard());
