@@ -177,11 +177,61 @@ function retryLookup(){
 }
 
 async function copyList(){
-  const text=filteredRows.value.map(r=>[
-    rowPriority(r),s(r.unidad)||'—',s(r.empresa)||'—',rowColor(r)||'—',s(r.placa)||'—',rowCupo(r)||'—',
-    rowMonth(r),s(r.galera)||'—',s(r.supervisora)||'—',rowStatus2(r),rowEcarState(r)
-  ].join(' | ')).join('\n')
-  try{await navigator.clipboard?.writeText(text)}catch{}
+  const rows=filteredRows.value
+  if(!rows.length)return
+
+  const unique=(values:string[])=>[...new Set(values.filter(Boolean))]
+  const galeraLabel=unique(rows.map(r=>s(r.galera)||'Sin galera')).join(', ')
+  const monthLabel=unique(rows.map(rowMonth)).join(', ')
+  const okCount=rows.filter(r=>rowEcarState(r)==='OK').length
+  const alertCount=rows.filter(r=>rowEcarState(r)==='ALERTA').length
+  const pendingCount=rows.filter(r=>rowEcarState(r)==='PENDIENTE').length
+  const errorCount=rows.filter(r=>rowEcarState(r)==='ERROR').length
+
+  const groups=new Map<string,CanonicalRevisadoRow[]>()
+  for(const row of rows){
+    const supervisor=s(row.supervisora)||'Sin supervisora'
+    if(!groups.has(supervisor))groups.set(supervisor,[])
+    groups.get(supervisor)!.push(row)
+  }
+
+  const lines:string[]=[
+    '*Portal RYM · Revisados*',
+    `*${galeraLabel || 'Todas las galeras'}* · ${monthLabel || 'Todos los meses'}`,
+    `*Unidades:* ${rows.length} · *eCarCheck OK:* ${okCount}${alertCount? ` · *Alertas:* ${alertCount}`:''}${pendingCount? ` · *Pendientes:* ${pendingCount}`:''}${errorCount? ` · *Errores:* ${errorCount}`:''}`,
+    ''
+  ]
+
+  for(const [supervisor,items] of [...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0],'es'))){
+    lines.push(`*${supervisor}* · ${items.length}`)
+    for(const row of items){
+      const unit=s(row.unidad)||'—'
+      const plate=s(row.placa)||'—'
+      const company=s(row.empresa)||'—'
+      const color=rowColor(row)||'—'
+      const status=rowStatus2(row)
+      const ecar=rowEcarState(row)
+      const issue=ecar==='OK' && n(status)==='ACTIVO' ? '' : ` · ${status}/${ecar}`
+      lines.push(`• ${unit} · ${plate} · ${color} · ${company}${issue}`)
+    }
+    lines.push('')
+  }
+
+  const text=lines.join('\n').trim()
+
+  try{
+    await navigator.clipboard.writeText(text)
+  }catch{
+    const area=document.createElement('textarea')
+    area.value=text
+    area.style.position='fixed'
+    area.style.opacity='0'
+    document.body.appendChild(area)
+    area.focus()
+    area.select()
+    document.execCommand('copy')
+    area.remove()
+  }
 }
 
 function formatPanamaDateOnly(v:unknown){
@@ -685,7 +735,12 @@ function exportPdf(){
       <small>Ordenada por prioridad y antigüedad.</small>
     </div>
     <div class="export-actions">
-      <button class="export-copy" type="button" @click="copyList"><RymIcon name="content_copy" :size="14"/> Copiar lista</button>
+      <button class="export-copy ws-copy" type="button" aria-label="Copiar resumen para WhatsApp" @click="copyList">
+        <svg class="ws-logo" viewBox="0 0 32 32" aria-hidden="true">
+          <path fill="currentColor" d="M16.02 3.2A12.76 12.76 0 0 0 5.1 22.55L3.2 28.8l6.43-1.84a12.8 12.8 0 1 0 6.39-23.76Zm0 2.55a10.24 10.24 0 0 1 8.86 15.36 10.21 10.21 0 0 1-13.66 3.8l-.47-.28-3.81 1.09 1.12-3.71-.3-.48A10.22 10.22 0 0 1 16.02 5.75Zm-5.68 4.28c-.24 0-.62.09-.95.45-.33.36-1.25 1.22-1.25 2.98 0 1.75 1.28 3.45 1.46 3.69.18.24 2.51 3.83 6.08 5.37.85.37 1.51.58 2.03.74.85.27 1.63.23 2.24.14.68-.1 2.1-.86 2.4-1.69.3-.82.3-1.53.21-1.68-.09-.15-.33-.24-.7-.42-.36-.18-2.1-1.04-2.43-1.16-.32-.12-.56-.18-.8.18-.23.36-.91 1.16-1.12 1.4-.2.24-.41.27-.77.09-.36-.18-1.52-.56-2.89-1.79-1.07-.95-1.79-2.13-2-2.49-.21-.36-.02-.56.16-.74.16-.16.36-.41.54-.62.18-.21.24-.36.36-.6.12-.24.06-.45-.03-.62-.09-.18-.8-1.93-1.1-2.64-.28-.69-.58-.6-.8-.61h-.66Z"/>
+        </svg>
+        WhatsApp
+      </button>
       <button class="export-excel" type="button" @click="exportExcel"><span class="app-mark">X</span> Excel</button>
       <button class="export-pdf" type="button" @click="exportPdf"><span class="app-mark">PDF</span> PDF</button>
     </div>
@@ -769,6 +824,9 @@ function exportPdf(){
 
 .queue-head>.export-actions{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;justify-content:flex-end!important;flex:0 0 auto!important}
 .export-actions button{min-height:36px!important}
+.ws-copy{border-color:#9DDFC0!important;color:#128C5E!important;background:#F2FFF8!important}
+.ws-copy:hover{background:#E9FFF2!important;border-color:#25D366!important}
+.ws-logo{width:17px;height:17px;display:block;flex:0 0 17px;color:#25D366}
 .export-excel{border-color:#A7D4B4!important;color:#17663A!important;background:#F2FBF5!important}
 .export-pdf{border-color:#E9B3B3!important;color:#A32424!important;background:#FFF5F5!important}
 .app-mark{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;font-size:7px;font-weight:900;background:currentColor;color:#fff}
