@@ -66,7 +66,18 @@ jobs:
         run: |
           EXPECTED_ASSET=$(grep -Eo '/vue/dist/assets/[^" ]+\.js' vue/dist/index.html | head -1)
           test -n "$EXPECTED_ASSET"
-          npx --yes wrangler@latest versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          build=os.environ['GITHUB_SHA']
+          worker=Path('worker.js').read_text().replace('__RYM_SANDBOX_BUILD__', build)
+          if build not in worker: raise SystemExit('worker SHA injection failed')
+          Path('.sandbox/worker.preview.js').write_text(worker)
+          config=Path('wrangler.jsonc').read_text().replace('"main": "worker.js"', '"main": ".sandbox/worker.preview.js"')
+          if 'worker.preview.js' not in config: raise SystemExit('preview config injection failed')
+          Path('.sandbox/wrangler.preview.jsonc').write_text(config)
+          PY
+          npx --yes wrangler@latest --config .sandbox/wrangler.preview.jsonc versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
           VERSION_URL=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
           test -n "$VERSION_URL"
           echo "version_url=$VERSION_URL" >> "$GITHUB_OUTPUT"
