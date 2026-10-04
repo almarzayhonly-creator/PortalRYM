@@ -66,8 +66,6 @@ jobs:
         run: |
           EXPECTED_ASSET=$(grep -Eo '/vue/dist/assets/[^" ]+\.js' vue/dist/index.html | head -1)
           test -n "$EXPECTED_ASSET"
-          sed -i "s/__RYM_SANDBOX_BUILD__/$GITHUB_SHA/g" worker.js
-          grep -Fq "$GITHUB_SHA" worker.js
           npx --yes wrangler@latest versions upload --preview-alias sandbox-panapass-v2 2>&1 | tee /tmp/wrangler.out
           VERSION_URL=$(grep -Eo 'https://[a-f0-9-]+-portal-ena-rym\.almarzayhonly\.workers\.dev' /tmp/wrangler.out | head -1)
           test -n "$VERSION_URL"
@@ -107,11 +105,11 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: |
           for attempt in $(seq 1 12); do
-            curl -fsSL "$ALIAS_URL/?sandboxBuild=$GITHUB_SHA" -o /tmp/alias-root.html || true
-            curl -fsSL "$ALIAS_URL/vue/dist/index.html?build=$GITHUB_SHA" -o /tmp/alias-vue.html || true
+            curl -fsSL "$ALIAS_URL/?sandbox=1&revisadosVue=1" -o /tmp/alias-root.html || true
+            curl -fsSL "$ALIAS_URL/vue/dist/index.html" -o /tmp/alias-vue.html || true
             ROOT_OK=0
             VUE_OK=0
-            grep -Fq "PANAPASS · SANDBOX V2 · ${GITHUB_SHA:0:7}" /tmp/alias-root.html && ROOT_OK=1 || true
+            grep -Fq "data-sandbox-build=\"$GITHUB_SHA\"" /tmp/alias-root.html && ROOT_OK=1 || true
             grep -Fq "/modules/v171-loader.js?v=$GITHUB_SHA" /tmp/alias-root.html && ROOT_OK=$((ROOT_OK+1)) || true
             grep -Fq "$EXPECTED_ASSET" /tmp/alias-vue.html && VUE_OK=1 || true
             if [ "$ROOT_OK" -eq 2 ] && [ "$VUE_OK" -eq 1 ]; then
