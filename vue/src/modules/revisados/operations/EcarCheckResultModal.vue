@@ -70,6 +70,16 @@ const serviceMessages=computed(()=>{
   return out
 })
 
+const semanticStatusLabel=computed(()=>{
+  const status=Number(result.value?.status||0)
+  const detail=text(result.value?.detalle,'').toUpperCase()
+  const type=text(result.value?.tipo_resultado,'').toUpperCase()
+  if(status>=500 || detail.includes('INTERMITEN') || detail.includes('NO ESTÁ DISPONIBLE') || detail.includes('SATURADO')) return 'Servicio ATTT no disponible'
+  if(type.includes('BLOQUEADO')) return 'Bloqueo reportado por eCarCheck'
+  if(type.includes('OK') || type.includes('FICHA') || status===200) return 'Consulta completada'
+  return text(result.value?.tipo_resultado || 'Resultado recibido')
+})
+
 const statusTone=computed(()=>{
   const status=Number(result.value?.status||0)
   const type=text(result.value?.tipo_resultado,'').toUpperCase()
@@ -103,7 +113,7 @@ const statusTone=computed(()=>{
             <section class="status-banner" :data-tone="statusTone">
               <div>
                 <small>ESTADO GENERAL</small>
-                <b>{{ text(result?.tipo_resultado || (result?.status===200?'OK':'Resultado recibido')) }}</b>
+                <b>{{ semanticStatusLabel }}</b>
               </div>
               <span>Consulta {{ dateText(result?.consultado_en || tickets?.consultadoEn) }}</span>
             </section>
@@ -159,7 +169,7 @@ const statusTone=computed(()=>{
             <section class="meta-strip">
               <span><small>HTTP</small><b>{{ text(result?.status) }}</b></span>
               <span><small>Bridge</small><b>{{ text(result?.bridge_version) }}</b></span>
-              <span><small>Tipo</small><b>{{ text(result?.tipo_resultado) }}</b></span>
+              <span><small>Resultado técnico</small><b>{{ text(result?.tipo_resultado) }}</b></span>
             </section>
           </div>
 
