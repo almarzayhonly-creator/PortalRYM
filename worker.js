@@ -37,12 +37,19 @@ export default {
       const staleSandboxLoader = /<script\b[^>]*src=["'][^"']*\/modules\/v171-loader\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script\s*>/gi;
       const staleSandboxGuard = /<script\b[^>]*src=["'][^"']*\/modules\/panapass-sandbox\/dashboard\/index\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script\s*>/gi;
 
+      const sandboxHead = isSandbox
+        ? '<meta name="rym-sandbox-build" content="'+safeBuild+'">'
+          + '<style id="rym-sandbox-build-style">html::after{content:"PANAPASS · SANDBOX V2 · '+shortBuild+'";position:fixed;right:14px;bottom:14px;z-index:2147483647;padding:8px 11px;border:1px solid #b9d6ff;border-radius:999px;background:#103d79;color:#fff;font:800 11px/1 system-ui,sans-serif;box-shadow:0 8px 22px rgba(16,61,121,.22);letter-spacing:.04em;pointer-events:none}</style>'
+        : '';
+
       const sandboxRuntime = isSandbox
         ? '<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v='+encodeURIComponent(safeBuild)+'">'
-          + '<div class="pps-sandbox-badge" data-sandbox-build="'+safeBuild+'" style="position:fixed;right:14px;bottom:14px;z-index:2147483647;padding:8px 11px;border:1px solid #b9d6ff;border-radius:999px;background:#103d79;color:#fff;font:800 11px/1 system-ui,sans-serif;box-shadow:0 8px 22px rgba(16,61,121,.22);letter-spacing:.04em">PANAPASS · SANDBOX V2 · '+shortBuild+'</div>'
           + '<script id="rym-v171-loader" src="/modules/v171-loader.js?v='+encodeURIComponent(safeBuild)+'" defer></script>'
           + '<script id="rym-sandbox-v2-guard" src="/modules/panapass-sandbox/dashboard/index.js?v='+encodeURIComponent(safeBuild)+'" defer></script>'
         : '';
+
+      const staleSandboxBuildMeta = /<meta\b[^>]*name=["']rym-sandbox-build["'][^>]*>/gi;
+      const staleSandboxBuildStyle = /<style\b[^>]*id=["']rym-sandbox-build-style["'][^>]*>[\s\S]*?<\/style\s*>/gi;
 
       let body = html
         .replace(staleInline, "")
@@ -50,7 +57,17 @@ export default {
         .replace(staleSandboxCss, "")
         .replace(staleSandboxBadge, "")
         .replace(staleSandboxLoader, "")
-        .replace(staleSandboxGuard, "");
+        .replace(staleSandboxGuard, "")
+        .replace(staleSandboxBuildMeta, "")
+        .replace(staleSandboxBuildStyle, "");
+
+      const headEnd = body.toLowerCase().lastIndexOf("</head>");
+      if (sandboxHead) {
+        body = headEnd >= 0
+          ? body.slice(0, headEnd) + sandboxHead + body.slice(headEnd)
+          : sandboxHead + body;
+      }
+
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
         ? body.slice(0, bodyEnd) + owner + rankingOwner + sandboxRuntime + body.slice(bodyEnd)
