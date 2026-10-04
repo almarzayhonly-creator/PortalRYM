@@ -184,6 +184,28 @@ async function copyList(){
   try{await navigator.clipboard?.writeText(text)}catch{}
 }
 
+function formatPanamaDateOnly(v:unknown){
+  const raw=s(v)
+  if(!raw)return '—'
+  const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if(iso)return `${iso[3]}/${iso[2]}/${iso[1]}`
+  const date=new Date(raw)
+  if(Number.isNaN(date.getTime()))return raw
+  return new Intl.DateTimeFormat('es-PA',{
+    day:'2-digit',month:'2-digit',year:'numeric',timeZone:'America/Panama'
+  }).format(date)
+}
+function formatPanamaDateTime(v:unknown){
+  const raw=s(v)
+  if(!raw)return '—'
+  const date=new Date(raw)
+  if(Number.isNaN(date.getTime()))return raw
+  return new Intl.DateTimeFormat('es-PA',{
+    day:'2-digit',month:'2-digit',year:'numeric',
+    hour:'numeric',minute:'2-digit',hour12:true,
+    timeZone:'America/Panama'
+  }).format(date)
+}
 function exportRows(){
   return filteredRows.value.map(r=>({
     Prioridad:rowPriority(r),
@@ -195,10 +217,10 @@ function exportRows(){
     Mes:rowMonth(r),
     Galera:s(r.galera)||'—',
     Supervisora:s(r.supervisora)||'—',
-    'Último revisado':s(r.ultimo_revisado)||'—',
+    'Último revisado':formatPanamaDateOnly(r.ultimo_revisado),
     'Estatus 2':rowStatus2(r),
     eCarCheck:rowEcarState(r),
-    'Última consulta eCarCheck':rowLastQuery(r)||'—'
+    'Última consulta eCarCheck':formatPanamaDateTime(rowLastQuery(r))
   }))
 }
 function exportContext(){
@@ -261,7 +283,7 @@ function exportExcel(){
       'Prioridad','Unidad','Empresa','Color','Placa','Cupo','Mes','Galera','Supervisora',
       'Último revisado','Estatus 2','eCarCheck','Última consulta eCarCheck'
     ]
-    const widths=[72,62,150,78,76,76,76,100,112,112,130,88,150]
+    const widths=[78,66,170,90,84,88,90,105,120,104,138,96,158]
 
     const titleRow=`<Row ss:Height="28"><Cell ss:MergeAcross="12" ss:StyleID="Title"><Data ss:Type="String">PORTAL RYM · REVISADOS · OPERACIONES</Data></Cell></Row>`
     const metaRow=`<Row ss:Height="20"><Cell ss:MergeAcross="12" ss:StyleID="Meta"><Data ss:Type="String">${xmlEscape(`Exportado: ${localExportDate()} · Registros: ${rows.length}`)}</Data></Cell></Row>`
@@ -270,8 +292,13 @@ function exportExcel(){
 
     const dataRows=rows.map((row,index)=>{
       const values=headers.map(key=>String((row as Record<string,string>)[key]??''))
-      const style=index%2===0?'Alt':'Cell'
-      return `<Row>${values.map(value=>excelXmlCell(value,style)).join('')}</Row>`
+      return `<Row ss:AutoFitHeight="1">${values.map((value,columnIndex)=>{
+        const isDate=columnIndex===9||columnIndex===12
+        const style=isDate
+          ? (index%2===0?'AltDate':'DateCell')
+          : (index%2===0?'Alt':'Cell')
+        return excelXmlCell(value,style)
+      }).join('')}</Row>`
     }).join('')
 
     const columns=widths.map(width=>`<Column ss:AutoFitWidth="0" ss:Width="${width}"/>`).join('')
@@ -310,7 +337,7 @@ function exportExcel(){
    </Borders>
   </Style>
   <Style ss:ID="Cell">
-   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
     <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
@@ -319,7 +346,26 @@ function exportExcel(){
    </Borders>
   </Style>
   <Style ss:ID="Alt">
-   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
+   <Interior ss:Color="#F8FAFD" ss:Pattern="Solid"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="DateCell">
+   <Alignment ss:Vertical="Center" ss:Horizontal="Left" ss:WrapText="0"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="AltDate">
+   <Alignment ss:Vertical="Center" ss:Horizontal="Left" ss:WrapText="0"/>
    <Interior ss:Color="#F8FAFD" ss:Pattern="Solid"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D8E2ED"/>
