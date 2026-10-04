@@ -1,5 +1,3 @@
-const SANDBOX_BUILD = "__RYM_SANDBOX_BUILD__";
-
 export default {
   async fetch(request, env) {
     const response = await env.ASSETS.fetch(request);
@@ -25,22 +23,15 @@ export default {
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
 
-      const compiledBuild = /^[0-9a-f]{40}$/i.test(SANDBOX_BUILD) ? SANDBOX_BUILD : "";
       const embeddedBuild = html.match(/data-sandbox-build=["']([0-9a-f]{40})["']/i)?.[1] || "";
-      const verifiedBuild = compiledBuild || embeddedBuild;
+      const verifiedBuild = embeddedBuild;
       const safeBuild = verifiedBuild || "unknown";
       const shortBuild = verifiedBuild ? verifiedBuild.slice(0, 7) : "BUILD DESCONOCIDO";
       if (isSandbox) headers.set("x-rym-sandbox-build", safeBuild);
 
       const staleSandboxCss = /<link\b[^>]*href=["'][^"']*\/css\/panapass-sandbox\/tokens\.css(?:\?[^"']*)?["'][^>]*>/gi;
-      const staleSandboxBadge = /<div\b[^>]*class=["'][^"']*pps-sandbox-badge[^"']*["'][^>]*>[\s\S]*?<\/div\s*>/gi;
       const staleSandboxLoader = /<script\b[^>]*src=["'][^"']*\/modules\/v171-loader\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script\s*>/gi;
       const staleSandboxGuard = /<script\b[^>]*src=["'][^"']*\/modules\/panapass-sandbox\/dashboard\/index\.js(?:\?[^"']*)?["'][^>]*>\s*<\/script\s*>/gi;
-
-      const sandboxHead = isSandbox
-        ? '<meta name="rym-sandbox-build" content="'+safeBuild+'">'
-          + '<style id="rym-sandbox-build-style">html::after{content:"PANAPASS · SANDBOX V2 · '+shortBuild+'";position:fixed;right:14px;bottom:14px;z-index:2147483647;padding:8px 11px;border:1px solid #b9d6ff;border-radius:999px;background:#103d79;color:#fff;font:800 11px/1 system-ui,sans-serif;box-shadow:0 8px 22px rgba(16,61,121,.22);letter-spacing:.04em;pointer-events:none}</style>'
-        : '';
 
       const sandboxRuntime = isSandbox
         ? '<link rel="stylesheet" href="/css/panapass-sandbox/tokens.css?v='+encodeURIComponent(safeBuild)+'">'
@@ -48,25 +39,12 @@ export default {
           + '<script id="rym-sandbox-v2-guard" src="/modules/panapass-sandbox/dashboard/index.js?v='+encodeURIComponent(safeBuild)+'" defer></script>'
         : '';
 
-      const staleSandboxBuildMeta = /<meta\b[^>]*name=["']rym-sandbox-build["'][^>]*>/gi;
-      const staleSandboxBuildStyle = /<style\b[^>]*id=["']rym-sandbox-build-style["'][^>]*>[\s\S]*?<\/style\s*>/gi;
-
       let body = html
         .replace(staleInline, "")
         .replace(staleExternal, "")
         .replace(staleSandboxCss, "")
-        .replace(staleSandboxBadge, "")
         .replace(staleSandboxLoader, "")
-        .replace(staleSandboxGuard, "")
-        .replace(staleSandboxBuildMeta, "")
-        .replace(staleSandboxBuildStyle, "");
-
-      const headEnd = body.toLowerCase().lastIndexOf("</head>");
-      if (sandboxHead) {
-        body = headEnd >= 0
-          ? body.slice(0, headEnd) + sandboxHead + body.slice(headEnd)
-          : sandboxHead + body;
-      }
+        .replace(staleSandboxGuard, "");
 
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
