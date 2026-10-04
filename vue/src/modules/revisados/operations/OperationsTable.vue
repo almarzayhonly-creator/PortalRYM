@@ -67,7 +67,7 @@ function detail(r:CanonicalRevisadoRow){
   <th class="action-head">Acción</th>
 </tr></thead>
 <tbody>
-<tr v-for="r in rows" :key="String(r.unidad_id||r.placa||r.unidad)" tabindex="0" @dblclick="emit('open',r)" @keydown.enter="emit('open',r)">
+<tr v-for="r in rows" :key="String(r.unidad_id||r.placa||r.unidad)" :data-priority="priorityTone(rowPriority(r))" tabindex="0" @dblclick="emit('open',r)" @keydown.enter="emit('open',r)">
   <td><span class="priority" :data-tone="priorityTone(rowPriority(r))">{{rowPriority(r)}}</span></td>
   <td><div class="unit-company"><b>{{r.unidad||'—'}}</b><span>{{r.empresa||'—'}}</span></div></td>
   <td><div class="plate-cupo"><span class="plate">{{r.placa||'—'}}</span><small>{{rowCupo(r)}}</small></div></td>
@@ -116,4 +116,15 @@ function detail(r:CanonicalRevisadoRow){
 .queue-table tbody tr:nth-child(even) .action-cell{background:#FBFCFE!important}.queue-table tbody tr:hover .action-cell{background:#F0F6FF!important}
 .open-btn{display:inline-flex!important;align-items:center!important;gap:5px!important;padding:7px 9px!important;border:1px solid #AFC9E8!important;border-radius:8px!important;background:#F6F9FF!important;color:#174EA6!important;font-size:9px!important;font-weight:850!important;cursor:pointer!important}.open-btn:hover{background:#E8F2FF!important}
 .empty{min-height:150px;display:flex;align-items:center;justify-content:center;gap:10px;color:#8290A4}.empty span{display:grid;gap:2px}.empty b{color:#10224E}.empty small{font-size:9px}
+</style>
+
+<style scoped>
+.queue-table tbody tr{position:relative}
+.queue-table tbody tr[data-priority="high"] td:first-child{box-shadow:inset 4px 0 0 #E24A4A}
+.queue-table tbody tr[data-priority="mid"] td:first-child{box-shadow:inset 4px 0 0 #F2A51A}
+.queue-table tbody tr[data-priority="current"] td:first-child{box-shadow:inset 4px 0 0 #6E91C7}
+.ecar{padding:7px 8px}
+.ecar-alerts span{max-width:156px}
+.ecar-detail{max-width:100%;font-size:7px}
+.action-cell{min-width:78px}
 </style>
