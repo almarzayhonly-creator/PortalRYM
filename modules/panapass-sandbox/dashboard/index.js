@@ -28,6 +28,25 @@
     setTimeout(()=>void enforceRevisadosVue(),0);
   };
 
-  const mark=()=>{if(d.querySelector('.pps-sandbox-badge'))return;d.body.dataset.panapassSandbox='v2';const badge=d.createElement('div');badge.className='pps-sandbox-badge';badge.textContent='PANAPASS · SANDBOX V2';d.body.appendChild(badge)};
+  const scriptSrc=d.currentScript&&d.currentScript.src?d.currentScript.src:'';
+  let runtimeBuild='';
+  try{
+    const fromScript=new URL(scriptSrc||w.location.href).searchParams.get('v')||'';
+    const fromLoader=String(w.RYM_BUILD_VERSION||'');
+    const candidate=/^[0-9a-f]{40}$/i.test(fromScript)?fromScript:/^[0-9a-f]{40}$/i.test(fromLoader)?fromLoader:'';
+    runtimeBuild=candidate;
+  }catch(_){runtimeBuild=''}
+  const mark=()=>{
+    d.body.dataset.panapassSandbox='v2';
+    let badge=d.querySelector('.pps-sandbox-badge');
+    if(!badge){
+      badge=d.createElement('div');
+      badge.className='pps-sandbox-badge';
+      d.body.appendChild(badge);
+    }
+    const shortBuild=runtimeBuild?runtimeBuild.slice(0,7):'SIN SHA';
+    badge.setAttribute('data-sandbox-build',runtimeBuild||'unknown');
+    badge.textContent='PANAPASS · SANDBOX V2 · '+shortBuild;
+  };
   d.readyState==='loading'?d.addEventListener('DOMContentLoaded',()=>{mark();startRevGuard()},{once:true}):(mark(),startRevGuard());
 })(window,document);
