@@ -361,3 +361,150 @@ const statusTone=computed(()=>{
   box-shadow:0 8px 18px rgba(18,97,220,.22)!important;
 }
 </style>
+
+
+<style scoped>
+/* modal overflow hardening */
+.modal-backdrop{
+  overflow:auto;
+  overscroll-behavior:contain;
+  align-items:start;
+}
+.modal-card{
+  max-width:calc(100vw - 32px);
+  max-height:calc(100dvh - 32px);
+  margin:auto;
+  min-width:0;
+}
+.modal-header,
+.modal-footer,
+.modal-body,
+.modal-title-wrap,
+.modal-title-wrap>div,
+.status-banner,
+.vehicle-grid,
+.summary-grid,
+.detail-card,
+.alerts-section,
+.meta-strip{
+  min-width:0;
+  max-width:100%;
+}
+.modal-title-wrap{
+  flex:1;
+}
+.modal-title-wrap>div{
+  overflow:hidden;
+}
+.modal-title-wrap h2,
+.modal-title-wrap p,
+.vehicle-grid b,
+.detail-card p,
+.alerts-list p,
+.meta-strip b{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.modal-title-wrap h2,
+.modal-title-wrap p{
+  white-space:normal;
+}
+.modal-body{
+  min-height:0;
+  scrollbar-gutter:stable;
+}
+.vehicle-grid,
+.summary-grid{
+  align-items:stretch;
+}
+.meta-strip>span{
+  flex:1 1 150px;
+  min-width:0;
+}
+.modal-footer>span{
+  min-width:0;
+  flex:1 1 auto;
+}
+.modal-actions{
+  flex:0 0 auto;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.footer-close,
+.footer-retry{
+  max-width:100%;
+}
+@media(max-width:760px){
+  .modal-backdrop{
+    padding:8px;
+    align-items:start;
+  }
+  .modal-card{
+    max-width:calc(100vw - 16px);
+    max-height:calc(100dvh - 16px);
+    margin:0 auto;
+    border-radius:16px;
+  }
+  .modal-header{
+    padding:16px;
+  }
+  .modal-title-wrap{
+    align-items:flex-start;
+  }
+  .modal-title-wrap h2{
+    font-size:24px;
+    line-height:1.05;
+  }
+  .modal-title-wrap p{
+    font-size:11px;
+  }
+  .modal-body{
+    padding:14px;
+  }
+  .vehicle-grid{
+    grid-template-columns:1fr 1fr;
+  }
+  .status-banner{
+    align-items:flex-start;
+  }
+  .modal-footer{
+    width:100%;
+    padding:12px 14px;
+  }
+  .modal-actions{
+    width:100%;
+  }
+  .footer-close,
+  .footer-retry{
+    flex:1 1 160px;
+    min-width:0;
+  }
+}
+@media(max-width:520px){
+  .vehicle-grid{
+    grid-template-columns:1fr;
+  }
+  .modal-title-wrap{
+    gap:10px;
+  }
+  .modal-icon{
+    width:42px;
+    height:42px;
+    flex:0 0 42px;
+  }
+  .modal-close{
+    flex:0 0 38px;
+  }
+  .summary-grid{
+    grid-template-columns:1fr;
+  }
+  .modal-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .footer-close,
+  .footer-retry{
+    width:100%;
+  }
+}
+</style>
