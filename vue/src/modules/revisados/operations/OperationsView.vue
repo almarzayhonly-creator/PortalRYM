@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import type { CanonicalRevisadoRow } from '../types/revisados.types'
 import RymIcon from '../components/RymIcon.vue'
 import OperationsTable from './OperationsTable.vue'
+import EcarCheckResultModal from './EcarCheckResultModal.vue'
 import SmartFacetSelect, { type FacetOption } from './SmartFacetSelect.vue'
 
 const props=defineProps<{
@@ -32,6 +33,7 @@ const months=ref<string[]>([])
 const supervisoras=ref<string[]>([])
 const statuses2=ref<string[]>([])
 const ecarStates=ref<string[]>([])
+const resultModalOpen=ref(false)
 
 function s(v:unknown){return String(v??'').trim()}
 function n(v:unknown){return s(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
@@ -161,6 +163,9 @@ function resetFilters(){
   ecarStates.value=[]
 }
 watch(()=>props.resetKey,()=>resetFilters())
+watch(()=>props.manualResult,(value)=>{
+  if(value?.result) resultModalOpen.value=true
+})
 
 async function copyList(){
   const text=filteredRows.value.map(r=>[
@@ -218,19 +223,6 @@ async function copyList(){
             {{manualBusy?'Consultando…':'Consultar'}}
           </button>
         </div>
-      </div>
-    </div>
-
-    <div v-if="manualResult?.result" class="query-result">
-      <div class="query-identity">
-        <small>RESULTADO ECARCHECK</small>
-        <b>{{manualResult.result?.vehiculo?.nroPlaca||manualPlate}}</b>
-        <span>{{manualResult.result?.vehiculo?.nombrePropietario||'—'}} · {{manualResult.result?.vehiculo?.colorVehiculo||'—'}} · Revisado {{manualResult.result?.vehiculo?.fechaRevisado||'—'}}</span>
-      </div>
-      <div class="query-signals">
-        <span><small>ENA</small><b>{{num(manualResult.result?.boletas?.infraccionesEna?.cantidad)}}</b></span>
-        <span><small>Documento</small><b>{{num(manualResult.result?.boletas?.boletasPorDocumento?.cantidad)}}</b></span>
-        <span><small>Placa</small><b>{{num(manualResult.result?.boletas?.boletasPorPlaca?.cantidad)}}</b></span>
       </div>
     </div>
   </section>
@@ -307,6 +299,13 @@ async function copyList(){
   </div>
 
   <OperationsTable :rows="filteredRows" @open="emit('open',$event)"/>
+
+  <EcarCheckResultModal
+    :open="resultModalOpen"
+    :plate="manualPlate"
+    :payload="manualResult"
+    @close="resultModalOpen=false"
+  />
 </section>
 </template>
 
@@ -375,4 +374,27 @@ async function copyList(){
 @media(max-width:1180px){.kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.facet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.command-actions{grid-template-columns:1fr}.priority-strip{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){.facet-grid,.kpi-row{grid-template-columns:1fr}.command-head,.queue-head,.filter-foot{align-items:flex-start;flex-direction:column}.sync-card,.lookup-card{grid-template-columns:auto minmax(0,1fr)}.action-button,.lookup-form{grid-column:2}.lookup-form{flex-wrap:wrap}.kpi span{white-space:normal}}
+</style>
+
+<style scoped>
+/* readability pass */
+.command-head h2{font-size:18px}
+.command-head p{font-size:10px}
+.action-copy small{font-size:8px}
+.action-copy b{font-size:12px}
+.action-copy em{font-size:9px}
+.action-button{font-size:9px;padding:8px 11px}
+.lookup-form input{font-size:10px}
+.lookup-form button{font-size:9px!important}
+.search-row input{font-size:10px}
+.filter-foot>b,.chips>span,.chips button{font-size:8px!important}
+.kpi small{font-size:7px}
+.kpi b{font-size:21px}
+.kpi span{font-size:8px}
+.priority-copy span{font-size:7px}
+.priority-copy b{font-size:10px}
+.priority-legend>div{font-size:8px}
+.queue-head span{font-size:7px}
+.queue-head b{font-size:12px}
+.queue-head small{font-size:8px}
 </style>

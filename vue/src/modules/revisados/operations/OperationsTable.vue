@@ -176,3 +176,28 @@ function detail(r:CanonicalRevisadoRow){
   .pagination-actions{width:100%;justify-content:space-between}
 }
 </style>
+
+<style scoped>
+/* readability + information preservation */
+.queue-table th{font-size:8px;padding:11px 12px}
+.queue-table td{height:72px;font-size:10px;padding:10px 12px}
+.unit-company b,.location b,.review b{font-size:11px}
+.unit-company span,.plate-cupo small,.location small,.review small{font-size:8px}
+.plate{font-size:9px}
+.priority{font-size:8px;min-height:23px}
+.pending-pill{font-size:7px}
+.status2{font-size:8px;min-height:23px}
+.ecar-main{font-size:8px;min-height:22px}
+.ecar-alerts span{font-size:7px;max-width:180px}
+.ecar-detail{
+  font-size:8px;
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  line-height:1.25;
+}
+.ecar-time{font-size:7px}
+.open-btn{font-size:8px!important}
+</style>
