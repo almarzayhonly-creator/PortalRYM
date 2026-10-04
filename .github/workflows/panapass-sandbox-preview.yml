@@ -1,8 +1,6 @@
 name: Panapass sandbox preview
 
 on:
-  push:
-    branches: [sandbox/panapass-v2]
   workflow_dispatch:
 
 permissions:
