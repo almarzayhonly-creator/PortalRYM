@@ -163,9 +163,16 @@ function resetFilters(){
   ecarStates.value=[]
 }
 watch(()=>props.resetKey,()=>resetFilters())
-watch(()=>props.manualResult,(value)=>{
-  if(value?.result) resultModalOpen.value=true
+watch(()=>props.manualBusy,(busy)=>{
+  if(busy) resultModalOpen.value=false
 })
+watch(()=>props.manualResult,(value)=>{
+  if(value) resultModalOpen.value=true
+})
+function retryLookup(){
+  resultModalOpen.value=false
+  emit('lookup')
+}
 
 async function copyList(){
   const text=filteredRows.value.map(r=>[
@@ -305,7 +312,7 @@ async function copyList(){
     :plate="manualPlate"
     :payload="manualResult"
     @close="resultModalOpen=false"
-    @retry="emit('lookup')"
+    @retry="retryLookup"
   />
 </section>
 </template>
@@ -489,4 +496,61 @@ async function copyList(){
   box-shadow:0 7px 18px rgba(14,41,82,.04);
 }
 .queue-head{padding:4px 2px}
+</style>
+
+
+<style scoped>
+/* overflow hardening + reliable responsive layout */
+.operations-stitch{
+  min-width:0;
+  width:100%;
+  max-width:100%;
+  overflow:hidden;
+}
+.ecar-command,
+.filters-panel,
+.priority-strip,
+.queue-head,
+.kpi-row{
+  min-width:0;
+  max-width:100%;
+}
+.command-actions,
+.command-actions>*,
+.action-copy,
+.lookup-form{
+  min-width:0;
+}
+.lookup-form{
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.lookup-form input{
+  max-width:100%;
+}
+.priority-visual{
+  min-width:0;
+}
+@media(max-width:1180px){
+  .command-actions{grid-template-columns:1fr}
+  .facet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .operations-stitch{padding:8px}
+  .facet-grid{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .priority-strip{grid-template-columns:1fr}
+  .sync-card,.lookup-card{grid-template-columns:auto minmax(0,1fr)}
+  .sync-card .action-button{grid-column:1/-1;justify-self:stretch;justify-content:center}
+  .lookup-form{grid-column:1/-1;width:100%;justify-content:stretch}
+  .lookup-form input{flex:1;min-width:0;width:auto}
+  .lookup-form button{flex:0 0 auto}
+}
+@media(max-width:520px){
+  .kpi-row{grid-template-columns:1fr}
+  .sync-meta{display:none}
+  .command-head{display:block}
+  .lookup-form{display:grid;grid-template-columns:minmax(0,1fr) auto}
+}
 </style>
