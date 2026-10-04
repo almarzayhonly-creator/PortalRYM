@@ -416,3 +416,72 @@ function detail(r:CanonicalRevisadoRow){
   text-overflow:clip!important;
 }
 </style>
+
+
+<style scoped>
+/* viewport-fit table: keep Acción visible without hiding eCarCheck */
+.queue-table-shell{
+  overflow-x:auto;
+}
+.queue-table{
+  width:100%!important;
+  min-width:1180px!important;
+  table-layout:fixed!important;
+}
+.queue-table th:nth-child(1),.queue-table td:nth-child(1){width:78px!important}
+.queue-table th:nth-child(2),.queue-table td:nth-child(2){width:160px!important}
+.queue-table th:nth-child(3),.queue-table td:nth-child(3){width:105px!important}
+.queue-table th:nth-child(4),.queue-table td:nth-child(4){width:68px!important}
+.queue-table th:nth-child(5),.queue-table td:nth-child(5){width:140px!important}
+.queue-table th:nth-child(6),.queue-table td:nth-child(6){width:145px!important}
+.queue-table th:nth-child(7),.queue-table td:nth-child(7){width:125px!important}
+.queue-table th:nth-child(8),.queue-table td:nth-child(8){width:auto!important}
+.queue-table th:nth-child(9),.queue-table td:nth-child(9){
+  width:88px!important;
+  min-width:88px!important;
+  max-width:88px!important;
+}
+.queue-table td:nth-child(8){
+  padding-right:12px!important;
+}
+.ecar{
+  overflow:hidden!important;
+}
+.ecar-alerts{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.ecar-alerts span{
+  max-width:100%!important;
+}
+.ecar-detail{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  overflow:hidden!important;
+  white-space:normal!important;
+}
+.ecar-time{
+  overflow:hidden!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis!important;
+}
+.action-head,
+.action-cell{
+  position:static!important;
+  right:auto!important;
+  z-index:auto!important;
+  box-shadow:none!important;
+}
+.open-btn{
+  width:100%;
+  min-width:0!important;
+  padding:7px 6px!important;
+}
+@media(max-width:1280px){
+  .queue-table{
+    min-width:1100px!important;
+  }
+}
+</style>
