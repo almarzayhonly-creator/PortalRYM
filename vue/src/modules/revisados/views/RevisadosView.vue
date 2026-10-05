@@ -792,3 +792,4 @@ onMounted(()=>load())
     align-items:center!important;
   }
 }
+</style>
