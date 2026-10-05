@@ -182,6 +182,16 @@ function monthlyGaleraCell(m:Record<string,unknown>,galera:string){
   const tone=!total?'neutral':pct===100?'good':pct>=85?'watch':'risk'
   return {total,covered,pending,pct,tone}
 }
+function monthlyGaleraTotal(galera:string){
+  let total=0,covered=0,pending=0
+  for(const m of executiveMonths.value){
+    const cell=monthlyGaleraCell(m,galera)
+    total+=cell.total
+    covered+=cell.covered
+    pending+=cell.pending
+  }
+  return {total,covered,pending,pct:total?Math.round(covered*100/total):0}
+}
 const monthlyExecutiveSummary=computed(()=>{
   let total=0,covered=0,pendingCount=0
   const byGal=new Map<string,{galera:string,total:number,covered:number,pending:number}>()
@@ -572,9 +582,11 @@ onMounted(()=>load())
 <main class="rym-revisados-vue" data-ui-source="portal-rym-main-contract">
   <aside class="rv-side">
     <div class="rv-brand-dark">
-      <div class="rv-brand-mark"><RymIcon name="verified_user"/></div>
+      <div class="rv-brand-mark rv-brand-main"><strong>RYM</strong><i></i></div>
       <div class="rv-brand-copy"><b>Revisados RYM</b><small>Control legal vehicular</small></div>
-      <span class="rv-version">{{num(metrics.total)}}</span>
+    </div>
+    <div class="rv-side-profile rv-side-profile-main">
+      <span>{{profile.nombre}}</span><b>{{profile.rol}}</b><small>{{profile.scope_label}}</small>
     </div>
     <div class="rv-nav-label">MÓDULO REVISADOS</div>
     <nav>
@@ -583,19 +595,17 @@ onMounted(()=>load())
         <em>{{navLabel(item.id,item.label)}}</em>
       </button>
     </nav>
-    <div class="rv-side-profile">
-      <span>{{profile.nombre}}</span><b>{{profile.rol}}</b><small>{{profile.scope_label}}</small>
-    </div>
     <button class="rv-back" @click="revisadosService.back()">← Volver al Portal</button>
   </aside>
   <section class="rv-main"><header class="rv-topbar">
       <div class="rv-page-heading">
         <small>REVISADOS RYM</small>
         <h1>{{navLabel(active, active)}}</h1>
-        <span>Control legal vehicular · datos operativos en tiempo real</span>
+        <span>{{active==='monthly'?'Reporte ejecutivo de cobertura por ciclo y galera. Haz clic en cualquier celda para ver el detalle.':'Control legal vehicular · datos operativos en tiempo real'}}</span>
       </div>
       <div class="rv-top-actions">
-        <button class="ghost" @click="clearAllFilters">Limpiar filtros</button>
+        <span v-if="active==='monthly'" class="rv-top-scope">{{profile.scope_label||'Todas las galeras'}}</span>
+        <button v-else class="ghost" @click="clearAllFilters">Limpiar filtros</button>
         <button class="primary" :disabled="loading" @click="load(true)">{{loading?'Actualizando…':'Actualizar vista'}}</button>
       </div>
     </header>
@@ -809,7 +819,10 @@ onMounted(()=>load())
               <thead>
                 <tr>
                   <th>MES / CICLO</th>
-                  <th v-for="g in executiveGaleras" :key="g">{{g}}</th>
+                  <th v-for="g in executiveGaleras" :key="g" :class="{focus:g===monthlyExecutiveSummary.highest.galera}">
+                    <span>{{g}}</span>
+                    <em v-if="g===monthlyExecutiveSummary.highest.galera">FOCO</em>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -830,7 +843,24 @@ onMounted(()=>load())
                   </td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>TOTAL ACUMULADO</th>
+                  <td v-for="g in executiveGaleras" :key="'total-'+g">
+                    <div class="rv-monthly-total" :data-focus="g===monthlyExecutiveSummary.highest.galera">
+                      <b>{{num(monthlyGaleraTotal(g).pending)}} pendientes</b>
+                      <strong>{{monthlyGaleraTotal(g).pct}}% cobertura</strong>
+                      <span>{{num(monthlyGaleraTotal(g).covered)}} / {{num(monthlyGaleraTotal(g).total)}} ciclos cubiertos</span>
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
+          </div>
+
+          <div v-if="executiveMonths.length" class="rv-monthly-reading-note">
+            <RymIcon name="info" :size="16"/>
+            <p><b>Lectura correcta:</b> los pendientes del TOTAL son acumulados por ciclo. Una misma unidad puede aparecer pendiente en más de un mes; no representan vehículos únicos.</p>
           </div>
 
           <div v-else class="rv-monthly-complete-state">
@@ -2013,4 +2043,53 @@ onMounted(()=>load())
   .rv-monthly-matrix{min-width:0!important}
   .rv-monthly-cell{min-height:65px}
 }
+</style>
+
+
+<style scoped>
+/* Main parity + Stitch refinement pass */
+.rym-revisados-vue{
+  grid-template-columns:228px minmax(0,1fr)!important;
+  background:#f5f7fa!important
+}
+.rv-side{
+  padding:16px 10px!important;
+  background:#fff!important;
+  border-right:1px solid #dce5ef!important
+}
+.rv-brand-dark{
+  display:flex!important;align-items:center!important;gap:10px!important;
+  padding:2px 6px 14px!important;margin:0 0 12px!important;
+  border-bottom:1px solid #e5ebf2!important;background:transparent!important
+}
+.rv-brand-main{
+  position:relative!important;width:42px!important;height:42px!important;min-width:42px!important;
+  display:grid!important;place-items:center!important;border-radius:12px!important;
+  background:linear-gradient(145deg,#f8fbff,#eaf3ff)!important;border:1px solid #bed4ec!important;
+  color:#123e70!important;box-shadow:0 3px 10px rgba(23,62,105,.06)!important
+}
+.rv-brand-main strong{font-size:11px!important;letter-spacing:-.03em!important}
+.rv-brand-main i{position:absolute!important;right:5px!important;top:5px!important;width:8px!important;height:8px!important;border-radius:50%!important;background:#f6a61b!important;border:2px solid #fff!important}
+.rv-brand-copy{display:grid!important;gap:2px!important}.rv-brand-copy b{font-size:15px!important;color:#163b66!important}.rv-brand-copy small{font-size:9px!important;color:#71839a!important;text-transform:uppercase!important;letter-spacing:.035em!important}
+.rv-side-profile-main{
+  order:0!important;display:grid!important;gap:3px!important;
+  margin:0 4px 16px!important;padding:11px 12px!important;border:1px solid #dce6f0!important;
+  border-radius:12px!important;background:#f8fbff!important
+}
+.rv-side-profile-main span{font-size:11px!important;font-weight:800!important;color:#334b67!important}.rv-side-profile-main b{justify-self:start!important;padding:3px 7px!important;border-radius:999px!important;background:#eaf2fc!important;color:#41658e!important;font-size:8px!important;letter-spacing:.035em!important}.rv-side-profile-main small{font-size:9px!important;color:#8392a5!important}
+.rv-nav-label{padding:0 7px 7px!important;font-size:8px!important;color:#71829a!important;letter-spacing:.1em!important}
+.rv-side nav{gap:3px!important}.rv-side nav button{position:relative!important;min-height:40px!important;padding:9px 10px!important;border-radius:9px!important;background:transparent!important;color:#405772!important;border:1px solid transparent!important;box-shadow:none!important}.rv-side nav button em{font-size:11px!important;font-style:normal!important}.rv-side nav button.active{background:#eaf3ff!important;color:#1856a0!important;border-color:#c9dcf2!important;box-shadow:none!important}.rv-side nav button.active:before{content:""!important;position:absolute!important;left:-5px!important;top:8px!important;bottom:8px!important;width:3px!important;border-radius:0 4px 4px 0!important;background:#2c78dc!important}
+.rv-back{margin:16px 4px 0!important;padding:9px 11px!important;border:1px solid #d6e1ec!important;border-radius:9px!important;background:#f8fbff!important;color:#2e5f98!important;font-size:10px!important}
+.rv-main{padding:20px 22px 28px!important}.rv-main>header{margin-bottom:16px!important;padding:0 2px 13px!important;border-bottom:1px solid #dfe7ef!important}.rv-page-heading small{font-size:8px!important;letter-spacing:.09em!important;color:#255da1!important}.rv-page-heading h1{margin:3px 0!important;font-size:24px!important;color:#12345e!important;letter-spacing:-.025em!important}.rv-page-heading span{font-size:10px!important;color:#667b93!important}.rv-top-actions{display:flex!important;align-items:center!important;gap:8px!important}.rv-top-scope{padding:8px 11px!important;border:1px solid #d5e2ef!important;border-radius:999px!important;background:#f7fbff!important;color:#3f638c!important;font-size:9px!important;font-weight:800!important}
+.rv-top-actions .primary,.rv-top-actions .ghost{min-height:36px!important;padding:0 12px!important;font-size:9px!important;border-radius:8px!important}
+
+.rv-monthly-exec{gap:11px!important}.rv-monthly-exec-hero{padding:17px 19px!important;border-radius:15px!important;box-shadow:0 6px 18px rgba(10,39,72,.035)!important}.rv-monthly-exec-title h2{font-size:23px!important}.rv-monthly-exec-title p{font-size:10.5px!important}.rv-monthly-exec-meta span{padding:5px 8px!important;border-radius:8px!important}
+.rv-monthly-exec-kpis{gap:10px!important}.rv-monthly-exec-kpis article{padding:14px 14px 13px!important;border-radius:13px!important;box-shadow:0 4px 14px rgba(10,39,72,.025)!important}.rv-monthly-exec-kpis .rv-kpi-accent{display:block!important;position:absolute!important;top:0!important;left:14px!important;width:28px!important;height:3px!important;min-width:28px!important;max-width:28px!important;padding:0!important;margin:0!important;border-radius:0 0 99px 99px!important}.rv-monthly-exec-kpis strong.danger{background:transparent!important;background-image:none!important;color:#d24940!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.rv-monthly-matrix-panel{border-radius:15px!important;box-shadow:0 7px 22px rgba(10,39,72,.04)!important}.rv-monthly-matrix-head{padding:13px 15px!important;background:#fbfdff!important}.rv-monthly-matrix-head h3{font-size:16px!important}
+.rv-monthly-matrix{min-width:920px!important}.rv-monthly-matrix thead th{position:sticky!important;top:0!important;z-index:3!important;background:#edf4fb!important;color:#315d8d!important}.rv-monthly-matrix thead th:first-child{left:0!important;z-index:4!important}.rv-monthly-matrix thead th.focus{background:#e3effc!important;color:#174f8d!important}.rv-monthly-matrix thead th>span{font-size:9px!important;font-weight:900!important}.rv-monthly-matrix thead th>em{display:inline-block!important;margin-left:5px!important;padding:2px 5px!important;border-radius:999px!important;background:#d7e8fb!important;color:#245d99!important;font-size:6.5px!important;font-style:normal!important;letter-spacing:.05em!important}
+.rv-monthly-matrix tbody>tr>th,.rv-monthly-matrix tfoot>tr>th{position:sticky!important;left:0!important;z-index:2!important;background:#f8fbff!important;color:#244f7d!important}
+.rv-monthly-cell{min-height:76px!important;padding:9px 29px 8px 9px!important}.rv-monthly-cell-main strong{font-size:15px!important}.rv-monthly-cell-main b{font-size:7px!important}.rv-monthly-cell>span{font-size:7.5px!important}
+.rv-monthly-matrix tfoot td,.rv-monthly-matrix tfoot th{background:#f9fbfe!important;padding:8px!important;border-top:1px solid #d5e2ee!important}.rv-monthly-total{display:grid!important;gap:2px!important;padding:8px!important;border:1px solid #dbe6f1!important;border-radius:9px!important;background:#fff!important;text-align:left!important}.rv-monthly-total[data-focus="true"]{border-color:#bad3ee!important;background:#f2f7fd!important}.rv-monthly-total b{font-size:9px!important;color:#425f7d!important}.rv-monthly-total strong{font-size:10px!important;color:#1d5e9f!important}.rv-monthly-total span{font-size:7.5px!important;color:#7b8da2!important}
+.rv-monthly-reading-note{display:flex!important;align-items:flex-start!important;gap:8px!important;padding:10px 14px!important;border-top:1px solid #f0dfb6!important;background:#fffdf7!important;color:#6b5a3b!important}.rv-monthly-reading-note .rym-icon{flex:0 0 auto!important;margin-top:1px!important;color:#bd8525!important}.rv-monthly-reading-note p{margin:0!important;font-size:9px!important;line-height:1.45!important}
+@media(max-width:1000px){.rym-revisados-vue{grid-template-columns:210px minmax(0,1fr)!important}.rv-main{padding:18px!important}}
 </style>
