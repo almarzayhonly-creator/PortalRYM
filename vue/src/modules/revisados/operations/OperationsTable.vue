@@ -530,3 +530,80 @@ function detail(r:CanonicalRevisadoRow){
   .queue-table th:nth-child(7),.queue-table td:nth-child(7){width:120px!important}
 }
 </style>
+
+
+<style scoped>
+/* alignment pass: visually center tactical rows without losing long eCarCheck details */
+.queue-table th{
+  text-align:center!important;
+  vertical-align:middle!important;
+}
+.queue-table td{
+  text-align:center!important;
+  vertical-align:middle!important;
+}
+.queue-table tbody tr{
+  min-height:78px;
+}
+.unit-company,
+.plate-cupo,
+.location,
+.review{
+  justify-items:center!important;
+  align-content:center!important;
+  text-align:center!important;
+}
+.unit-company b,
+.unit-company span,
+.unit-company small,
+.plate-cupo small,
+.location b,
+.location small,
+.review b,
+.review small{
+  text-align:center!important;
+}
+.plate,
+.priority,
+.month,
+.pending-pill,
+.status2{
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+.ecar-cell{
+  align-items:center!important;
+}
+.ecar{
+  align-content:center!important;
+  justify-items:center!important;
+  text-align:center!important;
+}
+.ecar-top{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.ecar-main{
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+.ecar-alerts{
+  justify-content:center!important;
+  align-items:center!important;
+}
+.ecar-time{
+  width:100%;
+  display:block;
+  text-align:center!important;
+}
+.ecar-detail{
+  width:100%;
+  text-align:center!important;
+}
+.ecar-cell .open-btn{
+  align-self:center!important;
+  justify-self:center!important;
+}
+</style>
