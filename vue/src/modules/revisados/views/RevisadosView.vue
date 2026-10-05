@@ -379,45 +379,7 @@ onMounted(()=>load())
           </div>
         </section>
 
-        <section v-if="canOperate" class="rv-incident rv-incident-v2">
-          <div class="rv-incident-head">
-            <div class="rv-section-title">
-              <span class="rv-section-icon incident"><RymIcon name="report_problem" :size="17"/></span>
-              <div><small>ACCIÓN OPERATIVA</small><b>Incidencias manuales</b></div>
-            </div>
-            <span class="rv-incident-count" :data-active="fichaOpenIncidents.length>0">{{fichaOpenIncidents.length}} abierta{{fichaOpenIncidents.length===1?'':'s'}}</span>
-          </div>
-          <p>Registra solo incidencias que requieren seguimiento. Se mantienen abiertas hasta que entre un revisado vigente nuevo.</p>
 
-          <div v-if="fichaOpenIncidents.length" class="rv-inc-list rv-inc-list-v2">
-            <span v-for="i in fichaOpenIncidents" :key="String(i.id||i.created_at)">
-              <b>{{i.tipo_nombre||i.tipo_codigo}}</b>
-              <em v-if="i.nota">{{i.nota}}</em>
-            </span>
-          </div>
-
-          <div class="rv-incident-form rv-incident-form-v2">
-            <label>
-              <span>Motivo</span>
-              <select v-model="incidentType">
-                <option value="">Selecciona motivo</option>
-                <option v-for="t in incidentTypes" :key="String(t.codigo)" :value="String(t.codigo)">{{t.nombre||t.codigo}}</option>
-              </select>
-            </label>
-            <label v-if="incidentType==='OTRO'">
-              <span>Otro motivo</span>
-              <input v-model="incidentCustom" maxlength="120" placeholder="Describe el motivo">
-            </label>
-            <label>
-              <span>Nota</span>
-              <textarea v-model="incidentNote" maxlength="500" rows="3" placeholder="Agrega contexto útil para seguimiento (opcional)"></textarea>
-            </label>
-            <button class="primary rv-save-incident" :disabled="incidentBusy||!incidentType" @click="saveIncident">
-              <RymIcon name="save" :size="15"/>
-              {{incidentBusy?'Guardando…':'Guardar incidencia'}}
-            </button>
-          </div>
-        </section>
       </template>
     </section>
   </div>
@@ -729,3 +691,104 @@ onMounted(()=>load())
   .rv-ficha-plate{padding-left:0;border-left:0}
 }
 </style>
+
+
+<style scoped>
+/* drawer v2 collision fixes */
+.rv-drawer-v2{
+  display:block!important;
+  height:100vh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scroll-behavior:smooth;
+}
+.rv-drawer-v2>.rv-ficha-hero{
+  display:block!important;
+  align-items:initial!important;
+  justify-content:initial!important;
+  gap:0!important;
+  min-height:190px;
+  padding:22px 24px 20px!important;
+  border-bottom:0!important;
+  flex:none!important;
+}
+.rv-ficha-hero small{
+  color:inherit!important;
+}
+.rv-ficha-hero .rv-ficha-main small,
+.rv-ficha-hero .rv-ficha-plate small{
+  color:#BFD8FF!important;
+}
+.rv-ficha-hero .rv-ficha-main h2{
+  color:#fff!important;
+}
+.rv-ficha-hero .rv-ficha-subline span{
+  color:#E6F1FF!important;
+}
+.rv-ficha-hero .rv-ficha-status-row span{
+  font-size:8px!important;
+}
+.rv-drawer-v2 .rv-section-title{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  text-align:left!important;
+}
+.rv-drawer-v2 .rv-section-title>div{
+  display:grid!important;
+  gap:1px!important;
+  min-width:0;
+}
+.rv-drawer-v2 .rv-section-title>div>small{
+  display:block!important;
+  padding:0!important;
+  background:transparent!important;
+  color:#7788A0!important;
+  font-family:Inter,system-ui,sans-serif!important;
+  font-size:8px!important;
+  line-height:1.2!important;
+  letter-spacing:.08em!important;
+}
+.rv-drawer-v2 .rv-section-title>div>b{
+  display:block!important;
+  color:#112C55!important;
+  font-size:13px!important;
+  line-height:1.25!important;
+}
+.rv-drawer-v2 .rv-ficha-card,
+.rv-drawer-v2 .rv-ficha-summary,
+.rv-drawer-v2 .rv-diffs-v2{
+  position:relative;
+  z-index:1;
+}
+.rv-drawer-v2>.rv-ficha-card:last-of-type{
+  margin-bottom:20px;
+}
+.rv-ficha-facts article,
+.rv-owner-name,
+.rv-date-grid article,
+.rv-ficha-summary article{
+  overflow:visible!important;
+}
+.rv-ficha-facts b,
+.rv-owner-name strong,
+.rv-date-grid b,
+.rv-ficha-summary b{
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+@media(max-width:800px){
+  .rv-drawer-v2>.rv-ficha-hero{
+    min-height:180px;
+  }
+  .rv-drawer-v2 .rv-section-title{
+    flex-direction:row!important;
+    align-items:center!important;
+  }
+}
