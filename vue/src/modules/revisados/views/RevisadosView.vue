@@ -25,7 +25,7 @@ const cupos=ref<Array<Record<string,unknown>>>([]), cuposLoading=ref(false), cup
 const fichaOpen=ref(false), fichaLoading=ref(false), fichaError=ref(''), ficha=ref<Record<string,any>|null>(null), fichaRow=ref<CanonicalRevisadoRow|null>(null)
 const incidentBusy=ref(false), incidentType=ref(''), incidentCustom=ref(''), incidentNote=ref('')
 const manualPlate=ref(''), manualBusy=ref(false), manualState=ref('Listo para consultar'), manualResult=ref<Record<string,any>|null>(null)
-const syncBusy=ref(false), syncState=ref('Listo para actualizar'), syncProgress=ref({procesadas:0,total:0,nuevos:0,fichas_ok:0})
+const syncBusy=ref(false), syncState=ref('Listo para actualizar'), syncPhase=ref<'idle'|'running'|'success'|'warning'|'error'>('idle'), syncProgress=ref({procesadas:0,total:0,nuevos:0,fichas_ok:0,fichas_pendientes:0,bloqueadas:0,errores:0})
 const boletaBusy=ref(false), boletaState=ref('Listo para actualizar'), boletaProgress=ref({procesadas:0,total:0}), boletaCompanies=ref<Array<Record<string,any>>>([]), boletaFilter=ref('TODAS')
 const dailyRecipients=ref<Array<Record<string,any>>>([]), dailyRecipientsLoading=ref(false), dailyRecipientsError=ref(''), dailySearch=ref(''), dailySelected=ref<string[]>([]), dailyManualEmail=ref(''), dailySending=ref(false), dailySendState=ref(''), dailyPreview=ref(false)
 const canOperate=computed(()=>Boolean(data.value?.profile?.can?.operations))
@@ -129,7 +129,55 @@ async function refreshAfterManualLookup(){
   }
 }
 async function runManualEcarcheck(){const placa=manualPlate.value.trim().toUpperCase().replace(/\s+/g,'');if(!/^[A-Z0-9-]{3,12}$/.test(placa)||manualBusy.value)return;manualBusy.value=true;manualResult.value=null;manualState.value='Encolando consulta…';try{const started=await revisadosService.iniciarConsultaEcarcheck(placa);if(!started?.ok||!started?.queue_id)throw new Error(String(started?.error||'No se pudo iniciar la consulta'));for(let i=0;i<45;i++){const d=await revisadosService.estadoConsultaEcarcheck(String(started.queue_id));if(!d?.ok)throw new Error(String(d?.error||'No se pudo consultar el estado'));const st=String(d?.queue?.estado||'').toUpperCase();manualState.value=st==='PENDIENTE'?'Esperando puente V2…':st==='PROCESANDO'?'Consultando eCarCheck V2…':st==='BLOQUEADO'?'Procesando resultado…':st||'Procesando…';if(d.done){const result=d?.result||{};const http=Number(result?.status||0);const detail=String(result?.detalle||'').toUpperCase();if(http>=500||detail.includes('INTERMITEN'))manualState.value='Servicio ATTT no disponible · reintentar';else if(http===200)manualState.value='Consulta completada';else manualState.value='Resultado recibido';manualResult.value=d;void refreshAfterManualLookup();return}await wait(2000)}throw new Error('La consulta sigue pendiente; verifica que el puente V2 esté conectado.')}catch(e){manualState.value=e instanceof Error?e.message:String(e)}finally{manualBusy.value=false}}
-async function runSyncEcarcheck(){if(syncBusy.value||!confirm('¿Actualizar los últimos revisados usando eCarCheck V2?'))return;syncBusy.value=true;syncState.value='Solicitando listado V2…';syncProgress.value={procesadas:0,total:0,nuevos:0,fichas_ok:0};try{const started=await revisadosService.iniciarSyncEcarcheck();if(!started?.ok||!started?.run_id)throw new Error(String(started?.error||'No se pudo iniciar la actualización'));for(let i=0;i<120;i++){const d=await revisadosService.estadoSyncEcarcheck(String(started.run_id));if(!d?.ok)throw new Error(String(d?.error||'No se pudo consultar el estado'));syncProgress.value={procesadas:Number(d.procesadas||0),total:Number(d.total||0),nuevos:Number(d.nuevos||0),fichas_ok:Number(d.fichas_ok||0)};syncState.value=String(d.estado)==='ESPERANDO_LISTADO'?'Esperando puente V2…':`V2 · ${syncProgress.value.procesadas}/${syncProgress.value.total} · ${syncProgress.value.nuevos} nuevos`;if(d.done){syncState.value=`Listo V2 · ${syncProgress.value.nuevos} nuevos · ${syncProgress.value.fichas_ok} fichas`;await load(true);return}await wait(2500)}throw new Error('La actualización continúa pendiente.')}catch(e){syncState.value=e instanceof Error?e.message:String(e)}finally{syncBusy.value=false}}
+async function runSyncEcarcheck(){
+  if(syncBusy.value||!confirm('¿Actualizar los últimos revisados usando eCarCheck V2?'))return
+  syncBusy.value=true
+  syncPhase.value='running'
+  syncState.value='Solicitando listado V2…'
+  syncProgress.value={procesadas:0,total:0,nuevos:0,fichas_ok:0,fichas_pendientes:0,bloqueadas:0,errores:0}
+  try{
+    const started=await revisadosService.iniciarSyncEcarcheck()
+    if(!started?.ok||!started?.run_id)throw new Error(String(started?.error||'No se pudo iniciar la actualización'))
+    for(let i=0;i<120;i++){
+      const d=await revisadosService.estadoSyncEcarcheck(String(started.run_id))
+      if(!d?.ok)throw new Error(String(d?.error||'No se pudo consultar el estado'))
+      syncProgress.value={
+        procesadas:Number(d.procesadas||0),
+        total:Number(d.total||0),
+        nuevos:Number(d.nuevos||0),
+        fichas_ok:Number(d.fichas_ok||0),
+        fichas_pendientes:Number(d.fichas_pendientes||0),
+        bloqueadas:Number(d.bloqueadas||0),
+        errores:Number(d.errores||0)
+      }
+      const estado=String(d.estado||'').toUpperCase()
+      if(estado==='ESPERANDO_LISTADO')syncState.value='Conectando con el puente V2 y esperando el listado…'
+      else if(estado==='ESPERANDO_RESULTADO_LISTADO')syncState.value='Recibiendo el listado oficial de eCarCheck…'
+      else syncState.value=`Procesando ${syncProgress.value.procesadas} de ${syncProgress.value.total||'—'} · ${syncProgress.value.nuevos} nuevos`
+      if(d.done){
+        if(estado==='ERROR'){
+          syncPhase.value='error'
+          syncState.value=String(d.error||'La sincronización terminó con error')
+        }else{
+          const hasWarnings=syncProgress.value.errores>0||syncProgress.value.fichas_pendientes>0||syncProgress.value.bloqueadas>0||estado==='OK_CON_ALERTAS'
+          syncPhase.value=hasWarnings?'warning':'success'
+          syncState.value=hasWarnings
+            ?'Sincronización completada con observaciones'
+            :'Sincronización completada correctamente'
+        }
+        await load(true)
+        return
+      }
+      await wait(2500)
+    }
+    throw new Error('La actualización continúa pendiente.')
+  }catch(e){
+    syncPhase.value='error'
+    syncState.value=e instanceof Error?e.message:String(e)
+  }finally{
+    syncBusy.value=false
+  }
+}
 
 function boletaCompanyResult(g:Record<string,any>){const checks=Array.isArray(g.checks)?g.checks:[];return checks.some((x:Record<string,any>)=>Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0)?'CON BOLETA':'SIN BOLETA'}
 async function pollBoletasV2(runId:string){if(boletaBusy.value)return;boletaBusy.value=true;localStorage.setItem('rym_v166_boletas_run',runId);try{for(let i=0;i<120;i++){const d=await revisadosService.estadoBoletasV2(runId);if(!d?.ok)throw new Error(String(d?.error||'Error consultando lote V2'));boletaProgress.value={procesadas:Number(d.procesadas||0),total:Number(d.total||0)};boletaCompanies.value=Array.isArray(d.companies)?d.companies:[];boletaState.value=`${boletaProgress.value.procesadas}/${boletaProgress.value.total} procesadas`;if(d.done){boletaState.value=`Finalizado · ${boletaProgress.value.procesadas}/${boletaProgress.value.total}`;localStorage.removeItem('rym_v166_boletas_run');await load(true);return}await wait(2500)}throw new Error('El lote continúa en proceso.')}catch(e){boletaState.value=e instanceof Error?e.message:String(e)}finally{boletaBusy.value=false}}
@@ -225,6 +273,8 @@ onMounted(()=>load())
         :up-to-date="metrics.vigentes"
         :sync-busy="syncBusy"
         :sync-state="syncState"
+        :sync-phase="syncPhase"
+        :sync-progress="syncProgress"
         :manual-plate="manualPlate"
         :manual-busy="manualBusy"
         :manual-state="manualState"
