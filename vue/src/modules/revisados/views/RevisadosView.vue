@@ -26,6 +26,7 @@ const incidentBusy=ref(false), incidentType=ref(''), incidentCustom=ref(''), inc
 const manualPlate=ref(''), manualBusy=ref(false), manualState=ref('Listo para consultar'), manualResult=ref<Record<string,any>|null>(null)
 const syncBusy=ref(false), syncState=ref('Listo para actualizar'), syncPhase=ref<'idle'|'running'|'success'|'warning'|'error'>('idle'), syncProgress=ref({procesadas:0,total:0,nuevos:0,fichas_ok:0,fichas_pendientes:0,bloqueadas:0,errores:0})
 const boletaBusy=ref(false), boletaState=ref('Listo para consultar'), boletaCopyState=ref(''), boletaProgress=ref({procesadas:0,total:0}), boletaCompanies=ref<Array<Record<string,any>>>([]), boletaFilter=ref('TODAS')
+const boletaVehicleModels=ref<Record<string,string>>({}), boletaModelsBusy=ref(false)
 const dailyRecipients=ref<Array<Record<string,any>>>([]), dailyRecipientsLoading=ref(false), dailyRecipientsError=ref(''), dailySearch=ref(''), dailySelected=ref<string[]>([]), dailyManualEmail=ref(''), dailySending=ref(false), dailySendState=ref(''), dailyPreview=ref(false)
 const canOperate=computed(()=>Boolean(data.value?.profile?.can?.operations))
 const isAdminTotal=computed(()=>String(profile.value.rol||'').trim().toUpperCase()==='ADMIN_TOTAL')
@@ -304,10 +305,45 @@ function boletaCheckModel(x:Record<string,any>){
   if(direct)return direct
   const alt=boletaTextValue(x.modelo_vehiculo,x.modelo_control,x.modelo_ecarcheck,x.model)
   if(alt)return alt
+  const id=String(x.unidad_id||'').trim()
   const plate=String(x.placa||'').trim().toUpperCase()
   const unit=String(x.unidad||'').trim().toUpperCase()
-  const row=rawRows.value.find(r=>(plate&&String(r.placa||'').trim().toUpperCase()===plate)||(unit&&String(r.unidad||'').trim().toUpperCase()===unit))
-  return row?vehicleModel(row):'Modelo no disponible'
+  const cached=boletaVehicleModels.value[id]||boletaVehicleModels.value[plate]||boletaVehicleModels.value[unit]
+  if(cached)return cached
+  const row=rawRows.value.find(r=>(plate&&String(r.placa||'').trim().toUpperCase()===plate)||(unit&&String(r.unidad||'').trim().toUpperCase()===unit)) as Record<string,any>|undefined
+  const fromRow=row?[row.marca,row.modelo].map(v=>String(v||'').trim()).filter(Boolean).join(' '):''
+  return fromRow||'Modelo no disponible'
+}
+async function hydrateBoletaModels(){
+  if(boletaModelsBusy.value)return
+  const checks=boletaCompanies.value.flatMap(g=>Array.isArray(g.checks)?g.checks:[])
+  const ids=[...new Set(checks.map((x:Record<string,any>)=>String(x.unidad_id||'').trim()).filter(Boolean))]
+  if(!ids.length)return
+  const missing=ids.filter(id=>!boletaVehicleModels.value[id])
+  if(!missing.length)return
+  boletaModelsBusy.value=true
+  try{
+    const safe=missing.filter(id=>/^[0-9a-f-]{36}$/i.test(id))
+    if(!safe.length)return
+    const query='/rest/v1/unidades?select=id,unidad,placa_unica,marca,modelo&id=in.('+safe.join(',')+')'
+    const rows=await revisadosService.request(query)
+    if(!Array.isArray(rows))return
+    const next={...boletaVehicleModels.value}
+    for(const row of rows as Array<Record<string,any>>){
+      const model=[row.marca,row.modelo].map(v=>String(v||'').trim()).filter(Boolean).join(' ')||'Modelo no disponible'
+      const id=String(row.id||'').trim()
+      const plate=String(row.placa_unica||'').trim().toUpperCase()
+      const unit=String(row.unidad||'').trim().toUpperCase()
+      if(id)next[id]=model
+      if(plate)next[plate]=model
+      if(unit)next[unit]=model
+    }
+    boletaVehicleModels.value=next
+  }catch(e){
+    console.warn('No se pudieron cargar los modelos de Boletas',e)
+  }finally{
+    boletaModelsBusy.value=false
+  }
 }
 function boletaCheckResult(x:Record<string,any>){
   const nested=(x.ecarcheck&&typeof x.ecarcheck==='object'?x.ecarcheck:null)
@@ -399,6 +435,7 @@ async function pollBoletasV2(runId:string){
       const total=Number(d.total||0)
       boletaProgress.value={procesadas:processed,total}
       boletaCompanies.value=Array.isArray(d.companies)?d.companies:[]
+      void hydrateBoletaModels()
       if(processed===lastProcessed)stalledPolls++
       else{lastProcessed=processed;stalledPolls=0}
       const companiesDone=boletaCompanyRows.value.filter(g=>g.status!=='PENDIENTE').length
@@ -1773,7 +1810,7 @@ onMounted(()=>load())
 .rv-boletas-actions{display:flex;gap:10px;align-items:center}.rv-consult-companies,.rv-ws-main{min-height:44px!important;padding:0 16px!important;border-radius:11px!important;font-size:12px!important;font-weight:900!important}.rv-consult-companies{display:inline-flex!important;align-items:center!important;gap:8px!important}.rv-ws-main{display:inline-flex;align-items:center;gap:8px;border:1px solid #A5DEC0;background:#F1FFF7;color:#117B49;cursor:pointer}.rv-ws-main svg{width:19px;height:19px;color:#22B967}.rv-ws-main:disabled{opacity:.45;cursor:not-allowed}
 .rv-boletas-progress{position:absolute;left:0;right:0;bottom:0;height:6px;background:#E4EDF7;overflow:hidden}.rv-boletas-progress i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2366C1,#38A1ED);transition:width .3s ease}.rv-copy-toast{justify-self:end;padding:8px 12px;border:1px solid #BCE6D0;border-radius:999px;background:#F0FFF7;color:#14794B;font-size:11px;font-weight:850}
 .rv-boletas-summary-focus{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.rv-boletas-summary-focus article{display:flex;align-items:center;gap:13px;padding:15px 16px;border:1px solid #D8E3EE;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(13,43,82,.035)}.rv-company-summary-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;flex:0 0 42px}.rv-company-summary-icon.blue{background:#EAF3FF;color:#2367BE}.rv-company-summary-icon.red{background:#FFF0EE;color:#BE453C}.rv-company-summary-icon.green{background:#EAF9F1;color:#23815A}.rv-boletas-summary-focus article>div{display:grid;gap:3px}.rv-boletas-summary-focus small{font-size:10px;font-weight:900;letter-spacing:.06em;color:#687B93}.rv-boletas-summary-focus b{font:800 28px/1 Inter;color:#153A68}.rv-boletas-summary-focus b i{font:700 12px/1 Inter;color:#8292A6;font-style:normal}.rv-boletas-summary-focus em{font-size:11px;font-style:normal;color:#6E8096}.rv-boletas-summary-focus article[data-tone="bad"]{border-color:#F0D2CF}.rv-boletas-summary-focus article[data-tone="good"]{border-color:#CFE8DC}
-.rv-company-results{padding:18px;border:1px solid #D7E2ED;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(13,42,82,.04)}.rv-company-results-head{display:flex;align-items:end;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid #E5EDF5}.rv-company-results-head>div:first-child{display:grid;gap:4px}.rv-company-results-head span{font-size:10px;font-weight:900;letter-spacing:.08em;color:#2564B4}.rv-company-results-head h3{margin:0;font:800 20px/1.2 Inter;color:#15355F}.rv-company-results-head p{margin:0;max-width:780px;font-size:13px;color:#61758E;line-height:1.5}.rv-company-segments{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.rv-company-segments button{min-height:34px;padding:0 11px;border:1px solid #D7E2ED;border-radius:999px;background:#fff;color:#516780;font-size:11px;font-weight:850;cursor:pointer}.rv-company-segments button.active{background:#1C60B6;border-color:#1C60B6;color:#fff}
+.rv-company-results{padding:18px;border:1px solid #D7E2ED;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(13,42,82,.04)}.rv-company-results-head{display:flex;align-items:end;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid #E5EDF5}.rv-company-results-head>div:first-child{display:grid;gap:4px}.rv-company-results-head span{font-size:10px;font-weight:900;letter-spacing:.08em;color:#2564B4}.rv-company-results-head h3{margin:0;font:800 20px/1.2 Inter;color:#15355F}.rv-company-results-head p{margin:0;max-width:780px;font-size:13px;color:#61758E;line-height:1.5}.rv-company-segments{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.rv-company-segments button{min-height:34px;padding:0 11px;border:1px solid #D7E2ED;border-radius:999px;background:#fff;color:#516780;font-size:11px;font-weight:850;cursor:pointer}.rv-company-segments button.active{background:#1C60B6!important;border-color:#1C60B6!important;color:#fff!important}
 .rv-company-table-head{display:grid;grid-template-columns:minmax(200px,1.25fr) 90px minmax(150px,.9fr) minmax(180px,1fr) minmax(210px,1.15fr) auto 24px;gap:12px;align-items:center;padding:12px 14px 8px;color:#718298}.rv-company-table-head span{font-size:10px!important;font-weight:900!important;letter-spacing:.045em!important;color:#718298!important;text-transform:uppercase}.rv-company-list{display:grid;gap:9px;margin-top:4px}.rv-company-row{border:1px solid #DFE7F0;border-radius:13px;background:#FBFCFE;overflow:hidden}.rv-company-row[data-status="CON RESTRICCIÓN"]{border-color:#EFC9C5;background:#FFF9F8}.rv-company-row[data-status="ERROR"]{border-color:#E9D2A9;background:#FFF9EE}.rv-company-row summary{list-style:none;display:grid;grid-template-columns:minmax(200px,1.25fr) 90px minmax(150px,.9fr) minmax(180px,1fr) minmax(210px,1.15fr) auto 24px;gap:12px;align-items:center;padding:14px;cursor:pointer}.rv-company-row summary::-webkit-details-marker{display:none}.rv-company-row[open] .rv-company-expand{transform:rotate(180deg)}.rv-company-expand{transition:transform .18s ease;color:#58708C}
 .rv-company-name{min-width:0;display:flex;align-items:center;gap:10px}.rv-company-dot{width:10px;height:10px;border-radius:50%;background:#31B779;box-shadow:0 0 0 5px rgba(49,183,121,.09);flex:0 0 10px}.rv-company-row[data-status="CON RESTRICCIÓN"] .rv-company-dot{background:#D84B42;box-shadow:0 0 0 5px rgba(216,75,66,.09)}.rv-company-row[data-status="ERROR"] .rv-company-dot{background:#E4A228;box-shadow:0 0 0 5px rgba(228,162,40,.1)}.rv-company-name>div{min-width:0;display:grid;gap:3px}.rv-company-name b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;color:#173B68}.rv-company-name small{font-size:11px;color:#6C7F96}.rv-company-galera{font-size:12px;color:#506781;font-weight:800}.rv-company-plates,.rv-company-models{display:flex;gap:6px;flex-wrap:wrap}.rv-company-plates span{padding:5px 7px;border:1px solid #CFDBE8;border-radius:7px;background:#F4F8FC;color:#173B68;font:850 12px/1 "JetBrains Mono",monospace;letter-spacing:.035em}.rv-company-models span{padding:5px 7px;border-radius:7px;background:#EDF4FC;color:#345A82;font-size:11px;font-weight:750;line-height:1.25}.rv-company-restriction{font-size:12px!important;font-weight:800!important;letter-spacing:0!important;color:#405B79!important;line-height:1.35;overflow-wrap:anywhere}.rv-company-status{padding:6px 9px;border-radius:999px;background:#EAF9F1;color:#1D7B54!important;font-size:9px!important;font-weight:900!important;letter-spacing:.03em!important;white-space:nowrap}.rv-company-row[data-status="CON RESTRICCIÓN"] .rv-company-status{background:#FFF0EE;color:#B63F37!important}.rv-company-row[data-status="ERROR"] .rv-company-status{background:#FFF2D8;color:#A56905!important}
 .rv-company-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px 14px 14px;border-top:1px solid #E3EBF3;background:#fff}.rv-company-detail article{display:grid;grid-template-columns:minmax(120px,.55fr) minmax(150px,.8fr) minmax(0,1.5fr);gap:14px;align-items:start;padding:13px;border:1px solid #DDE6EF;border-radius:11px;background:#F8FAFD}.rv-company-detail article>div{display:grid;gap:4px}.rv-company-detail small{font-size:9px;font-weight:900;letter-spacing:.05em;color:#71849A}.rv-company-detail-identity strong{font:900 17px/1.2 "JetBrains Mono",monospace;letter-spacing:.05em;color:#153A68}.rv-company-detail-identity span{font-size:10px;color:#78899D}.rv-company-detail-model b{font-size:13px;line-height:1.35;color:#234463}.rv-company-detail-result b{font-size:12px;line-height:1.45;color:#243E5B;overflow-wrap:anywhere}.rv-company-row[data-status="CON RESTRICCIÓN"] .rv-company-detail-result b{color:#9D3933}.rv-company-empty{display:grid;justify-items:center;gap:7px;padding:42px 18px;text-align:center;color:#647990}.rv-company-empty>span{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:#EDF4FC;color:#2B68B5}.rv-company-empty b{font-size:15px;color:#244463}.rv-company-empty p{max-width:620px;margin:0;font-size:12px;line-height:1.5}
