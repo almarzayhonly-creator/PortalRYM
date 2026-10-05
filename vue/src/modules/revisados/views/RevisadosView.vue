@@ -108,10 +108,12 @@ const dashboardGallery=computed(()=>gallery.value.map(g=>{
   const pendingCount=Number(g.pendientes||0)
   const alerts=Number(g.alertas||0)
   const blocked=Number(g.bloqueadas||0)
+  const pct=total?Math.round(covered*100/total):0
+  const tone=alerts>20||pct<75?'risk':pct<90?'watch':'good'
   return {
     galera:String(g.galera||'OTROS'),
-    total,covered,pending:pendingCount,alerts,blocked,
-    pct:total?Math.round(covered*100/total):0
+    total,covered,pending:pendingCount,alerts,blocked,pct,tone,
+    statusLabel:tone==='good'?'Controlado':tone==='watch'?'En seguimiento':'Atención'
   }
 }).filter(g=>g.total>0))
 const cycleGlance=computed(()=>monthly.value.filter(m=>Number(m.total||m.activas||0)>0).slice(-3))
@@ -259,110 +261,123 @@ onMounted(()=>load())
     </header>
     <div v-if="loading" class="rv-state">Cargando datos reales de Revisados…</div><div v-else-if="error" class="rv-state error"><b>No fue posible cargar Revisados.</b><span>{{error}}</span><button class="primary" @click="load(true)">Reintentar</button></div>
     <template v-else>
-      <section v-if="active==='dashboard'" class="rv-stack rv-mission-dashboard">
-        <section class="rv-mission-hero">
-          <div class="rv-mission-copy">
-            <span class="rv-mission-eyebrow"><i></i> REVISADOS · MISSION CONTROL</span>
-            <h2>Control legal, sin ruido.</h2>
-            <p><b>{{hero.title}}</b> · {{hero.detail}}</p>
-            <div class="rv-mission-actions">
-              <button class="primary" @click="open(hero.action)">{{hero.label}}</button>
-              <button v-if="criticalCount" class="ghost" @click="open(canOperate?'operations':'history')">Revisar {{num(criticalCount)}} alertas</button>
+      <section v-if="active==='dashboard'" class="rv-stack rv-command-dashboard">
+        <section class="rv-command-surface">
+          <div class="rv-command-hero">
+            <div class="rv-command-copy">
+              <span class="rv-command-eyebrow"><i></i> REVISADOS · CONTROL LEGAL</span>
+              <h2>Estado legal de la flota.</h2>
+              <p><strong>{{num(metrics.vigentes)}} de {{num(metrics.total)}}</strong> unidades están al día. <b>{{num(metrics.pendientesCiclo)}}</b> requieren gestión.</p>
+              <div class="rv-command-meter">
+                <i :style="{width:coveragePct+'%'}"></i>
+                <span>{{coveragePct}}% cobertura</span>
+              </div>
+              <div class="rv-command-actions">
+                <button class="primary" @click="open(hero.action)">{{hero.label}}</button>
+                <button v-if="criticalCount" class="ghost" @click="open(canOperate?'operations':'history')">{{num(criticalCount)}} alertas por revisar</button>
+              </div>
+            </div>
+
+            <div class="rv-command-score">
+              <div class="rv-score-orbit" :style="{'--score':coveragePct+'%'}">
+                <div><strong>{{coveragePct}}</strong><span>%</span><small>AL DÍA</small></div>
+              </div>
+              <div class="rv-score-copy">
+                <span><small>FLOTA VISIBLE</small><b>{{num(metrics.total)}}</b></span>
+                <span><small>VIGENTES</small><b>{{num(metrics.vigentes)}}</b></span>
+                <span><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b></span>
+              </div>
             </div>
           </div>
 
-          <div class="rv-health-cluster">
-            <div class="rv-health-ring" :style="{'--health':coveragePct+'%'}">
-              <div><strong>{{coveragePct}}%</strong><span>al día</span></div>
-            </div>
-            <div class="rv-health-facts">
-              <span><small>FLOTA VISIBLE</small><b>{{num(metrics.total)}}</b></span>
-              <span><small>AL DÍA</small><b>{{num(metrics.vigentes)}}</b></span>
-              <span><small>POR GESTIONAR</small><b>{{num(metrics.pendientesCiclo)}}</b></span>
-            </div>
+          <div class="rv-command-ribbon">
+            <button @click="open('operations')" data-tone="blue">
+              <span class="rv-ribbon-icon"><RymIcon name="schedule" :size="17"/></span>
+              <div><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b><em>Gestión del ciclo</em></div>
+            </button>
+            <button @click="open(canOperate?'operations':'history')" data-tone="red">
+              <span class="rv-ribbon-icon"><RymIcon name="gavel" :size="17"/></span>
+              <div><small>ALERTAS REALES</small><b>{{num(criticalCount)}}</b><em>Impedimentos activos</em></div>
+            </button>
+            <button @click="open('operations')" data-tone="amber">
+              <span class="rv-ribbon-icon"><RymIcon name="palette" :size="17"/></span>
+              <div><small>CAMBIO DE COLOR</small><b>{{num(metrics.cambiosColor)}}</b><em>Nuevo revisado</em></div>
+            </button>
+            <button @click="open('daily')" data-tone="cyan">
+              <span class="rv-ribbon-icon"><RymIcon name="verified" :size="17"/></span>
+              <div><small>EMITIDOS HOY</small><b>{{num(dailyCapacity.emitted)}} <i>/ {{num(dailyCapacity.limit)}}</i></b><em>{{num(dailyCapacity.available)}} cupos disponibles</em></div>
+              <span class="rv-ribbon-meter"><i :style="{width:dailyCapacity.pct+'%'}"></i></span>
+            </button>
           </div>
         </section>
 
-        <section class="rv-signal-board">
-          <button class="rv-signal-card" data-tone="blue" @click="open('operations')">
-            <span class="rv-signal-icon"><RymIcon name="schedule" :size="18"/></span>
-            <div><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b><em>Requieren gestión del ciclo</em></div>
-            <RymIcon name="arrow_forward" :size="15"/>
-          </button>
-          <button class="rv-signal-card" data-tone="red" @click="open(canOperate?'operations':'history')">
-            <span class="rv-signal-icon"><RymIcon name="gavel" :size="18"/></span>
-            <div><small>ALERTAS REALES</small><b>{{num(criticalCount)}}</b><em>Impedimentos que requieren acción</em></div>
-            <RymIcon name="arrow_forward" :size="15"/>
-          </button>
-          <button class="rv-signal-card" data-tone="amber" @click="open('operations')">
-            <span class="rv-signal-icon"><RymIcon name="palette" :size="18"/></span>
-            <div><small>CAMBIO DE COLOR</small><b>{{num(metrics.cambiosColor)}}</b><em>Requieren nuevo revisado</em></div>
-            <RymIcon name="arrow_forward" :size="15"/>
-          </button>
-          <button class="rv-signal-card" data-tone="cyan" @click="open('daily')">
-            <span class="rv-signal-icon"><RymIcon name="verified" :size="18"/></span>
-            <div><small>EMITIDOS HOY</small><b>{{num(dailyCapacity.emitted)}} <i>/ {{num(dailyCapacity.limit)}}</i></b><em>{{num(dailyCapacity.available)}} cupos disponibles</em></div>
-            <span class="rv-signal-mini-meter"><i :style="{width:dailyCapacity.pct+'%'}"></i></span>
-          </button>
-        </section>
-
-        <div class="rv-secondary-signals">
-          <span v-if="taxiCount"><i data-tone="amber"></i><b>{{num(taxiCount)}}</b> pendiente revisado taxi</span>
-          <span><i data-tone="slate"></i><b>{{num(kpis.sin_fotos)}}</b> sin fotos</span>
-          <span class="rv-secondary-live"><i data-tone="green"></i> Datos sincronizados con fuente real</span>
+        <div class="rv-quiet-signals">
+          <span v-if="taxiCount"><i data-tone="amber"></i><b>{{num(taxiCount)}}</b> revisados taxi pendientes</span>
+          <span><i data-tone="slate"></i><b>{{num(kpis.sin_fotos)}}</b> unidades sin fotos</span>
+          <span class="live"><i data-tone="green"></i> Datos sincronizados con fuente real</span>
         </div>
 
-        <div class="rv-mission-grid">
-          <section class="rv-network-panel">
-            <header class="rv-mission-panel-head">
-              <div><span>RED OPERATIVA</span><h3>Estado por galera</h3><p>Cobertura, pendientes y alertas en una sola lectura.</p></div>
-              <small>{{dashboardGallery.length}} galeras visibles</small>
+        <div class="rv-control-layout">
+          <section class="rv-gallery-deck-panel">
+            <header class="rv-control-heading">
+              <div><span>RED OPERATIVA</span><h3>Galeras en una mirada</h3><p>Prioriza dónde intervenir sin entrar a otra pantalla.</p></div>
+              <small>{{dashboardGallery.length}} galeras</small>
             </header>
-            <div class="rv-gallery-matrix">
-              <article v-for="g in dashboardGallery" :key="g.galera" class="rv-gallery-row" :data-attention="g.pending>0">
-                <div class="rv-gallery-name">
-                  <b>{{g.galera}}</b>
-                  <span>{{num(g.total)}} unidades</span>
-                </div>
-                <div class="rv-gallery-progress">
-                  <div><i :style="{width:g.pct+'%'}"></i></div>
-                  <span><b>{{g.pct}}%</b> al día</span>
-                </div>
-                <div class="rv-gallery-counts">
+
+            <div class="rv-gallery-deck">
+              <article v-for="g in dashboardGallery" :key="g.galera" class="rv-gallery-card" :data-tone="g.tone">
+                <header>
+                  <div><span>{{g.statusLabel}}</span><h4>{{g.galera}}</h4><small>{{num(g.total)}} unidades</small></div>
+                  <strong>{{g.pct}}<i>%</i></strong>
+                </header>
+                <div class="rv-gallery-meter"><i :style="{width:g.pct+'%'}"></i></div>
+                <footer>
                   <span><b>{{num(g.covered)}}</b> al día</span>
-                  <span v-if="g.pending" data-tone="amber"><b>{{num(g.pending)}}</b> pendientes</span>
-                  <span v-if="g.alerts" data-tone="red"><b>{{num(g.alerts)}}</b> alertas</span>
-                </div>
+                  <span v-if="g.pending"><b>{{num(g.pending)}}</b> pendientes</span>
+                  <span v-if="g.alerts" class="alert"><b>{{num(g.alerts)}}</b> alertas</span>
+                </footer>
               </article>
             </div>
           </section>
 
-          <aside class="rv-mission-side">
-            <section class="rv-now-panel">
-              <header class="rv-mission-panel-head compact">
-                <div><span>ATENDER AHORA</span><h3>Prioridad inmediata</h3></div>
+          <aside class="rv-decision-column">
+            <section class="rv-decision-panel">
+              <header class="rv-control-heading compact">
+                <div><span>ATENDER AHORA</span><h3>Decisiones inmediatas</h3></div>
                 <button @click="open('operations')">Ver cola →</button>
               </header>
-              <div class="rv-now-list">
-                <button v-for="r in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" @click="openFicha(r)">
-                  <span class="rv-now-rank" :data-tone="vehicleStateTone(r)">{{String(r.prioridad||'ACTUAL').slice(0,1)}}</span>
+              <div class="rv-decision-list">
+                <button v-for="(r,index) in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" @click="openFicha(r)">
+                  <span class="rv-decision-number">0{{index+1}}</span>
                   <div>
                     <b>{{r.unidad||'—'}} <i>·</i> {{r.placa||'—'}}</b>
                     <small>{{r.galera||'—'}} · {{r.supervisora||'Sin supervisora'}}</small>
                   </div>
-                  <em>{{vehicleStateLabel(r)}}</em>
+                  <em :data-tone="vehicleStateTone(r)">{{vehicleStateLabel(r)}}</em>
                 </button>
               </div>
             </section>
 
-            <section class="rv-cycle-glance">
-              <header class="rv-mission-panel-head compact">
+            <section class="rv-today-panel">
+              <div class="rv-today-orbit" :style="{'--today':dailyCapacity.pct+'%'}">
+                <div><b>{{dailyCapacity.emitted}}</b><span>/{{dailyCapacity.limit}}</span></div>
+              </div>
+              <div class="rv-today-copy">
+                <span>CAPACIDAD DIARIA</span>
+                <h3>{{num(dailyCapacity.available)}} cupos libres hoy</h3>
+                <p>{{dailyCapacity.pct}}% del límite utilizado.</p>
+              </div>
+              <button @click="open('daily')">Ver emitidos →</button>
+            </section>
+
+            <section class="rv-cycle-pulse">
+              <header class="rv-control-heading compact">
                 <div><span>PULSO DE CICLO</span><h3>Últimos meses</h3></div>
                 <button @click="open('monthly')">Abrir →</button>
               </header>
               <article v-for="m in cycleGlance" :key="String(m.mes_num)">
                 <div><b>{{m.mes_nombre||('Mes '+m.mes_num)}}</b><small>{{num(m.pendientes)}} pendientes</small></div>
-                <div class="rv-cycle-glance-bar"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
+                <div class="rv-pulse-meter"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
                 <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
               </article>
             </section>
@@ -1017,3 +1032,56 @@ onMounted(()=>load())
   .rv-gallery-row{grid-template-columns:1fr}.rv-gallery-counts{justify-content:flex-start}.rv-gallery-progress{grid-template-columns:1fr 60px}
 }
 </style>
+
+<style scoped>
+/* Dashboard Command Deck v4 */
+.rv-command-dashboard{gap:12px!important}
+.rv-command-surface{overflow:hidden;border:1px solid #0E3C85;border-radius:20px;background:#0B2E69;box-shadow:0 18px 38px rgba(13,45,101,.16)}
+.rv-command-hero{
+  position:relative;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(360px,.6fr);gap:22px;align-items:center;
+  min-height:166px;padding:22px 24px;
+  background:
+    radial-gradient(circle at 90% 12%,rgba(81,162,255,.32),transparent 30%),
+    linear-gradient(135deg,#071B45 0%,#0A438F 58%,#1574D6 100%);
+}
+.rv-command-hero:after{content:"";position:absolute;right:-74px;bottom:-120px;width:260px;height:260px;border:35px solid rgba(255,255,255,.06);border-radius:50%}
+.rv-command-copy{position:relative;z-index:1;display:grid;justify-items:start;gap:7px}.rv-command-eyebrow{display:flex;align-items:center;gap:7px;font-size:7px;font-weight:900;letter-spacing:.11em;color:#BFD9FF}.rv-command-eyebrow i{width:7px;height:7px;border-radius:50%;background:#4AE1A4;box-shadow:0 0 0 5px rgba(74,225,164,.12)}
+.rv-command-copy h2{margin:0;font:800 27px/1.05 Inter,system-ui,sans-serif;color:#fff;letter-spacing:-.035em}.rv-command-copy p{margin:0;font-size:10px;color:#D4E4F8}.rv-command-copy p strong{color:#fff}.rv-command-copy p b{color:#8EE8C0}
+.rv-command-meter{position:relative;width:min(560px,100%);height:8px;margin-top:5px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden}.rv-command-meter>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#47DDA2,#77E7BD)}.rv-command-meter>span{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:5px;font-weight:900;color:#fff;letter-spacing:.04em}
+.rv-command-actions{display:flex;gap:7px;margin-top:3px}.rv-command-actions .primary,.rv-command-actions .ghost{min-height:32px!important;padding:0 11px!important;border-radius:9px!important;font-size:7.5px!important;font-weight:900!important}.rv-command-actions .primary{background:#fff!important;color:#0D4B9B!important;border-color:#fff!important}.rv-command-actions .ghost{background:rgba(255,255,255,.08)!important;color:#fff!important;border-color:rgba(255,255,255,.22)!important}
+.rv-command-score{position:relative;z-index:1;display:grid;grid-template-columns:112px 1fr;gap:14px;align-items:center;padding:12px 13px;border:1px solid rgba(255,255,255,.15);border-radius:16px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.rv-score-orbit{--score:0%;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#0B438E 56%,transparent 57%),conic-gradient(#55DDA8 var(--score),rgba(255,255,255,.18) 0)}.rv-score-orbit>div{display:grid;grid-template-columns:auto auto;align-items:end;justify-content:center}.rv-score-orbit strong{font:800 28px/1 Inter,system-ui,sans-serif;color:#fff}.rv-score-orbit span{font:800 10px/1 Inter;color:#fff;margin-bottom:3px}.rv-score-orbit small{grid-column:1/-1;margin-top:3px;text-align:center;font-size:6px;font-weight:900;color:#BED4F3}
+.rv-score-copy{display:grid;gap:5px}.rv-score-copy span{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:5px 3px;border-bottom:1px solid rgba(255,255,255,.1)}.rv-score-copy span:last-child{border-bottom:0}.rv-score-copy small{font-size:6px;font-weight:900;letter-spacing:.08em;color:#BED0EB}.rv-score-copy b{font:800 14px/1 Inter;color:#fff}
+
+.rv-command-ribbon{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff}
+.rv-command-ribbon>button{position:relative;min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;padding:11px 13px;border:0;border-right:1px solid #E2EAF3;background:#fff;text-align:left;cursor:pointer}.rv-command-ribbon>button:last-child{border-right:0}.rv-command-ribbon>button:hover{background:#F8FBFF}
+.rv-ribbon-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#EEF5FF;color:#2264BF}.rv-command-ribbon button[data-tone="red"] .rv-ribbon-icon{background:#FFF0EE;color:#C64036}.rv-command-ribbon button[data-tone="amber"] .rv-ribbon-icon{background:#FFF5DE;color:#B76D00}.rv-command-ribbon button[data-tone="cyan"] .rv-ribbon-icon{background:#EAF9FF;color:#087DA8}
+.rv-command-ribbon button>div{min-width:0;display:grid;gap:1px}.rv-command-ribbon small{font-size:6px;font-weight:900;letter-spacing:.06em;color:#8190A5}.rv-command-ribbon b{font:800 18px/1 Inter;color:#15345F}.rv-command-ribbon b i{font:700 8px/1 Inter;color:#8594A7;font-style:normal}.rv-command-ribbon em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6.5px;font-style:normal;color:#77879B}
+.rv-ribbon-meter{width:34px;height:5px;border-radius:999px;background:#E4EDF7;overflow:hidden}.rv-ribbon-meter i{display:block;height:100%;background:#0B88B4;border-radius:999px}
+
+.rv-quiet-signals{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:0 2px}.rv-quiet-signals span{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #DDE6F0;border-radius:999px;background:#FBFCFE;color:#6A7C94;font-size:6.8px}.rv-quiet-signals b{color:#1E426F}.rv-quiet-signals i{width:6px;height:6px;border-radius:50%;background:#A9B6C6}.rv-quiet-signals i[data-tone="amber"]{background:#F0A524}.rv-quiet-signals i[data-tone="green"]{background:#1FB777}.rv-quiet-signals .live{margin-left:auto;background:#F3FBF7;border-color:#CDEBDD;color:#447961}
+
+.rv-control-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(330px,.55fr);gap:12px;align-items:start}.rv-gallery-deck-panel,.rv-decision-panel,.rv-today-panel,.rv-cycle-pulse{border:1px solid #D8E3EF;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(14,43,83,.045)}
+.rv-gallery-deck-panel{padding:14px}.rv-control-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid #E5EDF5}.rv-control-heading>div{display:grid;gap:2px}.rv-control-heading span{font-size:6px;font-weight:900;letter-spacing:.09em;color:#2668C2}.rv-control-heading h3{margin:0;font:800 14px/1.2 Inter;color:#15325C}.rv-control-heading p{margin:0;font-size:7px;color:#7B8BA0}.rv-control-heading>small{font-size:6.5px;color:#8594A7}.rv-control-heading button{border:0;background:transparent;color:#2362B6;font-size:7px;font-weight:850;cursor:pointer}
+.rv-gallery-deck{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.rv-gallery-card{min-width:0;padding:11px;border:1px solid #E0E8F1;border-radius:12px;background:linear-gradient(180deg,#fff,#FAFCFF)}.rv-gallery-card[data-tone="risk"]{border-color:#F1D4D0;background:linear-gradient(180deg,#FFF,#FFF8F7)}.rv-gallery-card[data-tone="watch"]{border-color:#EFDFC3;background:linear-gradient(180deg,#FFF,#FFFCF5)}
+.rv-gallery-card header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.rv-gallery-card header>div{display:grid;gap:1px}.rv-gallery-card header span{font-size:5.5px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#2A8A68}.rv-gallery-card[data-tone="watch"] header span{color:#A66B08}.rv-gallery-card[data-tone="risk"] header span{color:#B23D35}.rv-gallery-card h4{margin:0;font:800 12px/1.1 Inter;color:#15365F}.rv-gallery-card header small{font-size:6px;color:#8796A9}.rv-gallery-card header>strong{font:800 24px/1 Inter;color:#153A6A}.rv-gallery-card header>strong i{font-size:8px;font-style:normal;color:#7F8FA4}
+.rv-gallery-meter{height:6px;margin:9px 0;border-radius:999px;background:#E4EDF6;overflow:hidden}.rv-gallery-meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#286BC7,#3C8BE6)}.rv-gallery-card[data-tone="risk"] .rv-gallery-meter i{background:linear-gradient(90deg,#D85B52,#F08B70)}.rv-gallery-card[data-tone="watch"] .rv-gallery-meter i{background:linear-gradient(90deg,#E4A22D,#F2C151)}
+.rv-gallery-card footer{display:flex;gap:5px;flex-wrap:wrap}.rv-gallery-card footer span{padding:4px 6px;border-radius:999px;background:#EEF4F9;color:#667991;font-size:5.8px}.rv-gallery-card footer span b{color:#23486F}.rv-gallery-card footer .alert{background:#FFF0EF;color:#B23B34}.rv-gallery-card footer .alert b{color:#B23B34}
+
+.rv-decision-column{display:grid;gap:10px}.rv-decision-panel{padding:14px}.rv-control-heading.compact{align-items:center}.rv-decision-list{display:grid;gap:7px;margin-top:9px}.rv-decision-list>button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px;border:1px solid #E1E9F2;border-radius:10px;background:#FBFCFE;text-align:left;cursor:pointer}.rv-decision-list>button:hover{border-color:#BBD2EE;background:#F6F9FE}.rv-decision-number{font:800 9px/1 Inter;color:#7390B5}.rv-decision-list>button>div{min-width:0;display:grid;gap:2px}.rv-decision-list b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;color:#173B68}.rv-decision-list b i{font-style:normal;color:#9BA8B8}.rv-decision-list small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6px;color:#8190A4}.rv-decision-list em{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:4px 6px;border-radius:999px;background:#FFF3DD;color:#9D6409;font-size:5.8px;font-style:normal}.rv-decision-list em[data-tone="incident"]{background:#FFF0EE;color:#B53E36}
+
+.rv-today-panel{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 13px;background:linear-gradient(135deg,#F6FBFF,#FFFFFF)}.rv-today-orbit{--today:0%;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#fff 58%,transparent 59%),conic-gradient(#18A0CE var(--today),#DDEAF3 0)}.rv-today-orbit>div{display:flex;align-items:baseline;gap:1px}.rv-today-orbit b{font:800 14px/1 Inter;color:#0F5484}.rv-today-orbit span{font-size:6px;color:#7E8FA2}.rv-today-copy{display:grid;gap:1px}.rv-today-copy>span{font-size:5.5px;font-weight:900;letter-spacing:.08em;color:#2783A7}.rv-today-copy h3{margin:0;font:800 10px/1.2 Inter;color:#183D67}.rv-today-copy p{margin:0;font-size:6px;color:#8290A3}.rv-today-panel>button{border:0;background:transparent;color:#2163B4;font-size:6.5px;font-weight:850;cursor:pointer}
+
+.rv-cycle-pulse{padding:13px}.rv-cycle-pulse>article{display:grid;grid-template-columns:76px minmax(70px,1fr) 32px;align-items:center;gap:7px;margin-top:8px}.rv-cycle-pulse>article>div:first-child{display:grid;gap:1px}.rv-cycle-pulse b{font-size:7px;color:#1D3D68}.rv-cycle-pulse small{font-size:5.5px;color:#8997A9}.rv-pulse-meter{height:5px;border-radius:999px;background:#E4EDF6;overflow:hidden}.rv-pulse-meter i{display:block;height:100%;border-radius:999px;background:#2A70D2}.rv-cycle-pulse>article>strong{font-size:7px;color:#2866B7}
+
+@media(max-width:1280px){
+  .rv-command-hero{grid-template-columns:1fr}.rv-command-ribbon{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rv-control-layout{grid-template-columns:1fr}.rv-gallery-deck{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:820px){
+  .rv-command-hero{padding:18px}.rv-command-score{grid-template-columns:1fr}.rv-score-orbit{margin:auto}
+  .rv-command-ribbon{grid-template-columns:1fr}.rv-command-ribbon>button{border-right:0;border-bottom:1px solid #E2EAF3}
+  .rv-gallery-deck{grid-template-columns:1fr}.rv-quiet-signals .live{margin-left:0}
+}
+</style>
+
