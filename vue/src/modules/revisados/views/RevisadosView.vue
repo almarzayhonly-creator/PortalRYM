@@ -6,7 +6,6 @@ import { useRevisados } from '../composables/useRevisados'
 import GaleraComparison from '../components/GaleraComparison.vue'
 import RevisadosFilterBar from '../components/RevisadosFilterBar.vue'
 import RevisadosTable from '../components/RevisadosTable.vue'
-import VehicleBadge from '../components/VehicleBadge.vue'
 import RymIcon from '../components/RymIcon.vue'
 import OperationsView from '../operations/OperationsView.vue'
 
@@ -16,7 +15,7 @@ const {filters,filtered,metrics,options,clearFilters}=useRevisados(records)
 const rawRows=computed(()=>Array.isArray(data.value?.rows)?data.value.rows as CanonicalRevisadoRow[]:[])
 const pending=computed(()=>rawRows.value.filter(r=>!r.emitido))
 const emitted=computed(()=>Array.isArray((data.value?.emitidos_hoy as {rows?:CanonicalRevisadoRow[]}|undefined)?.rows)?(data.value?.emitidos_hoy as {rows:CanonicalRevisadoRow[]}).rows:[])
-const emittedToday=computed(()=>data.value?.emitidos_hoy as {emitidos?:number; limite?:number}|undefined)
+const emittedToday=computed(()=>data.value?.emitidos_hoy as {emitidos?:number; limite?:number; disponibles?:number; excedente?:number; rows?:CanonicalRevisadoRow[]}|undefined)
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
 const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all')
@@ -92,7 +91,40 @@ const quickOps=computed(()=>[
 
 const kpis=computed(()=>data.value?.kpis||{})
 const coveragePct=computed(()=>metrics.value.total?Math.round(metrics.value.vigentes*100/metrics.value.total):0)
-const focusRows=computed(()=>[...pending.value].sort((a,b)=>Number(Boolean(b.bloqueado))-Number(Boolean(a.bloqueado))).slice(0,4))
+function dashboardPriorityRank(r:CanonicalRevisadoRow){
+  const p=String(r.prioridad||r.pendiente_tipo||'').toUpperCase()
+  if(p.includes('CRIT'))return 0
+  if(p.includes('URG'))return 1
+  if(p.includes('ALTA'))return 2
+  return 3
+}
+const focusRows=computed(()=>[...pending.value].sort((a,b)=>{
+  const blocked=Number(Boolean(b.bloqueado))-Number(Boolean(a.bloqueado))
+  return blocked||dashboardPriorityRank(a)-dashboardPriorityRank(b)
+}).slice(0,3))
+const dashboardGallery=computed(()=>gallery.value.map(g=>{
+  const total=Number(g.total||0)
+  const covered=Number(g.cubiertas||0)
+  const pendingCount=Number(g.pendientes||0)
+  const alerts=Number(g.alertas||0)
+  const blocked=Number(g.bloqueadas||0)
+  return {
+    galera:String(g.galera||'OTROS'),
+    total,covered,pending:pendingCount,alerts,blocked,
+    pct:total?Math.round(covered*100/total):0
+  }
+}).filter(g=>g.total>0))
+const cycleGlance=computed(()=>monthly.value.filter(m=>Number(m.total||m.activas||0)>0).slice(-3))
+const dailyCapacity=computed(()=>{
+  const limit=Math.max(1,Number(emittedToday.value?.limite||33))
+  const emittedCount=Number(emittedToday.value?.emitidos||emitted.value.length||0)
+  return {
+    emitted:emittedCount,
+    limit,
+    available:Number(emittedToday.value?.disponibles??Math.max(0,limit-emittedCount)),
+    pct:Math.min(100,Math.round(emittedCount*100/limit))
+  }
+})
 const attentionItems=computed(()=>[
   {label:'Pendientes de ciclo',value:metrics.value.pendientesCiclo,tone:'blue'},
   {label:'Cambio de color',value:metrics.value.cambiosColor,tone:'amber'},
@@ -227,44 +259,115 @@ onMounted(()=>load())
     </header>
     <div v-if="loading" class="rv-state">Cargando datos reales de Revisados…</div><div v-else-if="error" class="rv-state error"><b>No fue posible cargar Revisados.</b><span>{{error}}</span><button class="primary" @click="load(true)">Reintentar</button></div>
     <template v-else>
-      <section v-if="active==='dashboard'" class="rv-stack rv-stitch-dashboard">
-        <div class="rv-module-strip">
-          <div><span>REVISADOS · CONTROL LEGAL</span><b>{{hero.title}}</b><small>{{hero.detail}}</small></div>
-          <div class="rv-module-actions"><button class="primary" @click="open(hero.action)">{{hero.label}}</button><button v-if="criticalCount" class="ghost" @click="open(canOperate?'operations':'history')">Revisar alertas</button></div>
-        </div>
-
-        <section class="rv-global-control">
-          <div class="rv-global-head rv-global-head-compact">
-            <div><span>ESTADO ACTUAL</span><strong>{{num(metrics.total)}}</strong><em>unidades visibles · {{coveragePct}}% al día</em></div>
+      <section v-if="active==='dashboard'" class="rv-stack rv-mission-dashboard">
+        <section class="rv-mission-hero">
+          <div class="rv-mission-copy">
+            <span class="rv-mission-eyebrow"><i></i> REVISADOS · MISSION CONTROL</span>
+            <h2>Control legal, sin ruido.</h2>
+            <p><b>{{hero.title}}</b> · {{hero.detail}}</p>
+            <div class="rv-mission-actions">
+              <button class="primary" @click="open(hero.action)">{{hero.label}}</button>
+              <button v-if="criticalCount" class="ghost" @click="open(canOperate?'operations':'history')">Revisar {{num(criticalCount)}} alertas</button>
+            </div>
           </div>
-          <div class="rv-kpi-deck">
-            <article data-tone="green"><header><span>AL DÍA</span><RymIcon name="verified"/></header><b>{{num(metrics.vigentes)}}</b><small>{{coveragePct}}% del padrón visible</small></article>
-            <article data-tone="blue"><header><span>PENDIENTES</span><RymIcon name="schedule"/></header><b>{{num(metrics.pendientesCiclo)}}</b><small>Requieren gestión del ciclo</small></article>
-            <article data-tone="amber"><header><span>CAMBIO DE COLOR</span><RymIcon name="palette"/></header><b>{{num(metrics.cambiosColor)}}</b><small>Requieren nuevo revisado</small></article>
-            <article data-tone="red"><header><span>ALERTAS REALES</span><RymIcon name="gavel"/></header><b>{{num(criticalCount)}}</b><small>Impedimentos que requieren acción</small></article>
-            <article v-if="taxiCount" data-tone="amber"><header><span>PENDIENTE REVISADO TAXI</span><RymIcon name="schedule"/></header><b>{{num(taxiCount)}}</b><small>Cambio a amarillo</small></article>
-            <article data-tone="neutral"><header><span>SIN FOTOS</span><RymIcon name="image"/></header><b>{{num(kpis.sin_fotos)}}</b><small>Unidades sin evidencia fotográfica</small></article>
-            <article data-tone="blue"><header><span>EMITIDOS HOY</span><RymIcon name="verified"/></header><b>{{num(emittedToday?.emitidos)}}</b><small>{{isAdminTotal?'de '+num(emittedToday?.limite)+' cupos diarios':'Dentro de tu alcance'}}</small></article>
+
+          <div class="rv-health-cluster">
+            <div class="rv-health-ring" :style="{'--health':coveragePct+'%'}">
+              <div><strong>{{coveragePct}}%</strong><span>al día</span></div>
+            </div>
+            <div class="rv-health-facts">
+              <span><small>FLOTA VISIBLE</small><b>{{num(metrics.total)}}</b></span>
+              <span><small>AL DÍA</small><b>{{num(metrics.vigentes)}}</b></span>
+              <span><small>POR GESTIONAR</small><b>{{num(metrics.pendientesCiclo)}}</b></span>
+            </div>
           </div>
         </section>
 
-        <GaleraComparison :rows="records"/>
+        <section class="rv-signal-board">
+          <button class="rv-signal-card" data-tone="blue" @click="open('operations')">
+            <span class="rv-signal-icon"><RymIcon name="schedule" :size="18"/></span>
+            <div><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b><em>Requieren gestión del ciclo</em></div>
+            <RymIcon name="arrow_forward" :size="15"/>
+          </button>
+          <button class="rv-signal-card" data-tone="red" @click="open(canOperate?'operations':'history')">
+            <span class="rv-signal-icon"><RymIcon name="gavel" :size="18"/></span>
+            <div><small>ALERTAS REALES</small><b>{{num(criticalCount)}}</b><em>Impedimentos que requieren acción</em></div>
+            <RymIcon name="arrow_forward" :size="15"/>
+          </button>
+          <button class="rv-signal-card" data-tone="amber" @click="open('operations')">
+            <span class="rv-signal-icon"><RymIcon name="palette" :size="18"/></span>
+            <div><small>CAMBIO DE COLOR</small><b>{{num(metrics.cambiosColor)}}</b><em>Requieren nuevo revisado</em></div>
+            <RymIcon name="arrow_forward" :size="15"/>
+          </button>
+          <button class="rv-signal-card" data-tone="cyan" @click="open('daily')">
+            <span class="rv-signal-icon"><RymIcon name="verified" :size="18"/></span>
+            <div><small>EMITIDOS HOY</small><b>{{num(dailyCapacity.emitted)}} <i>/ {{num(dailyCapacity.limit)}}</i></b><em>{{num(dailyCapacity.available)}} cupos disponibles</em></div>
+            <span class="rv-signal-mini-meter"><i :style="{width:dailyCapacity.pct+'%'}"></i></span>
+          </button>
+        </section>
 
-        <div class="rv-dashboard-lower">
-          <section class="rv-focus-panel">
-            <div class="rv-panel-title"><div><span>QUÉ ATENDER PRIMERO</span><h3>Pendientes con mayor prioridad</h3></div><button type="button" @click="open('operations')">Abrir Operaciones →</button></div>
-            <div class="rv-focus-grid"><VehicleBadge v-for="r in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" :row="r" compact @open="openFicha"/></div>
-          </section>
-          <section class="rv-cycle-panel">
-            <div class="rv-panel-title"><div><span>AVANCE POR MES</span><h3>Cobertura por ciclo</h3></div><button type="button" @click="open('monthly')">Ver completo →</button></div>
-            <article v-for="m in monthly.slice(0,4)" :key="String(m.mes_num)">
-              <div><b>{{m.mes_nombre||('Mes '+m.mes_num)}}</b><span>{{num(m.cubiertas)}} / {{num(m.total||m.activas)}} al día</span></div>
-              <div class="rv-cycle-bar"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
-              <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
-            </article>
-          </section>
+        <div class="rv-secondary-signals">
+          <span v-if="taxiCount"><i data-tone="amber"></i><b>{{num(taxiCount)}}</b> pendiente revisado taxi</span>
+          <span><i data-tone="slate"></i><b>{{num(kpis.sin_fotos)}}</b> sin fotos</span>
+          <span class="rv-secondary-live"><i data-tone="green"></i> Datos sincronizados con fuente real</span>
         </div>
 
+        <div class="rv-mission-grid">
+          <section class="rv-network-panel">
+            <header class="rv-mission-panel-head">
+              <div><span>RED OPERATIVA</span><h3>Estado por galera</h3><p>Cobertura, pendientes y alertas en una sola lectura.</p></div>
+              <small>{{dashboardGallery.length}} galeras visibles</small>
+            </header>
+            <div class="rv-gallery-matrix">
+              <article v-for="g in dashboardGallery" :key="g.galera" class="rv-gallery-row" :data-attention="g.pending>0">
+                <div class="rv-gallery-name">
+                  <b>{{g.galera}}</b>
+                  <span>{{num(g.total)}} unidades</span>
+                </div>
+                <div class="rv-gallery-progress">
+                  <div><i :style="{width:g.pct+'%'}"></i></div>
+                  <span><b>{{g.pct}}%</b> al día</span>
+                </div>
+                <div class="rv-gallery-counts">
+                  <span><b>{{num(g.covered)}}</b> al día</span>
+                  <span v-if="g.pending" data-tone="amber"><b>{{num(g.pending)}}</b> pendientes</span>
+                  <span v-if="g.alerts" data-tone="red"><b>{{num(g.alerts)}}</b> alertas</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <aside class="rv-mission-side">
+            <section class="rv-now-panel">
+              <header class="rv-mission-panel-head compact">
+                <div><span>ATENDER AHORA</span><h3>Prioridad inmediata</h3></div>
+                <button @click="open('operations')">Ver cola →</button>
+              </header>
+              <div class="rv-now-list">
+                <button v-for="r in focusRows" :key="String(r.unidad_id||r.placa||r.unidad)" @click="openFicha(r)">
+                  <span class="rv-now-rank" :data-tone="vehicleStateTone(r)">{{String(r.prioridad||'ACTUAL').slice(0,1)}}</span>
+                  <div>
+                    <b>{{r.unidad||'—'}} <i>·</i> {{r.placa||'—'}}</b>
+                    <small>{{r.galera||'—'}} · {{r.supervisora||'Sin supervisora'}}</small>
+                  </div>
+                  <em>{{vehicleStateLabel(r)}}</em>
+                </button>
+              </div>
+            </section>
+
+            <section class="rv-cycle-glance">
+              <header class="rv-mission-panel-head compact">
+                <div><span>PULSO DE CICLO</span><h3>Últimos meses</h3></div>
+                <button @click="open('monthly')">Abrir →</button>
+              </header>
+              <article v-for="m in cycleGlance" :key="String(m.mes_num)">
+                <div><b>{{m.mes_nombre||('Mes '+m.mes_num)}}</b><small>{{num(m.pendientes)}} pendientes</small></div>
+                <div class="rv-cycle-glance-bar"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
+                <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
+              </article>
+            </section>
+          </aside>
+        </div>
       </section>
       <OperationsView
         v-else-if="active==='operations'"
@@ -843,5 +946,74 @@ onMounted(()=>load())
     flex-direction:row!important;
     align-items:center!important;
   }
+}
+</style>
+
+<style scoped>
+/* Dashboard Mission Control v3 — main parity + Stitch hierarchy */
+.rv-mission-dashboard{gap:14px!important}
+.rv-mission-hero{
+  position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(360px,.65fr);gap:24px;align-items:center;
+  min-height:188px;padding:24px 26px;border-radius:20px;
+  background:
+    radial-gradient(circle at 92% 15%,rgba(79,157,255,.32),transparent 30%),
+    radial-gradient(circle at 62% 120%,rgba(31,203,166,.14),transparent 35%),
+    linear-gradient(135deg,#071A45 0%,#0B3E91 52%,#146FD1 100%);
+  box-shadow:0 18px 42px rgba(10,45,105,.18);color:#fff
+}
+.rv-mission-hero:after{content:"";position:absolute;right:-58px;top:-82px;width:230px;height:230px;border:34px solid rgba(255,255,255,.07);border-radius:50%}
+.rv-mission-copy{position:relative;z-index:1;display:grid;justify-items:start;gap:8px}
+.rv-mission-eyebrow{display:flex;align-items:center;gap:7px;font-size:8px;font-weight:900;letter-spacing:.11em;color:#BFD9FF}
+.rv-mission-eyebrow i{width:7px;height:7px;border-radius:50%;background:#4DE4A8;box-shadow:0 0 0 5px rgba(77,228,168,.1)}
+.rv-mission-copy h2{margin:0;font:800 28px/1.05 Inter,system-ui,sans-serif;color:#fff;letter-spacing:-.035em}
+.rv-mission-copy p{margin:0;max-width:660px;font-size:11px;line-height:1.45;color:#D5E5FA}.rv-mission-copy p b{color:#fff}
+.rv-mission-actions{display:flex;gap:8px;margin-top:4px}.rv-mission-actions .primary,.rv-mission-actions .ghost{min-height:34px!important;border-radius:9px!important;padding:0 12px!important;font-size:8px!important;font-weight:900!important}
+.rv-mission-actions .primary{background:#fff!important;color:#0B4AA0!important;border-color:#fff!important}.rv-mission-actions .ghost{background:rgba(255,255,255,.08)!important;color:#fff!important;border-color:rgba(255,255,255,.24)!important}
+
+.rv-health-cluster{position:relative;z-index:1;display:grid;grid-template-columns:126px 1fr;gap:16px;align-items:center;padding:14px;border:1px solid rgba(255,255,255,.15);border-radius:17px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.rv-health-ring{--health:0%;width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#0A367C 57%,transparent 58%),conic-gradient(#55DDA8 var(--health),rgba(255,255,255,.17) 0);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.rv-health-ring>div{display:grid;justify-items:center}.rv-health-ring strong{font:800 28px/1 Inter,system-ui,sans-serif}.rv-health-ring span{margin-top:3px;font-size:8px;color:#BFD4F4}
+.rv-health-facts{display:grid;gap:7px}.rv-health-facts span{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 9px;border-bottom:1px solid rgba(255,255,255,.1)}.rv-health-facts span:last-child{border-bottom:0}
+.rv-health-facts small{font-size:6.5px;font-weight:900;letter-spacing:.08em;color:#B9CFF0}.rv-health-facts b{font:800 15px/1 Inter,system-ui,sans-serif;color:#fff}
+
+.rv-signal-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.rv-signal-card{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 13px;border:1px solid #D9E4F0;border-radius:14px;background:#fff;text-align:left;box-shadow:0 7px 18px rgba(13,43,88,.045);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+.rv-signal-card:hover{transform:translateY(-1px);box-shadow:0 11px 24px rgba(13,43,88,.08)}
+.rv-signal-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#EDF4FF;color:#1E65C8}
+.rv-signal-card>div{min-width:0;display:grid;gap:2px}.rv-signal-card small{font-size:6.5px;font-weight:900;letter-spacing:.06em;color:#798BA3}.rv-signal-card b{font:800 22px/1 Inter,system-ui,sans-serif;color:#122D59}.rv-signal-card b i{font:700 9px/1 Inter,system-ui,sans-serif;color:#7D8DA1;font-style:normal}.rv-signal-card em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7.5px;font-style:normal;color:#6D7E95}
+.rv-signal-card[data-tone="red"] .rv-signal-icon{background:#FFF0EE;color:#C53A31}.rv-signal-card[data-tone="red"]{border-color:#F3D1CD}
+.rv-signal-card[data-tone="amber"] .rv-signal-icon{background:#FFF5DF;color:#B46A00}.rv-signal-card[data-tone="amber"]{border-color:#F2DFC0}
+.rv-signal-card[data-tone="cyan"] .rv-signal-icon{background:#EAF9FF;color:#087FAB}.rv-signal-card[data-tone="cyan"]{border-color:#CDE7F2}
+.rv-signal-mini-meter{grid-column:3;width:36px;height:5px;border-radius:999px;background:#E4EEF7;overflow:hidden}.rv-signal-mini-meter i{display:block;height:100%;background:#0E8DB7;border-radius:999px}
+
+.rv-secondary-signals{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:1px 2px}
+.rv-secondary-signals span{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #DCE5EF;border-radius:999px;background:#FAFCFE;color:#657790;font-size:7.5px}.rv-secondary-signals b{color:#173765}
+.rv-secondary-signals i{width:7px;height:7px;border-radius:50%;background:#A7B4C5}.rv-secondary-signals i[data-tone="amber"]{background:#F4A524}.rv-secondary-signals i[data-tone="green"]{background:#21B875}
+.rv-secondary-live{margin-left:auto!important;background:#F3FBF7!important;border-color:#CBEBDD!important;color:#39745B!important}
+
+.rv-mission-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(330px,.55fr);gap:12px;align-items:start}
+.rv-network-panel,.rv-now-panel,.rv-cycle-glance{padding:14px;border:1px solid #D8E3EF;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(12,42,84,.045)}
+.rv-mission-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid #E6EDF5}.rv-mission-panel-head>div{display:grid;gap:2px}.rv-mission-panel-head span{font-size:6.5px;font-weight:900;letter-spacing:.09em;color:#2568C3}.rv-mission-panel-head h3{margin:0;font:800 14px/1.2 Inter,system-ui,sans-serif;color:#112F5C}.rv-mission-panel-head p{margin:0;font-size:7.5px;color:#7889A0}.rv-mission-panel-head>small{font-size:7px;color:#8493A7}.rv-mission-panel-head button{border:0;background:transparent;color:#1F63BD;font-size:7.5px;font-weight:850;cursor:pointer}
+
+.rv-gallery-matrix{display:grid;gap:7px;margin-top:10px}.rv-gallery-row{display:grid;grid-template-columns:120px minmax(160px,1fr) minmax(235px,auto);gap:12px;align-items:center;padding:9px 10px;border:1px solid #E2EAF3;border-radius:11px;background:#FBFCFE}
+.rv-gallery-name{display:grid;gap:2px}.rv-gallery-name b{font-size:9px;color:#173967}.rv-gallery-name span{font-size:6.5px;color:#8494A9}
+.rv-gallery-progress{display:grid;grid-template-columns:minmax(100px,1fr) 64px;align-items:center;gap:8px}.rv-gallery-progress>div{height:7px;border-radius:999px;background:#E4EDF7;overflow:hidden}.rv-gallery-progress i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2568D1,#3E89E8)}.rv-gallery-progress>span{font-size:7px;color:#6C7F98}.rv-gallery-progress>span b{font-size:9px;color:#173C72}
+.rv-gallery-counts{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap}.rv-gallery-counts span{padding:5px 7px;border-radius:999px;background:#F0F5FA;color:#687C95;font-size:6.5px;white-space:nowrap}.rv-gallery-counts span b{color:#24476F}.rv-gallery-counts span[data-tone="amber"]{background:#FFF5E4;color:#9E6309}.rv-gallery-counts span[data-tone="amber"] b{color:#9E6309}.rv-gallery-counts span[data-tone="red"]{background:#FFF0EF;color:#B33A33}.rv-gallery-counts span[data-tone="red"] b{color:#B33A33}
+
+.rv-mission-side{display:grid;gap:12px}.rv-mission-panel-head.compact{align-items:center}.rv-now-list{display:grid;gap:7px;margin-top:9px}.rv-now-list>button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px;border:1px solid #E1E9F2;border-radius:10px;background:#FAFCFF;text-align:left;cursor:pointer}.rv-now-list>button:hover{border-color:#B8D1EE;background:#F5F9FF}
+.rv-now-rank{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:#EAF2FF;color:#2769BE;font-size:9px;font-weight:900}.rv-now-rank[data-tone="incident"]{background:#FFE9E6;color:#B43B30}.rv-now-rank[data-tone="color"]{background:#FFF3DA;color:#A96A04}
+.rv-now-list>button>div{min-width:0;display:grid;gap:2px}.rv-now-list b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;color:#183A67}.rv-now-list b i{font-style:normal;color:#9AA7B7}.rv-now-list small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6.5px;color:#8190A4}.rv-now-list em{max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6.5px;font-style:normal;color:#A05C04}
+
+.rv-cycle-glance{display:grid;gap:7px}.rv-cycle-glance>article{display:grid;grid-template-columns:82px minmax(80px,1fr) 34px;align-items:center;gap:8px;padding-top:4px}.rv-cycle-glance>article>div:first-child{display:grid;gap:1px}.rv-cycle-glance>article b{font-size:8px;color:#193A67}.rv-cycle-glance>article small{font-size:6px;color:#8795A8}.rv-cycle-glance-bar{height:6px;border-radius:999px;background:#E4EDF7;overflow:hidden}.rv-cycle-glance-bar i{display:block;height:100%;border-radius:999px;background:#2A71D5}.rv-cycle-glance>article>strong{font-size:8px;color:#2867BA}
+
+@media(max-width:1280px){
+  .rv-mission-hero{grid-template-columns:1fr}.rv-health-cluster{grid-template-columns:112px 1fr}
+  .rv-signal-board{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rv-mission-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .rv-mission-hero{padding:18px}.rv-health-cluster{grid-template-columns:1fr}.rv-health-ring{margin:auto}
+  .rv-signal-board{grid-template-columns:1fr}.rv-secondary-live{margin-left:0!important}
+  .rv-gallery-row{grid-template-columns:1fr}.rv-gallery-counts{justify-content:flex-start}.rv-gallery-progress{grid-template-columns:1fr 60px}
 }
 </style>
