@@ -45,7 +45,12 @@ const incidents=computed(()=>Array.isArray(data.value?.incidents)?data.value?.in
 const fichaOpenIncidents=computed(()=>{const id=ficha.value?.unidad?.id;if(id==null)return [];return incidents.value.filter(i=>String(i.unidad_id)===String(id)&&String(i.estado)==='ABIERTA')})
 function text(v:unknown){return String(v??'—')}
 function num(v:unknown){return new Intl.NumberFormat('es-PA').format(Number(v)||0)}
-function date(v:unknown){try{return v?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium'}).format(new Date(String(v))):'—'}catch{return text(v)}}
+function date(v:unknown){try{return v?new Intl.DateTimeFormat('es-PA',{dateStyle:'medium',timeZone:'America/Panama'}).format(new Date(String(v))):'—'}catch{return text(v)}}
+function monthName(v:unknown){
+  const n=Number(v)
+  const names=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+  return names[n-1]||('Mes '+String(v||'—'))
+}
 function share(v:unknown){return metrics.value.total?Math.max(0,Math.min(100,Number(v||0)*100/metrics.value.total)):0}
 function state(r:CanonicalRevisadoRow){return r.emitido?'Vigente':r.requiere_atencion?'Pendiente':'Sin ciclo'}
 function status(r:CanonicalRevisadoRow){return r.bloqueado?'Bloqueo real':String(r.pendiente_tipo||r.status2||state(r))}
@@ -404,7 +409,7 @@ onMounted(()=>load())
                 <button @click="open('monthly')">Abrir →</button>
               </header>
               <article v-for="m in cycleGlance" :key="String(m.mes_num)">
-                <div><b>{{m.mes_nombre||('Mes '+m.mes_num)}}</b><small>{{num(m.pendientes)}} pendientes</small></div>
+                <div><b>{{m.mes_nombre||monthName(m.mes_num)}}</b><small>{{num(m.pendientes)}} pendientes</small></div>
                 <div class="rv-pulse-meter"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
                 <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
               </article>
@@ -450,7 +455,7 @@ onMounted(()=>load())
         <section class="rv-cycle-deck">
           <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
             <header>
-              <div><span>CICLO</span><h3>{{m.mes_nombre||('Mes '+m.mes_num)}}</h3></div>
+              <div><span>CICLO</span><h3>{{m.mes_nombre||monthName(m.mes_num)}}</h3></div>
               <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
             </header>
             <div class="rv-cycle-v2-meter"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
@@ -570,7 +575,7 @@ onMounted(()=>load())
       <section v-else-if="active==='stats'" class="rv-stack rv-workspace-tab rv-stats-v2">
         <header class="rv-tab-hero rv-tab-hero-stats">
           <div><span>ESTADÍSTICAS</span><h2>Lectura ejecutiva de cobertura</h2><p>Estado del padrón visible y distribución de los principales riesgos operativos.</p></div>
-          <div class="rv-stats-score"><strong>{{metrics.total?Math.round(metrics.vigentes*100/metrics.total):0}}%</strong><span>cobertura actual</span></div>
+          <div class="rv-stats-score" :style="{'--coverage':String(metrics.total?Math.round(metrics.vigentes*100/metrics.total):0)}"><strong>{{metrics.total?Math.round(metrics.vigentes*100/metrics.total):0}}%</strong><span>cobertura actual</span></div>
         </header>
         <section class="rv-stats-deck">
           <article data-tone="green"><span><RymIcon name="verified" :size="19"/></span><div><small>AL DÍA</small><b>{{num(metrics.vigentes)}}</b><em>unidades vigentes</em></div></article>
@@ -611,7 +616,7 @@ onMounted(()=>load())
 
         <section class="rv-data-panel">
           <header class="rv-data-panel-head"><div><span>DETALLE CANÓNICO</span><h3>Boletas y restricciones persistidas</h3><p>Solo unidades donde eCarCheck reporta una alerta o restricción.</p></div><small>{{boletaAlertRows.length}} unidades</small></header>
-          <div v-if="boletaAlertRows.length" class="rv-table rv-table-readable"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Empresa</th><th>Galera</th><th>Restricción</th></tr></thead><tbody><tr v-for="r in boletaAlertRows" :key="String(r.unidad_id||r.placa)"><td><b>{{r.unidad}}</b></td><td>{{r.placa}}</td><td>{{r.empresa}}</td><td>{{r.galera}}</td><td><span class="rv-alert-text">{{(r.alerts||[]).map(x=>x.tipo||x.texto).join(' · ')}}</span></td></tr></tbody></table></div>
+          <div v-if="boletaAlertRows.length" class="rv-table rv-table-readable"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Empresa</th><th>Galera</th><th>Restricción</th></tr></thead><tbody><tr v-for="r in boletaAlertRows" :key="String(r.unidad_id||r.placa)"><td><b>{{r.unidad}}</b></td><td>{{r.placa}}</td><td>{{r.empresa}}</td><td>{{r.galera}}</td><td><div class="rv-restriction-list"><span v-for="(a,idx) in (r.alerts||[])" :key="idx" :data-tone="String(a.tipo||a.texto||'').toUpperCase().includes('BOLETA')?'bad':'warn'">{{String(a.tipo||a.texto||'Restricción').replaceAll('_',' ')}}</span></div></td></tr></tbody></table></div>
           <div v-else class="rv-empty-state"><RymIcon name="verified" :size="22"/><b>Sin restricciones visibles</b><span>No hay alertas canónicas en el alcance actual.</span></div>
         </section>
       </section>
@@ -1448,4 +1453,64 @@ onMounted(()=>load())
 @media(max-width:760px){
   .rv-cycle-deck,.rv-emitted-grid,.rv-pending-galera-grid,.rv-stats-deck{grid-template-columns:1fr}.rv-tab-hero-metrics,.rv-daily-pulse-v2,.rv-boleta-summary,.rv-cupos-summary,.rv-history-status{grid-template-columns:1fr}
 }
+</style>
+
+<style scoped>
+/* refinement pass v2 */
+.rv-monthly-v2 .rv-cycle-deck{align-items:stretch}
+.rv-monthly-v2 .rv-cycle-deck article{min-height:150px}
+.rv-monthly-v2 .rv-data-panel{margin-top:2px}
+
+.rv-mailer-v2 .rv-recipient-list{
+  max-height:360px!important;
+  display:grid!important;
+  gap:7px!important;
+  padding-right:4px!important;
+}
+.rv-mailer-v2 .rv-recipient-list label{
+  display:grid!important;
+  grid-template-columns:22px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:10px!important;
+  padding:10px 11px!important;
+  border:1px solid #E0E8F1!important;
+  border-radius:10px!important;
+  background:#FBFCFE!important;
+}
+.rv-mailer-v2 .rv-recipient-list input{width:16px!important;height:16px!important;margin:0!important}
+.rv-mailer-v2 .rv-recipient-list label>span{display:grid!important;gap:2px!important;min-width:0!important}
+.rv-mailer-v2 .rv-recipient-list b{font-size:10px!important;color:#15365F!important}
+.rv-mailer-v2 .rv-recipient-list small{font-size:8px!important;line-height:1.35!important;color:#708199!important}
+.rv-mailer-v2 .rv-mail-search,
+.rv-mailer-v2 .rv-mail-manual input{
+  min-height:40px!important;
+  font-size:10px!important;
+}
+.rv-mailer-v2 .rv-mail-actions button,
+.rv-mailer-v2 .rv-mail-manual button{
+  min-height:34px!important;
+  font-size:8.5px!important;
+}
+.rv-mailer-v2 .rv-mail-selected{font-size:9px!important}
+.rv-mailer-v2 .rv-mail-selected b{font-size:11px!important}
+
+.rv-boletas-v2 .rv-alert-text{font-size:9px!important}
+.rv-restriction-list{display:flex;gap:5px;flex-wrap:wrap}
+.rv-restriction-list span{
+  display:inline-flex;align-items:center;
+  padding:5px 8px;border-radius:999px;
+  background:#FFF5DF;color:#9B6207;
+  font-size:7.5px;font-weight:900;
+}
+.rv-restriction-list span[data-tone="bad"]{background:#FFF0EE;color:#B53D35}
+.rv-restriction-list span[data-tone="warn"]{background:#FFF5DF;color:#9B6207}
+
+.rv-boletas-v2 .rv-table-readable td:nth-child(5){min-width:260px}
+.rv-boletas-v2 .rv-table-readable td,
+.rv-boletas-v2 .rv-table-readable th{font-size:9px!important}
+
+.rv-history-v2 .rv-data-panel{padding:13px!important}
+.rv-history-v2 .rv-filter-shell{padding:12px!important}
+
+.rv-stats-v2 .rv-data-panel{padding:13px!important}
 </style>
