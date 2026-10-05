@@ -19,6 +19,7 @@ const emittedToday=computed(()=>data.value?.emitidos_hoy as {emitidos?:number; l
 const monthly=computed(()=>Array.isArray(data.value?.monthly)?data.value.monthly as Array<Record<string,unknown>>:[])
 const gallery=computed(()=>Array.isArray(data.value?.por_galera)?data.value.por_galera as Array<Record<string,unknown>>:[])
 const selectedGalera=ref(''), selectedStatus=ref(''), quickFilter=ref('all')
+const monthlyDetail=ref<{mes_num:number;mes_nombre:string;galera:string}|null>(null)
 const operationsResetKey=ref(0)
 const cupos=ref<Array<Record<string,unknown>>>([]), cuposLoading=ref(false), cuposError=ref('')
 const fichaOpen=ref(false), fichaLoading=ref(false), fichaError=ref(''), ficha=ref<Record<string,any>|null>(null), fichaRow=ref<CanonicalRevisadoRow|null>(null)
@@ -163,6 +164,106 @@ const dashboardGallery=computed(()=>gallery.value.map(g=>{
   }
 }).filter(g=>g.total>0))
 const cycleGlance=computed(()=>monthly.value.filter(m=>Number(m.total||m.activas||0)>0).slice(-3))
+const executiveMonths=computed(()=>monthly.value
+  .filter(m=>Number(m.total||m.activas||0)>0&&Number(m.pendientes||0)>0)
+  .sort((a,b)=>Number(a.mes_num||0)-Number(b.mes_num||0)))
+const executiveGaleras=computed(()=>{
+  const found=new Set<string>()
+  for(const m of executiveMonths.value){
+    const gs=(m.galeras&&typeof m.galeras==='object'?m.galeras:{}) as Record<string,unknown>
+    for(const g of Object.keys(gs))if(g)found.add(g)
+  }
+  const preferred=['VCOMP','VIPCO','VINDU','VCARS']
+  return [...preferred.filter(g=>found.has(g)),...[...found].filter(g=>!preferred.includes(g)).sort()]
+})
+function monthlyGaleraCell(m:Record<string,unknown>,galera:string){
+  const gs=(m.galeras&&typeof m.galeras==='object'?m.galeras:{}) as Record<string,Record<string,unknown>>
+  const raw=gs[galera]||{}
+  const total=Number(raw.total||0)
+  const covered=Number(raw.cubiertas||0)
+  const pending=Number(raw.pendientes||0)
+  const pct=total?Math.round(covered*100/total):0
+  const tone=!total?'neutral':pct===100?'good':pct>=85?'watch':'risk'
+  return {total,covered,pending,pct,tone}
+}
+const monthlyExecutiveSummary=computed(()=>{
+  let total=0,covered=0,pendingCount=0
+  const byGal=new Map<string,{galera:string,total:number,covered:number,pending:number}>()
+  for(const m of executiveMonths.value){
+    total+=Number(m.total||m.activas||0)
+    covered+=Number(m.cubiertas||0)
+    pendingCount+=Number(m.pendientes||0)
+    for(const g of executiveGaleras.value){
+      const cell=monthlyGaleraCell(m,g)
+      const current=byGal.get(g)||{galera:g,total:0,covered:0,pending:0}
+      current.total+=cell.total
+      current.covered+=cell.covered
+      current.pending+=cell.pending
+      byGal.set(g,current)
+    }
+  }
+  const rows=[...byGal.values()].map(g=>({...g,pct:g.total?Math.round(g.covered*100/g.total):0}))
+  const highest=[...rows].sort((a,b)=>b.pending-a.pending||a.galera.localeCompare(b.galera))[0]
+  const best=[...rows].filter(g=>g.total>0).sort((a,b)=>b.pct-a.pct||a.pending-b.pending)[0]
+  return {
+    total,covered,pending:pendingCount,pct:total?Math.round(covered*100/total):0,
+    highest:highest||{galera:'—',pending:0,pct:0,total:0,covered:0},
+    best:best||{galera:'—',pending:0,pct:0,total:0,covered:0}
+  }
+})
+const monthlyUpdatedLabel=computed(()=>{
+  const value=data.value?.generated_at||data.value?.panama_now
+  if(!value)return '—'
+  try{
+    const parsed=new Date(String(value))
+    if(Number.isNaN(parsed.getTime()))return String(value)
+    return new Intl.DateTimeFormat('es-PA',{dateStyle:'short',timeStyle:'short',timeZone:'America/Panama'}).format(parsed)
+  }catch{return String(value)}
+})
+const monthlyPendingRows=computed(()=>{
+  if(!monthlyDetail.value)return []
+  return rawRows.value.filter(r=>
+    Number(r.mes_num||0)===monthlyDetail.value?.mes_num
+    &&String(r.galera||'').trim().toUpperCase()===monthlyDetail.value?.galera.toUpperCase()
+    &&Boolean(r.requiere_atencion)
+  )
+})
+function openMonthlyCell(m:Record<string,unknown>,galera:string){
+  monthlyDetail.value={mes_num:Number(m.mes_num||0),mes_nombre:String(m.mes_nombre||monthName(m.mes_num)),galera}
+}
+function closeMonthlyDetail(){monthlyDetail.value=null}
+async function copyMonthlySummary(){
+  const s=monthlyExecutiveSummary.value
+  const range=executiveMonths.value.length
+    ? monthName(executiveMonths.value[0].mes_num)+' – '+monthName(executiveMonths.value[executiveMonths.value.length-1].mes_num)
+    :'Sin ciclos pendientes'
+  const lines=[
+    '*Avance mensual de revisados*',
+    'Corte: '+range,
+    'Cobertura acumulada: '+s.pct+'% ('+num(s.covered)+' / '+num(s.total)+')',
+    'Pendientes acumulados: '+num(s.pending),
+    'Mayor carga pendiente: '+s.highest.galera+' · '+num(s.highest.pending),
+    'Galera mejor cubierta: '+s.best.galera+' · '+s.best.pct+'%',
+    '',
+    ...executiveMonths.value.map(m=>{
+      const parts=executiveGaleras.value.map(g=>{
+        const cell=monthlyGaleraCell(m,g)
+        return g+' '+cell.covered+'/'+cell.total+' ('+cell.pct+'%)'
+      })
+      return '• '+String(m.mes_nombre||monthName(m.mes_num))+': '+parts.join(' · ')
+    })
+  ]
+  try{
+    await navigator.clipboard.writeText(lines.join('\n'))
+  }catch{
+    const area=document.createElement('textarea')
+    area.value=lines.join('\n')
+    area.style.position='fixed';area.style.opacity='0'
+    document.body.appendChild(area);area.focus();area.select();document.execCommand('copy');area.remove()
+  }
+}
+function printMonthlyReport(){window.print()}
+
 const dailyCapacity=computed(()=>{
   const limit=Math.max(1,Number(emittedToday.value?.limite||33))
   const emittedCount=Number(emittedToday.value?.emitidos||emitted.value.length||0)
@@ -649,53 +750,124 @@ onMounted(()=>load())
         @lookup="runManualEcarcheck"
         @open="openFicha"
       />
-      <section v-else-if="active==='monthly'" class="rv-stack rv-workspace-tab rv-monthly-v2">
-        <header class="rv-tab-hero rv-tab-hero-monthly">
-          <div>
-            <span>AVANCE MENSUAL</span>
-            <h2>Cobertura por ciclo</h2>
-            <p>Qué meses están controlados y dónde sigue pendiente la gestión.</p>
+      <section v-else-if="active==='monthly'" class="rv-stack rv-workspace-tab rv-monthly-exec">
+        <header class="rv-monthly-exec-hero">
+          <div class="rv-monthly-exec-title">
+            <span>REVISADOS · REPORTE EJECUTIVO</span>
+            <h2>Avance mensual por galera</h2>
+            <p>Vista consolidada para revisión gerencial. Los colores se calculan automáticamente según la cobertura de cada ciclo.</p>
           </div>
-          <div class="rv-tab-hero-metrics">
-            <article><small>COBERTURA ACTUAL</small><b>{{coveragePct}}%</b><em>{{num(metrics.vigentes)}} al día</em></article>
-            <article><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b><em>requieren gestión</em></article>
+          <div class="rv-monthly-exec-actions">
+            <button class="ghost" type="button" @click="copyMonthlySummary"><RymIcon name="content_copy" :size="15"/>Copiar resumen</button>
+            <button class="primary" type="button" @click="printMonthlyReport"><RymIcon name="print" :size="15"/>Imprimir / PDF</button>
           </div>
-          <button class="rv-tab-action" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="16"/>{{syncBusy?'Sincronizando…':'Actualizar eCarCheck'}}</button>
+          <div class="rv-monthly-exec-meta">
+            <span><b>Corte</b>{{executiveMonths.length?monthName(executiveMonths[0].mes_num)+' – '+monthName(executiveMonths[executiveMonths.length-1].mes_num):'Sin pendientes'}}</span>
+            <span><b>Alcance</b>{{profile.scope_label||'Todas las galeras'}}</span>
+            <span><b>Actualizado</b>{{monthlyUpdatedLabel}}</span>
+          </div>
         </header>
 
-        <section class="rv-cycle-deck">
-          <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
-            <header>
-              <div><span>CICLO</span><h3>{{m.mes_nombre||monthName(m.mes_num)}}</h3></div>
-              <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
-            </header>
-            <div class="rv-cycle-v2-meter"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
-            <footer>
-              <span><small>AL DÍA</small><b>{{num(m.cubiertas)}}</b></span>
-              <span><small>PENDIENTES</small><b>{{num(m.pendientes)}}</b></span>
-              <span><small>TOTAL</small><b>{{num(m.total||m.activas)}}</b></span>
-            </footer>
+        <section class="rv-monthly-exec-kpis">
+          <article>
+            <i class="blue"></i>
+            <small>COBERTURA ACUMULADA</small>
+            <strong>{{monthlyExecutiveSummary.pct}}%</strong>
+            <span>{{num(monthlyExecutiveSummary.covered)}} de {{num(monthlyExecutiveSummary.total)}} ciclos cubiertos</span>
+          </article>
+          <article>
+            <i class="red"></i>
+            <small>PENDIENTES ACUMULADOS</small>
+            <strong class="danger">{{num(monthlyExecutiveSummary.pending)}}</strong>
+            <span>Suma de pendientes de los ciclos mostrados</span>
+          </article>
+          <article>
+            <i class="blue"></i>
+            <small>MAYOR CARGA PENDIENTE</small>
+            <strong>{{monthlyExecutiveSummary.highest.galera}}</strong>
+            <span>{{num(monthlyExecutiveSummary.highest.pending)}} pendientes acumulados</span>
+          </article>
+          <article>
+            <i class="blue"></i>
+            <small>GALERA MEJOR CUBIERTA</small>
+            <strong>{{monthlyExecutiveSummary.best.galera}}</strong>
+            <span>{{monthlyExecutiveSummary.best.pct}}% acumulado</span>
           </article>
         </section>
 
-        <section class="rv-data-panel">
-          <header class="rv-data-panel-head">
-            <div><span>MATRIZ OPERATIVA</span><h3>Avance por galera</h3><p>Comparación directa para identificar dónde enfocar la gestión.</p></div>
-            <small>{{gallery.length}} galeras</small>
+        <section class="rv-monthly-matrix-panel">
+          <header class="rv-monthly-matrix-head">
+            <div>
+              <h3>Matriz ejecutiva de cobertura</h3>
+              <p>Haz clic en una celda para ver las unidades pendientes de ese mes y galera.</p>
+            </div>
+            <div class="rv-monthly-legend">
+              <span data-tone="good"><i></i>100% completo</span>
+              <span data-tone="watch"><i></i>85–99%</span>
+              <span data-tone="risk"><i></i>&lt;85%</span>
+            </div>
           </header>
-          <div class="rv-table rv-table-readable">
-            <table>
-              <thead><tr><th>Galera</th><th>Total</th><th>Al día</th><th>Pendientes</th><th>Cobertura</th></tr></thead>
-              <tbody><tr v-for="g in gallery" :key="String(g.galera)">
-                <td><b>{{g.galera}}</b></td>
-                <td>{{num(g.total)}}</td>
-                <td>{{num(g.cubiertas)}}</td>
-                <td><span class="rv-table-pill" :data-tone="Number(g.pendientes)>0?'warn':'ok'">{{num(g.pendientes)}}</span></td>
-                <td><div class="rv-coverage-cell"><div><i :style="{width:(Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0)+'%'}"></i></div><b>{{Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0}}%</b></div></td>
-              </tr></tbody>
+
+          <div v-if="executiveMonths.length&&executiveGaleras.length" class="rv-monthly-matrix-scroll">
+            <table class="rv-monthly-matrix">
+              <thead>
+                <tr>
+                  <th>MES / CICLO</th>
+                  <th v-for="g in executiveGaleras" :key="g">{{g}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="m in executiveMonths" :key="String(m.mes_num)">
+                  <th>{{m.mes_nombre||monthName(m.mes_num)}}</th>
+                  <td v-for="g in executiveGaleras" :key="String(m.mes_num)+'-'+g">
+                    <button class="rv-monthly-cell" :data-tone="monthlyGaleraCell(m,g).tone" type="button" @click="openMonthlyCell(m,g)">
+                      <div class="rv-monthly-cell-main">
+                        <strong>{{monthlyGaleraCell(m,g).covered}} / {{monthlyGaleraCell(m,g).total}}</strong>
+                        <b>{{monthlyGaleraCell(m,g).pct}}%</b>
+                      </div>
+                      <small>cobertura</small>
+                      <span v-if="monthlyGaleraCell(m,g).total===0">Sin unidades</span>
+                      <span v-else-if="monthlyGaleraCell(m,g).pending===0" class="complete">✓ Completo</span>
+                      <span v-else>{{monthlyGaleraCell(m,g).pending}} pendiente{{monthlyGaleraCell(m,g).pending===1?'':'s'}}</span>
+                      <RymIcon name="chevron_right" :size="16"/>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
+
+          <div v-else class="rv-monthly-complete-state">
+            <RymIcon name="verified" :size="28"/>
+            <b>Todos los ciclos están completos</b>
+            <span>No hay meses con pendientes que mostrar en la matriz ejecutiva.</span>
+          </div>
         </section>
+
+        <div v-if="monthlyDetail" class="rv-monthly-modal" @click.self="closeMonthlyDetail">
+          <section>
+            <header>
+              <div>
+                <span>DETALLE DEL CICLO</span>
+                <h3>{{monthlyDetail.mes_nombre}} · {{monthlyDetail.galera}}</h3>
+                <p>{{monthlyPendingRows.length}} unidad{{monthlyPendingRows.length===1?'':'es'}} pendiente{{monthlyPendingRows.length===1?'':'s'}}.</p>
+              </div>
+              <button type="button" aria-label="Cerrar" @click="closeMonthlyDetail">×</button>
+            </header>
+            <div v-if="monthlyPendingRows.length" class="rv-monthly-pending-list">
+              <button v-for="r in monthlyPendingRows" :key="String(r.unidad_id||r.placa||r.unidad)" type="button" @click="openFicha(r)">
+                <div><b>{{r.unidad||'—'}}</b><span>{{r.placa||'—'}}</span></div>
+                <small>{{r.supervisora||'Sin supervisora'}} · {{dashboardReason(r)}}</small>
+                <RymIcon name="chevron_right" :size="17"/>
+              </button>
+            </div>
+            <div v-else class="rv-monthly-modal-empty">
+              <RymIcon name="verified" :size="24"/>
+              <b>Sin pendientes</b>
+              <span>Esta celda está completamente cubierta.</span>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section v-else-if="active==='daily'" class="rv-stack rv-workspace-tab rv-daily-v2">
@@ -1817,4 +1989,32 @@ onMounted(()=>load())
 @media(max-width:1260px){.rv-company-table-head{display:none}.rv-company-row summary{grid-template-columns:minmax(220px,1.2fr) 100px minmax(170px,1fr) minmax(210px,1.15fr) auto 24px}.rv-company-models{grid-column:1/4;padding-left:20px}}
 @media(max-width:900px){.rv-boletas-command{grid-template-columns:1fr}.rv-boletas-actions{justify-content:flex-start;flex-wrap:wrap}.rv-boletas-summary-focus{grid-template-columns:1fr}.rv-company-results-head{align-items:flex-start;flex-direction:column}.rv-company-row summary{grid-template-columns:1fr auto;gap:9px}.rv-company-galera,.rv-company-plates,.rv-company-models,.rv-company-restriction{grid-column:1}.rv-company-status{grid-column:2;grid-row:1}.rv-company-expand{grid-column:2;grid-row:2}.rv-company-models{padding-left:0}.rv-company-detail{grid-template-columns:1fr}.rv-company-detail article{grid-template-columns:1fr}.rv-boletas-command-copy h2{font-size:26px}}
 
+</style>
+
+
+<style scoped>
+/* Avance mensual · executive matrix parity */
+.rv-monthly-exec{gap:12px}
+.rv-monthly-exec-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start;padding:20px 22px;border:1px solid #d4dfeb;border-radius:17px;background:linear-gradient(135deg,#fff,#f7fbff);box-shadow:0 7px 22px rgba(23,53,89,.04)}
+.rv-monthly-exec-title>span{display:block;font-size:9px;font-weight:900;letter-spacing:.09em;color:#2769c5}.rv-monthly-exec-title h2{margin:4px 0 3px;font-size:25px;letter-spacing:-.025em;color:#12345c}.rv-monthly-exec-title p{margin:0;max-width:830px;color:#667b94;font-size:12px;line-height:1.45}
+.rv-monthly-exec-actions{display:flex;gap:8px}.rv-monthly-exec-actions button{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 12px;font-size:10px}
+.rv-monthly-exec-meta{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.rv-monthly-exec-meta span{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid #d7e3ef;border-radius:999px;background:#f4f8fd;color:#58708c;font-size:9px}.rv-monthly-exec-meta b{color:#234f82;font-size:8px;text-transform:uppercase;letter-spacing:.04em}
+.rv-monthly-exec-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.rv-monthly-exec-kpis article{position:relative;display:grid;gap:3px;padding:16px 15px;border:1px solid #d7e2ed;border-radius:14px;background:#fff;overflow:hidden}.rv-monthly-exec-kpis article>i{position:absolute;top:0;left:15px;width:30px;height:3px;border-radius:0 0 99px 99px;background:#3479d6}.rv-monthly-exec-kpis article>i.red{background:#e0564d}.rv-monthly-exec-kpis small{margin-top:3px;color:#607895;font-size:8px;font-weight:900;letter-spacing:.06em}.rv-monthly-exec-kpis strong{font-size:25px;line-height:1.05;color:#153b68;letter-spacing:-.03em}.rv-monthly-exec-kpis strong.danger{color:#d24940}.rv-monthly-exec-kpis span{color:#7a8da4;font-size:9px}
+.rv-monthly-matrix-panel{overflow:hidden;border:1px solid #d5e0eb;border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(20,49,82,.035)}
+.rv-monthly-matrix-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid #e3ebf3}.rv-monthly-matrix-head h3{margin:0;font-size:17px;color:#15385f}.rv-monthly-matrix-head p{margin:3px 0 0;color:#72849a;font-size:10px}.rv-monthly-legend{display:flex;gap:7px;flex-wrap:wrap}.rv-monthly-legend span{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border:1px solid #dbe4ee;border-radius:999px;font-size:8px;font-weight:800;color:#50677e;background:#fff}.rv-monthly-legend i{width:7px;height:7px;border-radius:50%}.rv-monthly-legend span[data-tone="good"]{border-color:#bfe3cf;background:#f2fbf6;color:#23734f}.rv-monthly-legend span[data-tone="good"] i{background:#30a76f}.rv-monthly-legend span[data-tone="watch"]{border-color:#edd399;background:#fffaf0;color:#9a6500}.rv-monthly-legend span[data-tone="watch"] i{background:#d49a23}.rv-monthly-legend span[data-tone="risk"]{border-color:#efc1bd;background:#fff5f4;color:#aa3d36}.rv-monthly-legend span[data-tone="risk"] i{background:#d85850}
+.rv-monthly-matrix-scroll{overflow:auto}.rv-monthly-matrix{width:100%;min-width:980px;border-collapse:separate;border-spacing:0}.rv-monthly-matrix th,.rv-monthly-matrix td{border-right:1px solid #dbe5ef;border-bottom:1px solid #dbe5ef}.rv-monthly-matrix th:last-child,.rv-monthly-matrix td:last-child{border-right:0}.rv-monthly-matrix tbody tr:last-child th,.rv-monthly-matrix tbody tr:last-child td{border-bottom:0}.rv-monthly-matrix thead th{padding:10px 9px;background:#eef4fb;color:#315b8b;font-size:9px;font-weight:900;text-align:center;letter-spacing:.04em}.rv-monthly-matrix thead th:first-child{text-align:left}.rv-monthly-matrix tbody>tr>th{width:110px;padding:12px 10px;background:#f7f9fc;color:#1d4e80;font-size:11px;text-align:left}
+.rv-monthly-matrix td{padding:7px;background:#fbfcfe}.rv-monthly-cell{position:relative;width:100%;min-height:82px;display:grid;align-content:start;gap:2px;padding:10px 31px 9px 10px;border:1px solid #dfe7ef;border-radius:11px;text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}.rv-monthly-cell:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(22,52,87,.08)}.rv-monthly-cell[data-tone="good"]{background:#f1faf5!important;border-color:#b9dfca!important}.rv-monthly-cell[data-tone="watch"]{background:#fff9ec!important;border-color:#ebcf8d!important}.rv-monthly-cell[data-tone="risk"]{background:#fff3f1!important;border-color:#edbcb7!important}.rv-monthly-cell[data-tone="neutral"]{background:#f6f8fb!important;border-color:#dfe6ee!important}.rv-monthly-cell-main{display:flex;align-items:baseline;gap:7px}.rv-monthly-cell-main strong{font-size:17px;color:#123a66}.rv-monthly-cell-main b{font-size:8px;color:#416b99}.rv-monthly-cell>small{font-size:7px;color:#7d8da0}.rv-monthly-cell>span{margin-top:5px;font-size:8px;font-weight:850;color:#a05f00}.rv-monthly-cell>span.complete{color:#23734f}.rv-monthly-cell>.rym-icon{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#2673d7}
+.rv-monthly-complete-state{display:grid;justify-items:center;gap:5px;padding:42px 18px;color:#668097}.rv-monthly-complete-state .rym-icon{color:#2c9b69}.rv-monthly-complete-state b{color:#244b72;font-size:14px}.rv-monthly-complete-state span{font-size:10px}
+.rv-monthly-modal{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:24px;background:rgba(10,27,49,.38)}.rv-monthly-modal>section{width:min(720px,94vw);max-height:82vh;overflow:auto;border-radius:16px;background:#fff;box-shadow:0 24px 70px rgba(8,26,49,.25)}.rv-monthly-modal>section>header{display:flex;justify-content:space-between;gap:14px;padding:17px 18px;border-bottom:1px solid #e1e9f1}.rv-monthly-modal header span{font-size:8px;font-weight:900;letter-spacing:.08em;color:#2868bb}.rv-monthly-modal header h3{margin:3px 0 2px;color:#163b63;font-size:20px}.rv-monthly-modal header p{margin:0;color:#74879c;font-size:10px}.rv-monthly-modal header button{width:34px;height:34px;border:0;border-radius:9px;background:#f0f4f8;color:#4e657e;font-size:21px;cursor:pointer}.rv-monthly-pending-list{display:grid;gap:7px;padding:12px}.rv-monthly-pending-list button{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:12px;padding:11px;border:1px solid #dce5ee;border-radius:10px;background:#fafcfe;text-align:left;cursor:pointer}.rv-monthly-pending-list button:hover{border-color:#bfd4ec;background:#f5f9fe}.rv-monthly-pending-list button>div{display:flex;align-items:baseline;gap:8px}.rv-monthly-pending-list b{font-size:13px;color:#153c67}.rv-monthly-pending-list span{font-size:10px;color:#59738f}.rv-monthly-pending-list small{font-size:10px;color:#6d8096}.rv-monthly-modal-empty{display:grid;justify-items:center;gap:5px;padding:34px;color:#6c8298}.rv-monthly-modal-empty .rym-icon{color:#2b9c68}.rv-monthly-modal-empty b{color:#244a72}
+@media(max-width:1180px){.rv-monthly-exec-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-monthly-exec-hero{grid-template-columns:1fr}.rv-monthly-exec-actions{justify-content:flex-start}}
+@media(max-width:720px){.rv-monthly-exec-kpis{grid-template-columns:1fr}.rv-monthly-matrix-head{align-items:flex-start;flex-direction:column}.rv-monthly-pending-list button{grid-template-columns:1fr auto}.rv-monthly-pending-list button>small{grid-column:1/-1}}
+@media print{
+  .rv-monthly-exec-actions,.rv-monthly-modal,.rv-main>header,.rv-side{display:none!important}
+  .rym-revisados-vue{display:block!important;background:#fff!important}
+  .rv-main{padding:0!important}
+  .rv-monthly-exec{gap:8px}
+  .rv-monthly-exec-hero,.rv-monthly-exec-kpis article,.rv-monthly-matrix-panel{box-shadow:none!important}
+  .rv-monthly-matrix{min-width:0!important}
+  .rv-monthly-cell{min-height:65px}
+}
 </style>
