@@ -7,7 +7,7 @@
   if(w.__RYM_PANAPASS_NO_PAN_ALERT_FIX__) return;
   w.__RYM_PANAPASS_NO_PAN_ALERT_FIX__=true;
 
-  const TYPES=new Set(['PANAPASS_NO_ASIGNADO','PANAPASS_NO_ENCONTRADO_ENA']);
+  const TYPES=new Set(['PANAPASS_NO_ASIGNADO','PANAPASS_NO_ENCONTRADO_ENA','PANAPASS_DIFERENTE_ENA','PLACA_DIFERENTE_ENA','TAG_DIFERENTE_ENA']);
   const CLOSED=new Set(['RESUELTA','RESUELTO','CERRADA','CERRADO']);
   const norm=s=>String(s||'').trim().toUpperCase();
   let loading=null,lastKey='',raf=0;
@@ -44,9 +44,12 @@
   }
 
   function detail(x){
-    return norm(x?.tipo)==='PANAPASS_NO_ENCONTRADO_ENA'
-      ? 'Panapass registrado, no encontrado en ENA'
-      : 'Sin número Panapass asignado';
+    const t=norm(x?.tipo);
+    if(t==='PANAPASS_NO_ENCONTRADO_ENA') return 'Panapass registrado, no encontrado en ENA';
+    if(t==='PANAPASS_DIFERENTE_ENA') return 'Panapass no coincide con ENA';
+    if(t==='PLACA_DIFERENTE_ENA') return 'Placa no coincide con ENA';
+    if(t==='TAG_DIFERENTE_ENA') return 'TAG no coincide con ENA';
+    return 'Sin número Panapass asignado';
   }
 
   function rows(list){
@@ -56,7 +59,10 @@
       galera:x.galera||'',
       empresa:x.empresa||x.empresa_operadora||'',
       panapass:x.panapass_numero||'',
-      detalle:x.detalle?.mensaje||x.detalle||x.mensaje||x.observacion||detail(x)
+      panapass_ena:x.detalle?.panapass_ena||'',
+      placa_ena:x.detalle?.placa_ena||'',
+      tag_ena:x.detalle?.tag_ena||'',
+      detalle:x.mensaje||x.observacion||detail(x)
     }));
   }
 
@@ -86,10 +92,12 @@
     const count=list.length;
     const key=`${count}:${list.map(x=>`${x.id||''}-${x.tipo||''}-${x.estado||''}`).join('|')}`;
 
+    const label=target.querySelector('.label');
+    if(label) label.textContent='Control Panapass / ENA';
     const strong=target.querySelector('strong');
     if(strong&&strong.textContent!==String(count)) strong.textContent=String(count);
     const small=target.querySelector('small');
-    if(small) small.textContent='Sin número o no encontrado en ENA';
+    if(small) small.textContent='Sin asignación o inconsistencia con ENA';
     target.dataset.rymAlertCount=String(count);
     target.onclick=()=>openRows(list);
 
@@ -98,7 +106,7 @@
       const b=alertItem.querySelector('b');
       if(b&&b.textContent!==String(count)) b.textContent=String(count);
       const s=alertItem.querySelector('small');
-      if(s) s.textContent='Sin número o no encontrado en ENA';
+      if(s) s.textContent='Sin asignación o inconsistencia con ENA';
     }
     lastKey=key;
   }
