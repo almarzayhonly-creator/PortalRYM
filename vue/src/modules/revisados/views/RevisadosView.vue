@@ -32,13 +32,13 @@ const isAdminTotal=computed(()=>String(profile.value.rol||'').trim().toUpperCase
 const dailyPendingGroups=computed(()=>{const map=new Map<string,CanonicalRevisadoRow[]>();for(const r of pending.value){const g=text(r.galera)==='—'?'OTROS':text(r.galera);if(!map.has(g))map.set(g,[]);map.get(g)!.push(r)}return [...map.entries()].map(([galera,rows])=>({galera,rows})).sort((a,b)=>b.rows.length-a.rows.length||a.galera.localeCompare(b.galera,'es'))})
 const filteredDailyRecipients=computed(()=>{const q=dailySearch.value.trim().toLowerCase();if(!q)return dailyRecipients.value;return dailyRecipients.value.filter(r=>[r.nombre,r.email,r.tipo,r.galera].some(x=>String(x||'').toLowerCase().includes(q)))})
 const BOLETA_COMPANY_TARGET=16
-const boletaCompanyRows=computed(()=>boletaCompanies.value.map(g=>({
+const boletaCompanyRows=computed<Array<Record<string,any>>>(()=>boletaCompanies.value.map((g:Record<string,any>):Record<string,any>=>({
   ...g,
   status:boletaCompanyStatus(g),
   restriction:boletaCompanyRestriction(g)
-})).sort((a,b)=>{
+})).sort((a:Record<string,any>,b:Record<string,any>)=>{
   const rank=(v:string)=>v==='CON RESTRICCIÓN'?0:v==='ERROR'?1:v==='PENDIENTE'?2:3
-  return rank(a.status)-rank(b.status)||String(a.empresa||'').localeCompare(String(b.empresa||''),'es')
+  return rank(String(a.status))-rank(String(b.status))||String(a.empresa||'').localeCompare(String(b.empresa||''),'es')
 }))
 const filteredBoletaCompanies=computed(()=>boletaCompanyRows.value.filter(g=>boletaFilter.value==='TODAS'||g.status===boletaFilter.value))
 const boletaPositiveCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='CON RESTRICCIÓN').length)
