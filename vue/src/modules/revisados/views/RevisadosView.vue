@@ -331,7 +331,7 @@ function boletaCheckResult(x:Record<string,any>){
   if(x.error_code)return 'No se pudo validar esta placa · '+String(x.error_code)
   return boletaCheckSummary(x)
 }
-function boletaWhatsAppTextfunction boletaWhatsAppText(){
+function boletaWhatsAppText(){
   const rows=boletaCompanyRows.value
   const restricted=rows.filter(g=>g.status==='CON RESTRICCIÓN')
   const checked=boletaCheckedCompanies.value
@@ -421,7 +421,7 @@ async function pollBoletasV2(runId:string){
     boletaBusy.value=false
   }
 }
-async function runBoletasV2async function runBoletasV2(){if(boletaBusy.value||!confirm('¿Consultar las 16 empresas usando eCarCheck V2? Se validarán 2 placas activas por empresa.'))return;boletaCopyState.value='';boletaState.value='Preparando consulta de 16 empresas…';try{const d=await revisadosService.iniciarBoletasV2();if(!d?.ok||!d?.run_id)throw new Error(String(d?.error||'No se pudo iniciar'));await pollBoletasV2(String(d.run_id))}catch(e){boletaState.value=e instanceof Error?e.message:String(e)}}
+async function runBoletasV2(){if(boletaBusy.value||!confirm('¿Consultar las 16 empresas usando eCarCheck V2? Se validarán 2 placas activas por empresa.'))return;boletaCopyState.value='';boletaState.value='Preparando consulta de 16 empresas…';try{const d=await revisadosService.iniciarBoletasV2();if(!d?.ok||!d?.run_id)throw new Error(String(d?.error||'No se pudo iniciar'));await pollBoletasV2(String(d.run_id))}catch(e){boletaState.value=e instanceof Error?e.message:String(e)}}
 async function resumeBoletasV2(){if(boletaBusy.value)return;const runId=localStorage.getItem('rym_v166_boletas_run');if(runId)await pollBoletasV2(runId)}
 async function prepareDailyMail(){if(!isAdminTotal.value||dailyRecipientsLoading.value||dailyRecipients.value.length)return;dailyRecipientsLoading.value=true;dailyRecipientsError.value='';try{const [rec,fresh]=await Promise.all([revisadosService.destinatariosReporteDiario(),revisadosService.emitidosHoy().catch(()=>null)]);if(!rec?.ok)throw new Error(String(rec?.error||'No se pudieron cargar los correos'));dailyRecipients.value=Array.isArray(rec.recipients)?rec.recipients:[];if(fresh&&data.value)data.value.emitidos_hoy=fresh}catch(e){dailyRecipientsError.value=e instanceof Error?e.message:String(e)}finally{dailyRecipientsLoading.value=false}}
 function toggleDailyEmail(email:string){const e=email.trim().toLowerCase();if(!e)return;dailySelected.value=dailySelected.value.includes(e)?dailySelected.value.filter(x=>x!==e):[...dailySelected.value,e]}
