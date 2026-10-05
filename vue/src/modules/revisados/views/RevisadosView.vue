@@ -865,7 +865,7 @@ onMounted(()=>load())
         </section>
       </section>
 
-      <section v-else-if="active==='cupos'"      <section v-else-if="active==='cupos'" class="rv-stack rv-workspace-tab rv-cupos-v2">
+      <section v-else-if="active==='cupos'" class="rv-stack rv-workspace-tab rv-cupos-v2">
         <header class="rv-tab-hero rv-tab-hero-cupos">
           <div><span>CUPOS</span><h2>Compras y disponibilidad operativa</h2><p>Historial de compras registrado en la fuente canónica.</p></div>
           <div class="rv-cupos-summary">
