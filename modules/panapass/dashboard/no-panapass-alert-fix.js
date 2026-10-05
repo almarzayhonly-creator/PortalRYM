@@ -71,9 +71,9 @@
     try{
       if(typeof w.openDataWindow==='function'&&typeof w.rowsTable==='function'){
         w.openDataWindow(
-          'Alertas Panapass',
-          `${data.length} activas con incidencia de asignación o validación ENA`,
-          w.rowsTable(data,['unidad','placa','galera','empresa','panapass','detalle'])
+          'Control Panapass / ENA',
+          `${data.length} unidades requieren acción`,
+          w.rowsTable(data,['unidad','placa','galera','empresa','panapass','panapass_ena','placa_ena','tag_ena','detalle'])
         );
         return;
       }
