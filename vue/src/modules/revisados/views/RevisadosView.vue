@@ -56,6 +56,25 @@ const visibleRows=computed(()=>rawRows.value.filter(r=>{
 }))
 function vehicleStateTone(r:CanonicalRevisadoRow){if(r.bloqueado)return'incident';const p=String(r.pendiente_tipo||r.status2||'').toUpperCase();if(p.includes('COLOR'))return'color';return'pending'}
 function vehicleStateLabel(r:CanonicalRevisadoRow){if(r.bloqueado)return'Incidencia';const p=String(r.pendiente_tipo||r.status2||'').trim();return p||'Pendiente'}
+function dashboardReason(r:CanonicalRevisadoRow){
+  if(Boolean(r.boleta_empresa))return 'Boleta de empresa'
+  if(Boolean(r.boleta_pendiente))return 'Boleta de placa'
+  const pendingType=String(r.pendiente_tipo||'').trim()
+  if(pendingType){
+    const normalized=pendingType.replaceAll('_',' ').toLowerCase()
+    if(normalized.includes('color'))return 'Cambio de color'
+    return normalized.replace(/\b\w/g,m=>m.toUpperCase())
+  }
+  const firstAlert=r.alerts?.[0]
+  if(firstAlert){
+    const label=String(firstAlert.tipo||firstAlert.texto||'Alerta operativa').replaceAll('_',' ')
+    return label.length>42?label.slice(0,39)+'…':label
+  }
+  const incident=r.incidencias_abiertas?.[0]
+  if(incident)return String(incident.tipo_nombre||incident.tipo_codigo||'Incidencia').replaceAll('_',' ')
+  if(r.bloqueado)return 'Bloqueo operativo'
+  return 'Revisado pendiente'
+}
 function vehicleModel(r:CanonicalRevisadoRow){return [r.marca,r.modelo].filter(Boolean).join(' ')||String(r.empresa||'Vehículo RYM')}
 function vehicleSignals(r:CanonicalRevisadoRow){
   const out:{label:string,tone:string}[]=[]
@@ -332,9 +351,9 @@ onMounted(()=>load())
                 </header>
                 <div class="rv-gallery-meter"><i :style="{width:g.pct+'%'}"></i></div>
                 <footer>
-                  <span><b>{{num(g.covered)}}</b> al día</span>
-                  <span v-if="g.pending"><b>{{num(g.pending)}}</b> pendientes</span>
-                  <span v-if="g.alerts" class="alert"><b>{{num(g.alerts)}}</b> alertas</span>
+                  <span><small>AL DÍA</small><b>{{num(g.covered)}}</b></span>
+                  <span><small>PENDIENTES</small><b>{{num(g.pending)}}</b></span>
+                  <span class="alert"><small>ALERTAS</small><b>{{num(g.alerts)}}</b></span>
                 </footer>
               </article>
             </div>
@@ -352,8 +371,9 @@ onMounted(()=>load())
                   <div>
                     <b>{{r.unidad||'—'}} <i>·</i> {{r.placa||'—'}}</b>
                     <small>{{r.galera||'—'}} · {{r.supervisora||'Sin supervisora'}}</small>
+                    <strong>{{dashboardReason(r)}}</strong>
                   </div>
-                  <em :data-tone="vehicleStateTone(r)">{{vehicleStateLabel(r)}}</em>
+                  <em :data-tone="vehicleStateTone(r)">{{String(r.prioridad||'ACTUAL')}}</em>
                 </button>
               </div>
             </section>
@@ -1085,3 +1105,134 @@ onMounted(()=>load())
 }
 </style>
 
+<style scoped>
+/* Dashboard readability pass v5 */
+.rv-command-eyebrow{font-size:9px!important}
+.rv-command-copy h2{font-size:30px!important}
+.rv-command-copy p{font-size:12px!important;line-height:1.45!important}
+.rv-command-meter{height:10px!important}
+.rv-command-meter>span{font-size:7px!important;right:9px!important}
+.rv-command-actions .primary,.rv-command-actions .ghost{
+  min-height:36px!important;
+  padding:0 14px!important;
+  font-size:9px!important;
+}
+.rv-command-score{padding:15px!important}
+.rv-score-orbit{width:112px!important;height:112px!important}
+.rv-score-orbit strong{font-size:32px!important}
+.rv-score-orbit span{font-size:11px!important}
+.rv-score-orbit small{font-size:8px!important}
+.rv-score-copy small{font-size:8px!important;color:#D2E2F8!important}
+.rv-score-copy b{font-size:17px!important}
+.rv-score-copy span{padding:7px 4px!important}
+
+.rv-command-ribbon>button{padding:14px 15px!important;gap:10px!important}
+.rv-ribbon-icon{width:38px!important;height:38px!important}
+.rv-command-ribbon small{font-size:8px!important;color:#667A95!important}
+.rv-command-ribbon b{font-size:22px!important}
+.rv-command-ribbon b i{font-size:10px!important}
+.rv-command-ribbon em{font-size:8.5px!important;color:#5E718B!important}
+.rv-ribbon-meter{width:44px!important;height:6px!important}
+
+.rv-quiet-signals{gap:9px!important}
+.rv-quiet-signals span{padding:7px 10px!important;font-size:8.5px!important}
+.rv-quiet-signals i{width:8px!important;height:8px!important}
+
+.rv-gallery-deck-panel,.rv-decision-panel,.rv-today-panel,.rv-cycle-pulse{border-color:#CFDCEB!important}
+.rv-control-heading{padding-bottom:12px!important}
+.rv-control-heading span{font-size:8px!important;color:#1E5EAF!important}
+.rv-control-heading h3{font-size:17px!important}
+.rv-control-heading p{font-size:9px!important;line-height:1.35!important}
+.rv-control-heading>small,.rv-control-heading button{font-size:8.5px!important}
+
+.rv-gallery-deck{gap:10px!important}
+.rv-gallery-card{padding:14px!important;border-radius:14px!important}
+.rv-gallery-card header span{font-size:7.5px!important}
+.rv-gallery-card h4{font-size:15px!important}
+.rv-gallery-card header small{font-size:8px!important;color:#6E8097!important}
+.rv-gallery-card header>strong{font-size:28px!important}
+.rv-gallery-card header>strong i{font-size:10px!important}
+.rv-gallery-meter{height:8px!important;margin:11px 0!important}
+.rv-gallery-card footer{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+.rv-gallery-card footer span{
+  display:grid!important;
+  gap:2px!important;
+  padding:7px 8px!important;
+  border-radius:9px!important;
+  text-align:center!important;
+  background:#EEF4F9!important;
+  color:#667991!important;
+}
+.rv-gallery-card footer span small{
+  font-size:6.5px!important;
+  font-weight:900!important;
+  letter-spacing:.04em!important;
+  color:#73849A!important;
+}
+.rv-gallery-card footer span b{
+  font-size:11px!important;
+  color:#23486F!important;
+}
+.rv-gallery-card footer .alert{background:#FFF0EF!important}
+.rv-gallery-card footer .alert small,.rv-gallery-card footer .alert b{color:#B23B34!important}
+
+.rv-decision-panel{padding:16px!important}
+.rv-decision-list{gap:9px!important;margin-top:11px!important}
+.rv-decision-list>button{
+  grid-template-columns:30px minmax(0,1fr) auto!important;
+  gap:10px!important;
+  padding:11px!important;
+  border-radius:12px!important;
+}
+.rv-decision-number{font-size:10px!important}
+.rv-decision-list>button>div{gap:3px!important}
+.rv-decision-list b{font-size:10px!important}
+.rv-decision-list small{font-size:8px!important;color:#708199!important}
+.rv-decision-list strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:8px;
+  font-weight:800;
+  color:#A25D08;
+}
+.rv-decision-list em{
+  max-width:105px!important;
+  padding:5px 8px!important;
+  font-size:7px!important;
+  font-weight:900!important;
+}
+.rv-decision-list em[data-tone="incident"]{background:#FFF0EE!important;color:#B53E36!important}
+
+.rv-today-panel{padding:14px 15px!important}
+.rv-today-orbit{width:58px!important;height:58px!important}
+.rv-today-orbit b{font-size:17px!important}
+.rv-today-orbit span{font-size:8px!important}
+.rv-today-copy>span{font-size:7px!important}
+.rv-today-copy h3{font-size:12px!important}
+.rv-today-copy p{font-size:8px!important}
+.rv-today-panel>button{font-size:8px!important}
+
+.rv-cycle-pulse{padding:15px!important}
+.rv-cycle-pulse>article{
+  grid-template-columns:92px minmax(80px,1fr) 38px!important;
+  gap:9px!important;
+  margin-top:10px!important;
+}
+.rv-cycle-pulse b{font-size:9px!important}
+.rv-cycle-pulse small{font-size:7px!important}
+.rv-pulse-meter{height:7px!important}
+.rv-cycle-pulse>article>strong{font-size:9px!important}
+
+@media(max-width:1280px){
+  .rv-gallery-deck{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:820px){
+  .rv-gallery-deck{grid-template-columns:1fr!important}
+}
+</style>
