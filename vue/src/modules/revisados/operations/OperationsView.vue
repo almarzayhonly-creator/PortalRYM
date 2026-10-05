@@ -15,6 +15,8 @@ const props=defineProps<{
   syncState:string
   syncPhase:'idle'|'running'|'success'|'warning'|'error'
   syncProgress:{procesadas:number;total:number;nuevos:number;fichas_ok:number;fichas_pendientes:number;bloqueadas:number;errores:number}
+  emittedRows:CanonicalRevisadoRow[]
+  emittedLimit:number
   manualPlate:string
   manualBusy:boolean
   manualState:string
@@ -44,6 +46,11 @@ const syncPercent=computed(()=>{
   return Math.max(0,Math.min(100,Math.round(done*100/total)))
 })
 const syncHasResult=computed(()=>props.syncPhase==='success'||props.syncPhase==='warning'||props.syncPhase==='error')
+const syncNoChanges=computed(()=>!props.syncBusy&&props.syncPhase==='success'&&Number(props.syncProgress?.total||0)===0&&Number(props.syncProgress?.nuevos||0)===0)
+const emittedCount=computed(()=>props.emittedRows.length)
+const emittedPct=computed(()=>Math.min(100,Math.round((emittedCount.value/Math.max(1,props.emittedLimit||33))*100)))
+const emittedRemaining=computed(()=>Math.max(0,(props.emittedLimit||33)-emittedCount.value))
+const emittedPreview=computed(()=>props.emittedRows.slice(0,3))
 
 function s(v:unknown){return String(v??'').trim()}
 function n(v:unknown){return s(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
@@ -653,21 +660,29 @@ function exportPdf(){
         </button>
 
         <div v-if="syncBusy||syncHasResult" class="sync-progress-panel" :data-phase="syncPhase">
-          <div class="sync-progress-head">
-            <div>
-              <small>{{syncBusy?'PROGRESO EN TIEMPO REAL':syncPhase==='success'?'RESULTADO COMPLETADO':syncPhase==='warning'?'COMPLETADO CON OBSERVACIONES':'RESULTADO DE SINCRONIZACIÓN'}}</small>
-              <b>{{syncBusy ? (syncProgress.procesadas+' de '+(syncProgress.total||'—')+' procesadas') : syncState}}</b>
+          <template v-if="syncNoChanges">
+            <div class="sync-quiet-result">
+              <span class="sync-check"><RymIcon name="check_circle" :size="18"/></span>
+              <div><small>TODO AL DÍA</small><b>Sin cambios nuevos en eCarCheck</b><em>La base ya está sincronizada.</em></div>
             </div>
-            <strong>{{syncPercent}}%</strong>
-          </div>
-          <div class="sync-progress-track"><i :style="{width:syncPercent+'%'}"></i></div>
-          <div class="sync-progress-stats">
-            <span><small>NUEVOS</small><b>{{syncProgress.nuevos}}</b></span>
-            <span><small>FICHAS OK</small><b>{{syncProgress.fichas_ok}}</b></span>
-            <span><small>PENDIENTES</small><b>{{syncProgress.fichas_pendientes}}</b></span>
-            <span><small>BLOQUEADAS</small><b>{{syncProgress.bloqueadas}}</b></span>
-            <span><small>ERRORES</small><b>{{syncProgress.errores}}</b></span>
-          </div>
+          </template>
+          <template v-else>
+            <div class="sync-progress-head">
+              <div>
+                <small>{{syncBusy?'PROGRESO EN TIEMPO REAL':syncPhase==='success'?'RESULTADO COMPLETADO':syncPhase==='warning'?'COMPLETADO CON OBSERVACIONES':'RESULTADO DE SINCRONIZACIÓN'}}</small>
+                <b>{{syncBusy ? (syncProgress.procesadas+' de '+(syncProgress.total||'—')+' procesadas') : syncState}}</b>
+              </div>
+              <strong>{{syncPercent}}%</strong>
+            </div>
+            <div class="sync-progress-track"><i :style="{width:syncPercent+'%'}"></i></div>
+            <div class="sync-progress-stats">
+              <span><small>NUEVOS</small><b>{{syncProgress.nuevos}}</b></span>
+              <span><small>FICHAS OK</small><b>{{syncProgress.fichas_ok}}</b></span>
+              <span><small>PENDIENTES</small><b>{{syncProgress.fichas_pendientes}}</b></span>
+              <span><small>BLOQUEADAS</small><b>{{syncProgress.bloqueadas}}</b></span>
+              <span><small>ERRORES</small><b>{{syncProgress.errores}}</b></span>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -692,6 +707,29 @@ function exportPdf(){
           </button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="daily-pulse">
+    <div class="daily-orbit" :style="{'--pulse':emittedPct+'%'}">
+      <div><b>{{emittedCount}}</b><span>/ {{emittedLimit}}</span></div>
+      <small>{{emittedPct}}% del día</small>
+    </div>
+    <div class="daily-pulse-copy">
+      <span>RITMO DEL DÍA</span>
+      <h3>Emitidos hoy</h3>
+      <p><b>{{emittedRemaining}}</b> cupos disponibles · límite operativo {{emittedLimit}}</p>
+      <div class="daily-line"><i :style="{width:emittedPct+'%'}"></i></div>
+    </div>
+    <div class="daily-recent" v-if="emittedPreview.length">
+      <span v-for="r in emittedPreview" :key="String(r.ultimo_revisado_id||r.unidad_id||r.placa)">
+        <b>{{r.unidad||'—'}} · {{r.placa||'—'}}</b>
+        <small>{{r.galera||'—'}} · {{formatPanamaDateTime(r.ultimo_revisado)}}</small>
+      </span>
+    </div>
+    <div v-else class="daily-recent empty">
+      <b>Sin emisiones registradas hoy</b>
+      <small>El primer revisado aparecerá aquí automáticamente.</small>
     </div>
   </section>
 
@@ -829,6 +867,18 @@ function exportPdf(){
 .sync-progress-stats span{display:grid;gap:2px;padding:7px 8px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.08);text-align:center}
 .sync-progress-stats small{font-size:5.5px;font-weight:900;color:#C8DAF7}
 .sync-progress-stats b{font-size:11px;color:#fff}
+.sync-quiet-result{display:flex;align-items:center;gap:10px;padding-top:10px}
+.sync-check{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,.16);color:#fff}
+.sync-quiet-result>div{display:grid;gap:2px}.sync-quiet-result small{font-size:6px;font-weight:900;letter-spacing:.08em;color:#CDEFE1}.sync-quiet-result b{font-size:10px;color:#fff}.sync-quiet-result em{font-size:7px;font-style:normal;color:#D8F6EA}
+
+.daily-pulse{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(270px,1.2fr);gap:14px;align-items:center;padding:13px 15px;border:1px solid #BDD2EC;border-radius:14px;background:linear-gradient(135deg,#F7FBFF 0%,#FFFFFF 55%,#F5FAFF 100%);box-shadow:0 8px 22px rgba(18,58,110,.06)}
+.daily-orbit{--pulse:0%;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;align-content:center;background:radial-gradient(circle at center,#fff 57%,transparent 58%),conic-gradient(#2878E0 var(--pulse),#DCE8F6 0);box-shadow:inset 0 0 0 1px #E5EDF7}
+.daily-orbit div{display:flex;align-items:baseline;gap:2px}.daily-orbit b{font-size:20px;color:#0A2F6C}.daily-orbit span{font-size:9px;font-weight:850;color:#6B7E98}.daily-orbit small{font-size:6px;color:#8292A8}
+.daily-pulse-copy{display:grid;gap:3px}.daily-pulse-copy>span{font-size:6px;font-weight:900;letter-spacing:.1em;color:#2B6EC8}.daily-pulse-copy h3{margin:0;font-size:14px;color:#0B2A5B}.daily-pulse-copy p{margin:0;font-size:8px;color:#697C95}.daily-pulse-copy p b{color:#0E5BAF}
+.daily-line{height:6px;margin-top:5px;border-radius:999px;background:#E4EDF8;overflow:hidden}.daily-line i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2E7BE4,#54A3FF)}
+.daily-recent{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.daily-recent span{min-width:0;display:grid;gap:2px;padding:9px 10px;border:1px solid #D7E4F3;border-radius:10px;background:#fff}.daily-recent b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;color:#183A69}.daily-recent small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6.5px;color:#75869C}
+.daily-recent.empty{grid-template-columns:1fr;padding:10px 12px;border:1px dashed #C9D8EA;border-radius:10px;background:#FAFCFF}.daily-recent.empty b{font-size:8px}.daily-recent.empty small{font-size:7px}
 .lookup-card{background:linear-gradient(135deg,#255DBD,#3D77D7)}
 .action-icon{width:37px;height:37px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.24);border-radius:9px;background:rgba(255,255,255,.12);color:#fff}
 .lookup-icon{background:rgba(72,220,174,.14);color:#9AF0D1}
@@ -1055,4 +1105,8 @@ function exportPdf(){
   .command-head{display:block}
   .lookup-form{display:grid;grid-template-columns:minmax(0,1fr) auto}
 }
+</style>
+
+<style scoped>
+@media(max-width:980px){.daily-pulse{grid-template-columns:auto 1fr}.daily-recent{grid-column:1/-1}}
 </style>
