@@ -25,15 +25,25 @@ const fichaOpen=ref(false), fichaLoading=ref(false), fichaError=ref(''), ficha=r
 const incidentBusy=ref(false), incidentType=ref(''), incidentCustom=ref(''), incidentNote=ref('')
 const manualPlate=ref(''), manualBusy=ref(false), manualState=ref('Listo para consultar'), manualResult=ref<Record<string,any>|null>(null)
 const syncBusy=ref(false), syncState=ref('Listo para actualizar'), syncPhase=ref<'idle'|'running'|'success'|'warning'|'error'>('idle'), syncProgress=ref({procesadas:0,total:0,nuevos:0,fichas_ok:0,fichas_pendientes:0,bloqueadas:0,errores:0})
-const boletaBusy=ref(false), boletaState=ref('Listo para actualizar'), boletaProgress=ref({procesadas:0,total:0}), boletaCompanies=ref<Array<Record<string,any>>>([]), boletaFilter=ref('TODAS')
+const boletaBusy=ref(false), boletaState=ref('Listo para consultar'), boletaCopyState=ref(''), boletaProgress=ref({procesadas:0,total:0}), boletaCompanies=ref<Array<Record<string,any>>>([]), boletaFilter=ref('TODAS')
 const dailyRecipients=ref<Array<Record<string,any>>>([]), dailyRecipientsLoading=ref(false), dailyRecipientsError=ref(''), dailySearch=ref(''), dailySelected=ref<string[]>([]), dailyManualEmail=ref(''), dailySending=ref(false), dailySendState=ref(''), dailyPreview=ref(false)
 const canOperate=computed(()=>Boolean(data.value?.profile?.can?.operations))
 const isAdminTotal=computed(()=>String(profile.value.rol||'').trim().toUpperCase()==='ADMIN_TOTAL')
 const dailyPendingGroups=computed(()=>{const map=new Map<string,CanonicalRevisadoRow[]>();for(const r of pending.value){const g=text(r.galera)==='—'?'OTROS':text(r.galera);if(!map.has(g))map.set(g,[]);map.get(g)!.push(r)}return [...map.entries()].map(([galera,rows])=>({galera,rows})).sort((a,b)=>b.rows.length-a.rows.length||a.galera.localeCompare(b.galera,'es'))})
 const filteredDailyRecipients=computed(()=>{const q=dailySearch.value.trim().toLowerCase();if(!q)return dailyRecipients.value;return dailyRecipients.value.filter(r=>[r.nombre,r.email,r.tipo,r.galera].some(x=>String(x||'').toLowerCase().includes(q)))})
-const filteredBoletaCompanies=computed(()=>boletaCompanies.value.filter(g=>boletaFilter.value==='TODAS'||boletaCompanyResult(g)===boletaFilter.value))
-const boletaAlertRows=computed(()=>rawRows.value.filter(x=>Array.isArray(x.alerts)&&x.alerts.length))
-const boletaPositiveCompanies=computed(()=>boletaCompanies.value.filter(g=>boletaCompanyResult(g)==='CON BOLETA').length)
+const BOLETA_COMPANY_TARGET=16
+const boletaCompanyRows=computed(()=>boletaCompanies.value.map(g=>({
+  ...g,
+  status:boletaCompanyStatus(g),
+  restriction:boletaCompanyRestriction(g)
+})).sort((a,b)=>{
+  const rank=(v:string)=>v==='CON RESTRICCIÓN'?0:v==='ERROR'?1:v==='PENDIENTE'?2:3
+  return rank(a.status)-rank(b.status)||String(a.empresa||'').localeCompare(String(b.empresa||''),'es')
+}))
+const filteredBoletaCompanies=computed(()=>boletaCompanyRows.value.filter(g=>boletaFilter.value==='TODAS'||g.status===boletaFilter.value))
+const boletaPositiveCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='CON RESTRICCIÓN').length)
+const boletaCleanCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='SIN RESTRICCIÓN').length)
+const boletaErrorCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='ERROR').length)
 const historyFilterCount=computed(()=>filters.value.galeras.length+filters.value.supervisoras.length+filters.value.estados.length+(filters.value.search.trim()?1:0))
 const cuposSummary=computed(()=>{
   const quantity=cupos.value.reduce((sum,row)=>sum+Number(row.cantidad||0),0)
@@ -245,9 +255,84 @@ async function runSyncEcarcheck(){
   }
 }
 
-function boletaCompanyResult(g:Record<string,any>){const checks=Array.isArray(g.checks)?g.checks:[];return checks.some((x:Record<string,any>)=>Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0)?'CON BOLETA':'SIN BOLETA'}
+function boletaCompanyStatus(g:Record<string,any>){
+  const checks=Array.isArray(g.checks)?g.checks:[]
+  if(!checks.length)return 'PENDIENTE'
+  if(checks.some((x:Record<string,any>)=>Boolean(x.error_code)||['ERROR','SESION_REQUERIDA','CANCELADO'].includes(String(x.estado||'').toUpperCase())))return 'ERROR'
+  const clas=String(g.clasificacion||'').toUpperCase()
+  if(clas&&clas!=='SIN BOLETAS')return 'CON RESTRICCIÓN'
+  return checks.some((x:Record<string,any>)=>Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0)?'CON RESTRICCIÓN':'SIN RESTRICCIÓN'
+}
+function boletaCompanyRestriction(g:Record<string,any>){
+  const status=boletaCompanyStatus(g)
+  if(status==='SIN RESTRICCIÓN')return 'Sin restricción'
+  if(status==='ERROR')return 'Consulta con error'
+  if(status==='PENDIENTE')return 'Pendiente de consulta'
+  const clas=String(g.clasificacion||'').trim().toUpperCase()
+  if(clas==='BOLETA EMPRESA')return 'Boleta de empresa'
+  if(clas==='BOLETA UNIDAD')return 'Boleta de unidad'
+  if(clas==='INFRACCION ENA')return 'Infracción ENA'
+  const checks=Array.isArray(g.checks)?g.checks:[]
+  const labels:string[]=[]
+  if(checks.some((x:Record<string,any>)=>Number(x.documento||0)>0))labels.push('Boleta por documento')
+  if(checks.some((x:Record<string,any>)=>Number(x.placa_boleta||0)>0))labels.push('Boleta por placa')
+  if(checks.some((x:Record<string,any>)=>Number(x.ena||0)>0))labels.push('Infracción ENA')
+  return labels.join(' · ')||'Restricción eCarCheck'
+}
+function boletaCheckSummary(x:Record<string,any>){
+  const labels:string[]=[]
+  if(Number(x.documento||0)>0)labels.push('Documento '+Number(x.documento))
+  if(Number(x.placa_boleta||0)>0)labels.push('Placa '+Number(x.placa_boleta))
+  if(Number(x.ena||0)>0)labels.push('ENA '+Number(x.ena))
+  if(x.error_code)labels.push('Error')
+  return labels.join(' · ')||'Sin restricción'
+}
+function boletaWhatsAppText(){
+  const rows=boletaCompanyRows.value
+  const restricted=rows.filter(g=>g.status==='CON RESTRICCIÓN')
+  const checked=rows.filter(g=>g.status!=='PENDIENTE').length
+  const lines=[
+    '*Boletas eCarCheck*',
+    `Consulta de empresas: ${checked}/${BOLETA_COMPANY_TARGET}`,
+    '',
+    `✅ Sin restricción: ${boletaCleanCompanies.value}`,
+    `⚠️ Con restricción: ${boletaPositiveCompanies.value}`
+  ]
+  if(boletaErrorCompanies.value)lines.push(`❗ Con error de consulta: ${boletaErrorCompanies.value}`)
+  lines.push('')
+  if(restricted.length){
+    lines.push('*Empresas con restricción:*')
+    for(const g of restricted){
+      const plates=(Array.isArray(g.checks)?g.checks:[]).filter((x:Record<string,any>)=>Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0).map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean)
+      lines.push(`• ${g.empresa||'Empresa'} — ${g.restriction}${plates.length?' · '+plates.join(', '):''}`)
+    }
+  }else if(rows.length){
+    lines.push('✅ No se detectaron restricciones en las empresas consultadas.')
+  }else{
+    lines.push('Aún no se ha ejecutado la consulta.')
+  }
+  return lines.join('\n')
+}
+async function copyBoletasWhatsApp(){
+  const t=boletaWhatsAppText()
+  try{
+    await navigator.clipboard.writeText(t)
+  }catch{
+    const area=document.createElement('textarea')
+    area.value=t
+    area.style.position='fixed'
+    area.style.opacity='0'
+    document.body.appendChild(area)
+    area.focus()
+    area.select()
+    document.execCommand('copy')
+    area.remove()
+  }
+  boletaCopyState.value='Resumen copiado para WhatsApp'
+  window.setTimeout(()=>{boletaCopyState.value=''},2200)
+}
 async function pollBoletasV2(runId:string){if(boletaBusy.value)return;boletaBusy.value=true;localStorage.setItem('rym_v166_boletas_run',runId);try{for(let i=0;i<120;i++){const d=await revisadosService.estadoBoletasV2(runId);if(!d?.ok)throw new Error(String(d?.error||'Error consultando lote V2'));boletaProgress.value={procesadas:Number(d.procesadas||0),total:Number(d.total||0)};boletaCompanies.value=Array.isArray(d.companies)?d.companies:[];boletaState.value=`${boletaProgress.value.procesadas}/${boletaProgress.value.total} procesadas`;if(d.done){boletaState.value=`Finalizado · ${boletaProgress.value.procesadas}/${boletaProgress.value.total}`;localStorage.removeItem('rym_v166_boletas_run');await load(true);return}await wait(2500)}throw new Error('El lote continúa en proceso.')}catch(e){boletaState.value=e instanceof Error?e.message:String(e)}finally{boletaBusy.value=false}}
-async function runBoletasV2(){if(boletaBusy.value||!confirm('¿Consultar 2 placas activas de cada empresa usando eCarCheck V2?'))return;boletaState.value='Creando lote…';try{const d=await revisadosService.iniciarBoletasV2();if(!d?.ok||!d?.run_id)throw new Error(String(d?.error||'No se pudo iniciar'));await pollBoletasV2(String(d.run_id))}catch(e){boletaState.value=e instanceof Error?e.message:String(e)}}
+async function runBoletasV2(){if(boletaBusy.value||!confirm('¿Consultar las 16 empresas usando eCarCheck V2? Se validarán 2 placas activas por empresa.'))return;boletaCopyState.value='';boletaState.value='Preparando consulta de 16 empresas…';try{const d=await revisadosService.iniciarBoletasV2();if(!d?.ok||!d?.run_id)throw new Error(String(d?.error||'No se pudo iniciar'));await pollBoletasV2(String(d.run_id))}catch(e){boletaState.value=e instanceof Error?e.message:String(e)}}
 async function resumeBoletasV2(){if(boletaBusy.value)return;const runId=localStorage.getItem('rym_v166_boletas_run');if(runId)await pollBoletasV2(runId)}
 async function prepareDailyMail(){if(!isAdminTotal.value||dailyRecipientsLoading.value||dailyRecipients.value.length)return;dailyRecipientsLoading.value=true;dailyRecipientsError.value='';try{const [rec,fresh]=await Promise.all([revisadosService.destinatariosReporteDiario(),revisadosService.emitidosHoy().catch(()=>null)]);if(!rec?.ok)throw new Error(String(rec?.error||'No se pudieron cargar los correos'));dailyRecipients.value=Array.isArray(rec.recipients)?rec.recipients:[];if(fresh&&data.value)data.value.emitidos_hoy=fresh}catch(e){dailyRecipientsError.value=e instanceof Error?e.message:String(e)}finally{dailyRecipientsLoading.value=false}}
 function toggleDailyEmail(email:string){const e=email.trim().toLowerCase();if(!e)return;dailySelected.value=dailySelected.value.includes(e)?dailySelected.value.filter(x=>x!==e):[...dailySelected.value,e]}
@@ -589,35 +674,94 @@ onMounted(()=>load())
         </section>
       </section>
 
-      <section v-else-if="active==='boletas'" class="rv-stack rv-workspace-tab rv-boletas-v2">
-        <header class="rv-tab-hero rv-tab-hero-boletas">
-          <div><span>BOLETAS Y RESTRICCIONES</span><h2>Control de impedimentos eCarCheck</h2><p>Distingue ENA/empresa, documento y placa sin confundir una deuda corporativa con una deuda individual.</p></div>
-          <div class="rv-boleta-summary">
-            <article><small>EMPRESAS REVISADAS</small><b>{{num(boletaCompanies.length)}}</b></article>
-            <article><small>CON BOLETA</small><b>{{num(boletaPositiveCompanies)}}</b></article>
-            <article><small>UNIDADES CON ALERTA</small><b>{{num(boletaAlertRows.length)}}</b></article>
+      <section v-else-if="active==='boletas'" class="rv-stack rv-boletas-focus">
+        <section class="rv-boletas-command">
+          <div class="rv-boletas-command-copy">
+            <span>CONSULTA ECARCHECK V2</span>
+            <h2>16 empresas · una sola verificación</h2>
+            <p>Consulta 2 placas activas por empresa y detecta rápidamente cuál presenta restricción.</p>
+            <div class="rv-boletas-state">
+              <i :data-active="boletaBusy"></i>
+              <span>{{boletaState}}</span>
+              <b v-if="boletaProgress.total">{{boletaProgress.procesadas}} / {{boletaProgress.total}} consultas</b>
+            </div>
           </div>
-        </header>
 
-        <section class="rv-sync-tool-v2">
-          <div class="rv-sync-tool-icon"><RymIcon name="sync" :size="22"/></div>
-          <div><span>ACTUALIZACIÓN V2</span><h3>Actualizar boletas eCarCheck</h3><p>Valida ENA, documento y placa usando el proceso oficial existente.</p><em>{{boletaState}}</em></div>
-          <button class="primary" :disabled="boletaBusy" @click="runBoletasV2">{{boletaBusy?'Procesando…':'Actualizar boletas'}}</button>
-          <div v-if="boletaProgress.total" class="rv-sync-tool-progress"><i :style="{width:Math.min(100,Math.round(boletaProgress.procesadas*100/boletaProgress.total))+'%'}"></i></div>
+          <div class="rv-boletas-actions">
+            <button class="rv-ws-main" type="button" :disabled="!boletaCompanies.length" @click="copyBoletasWhatsApp">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16.02 3.2A12.76 12.76 0 0 0 5.1 22.55L3.2 28.8l6.43-1.84a12.8 12.8 0 1 0 6.39-23.76Zm0 2.55a10.24 10.24 0 0 1 8.86 15.36 10.21 10.21 0 0 1-13.66 3.8l-.47-.28-3.81 1.09 1.12-3.71-.3-.48A10.22 10.22 0 0 1 16.02 5.75Zm-5.68 4.28c-.24 0-.62.09-.95.45-.33.36-1.25 1.22-1.25 2.98 0 1.75 1.28 3.45 1.46 3.69.18.24 2.51 3.83 6.08 5.37.85.37 1.51.58 2.03.74.85.27 1.63.23 2.24.14.68-.1 2.1-.86 2.4-1.69.3-.82.3-1.53.21-1.68-.09-.15-.33-.24-.7-.42-.36-.18-2.1-1.04-2.43-1.16-.32-.12-.56-.18-.8.18-.23.36-.91 1.16-1.12 1.4-.2.24-.41.27-.77.09-.36-.18-1.52-.56-2.89-1.79-1.07-.95-1.79-2.13-2-2.49-.21-.36-.02-.56.16-.74.16-.16.36-.41.54-.62.18-.21.24-.36.36-.6.12-.24.06-.45-.03-.62-.09-.18-.8-1.93-1.1-2.64-.28-.69-.58-.6-.8-.61h-.66Z"/></svg>
+              Copiar WS
+            </button>
+            <button class="primary rv-consult-companies" type="button" :disabled="boletaBusy" @click="runBoletasV2">
+              <RymIcon name="sync" :size="16"/>
+              {{boletaBusy?'Consultando…':'Consultar 16 empresas'}}
+            </button>
+          </div>
+
+          <div v-if="boletaProgress.total" class="rv-boletas-progress">
+            <i :style="{width:Math.min(100,Math.round(boletaProgress.procesadas*100/boletaProgress.total))+'%'}"></i>
+          </div>
         </section>
 
-        <section v-if="boletaCompanies.length" class="rv-data-panel">
-          <header class="rv-data-panel-head">
-            <div><span>EMPRESAS</span><h3>Resultado de validación</h3><p>Vista resumida por empresa y galera.</p></div>
-            <div class="rv-segment-actions"><button :class="{active:boletaFilter==='TODAS'}" @click="boletaFilter='TODAS'">Todas</button><button :class="{active:boletaFilter==='CON BOLETA'}" @click="boletaFilter='CON BOLETA'">Con boleta</button><button :class="{active:boletaFilter==='SIN BOLETA'}" @click="boletaFilter='SIN BOLETA'">Sin boleta</button></div>
+        <div v-if="boletaCopyState" class="rv-copy-toast">{{boletaCopyState}}</div>
+
+        <section class="rv-boletas-summary-focus">
+          <article>
+            <span class="rv-company-summary-icon blue"><RymIcon name="business" :size="18"/></span>
+            <div><small>CONSULTADAS</small><b>{{num(boletaCompanies.length)}} <i>/ {{BOLETA_COMPANY_TARGET}}</i></b><em>empresas con resultado</em></div>
+          </article>
+          <article data-tone="bad">
+            <span class="rv-company-summary-icon red"><RymIcon name="warning" :size="18"/></span>
+            <div><small>CON RESTRICCIÓN</small><b>{{num(boletaPositiveCompanies)}}</b><em>requieren atención</em></div>
+          </article>
+          <article data-tone="good">
+            <span class="rv-company-summary-icon green"><RymIcon name="verified" :size="18"/></span>
+            <div><small>SIN RESTRICCIÓN</small><b>{{num(boletaCleanCompanies)}}</b><em>consulta limpia</em></div>
+          </article>
+        </section>
+
+        <section class="rv-company-results">
+          <header class="rv-company-results-head">
+            <div>
+              <span>RESULTADO POR EMPRESA</span>
+              <h3>{{boletaCompanies.length?'Consulta eCarCheck':'Aún no se ha ejecutado la consulta'}}</h3>
+              <p>{{boletaCompanies.length?'Las empresas con restricción aparecen primero. Abre una fila para ver las 2 placas usadas en la validación.':'Presiona “Consultar 16 empresas” para iniciar la verificación.'}}</p>
+            </div>
+            <div v-if="boletaCompanies.length" class="rv-company-segments">
+              <button :class="{active:boletaFilter==='TODAS'}" @click="boletaFilter='TODAS'">Todas {{boletaCompanies.length}}</button>
+              <button :class="{active:boletaFilter==='CON RESTRICCIÓN'}" @click="boletaFilter='CON RESTRICCIÓN'">Con restricción {{boletaPositiveCompanies}}</button>
+              <button :class="{active:boletaFilter==='SIN RESTRICCIÓN'}" @click="boletaFilter='SIN RESTRICCIÓN'">Sin restricción {{boletaCleanCompanies}}</button>
+            </div>
           </header>
-          <div class="rv-table rv-table-readable"><table><thead><tr><th>Empresa</th><th>Galera</th><th>Placas consultadas</th><th>Resultado</th></tr></thead><tbody><tr v-for="g in filteredBoletaCompanies" :key="String(g.empresa)+'|'+String(g.galera)"><td><b>{{g.empresa||'—'}}</b></td><td>{{g.galera||'—'}}</td><td>{{(g.checks||[]).map((x:any)=>x.placa||'—').join(' · ')}}</td><td><span class="rv-result-badge" :data-tone="boletaCompanyResult(g)==='CON BOLETA'?'bad':'ok'">{{boletaCompanyResult(g)}}</span></td></tr></tbody></table></div>
-        </section>
 
-        <section class="rv-data-panel">
-          <header class="rv-data-panel-head"><div><span>DETALLE CANÓNICO</span><h3>Boletas y restricciones persistidas</h3><p>Solo unidades donde eCarCheck reporta una alerta o restricción.</p></div><small>{{boletaAlertRows.length}} unidades</small></header>
-          <div v-if="boletaAlertRows.length" class="rv-table rv-table-readable"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Empresa</th><th>Galera</th><th>Restricción</th></tr></thead><tbody><tr v-for="r in boletaAlertRows" :key="String(r.unidad_id||r.placa)"><td><b>{{r.unidad}}</b></td><td>{{r.placa}}</td><td>{{r.empresa}}</td><td>{{r.galera}}</td><td><div class="rv-restriction-list"><span v-for="(a,idx) in (r.alerts||[])" :key="idx" :data-tone="String(a.tipo||a.texto||'').toUpperCase().includes('BOLETA')?'bad':'warn'">{{String(a.tipo||a.texto||'Restricción').replaceAll('_',' ')}}</span></div></td></tr></tbody></table></div>
-          <div v-else class="rv-empty-state"><RymIcon name="verified" :size="22"/><b>Sin restricciones visibles</b><span>No hay alertas canónicas en el alcance actual.</span></div>
+          <div v-if="boletaCompanies.length" class="rv-company-list">
+            <details v-for="g in filteredBoletaCompanies" :key="String(g.empresa_id||g.empresa)+'|'+String(g.galera)" class="rv-company-row" :data-status="g.status">
+              <summary>
+                <div class="rv-company-name">
+                  <span class="rv-company-dot"></span>
+                  <div><b>{{g.empresa||'Empresa sin nombre'}}</b><small>{{g.galera||'Sin galera'}} · {{(g.checks||[]).length}} placas consultadas</small></div>
+                </div>
+                <span class="rv-company-restriction">{{g.restriction}}</span>
+                <span class="rv-company-status">{{g.status}}</span>
+                <RymIcon name="expand_more" :size="18"/>
+              </summary>
+              <div class="rv-company-detail">
+                <article v-for="(check,idx) in (g.checks||[])" :key="String(check.placa||idx)">
+                  <div>
+                    <small>MUESTRA {{idx+1}}</small>
+                    <b>{{check.unidad||'—'}} · {{check.placa||'—'}}</b>
+                  </div>
+                  <span>{{boletaCheckSummary(check)}}</span>
+                </article>
+              </div>
+            </details>
+          </div>
+
+          <div v-else class="rv-company-empty">
+            <span><RymIcon name="business" :size="24"/></span>
+            <b>Lista preparada para 16 empresas</b>
+            <p>La consulta verificará dos placas activas de cada empresa y resumirá únicamente si existe o no una restricción eCarCheck.</p>
+          </div>
         </section>
       </section>
 
@@ -1513,4 +1657,51 @@ onMounted(()=>load())
 .rv-history-v2 .rv-filter-shell{padding:12px!important}
 
 .rv-stats-v2 .rv-data-panel{padding:13px!important}
+</style>
+
+<style scoped>
+/* Boletas focused workflow v3 */
+.rv-boletas-focus{gap:12px!important}
+.rv-boletas-command{
+  position:relative;overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;
+  padding:20px 21px 22px;border:1px solid #C9DAEE;border-radius:18px;
+  background:
+    radial-gradient(circle at 92% 10%,rgba(49,133,225,.12),transparent 30%),
+    linear-gradient(135deg,#F7FBFF,#FFFFFF);
+  box-shadow:0 9px 24px rgba(15,47,90,.055)
+}
+.rv-boletas-command-copy{display:grid;gap:3px}.rv-boletas-command-copy>span{font-size:8px;font-weight:900;letter-spacing:.09em;color:#2464B8}.rv-boletas-command-copy h2{margin:0;font:800 23px/1.15 Inter,system-ui,sans-serif;color:#12335E}.rv-boletas-command-copy p{margin:0;font-size:10px;color:#708299}
+.rv-boletas-state{display:flex;align-items:center;gap:7px;margin-top:7px;color:#6E8097;font-size:8px}.rv-boletas-state i{width:8px;height:8px;border-radius:50%;background:#9FB0C3}.rv-boletas-state i[data-active="true"]{background:#2C78D6;box-shadow:0 0 0 5px rgba(44,120,214,.1)}.rv-boletas-state b{color:#315A8C}
+.rv-boletas-actions{display:flex;gap:8px;align-items:center}.rv-consult-companies,.rv-ws-main{min-height:42px!important;padding:0 14px!important;border-radius:10px!important;font-size:9px!important;font-weight:900!important}
+.rv-consult-companies{display:inline-flex!important;align-items:center!important;gap:7px!important}
+.rv-ws-main{display:inline-flex;align-items:center;gap:7px;border:1px solid #A5DEC0;background:#F1FFF7;color:#117B49;cursor:pointer}.rv-ws-main svg{width:17px;height:17px;color:#22B967}.rv-ws-main:disabled{opacity:.45;cursor:not-allowed}
+.rv-boletas-progress{position:absolute;left:0;right:0;bottom:0;height:5px;background:#E4EDF7;overflow:hidden}.rv-boletas-progress i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2366C1,#38A1ED);transition:width .3s ease}
+.rv-copy-toast{justify-self:end;padding:7px 10px;border:1px solid #BCE6D0;border-radius:999px;background:#F0FFF7;color:#14794B;font-size:8px;font-weight:850}
+
+.rv-boletas-summary-focus{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rv-boletas-summary-focus article{display:flex;align-items:center;gap:11px;padding:13px 14px;border:1px solid #D8E3EE;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(13,43,82,.035)}
+.rv-company-summary-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;flex:0 0 38px}.rv-company-summary-icon.blue{background:#EAF3FF;color:#2367BE}.rv-company-summary-icon.red{background:#FFF0EE;color:#BE453C}.rv-company-summary-icon.green{background:#EAF9F1;color:#23815A}
+.rv-boletas-summary-focus article>div{display:grid;gap:2px}.rv-boletas-summary-focus small{font-size:7px;font-weight:900;letter-spacing:.06em;color:#788AA0}.rv-boletas-summary-focus b{font:800 23px/1 Inter;color:#153A68}.rv-boletas-summary-focus b i{font:700 10px/1 Inter;color:#8292A6;font-style:normal}.rv-boletas-summary-focus em{font-size:7px;font-style:normal;color:#7A8B9F}
+.rv-boletas-summary-focus article[data-tone="bad"]{border-color:#F0D2CF}.rv-boletas-summary-focus article[data-tone="good"]{border-color:#CFE8DC}
+
+.rv-company-results{padding:15px;border:1px solid #D7E2ED;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(13,42,82,.04)}
+.rv-company-results-head{display:flex;align-items:end;justify-content:space-between;gap:14px;padding-bottom:12px;border-bottom:1px solid #E5EDF5}.rv-company-results-head>div:first-child{display:grid;gap:2px}.rv-company-results-head span{font-size:7px;font-weight:900;letter-spacing:.08em;color:#2564B4}.rv-company-results-head h3{margin:0;font:800 15px/1.2 Inter;color:#15355F}.rv-company-results-head p{margin:0;max-width:720px;font-size:8.5px;color:#74869C;line-height:1.4}
+.rv-company-segments{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.rv-company-segments button{min-height:30px;padding:0 9px;border:1px solid #D7E2ED;border-radius:999px;background:#fff;color:#61758E;font-size:7.5px;font-weight:850;cursor:pointer}.rv-company-segments button.active{background:#1C60B6;border-color:#1C60B6;color:#fff}
+
+.rv-company-list{display:grid;gap:7px;margin-top:11px}
+.rv-company-row{border:1px solid #DFE7F0;border-radius:12px;background:#FBFCFE;overflow:hidden}.rv-company-row[data-status="CON RESTRICCIÓN"]{border-color:#EFC9C5;background:#FFF9F8}.rv-company-row[data-status="ERROR"]{border-color:#E9D2A9;background:#FFF9EE}
+.rv-company-row summary{list-style:none;display:grid;grid-template-columns:minmax(220px,1.2fr) minmax(160px,.8fr) auto auto;gap:12px;align-items:center;padding:11px 12px;cursor:pointer}.rv-company-row summary::-webkit-details-marker{display:none}
+.rv-company-name{min-width:0;display:flex;align-items:center;gap:9px}.rv-company-dot{width:10px;height:10px;border-radius:50%;background:#31B779;box-shadow:0 0 0 5px rgba(49,183,121,.09);flex:0 0 10px}.rv-company-row[data-status="CON RESTRICCIÓN"] .rv-company-dot{background:#D84B42;box-shadow:0 0 0 5px rgba(216,75,66,.09)}.rv-company-row[data-status="ERROR"] .rv-company-dot{background:#E4A228;box-shadow:0 0 0 5px rgba(228,162,40,.1)}
+.rv-company-name>div{min-width:0;display:grid;gap:2px}.rv-company-name b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:#173B68}.rv-company-name small{font-size:7.5px;color:#7789A0}
+.rv-company-restriction{font-size:8px!important;font-weight:800!important;letter-spacing:0!important;color:#4C6380!important}
+.rv-company-status{padding:5px 8px;border-radius:999px;background:#EAF9F1;color:#1D7B54!important;font-size:6.5px!important;font-weight:900!important;letter-spacing:.03em!important;white-space:nowrap}.rv-company-row[data-status="CON RESTRICCIÓN"] .rv-company-status{background:#FFF0EE;color:#B63F37!important}.rv-company-row[data-status="ERROR"] .rv-company-status{background:#FFF2D8;color:#A56905!important}
+.rv-company-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:0 12px 12px 31px;border-top:1px solid #E8EEF5;background:#fff}.rv-company-detail article{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:9px;padding:9px 10px;border:1px solid #E2E9F1;border-radius:9px;background:#F8FAFD}.rv-company-detail article>div{display:grid;gap:2px}.rv-company-detail small{font-size:6px;font-weight:900;color:#8392A5}.rv-company-detail b{font-size:8.5px;color:#183A66}.rv-company-detail article>span{font-size:7px;color:#6C7F96}
+.rv-company-empty{display:grid;justify-items:center;gap:5px;padding:38px 18px;text-align:center;color:#71849A}.rv-company-empty>span{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#EDF4FC;color:#2B68B5}.rv-company-empty b{font-size:12px;color:#244463}.rv-company-empty p{max-width:560px;margin:0;font-size:8.5px;line-height:1.45}
+
+@media(max-width:900px){
+  .rv-boletas-command{grid-template-columns:1fr}.rv-boletas-actions{justify-content:flex-start}
+  .rv-boletas-summary-focus{grid-template-columns:1fr}.rv-company-results-head{align-items:flex-start;flex-direction:column}
+  .rv-company-row summary{grid-template-columns:1fr auto}.rv-company-restriction{grid-column:1}.rv-company-status{grid-column:2;grid-row:1}.rv-company-detail{grid-template-columns:1fr;padding-left:12px}
+}
 </style>
