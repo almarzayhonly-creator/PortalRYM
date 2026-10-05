@@ -13,6 +13,8 @@ const props=defineProps<{
   upToDate:number
   syncBusy:boolean
   syncState:string
+  syncPhase:'idle'|'running'|'success'|'warning'|'error'
+  syncProgress:{procesadas:number;total:number;nuevos:number;fichas_ok:number;fichas_pendientes:number;bloqueadas:number;errores:number}
   manualPlate:string
   manualBusy:boolean
   manualState:string
@@ -35,6 +37,13 @@ const supervisoras=ref<string[]>([])
 const statuses2=ref<string[]>([])
 const ecarStates=ref<string[]>([])
 const resultModalOpen=ref(false)
+const syncPercent=computed(()=>{
+  const total=Math.max(0,Number(props.syncProgress?.total||0))
+  const done=Math.max(0,Number(props.syncProgress?.procesadas||0))
+  if(!total)return props.syncBusy?8:(props.syncPhase==='success'||props.syncPhase==='warning'?100:0)
+  return Math.max(0,Math.min(100,Math.round(done*100/total)))
+})
+const syncHasResult=computed(()=>props.syncPhase==='success'||props.syncPhase==='warning'||props.syncPhase==='error')
 
 function s(v:unknown){return String(v??'').trim()}
 function n(v:unknown){return s(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
@@ -632,15 +641,35 @@ function exportPdf(){
     </div>
 
     <div class="command-actions">
-      <button class="sync-card" type="button" :disabled="syncBusy" @click="emit('sync')">
-        <span class="action-icon"><RymIcon name="sync" :size="20"/></span>
-        <span class="action-copy">
-          <small>SINCRONIZACIÓN EN LOTE</small>
-          <b>{{syncBusy?'Actualizando eCarCheck…':'Sincronización en lote eCarCheck'}}</b>
-          <em>{{syncState}}</em>
-        </span>
-        <span class="action-button">{{syncBusy?'Procesando':'Sincronizar lote'}} <RymIcon name="arrow_forward" :size="14"/></span>
-      </button>
+      <div class="sync-card-shell" :data-phase="syncPhase">
+        <button class="sync-card" type="button" :disabled="syncBusy" @click="emit('sync')">
+          <span class="action-icon" :class="{spinning:syncBusy}"><RymIcon name="sync" :size="20"/></span>
+          <span class="action-copy">
+            <small>SINCRONIZACIÓN EN LOTE</small>
+            <b>{{syncBusy?'Actualizando eCarCheck…':syncHasResult?'Última sincronización eCarCheck':'Sincronización en lote eCarCheck'}}</b>
+            <em>{{syncState}}</em>
+          </span>
+          <span class="action-button">{{syncBusy?'Procesando':syncHasResult?'Sincronizar otra vez':'Sincronizar lote'}} <RymIcon name="arrow_forward" :size="14"/></span>
+        </button>
+
+        <div v-if="syncBusy||syncHasResult" class="sync-progress-panel" :data-phase="syncPhase">
+          <div class="sync-progress-head">
+            <div>
+              <small>{{syncBusy?'PROGRESO EN TIEMPO REAL':syncPhase==='success'?'RESULTADO COMPLETADO':syncPhase==='warning'?'COMPLETADO CON OBSERVACIONES':'RESULTADO DE SINCRONIZACIÓN'}}</small>
+              <b>{{syncBusy ? (syncProgress.procesadas+' de '+(syncProgress.total||'—')+' procesadas') : syncState}}</b>
+            </div>
+            <strong>{{syncPercent}}%</strong>
+          </div>
+          <div class="sync-progress-track"><i :style="{width:syncPercent+'%'}"></i></div>
+          <div class="sync-progress-stats">
+            <span><small>NUEVOS</small><b>{{syncProgress.nuevos}}</b></span>
+            <span><small>FICHAS OK</small><b>{{syncProgress.fichas_ok}}</b></span>
+            <span><small>PENDIENTES</small><b>{{syncProgress.fichas_pendientes}}</b></span>
+            <span><small>BLOQUEADAS</small><b>{{syncProgress.bloqueadas}}</b></span>
+            <span><small>ERRORES</small><b>{{syncProgress.errores}}</b></span>
+          </div>
+        </div>
+      </div>
 
       <div class="lookup-card">
         <span class="action-icon lookup-icon"><RymIcon name="manage_search" :size="20"/></span>
@@ -780,7 +809,26 @@ function exportPdf(){
   min-width:0;min-height:78px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
   padding:11px;border:1px solid rgba(174,204,255,.25);border-radius:11px;
 }
-.sync-card{background:linear-gradient(135deg,#164DAF,#2D68D4);color:#fff;text-align:left;cursor:pointer}
+.sync-card-shell{min-width:0;border:1px solid rgba(174,204,255,.25);border-radius:11px;background:linear-gradient(135deg,#164DAF,#2D68D4);overflow:hidden}
+.sync-card-shell .sync-card{width:100%;border:0!important;border-radius:0!important;box-shadow:none!important}
+.sync-card{background:transparent;color:#fff;text-align:left;cursor:pointer}
+.sync-card-shell[data-phase="success"]{background:linear-gradient(135deg,#0E6A52,#15936F)}
+.sync-card-shell[data-phase="warning"]{background:linear-gradient(135deg,#8A5A00,#C88300)}
+.sync-card-shell[data-phase="error"]{background:linear-gradient(135deg,#8B2530,#C4414E)}
+.action-icon.spinning svg{animation:sync-spin 1.1s linear infinite}
+@keyframes sync-spin{to{transform:rotate(360deg)}}
+.sync-progress-panel{padding:0 11px 11px;border-top:1px solid rgba(255,255,255,.14)}
+.sync-progress-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:9px 0 7px}
+.sync-progress-head>div{display:grid;gap:2px}
+.sync-progress-head small{font-size:6px;font-weight:900;letter-spacing:.08em;color:#C7D8F7}
+.sync-progress-head b{font-size:8px;color:#fff}
+.sync-progress-head strong{font-size:15px;color:#fff}
+.sync-progress-track{height:7px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+.sync-progress-track i{display:block;height:100%;border-radius:999px;background:#fff;box-shadow:0 0 14px rgba(255,255,255,.36);transition:width .35s ease}
+.sync-progress-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:9px}
+.sync-progress-stats span{display:grid;gap:2px;padding:7px 8px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.08);text-align:center}
+.sync-progress-stats small{font-size:5.5px;font-weight:900;color:#C8DAF7}
+.sync-progress-stats b{font-size:11px;color:#fff}
 .lookup-card{background:linear-gradient(135deg,#255DBD,#3D77D7)}
 .action-icon{width:37px;height:37px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.24);border-radius:9px;background:rgba(255,255,255,.12);color:#fff}
 .lookup-icon{background:rgba(72,220,174,.14);color:#9AF0D1}
@@ -835,7 +883,7 @@ function exportPdf(){
 
 @media(max-width:1180px){.kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.facet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.command-actions{grid-template-columns:1fr}.priority-strip{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:680px){.facet-grid,.kpi-row{grid-template-columns:1fr}.command-head,.filter-foot{align-items:flex-start;flex-direction:column}.queue-head{align-items:center;flex-direction:row}.queue-copy{min-width:0}.queue-head>.export-actions{gap:5px!important}.export-actions button{padding:6px 8px!important;font-size:7px!important}.sync-card,.lookup-card{grid-template-columns:auto minmax(0,1fr)}.action-button,.lookup-form{grid-column:2}.lookup-form{flex-wrap:wrap}.kpi span{white-space:normal}}
+@media(max-width:680px){.sync-progress-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.sync-progress-stats span:last-child{grid-column:1/-1}.facet-grid,.kpi-row{grid-template-columns:1fr}.command-head,.filter-foot{align-items:flex-start;flex-direction:column}.queue-head{align-items:center;flex-direction:row}.queue-copy{min-width:0}.queue-head>.export-actions{gap:5px!important}.export-actions button{padding:6px 8px!important;font-size:7px!important}.sync-card,.lookup-card{grid-template-columns:auto minmax(0,1fr)}.action-button,.lookup-form{grid-column:2}.lookup-form{flex-wrap:wrap}.kpi span{white-space:normal}}
 </style>
 
 <style scoped>
