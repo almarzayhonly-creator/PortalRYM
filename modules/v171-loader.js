@@ -61,6 +61,7 @@
     '/modules/panapass/negativos/index.js',
     '/modules/panapass/negativos/panama-date.js',
     ...(w.RYM_PANAPASS_DASHBOARD_V2_ENABLED?dashboardV2:legacyDashboard),
+    '/modules/panapass/dashboard/no-panapass-alert-fix.js',
     '/modules/panapass/sidebar-v6-restored.js',
     '/modules/panapass/ranking/final-tabs.js',
     '/modules/panapass/ranking/criteria-final.js',
