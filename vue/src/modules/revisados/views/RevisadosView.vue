@@ -279,21 +279,145 @@ onMounted(()=>load())
     </template>
   </section>
   <div v-if="fichaOpen" class="rv-modal" @click.self="closeFicha">
-    <section class="rv-drawer">
-      <header class="rv-drawer-hero"><div><small>FICHA DE UNIDAD · ECARCHECK OPS</small><div class="rv-drawer-id"><h2>{{ficha?.unidad?.unidad||fichaRow?.unidad||fichaRow?.placa}}</h2><span class="rv-drawer-status">{{fichaRow?.emitido?'VIGENTE':'REQUIERE ATENCIÓN'}}</span></div><div class="rv-drawer-plate">{{ficha?.unidad?.placa_unica||fichaRow?.placa}}</div><span>{{ficha?.unidad?.galera||fichaRow?.galera}} · {{[ficha?.unidad?.marca,ficha?.unidad?.modelo].filter(Boolean).join(' ')||'Ficha vehicular'}}</span></div><button class="rv-close" @click="closeFicha">×</button></header>
-      <div v-if="fichaLoading" class="rv-state">Cargando ficha guardada en Supabase…</div>
-      <div v-else-if="fichaError" class="rv-state error"><b>No fue posible cargar la ficha.</b><span>{{fichaError}}</span></div>
-      <template v-else-if="ficha">
-        <div v-if="Array.isArray(ficha.diferencias)&&ficha.diferencias.length" class="rv-diffs"><b>{{ficha.diferencias.length}} diferencia(s) por revisar</b><span v-for="d in ficha.diferencias" :key="String(d.campo)">{{d.campo}}: {{d.control||'—'}} → {{d.ecarcheck||'—'}}</span></div>
-        <div class="rv-source-grid">
-          <article><h3>Control de Auto</h3><dl><dt>Empresa</dt><dd>{{ficha.unidad?.empresa_duena||'—'}}</dd><dt>Cupo</dt><dd>{{ficha.unidad?.placa_comercial||'—'}}</dd><dt>Color</dt><dd>{{ficha.unidad?.color||'—'}}</dd><dt>Marca / modelo</dt><dd>{{[ficha.unidad?.marca,ficha.unidad?.modelo].filter(Boolean).join(' ')||'—'}}</dd><dt>Supervisora</dt><dd>{{ficha.unidad?.supervisora||'—'}}</dd><dt>Estatus 2</dt><dd>{{ficha.logistica?.status2||'—'}}</dd></dl></article>
-          <article><h3>eCarCheck guardado</h3><dl><dt>Propietario</dt><dd>{{ficha.oficial?.propietario||'—'}}</dd><dt>Cupo</dt><dd>{{ficha.oficial?.cupo||'—'}}</dd><dt>Color</dt><dd>{{ficha.oficial?.color||'—'}}</dd><dt>VIN</dt><dd>{{ficha.oficial?.vin||'—'}}</dd><dt>Chasis</dt><dd>{{ficha.oficial?.chasis||'—'}}</dd><dt>Motor</dt><dd>{{ficha.oficial?.motor||'—'}}</dd><dt>Último revisado</dt><dd>{{date(ficha.oficial?.fecha_revisado)}}</dd><dt>Última verificación</dt><dd>{{date(ficha.oficial?.actualizado_at)}}</dd></dl></article>
+    <section class="rv-drawer rv-drawer-v2">
+      <header class="rv-ficha-hero">
+        <button class="rv-close rv-close-v2" type="button" aria-label="Cerrar ficha" @click="closeFicha">×</button>
+        <div class="rv-ficha-eyebrow">
+          <span class="rv-ficha-icon"><RymIcon name="directions_car" :size="18"/></span>
+          <span>FICHA OPERATIVA · ECARCHECK</span>
         </div>
-        <article v-if="canOperate" class="rv-incident">
-          <div><h3>Incidencias manuales</h3><p>Se mantienen abiertas hasta que entre un revisado vigente nuevo.</p></div>
-          <div v-if="fichaOpenIncidents.length" class="rv-inc-list"><span v-for="i in fichaOpenIncidents" :key="String(i.id||i.created_at)"><b>{{i.tipo_nombre||i.tipo_codigo}}</b>{{i.nota?' · '+i.nota:''}}</span></div>
-          <div class="rv-incident-form"><select v-model="incidentType"><option value="">Selecciona motivo</option><option v-for="t in incidentTypes" :key="String(t.codigo)" :value="String(t.codigo)">{{t.nombre||t.codigo}}</option></select><input v-if="incidentType==='OTRO'" v-model="incidentCustom" maxlength="120" placeholder="Otro motivo"><textarea v-model="incidentNote" maxlength="500" rows="3" placeholder="Nota opcional"></textarea><button class="primary" :disabled="incidentBusy||!incidentType" @click="saveIncident">{{incidentBusy?'Guardando…':'Guardar incidencia'}}</button></div>
-        </article>
+        <div class="rv-ficha-main">
+          <div>
+            <small>UNIDAD</small>
+            <h2>{{ficha?.unidad?.unidad||fichaRow?.unidad||fichaRow?.placa}}</h2>
+          </div>
+          <div class="rv-ficha-plate">
+            <small>PLACA</small>
+            <strong>{{ficha?.unidad?.placa_unica||fichaRow?.placa||'—'}}</strong>
+          </div>
+        </div>
+        <div class="rv-ficha-subline">
+          <span><RymIcon name="garage_home" :size="14"/>{{ficha?.unidad?.galera||fichaRow?.galera||'Sin galera'}}</span>
+          <span><RymIcon name="directions_car" :size="14"/>{{[ficha?.unidad?.marca,ficha?.unidad?.modelo].filter(Boolean).join(' ')||'Ficha vehicular'}}</span>
+        </div>
+        <div class="rv-ficha-status-row">
+          <span class="rv-ficha-state" :data-tone="fichaRow?.emitido?'ok':'attention'">
+            {{fichaRow?.emitido?'VIGENTE':'REQUIERE ATENCIÓN'}}
+          </span>
+          <template v-if="fichaRow">
+            <span v-for="signal in vehicleSignals(fichaRow)" :key="signal.label" class="rv-ficha-signal" :data-tone="signal.tone">{{signal.label}}</span>
+          </template>
+        </div>
+      </header>
+
+      <div v-if="fichaLoading" class="rv-state rv-ficha-loading">Cargando ficha guardada en Supabase…</div>
+      <div v-else-if="fichaError" class="rv-state error"><b>No fue posible cargar la ficha.</b><span>{{fichaError}}</span></div>
+
+      <template v-else-if="ficha">
+        <div v-if="Array.isArray(ficha.diferencias)&&ficha.diferencias.length" class="rv-diffs rv-diffs-v2">
+          <div class="rv-section-title">
+            <span class="rv-section-icon warn"><RymIcon name="warning" :size="16"/></span>
+            <div><small>VALIDACIÓN CRUZADA</small><b>{{ficha.diferencias.length}} diferencia(s) por revisar</b></div>
+          </div>
+          <div class="rv-diff-list">
+            <span v-for="d in ficha.diferencias" :key="String(d.campo)">
+              <b>{{d.campo}}</b><em>{{d.control||'—'}}</em><i>→</i><strong>{{d.ecarcheck||'—'}}</strong>
+            </span>
+          </div>
+        </div>
+
+        <section class="rv-ficha-summary">
+          <article>
+            <span class="rv-summary-icon"><RymIcon name="business" :size="16"/></span>
+            <div><small>EMPRESA</small><b>{{ficha.unidad?.empresa_duena||fichaRow?.empresa||'—'}}</b></div>
+          </article>
+          <article>
+            <span class="rv-summary-icon"><RymIcon name="person" :size="16"/></span>
+            <div><small>SUPERVISORA</small><b>{{ficha.unidad?.supervisora||fichaRow?.supervisora||'—'}}</b></div>
+          </article>
+          <article>
+            <span class="rv-summary-icon"><RymIcon name="verified" :size="16"/></span>
+            <div><small>ESTATUS 2</small><b>{{ficha.logistica?.status2||fichaRow?.status2||'—'}}</b></div>
+          </article>
+        </section>
+
+        <section class="rv-ficha-card">
+          <div class="rv-section-title">
+            <span class="rv-section-icon"><RymIcon name="directions_car" :size="17"/></span>
+            <div><small>IDENTIDAD VEHICULAR</small><b>Información del vehículo</b></div>
+          </div>
+          <div class="rv-ficha-facts">
+            <article class="wide"><small>Marca / modelo</small><b>{{[ficha.unidad?.marca,ficha.unidad?.modelo].filter(Boolean).join(' ')||'—'}}</b></article>
+            <article><small>Color control</small><b>{{ficha.unidad?.color||'—'}}</b></article>
+            <article><small>Color eCarCheck</small><b>{{ficha.oficial?.color||'—'}}</b></article>
+            <article><small>Cupo control</small><b>{{ficha.unidad?.placa_comercial||'—'}}</b></article>
+            <article><small>Cupo eCarCheck</small><b>{{ficha.oficial?.cupo||'—'}}</b></article>
+            <article class="wide"><small>VIN</small><b class="mono">{{ficha.oficial?.vin||'—'}}</b></article>
+            <article class="wide"><small>Chasis</small><b class="mono">{{ficha.oficial?.chasis||'—'}}</b></article>
+            <article class="wide"><small>Motor</small><b class="mono">{{ficha.oficial?.motor||'—'}}</b></article>
+          </div>
+        </section>
+
+        <section class="rv-ficha-card rv-owner-card">
+          <div class="rv-section-title">
+            <span class="rv-section-icon owner"><RymIcon name="badge" :size="17"/></span>
+            <div><small>TITULAR Y VIGENCIA</small><b>Información oficial eCarCheck</b></div>
+          </div>
+          <div class="rv-owner-name">
+            <small>PROPIETARIO REGISTRAL</small>
+            <strong>{{ficha.oficial?.propietario||'—'}}</strong>
+          </div>
+          <div class="rv-date-grid">
+            <article>
+              <small>Último revisado</small>
+              <b>{{date(ficha.oficial?.fecha_revisado)}}</b>
+            </article>
+            <article>
+              <small>Última verificación</small>
+              <b>{{date(ficha.oficial?.actualizado_at)}}</b>
+            </article>
+          </div>
+        </section>
+
+        <section v-if="canOperate" class="rv-incident rv-incident-v2">
+          <div class="rv-incident-head">
+            <div class="rv-section-title">
+              <span class="rv-section-icon incident"><RymIcon name="report_problem" :size="17"/></span>
+              <div><small>ACCIÓN OPERATIVA</small><b>Incidencias manuales</b></div>
+            </div>
+            <span class="rv-incident-count" :data-active="fichaOpenIncidents.length>0">{{fichaOpenIncidents.length}} abierta{{fichaOpenIncidents.length===1?'':'s'}}</span>
+          </div>
+          <p>Registra solo incidencias que requieren seguimiento. Se mantienen abiertas hasta que entre un revisado vigente nuevo.</p>
+
+          <div v-if="fichaOpenIncidents.length" class="rv-inc-list rv-inc-list-v2">
+            <span v-for="i in fichaOpenIncidents" :key="String(i.id||i.created_at)">
+              <b>{{i.tipo_nombre||i.tipo_codigo}}</b>
+              <em v-if="i.nota">{{i.nota}}</em>
+            </span>
+          </div>
+
+          <div class="rv-incident-form rv-incident-form-v2">
+            <label>
+              <span>Motivo</span>
+              <select v-model="incidentType">
+                <option value="">Selecciona motivo</option>
+                <option v-for="t in incidentTypes" :key="String(t.codigo)" :value="String(t.codigo)">{{t.nombre||t.codigo}}</option>
+              </select>
+            </label>
+            <label v-if="incidentType==='OTRO'">
+              <span>Otro motivo</span>
+              <input v-model="incidentCustom" maxlength="120" placeholder="Describe el motivo">
+            </label>
+            <label>
+              <span>Nota</span>
+              <textarea v-model="incidentNote" maxlength="500" rows="3" placeholder="Agrega contexto útil para seguimiento (opcional)"></textarea>
+            </label>
+            <button class="primary rv-save-incident" :disabled="incidentBusy||!incidentType" @click="saveIncident">
+              <RymIcon name="save" :size="15"/>
+              {{incidentBusy?'Guardando…':'Guardar incidencia'}}
+            </button>
+          </div>
+        </section>
       </template>
     </section>
   </div>
@@ -470,5 +594,138 @@ onMounted(()=>load())
 .rv-main>*{
   min-width:0;
   max-width:100%;
+}
+</style>
+
+
+<style scoped>
+/* ficha operativa v2 */
+.rv-modal{
+  background:rgba(7,20,43,.46)!important;
+  backdrop-filter:blur(2px);
+}
+.rv-drawer-v2{
+  width:min(680px,96vw)!important;
+  padding:0!important;
+  gap:0!important;
+  background:#F5F8FC!important;
+  box-shadow:-26px 0 64px rgba(8,28,65,.24)!important;
+}
+.rv-ficha-hero{
+  position:relative;
+  overflow:hidden;
+  padding:22px 24px 20px;
+  border:0!important;
+  background:
+    radial-gradient(circle at 88% 5%,rgba(96,165,250,.35),transparent 28%),
+    linear-gradient(135deg,#0A2D72 0%,#0E54BF 58%,#2486E8 100%);
+  color:#fff;
+}
+.rv-ficha-hero::after{
+  content:"";
+  position:absolute;
+  width:170px;height:170px;
+  border-radius:50%;
+  right:-80px;bottom:-105px;
+  border:26px solid rgba(255,255,255,.08);
+}
+.rv-close-v2{
+  position:absolute;right:18px;top:18px;z-index:2;
+  width:38px!important;height:38px!important;
+  background:rgba(255,255,255,.14)!important;
+  color:#fff!important;border:1px solid rgba(255,255,255,.16)!important;
+  backdrop-filter:blur(8px);
+}
+.rv-ficha-eyebrow{display:flex;align-items:center;gap:8px;font-size:9px;font-weight:900;letter-spacing:.11em;color:#DCEBFF}
+.rv-ficha-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.13)}
+.rv-ficha-main{display:flex;align-items:end;gap:18px;margin-top:13px}
+.rv-ficha-main>div:first-child small,.rv-ficha-plate small{display:block;margin-bottom:3px;font-size:8px;font-weight:900;letter-spacing:.11em;color:#BFD8FF}
+.rv-ficha-main h2{margin:0!important;font-size:34px!important;line-height:1;color:#fff}
+.rv-ficha-plate{padding-left:18px;border-left:1px solid rgba(255,255,255,.24)}
+.rv-ficha-plate strong{font:800 22px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;color:#fff}
+.rv-ficha-subline{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:11px;color:#E6F1FF}
+.rv-ficha-subline span{display:inline-flex!important;align-items:center;gap:5px;color:#E6F1FF!important;font-size:11px!important}
+.rv-ficha-status-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:14px}
+.rv-ficha-state,.rv-ficha-signal{display:inline-flex;align-items:center;min-height:24px;padding:5px 9px;border-radius:999px;font-size:8px;font-weight:900;letter-spacing:.02em}
+.rv-ficha-state[data-tone="ok"]{background:#D8F8E7;color:#087A49}
+.rv-ficha-state[data-tone="attention"]{background:#FFF0D6;color:#A65A00}
+.rv-ficha-signal{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.16)}
+.rv-ficha-signal[data-tone="bad"]{background:#FFE1DD;color:#AD2C24;border-color:#F7B9B3}
+.rv-ficha-signal[data-tone="warn"]{background:#FFF0D2;color:#9C5B00;border-color:#F1D19A}
+.rv-ficha-signal[data-tone="ok"]{background:#DDF7E9;color:#08784A;border-color:#B7E4CE}
+.rv-ficha-signal[data-tone="info"]{background:#E1EEFF;color:#1557A5;border-color:#BAD4F3}
+
+.rv-drawer-v2>.rv-state,.rv-drawer-v2>.rv-diffs-v2,.rv-drawer-v2>.rv-ficha-summary,.rv-drawer-v2>.rv-ficha-card,.rv-drawer-v2>.rv-incident-v2{
+  margin-left:18px;margin-right:18px;
+}
+.rv-ficha-loading{margin-top:18px}
+.rv-diffs-v2,.rv-ficha-summary,.rv-ficha-card,.rv-incident-v2{margin-top:14px}
+.rv-diffs-v2{
+  padding:14px!important;border-radius:14px!important;
+  background:#FFF9EC!important;border:1px solid #EFD49B!important;
+}
+.rv-section-title{display:flex;align-items:center;gap:10px}
+.rv-section-title>div{display:grid;gap:1px}
+.rv-section-title small{font-size:8px;font-weight:900;letter-spacing:.08em;color:#7788A0}
+.rv-section-title b{font-size:13px;color:#112C55}
+.rv-section-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#E8F1FF;color:#1761C5;flex:0 0 34px}
+.rv-section-icon.warn{background:#FFF0D3;color:#B56C00}
+.rv-section-icon.owner{background:#EEE8FF;color:#6847C9}
+.rv-section-icon.incident{background:#FFE9E6;color:#B43B30}
+.rv-diff-list{display:grid;gap:6px;margin-top:10px}
+.rv-diff-list span{display:grid;grid-template-columns:90px minmax(0,1fr) auto minmax(0,1fr);gap:7px;align-items:center;padding:8px 10px;border-radius:9px;background:#fff;border:1px solid #F0DFC0;font-size:9px;color:#5B687B}
+.rv-diff-list b{color:#324A69}.rv-diff-list em{font-style:normal}.rv-diff-list i{font-style:normal;color:#B58A42}.rv-diff-list strong{color:#8D5200}
+
+.rv-ficha-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rv-ficha-summary article{min-width:0;display:flex;align-items:center;gap:9px;padding:12px;border:1px solid #D9E4F0;border-radius:13px;background:#fff;box-shadow:0 5px 14px rgba(15,46,88,.04)}
+.rv-summary-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:#EFF5FF;color:#1761C5;flex:0 0 30px}
+.rv-ficha-summary article>div{min-width:0;display:grid;gap:2px}
+.rv-ficha-summary small{font-size:7px;font-weight:900;color:#8593A6}
+.rv-ficha-summary b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:#173257}
+
+.rv-ficha-card{
+  padding:15px;border:1px solid #D7E2EE;border-radius:15px;background:#fff;
+  box-shadow:0 7px 18px rgba(11,38,82,.045);
+}
+.rv-ficha-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.rv-ficha-facts article{min-width:0;padding:10px 11px;border:1px solid #E0E7F0;border-radius:10px;background:#F9FBFE}
+.rv-ficha-facts article.wide{grid-column:span 2}
+.rv-ficha-facts small,.rv-owner-name small,.rv-date-grid small{display:block;margin-bottom:4px;font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#8290A4}
+.rv-ficha-facts b,.rv-date-grid b{display:block;font-size:10px;line-height:1.35;color:#18345D;overflow-wrap:anywhere}
+.rv-ficha-facts .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9px;letter-spacing:.02em}
+.rv-owner-card{background:linear-gradient(135deg,#FBFAFF,#fff)}
+.rv-owner-name{margin-top:12px;padding:12px;border:1px solid #DED7F6;border-radius:11px;background:#FAF8FF}
+.rv-owner-name strong{display:block;font-size:12px;line-height:1.35;color:#172F57}
+.rv-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.rv-date-grid article{padding:10px 11px;border:1px solid #E1E7EF;border-radius:10px;background:#fff}
+
+.rv-incident-v2{
+  margin-bottom:18px;padding:15px!important;border-radius:15px!important;
+  border:1px solid #D7E2EE!important;background:#fff!important;
+  box-shadow:0 8px 20px rgba(14,39,76,.05);
+}
+.rv-incident-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rv-incident-count{padding:6px 8px;border-radius:999px;background:#EDF2F8;color:#607086;font-size:8px;font-weight:900;white-space:nowrap}
+.rv-incident-count[data-active="true"]{background:#FFE9E6;color:#AC352D}
+.rv-incident-v2>p{margin:8px 0 0!important;padding-left:44px;font-size:9px!important;line-height:1.45!important}
+.rv-inc-list-v2{margin-top:3px}
+.rv-inc-list-v2 span{display:grid!important;gap:2px!important;padding:9px 10px!important;border:1px solid #F1C8C3;background:#FFF5F4!important}
+.rv-inc-list-v2 b{font-size:9px}.rv-inc-list-v2 em{font-style:normal;font-size:8px;color:#7D5B58}
+.rv-incident-form-v2{display:grid;gap:9px;padding-top:4px}
+.rv-incident-form-v2 label{display:grid;gap:4px}
+.rv-incident-form-v2 label>span{font-size:8px;font-weight:850;color:#65768D}
+.rv-incident-form-v2 select,.rv-incident-form-v2 input,.rv-incident-form-v2 textarea{
+  border:1px solid #C9D7E7!important;border-radius:10px!important;background:#FBFCFE!important;
+  padding:10px 11px!important;font-size:10px!important;color:#213A5F!important;
+}
+.rv-incident-form-v2 select:focus,.rv-incident-form-v2 input:focus,.rv-incident-form-v2 textarea:focus{outline:none;border-color:#4A83D4!important;box-shadow:0 0 0 3px rgba(74,131,212,.11)}
+.rv-save-incident{min-height:40px;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:10px!important;background:linear-gradient(135deg,#165BC5,#267DE0)!important;border:0!important;box-shadow:0 8px 18px rgba(22,91,197,.18)}
+
+@media(max-width:620px){
+  .rv-ficha-summary{grid-template-columns:1fr}
+  .rv-ficha-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rv-ficha-facts article.wide{grid-column:span 2}
+  .rv-ficha-main{align-items:flex-start;flex-direction:column;gap:10px}
+  .rv-ficha-plate{padding-left:0;border-left:0}
 }
 </style>
