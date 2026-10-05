@@ -748,7 +748,7 @@ onMounted(()=>load())
               <div class="rv-company-detail">
                 <article v-for="(check,idx) in (g.checks||[])" :key="String(check.placa||idx)">
                   <div>
-                    <small>MUESTRA {{idx+1}}</small>
+                    <small>MUESTRA {{Number(idx)+1}}</small>
                     <b>{{check.unidad||'—'}} · {{check.placa||'—'}}</b>
                   </div>
                   <span>{{boletaCheckSummary(check)}}</span>
