@@ -32,6 +32,14 @@ const isAdminTotal=computed(()=>String(profile.value.rol||'').trim().toUpperCase
 const dailyPendingGroups=computed(()=>{const map=new Map<string,CanonicalRevisadoRow[]>();for(const r of pending.value){const g=text(r.galera)==='—'?'OTROS':text(r.galera);if(!map.has(g))map.set(g,[]);map.get(g)!.push(r)}return [...map.entries()].map(([galera,rows])=>({galera,rows})).sort((a,b)=>b.rows.length-a.rows.length||a.galera.localeCompare(b.galera,'es'))})
 const filteredDailyRecipients=computed(()=>{const q=dailySearch.value.trim().toLowerCase();if(!q)return dailyRecipients.value;return dailyRecipients.value.filter(r=>[r.nombre,r.email,r.tipo,r.galera].some(x=>String(x||'').toLowerCase().includes(q)))})
 const filteredBoletaCompanies=computed(()=>boletaCompanies.value.filter(g=>boletaFilter.value==='TODAS'||boletaCompanyResult(g)===boletaFilter.value))
+const boletaAlertRows=computed(()=>rawRows.value.filter(x=>Array.isArray(x.alerts)&&x.alerts.length))
+const boletaPositiveCompanies=computed(()=>boletaCompanies.value.filter(g=>boletaCompanyResult(g)==='CON BOLETA').length)
+const historyFilterCount=computed(()=>filters.value.galeras.length+filters.value.supervisoras.length+filters.value.estados.length+(filters.value.search.trim()?1:0))
+const cuposSummary=computed(()=>{
+  const quantity=cupos.value.reduce((sum,row)=>sum+Number(row.cantidad||0),0)
+  const approved=cupos.value.filter(row=>['APROBADO','COMPLETADO','PAGADO','OK'].includes(String(row.estado||'').trim().toUpperCase())).length
+  return {quantity,approved,total:cupos.value.length}
+})
 const incidentTypes=computed(()=>Array.isArray(data.value?.incident_types)?data.value?.incident_types as Array<Record<string,any>>:[])
 const incidents=computed(()=>Array.isArray(data.value?.incidents)?data.value?.incidents as Array<Record<string,any>>:[])
 const fichaOpenIncidents=computed(()=>{const id=ficha.value?.unidad?.id;if(id==null)return [];return incidents.value.filter(i=>String(i.unidad_id)===String(id)&&String(i.estado)==='ABIERTA')})
@@ -425,30 +433,109 @@ onMounted(()=>load())
         @lookup="runManualEcarcheck"
         @open="openFicha"
       />
-      <section v-else-if="active==='monthly'" class="rv-stack rv-monthly">
-        <div class="rv-monthly-head"><div><span class="rv-module-pill">AVANCE MENSUAL</span><h2>Cobertura por ciclo y galera</h2><p>Datos canónicos de Revisados dentro de tu alcance.</p></div><div class="rv-monthly-actions"><button class="ghost" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="15"/>{{syncBusy?'Sincronizando…':'Actualizar eCarCheck'}}</button><div class="rv-monthly-total"><b>{{num(metrics.pendientesCiclo)}}</b><span>pendientes actuales</span></div></div></div>
-        <div class="rv-cycle-grid">
-          <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
-            <header><div><span>CICLO OPERATIVO</span><h3>{{m.mes_nombre||('Mes '+m.mes_num)}}</h3></div><b>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</b></header>
-            <div class="rv-cycle-bigbar"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
-            <div class="rv-cycle-stats"><span><b>{{num(m.cubiertas)}}</b> al día</span><span><b>{{num(m.pendientes)}}</b> pendientes</span><span><b>{{num(m.total||m.activas)}}</b> total</span></div>
-          </article>
-        </div>
-        <section class="rv-monthly-table"><div class="rv-panel-title"><div><span>MATRIZ POR GALERA</span><h3>Avance y pendientes</h3></div><small>{{gallery.length}} galeras</small></div><div class="rv-table"><table><thead><tr><th>Galera</th><th>Total</th><th>Al día</th><th>Pendientes</th><th>Cobertura</th></tr></thead><tbody><tr v-for="g in gallery" :key="String(g.galera)"><td><b>{{g.galera}}</b></td><td>{{num(g.total)}}</td><td>{{num(g.cubiertas)}}</td><td>{{num(g.pendientes)}}</td><td><div class="rv-mini-meter"><i :style="{width:(Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0)+'%'}"></i></div><b>{{Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0}}%</b></td></tr></tbody></table></div></section>
-      </section>
-      <section v-else-if="active==='daily'" class="rv-stack">
-        <div class="rv-grid"><article class="rv-card"><b>Emitidos hoy</b><strong>{{num(emitted.length)}}</strong></article><article class="rv-card"><b>Pendientes</b><strong>{{num(pending.length)}}</strong></article><article class="rv-card"><b>Galera con más pendientes</b><strong>{{dailyPendingGroups[0]?.galera||'—'}}</strong><span>{{dailyPendingGroups[0]?num(dailyPendingGroups[0].rows.length)+' pendientes':'Sin pendientes'}}</span></article></div>
-        <div class="rv-daily-layout">
-          <div class="rv-stack">
-            <section><h3>Emitidos hoy</h3><div class="rv-table"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Galera</th><th>Empresa</th><th>Último revisado</th></tr></thead><tbody><tr v-for="r in emitted" :key="String(r.unidad_id||r.placa)"><td>{{r.unidad}}</td><td>{{r.placa}}</td><td>{{r.galera}}</td><td>{{r.empresa}}</td><td>{{date(r.ultimo_revisado)}}</td></tr></tbody></table></div></section>
-            <section><h3>Pendientes por galera</h3><div class="rv-daily-groups"><article v-for="g in dailyPendingGroups" :key="g.galera"><header><b>{{g.galera}}</b><span>{{num(g.rows.length)}} pendientes</span></header><div class="rv-daily-units">{{g.rows.slice(0,12).map(r=>r.unidad||r.placa).join(' · ')}}<span v-if="g.rows.length>12"> · +{{g.rows.length-12}}</span></div></article></div></section>
+      <section v-else-if="active==='monthly'" class="rv-stack rv-workspace-tab rv-monthly-v2">
+        <header class="rv-tab-hero rv-tab-hero-monthly">
+          <div>
+            <span>AVANCE MENSUAL</span>
+            <h2>Cobertura por ciclo</h2>
+            <p>Qué meses están controlados y dónde sigue pendiente la gestión.</p>
           </div>
-          <aside v-if="isAdminTotal" class="rv-mailer">
-            <header><div><h3>Enviar reporte diario</h3><p>Destinatarios autorizados + correos manuales.</p></div><button class="ghost" @click="copyDailyWhatsApp">Copiar WhatsApp</button></header>
+          <div class="rv-tab-hero-metrics">
+            <article><small>COBERTURA ACTUAL</small><b>{{coveragePct}}%</b><em>{{num(metrics.vigentes)}} al día</em></article>
+            <article><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b><em>requieren gestión</em></article>
+          </div>
+          <button class="rv-tab-action" :disabled="syncBusy" @click="runSyncEcarcheck"><RymIcon name="sync" :size="16"/>{{syncBusy?'Sincronizando…':'Actualizar eCarCheck'}}</button>
+        </header>
+
+        <section class="rv-cycle-deck">
+          <article v-for="m in monthly.filter(x=>Number(x.pendientes||0)||Number(x.cubiertas||0))" :key="String(m.mes_num)">
+            <header>
+              <div><span>CICLO</span><h3>{{m.mes_nombre||('Mes '+m.mes_num)}}</h3></div>
+              <strong>{{Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0}}%</strong>
+            </header>
+            <div class="rv-cycle-v2-meter"><i :style="{width:(Number(m.total||m.activas)?Math.round(Number(m.cubiertas||0)*100/Number(m.total||m.activas)):0)+'%'}"></i></div>
+            <footer>
+              <span><small>AL DÍA</small><b>{{num(m.cubiertas)}}</b></span>
+              <span><small>PENDIENTES</small><b>{{num(m.pendientes)}}</b></span>
+              <span><small>TOTAL</small><b>{{num(m.total||m.activas)}}</b></span>
+            </footer>
+          </article>
+        </section>
+
+        <section class="rv-data-panel">
+          <header class="rv-data-panel-head">
+            <div><span>MATRIZ OPERATIVA</span><h3>Avance por galera</h3><p>Comparación directa para identificar dónde enfocar la gestión.</p></div>
+            <small>{{gallery.length}} galeras</small>
+          </header>
+          <div class="rv-table rv-table-readable">
+            <table>
+              <thead><tr><th>Galera</th><th>Total</th><th>Al día</th><th>Pendientes</th><th>Cobertura</th></tr></thead>
+              <tbody><tr v-for="g in gallery" :key="String(g.galera)">
+                <td><b>{{g.galera}}</b></td>
+                <td>{{num(g.total)}}</td>
+                <td>{{num(g.cubiertas)}}</td>
+                <td><span class="rv-table-pill" :data-tone="Number(g.pendientes)>0?'warn':'ok'">{{num(g.pendientes)}}</span></td>
+                <td><div class="rv-coverage-cell"><div><i :style="{width:(Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0)+'%'}"></i></div><b>{{Number(g.total)?Math.round(Number(g.cubiertas||0)*100/Number(g.total)):0}}%</b></div></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section v-else-if="active==='daily'" class="rv-stack rv-workspace-tab rv-daily-v2">
+        <header class="rv-tab-hero rv-tab-hero-daily">
+          <div>
+            <span>REPORTE DIARIO</span>
+            <h2>Estado operativo de hoy</h2>
+            <p>Emitidos, pendientes y distribución por galera en una sola lectura.</p>
+          </div>
+          <div class="rv-daily-pulse-v2">
+            <article><small>EMITIDOS HOY</small><b>{{num(emitted.length)}}</b><em>de {{num(emittedToday?.limite||33)}} cupos</em></article>
+            <article><small>PENDIENTES</small><b>{{num(pending.length)}}</b><em>en tu alcance</em></article>
+            <article><small>MAYOR CARGA</small><b>{{dailyPendingGroups[0]?.galera||'—'}}</b><em>{{dailyPendingGroups[0]?num(dailyPendingGroups[0].rows.length)+' pendientes':'Sin pendientes'}}</em></article>
+          </div>
+        </header>
+
+        <div class="rv-daily-layout rv-daily-layout-v2">
+          <div class="rv-stack">
+            <section class="rv-data-panel">
+              <header class="rv-data-panel-head">
+                <div><span>EMITIDOS</span><h3>Revisados emitidos hoy</h3><p>Últimos registros disponibles dentro de tu alcance.</p></div>
+                <small>{{emitted.length}} registros</small>
+              </header>
+              <div v-if="emitted.length" class="rv-emitted-grid">
+                <article v-for="r in emitted" :key="String(r.unidad_id||r.placa)">
+                  <div><b>{{r.unidad||'—'}}</b><span>{{r.placa||'—'}}</span></div>
+                  <small>{{r.galera||'—'}} · {{r.empresa||'—'}}</small>
+                  <em>{{date(r.ultimo_revisado)}}</em>
+                </article>
+              </div>
+              <div v-else class="rv-empty-state"><RymIcon name="verified" :size="22"/><b>Sin emisiones registradas hoy</b><span>Los nuevos revisados aparecerán aquí automáticamente.</span></div>
+            </section>
+
+            <section class="rv-data-panel">
+              <header class="rv-data-panel-head">
+                <div><span>PENDIENTES</span><h3>Carga por galera</h3><p>Resumen corto para identificar dónde se concentra el trabajo.</p></div>
+              </header>
+              <div class="rv-pending-galera-grid">
+                <article v-for="g in dailyPendingGroups" :key="g.galera">
+                  <header><b>{{g.galera}}</b><strong>{{num(g.rows.length)}}</strong></header>
+                  <p>{{g.rows.slice(0,6).map(r=>r.unidad||r.placa).join(' · ')}}<span v-if="g.rows.length>6"> · +{{g.rows.length-6}}</span></p>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <aside v-if="isAdminTotal" class="rv-mailer rv-mailer-v2">
+            <header>
+              <div><span>ENVÍO OPERATIVO</span><h3>Compartir reporte diario</h3><p>Selecciona destinatarios autorizados o agrega un correo puntual.</p></div>
+              <button class="rv-ws-button" @click="copyDailyWhatsApp">WhatsApp</button>
+            </header>
             <div class="rv-mail-from"><span>Remitente</span><b>panapassrym@gmail.com</b></div>
-            <input v-model="dailySearch" class="rv-mail-search" placeholder="Buscar nombre, correo, rol o galera">
+            <input v-model="dailySearch" class="rv-mail-search" placeholder="Buscar destinatario, correo, rol o galera">
             <div class="rv-mail-actions"><button class="ghost" @click="selectVisibleDaily">Seleccionar visibles</button><button class="ghost" @click="clearDailySelected">Limpiar</button></div>
-            <div v-if="dailyRecipientsLoading" class="rv-note">Cargando destinatarios…</div><div v-else-if="dailyRecipientsError" class="rv-note danger">{{dailyRecipientsError}}</div>
+            <div v-if="dailyRecipientsLoading" class="rv-note">Cargando destinatarios…</div>
+            <div v-else-if="dailyRecipientsError" class="rv-note danger">{{dailyRecipientsError}}</div>
             <div v-else class="rv-recipient-list"><label v-for="r in filteredDailyRecipients" :key="String(r.email)"><input type="checkbox" :checked="dailySelected.includes(String(r.email||'').toLowerCase())" @change="toggleDailyEmail(String(r.email||''))"><span><b>{{r.nombre||r.email}}</b><small>{{r.email}}<template v-if="r.tipo"> · {{r.tipo}}</template><template v-if="r.galera"> · {{r.galera}}</template></small></span></label></div>
             <div class="rv-mail-manual"><input v-model="dailyManualEmail" type="email" placeholder="Agregar correo manual" @keydown.enter="addManualDailyEmail"><button class="ghost" @click="addManualDailyEmail">Agregar</button></div>
             <div class="rv-mail-selected"><b>{{dailySelected.length}}</b> destinatario(s) seleccionado(s)</div>
@@ -458,14 +545,93 @@ onMounted(()=>load())
           </aside>
         </div>
       </section>
-      <section v-else-if="active==='history'" class="rv-stack"><RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/><RevisadosTable :rows="filtered"/></section>
-      <section v-else-if="active==='stats'" class="rv-stack"><div class="rv-grid"><article class="rv-card"><b>Cobertura</b><strong>{{metrics.total?Math.round(metrics.vigentes/metrics.total*100):0}}%</strong></article><article class="rv-card"><b>Alertas reales</b><strong>{{metrics.incidencias}}</strong></article><article class="rv-card"><b>Cambio de color</b><strong>{{metrics.cambiosColor}}</strong></article></div><GaleraComparison :rows="filtered"/></section>
-      <section v-else-if="active==='boletas'" class="rv-stack">
-        <article class="rv-boleta-tool"><div><b>Actualizar boletas eCarCheck V2</b><span>Valida ENA, documento y placa usando el proceso V2 existente.</span></div><div class="rv-boleta-tool-actions"><span>{{boletaState}}</span><button class="primary" :disabled="boletaBusy" @click="runBoletasV2">{{boletaBusy?'Procesando…':'Actualizar boletas'}}</button></div><div v-if="boletaProgress.total" class="rv-progress"><i :style="{width:Math.min(100,Math.round(boletaProgress.procesadas*100/boletaProgress.total))+'%'}"></i></div></article>
-        <section v-if="boletaCompanies.length" class="rv-boleta-results"><div class="rv-mail-actions"><button class="ghost" :class="{selected:boletaFilter==='TODAS'}" @click="boletaFilter='TODAS'">Todas</button><button class="ghost" :class="{selected:boletaFilter==='CON BOLETA'}" @click="boletaFilter='CON BOLETA'">Con boleta</button><button class="ghost" :class="{selected:boletaFilter==='SIN BOLETA'}" @click="boletaFilter='SIN BOLETA'">Sin boleta</button></div><div class="rv-table"><table><thead><tr><th>Empresa</th><th>Galera</th><th>Placas modelo</th><th>Resultado</th></tr></thead><tbody><tr v-for="g in filteredBoletaCompanies" :key="String(g.empresa)+'|'+String(g.galera)"><td>{{g.empresa||'—'}}</td><td>{{g.galera||'—'}}</td><td>{{(g.checks||[]).map((x:any)=>x.placa||'—').join(' · ')}}</td><td><b :class="{danger:boletaCompanyResult(g)==='CON BOLETA'}">{{boletaCompanyResult(g)}}</b></td></tr></tbody></table></div></section>
-        <p class="rv-note">Boletas y restricciones persistidas en la fuente canónica.</p><div class="rv-table"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Empresa</th><th>Galera</th><th>Restricción</th></tr></thead><tbody><tr v-for="r in rawRows.filter(x=>Array.isArray(x.alerts)&&x.alerts.length)" :key="String(r.unidad_id||r.placa)"><td>{{r.unidad}}</td><td>{{r.placa}}</td><td>{{r.empresa}}</td><td>{{r.galera}}</td><td>{{(r.alerts||[]).map(x=>x.tipo||x.texto).join(' · ')}}</td></tr></tbody></table></div>
+
+      <section v-else-if="active==='history'" class="rv-stack rv-workspace-tab rv-history-v2">
+        <header class="rv-tab-hero rv-tab-hero-light">
+          <div><span>HISTORIAL</span><h2>Buscar y validar revisados</h2><p>Consulta el registro por unidad, placa, galera, supervisora o estado.</p></div>
+          <div class="rv-history-status">
+            <article><small>RESULTADOS</small><b>{{num(filtered.length)}}</b></article>
+            <article><small>FILTROS ACTIVOS</small><b>{{historyFilterCount}}</b></article>
+            <article><small>COBERTURA</small><b>{{metrics.total?Math.round(metrics.vigentes*100/metrics.total):0}}%</b></article>
+          </div>
+        </header>
+        <section class="rv-filter-shell">
+          <RevisadosFilterBar v-model="filters" :galeras="options.galeras" :supervisoras="options.supervisoras"/>
+        </section>
+        <section class="rv-data-panel">
+          <header class="rv-data-panel-head">
+            <div><span>RESULTADOS</span><h3>Historial filtrado</h3><p>{{historyFilterCount?'Mostrando únicamente los registros que coinciden con tus filtros.':'Mostrando todos los registros visibles.'}}</p></div>
+            <button v-if="historyFilterCount" class="ghost" @click="clearFilters">Limpiar filtros</button>
+          </header>
+          <RevisadosTable :rows="filtered"/>
+        </section>
       </section>
-      <section v-else class="rv-stack"><div v-if="cuposLoading" class="rv-state">Cargando compras de cupos…</div><div v-else-if="cuposError" class="rv-state error"><b>No fue posible cargar Cupos.</b><span>{{cuposError}}</span></div><template v-else><p class="rv-note">{{num(cupos.length)}} compras visibles de la fuente canónica.</p><div class="rv-table"><table><thead><tr><th>Fecha</th><th>ID</th><th>Tipo</th><th>Cantidad</th><th>Monto</th><th>Estado</th><th>Taller</th><th>Método</th></tr></thead><tbody><tr v-for="c in cupos" :key="String(c.id_pago)"><td>{{date(c.fecha_compra_local)}}</td><td>{{c.id_pago||'—'}}</td><td>{{c.tipo_comprado||'—'}}</td><td>{{num(c.cantidad)}}</td><td>{{c.monto||'—'}}</td><td>{{c.estado||'—'}}</td><td>{{c.taller||'—'}}</td><td>{{c.metodo||'—'}}</td></tr></tbody></table></div></template></section>
+
+      <section v-else-if="active==='stats'" class="rv-stack rv-workspace-tab rv-stats-v2">
+        <header class="rv-tab-hero rv-tab-hero-stats">
+          <div><span>ESTADÍSTICAS</span><h2>Lectura ejecutiva de cobertura</h2><p>Estado del padrón visible y distribución de los principales riesgos operativos.</p></div>
+          <div class="rv-stats-score"><strong>{{metrics.total?Math.round(metrics.vigentes*100/metrics.total):0}}%</strong><span>cobertura actual</span></div>
+        </header>
+        <section class="rv-stats-deck">
+          <article data-tone="green"><span><RymIcon name="verified" :size="19"/></span><div><small>AL DÍA</small><b>{{num(metrics.vigentes)}}</b><em>unidades vigentes</em></div></article>
+          <article data-tone="blue"><span><RymIcon name="schedule" :size="19"/></span><div><small>PENDIENTES</small><b>{{num(metrics.pendientesCiclo)}}</b><em>requieren gestión</em></div></article>
+          <article data-tone="red"><span><RymIcon name="gavel" :size="19"/></span><div><small>ALERTAS REALES</small><b>{{num(metrics.incidencias)}}</b><em>impedimentos activos</em></div></article>
+          <article data-tone="amber"><span><RymIcon name="palette" :size="19"/></span><div><small>CAMBIO DE COLOR</small><b>{{num(metrics.cambiosColor)}}</b><em>nuevo revisado</em></div></article>
+        </section>
+        <section class="rv-data-panel">
+          <header class="rv-data-panel-head"><div><span>COMPARATIVO</span><h3>Estado por galera</h3><p>La misma fuente canónica, presentada para comparación rápida.</p></div></header>
+          <GaleraComparison :rows="filtered"/>
+        </section>
+      </section>
+
+      <section v-else-if="active==='boletas'" class="rv-stack rv-workspace-tab rv-boletas-v2">
+        <header class="rv-tab-hero rv-tab-hero-boletas">
+          <div><span>BOLETAS Y RESTRICCIONES</span><h2>Control de impedimentos eCarCheck</h2><p>Distingue ENA/empresa, documento y placa sin confundir una deuda corporativa con una deuda individual.</p></div>
+          <div class="rv-boleta-summary">
+            <article><small>EMPRESAS REVISADAS</small><b>{{num(boletaCompanies.length)}}</b></article>
+            <article><small>CON BOLETA</small><b>{{num(boletaPositiveCompanies)}}</b></article>
+            <article><small>UNIDADES CON ALERTA</small><b>{{num(boletaAlertRows.length)}}</b></article>
+          </div>
+        </header>
+
+        <section class="rv-sync-tool-v2">
+          <div class="rv-sync-tool-icon"><RymIcon name="sync" :size="22"/></div>
+          <div><span>ACTUALIZACIÓN V2</span><h3>Actualizar boletas eCarCheck</h3><p>Valida ENA, documento y placa usando el proceso oficial existente.</p><em>{{boletaState}}</em></div>
+          <button class="primary" :disabled="boletaBusy" @click="runBoletasV2">{{boletaBusy?'Procesando…':'Actualizar boletas'}}</button>
+          <div v-if="boletaProgress.total" class="rv-sync-tool-progress"><i :style="{width:Math.min(100,Math.round(boletaProgress.procesadas*100/boletaProgress.total))+'%'}"></i></div>
+        </section>
+
+        <section v-if="boletaCompanies.length" class="rv-data-panel">
+          <header class="rv-data-panel-head">
+            <div><span>EMPRESAS</span><h3>Resultado de validación</h3><p>Vista resumida por empresa y galera.</p></div>
+            <div class="rv-segment-actions"><button :class="{active:boletaFilter==='TODAS'}" @click="boletaFilter='TODAS'">Todas</button><button :class="{active:boletaFilter==='CON BOLETA'}" @click="boletaFilter='CON BOLETA'">Con boleta</button><button :class="{active:boletaFilter==='SIN BOLETA'}" @click="boletaFilter='SIN BOLETA'">Sin boleta</button></div>
+          </header>
+          <div class="rv-table rv-table-readable"><table><thead><tr><th>Empresa</th><th>Galera</th><th>Placas consultadas</th><th>Resultado</th></tr></thead><tbody><tr v-for="g in filteredBoletaCompanies" :key="String(g.empresa)+'|'+String(g.galera)"><td><b>{{g.empresa||'—'}}</b></td><td>{{g.galera||'—'}}</td><td>{{(g.checks||[]).map((x:any)=>x.placa||'—').join(' · ')}}</td><td><span class="rv-result-badge" :data-tone="boletaCompanyResult(g)==='CON BOLETA'?'bad':'ok'">{{boletaCompanyResult(g)}}</span></td></tr></tbody></table></div>
+        </section>
+
+        <section class="rv-data-panel">
+          <header class="rv-data-panel-head"><div><span>DETALLE CANÓNICO</span><h3>Boletas y restricciones persistidas</h3><p>Solo unidades donde eCarCheck reporta una alerta o restricción.</p></div><small>{{boletaAlertRows.length}} unidades</small></header>
+          <div v-if="boletaAlertRows.length" class="rv-table rv-table-readable"><table><thead><tr><th>Unidad</th><th>Placa</th><th>Empresa</th><th>Galera</th><th>Restricción</th></tr></thead><tbody><tr v-for="r in boletaAlertRows" :key="String(r.unidad_id||r.placa)"><td><b>{{r.unidad}}</b></td><td>{{r.placa}}</td><td>{{r.empresa}}</td><td>{{r.galera}}</td><td><span class="rv-alert-text">{{(r.alerts||[]).map(x=>x.tipo||x.texto).join(' · ')}}</span></td></tr></tbody></table></div>
+          <div v-else class="rv-empty-state"><RymIcon name="verified" :size="22"/><b>Sin restricciones visibles</b><span>No hay alertas canónicas en el alcance actual.</span></div>
+        </section>
+      </section>
+
+      <section v-else-if="active==='cupos'" class="rv-stack rv-workspace-tab rv-cupos-v2">
+        <header class="rv-tab-hero rv-tab-hero-cupos">
+          <div><span>CUPOS</span><h2>Compras y disponibilidad operativa</h2><p>Historial de compras registrado en la fuente canónica.</p></div>
+          <div class="rv-cupos-summary">
+            <article><small>COMPRAS VISIBLES</small><b>{{num(cuposSummary.total)}}</b></article>
+            <article><small>CUPOS REGISTRADOS</small><b>{{num(cuposSummary.quantity)}}</b></article>
+            <article><small>COMPLETADAS</small><b>{{num(cuposSummary.approved)}}</b></article>
+          </div>
+        </header>
+        <div v-if="cuposLoading" class="rv-state">Cargando compras de cupos…</div>
+        <div v-else-if="cuposError" class="rv-state error"><b>No fue posible cargar Cupos.</b><span>{{cuposError}}</span></div>
+        <section v-else class="rv-data-panel">
+          <header class="rv-data-panel-head"><div><span>HISTORIAL DE COMPRAS</span><h3>Movimientos de cupos</h3><p>{{num(cupos.length)}} compras visibles, ordenadas desde la fuente canónica.</p></div></header>
+          <div class="rv-table rv-table-readable"><table><thead><tr><th>Fecha</th><th>ID</th><th>Tipo</th><th>Cantidad</th><th>Monto</th><th>Estado</th><th>Taller</th><th>Método</th></tr></thead><tbody><tr v-for="c in cupos" :key="String(c.id_pago)"><td>{{date(c.fecha_compra_local)}}</td><td><b>{{c.id_pago||'—'}}</b></td><td>{{c.tipo_comprado||'—'}}</td><td>{{num(c.cantidad)}}</td><td>{{c.monto||'—'}}</td><td><span class="rv-result-badge" data-tone="ok">{{c.estado||'—'}}</span></td><td>{{c.taller||'—'}}</td><td>{{c.metodo||'—'}}</td></tr></tbody></table></div>
+        </section>
+      </section>
     </template>
   </section>
   <div v-if="fichaOpen" class="rv-modal" @click.self="closeFicha">
@@ -1234,5 +1400,52 @@ onMounted(()=>load())
 }
 @media(max-width:820px){
   .rv-gallery-deck{grid-template-columns:1fr!important}
+}
+</style>
+
+<style scoped>
+/* Secondary tabs visual system v1 — parity with main, Stitch-inspired */
+.rv-workspace-tab{gap:14px!important}
+.rv-tab-hero{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center;
+  padding:19px 21px;border:1px solid #D5E1EF;border-radius:18px;background:#fff;
+  box-shadow:0 10px 26px rgba(14,43,83,.05)
+}
+.rv-tab-hero>div:first-child{display:grid;gap:3px}.rv-tab-hero>div:first-child>span{font-size:8px;font-weight:900;letter-spacing:.09em;color:#2565BC}.rv-tab-hero h2{margin:0;font:800 23px/1.12 Inter,system-ui,sans-serif;color:#12315E}.rv-tab-hero p{margin:0;font-size:10px;line-height:1.4;color:#71839A}
+.rv-tab-hero-metrics,.rv-daily-pulse-v2,.rv-boleta-summary,.rv-cupos-summary{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:8px}.rv-tab-hero-metrics{grid-template-columns:repeat(2,minmax(135px,1fr))}
+.rv-tab-hero-metrics article,.rv-daily-pulse-v2 article,.rv-boleta-summary article,.rv-cupos-summary article{display:grid;gap:2px;padding:10px 12px;border:1px solid #E0E8F2;border-radius:11px;background:#F9FBFE}.rv-tab-hero-metrics small,.rv-daily-pulse-v2 small,.rv-boleta-summary small,.rv-cupos-summary small{font-size:7px;font-weight:900;color:#778AA2;letter-spacing:.05em}.rv-tab-hero-metrics b,.rv-daily-pulse-v2 b,.rv-boleta-summary b,.rv-cupos-summary b{font:800 19px/1 Inter;color:#173967}.rv-tab-hero-metrics em,.rv-daily-pulse-v2 em{font-size:7px;font-style:normal;color:#7C8CA0}
+.rv-tab-action{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 13px;border:1px solid #BFD2EA;border-radius:10px;background:#F7FAFE;color:#1C5BAA;font-size:8.5px;font-weight:900;cursor:pointer}
+
+.rv-tab-hero-monthly{background:linear-gradient(135deg,#F8FBFF,#FFFFFF)}
+.rv-tab-hero-daily{background:linear-gradient(135deg,#F5FAFF,#FFFFFF)}
+.rv-tab-hero-stats{background:linear-gradient(135deg,#102F67,#176EC6);border-color:#174F9A;color:#fff}.rv-tab-hero-stats>div:first-child>span,.rv-tab-hero-stats h2,.rv-tab-hero-stats p{color:#fff!important}.rv-tab-hero-stats p{opacity:.8}
+.rv-tab-hero-boletas{background:linear-gradient(135deg,#FFF9F1,#FFFFFF)}
+.rv-tab-hero-cupos{background:linear-gradient(135deg,#F6FBFF,#FFFFFF)}
+.rv-tab-hero-light{grid-template-columns:minmax(0,1fr) auto;background:linear-gradient(135deg,#F8FBFF,#FFFFFF)}
+
+.rv-cycle-deck{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.rv-cycle-deck article{padding:14px;border:1px solid #D9E4F0;border-radius:14px;background:#fff;box-shadow:0 7px 18px rgba(14,43,83,.04)}.rv-cycle-deck article header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.rv-cycle-deck header>div{display:grid;gap:2px}.rv-cycle-deck header span{font-size:7px;font-weight:900;color:#72849B}.rv-cycle-deck h3{margin:0;font-size:15px;color:#16365F}.rv-cycle-deck header>strong{font:800 25px/1 Inter;color:#1E5FAF}.rv-cycle-v2-meter{height:8px;margin:12px 0;border-radius:999px;background:#E4EDF7;overflow:hidden}.rv-cycle-v2-meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#2568CE,#4B91E8)}.rv-cycle-deck footer{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rv-cycle-deck footer span{display:grid;gap:2px;padding:7px;border-radius:9px;background:#F5F8FC}.rv-cycle-deck footer small{font-size:6.5px;font-weight:900;color:#788AA0}.rv-cycle-deck footer b{font-size:11px;color:#17375F}
+
+.rv-data-panel{padding:15px;border:1px solid #D7E2EE;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(14,43,83,.045)}.rv-data-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding-bottom:11px;border-bottom:1px solid #E6EDF5}.rv-data-panel-head>div{display:grid;gap:2px}.rv-data-panel-head span{font-size:7px;font-weight:900;letter-spacing:.08em;color:#2866B8}.rv-data-panel-head h3{margin:0;font:800 15px/1.2 Inter;color:#15345F}.rv-data-panel-head p{margin:0;font-size:8.5px;color:#77889E}.rv-data-panel-head>small{font-size:8px;color:#7E8EA3}
+.rv-table-readable{margin-top:10px;border:1px solid #E0E8F1;border-radius:12px;overflow:auto}.rv-table-readable table{font-size:9px!important}.rv-table-readable th{padding:10px!important;font-size:7.5px!important;color:#61758E!important;background:#F3F7FB!important}.rv-table-readable td{padding:10px!important;color:#263F61!important;vertical-align:middle!important}.rv-table-readable tbody tr:hover{background:#FAFCFF}.rv-table-pill,.rv-result-badge{display:inline-flex;align-items:center;justify-content:center;padding:5px 8px;border-radius:999px;background:#EEF5FB;color:#2E5E91;font-size:7.5px;font-weight:900}.rv-table-pill[data-tone="warn"],.rv-result-badge[data-tone="bad"]{background:#FFF0E9;color:#B24C31}.rv-table-pill[data-tone="ok"],.rv-result-badge[data-tone="ok"]{background:#EAF9F1;color:#19704B}
+.rv-coverage-cell{display:grid;grid-template-columns:minmax(100px,1fr) 38px;gap:8px;align-items:center}.rv-coverage-cell>div{height:7px;border-radius:999px;background:#E5EDF6;overflow:hidden}.rv-coverage-cell i{display:block;height:100%;background:#2D73D2;border-radius:999px}.rv-coverage-cell b{font-size:9px;color:#1D579F}
+
+.rv-daily-layout-v2{grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr)!important;gap:14px!important}.rv-emitted-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}.rv-emitted-grid article{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 11px;border:1px solid #E0E9F2;border-radius:11px;background:#FAFCFF}.rv-emitted-grid article>div{display:flex;align-items:baseline;gap:6px}.rv-emitted-grid b{font-size:10px;color:#163A69}.rv-emitted-grid article>div span{font-size:8px;color:#58728F}.rv-emitted-grid small{font-size:7.5px;color:#7689A0}.rv-emitted-grid em{grid-row:1/3;grid-column:2;font-size:7px;font-style:normal;color:#70839A}
+.rv-pending-galera-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}.rv-pending-galera-grid article{padding:10px 11px;border:1px solid #E2EAF2;border-radius:11px;background:#FBFCFE}.rv-pending-galera-grid header{display:flex;justify-content:space-between;align-items:center}.rv-pending-galera-grid b{font-size:10px;color:#173B67}.rv-pending-galera-grid strong{font:800 18px/1 Inter;color:#B16B08}.rv-pending-galera-grid p{margin:6px 0 0;font-size:7.5px;line-height:1.4;color:#72849B}
+.rv-mailer-v2{padding:15px!important;border-radius:16px!important;border-color:#D7E2EE!important;box-shadow:0 8px 22px rgba(14,43,83,.05)!important}.rv-mailer-v2>header{display:flex;align-items:flex-start!important;justify-content:space-between;gap:10px}.rv-mailer-v2>header>div{display:grid;gap:2px}.rv-mailer-v2>header span{font-size:7px;font-weight:900;color:#2564B5}.rv-mailer-v2>header h3{margin:0;font-size:15px}.rv-mailer-v2>header p{margin:0;font-size:8px;color:#75869B}.rv-ws-button{padding:8px 10px;border:1px solid #A9E2C2;border-radius:9px;background:#F0FFF6;color:#15834E;font-size:8px;font-weight:900;cursor:pointer}
+
+.rv-history-status{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:8px}.rv-history-status article{display:grid;gap:2px;padding:10px 12px;border:1px solid #E0E8F1;border-radius:10px;background:#fff}.rv-history-status small{font-size:7px;font-weight:900;color:#7B8BA0}.rv-history-status b{font:800 18px/1 Inter;color:#173A66}.rv-filter-shell{padding:13px;border:1px solid #D8E3EE;border-radius:15px;background:#fff}
+
+.rv-stats-score{width:116px;height:116px;border-radius:50%;display:grid;place-items:center;align-content:center;background:radial-gradient(circle,rgba(12,61,131,.94) 56%,transparent 57%),conic-gradient(#58E0A9 calc(var(--coverage,80)*1%),rgba(255,255,255,.16) 0);border:1px solid rgba(255,255,255,.14)}.rv-stats-score strong{font:800 28px/1 Inter;color:#fff}.rv-stats-score span{font-size:7px;color:#C6D9F4}.rv-stats-deck{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.rv-stats-deck article{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #DCE5EF;border-radius:13px;background:#fff}.rv-stats-deck article>span{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#EDF4FF;color:#2666BC}.rv-stats-deck article>div{display:grid;gap:1px}.rv-stats-deck small{font-size:7px;font-weight:900;color:#75879E}.rv-stats-deck b{font:800 21px/1 Inter;color:#173967}.rv-stats-deck em{font-size:7px;font-style:normal;color:#7A899C}.rv-stats-deck article[data-tone="green"]>span{background:#E9F9F1;color:#20805A}.rv-stats-deck article[data-tone="red"]>span{background:#FFF0EE;color:#C0463D}.rv-stats-deck article[data-tone="amber"]>span{background:#FFF5E3;color:#B67108}
+
+.rv-sync-tool-v2{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid #D8E3EF;border-radius:15px;background:#fff}.rv-sync-tool-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#EDF4FF;color:#2868BB}.rv-sync-tool-v2>div:nth-child(2){display:grid;gap:2px}.rv-sync-tool-v2 span{font-size:7px;font-weight:900;color:#2A67B7}.rv-sync-tool-v2 h3{margin:0;font-size:14px;color:#173760}.rv-sync-tool-v2 p{margin:0;font-size:8px;color:#74869C}.rv-sync-tool-v2 em{font-size:7px;font-style:normal;color:#7A8BA0}.rv-sync-tool-progress{position:absolute;left:0;right:0;bottom:0;height:5px;background:#E7EEF6;overflow:hidden;border-radius:0 0 15px 15px}.rv-sync-tool-progress i{display:block;height:100%;background:#2C74D4}.rv-segment-actions{display:flex;gap:5px}.rv-segment-actions button{padding:6px 9px;border:1px solid #D8E3EE;border-radius:999px;background:#fff;color:#61758D;font-size:7.5px;font-weight:800;cursor:pointer}.rv-segment-actions button.active{background:#1D62BA;color:#fff;border-color:#1D62BA}.rv-alert-text{font-size:8px;line-height:1.4;color:#5D6F86}
+
+.rv-empty-state{display:grid;justify-items:center;gap:4px;padding:24px;color:#75869B;text-align:center}.rv-empty-state b{font-size:11px;color:#33506F}.rv-empty-state span{font-size:8px}
+
+@media(max-width:1180px){
+  .rv-tab-hero{grid-template-columns:1fr}.rv-tab-hero-metrics,.rv-daily-pulse-v2,.rv-boleta-summary,.rv-cupos-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rv-daily-layout-v2{grid-template-columns:1fr!important}.rv-cycle-deck{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-stats-deck{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .rv-cycle-deck,.rv-emitted-grid,.rv-pending-galera-grid,.rv-stats-deck{grid-template-columns:1fr}.rv-tab-hero-metrics,.rv-daily-pulse-v2,.rv-boleta-summary,.rv-cupos-summary,.rv-history-status{grid-template-columns:1fr}
 }
 </style>
