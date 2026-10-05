@@ -164,18 +164,14 @@ const dashboardGallery=computed(()=>gallery.value.map(g=>{
   }
 }).filter(g=>g.total>0))
 const cycleGlance=computed(()=>monthly.value.filter(m=>Number(m.total||m.activas||0)>0).slice(-3))
+const EXECUTIVE_GALERAS=['VCOMP','VIPCO','VINDU','VCARS'] as const
+const executiveGaleras=computed(()=>[...EXECUTIVE_GALERAS])
 const executiveMonths=computed(()=>monthly.value
-  .filter(m=>Number(m.total||m.activas||0)>0&&Number(m.pendientes||0)>0)
+  .filter(m=>{
+    const scoped=EXECUTIVE_GALERAS.map(g=>monthlyGaleraCell(m,g))
+    return scoped.some(cell=>cell.total>0)&&scoped.some(cell=>cell.pending>0)
+  })
   .sort((a,b)=>Number(a.mes_num||0)-Number(b.mes_num||0)))
-const executiveGaleras=computed(()=>{
-  const found=new Set<string>()
-  for(const m of executiveMonths.value){
-    const gs=(m.galeras&&typeof m.galeras==='object'?m.galeras:{}) as Record<string,unknown>
-    for(const g of Object.keys(gs))if(g)found.add(g)
-  }
-  const preferred=['VCOMP','VIPCO','VINDU','VCARS']
-  return [...preferred.filter(g=>found.has(g)),...[...found].filter(g=>!preferred.includes(g)).sort()]
-})
 function monthlyGaleraCell(m:Record<string,unknown>,galera:string){
   const gs=(m.galeras&&typeof m.galeras==='object'?m.galeras:{}) as Record<string,Record<string,unknown>>
   const raw=gs[galera]||{}
@@ -190,11 +186,11 @@ const monthlyExecutiveSummary=computed(()=>{
   let total=0,covered=0,pendingCount=0
   const byGal=new Map<string,{galera:string,total:number,covered:number,pending:number}>()
   for(const m of executiveMonths.value){
-    total+=Number(m.total||m.activas||0)
-    covered+=Number(m.cubiertas||0)
-    pendingCount+=Number(m.pendientes||0)
     for(const g of executiveGaleras.value){
       const cell=monthlyGaleraCell(m,g)
+      total+=cell.total
+      covered+=cell.covered
+      pendingCount+=cell.pending
       const current=byGal.get(g)||{galera:g,total:0,covered:0,pending:0}
       current.total+=cell.total
       current.covered+=cell.covered
@@ -763,32 +759,32 @@ onMounted(()=>load())
           </div>
           <div class="rv-monthly-exec-meta">
             <span><b>Corte</b>{{executiveMonths.length?monthName(executiveMonths[0].mes_num)+' – '+monthName(executiveMonths[executiveMonths.length-1].mes_num):'Sin pendientes'}}</span>
-            <span><b>Alcance</b>{{profile.scope_label||'Todas las galeras'}}</span>
+            <span><b>Alcance</b>VCOMP · VIPCO · VINDU · VCARS</span>
             <span><b>Actualizado</b>{{monthlyUpdatedLabel}}</span>
           </div>
         </header>
 
         <section class="rv-monthly-exec-kpis">
           <article>
-            <i class="blue"></i>
+            <span class="rv-kpi-accent blue"></span>
             <small>COBERTURA ACUMULADA</small>
             <strong>{{monthlyExecutiveSummary.pct}}%</strong>
             <span>{{num(monthlyExecutiveSummary.covered)}} de {{num(monthlyExecutiveSummary.total)}} ciclos cubiertos</span>
           </article>
           <article>
-            <i class="red"></i>
+            <span class="rv-kpi-accent red"></span>
             <small>PENDIENTES ACUMULADOS</small>
             <strong class="danger">{{num(monthlyExecutiveSummary.pending)}}</strong>
             <span>Suma de pendientes de los ciclos mostrados</span>
           </article>
           <article>
-            <i class="blue"></i>
+            <span class="rv-kpi-accent blue"></span>
             <small>MAYOR CARGA PENDIENTE</small>
             <strong>{{monthlyExecutiveSummary.highest.galera}}</strong>
             <span>{{num(monthlyExecutiveSummary.highest.pending)}} pendientes acumulados</span>
           </article>
           <article>
-            <i class="blue"></i>
+            <span class="rv-kpi-accent blue"></span>
             <small>GALERA MEJOR CUBIERTA</small>
             <strong>{{monthlyExecutiveSummary.best.galera}}</strong>
             <span>{{monthlyExecutiveSummary.best.pct}}% acumulado</span>
@@ -1999,11 +1995,11 @@ onMounted(()=>load())
 .rv-monthly-exec-title>span{display:block;font-size:9px;font-weight:900;letter-spacing:.09em;color:#2769c5}.rv-monthly-exec-title h2{margin:4px 0 3px;font-size:25px;letter-spacing:-.025em;color:#12345c}.rv-monthly-exec-title p{margin:0;max-width:830px;color:#667b94;font-size:12px;line-height:1.45}
 .rv-monthly-exec-actions{display:flex;gap:8px}.rv-monthly-exec-actions button{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 12px;font-size:10px}
 .rv-monthly-exec-meta{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.rv-monthly-exec-meta span{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid #d7e3ef;border-radius:999px;background:#f4f8fd;color:#58708c;font-size:9px}.rv-monthly-exec-meta b{color:#234f82;font-size:8px;text-transform:uppercase;letter-spacing:.04em}
-.rv-monthly-exec-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.rv-monthly-exec-kpis article{position:relative;display:grid;gap:3px;padding:16px 15px;border:1px solid #d7e2ed;border-radius:14px;background:#fff;overflow:hidden}.rv-monthly-exec-kpis article>i{position:absolute;top:0;left:15px;width:30px;height:3px;border-radius:0 0 99px 99px;background:#3479d6}.rv-monthly-exec-kpis article>i.red{background:#e0564d}.rv-monthly-exec-kpis small{margin-top:3px;color:#607895;font-size:8px;font-weight:900;letter-spacing:.06em}.rv-monthly-exec-kpis strong{font-size:25px;line-height:1.05;color:#153b68;letter-spacing:-.03em}.rv-monthly-exec-kpis strong.danger{color:#d24940}.rv-monthly-exec-kpis span{color:#7a8da4;font-size:9px}
+.rv-monthly-exec-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.rv-monthly-exec-kpis article{position:relative;display:grid;gap:3px;padding:16px 15px;border:1px solid #d7e2ed;border-radius:14px;background:#fff;overflow:hidden}.rv-monthly-exec-kpis .rv-kpi-accent{position:absolute!important;top:0!important;left:15px!important;width:30px!important;height:3px!important;min-width:0!important;max-width:30px!important;border-radius:0 0 99px 99px!important;background:#3479d6!important}.rv-monthly-exec-kpis .rv-kpi-accent.red{background:#e0564d!important}.rv-monthly-exec-kpis small{margin-top:3px;color:#607895;font-size:8px;font-weight:900;letter-spacing:.06em}.rv-monthly-exec-kpis strong{font-size:25px;line-height:1.05;color:#153b68;letter-spacing:-.03em}.rv-monthly-exec-kpis strong.danger{color:#d24940}.rv-monthly-exec-kpis span{color:#7a8da4;font-size:9px}
 .rv-monthly-matrix-panel{overflow:hidden;border:1px solid #d5e0eb;border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(20,49,82,.035)}
 .rv-monthly-matrix-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid #e3ebf3}.rv-monthly-matrix-head h3{margin:0;font-size:17px;color:#15385f}.rv-monthly-matrix-head p{margin:3px 0 0;color:#72849a;font-size:10px}.rv-monthly-legend{display:flex;gap:7px;flex-wrap:wrap}.rv-monthly-legend span{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border:1px solid #dbe4ee;border-radius:999px;font-size:8px;font-weight:800;color:#50677e;background:#fff}.rv-monthly-legend i{width:7px;height:7px;border-radius:50%}.rv-monthly-legend span[data-tone="good"]{border-color:#bfe3cf;background:#f2fbf6;color:#23734f}.rv-monthly-legend span[data-tone="good"] i{background:#30a76f}.rv-monthly-legend span[data-tone="watch"]{border-color:#edd399;background:#fffaf0;color:#9a6500}.rv-monthly-legend span[data-tone="watch"] i{background:#d49a23}.rv-monthly-legend span[data-tone="risk"]{border-color:#efc1bd;background:#fff5f4;color:#aa3d36}.rv-monthly-legend span[data-tone="risk"] i{background:#d85850}
-.rv-monthly-matrix-scroll{overflow:auto}.rv-monthly-matrix{width:100%;min-width:980px;border-collapse:separate;border-spacing:0}.rv-monthly-matrix th,.rv-monthly-matrix td{border-right:1px solid #dbe5ef;border-bottom:1px solid #dbe5ef}.rv-monthly-matrix th:last-child,.rv-monthly-matrix td:last-child{border-right:0}.rv-monthly-matrix tbody tr:last-child th,.rv-monthly-matrix tbody tr:last-child td{border-bottom:0}.rv-monthly-matrix thead th{padding:10px 9px;background:#eef4fb;color:#315b8b;font-size:9px;font-weight:900;text-align:center;letter-spacing:.04em}.rv-monthly-matrix thead th:first-child{text-align:left}.rv-monthly-matrix tbody>tr>th{width:110px;padding:12px 10px;background:#f7f9fc;color:#1d4e80;font-size:11px;text-align:left}
-.rv-monthly-matrix td{padding:7px;background:#fbfcfe}.rv-monthly-cell{position:relative;width:100%;min-height:82px;display:grid;align-content:start;gap:2px;padding:10px 31px 9px 10px;border:1px solid #dfe7ef;border-radius:11px;text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}.rv-monthly-cell:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(22,52,87,.08)}.rv-monthly-cell[data-tone="good"]{background:#f1faf5!important;border-color:#b9dfca!important}.rv-monthly-cell[data-tone="watch"]{background:#fff9ec!important;border-color:#ebcf8d!important}.rv-monthly-cell[data-tone="risk"]{background:#fff3f1!important;border-color:#edbcb7!important}.rv-monthly-cell[data-tone="neutral"]{background:#f6f8fb!important;border-color:#dfe6ee!important}.rv-monthly-cell-main{display:flex;align-items:baseline;gap:7px}.rv-monthly-cell-main strong{font-size:17px;color:#123a66}.rv-monthly-cell-main b{font-size:8px;color:#416b99}.rv-monthly-cell>small{font-size:7px;color:#7d8da0}.rv-monthly-cell>span{margin-top:5px;font-size:8px;font-weight:850;color:#a05f00}.rv-monthly-cell>span.complete{color:#23734f}.rv-monthly-cell>.rym-icon{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#2673d7}
+.rv-monthly-matrix-scroll{overflow:auto}.rv-monthly-matrix{width:100%;min-width:980px;border-collapse:separate;border-spacing:0}.rv-monthly-matrix th,.rv-monthly-matrix td{border-right:1px solid #dbe5ef;border-bottom:1px solid #dbe5ef}.rv-monthly-matrix th:last-child,.rv-monthly-matrix td:last-child{border-right:0}.rv-monthly-matrix tbody tr:last-child th,.rv-monthly-matrix tbody tr:last-child td{border-bottom:0}.rv-monthly-matrix thead th{padding:10px 9px!important;background:#eef4fb!important;background-image:none!important;color:#315b8b!important;font-size:9px!important;font-weight:900!important;text-align:center!important;letter-spacing:.04em!important}.rv-monthly-matrix thead th:first-child{text-align:left!important}.rv-monthly-matrix tbody>tr>th{width:110px!important;padding:12px 10px!important;background:#f7f9fc!important;background-image:none!important;color:#1d4e80!important;font-size:11px!important;text-align:left!important}
+.rv-monthly-matrix td{padding:7px!important;background:#fbfcfe!important;background-image:none!important}.rv-monthly-cell{position:relative;width:100%;min-height:82px;display:grid;align-content:start;gap:2px;padding:10px 31px 9px 10px;border:1px solid #dfe7ef;border-radius:11px;text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}.rv-monthly-cell:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(22,52,87,.08)}.rv-monthly-cell[data-tone="good"]{background:#f1faf5!important;border-color:#b9dfca!important}.rv-monthly-cell[data-tone="watch"]{background:#fff9ec!important;border-color:#ebcf8d!important}.rv-monthly-cell[data-tone="risk"]{background:#fff3f1!important;border-color:#edbcb7!important}.rv-monthly-cell[data-tone="neutral"]{background:#f6f8fb!important;border-color:#dfe6ee!important}.rv-monthly-cell-main{display:flex;align-items:baseline;gap:7px}.rv-monthly-cell-main strong{font-size:17px;color:#123a66}.rv-monthly-cell-main b{font-size:8px;color:#416b99}.rv-monthly-cell>small{font-size:7px;color:#7d8da0}.rv-monthly-cell>span{margin-top:5px;font-size:8px;font-weight:850;color:#a05f00}.rv-monthly-cell>span.complete{color:#23734f}.rv-monthly-cell>.rym-icon{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#2673d7}
 .rv-monthly-complete-state{display:grid;justify-items:center;gap:5px;padding:42px 18px;color:#668097}.rv-monthly-complete-state .rym-icon{color:#2c9b69}.rv-monthly-complete-state b{color:#244b72;font-size:14px}.rv-monthly-complete-state span{font-size:10px}
 .rv-monthly-modal{position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:24px;background:rgba(10,27,49,.38)}.rv-monthly-modal>section{width:min(720px,94vw);max-height:82vh;overflow:auto;border-radius:16px;background:#fff;box-shadow:0 24px 70px rgba(8,26,49,.25)}.rv-monthly-modal>section>header{display:flex;justify-content:space-between;gap:14px;padding:17px 18px;border-bottom:1px solid #e1e9f1}.rv-monthly-modal header span{font-size:8px;font-weight:900;letter-spacing:.08em;color:#2868bb}.rv-monthly-modal header h3{margin:3px 0 2px;color:#163b63;font-size:20px}.rv-monthly-modal header p{margin:0;color:#74879c;font-size:10px}.rv-monthly-modal header button{width:34px;height:34px;border:0;border-radius:9px;background:#f0f4f8;color:#4e657e;font-size:21px;cursor:pointer}.rv-monthly-pending-list{display:grid;gap:7px;padding:12px}.rv-monthly-pending-list button{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:12px;padding:11px;border:1px solid #dce5ee;border-radius:10px;background:#fafcfe;text-align:left;cursor:pointer}.rv-monthly-pending-list button:hover{border-color:#bfd4ec;background:#f5f9fe}.rv-monthly-pending-list button>div{display:flex;align-items:baseline;gap:8px}.rv-monthly-pending-list b{font-size:13px;color:#153c67}.rv-monthly-pending-list span{font-size:10px;color:#59738f}.rv-monthly-pending-list small{font-size:10px;color:#6d8096}.rv-monthly-modal-empty{display:grid;justify-items:center;gap:5px;padding:34px;color:#6c8298}.rv-monthly-modal-empty .rym-icon{color:#2b9c68}.rv-monthly-modal-empty b{color:#244a72}
 @media(max-width:1180px){.rv-monthly-exec-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.rv-monthly-exec-hero{grid-template-columns:1fr}.rv-monthly-exec-actions{justify-content:flex-start}}
