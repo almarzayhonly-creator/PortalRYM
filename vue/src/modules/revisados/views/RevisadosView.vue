@@ -2174,3 +2174,105 @@ onMounted(()=>load())
 @media(max-width:720px){.rv-stitch-kpis{grid-template-columns:1fr}.rv-stitch-context-pills,.rv-stitch-action-row{flex-wrap:wrap}.rv-stitch-method-note{align-items:flex-start;flex-direction:column}}
 @media print{.rv-stitch-matrix-controls,.rv-stitch-method-note button,.rv-stitch-report-actions{display:none!important}.rv-stitch-kpis article,.rv-stitch-matrix{box-shadow:none!important}.rv-stitch-table{min-width:0!important}}
 </style>
+
+
+<style scoped>
+/* Stitch monthly visual isolation: prevent legacy table/status CSS from leaking in */
+.rv-monthly-stitch .rv-stitch-table thead th{
+  height:36px!important;
+  padding:0 12px!important;
+  background:#f1f1f8!important;
+  background-image:none!important;
+  color:#687184!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  letter-spacing:.035em!important;
+  text-align:left!important;
+  text-shadow:none!important;
+  box-shadow:none!important
+}
+.rv-monthly-stitch .rv-stitch-table thead th.focus{
+  background:#e9eefc!important;
+  background-image:none!important;
+  color:#163d84!important
+}
+.rv-monthly-stitch .rv-stitch-table thead th em{
+  background:#104bad!important;
+  color:#fff!important
+}
+.rv-monthly-stitch .rv-stitch-table tbody>tr>th{
+  padding:0 15px!important;
+  background:#fff!important;
+  background-image:none!important;
+  color:#111318!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  text-align:left!important;
+  text-shadow:none!important;
+  box-shadow:none!important
+}
+.rv-monthly-stitch .rv-stitch-table tbody td{
+  background:#fff!important;
+  background-image:none!important
+}
+.rv-monthly-stitch .rv-stitch-table tbody td.focus{
+  background:#fbfcff!important;
+  background-image:none!important
+}
+.rv-monthly-stitch .rv-stitch-kpi-value p.danger{
+  display:block!important;
+  margin:0 0 1px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  color:#d43630!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  font-weight:800!important;
+  white-space:normal!important
+}
+.rv-monthly-stitch .rv-stitch-kpi-value p.good{
+  display:block!important;
+  margin:0 0 1px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  color:#13805a!important;
+  font-size:10px!important;
+  line-height:1.3!important;
+  font-weight:800!important
+}
+.rv-monthly-stitch .rv-stitch-kpi-value strong.danger{
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  color:#ea4b45!important
+}
+.rv-monthly-stitch .rv-stitch-kpi-value{
+  min-width:0!important
+}
+.rv-monthly-stitch .rv-stitch-kpi-value>p{
+  min-width:0!important;
+  max-width:120px!important
+}
+/* Keep Stitch's intended dark accumulated-total footer, isolated from body/header */
+.rv-monthly-stitch .rv-stitch-table tfoot th,
+.rv-monthly-stitch .rv-stitch-table tfoot td{
+  background:#0b1f4d!important;
+  background-image:none!important;
+  color:#fff!important;
+  border-color:#29406f!important
+}
+.rv-monthly-stitch .rv-stitch-table tfoot td.focus{
+  background:#103d7d!important
+}
+</style>
