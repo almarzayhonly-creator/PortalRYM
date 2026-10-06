@@ -110,6 +110,31 @@ try{
 const screens=Array.isArray(variants)?variants:(Array.isArray(variants?.screens)?variants.screens:[]);
 if(!screens.length)throw new Error('Stitch variants returned no screens');
 
+async function htmlContent(screen){
+  const asset=await screen.getHtml();
+  if(typeof asset==='string'&&/^https?:\/\//i.test(asset)){
+    const response=await fetch(asset);
+    if(!response.ok)throw new Error('Variant HTML download failed: '+response.status);
+    return await response.text();
+  }
+  return String(asset||'');
+}
+async function imageBytes(screen){
+  const asset=await screen.getImage();
+  if(typeof asset==='string'&&/^https?:\/\//i.test(asset)){
+    const response=await fetch(asset);
+    if(!response.ok)throw new Error('Variant image download failed: '+response.status);
+    return Buffer.from(await response.arrayBuffer());
+  }
+  return Buffer.from(asset);
+}
+for(let index=0;index<screens.length;index++){
+  const screen=screens[index];
+  const number=index+1;
+  await fs.writeFile(path.join(outDir,'operations-emitted-variant-'+number+'.html'),await htmlContent(screen));
+  await fs.writeFile(path.join(outDir,'operations-emitted-variant-'+number+'.png'),await imageBytes(screen));
+}
+
 await fs.writeFile(path.join(outDir,'operations-emitted-stitch-latest.json'),JSON.stringify({
   generatedAt:new Date().toISOString(),
   projectId,
