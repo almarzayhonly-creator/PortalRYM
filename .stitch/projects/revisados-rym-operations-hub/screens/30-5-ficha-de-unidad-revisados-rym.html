@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-high": "#e5e8ec", "outline-variant": "#c6c5d0", "surface-variant": "#e0e3e7", "outline": "#767680", "inverse-surface": "#2d3134", "on-tertiary-container": "#1a90bf", "on-primary-fixed-variant": "#364477", "tertiary-container": "#002231", "on-tertiary-fixed-variant": "#004c68", "surface": "#f7fafe", "tertiary-fixed-dim": "#7ad0ff", "on-surface": "#181c1f", "on-secondary": "#ffffff", "on-tertiary": "#ffffff", "secondary-container": "#7f9fff", "primary-container": "#0a1b4d", "on-background": "#181c1f", "surface-container": "#ebeef2", "surface-tint": "#4e5c90", "on-surface-variant": "#45464f", "surface-dim": "#d7dade", "error-container": "#ffdad6", "surface-bright": "#f7fafe", "surface-container-lowest": "#ffffff", "primary-fixed": "#dce1ff", "on-error-container": "#93000a", "surface-container-highest": "#e0e3e7", "on-primary-fixed": "#051749", "error": "#ba1a1a", "secondary-fixed-dim": "#b4c5ff", "secondary": "#3659b4", "on-secondary-container": "#00328a", "on-secondary-fixed": "#00174b", "on-primary": "#ffffff", "tertiary-fixed": "#c3e8ff", "inverse-on-surface": "#eef1f5", "primary-fixed-dim": "#b6c4ff", "inverse-primary": "#b6c4ff", "secondary-fixed": "#dbe1ff", "on-error": "#ffffff", "on-tertiary-fixed": "#001e2c", "on-primary-container": "#7684bc", "on-secondary-fixed-variant": "#17409b", "tertiary": "#00070e", "primary": "#000520", "background": "#f7fafe", "surface-container-low": "#f1f4f8" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "gutter": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "margin": "2rem", "space-xl": "2rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-lg": ["Inter"], "headline-md": ["Inter"], "code-chassis": ["JetBrains Mono"], "display-lg": ["Inter"], "body-md": ["Inter"], "headline-sm": ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "code-plate": ["JetBrains Mono"], "body-lg": ["Inter"] }, "fontSize": { "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "code-chassis": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "400"}], "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}], "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}], "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600"}], "code-plate": ["13px", {"lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500"}], "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}] } } } };</script><style>html,body{min-height:1024px}</style></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[250px] bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(10,27,77,0.03)]"><div class="flex flex-col flex-1 min-h-0"><div class="px-space-lg pt-space-lg pb-space-md border-b border-surface-container-high/60"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-primary-fixed"><span class="material-symbols-outlined text-[20px]">verified</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">Portal RYM</span><span class="font-label-md text-[11px] leading-[14px] text-on-surface-variant font-medium">Revisados Vehiculares</span></div></div></div><div class="px-space-md py-space-sm mx-space-sm my-space-sm bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-center gap-space-sm"><div class="relative flex-shrink-0"><div class="w-8 h-8 rounded-full bg-secondary-container/50 flex items-center justify-center text-on-secondary-container font-headline-sm text-[12px] font-semibold">MC</div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-surface-container-lowest"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface font-semibold truncate">Ing. M. Carrizo</span><span class="font-label-md text-[11px] text-on-surface-variant truncate">Supervisor Master</span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1 overflow-y-auto" data-active-classes="bg-primary-fixed/30 text-secondary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[#F47C20] before:rounded-r"><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Dashboard</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg transition-colors bg-primary-fixed/30 text-secondary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[#F47C20] before:rounded-r" data-path="operaciones" href="#"><span class="material-symbols-outlined text-[20px]">directions_car</span><span class="font-body-md text-body-md">Operaciones</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="avance-mensual" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span class="font-body-md text-body-md">Avance Mensual</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="reporte-diario" href="#"><span class="material-symbols-outlined text-[20px]">forward_to_inbox</span><span class="font-body-md text-body-md">Reporte Diario</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="historial" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-body-md text-body-md">Historial</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="estadisticas" href="#"><span class="material-symbols-outlined text-[20px]">bar_chart</span><span class="font-body-md text-body-md">Estadísticas</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="boletas" href="#"><span class="material-symbols-outlined text-[20px]">confirmation_number</span><span class="font-body-md text-body-md">Boletas</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="cupos" href="#"><span class="material-symbols-outlined text-[20px]">security</span><span class="font-body-md text-body-md">Cupos</span></a></nav></div><div class="p-space-sm border-t border-surface-container-high/60"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">arrow_back</span><span class="font-label-md text-label-md font-medium">Volver al Portal</span></a></div></aside><div class="pl-[250px]"><header class="fixed top-0 left-[250px] right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(10,27,77,0.02)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-md w-96"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full h-10 pl-9 pr-space-md bg-surface-container-low border border-outline-variant/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-secondary focus:bg-surface-container-lowest transition-all" placeholder="Buscar placa, chasis (VIN) o boleta..." type="text"/></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#F47C20]"></span></button><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button></div><div class="h-6 w-[1px] bg-outline-variant/40"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface font-semibold">M. Carrizo</span><span class="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider">MTC-RYM</span></div></div></div></header><main class="w-full pt-16 bg-surface px-space-xl py-space-xl min-h-screen"><div class="flex flex-col w-full">
+<!-- Sub-header / Top Navigation Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-lg">
+<div class="flex flex-col">
+<nav aria-label="Breadcrumb" class="flex items-center gap-space-xs text-on-surface-variant mb-1">
+<a class="font-label-md text-label-md hover:text-secondary transition-colors" href="#">Operaciones</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="font-label-md text-label-md text-on-surface-variant/80">Unidad #104 (CU · 9475)</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="font-label-md text-label-md text-primary font-semibold">Ficha Legal &amp; Técnica</span>
+</nav>
+<div class="flex items-center gap-space-sm">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Ficha de Unidad: CU · 9475</h1>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Vigente (Aprobado)
+        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+        Expediente consolidado de revisado vehicular, trazabilidad RUV e integraciones eCarCheck.
+      </p>
+</div>
+<!-- Action Toolbar -->
+<div class="flex items-center gap-space-sm self-start lg:self-center">
+<a class="h-10 px-4 rounded-lg bg-surface-container-lowest text-primary font-headline-sm text-body-md border border-outline-variant/50 hover:bg-surface-container-low transition-colors shadow-sm inline-flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Volver a Operaciones
+      </a>
+<button class="h-10 px-4 rounded-lg bg-surface-container-lowest text-primary font-headline-sm text-body-md border border-outline-variant/50 hover:bg-surface-container-low transition-colors shadow-sm inline-flex items-center gap-1.5" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>
+        Imprimir Ficha PDF
+      </button>
+<button class="h-10 px-4 rounded-lg bg-secondary text-on-secondary font-headline-sm text-body-md hover:bg-primary-container transition-all shadow-sm inline-flex items-center gap-1.5 active:scale-95" id="btn-sync-ecarcheck" type="button">
+<span class="material-symbols-outlined text-[18px]" id="sync-icon">sync</span>
+        Actualizar eCarCheck
+      </button>
+</div>
+</div>
+<!-- BLOQUE 1 // CABECERA DE VEHÍCULO (Hero Card) -->
+<div class="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-lg mb-space-xl relative overflow-hidden">
+<div class="absolute -right-12 -top-12 w-64 h-64 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-center">
+<!-- Panamanian License Plate Badge Visualizer -->
+<div class="lg:col-span-4 flex flex-col items-center justify-center p-space-md bg-surface-container-low rounded-xl border border-outline-variant/30 relative">
+<span class="font-label-md text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-2">Placa Oficial Registrada</span>
+<!-- Physical Panama Plate Style -->
+<div class="w-full max-w-[280px] bg-amber-50 rounded-lg border-2 border-primary/80 shadow-md p-2.5 flex flex-col items-center justify-between text-center relative overflow-hidden">
+<div class="flex items-center justify-between w-full px-2">
+<span class="font-code-plate text-[10px] font-bold text-primary tracking-widest uppercase">REPÚBLICA DE PANAMÁ</span>
+<span class="font-label-md text-[10px] font-semibold text-error">2026</span>
+</div>
+<div class="my-1 py-1 w-full bg-surface-container-lowest/80 rounded border border-outline-variant/20">
+<span class="font-code-plate text-[34px] leading-tight font-bold text-primary tracking-tight">CU · 9475</span>
+</div>
+<div class="flex items-center justify-between w-full px-2 text-[9px] font-label-md text-on-surface-variant">
+<span class="uppercase font-semibold">COMERCIAL</span>
+<span class="font-code-chassis">ATTT-RYM</span>
+</div>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">Sticker RUV #B-88319 Validado</span>
+</div>
+</div>
+<!-- Core Vehicle & Regulatory Attributes -->
+<div class="lg:col-span-8 flex flex-col justify-between h-full">
+<div class="flex flex-wrap items-center justify-between gap-2 pb-space-sm border-b border-surface-container-high">
+<div>
+<span class="font-label-md text-[11px] uppercase tracking-wider text-secondary font-bold">Unidad Comercial #104</span>
+<h2 class="font-headline-lg text-headline-lg text-primary font-bold">Honda Series 714 · Año 2025</h2>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/30">
+<span class="material-symbols-outlined text-secondary text-[18px]">speed</span>
+<div class="flex flex-col">
+<span class="font-label-md text-[10px] text-on-surface-variant uppercase font-medium">Odómetro Certificado</span>
+<span class="font-code-plate text-code-plate text-primary font-bold">48,210 km</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 pt-space-sm">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium block mb-0.5">Número de Chasis (VIN)</span>
+<div class="flex items-center gap-1 font-code-plate text-body-md text-primary font-semibold">
+<span>1HGBH41...8921</span>
+<button class="text-on-surface-variant hover:text-secondary" title="Copiar VIN completo" type="button"><span class="material-symbols-outlined text-[15px]">content_copy</span></button>
+</div>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium block mb-0.5">Empresa / Propietario</span>
+<span class="font-headline-sm text-body-md text-primary font-semibold block truncate">Trans-Panamá S.A.</span>
+<span class="font-code-chassis text-[11px] text-on-surface-variant">RUC 155621-1-65482</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium block mb-0.5">Galera de Asignación</span>
+<span class="font-headline-sm text-body-md text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">warehouse</span>
+              VCARS Bahía 04
+            </span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium block mb-0.5">Supervisora MTC</span>
+<span class="font-headline-sm text-body-md text-primary font-semibold block">Ing. D. Morales</span>
+<span class="font-label-md text-[11px] text-emerald-700">Lic. Auditor MTC-402</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium block mb-0.5">Tipo de Carrocería</span>
+<span class="font-body-md text-body-md text-on-surface">Furgón Liviano / Carga</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium block mb-0.5">Estado Operativo</span>
+<span class="inline-flex items-center gap-1 font-label-md text-label-md text-secondary font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              En Ruta Interurbana
+            </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BLOQUE 2 // ANÁLISIS DE INCIDENCIAS Y ESTADO LEGAL (Segregación Rigurosa) -->
+<div class="mb-space-xl">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">gavel</span>
+<h3 class="font-headline-md text-headline-md text-primary font-bold">Análisis de Incidencias &amp; Segregación Jurídica</h3>
+</div>
+<span class="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-semibold">Corte Automatizado: Hoy 08:30 AM</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- 1. Boletas de esta Placa (ATTT) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-md flex flex-col justify-between relative overflow-hidden group hover:border-secondary transition-all">
+<div class="flex items-start justify-between mb-3">
+<div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">traffic</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-label-md text-[11px] font-bold uppercase">
+            ATTT Oficial
+          </span>
+</div>
+<div>
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-semibold block">Boletas de esta Placa</span>
+<div class="flex items-baseline gap-2 mt-1 mb-2">
+<span class="font-headline-lg text-headline-lg font-bold text-emerald-700">$0.00 Limpio</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Cero infracciones vinculadas a la placa <strong class="font-code-plate text-primary">CU · 9475</strong> en el sistema de tránsito unificado.
+          </p>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between text-on-surface-variant font-label-md text-[11px]">
+<span>Sin retenciones activas</span>
+<span class="material-symbols-outlined text-emerald-600 text-[16px]">check_circle</span>
+</div>
+</div>
+<!-- 2. ENA / Documento Corporativo -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-md flex flex-col justify-between relative overflow-hidden group hover:border-secondary transition-all">
+<div class="flex items-start justify-between mb-3">
+<div class="w-10 h-10 rounded-lg bg-secondary-container/20 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">toll</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/30 text-on-secondary-container border border-secondary-container/40 font-label-md text-[11px] font-bold uppercase">
+            Panapass ENA
+          </span>
+</div>
+<div>
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-semibold block">ENA / Doc. Corporativo</span>
+<div class="flex items-baseline gap-2 mt-1 mb-2">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Paz y Salvo Vigente</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            La cuenta corporativa <strong class="text-primary font-medium">Trans-Panamá S.A.</strong> no posee morosidad en corredores. (Segregado de boletas de chofer).
+          </p>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between text-on-surface-variant font-label-md text-[11px]">
+<span>Saldo prepago flotas OK</span>
+<span class="material-symbols-outlined text-secondary text-[16px]">verified_user</span>
+</div>
+</div>
+<!-- 3. Restricción de Circulación / Gravamen -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-md flex flex-col justify-between relative overflow-hidden group hover:border-secondary transition-all">
+<div class="flex items-start justify-between mb-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">shield_with_house</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-[11px] font-bold uppercase">
+            Registro Público
+          </span>
+</div>
+<div>
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-semibold block">Restricción / Gravamen</span>
+<div class="flex items-baseline gap-2 mt-1 mb-2">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Sin Impedimentos</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Libre de secuestros judiciales, órdenes de captura civil y reserva de dominio en la plataforma RUV.
+          </p>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between text-on-surface-variant font-label-md text-[11px]">
+<span>Certificado Folio #31089</span>
+<span class="material-symbols-outlined text-emerald-600 text-[16px]">lock_open</span>
+</div>
+</div>
+<!-- 4. Cupo y Concesión -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-md flex flex-col justify-between relative overflow-hidden group hover:border-secondary transition-all">
+<div class="flex items-start justify-between mb-3">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed/40 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">confirmation_number</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-label-md text-[11px] font-bold uppercase">
+            Concesión Activa
+          </span>
+</div>
+<div>
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-semibold block">Cupo y Concesión</span>
+<div class="flex items-baseline gap-2 mt-1 mb-2">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Cupo #8-84920</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Vigencia de concesión de transporte comercial autorizada hasta <strong class="text-primary font-semibold">Diciembre 2027</strong>.
+          </p>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between text-on-surface-variant font-label-md text-[11px]">
+<span>Ruta Panamá - Colón</span>
+<span class="material-symbols-outlined text-emerald-600 text-[16px]">check</span>
+</div>
+</div>
+</div>
+</div>
+<!-- BLOQUE 3 // RESULTADOS ECARCHECK & INSPECCIÓN FÍSICA -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl">
+<!-- Diagnóstico eCarCheck & Certificado -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pb-space-sm border-b border-surface-container-high mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">assignment_turned_in</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Certificado eCarCheck #994821</h3>
+<span class="font-label-md text-[11px] text-on-surface-variant">Emitido el 28 SEP 2026 por Repuestos y Multiservicios VCARS</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-md text-[10px] uppercase text-on-surface-variant block font-semibold">Inspector Técnico</span>
+<span class="font-headline-sm text-body-md text-primary font-semibold">Ing. R. Solís</span>
+</div>
+</div>
+<!-- Telemetry & Diagnostic Gauges Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-md">
+<!-- Gases / Emisiones -->
+<div class="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-bold">Emisión Gases</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[10px] font-bold">APROBADO</span>
+</div>
+<div class="space-y-3">
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface-variant">CO₂: <strong class="text-primary font-code-plate">0.6%</strong></span>
+<span class="text-[11px] text-on-surface-variant/80">Límite &lt; 1.5%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-emerald-600 h-2 rounded-full" style="width: 40%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-body-sm mb-1">
+<span class="text-on-surface-variant">HC: <strong class="text-primary font-code-plate">42 ppm</strong></span>
+<span class="text-[11px] text-on-surface-variant/80">Límite &lt; 100 ppm</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+<div class="bg-emerald-600 h-2 rounded-full" style="width: 42%"></div>
+</div>
+</div>
+</div>
+<span class="font-label-md text-[10px] text-emerald-700 mt-2 block font-medium">Bajo norma EURO VI</span>
+</div>
+<!-- Prueba de Frenado -->
+<div class="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-bold">Frenómetro Dinámico</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[10px] font-bold">APROBADO</span>
+</div>
+<div class="flex flex-col items-center justify-center my-1">
+<div class="relative w-20 h-20 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-emerald-600" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="94, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">94%</span>
+<span class="text-[9px] uppercase font-label-md text-on-surface-variant">Eficacia</span>
+</div>
+</div>
+</div>
+<div class="text-center">
+<span class="font-body-sm text-[11px] text-on-surface-variant">Desequilibrio eje 1: 4% | eje 2: 6%</span>
+</div>
+</div>
+<!-- Colorimetría y Carrocería RUV -->
+<div class="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-md text-[11px] uppercase tracking-wide text-on-surface-variant font-bold">Cotejo Físico RUV</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[10px] font-bold">100% MATCH</span>
+</div>
+<div class="space-y-2 my-auto">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-md bg-white border border-outline-variant/60 shadow-inner flex items-center justify-center">
+<span class="w-2 h-2 rounded-full bg-slate-200"></span>
+</div>
+<div>
+<span class="font-body-sm text-body-sm text-primary font-semibold block">Blanco Glaciar</span>
+<span class="font-label-md text-[10px] text-on-surface-variant">Color según registro RUV</span>
+</div>
+</div>
+<div class="p-2 bg-surface-container-lowest rounded-lg border border-outline-variant/20 text-on-surface-variant text-[11px]">
+<span class="font-medium text-primary">Vidrios de Seguridad:</span> Cumple AS1/AS2.
+              </div>
+</div>
+<span class="font-label-md text-[10px] text-emerald-700 mt-2 block font-medium">Inspección visual sin abolladuras</span>
+</div>
+</div>
+</div>
+<!-- Certifier Footer Bar -->
+<div class="p-3 bg-surface-container-low rounded-lg border border-outline-variant/30 flex flex-wrap items-center justify-between text-body-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified</span>
+<span class="text-primary font-medium">Hash Criptográfico de Certificado:</span>
+<span class="font-code-plate text-xs text-on-surface-variant">eCar-SHA256: 7d9a3b...9902c4</span>
+</div>
+<button class="text-secondary hover:text-primary font-label-md text-label-md font-semibold inline-flex items-center gap-1" type="button">
+          Descargar Hoja de Datos Crudos
+          <span class="material-symbols-outlined text-[14px]">download</span>
+</button>
+</div>
+</div>
+<!-- Right Side: Visual Evidence & Galera Verification -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-high mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">photo_camera</span>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Captura en Galera</h3>
+</div>
+<span class="font-code-plate text-xs text-on-surface-variant">LÍNEA 02</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+          Registro fotográfico georreferenciado tomado durante la prueba de opacímetro y alineación.
+        </p>
+<!-- Galera Image Container -->
+<div class="relative w-full h-44 rounded-lg overflow-hidden border border-outline-variant/30 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A clean modern commercial vehicle inspection line inside a certified vehicular workshop with high ceilings, institutional lighting, technicians in navy coveralls verifying a white transport vehicle with digital diagnostics equipment connected to the wheels and exhaust." src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-primary/90 to-transparent p-2 text-on-primary flex items-center justify-between">
+<span class="font-code-plate text-[10px]">28/09/2026 14:22:10 UTC-5</span>
+<span class="font-label-md text-[10px] bg-secondary px-1.5 py-0.5 rounded">VCARS-Bahía-04</span>
+</div>
+</div>
+<div class="mt-3 grid grid-cols-2 gap-2 text-center">
+<div class="p-2 rounded bg-surface-container-low">
+<span class="font-label-md text-[10px] text-on-surface-variant block uppercase">Alineación Delantera</span>
+<span class="font-headline-sm text-body-md text-emerald-700 font-bold">+0.8 mm/m OK</span>
+</div>
+<div class="p-2 rounded bg-surface-container-low">
+<span class="font-label-md text-[10px] text-on-surface-variant block uppercase">Luxómetro (Focos)</span>
+<span class="font-headline-sm text-body-md text-emerald-700 font-bold">24,500 cd OK</span>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between">
+<span class="font-label-md text-[11px] text-on-surface-variant">Calcomanía RUV adherida en parabrisas</span>
+<span class="material-symbols-outlined text-emerald-600 text-[18px]">done_all</span>
+</div>
+</div>
+</div>
+<!-- BLOQUE 4 // HISTORIAL Y TRAZABILIDAD (Timeline cronológico de auditorías) -->
+<div class="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm p-space-lg mb-space-lg">
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-high mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">history</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Historial &amp; Trazabilidad de Auditorías</h3>
+<span class="font-label-md text-[11px] text-on-surface-variant">Cadena inmutable de registros técnicos y renovaciones legales</span>
+</div>
+</div>
+<button class="text-secondary font-label-md text-label-md font-semibold hover:underline inline-flex items-center gap-1" type="button">
+        Ver expediente RUV completo
+        <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</button>
+</div>
+<!-- Timeline List -->
+<div class="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-surface-container-high">
+<!-- Event 1: Inspección Aprobada -->
+<div class="relative flex items-start gap-space-md">
+<div class="absolute -left-6 top-1 w-5 h-5 rounded-full bg-emerald-600 border-4 border-surface-container-lowest flex items-center justify-center shadow-sm"></div>
+<div class="flex-1 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/20 hover:border-secondary transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+<span class="font-headline-sm text-body-md text-primary font-bold">Inspección aprobada e impresión de calcomanía 2026</span>
+<span class="font-code-plate text-xs text-on-surface-variant bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/30">28 SEP 2026 · 14:35</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Se completó la verificación técnica eCarCheck en Galera VCARS Bahía 04 con dictamen favorable de Ing. R. Solís. Se emitió el sticker holográfico fiscal ATTT serie #B-88319 y se actualizó el estatus nacional a Vigente.
+          </p>
+<div class="mt-2 flex items-center gap-4 text-[11px] font-label-md text-secondary">
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span> Certificado #994821</span>
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">pin</span> Odómetro 48,210 km</span>
+</div>
+</div>
+</div>
+<!-- Event 2: Cotejo Preventivo -->
+<div class="relative flex items-start gap-space-md">
+<div class="absolute -left-6 top-1 w-5 h-5 rounded-full bg-secondary border-4 border-surface-container-lowest flex items-center justify-center shadow-sm"></div>
+<div class="flex-1 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/20 hover:border-secondary transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+<span class="font-headline-sm text-body-md text-primary font-bold">Cotejo preventivo en pre-línea VCARS</span>
+<span class="font-code-plate text-xs text-on-surface-variant bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/30">15 SEP 2026 · 09:15</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Mantenimiento preventivo de zapatas de freno traseras y calibración de inyectores diésel para reducción de hidrocarburos no quemados. Unidad declarada en pre-aprobación técnica satisfactoria.
+          </p>
+<div class="mt-2 flex items-center gap-4 text-[11px] font-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">build</span> Taller Mecánico Principal</span>
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">account_circle</span> Tec. J. Castillo</span>
+</div>
+</div>
+</div>
+<!-- Event 3: Seguro de Flota -->
+<div class="relative flex items-start gap-space-md">
+<div class="absolute -left-6 top-1 w-5 h-5 rounded-full bg-surface-tint border-4 border-surface-container-lowest flex items-center justify-center shadow-sm"></div>
+<div class="flex-1 bg-surface-container-low p-space-md rounded-xl border border-outline-variant/20 hover:border-secondary transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+<span class="font-headline-sm text-body-md text-primary font-bold">Renovación de póliza de seguro de flota</span>
+<span class="font-code-plate text-xs text-on-surface-variant bg-surface-container-lowest px-2 py-0.5 rounded border border-outline-variant/30">10 SEP 2026 · 11:00</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Incorporación al contrato marco de Cobertura Integral de Carga #POL-99214-PA por Aseguradora Global Panamá. Vigencia contractual activa hasta Septiembre 2027 sin exclusiones territoriales.
+          </p>
+<div class="mt-2 flex items-center gap-4 text-[11px] font-label-md text-on-surface-variant">
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">security</span> Póliza Comercial Colectiva</span>
+<span class="inline-flex items-center gap-1 text-emerald-700 font-semibold"><span class="material-symbols-outlined text-[14px]">check</span> Registrado en RUV</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Notification Toast Container (Simulated Micro-interaction for eCarCheck Sync) -->
+<div class="fixed bottom-6 right-6 max-w-md bg-surface-container-lowest border border-secondary shadow-xl rounded-xl p-4 flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50" id="sync-toast">
+<div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+<div class="flex flex-col">
+</div></div></div></main></div></body></html>

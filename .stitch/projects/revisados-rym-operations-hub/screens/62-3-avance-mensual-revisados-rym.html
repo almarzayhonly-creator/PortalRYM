@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-high": "#e5e8ec", "outline-variant": "#c6c5d0", "surface-variant": "#e0e3e7", "outline": "#767680", "inverse-surface": "#2d3134", "on-tertiary-container": "#1a90bf", "on-primary-fixed-variant": "#364477", "tertiary-container": "#002231", "on-tertiary-fixed-variant": "#004c68", "surface": "#f7fafe", "tertiary-fixed-dim": "#7ad0ff", "on-surface": "#181c1f", "on-secondary": "#ffffff", "on-tertiary": "#ffffff", "secondary-container": "#7f9fff", "primary-container": "#0a1b4d", "on-background": "#181c1f", "surface-container": "#ebeef2", "surface-tint": "#4e5c90", "on-surface-variant": "#45464f", "surface-dim": "#d7dade", "error-container": "#ffdad6", "surface-bright": "#f7fafe", "surface-container-lowest": "#ffffff", "primary-fixed": "#dce1ff", "on-error-container": "#93000a", "surface-container-highest": "#e0e3e7", "on-primary-fixed": "#051749", "error": "#ba1a1a", "secondary-fixed-dim": "#b4c5ff", "secondary": "#3659b4", "on-secondary-container": "#00328a", "on-secondary-fixed": "#00174b", "on-primary": "#ffffff", "tertiary-fixed": "#c3e8ff", "inverse-on-surface": "#eef1f5", "primary-fixed-dim": "#b6c4ff", "inverse-primary": "#b6c4ff", "secondary-fixed": "#dbe1ff", "on-error": "#ffffff", "on-tertiary-fixed": "#001e2c", "on-primary-container": "#7684bc", "on-secondary-fixed-variant": "#17409b", "tertiary": "#00070e", "primary": "#000520", "background": "#f7fafe", "surface-container-low": "#f1f4f8" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "gutter": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "margin": "2rem", "space-xl": "2rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-lg": ["Inter"], "headline-md": ["Inter"], "code-chassis": ["JetBrains Mono"], "display-lg": ["Inter"], "body-md": ["Inter"], "headline-sm": ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "code-plate": ["JetBrains Mono"], "body-lg": ["Inter"] }, "fontSize": { "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "code-chassis": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "400"}], "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}], "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}], "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600"}], "code-plate": ["13px", {"lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500"}], "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[250px] bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(10,27,77,0.03)]"><div class="flex flex-col flex-1 min-h-0"><div class="px-space-lg pt-space-lg pb-space-md border-b border-surface-container-high/60"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-primary-fixed"><span class="material-symbols-outlined text-[20px]">verified</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">Portal RYM</span><span class="font-label-md text-[11px] leading-[14px] text-on-surface-variant font-medium">Revisados Vehiculares</span></div></div></div><div class="px-space-md py-space-sm mx-space-sm my-space-sm bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-center gap-space-sm"><div class="relative flex-shrink-0"><div class="w-8 h-8 rounded-full bg-secondary-container/50 flex items-center justify-center text-on-secondary-container font-headline-sm text-[12px] font-semibold">MC</div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-surface-container-lowest"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface font-semibold truncate">Ing. M. Carrizo</span><span class="font-label-md text-[11px] text-on-surface-variant truncate">Supervisor Master</span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1 overflow-y-auto" data-active-classes="bg-primary-fixed/30 text-secondary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[#F47C20] before:rounded-r"><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Dashboard</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="operaciones" href="#"><span class="material-symbols-outlined text-[20px]">directions_car</span><span class="font-body-md text-body-md">Operaciones</span></a><a aria-current="page" class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg transition-colors bg-primary-fixed/30 text-secondary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[#F47C20] before:rounded-r" data-path="avance-mensual" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span class="font-body-md text-body-md">Avance Mensual</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="reporte-diario" href="#"><span class="material-symbols-outlined text-[20px]">forward_to_inbox</span><span class="font-body-md text-body-md">Reporte Diario</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="historial" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-body-md text-body-md">Historial</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="estadisticas" href="#"><span class="material-symbols-outlined text-[20px]">bar_chart</span><span class="font-body-md text-body-md">Estadísticas</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="boletas" href="#"><span class="material-symbols-outlined text-[20px]">confirmation_number</span><span class="font-body-md text-body-md">Boletas</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="cupos" href="#"><span class="material-symbols-outlined text-[20px]">security</span><span class="font-body-md text-body-md">Cupos</span></a></nav></div><div class="p-space-sm border-t border-surface-container-high/60"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">arrow_back</span><span class="font-label-md text-label-md font-medium">Volver al Portal</span></a></div></aside><div class="pl-[250px]"><header class="fixed top-0 left-[250px] right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(10,27,77,0.02)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-md w-96"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full h-10 pl-9 pr-space-md bg-surface-container-low border border-outline-variant/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-secondary focus:bg-surface-container-lowest transition-all" placeholder="Buscar placa, chasis (VIN) o boleta..." type="text"/></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#F47C20]"></span></button><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button></div><div class="h-6 w-[1px] bg-outline-variant/40"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface font-semibold">M. Carrizo</span><span class="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider">MTC-RYM</span></div></div></div></header><main class="w-full pt-16 bg-surface px-space-xl py-space-xl min-h-screen"><div class="flex flex-col w-full gap-space-lg">
+<!-- Header Institucional & Filtros Ejecutivos -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md mb-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+<span>SISTEMA DE GESTIÓN MTC-RYM</span>
+<span>•</span>
+<span class="text-secondary font-semibold">AUDITORÍA OPERATIVA</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Avance Mensual</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Control de cumplimiento y auditoría de revisados por ciclo mensual.</p>
+</div>
+<!-- Acciones y Filtros de Cabecera -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="relative min-w-[130px]">
+<select class="w-full h-10 pl-3 pr-8 bg-surface-container-lowest text-on-surface font-body-sm text-body-sm rounded-lg shadow-sm focus:outline-none focus:bg-surface-container-low transition-colors appearance-none cursor-pointer">
+<option selected="" value="2026">Año 2026</option>
+<option value="2025">Año 2025</option>
+<option value="2024">Año 2024</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
+</div>
+<div class="relative min-w-[180px]">
+<select class="w-full h-10 pl-3 pr-8 bg-surface-container-lowest text-on-surface font-body-sm text-body-sm rounded-lg shadow-sm focus:outline-none focus:bg-surface-container-low transition-colors appearance-none cursor-pointer">
+<option selected="" value="all">Todas las Galeras</option>
+<option value="vcomp">Galera VCOMP</option>
+<option value="vipco">Galera VIPCO</option>
+<option value="vindu">Galera VINDU</option>
+<option value="vcars">Galera VCARS</option>
+<option value="paneles">Galera PANELES</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
+</div>
+<button class="h-10 px-space-md bg-secondary hover:bg-on-secondary-fixed-variant text-on-secondary font-label-md text-label-md rounded-lg shadow-sm flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span>Exportar Informe Ejecutivo</span>
+</button>
+</div>
+</div>
+<!-- TARJETA DE RESUMEN EJECUTIVO (4 Métricas Clave) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- KPI 1: Cumplimiento Anual 2026 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.04)] relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold tracking-wider uppercase block">Cumplimiento Anual 2026</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">81.3%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ 95% meta</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">target</span>
+</div>
+</div>
+<div class="mt-space-md">
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all" style="width: 81.3%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-body-sm text-body-sm text-on-surface-variant">
+<span>19,840 de 24,400 u.</span>
+<span class="text-secondary font-semibold">Déficit: -13.7%</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: Meta Octubre -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.04)] relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold tracking-wider uppercase block">Meta Octubre</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">78.4%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">/ 92% obj.</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[22px]">donut_large</span>
+</div>
+</div>
+<div class="mt-space-md">
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-[#F47C20] h-full rounded-full transition-all" style="width: 78.4%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-body-sm text-body-sm text-on-surface-variant">
+<span class="text-on-surface font-medium">1,725 inspeccionadas</span>
+<span class="text-error font-medium">Faltan 299 p/meta</span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Pendientes Críticos -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.04)] relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold tracking-wider uppercase block">Pendientes Críticos</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-display-lg text-display-lg text-error font-bold tracking-tight">84</span>
+<span class="font-label-md text-label-md text-on-surface-variant">unidades</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-error-container/60 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+</div>
+<div class="mt-space-md pt-2">
+<div class="flex items-center gap-space-xs bg-error-container/30 text-on-error-container px-2.5 py-1.5 rounded-lg font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-error flex-shrink-0">report_problem</span>
+<span class="truncate">Con impedimentos legales o fuera de plazo</span>
+</div>
+</div>
+</div>
+<!-- KPI 4: Próximo Vencimiento Masivo -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.04)] relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold tracking-wider uppercase block">Próximo Vencimiento</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-display-lg text-display-lg text-primary font-bold tracking-tight">15 Nov</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">(210 un.)</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[22px]">event_busy</span>
+</div>
+</div>
+<div class="mt-space-md pt-2">
+<div class="flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low px-2.5 py-1.5 rounded-lg">
+<span>Galeras más expuestas:</span>
+<span class="font-semibold text-primary">VIPCO • VCARS</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECCIÓN PRINCIPAL: CICLO VIGENTE (Protagonista) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-xl shadow-[0_4px_16px_rgba(10,27,77,0.05)] relative overflow-hidden">
+<!-- Indicador de Mes Activo -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between pb-space-lg gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-primary flex flex-col items-center justify-center text-on-primary flex-shrink-0">
+<span class="font-label-md text-[10px] tracking-wider uppercase font-semibold text-primary-fixed">OCT</span>
+<span class="font-headline-md text-headline-md leading-none font-bold">26</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-md text-[11px] font-semibold">EN CURSO • FALTAN 6 DÍAS</span>
+<span class="font-code-chassis text-code-chassis text-on-surface-variant uppercase">CICLO ID: CYC-2026-10</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-primary font-bold mt-0.5">Octubre 2026 — Mes Activo en Gestión</h2>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="text-right hidden sm:block">
+<span class="font-label-md text-label-md text-on-surface-variant block">Meta Comprometida</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">2,200 Unidades</span>
+</div>
+<a class="px-space-lg py-2.5 bg-primary text-on-primary hover:bg-primary-container rounded-lg font-label-md text-label-md flex items-center gap-space-xs transition-colors shadow-sm" href="#pendientes">
+<span>Ver 475 unidades pendientes de Octubre</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Barra de Progreso Prominente -->
+<div class="bg-surface-container-low rounded-xl p-space-lg my-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-space-sm gap-1">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-lg text-headline-lg font-bold text-primary">78.4%</span>
+<span class="font-body-md text-body-md text-on-surface-variant">completado de la meta mensual</span>
+</div>
+<div class="font-code-plate text-code-plate text-secondary font-medium">
+          1,725 / 2,200 UNIDADES AL DÍA
+        </div>
+</div>
+<div class="w-full bg-surface-container-highest h-4 rounded-full overflow-hidden p-0.5">
+<div class="bg-secondary h-full rounded-full transition-all duration-700" style="width: 78.4%"></div>
+</div>
+<div class="flex flex-wrap items-center justify-between mt-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 1,725 Aprobadas</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#F47C20]"></span> 391 En Proceso</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-error"></span> 84 Con Impedimento</span>
+</div>
+<span class="text-on-surface font-medium">Ritmo Requerido: 79 unidades / día restante</span>
+</div>
+</div>
+<!-- Desglose por Galera en Columnas Ordenadas -->
+<div class="pt-space-md">
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-headline-sm text-headline-sm text-primary font-semibold">Cumplimiento Operativo por Galera</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase">Rendimiento en orden descendente</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+<!-- Galera VCOMP -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md hover:bg-surface-container-low transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">VCOMP</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-code-plate text-[11px] font-bold">88%</span>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 88%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-code-chassis text-code-chassis text-on-surface-variant">
+<span>Progreso:</span>
+<span class="font-semibold text-on-surface">475 / 540</span>
+</div>
+<div class="text-[11px] text-emerald-700 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+<span>Dentro de programación</span>
+</div>
+</div>
+</div>
+<!-- Galera VIPCO -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md hover:bg-surface-container-low transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">VIPCO</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-code-plate text-[11px] font-bold">83%</span>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 83%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-code-chassis text-code-chassis text-on-surface-variant">
+<span>Progreso:</span>
+<span class="font-semibold text-on-surface">398 / 480</span>
+</div>
+<div class="text-[11px] text-emerald-700 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+<span>82 u. pendientes</span>
+</div>
+</div>
+</div>
+<!-- Galera VINDU -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md hover:bg-surface-container-low transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">VINDU</span>
+<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-code-plate text-[11px] font-bold">83%</span>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 83%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-code-chassis text-code-chassis text-on-surface-variant">
+<span>Progreso:</span>
+<span class="font-semibold text-on-surface">350 / 420</span>
+</div>
+<div class="text-[11px] text-emerald-700 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+<span>70 u. pendientes</span>
+</div>
+</div>
+</div>
+<!-- Galera VCARS -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md hover:bg-surface-container-low transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">VCARS</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-code-plate text-[11px] font-bold">80%</span>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-[#F47C20] h-full rounded-full" style="width: 80%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-code-chassis text-code-chassis text-on-surface-variant">
+<span>Progreso:</span>
+<span class="font-semibold text-on-surface">360 / 450</span>
+</div>
+<div class="text-[11px] text-amber-700 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+<span>90 u. en turno</span>
+</div>
+</div>
+</div>
+<!-- Galera PANELES -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md hover:bg-surface-container-low transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold">PANELES</span>
+<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-code-plate text-[11px] font-bold">74%</span>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-error h-full rounded-full" style="width: 74%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 font-code-chassis text-code-chassis text-on-surface-variant">
+<span>Progreso:</span>
+<span class="font-semibold text-on-surface">158 / 212</span>
+</div>
+<div class="text-[11px] text-error mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">priority_high</span>
+<span>54 u. atraso crítico</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECCIÓN COMBINADA: HISTORIAL COMPACTO (Cerrados) & PROYECCIÓN PRÓXIMOS MESES -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg">
+<!-- MESES ANTERIORES: Cerrados / Auditoría (8 columnas) -->
+<div class="xl:col-span-7 bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.03)] flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">inventory_2</span>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold">Ciclos Cerrados y Auditados</h3>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Archivos definitivos sin acción pendiente</span>
+</div>
+<!-- Lista compacta de meses cerrados -->
+<div class="space-y-space-xs">
+<!-- Septiembre 2026 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md bg-surface-container-low/50 hover:bg-surface-container-low rounded-lg transition-colors gap-2">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant font-code-chassis text-[11px] font-bold">
+                09
+              </div>
+<div>
+<span class="font-body-md text-body-md text-primary font-semibold">Septiembre 2026</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant ml-2">2,160 / 2,200 unidades cerradas</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-code-plate text-code-plate text-on-surface font-semibold">98.2% Cumplido</span>
+<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[11px] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Cerrado
+              </span>
+<span class="text-[12px] text-on-surface-variant hidden md:inline">40 en litigio/baja</span>
+</div>
+</div>
+<!-- Agosto 2026 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md bg-surface-container-low/50 hover:bg-surface-container-low rounded-lg transition-colors gap-2">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant font-code-chassis text-[11px] font-bold">
+                08
+              </div>
+<div>
+<span class="font-body-md text-body-md text-primary font-semibold">Agosto 2026</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant ml-2">2,180 / 2,200 unidades</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-code-plate text-code-plate text-on-surface font-semibold">99.1% Cumplido</span>
+<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[11px] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Auditado
+              </span>
+<span class="text-[12px] text-on-surface-variant hidden md:inline">Certif. MTC emitido</span>
+</div>
+</div>
+<!-- Julio 2026 -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md bg-surface-container-low/50 hover:bg-surface-container-low rounded-lg transition-colors gap-2">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant font-code-chassis text-[11px] font-bold">
+                07
+              </div>
+<div>
+<span class="font-body-md text-body-md text-primary font-semibold">Julio 2026</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant ml-2">2,200 / 2,200 unidades</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-code-plate text-code-plate text-on-surface font-semibold">100.0% Cumplido</span>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-[11px] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Archivado
+              </span>
+<span class="text-[12px] text-on-surface-variant hidden md:inline">Sin observaciones</span>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Historial disponible desde Enero 2024</span>
+<button class="text-secondary font-semibold hover:underline flex items-center gap-1" type="button">
+<span>Ver auditorías anteriores</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- MESES PRÓXIMOS: Planificación Anticipada (5 columnas) -->
+<div class="xl:col-span-5 bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.03)] flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">calendar_clock</span>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold">Planificación Anticipada</h3>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-md text-[11px] font-semibold">CICLOS FUTUROS</span>
+</div>
+<div class="space-y-space-md">
+<!-- Noviembre 2026 -->
+<div class="p-space-md bg-surface-container-low rounded-xl">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-body-md text-body-md text-primary font-bold">Noviembre 2026</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Total proyectado: 2,202 unidades</span>
+</div>
+<div class="text-right">
+<span class="font-code-plate text-code-plate text-secondary font-bold">12%</span>
+<span class="font-label-md text-[11px] text-on-surface-variant block">adelantado</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full" style="width: 12%"></div>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant mt-2">
+                264 unidades ingresadas en pre-inspección anticipada para evitar cuellos de botella al 15 Nov.
+              </p>
+</div>
+</div>
+<!-- Diciembre 2026 -->
+<div class="p-space-md bg-surface-container-low rounded-xl">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-body-md text-body-md text-primary font-bold">Diciembre 2026</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Proyección Cierre Anual MTC</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-[11px]">CALENDARIZADO</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant mt-2">
+              Volumen proyectado estimado en 2,350 unidades. Apertura de ventanilla programada: 20 Nov.
+            </p>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Capacidad asignada: 120 veh/día</span>
+<button class="text-secondary font-semibold font-body-sm text-body-sm hover:underline" type="button">
+          Ajustar cupos de pre-inspección →
+        </button>
+</div>
+</div>
+</div>
+<!-- TABLA RESUMEN DE GALERAS AFECTADAS -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-[0_2px_8px_-2px_rgba(10,27,77,0.03)] flex flex-col gap-space-md" id="pendientes">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-semibold">Auditoría Operativa de Galeras — Octubre 2026</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Desglose nominal de gestión de unidades con alertas y responsables técnicos.</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2 bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md rounded-lg flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>Filtrar Alertas</span>
+</button>
+<button class="px-space-md py-2 bg-secondary text-on-secondary hover:bg-on-secondary-fixed-variant font-label-md text-label-md rounded-lg flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+<span>Generar Reporte PDF</span>
+</button>
+</div>
+</div>
+<!-- Contenedor Tabla con diseño limpio -->
+<div class="overflow-x-auto rounded-lg">
+<table class="w-full text-left font-body-md text-body-md">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<th class="py-3 px-space-md font-semibold">Galera / Centro</th>
+<th class="py-3 px-space-md font-semibold">Total Asignado</th>
+<th class="py-3 px-space-md font-semibold">Aprobados</th>
+<th class="py-3 px-space-md font-semibold">% Cumplimiento</th>
+<th class="py-3 px-space-md font-semibold">Atrasadas / Faltantes</th>
+<th class="py-3 px-space-md font-semibold">Alertas Críticas</th>
+<th class="py-3 px-space-md font-semibold">Supervisor a Cargo</th>
+<th class="py-3 px-space-md font-semibold text-right">Acción</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<!-- Fila VCOMP -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-md bg-secondary-fixed text-primary flex items-center justify-center font-bold text-[11px]">VC</div>
+<div>
+<span class="font-semibold text-primary block">Galera VCOMP</span>
+<span class="font-code-chassis text-code-chassis text-on-surface-variant">Sede Norte - Línea 1 y 2</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate">540</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-emerald-700 font-semibold">475</td>
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-plate text-code-plate font-bold text-on-surface">88%</span>
+<div class="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden hidden sm:block">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-on-surface-variant">65 un.</td>
+<td class="py-4 px-space-md">
+<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[11px] font-semibold">Estable</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-medium">Ing. Roberto Silva</span>
+<span class="text-[11px] text-on-surface-variant">Turno Mañana</span>
+</div>
+</td>
+<td class="py-4 px-space-md text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface inline-flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Fila VIPCO -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-md bg-secondary-fixed text-primary flex items-center justify-center font-bold text-[11px]">VP</div>
+<div>
+<span class="font-semibold text-primary block">Galera VIPCO</span>
+<span class="font-code-chassis text-code-chassis text-on-surface-variant">Sede Este - Industrial</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate">480</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-emerald-700 font-semibold">398</td>
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-plate text-code-plate font-bold text-on-surface">83%</span>
+<div class="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden hidden sm:block">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 83%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-on-surface-variant">82 un.</td>
+<td class="py-4 px-space-md">
+<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-md text-[11px] font-semibold">14 Venc. Próx</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-medium">Lic. Carmen Valdés</span>
+<span class="text-[11px] text-on-surface-variant">Turno Mixto</span>
+</div>
+</td>
+<td class="py-4 px-space-md text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface inline-flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Fila VINDU -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-md bg-secondary-fixed text-primary flex items-center justify-center font-bold text-[11px]">VI</div>
+<div>
+<span class="font-semibold text-primary block">Galera VINDU</span>
+<span class="font-code-chassis text-code-chassis text-on-surface-variant">Sede Sur - Carga Pesada</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate">420</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-emerald-700 font-semibold">350</td>
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-plate text-code-plate font-bold text-on-surface">83%</span>
+<div class="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden hidden sm:block">
+<div class="bg-emerald-600 h-full rounded-full" style="width: 83%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-on-surface-variant">70 un.</td>
+<td class="py-4 px-space-md">
+<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-md text-[11px] font-semibold">Estable</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-medium">Ing. Héctor Gómez</span>
+<span class="text-[11px] text-on-surface-variant">Turno Tarde</span>
+</div>
+</td>
+<td class="py-4 px-space-md text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface inline-flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Fila VCARS -->
+<tr class="hover:bg-surface-container-low/70 transition-colors">
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-md bg-secondary-fixed text-primary flex items-center justify-center font-bold text-[11px]">VA</div>
+<div>
+<span class="font-semibold text-primary block">Galera VCARS</span>
+<span class="font-code-chassis text-code-chassis text-on-surface-variant">Sede Oeste - Livianos</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate">450</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-emerald-700 font-semibold">360</td>
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-plate text-code-plate font-bold text-on-surface">80%</span>
+<div class="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden hidden sm:block">
+<div class="bg-[#F47C20] h-full rounded-full" style="width: 80%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-on-surface-variant">90 un.</td>
+<td class="py-4 px-space-md">
+<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-label-md text-[11px] font-semibold">22 por agendar</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-medium">Ing. Patricia Ríos</span>
+<span class="text-[11px] text-on-surface-variant">Turno Central</span>
+</div>
+</td>
+<td class="py-4 px-space-md text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface inline-flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Fila PANELES -->
+<tr class="hover:bg-error-container/20 transition-colors">
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-md bg-error-container text-error flex items-center justify-center font-bold text-[11px]">PA</div>
+<div>
+<span class="font-semibold text-primary block">Galera PANELES</span>
+<span class="font-code-chassis text-code-chassis text-error">Ruta Especial y Transporte</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate">212</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-error font-semibold">158</td>
+<td class="py-4 px-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="font-code-plate text-code-plate font-bold text-error">74%</span>
+<div class="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden hidden sm:block">
+<div class="bg-error h-full rounded-full" style="width: 74%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md font-code-plate text-code-plate text-error font-bold">54 un.</td>
+<td class="py-4 px-space-md">
+<span class="px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-md text-[11px] font-bold">48 Impedimentos</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<span class="text-on-surface font-semibold">Ing. Diego Morales</span>
+<span class="text-[11px] text-error font-medium">Auditoría Solicitada</span>
+</div>
+</td>
+<td class="py-4 px-space-md text-right">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface inline-flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pie de tabla con datos de paginación e integridad -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pt-space-sm text-on-surface-variant font-body-sm text-body-sm gap-2">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-emerald-600">sync_saved_locally</span>
+<span>Sincronizado con base MTC central hace 14 minutos</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span>Mostrando 5 de 5 Galeras Activas</span>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

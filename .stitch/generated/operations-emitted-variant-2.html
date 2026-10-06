@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Portal RYM · Operaciones · Emitidos hoy (Variante 2)</title>
+<!-- Google Fonts: Space Grotesk, Inter, JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0A1B4D',
+              blue: '#1E40AF',
+              subtle: '#244AA5',
+              amber: '#F47C20',
+              bg: '#EFF4FB',
+              line: '#D8E3F2',
+              card: '#FFFFFF',
+              whatsapp: '#25D366',
+              whatsappDark: '#128C7E',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @keyframes pulse-amber {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 124, 32, 0.45); }
+      50% { opacity: 0.85; transform: scale(1.08); box-shadow: 0 0 0 6px rgba(244, 124, 32, 0); }
+    }
+    .animate-pulse-amber {
+      animation: pulse-amber 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-[#0A1B4D] font-sans min-h-screen p-4 md:p-8 lg:p-10 flex flex-col justify-center items-center antialiased">
+<!-- Component Container: Split Executive Panel & Chrono-Feed -->
+<main class="w-full max-w-[1520px] bg-white rounded-3xl border border-brand-line shadow-sm overflow-hidden p-6 md:p-8 lg:p-10">
+<!-- Header Breadcrumb / Module Status -->
+<header class="flex flex-wrap items-center justify-between border-b border-brand-line/70 pb-6 mb-8 gap-4">
+<div>
+<div class="flex items-center gap-2 text-xs font-semibold tracking-wider text-brand-blue uppercase">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+<span>CAPACIDAD DIARIA ECARCHECK · PORTAL RYM</span>
+</div>
+<h1 class="text-2xl md:text-3xl font-display font-bold text-brand-navy tracking-tight mt-1">
+          Operaciones <span class="text-slate-400 font-normal">/</span> Emitidos hoy
+        </h1>
+</div>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-brand-blue border border-blue-200">
+<span class="material-symbols-outlined text-sm">schedule</span>
+          Actualizado 01:41 p. m.
+        </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Sistema en Línea
+        </span>
+</div>
+</header>
+<!-- Split Layout (35% Left / 65% Right) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- ================= COLUMNA IZQUIERDA: Panel Ejecutivo de Capacidad (35% -> lg:col-span-4 or 5) ================= -->
+<section class="lg:col-span-5 xl:col-span-4 bg-[#F8FAFD] border border-brand-line/80 rounded-2xl p-6 lg:p-7 flex flex-col gap-6 shadow-xs">
+<!-- Medidor Radial & Conteo Numérico -->
+<div class="flex items-center gap-5 pb-5 border-b border-brand-line/60">
+<!-- Circular Gauge (97%) -->
+<div class="relative w-24 h-24 flex-shrink-0">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<!-- Background Circle -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#DCE6F3" stroke-width="8"></circle>
+<!-- Progress Circle (97% of 2 * PI * 40 = 251.32 => stroke-dasharray = 251.32, stroke-dashoffset = 7.5) -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#1E40AF" stroke-dasharray="251.32" stroke-dashoffset="7.5" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-display font-bold text-2xl text-brand-navy leading-none">97<span class="text-sm font-semibold text-brand-blue">%</span></span>
+<span class="text-[9px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5">del día</span>
+</div>
+</div>
+<!-- Números de Impacto y Alerta de Cupos -->
+<div class="flex-1">
+<div class="text-[11px] font-semibold text-slate-500 tracking-wide uppercase">Capacidad consumida</div>
+<div class="text-3xl font-display font-bold text-brand-navy leading-tight mt-0.5">
+              32 <span class="text-slate-400 font-normal text-2xl">/ 33</span>
+</div>
+<!-- Alert Badge -->
+<div class="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 border border-brand-amber/30 text-amber-900 text-xs font-semibold">
+<span class="material-symbols-outlined text-sm text-brand-amber animate-pulse">priority_high</span>
+<span>Queda 1 cupo disponible hoy</span>
+</div>
+</div>
+</div>
+<!-- Matriz Física Compacta de Cupos (33 bloques en cuadrícula 11x3) -->
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<h3 class="text-xs font-bold text-brand-navy uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-brand-blue">grid_view</span>
+              Matriz física de cupos (33)
+            </h3>
+<span class="text-[10px] text-slate-500 font-medium">11 × 3 Mapeo</span>
+</div>
+<!-- Contenedor de Grilla 11 columnas x 3 filas -->
+<div class="bg-white p-3.5 rounded-xl border border-brand-line/90 shadow-2xs">
+<div class="grid grid-cols-11 gap-1.5" title="32 emitidos (Azul) / 1 disponible (Ámbar)">
+<!-- 32 cupos ocupados -->
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #1 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #2 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #3 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #4 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #5 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #6 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #7 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #8 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #9 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #10 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #11 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #12 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #13 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #14 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #15 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #16 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #17 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #18 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #19 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #20 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #21 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #22 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #23 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #24 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #25 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #26 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #27 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #28 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #29 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #30 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors" title="Cupo #31 - Emitido"></span>
+<span class="h-5 rounded bg-brand-navy/90 hover:bg-brand-blue transition-colors ring-2 ring-brand-blue/30" title="Cupo #32 - Último emitido (I218)"></span>
+<!-- Cupo #33 Libre (Ámbar parpadeante) -->
+<span class="h-5 rounded bg-brand-amber animate-pulse-amber cursor-pointer ring-2 ring-amber-300" title="Cupo #33 - 1 Cupo disponible"></span>
+</div>
+<div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+<span class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-sm bg-brand-navy inline-block"></span> 32 Emitidos
+              </span>
+<span class="flex items-center gap-1.5 font-medium text-amber-700">
+<span class="w-2.5 h-2.5 rounded-sm bg-brand-amber inline-block"></span> 1 Disponible
+              </span>
+</div>
+</div>
+</div>
+<!-- Métricas de Rendimiento / Ritmo Operativo -->
+<div class="grid grid-cols-2 gap-3 pt-2">
+<div class="bg-white p-3.5 rounded-xl border border-brand-line/70">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ritmo Operativo</span>
+<div class="text-base font-display font-bold text-brand-navy mt-1 flex items-center gap-1">
+<span>~4.1</span>
+<span class="text-xs font-normal text-slate-500">docs/hora</span>
+</div>
+<p class="text-[10px] text-emerald-600 mt-1 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">trending_up</span> Flujo óptimo
+            </p>
+</div>
+<div class="bg-white p-3.5 rounded-xl border border-brand-line/70">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Proyección Cierre</span>
+<div class="text-base font-display font-bold text-brand-navy mt-1">
+              100% <span class="text-xs font-normal text-slate-500">esperado</span>
+</div>
+<p class="text-[10px] text-brand-blue mt-1 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">timer</span> Estimado 02:15 p. m.
+            </p>
+</div>
+</div>
+</section>
+<!-- ================= COLUMNA DERECHA: Feed Cronológico y Despacho WhatsApp (65% -> lg:col-span-7 or 8) ================= -->
+<section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+<!-- Bloque Superior de Despacho Rápido WhatsApp -->
+<div class="bg-[#F4F9F6] border border-[#C5E8D3] rounded-2xl p-5 shadow-2xs relative">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-[#25D366]/20 text-[#128C7E] flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">chat</span>
+</span>
+<div>
+<h3 class="text-sm font-bold text-slate-900 leading-tight">Despacho Rápido WhatsApp</h3>
+<p class="text-xs text-slate-600">Resumen operativo formateado listo para difusión de equipo</p>
+</div>
+</div>
+<!-- Botón Copiar WS con feedback -->
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow transition-all cursor-pointer focus:ring-2 focus:ring-emerald-400 focus:outline-none" id="copyWsBtn" onclick="copyWhatsAppSummary()">
+<span class="material-symbols-outlined text-base">content_copy</span>
+<span id="btnText">Copiar WS</span>
+</button>
+</div>
+<!-- Cajón de Vista Previa Monospaced -->
+<div class="bg-white rounded-xl border border-[#D1EBDC] p-3 text-xs font-mono text-slate-700 leading-relaxed overflow-x-auto shadow-inner">
+<p class="select-all whitespace-pre-line" id="wsContent">*RYM OPERACIONES - ECARCHECK* 📋
+Capacidad hoy: *32 / 33* (97% consumido) | ⚠️ Queda *1 cupo*.
+Último emitido: I218 · EI2050 (CATALINA SA - LEIBY) a las 01:41 p. m.</p>
+</div>
+<!-- Toast Flotante Interactivo -->
+<div class="hidden absolute top-4 right-4 bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg items-center gap-2 transition-all" id="toastFeedback">
+<span class="material-symbols-outlined text-emerald-400 text-sm">check_circle</span>
+<span>¡Copiado al portapapeles!</span>
+</div>
+</div>
+<!-- Encabezado de Lista Cronológica & Controles -->
+<div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-lg font-display font-bold text-brand-navy">Emitidos recientes</h2>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200" id="itemsCounterBadge">
+                Mostrando 4 de 32
+              </span>
+</div>
+<p class="text-xs text-slate-500 mt-0.5">Últimos revisados emitidos hoy dentro de tu alcance operacional.</p>
+</div>
+<!-- Toggle Ver Todos / Ver Menos -->
+<button class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-blue-800 transition-colors py-1.5 px-3 rounded-lg hover:bg-blue-50 border border-transparent hover:border-blue-100 cursor-pointer" id="toggleViewBtn" onclick="toggleExpandedList()">
+<span id="toggleText">Ver todos (32)</span>
+<span class="material-symbols-outlined text-sm" id="toggleIcon">arrow_forward</span>
+</button>
+</div>
+<!-- Chrono-Feed: Lista Cronológica Densa de Tarjetas -->
+<div class="relative pl-6 space-y-3.5 before:content-[''] before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-brand-line">
+<!-- Tarjeta 1 (Último emitido #32) -->
+<article class="relative bg-white border-2 border-brand-blue/30 rounded-xl p-4 shadow-xs hover:shadow-md transition-shadow">
+<!-- Timeline node icon -->
+<span class="absolute -left-[1.95rem] top-4 w-4 h-4 rounded-full bg-brand-blue border-2 border-white ring-2 ring-blue-100 flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+</span>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-mono text-sm font-bold text-brand-navy tracking-tight bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                  I218 · EI2050
+                </span>
+<span class="inline-flex items-center gap-1 text-[11px] font-bold bg-blue-100 text-brand-blue px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-xs">verified</span>
+                  #32 Último emitido
+                </span>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-500 font-mono">
+<span class="material-symbols-outlined text-sm text-slate-400">schedule</span>
+                10/06/2026, 01:41 p. m.
+              </div>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+<div class="flex items-center gap-3">
+<span class="font-semibold text-slate-800 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">business</span>
+                  CATALINA SA
+                </span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">badge</span>
+                  Supervisora: <strong class="text-slate-800">LEIBY</strong>
+</span>
+</div>
+<button class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline cursor-pointer">
+                Ver ficha <span class="material-symbols-outlined text-xs">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Tarjeta 2 (#31) -->
+<article class="relative bg-white border border-brand-line rounded-xl p-4 shadow-2xs hover:shadow-md transition-shadow">
+<span class="absolute -left-[1.95rem] top-4 w-4 h-4 rounded-full bg-slate-300 border-2 border-white ring-2 ring-slate-100"></span>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-mono text-sm font-bold text-brand-navy tracking-tight bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                  V828 · EM5186
+                </span>
+<span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  #31
+                </span>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-500 font-mono">
+<span class="material-symbols-outlined text-sm text-slate-400">schedule</span>
+                10/06/2026, 01:08 p. m.
+              </div>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+<div class="flex items-center gap-3">
+<span class="font-semibold text-slate-800 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">business</span>
+                  TABOGA, S.A.
+                </span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">badge</span>
+                  Supervisora: <strong class="text-slate-800">ROXANA</strong>
+</span>
+</div>
+<button class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline cursor-pointer">
+                Ver ficha <span class="material-symbols-outlined text-xs">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Tarjeta 3 (#30) -->
+<article class="relative bg-white border border-brand-line rounded-xl p-4 shadow-2xs hover:shadow-md transition-shadow">
+<span class="absolute -left-[1.95rem] top-4 w-4 h-4 rounded-full bg-slate-300 border-2 border-white ring-2 ring-slate-100"></span>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-mono text-sm font-bold text-brand-navy tracking-tight bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                  V840 · EM5046
+                </span>
+<span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  #30
+                </span>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-500 font-mono">
+<span class="material-symbols-outlined text-sm text-slate-400">schedule</span>
+                10/06/2026, 01:00 p. m.
+              </div>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+<div class="flex items-center gap-3">
+<span class="font-semibold text-slate-800 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">business</span>
+                  TABOGA, S.A.
+                </span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">badge</span>
+                  Supervisora: <strong class="text-slate-800">MARIFEL</strong>
+</span>
+</div>
+<button class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline cursor-pointer">
+                Ver ficha <span class="material-symbols-outlined text-xs">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Tarjeta 4 (#29) -->
+<article class="relative bg-white border border-brand-line rounded-xl p-4 shadow-2xs hover:shadow-md transition-shadow">
+<span class="absolute -left-[1.95rem] top-4 w-4 h-4 rounded-full bg-slate-300 border-2 border-white ring-2 ring-slate-100"></span>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-mono text-sm font-bold text-brand-navy tracking-tight bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                  V499 · CX0269
+                </span>
+<span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  #29
+                </span>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-500 font-mono">
+<span class="material-symbols-outlined text-sm text-slate-400">schedule</span>
+                10/06/2026, 12:29 p. m.
+              </div>
+</div>
+<div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+<div class="flex items-center gap-3">
+<span class="font-semibold text-slate-800 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">business</span>
+                  ATALAYA COMPANY S.A.
+                </span>
+<span class="text-slate-300">·</span>
+<span class="text-slate-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-slate-400">badge</span>
+                  Supervisora: <strong class="text-slate-800">ROXANA</strong>
+</span>
+</div>
+<button class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-blue hover:underline cursor-pointer">
+                Ver ficha <span class="material-symbols-outlined text-xs">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Sección Desplegable Opcional de Historial Expandido (Ver todos) -->
+<div class="hidden space-y-3.5 transition-all" id="expandedItems">
+<div class="py-2 text-center text-xs text-slate-400 font-mono">— 28 registros consolidados previos de la jornada —</div>
+<article class="relative bg-slate-50/70 border border-dashed border-slate-300 rounded-xl p-3.5 text-xs text-slate-600 flex items-center justify-between">
+<span class="absolute -left-[1.95rem] top-3.5 w-4 h-4 rounded-full bg-slate-200 border-2 border-white ring-2 ring-slate-100"></span>
+<div class="flex items-center gap-3">
+<span class="font-mono font-semibold text-slate-800">#28 · V112 · AL9021</span>
+<span>CATALINA SA · LEIBY</span>
+</div>
+<span class="font-mono text-slate-400">10/06/2026, 11:45 a. m.</span>
+</article>
+<article class="relative bg-slate-50/70 border border-dashed border-slate-300 rounded-xl p-3.5 text-xs text-slate-600 flex items-center justify-between">
+<span class="absolute -left-[1.95rem] top-3.5 w-4 h-4 rounded-full bg-slate-200 border-2 border-white ring-2 ring-slate-100"></span>
+<div class="flex items-center gap-3">
+<span class="font-mono font-semibold text-slate-800">#27 · I098 · TK3310</span>
+<span>TABOGA, S.A. · MARIFEL</span>
+</div>
+<span class="font-mono text-slate-400">10/06/2026, 11:20 a. m.</span>
+</article>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Interactive JavaScript logic -->
+<script>
+    function copyWhatsAppSummary() {
+      const summaryText = document.getElementById('wsContent').innerText;
+      const btn = document.getElementById('copyWsBtn');
+      const btnText = document.getElementById('btnText');
+      const toast = document.getElementById('toastFeedback');
+
+      navigator.clipboard.writeText(summaryText).then(() => {
+        // Feedback visual
+        btnText.textContent = '¡Copiado!';
+        btn.classList.remove('bg-emerald-600');
+        btn.classList.add('bg-slate-900');
+        
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+
+        setTimeout(() => {
+          btnText.textContent = 'Copiar WS';
+          btn.classList.remove('bg-slate-900');
+          btn.classList.add('bg-emerald-600');
+          toast.classList.add('hidden');
+          toast.classList.remove('flex');
+        }, 2200);
+      }).catch(err => {
+        console.error('Error al copiar texto: ', err);
+      });
+    }
+
+    let isExpanded = false;
+    function toggleExpandedList() {
+      const expandedBlock = document.getElementById('expandedItems');
+      const toggleText = document.getElementById('toggleText');
+      const toggleIcon = document.getElementById('toggleIcon');
+      const badge = document.getElementById('itemsCounterBadge');
+
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        expandedBlock.classList.remove('hidden');
+        toggleText.textContent = 'Ver menos';
+        toggleIcon.textContent = 'expand_less';
+        badge.textContent = 'Mostrando 32 de 32';
+      } else {
+        expandedBlock.classList.add('hidden');
+        toggleText.textContent = 'Ver todos (32)';
+        toggleIcon.textContent = 'arrow_forward';
+        badge.textContent = 'Mostrando 4 de 32';
+      }
+    }
+  </script>
+</body></html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Portal RYM - Revisados Vehiculares</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            rym: {
+              navy: '#0A1B4D',
+              blue: '#244AA5',
+              blueHover: '#1D3B84',
+              sky: '#53B7E8',
+              orange: '#F47C20',
+              bg: '#F4F7FB',
+              cardBorder: '#D8E3F2',
+              darkText: '#10224E',
+              muted: '#62708C',
+              green: '#047857',
+              red: '#DC2626',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Core Styles -->
+<style data-purpose="custom-utilities">
+    body {
+      background-color: #F4F7FB;
+      color: #10224E;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex bg-[#F4F7FB] text-[#10224E]">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 flex-shrink-0 bg-white border-r border-[#D8E3F2] flex flex-col justify-between min-h-screen py-6 px-4" data-purpose="sidebar">
+<!-- Top Branding & Navigation Area -->
+<div class="space-y-6">
+<!-- Logo Branding -->
+<div class="flex items-center gap-3 px-2">
+<div class="relative w-11 h-11 flex-shrink-0 flex items-center justify-center bg-gray-50 border border-[#D8E3F2] rounded-xl shadow-xs">
+<!-- Mechanical Emblem Icon -->
+<svg class="w-6 h-6 text-[#10224E]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+</svg>
+<span class="absolute -top-1 -right-1 flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F47C20] opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-[#F47C20]"></span>
+</span>
+</div>
+<div>
+<h1 class="text-base font-bold text-[#10224E] leading-tight tracking-tight">Revisados RYM</h1>
+<p class="text-[10px] font-semibold text-[#62708C] uppercase tracking-wider">Control Legal Vehicular</p>
+</div>
+</div>
+<!-- User Profile Card -->
+<div class="bg-[#F8FAFC] border border-[#D8E3F2] rounded-2xl p-4 shadow-sm" data-purpose="user-card">
+<div class="flex items-start justify-between">
+<div>
+<h2 class="text-sm font-bold text-[#10224E]">Yhonly Almarza</h2>
+<div class="mt-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#E2E8F0] text-[#1E293B]">
+                ADMIN_TOTAL
+              </span>
+</div>
+<p class="text-xs text-[#62708C] mt-2 font-medium">Todas las galeras</p>
+</div>
+</div>
+</div>
+<!-- Main Navigation Menu -->
+<nav class="space-y-1" data-purpose="main-nav">
+<!-- Dashboard (Active) -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl bg-[#EBF3FC] text-[#244AA5] font-semibold text-sm transition-colors border border-[#D0E2FB]" href="#">
+<svg class="w-4 h-4 text-[#244AA5]" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Dashboard</span>
+</a>
+<!-- Operaciones -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+<line x1="4" x2="4" y1="22" y2="15"></line>
+</svg>
+<span>Operaciones</span>
+</a>
+<!-- Avance mensual -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect>
+<line x1="16" x2="16" y1="2" y2="6"></line>
+<line x1="8" x2="8" y1="2" y2="6"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+<path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path>
+</svg>
+<span>Avance mensual</span>
+</a>
+<!-- Reporte diario -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<rect height="16" rx="2" width="20" x="2" y="4"></rect>
+<path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+</svg>
+<span>Reporte diario</span>
+</a>
+<!-- Historial -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<line x1="4" x2="20" y1="6" y2="6"></line>
+<line x1="4" x2="20" y1="12" y2="12"></line>
+<line x1="4" x2="20" y1="18" y2="18"></line>
+</svg>
+<span>Historial</span>
+</a>
+<!-- Estadísticas -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<line x1="18" x2="18" y1="20" y2="10"></line>
+<line x1="12" x2="12" y1="20" y2="4"></line>
+<line x1="6" x2="6" y1="20" y2="14"></line>
+</svg>
+<span>Estadísticas</span>
+</a>
+<!-- Boletas -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="4"></circle>
+</svg>
+<span>Boletas</span>
+</a>
+<!-- Cupos -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[#62708C] hover:text-[#10224E] hover:bg-slate-50 font-medium text-sm transition-colors" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<line x1="12" x2="12" y1="2" y2="22"></line>
+<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+</svg>
+<span>Cupos</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Action Button -->
+<div class="pt-4">
+<a class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#EEF4FB] text-[#244AA5] text-sm font-semibold hover:bg-[#E2ECF9] transition-all border border-[#D5E3F5]" href="#">
+<span>← Volver al Portal</span>
+</a>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Dashboard Content Area -->
+<main class="flex-1 overflow-y-auto px-10 py-8 custom-scrollbar">
+<div class="max-w-[1400px] mx-auto space-y-6">
+<!-- BEGIN: Hero Section -->
+<section class="space-y-4" data-purpose="hero-overview">
+<div>
+<!-- Contextual Breadcrumb -->
+<span class="text-[11px] font-bold tracking-wider text-[#62708C] uppercase">
+            REVISADOS • CONTROL LEGAL
+          </span>
+<!-- Prominent Hero Headline -->
+<h1 class="text-3xl font-extrabold text-[#10224E] tracking-tight mt-1">
+            411 unidades necesitan atención
+          </h1>
+<!-- Breakdown Subtext -->
+<p class="text-sm font-medium text-[#62708C] mt-1.5">
+            24 están más atrasadas • 108 corresponden al mes anterior • 279 al mes en curso. 1,751 unidades están al día.
+          </p>
+</div>
+<!-- Hero Actions -->
+<div class="flex flex-wrap items-center gap-3 pt-1">
+<!-- Primary CTA Button -->
+<button class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#244AA5] hover:bg-[#1D3B84] text-white text-sm font-semibold shadow-xs transition-colors" type="button">
+            Atender pendientes →
+          </button>
+<!-- Secondary Pill Button -->
+<button class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-[#EBF3FC] hover:bg-[#DFECF9] text-[#244AA5] text-sm font-semibold border border-[#D0E2FB] transition-colors" type="button">
+            Pendiente Revisado Taxi: 44
+          </button>
+</div>
+</section>
+<!-- END: Hero Section -->
+<!-- BEGIN: Top KPI Cards Row -->
+<section data-purpose="kpi-grid">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3.5">
+<!-- KPI 1: Unidades en tu alcance -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#244AA5]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>UNIDADES EN TU ALCANCE</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">2,202</div>
+</div>
+<p class="text-xs font-medium text-[#62708C] mt-2">Población visible</p>
+</div>
+<!-- KPI 2: Al día -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#047857]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>AL DÍA</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">1,751</div>
+</div>
+<p class="text-xs font-medium text-[#62708C] mt-2">Ciclo vigente cubierto</p>
+</div>
+<!-- KPI 3: Pendientes ahora -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#DC2626]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>PENDIENTES AHORA</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">411</div>
+</div>
+<p class="text-xs font-medium text-[#62708C] mt-2">Requieren gestión</p>
+</div>
+<!-- KPI 4: Alertas reales -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#244AA5]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>ALERTAS REALES</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">129</div>
+</div>
+<p class="text-[11px] font-medium text-[#62708C] mt-2 leading-tight">
+              Pendiente Revisado Taxi: 44 • Boleta a la empresa: 34 • Sin cupo: 25
+            </p>
+</div>
+<!-- KPI 5: Pendientes Revisado Taxi -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#F47C20]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>PENDIENTES REVISADO TAXI</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">44</div>
+</div>
+<p class="text-[11px] font-medium text-[#62708C] mt-2 leading-tight">
+              Cambio a Amarillo • requiere nuevo revisado
+            </p>
+</div>
+<!-- KPI 6: Sin fotos -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#53B7E8]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>SIN FOTOS</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">83</div>
+</div>
+<p class="text-[11px] font-medium text-[#62708C] mt-2 leading-tight">
+              Synology • unidades sin evidencia fotográfica
+            </p>
+</div>
+<!-- KPI 7: Emitidos hoy -->
+<div class="bg-white rounded-2xl p-4 border border-[#D8E3F2] shadow-xs flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#244AA5]"></div>
+<div>
+<div class="flex items-center justify-between text-[11px] font-bold text-[#62708C] uppercase tracking-wider">
+<span>EMITIDOS HOY</span>
+<span class="text-xs">&gt;</span>
+</div>
+<div class="text-3xl font-black text-[#10224E] mt-3">7</div>
+</div>
+<p class="text-xs font-medium text-[#62708C] mt-2">de 33 cupos diarios</p>
+</div>
+</div>
+</section>
+<!-- END: Top KPI Cards Row -->
+<!-- BEGIN: Lower Detailed Content (Two-Column Layout) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" data-purpose="galeras-and-summary">
+<!-- Left Main Column: Estado por galera (8 Cols) -->
+<div class="lg:col-span-8 bg-white border border-[#D8E3F2] rounded-3xl p-6 shadow-xs">
+<!-- Galera Header Section -->
+<div class="flex items-start justify-between mb-6">
+<div>
+<h2 class="text-xl font-bold text-[#10224E]">Estado por galera</h2>
+<p class="text-xs font-medium text-[#62708C] mt-1">Pendientes primero; lo cubierto queda como referencia.</p>
+</div>
+<a class="inline-flex items-center gap-1 text-sm font-semibold text-[#244AA5] hover:text-[#1D3B84] transition-colors" href="#">
+<span>Abrir Operaciones</span>
+<span>→</span>
+</a>
+</div>
+<!-- Galeras Card Grid (4 top, 2 bottom) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Card 1: VCOMP -->
+<div class="border border-[#D8E3F2] rounded-2xl p-4 bg-white flex flex-col justify-between shadow-2xs">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-[#10224E] text-base">VCOMP</span>
+<span class="text-[#62708C] text-[11px] font-medium">520 unidades</span>
+</div>
+<div class="mt-3 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-[#10224E]">91</span>
+<span class="text-xs font-semibold text-[#62708C]">pendientes</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#244AA5] h-full rounded-full" style="width: 81%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#62708C] mt-2 font-medium">
+<span>✓ 419 al día</span>
+<span class="font-bold text-[#10224E]">81%</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<a class="text-xs text-[#62708C] hover:text-[#244AA5] font-medium flex items-center justify-between" href="#">
+<span>8 con alertas de datos</span>
+<span class="text-slate-400 font-bold">›</span>
+</a>
+</div>
+</div>
+<!-- Card 2: VIPCO -->
+<div class="border border-[#D8E3F2] rounded-2xl p-4 bg-white flex flex-col justify-between shadow-2xs">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-[#10224E] text-base">VIPCO</span>
+<span class="text-[#62708C] text-[11px] font-medium">541 unidades</span>
+</div>
+<div class="mt-3 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-[#10224E]">124</span>
+<span class="text-xs font-semibold text-[#62708C]">pendientes</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#244AA5] h-full rounded-full" style="width: 74%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#62708C] mt-2 font-medium">
+<span>✓ 402 al día</span>
+<span class="font-bold text-[#10224E]">74%</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<a class="text-xs text-[#62708C] hover:text-[#244AA5] font-medium flex items-center justify-between" href="#">
+<span>10 con alertas de datos</span>
+<span class="text-slate-400 font-bold">›</span>
+</a>
+</div>
+</div>
+<!-- Card 3: VINDU -->
+<div class="border border-[#D8E3F2] rounded-2xl p-4 bg-white flex flex-col justify-between shadow-2xs">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-[#10224E] text-base">VINDU</span>
+<span class="text-[#62708C] text-[11px] font-medium">539 unidades</span>
+</div>
+<div class="mt-3 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-[#10224E]">127</span>
+<span class="text-xs font-semibold text-[#62708C]">pendientes</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#244AA5] h-full rounded-full" style="width: 74%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#62708C] mt-2 font-medium">
+<span>✓ 397 al día</span>
+<span class="font-bold text-[#10224E]">74%</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<a class="text-xs text-[#62708C] hover:text-[#244AA5] font-medium flex items-center justify-between" href="#">
+<span>13 con alertas de datos</span>
+<span class="text-slate-400 font-bold">›</span>
+</a>
+</div>
+</div>
+<!-- Card 4: VCARS -->
+<div class="border border-[#D8E3F2] rounded-2xl p-4 bg-white flex flex-col justify-between shadow-2xs">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-[#10224E] text-base">VCARS</span>
+<span class="text-[#62708C] text-[11px] font-medium">598 unidades</span>
+</div>
+<div class="mt-3 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-[#10224E]">68</span>
+<span class="text-xs font-semibold text-[#62708C]">pendientes</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#244AA5] h-full rounded-full" style="width: 89%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#62708C] mt-2 font-medium">
+<span>✓ 530 al día</span>
+<span class="font-bold text-[#10224E]">89%</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-slate-100">
+<a class="text-xs text-[#62708C] hover:text-[#244AA5] font-medium flex items-center justify-between" href="#">
+<span>1 con alertas de datos</span>
+<span class="text-slate-400 font-bold">›</span>
+</a>
+</div>
+</div>
+<!-- Card 5: PANELES -->
+<div class="border border-[#D8E3F2] rounded-2xl p-4 bg-white flex flex-col justify-between shadow-2xs">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-[#10224E] text-base">PANELES</span>
+<span class="text-[#62708C] text-[11px] font-medium">3 unidades</span>
+</div>
+<div class="mt-3 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-[#10224E]">1</span>
+<span class="text-xs font-semibold text-[#62708C]">pendientes</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#244AA5] h-full rounded-full" style="width: 67%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#62708C] mt-2 font-medium">
+<span>✓ 2 al día</span>
+<span class="font-bold text-[#10224E]">67%</span>
+</div>
+</div>
+</div>
+<!-- Card 6: OTROS -->
+<div class="border border-[#D8E3F2] rounded-2xl p-4 bg-white flex flex-col justify-between shadow-2xs">
+<div>
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-[#10224E] text-base">OTROS</span>
+<span class="text-[#62708C] text-[11px] font-medium">1 unidades</span>
+</div>
+<div class="mt-3 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-[#10224E]">0</span>
+<span class="text-xs font-semibold text-[#62708C]">pendientes</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-[#E2E8F0] h-2 rounded-full mt-3 overflow-hidden">
+<div class="bg-[#047857] h-full rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex items-center justify-between text-xs text-[#62708C] mt-2 font-medium">
+<span>✓ 1 al día</span>
+<span class="font-bold text-[#10224E]">100%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Avance por mes (4 Cols) -->
+<div class="lg:col-span-4 bg-white border border-[#D8E3F2] rounded-3xl p-6 shadow-xs flex flex-col justify-between min-h-[380px]">
+<div>
+<!-- Section Header -->
+<div class="flex items-start justify-between mb-2">
+<div>
+<h2 class="text-xl font-bold text-[#10224E]">Avance por mes</h2>
+<p class="text-xs font-medium text-[#62708C] mt-0.5">Semáforo de cobertura por ciclo.</p>
+</div>
+<a class="inline-flex items-center gap-1 text-sm font-semibold text-[#244AA5] hover:text-[#1D3B84] transition-colors" href="#">
+<span>Ver completo</span>
+<span>→</span>
+</a>
+</div>
+<!-- Dashed Placeholder Notice Box -->
+<div class="mt-6 border border-dashed border-[#CBD5E1] bg-[#F8FAFC] rounded-2xl p-6 text-center">
+<p class="text-xs font-medium text-[#62708C] leading-relaxed">
+                Consulta el detalle completo y cada unidad pendiente en <strong class="text-[#10224E] font-semibold">“Avance mensual”</strong>.
+              </p>
+</div>
+</div>
+<!-- Sub-Summary Cycle Status Pill -->
+<div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-[#62708C]">
+<span class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#047857]"></span>
+              Ciclo activo verificado
+            </span>
+<span class="font-semibold text-[#10224E]">Actualizado hoy</span>
+</div>
+</div>
+</section>
+<!-- END: Lower Detailed Content -->
+</div>
+</main>
+<!-- END: Main Dashboard Content Area -->
+</body></html>

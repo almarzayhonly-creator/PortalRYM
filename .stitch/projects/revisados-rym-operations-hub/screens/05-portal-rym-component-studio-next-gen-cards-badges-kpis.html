@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-surface-variant":"#424656","inverse-on-surface":"#eaf1ff","surface-container-low":"#eff4ff","surface-variant":"#d3e4fe","primary-container":"#0062ff","surface-tint":"#0053da","primary":"#004cca","on-tertiary-fixed-variant":"#3f465c","on-secondary-fixed-variant":"#004e60","tertiary-container":"#676f86","on-tertiary-fixed":"#131b2e","surface-container-high":"#dce9ff","primary-fixed-dim":"#b4c5ff","on-secondary-fixed":"#001f28","on-primary-fixed-variant":"#003ea8","secondary":"#00677f","secondary-fixed-dim":"#47d6ff","error":"#ba1a1a","surface":"#f8f9ff","secondary-fixed":"#b6ebff","background":"#f8f9ff","surface-bright":"#f8f9ff","on-tertiary-container":"#f2f3ff","error-container":"#ffdad6","inverse-surface":"#213145","primary-fixed":"#dbe1ff","surface-dim":"#cbdbf5","on-secondary":"#ffffff","on-primary":"#ffffff","outline-variant":"#c2c6d9","inverse-primary":"#b4c5ff","tertiary":"#4f576d","on-primary-container":"#f3f3ff","surface-container-highest":"#d3e4fe","surface-container-lowest":"#ffffff","surface-container":"#e5eeff","outline":"#737687","tertiary-fixed-dim":"#bec6e0","on-background":"#0b1c30","on-tertiary":"#ffffff","on-surface":"#0b1c30","tertiary-fixed":"#dae2fd","on-error-container":"#93000a","secondary-container":"#00d2ff","on-secondary-container":"#00566a","on-error":"#ffffff","on-primary-fixed":"#00174b"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-sm":"0.5rem","space-md":"1rem","gutter":"1rem","margin-desktop":"2.5rem","margin-tablet":"1.5rem","margin":"1rem","space-xs":"0.25rem","gutter-desktop":"1.5rem","space-xl":"2.5rem","space-lg":"1.5rem"},"fontFamily":{"headline-xl":["Space Grotesk"],"body-md":["Inter"],"headline-md":["Space Grotesk"],"label-data-metric":["JetBrains Mono"],"label-vin":["JetBrains Mono"],"body-sm":["Inter"],"headline-sm":["Space Grotesk"],"label-tag":["Space Grotesk"],"body-lg":["Inter"],"headline-lg":["Space Grotesk"],"label-plate":["JetBrains Mono"],"headline-xl-mobile":["Space Grotesk"]},"fontSize":{"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.03em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-data-metric":["14px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"500"}],"label-vin":["13px",{"lineHeight":"18px","letterSpacing":"0.08em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"18px","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"600"}],"label-tag":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"body-lg":["16px",{"lineHeight":"26px","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"label-plate":["22px",{"lineHeight":"24px","letterSpacing":"0.12em","fontWeight":"700"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest/90 backdrop-blur-xl z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container shadow-[0_0_12px_rgba(0,98,255,0.35)]"><span class="material-symbols-outlined text-[20px]">verified</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm uppercase tracking-tight text-on-surface">PORTAL RYM</span><span class="font-label-tag text-label-tag uppercase tracking-wider text-secondary">Revisados Vehiculares</span></div></div></div><div class="px-space-md py-space-sm"><div class="bg-surface-container-low px-space-md py-space-xs rounded-xl flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span><span class="font-label-tag text-label-tag uppercase text-on-surface-variant">SISTEMA NACIONAL</span></div><span class="font-label-vin text-label-vin text-primary">v4.2 PROD</span></div></div><div class="px-space-md mt-space-sm"><span class="px-space-sm font-label-tag text-label-tag text-tertiary uppercase">Navegación Táctica</span><nav class="flex flex-col gap-1 mt-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-[0_0_12px_rgba(0,98,255,0.25)] rounded-full"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="mission-control" href="#"><span class="material-symbols-outlined text-[18px]">rocket_launch</span><span class="font-body-md text-body-md">Mission Control</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="operaciones" href="#"><span class="material-symbols-outlined text-[18px]">fact_check</span><span class="font-body-md text-body-md">Operaciones</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="avance-mensual" href="#"><span class="material-symbols-outlined text-[18px]">query_stats</span><span class="font-body-md text-body-md">Avance Mensual</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-all bg-primary-container text-on-primary-container font-semibold shadow-[0_0_12px_rgba(0,98,255,0.25)] rounded-full" data-path="component-studio" href="#"><span class="material-symbols-outlined text-[18px]">widgets</span><span class="font-body-md text-body-md">Component Studio</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="ui-library" href="#"><span class="material-symbols-outlined text-[18px]">token</span><span class="font-body-md text-body-md">UI Library</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="telemetria" href="#"><span class="material-symbols-outlined text-[18px]">speed</span><span class="font-body-md text-body-md">Telemetría</span></a></nav></div></div><div class="p-space-md"><div class="bg-surface-container-low p-space-md rounded-xl flex items-center justify-between"><div class="flex flex-col"><span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Estación Activa</span><span class="font-headline-sm text-headline-sm text-on-surface">PRV-09 Norte</span><span class="font-label-vin text-label-vin text-secondary">CAN BUS 2.0B</span></div><div class="w-3 h-3 rounded-full bg-secondary-container ring-4 ring-secondary/20"></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/80 backdrop-blur-xl z-40 flex items-center justify-between px-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-md py-1.5 rounded-full"><span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span><span class="font-label-tag text-label-tag uppercase text-on-surface">eCarCheck SYNC:</span><span class="font-label-data-metric text-label-data-metric text-primary-container font-semibold">0.3s ONLINE</span></div><div class="hidden lg:flex items-center gap-space-xs bg-surface-container px-space-md py-1.5 rounded-lg text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">search</span><span class="font-body-sm text-body-sm">Buscar VIN, Placa o Trámite...</span><kbd class="bg-surface-container-lowest text-on-surface font-label-vin text-label-vin px-1.5 py-0.5 rounded shadow-[0_1px_2px_rgba(0,0,0,0.05)]">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span></button><div class="flex items-center gap-space-sm pl-space-sm"><div class="flex flex-col text-right"><span class="font-headline-sm text-headline-sm leading-tight text-on-surface">Ing. M. Carrizo</span><span class="font-label-tag text-label-tag uppercase text-secondary font-semibold">Supervisor Jefe</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 px-gutter-desktop bg-surface min-h-screen"><div class="flex flex-col w-full text-on-surface">
+<!-- Ambient Light Effects (Relative container bounds) -->
+<div class="relative w-full overflow-hidden pb-space-xl">
+<div class="absolute -top-32 -left-20 w-96 h-96 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-48 right-0 w-[30rem] h-[30rem] bg-secondary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- HERO / BANNER HEADER -->
+<section class="relative pt-space-lg pb-space-lg">
+<div class="flex flex-col gap-space-sm">
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-md py-1 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+<span class="font-label-tag text-label-tag text-primary font-bold uppercase tracking-wider">DESIGN SYSTEM v4.5 // TELEMETRY CORE</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-md py-1 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary">memory</span>
+<span class="font-label-data-metric text-label-data-metric text-on-surface-variant font-medium">60 FPS Hardware-Accelerated • Vue 3 Ready • Háptico Visual</span>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md mt-space-xs">
+<div class="max-w-3xl">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">
+              Componentes Tácticos RYM <span class="text-primary-container font-headline-lg font-normal text-headline-lg">// Next-Gen Suite</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1 leading-relaxed">
+              Tarjetas vehiculares biométricas, Badges dinámicos de inspección, KPIs cinéticos con telemetría en tiempo real y micro-indicadores inteligentes con respuesta táctil.
+            </p>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-body-sm font-body-sm font-semibold rounded-lg shadow-sm transition-all duration-200 flex items-center gap-space-xs" id="btnCopyAllSpecs" onclick="triggerToast('Tokens de diseño y especificaciones CSS copiados al portapapeles')">
+<span class="material-symbols-outlined text-[16px] text-secondary">file_copy</span>
+<span>Tokens Spec</span>
+</button>
+<button class="px-space-md py-2 bg-primary-container hover:bg-surface-tint text-on-primary font-body-sm text-body-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-space-xs" onclick="triggerToast('Entorno de pruebas interactivo reiniciado a valores nominales')">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+<span>Sync Sandbox</span>
+</button>
+</div>
+</div>
+<!-- Filter Tab Rail -->
+<div class="mt-space-md bg-surface-container-lowest p-1.5 rounded-xl shadow-sm flex flex-wrap gap-1.5 items-center">
+<button class="studio-tab active px-space-md py-1.5 rounded-lg text-body-sm font-body-sm font-semibold bg-primary-container text-on-primary transition-all" onclick="filterComponents('all', this)">
+            Todos los Componentes
+          </button>
+<button class="studio-tab px-space-md py-1.5 rounded-lg text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" onclick="filterComponents('vehicle-badges', this)">
+            Vehicle Badges
+          </button>
+<button class="studio-tab px-space-md py-1.5 rounded-lg text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" onclick="filterComponents('kinetic-kpis', this)">
+            KPIs Cinéticos
+          </button>
+<button class="studio-tab px-space-md py-1.5 rounded-lg text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" onclick="filterComponents('smart-badges', this)">
+            Badges &amp; Micro-tags
+          </button>
+<button class="studio-tab px-space-md py-1.5 rounded-lg text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" onclick="filterComponents('alert-cards', this)">
+            Tarjetas de Alerta
+          </button>
+<button class="studio-tab px-space-md py-1.5 rounded-lg text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" onclick="filterComponents('bay-controls', this)">
+            Controles de Bahía
+          </button>
+</div>
+</div>
+</section>
+<!-- SECTION 1: VEHICLE BADGES // TARJETAS DE IDENTIDAD DIGITAL -->
+<section class="component-section my-space-lg" id="section-vehicle-badges">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container font-headline-sm text-headline-sm">
+            01
+          </div>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">RYM Vehicle Badges // Tarjetas de Identidad Digital</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Modelado táctil con placas físicas realistas, indicadores holográficos y telemetría diagnóstica directa.</p>
+</div>
+</div>
+<span class="hidden sm:inline-block font-label-tag text-label-tag text-secondary uppercase bg-surface-container px-space-sm py-1 rounded">3 ESTADOS DE FLUJO REGULATORIO</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+<!-- CARD A: UNIDAD 104 - VIGENTE -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+<!-- Status Line Top -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-primary-container to-secondary-container"></div>
+<div>
+<!-- Header Tag & Actions -->
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-label-tag text-label-tag font-bold text-emerald-700 tracking-wider">VIGENTE // APROBADO</span>
+</div>
+<button class="text-tertiary hover:text-primary p-1 rounded hover:bg-surface-container transition-colors" onclick="copySnippet('Unidad104_Vue')" title="Copiar componente">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</button>
+</div>
+<!-- Vehicle Identification -->
+<div class="mt-space-xs">
+<span class="font-label-vin text-label-vin text-tertiary">UNIDAD #104 • RUTA SUR</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Hino 300 Series (3.5T)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Chasis: <span class="font-label-vin text-label-vin font-medium">HN92-8810-XK290</span></p>
+</div>
+<!-- Photorealistic License Plate -->
+<div class="my-space-md p-2 bg-gradient-to-b from-slate-100 to-slate-200 rounded-lg shadow-inner flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute top-1 left-2 w-1.5 h-1.5 rounded-full bg-slate-400 shadow-inner"></div>
+<div class="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-slate-400 shadow-inner"></div>
+<div class="absolute bottom-1 left-2 w-1.5 h-1.5 rounded-full bg-slate-400 shadow-inner"></div>
+<div class="absolute bottom-1 right-2 w-1.5 h-1.5 rounded-full bg-slate-400 shadow-inner"></div>
+<div class="flex items-center justify-between w-full px-space-sm text-[9px] font-headline-sm uppercase text-slate-600 tracking-widest font-bold">
+<span>REPÚBLICA DE PANAMÁ</span>
+<span class="text-primary-container font-mono text-[8px]">● ATTT ●</span>
+<span>PARTICULAR</span>
+</div>
+<div class="font-label-plate text-label-plate text-slate-900 tracking-widest py-1 filter drop-shadow-sm flex items-center gap-2">
+<span>CU</span>
+<span class="text-slate-400 text-sm">✦</span>
+<span>9475</span>
+</div>
+<div class="text-[8px] font-mono text-slate-500 uppercase tracking-widest">
+                VERIFICACIÓN OFICIAL 2026
+              </div>
+</div>
+<!-- Sub-indicators Bench -->
+<div class="grid grid-cols-3 gap-space-xs bg-surface-container-low p-space-xs rounded-lg text-center">
+<div class="p-1 rounded bg-surface-container-lowest flex flex-col items-center">
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Frenómetro</span>
+<span class="font-label-data-metric text-label-data-metric text-emerald-600 font-bold">94% OK</span>
+<span class="text-[10px] text-tertiary">0.8 kN dev</span>
+</div>
+<div class="p-1 rounded bg-surface-container-lowest flex flex-col items-center">
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Emisión CO2</span>
+<span class="font-label-data-metric text-label-data-metric text-emerald-600 font-bold">0.6%</span>
+<span class="text-[10px] text-tertiary">Norma Euro 5</span>
+</div>
+<div class="p-1 rounded bg-surface-container-lowest flex flex-col items-center">
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Calcomanía</span>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-primary-container">qr_code_2</span>
+<span class="font-label-vin text-label-vin text-primary-container">2026</span>
+</div>
+<span class="text-[10px] text-emerald-600 font-medium">Activa</span>
+</div>
+</div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="flex items-center gap-space-xs pt-space-md mt-space-md">
+<button class="flex-1 py-1.5 px-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface text-body-sm font-body-sm font-medium rounded-lg text-center transition-colors" onclick="triggerToast('Ficha técnica ampliada cargada en consola')">
+              Inspeccionar Ficha
+            </button>
+<button class="py-1.5 px-space-sm bg-primary-container hover:bg-surface-tint text-on-primary text-body-sm font-body-sm font-medium rounded-lg shadow-sm flex items-center justify-center transition-colors" onclick="triggerToast('Generando pase de circulación seguro con timbrado fiscal...')">
+<span class="material-symbols-outlined text-[16px]">print</span>
+</button>
+</div>
+</div>
+<!-- CARD B: UNIDAD 088 - RETENCIÓN ATTT / BÁSCULA -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+<!-- Carmine Alert Top Stripe -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-error"></div>
+<div>
+<!-- Header Tag & Actions -->
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-xs bg-error-container/60 px-2 py-0.5 rounded-full">
+<span class="w-2.5 h-2.5 rounded-full bg-error animate-ping"></span>
+<span class="font-label-tag text-label-tag font-bold text-on-error-container uppercase">RETENCIÓN ATTT // BÁSCULA</span>
+</div>
+<button class="text-tertiary hover:text-error p-1 rounded hover:bg-surface-container transition-colors" onclick="copySnippet('Unidad088_Vue')" title="Copiar componente">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</button>
+</div>
+<!-- Vehicle Identification -->
+<div class="mt-space-xs">
+<span class="font-label-vin text-label-vin text-error font-semibold">ALERTA DE IMPEDIMENTO FISCAL</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Mack Granite HD-T (6x4)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Chasis: <span class="font-label-vin text-label-vin font-medium">1M2AX-7721-M0098</span></p>
+</div>
+<!-- Commercial Heavy-Duty Plate -->
+<div class="my-space-md p-2 bg-gradient-to-b from-amber-50 to-amber-100 rounded-lg shadow-inner flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-repeating-linear-gradient-stripe opacity-30"></div>
+<div class="flex items-center justify-between w-full px-space-sm text-[9px] font-headline-sm uppercase text-amber-900 tracking-widest font-bold">
+<span>PANAMÁ</span>
+<span class="bg-amber-600 text-white px-1 rounded text-[8px] font-mono">COMERCIAL</span>
+<span>CARGA PESADA</span>
+</div>
+<div class="font-label-plate text-label-plate text-stone-900 tracking-widest py-1 flex items-center gap-2">
+<span>RYM</span>
+<span class="text-amber-500 text-sm">■</span>
+<span>7102</span>
+</div>
+<div class="text-[8px] font-mono text-error uppercase font-bold tracking-widest">
+                BLOQUEO DE SALIDA DE PATIO ACTIVO
+              </div>
+</div>
+<!-- Critical Discrepancy Breakdown -->
+<div class="bg-error-container/30 p-space-sm rounded-lg flex flex-col gap-space-xs text-body-sm">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-error">scale</span>
+                  Exceso de Báscula:
+                </span>
+<span class="font-label-data-metric text-label-data-metric font-bold text-error">+4.2 Ton Excedente</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Infracción ATTT:</span>
+<span class="font-label-vin text-label-vin text-on-surface font-bold">Boleta #440-B</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden mt-1">
+<div class="bg-error h-full rounded-full w-full"></div>
+</div>
+</div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="pt-space-md mt-space-md">
+<button class="w-full py-2 px-space-md bg-error hover:bg-red-700 text-on-error font-body-sm text-body-sm font-semibold rounded-lg shadow-md transition-all flex items-center justify-center gap-space-xs" onclick="triggerToast('Procesando pago de caución boleta #440-B ($150 USD)...')">
+<span class="material-symbols-outlined text-[18px]">lock_open</span>
+<span>Subsanar Boleta ($150 USD)</span>
+</button>
+</div>
+</div>
+<!-- CARD C: UNIDAD 219 - PERITAJE COLOR -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+<!-- Amber Warning Top Stripe -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-amber-400"></div>
+<div>
+<!-- Header Tag & Actions -->
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-xs bg-amber-50 px-2 py-0.5 rounded-full">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+<span class="font-label-tag text-label-tag font-bold text-amber-800 uppercase">PERITAJE COLOR // COTEJO DIJ</span>
+</div>
+<button class="text-tertiary hover:text-amber-600 p-1 rounded hover:bg-surface-container transition-colors" onclick="copySnippet('Unidad219_Vue')" title="Copiar componente">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</button>
+</div>
+<!-- Vehicle Identification -->
+<div class="mt-space-xs">
+<span class="font-label-vin text-label-vin text-amber-700 font-semibold">DISCREPANCIA EN REGISTRO</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Toyota Hilux D-4D 3.0</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Chasis: <span class="font-label-vin text-label-vin font-medium">MROFR-22G4-09823</span></p>
+</div>
+<!-- Standard Plate -->
+<div class="my-space-md p-2 bg-gradient-to-b from-slate-100 to-slate-200 rounded-lg shadow-inner flex flex-col items-center justify-center relative overflow-hidden">
+<div class="flex items-center justify-between w-full px-space-sm text-[9px] font-headline-sm uppercase text-slate-600 tracking-widest font-bold">
+<span>REPÚBLICA DE PANAMÁ</span>
+<span class="text-amber-600 font-mono text-[8px]">● OBSERVADO ●</span>
+<span>PARTICULAR</span>
+</div>
+<div class="font-label-plate text-label-plate text-slate-900 tracking-widest py-1 flex items-center gap-2">
+<span>BC</span>
+<span class="text-slate-400 text-sm">✦</span>
+<span>3091</span>
+</div>
+<div class="text-[8px] font-mono text-slate-500 uppercase tracking-widest">
+                VERIFICACIÓN FÍSICA EN PROCESO
+              </div>
+</div>
+<!-- Dual Swatch Comparison Pill -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-2">
+<span class="font-label-tag text-label-tag text-on-surface-variant uppercase">Discrepancia de Pintura Identificada:</span>
+<div class="flex items-center justify-between bg-surface-container-lowest p-2 rounded">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-slate-500 shadow-inner"></div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-on-surface">Gris Metálico</span>
+<span class="text-[9px] text-tertiary">Inspección Física</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-amber-600">arrow_forward</span>
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded-full bg-white shadow"></div>
+<div class="flex flex-col text-right">
+<span class="text-[11px] font-semibold text-on-surface">Blanco Corp.</span>
+<span class="text-[9px] text-tertiary">Padrón RUV</span>
+</div>
+</div>
+</div>
+<!-- DIJ Progress Bar -->
+<div class="flex flex-col gap-1 mt-1">
+<div class="flex items-center justify-between text-[11px]">
+<span class="font-medium text-on-surface">Cotejo Forense DIJ</span>
+<span class="font-label-vin text-label-vin text-amber-700 font-bold">75% Validado</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-amber-500 h-full rounded-full transition-all duration-1000" style="width: 75%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="pt-space-md mt-space-md">
+<button class="w-full py-2 px-space-md bg-amber-500 hover:bg-amber-600 text-white font-body-sm text-body-sm font-semibold rounded-lg shadow-sm transition-all flex items-center justify-center gap-space-xs" onclick="triggerToast('Solicitud de aclaración enviada a peritos DIJ')">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Aprobar Acta de Homologación</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: KINETIC KPI CARDS // TELEMETRÍA Y CONTROL -->
+<section class="component-section my-space-xl" id="section-kinetic-kpis">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container font-headline-sm text-headline-sm">
+            02
+          </div>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Kinetic KPI Cards // Telemetría y Ritmo Operativo</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Widgets cinéticos de alta fidelidad para monitoreo en vivo de flujos de inspección y pasarelas fiscales.</p>
+</div>
+</div>
+<span class="font-label-tag text-label-tag text-secondary uppercase bg-surface-container px-space-sm py-1 rounded">LIVE REACTION ENGINES</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg">
+<!-- KPI 1: FLEET READINESS & COBERTURA TOTAL -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between">
+<span class="font-label-tag text-label-tag uppercase text-on-surface-variant">READINESS TOTAL FLOTA</span>
+<div class="w-7 h-7 rounded-lg bg-primary-container/10 text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+</div>
+</div>
+<!-- Center kinetic gauge + Metric -->
+<div class="flex items-center justify-between my-space-md">
+<div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight" id="fleetMetricNumber">79.4</span>
+<span class="font-headline-md text-headline-md text-primary-container font-bold">%</span>
+</div>
+<p class="font-label-vin text-label-vin text-tertiary">1,749 / 2,202 uds</p>
+</div>
+<!-- Animated SVG Ring -->
+<div class="relative w-20 h-20 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<!-- Background ring -->
+<path class="text-surface-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<!-- Dynamic progress ring -->
+<path class="text-primary-container group-hover:text-secondary-container transition-colors duration-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="79.4, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-primary-container">verified</span>
+</div>
+</div>
+</div>
+<!-- Micro Stats Row -->
+<div class="grid grid-cols-3 pt-space-xs text-center border-t border-surface-container-high/50">
+<div>
+<span class="text-[10px] text-tertiary block font-mono">1ra Vuelta</span>
+<span class="font-label-data-metric text-label-data-metric text-emerald-600 font-bold">92.4%</span>
+</div>
+<div>
+<span class="text-[10px] text-tertiary block font-mono">En Bahía</span>
+<span class="font-label-data-metric text-label-data-metric text-on-surface font-bold">11.2m</span>
+</div>
+<div>
+<span class="text-[10px] text-tertiary block font-mono">Corte</span>
+<span class="font-label-data-metric text-label-data-metric text-primary-container font-bold">14d</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: RITMO QUINCENAL DE CIERRE -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group">
+<div class="flex items-center justify-between">
+<span class="font-label-tag text-label-tag uppercase text-on-surface-variant">RITMO QUINCENAL // C01</span>
+<span class="bg-emerald-50 text-emerald-700 font-label-tag text-label-tag px-2 py-0.5 rounded-full font-bold">EN OBJETIVO</span>
+</div>
+<div class="my-space-md">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight">82%</span>
+<span class="font-label-data-metric text-label-data-metric text-tertiary">451 / 550 Uds</span>
+</div>
+<!-- Segmented Progress Bar with kinetic hover glow -->
+<div class="w-full bg-surface-container rounded-full h-3 flex overflow-hidden p-0.5 gap-0.5 group-hover:shadow-[0_0_12px_rgba(0,98,255,0.2)] transition-shadow">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 25%"></div>
+<div class="bg-primary-container h-full" style="width: 25%"></div>
+<div class="bg-primary-container h-full" style="width: 25%"></div>
+<div class="bg-secondary-container h-full rounded-r-full" style="width: 7%"></div>
+<div class="bg-surface-container-high h-full flex-1 rounded-r-full"></div>
+</div>
+<!-- Countdown ticker -->
+<div class="flex items-center gap-1.5 mt-space-sm text-body-sm text-tertiary">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="font-medium text-on-surface text-[12px]">&lt; 48 hrs para cierre quincena</span>
+</div>
+</div>
+<button class="w-full py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface text-body-sm font-body-sm font-semibold rounded-lg flex items-center justify-center gap-space-xs transition-colors" onclick="triggerToast('Informe de pre-cierre generado exitosamente')">
+<span class="material-symbols-outlined text-[15px] text-primary">download</span>
+<span>Exportar Pre-cierre</span>
+</button>
+</div>
+<!-- KPI 3: MONITOR DE PASARELA FISCAL & RETENCIONES -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group">
+<div class="flex items-center justify-between">
+<span class="font-label-tag text-label-tag uppercase text-on-surface-variant">PASARELA FISCAL ATTT</span>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+<span class="text-[10px] font-mono text-emerald-700 font-bold">0.3s SYNC</span>
+</div>
+</div>
+<div class="my-space-md">
+<div class="flex items-baseline justify-between mb-1">
+<div class="flex flex-col">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">$14,250</span>
+<span class="text-[11px] text-error font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">trending_up</span>
+                  Pasivo en Boletas
+                </span>
+</div>
+<!-- Interactive Tab switch -->
+<div class="bg-surface-container-low p-0.5 rounded-lg flex text-[10px] font-medium">
+<button class="px-2 py-0.5 rounded bg-surface-container-lowest shadow-xs text-on-surface font-bold" id="toggleEmpresa" onclick="setPasarelaToggle('empresa')">RUC</button>
+<button class="px-2 py-0.5 rounded text-tertiary" id="toggleChofer" onclick="setPasarelaToggle('chofer')">Chofer</button>
+</div>
+</div>
+<!-- Sparkline SVG -->
+<div class="h-10 w-full mt-space-xs">
+<svg class="w-full h-full text-secondary-container" fill="none" viewbox="0 0 120 30">
+<path d="M0,25 Q15,22 30,12 T60,18 T90,6 T120,15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+<path d="M0,25 Q15,22 30,12 T60,18 T90,6 T120,15 L120,30 L0,30 Z" fill="currentColor" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+<div class="flex items-center justify-between text-[11px] pt-space-xs border-t border-surface-container-high/50 text-on-surface-variant">
+<span>Boletas subsanadas hoy:</span>
+<span class="font-label-vin text-label-vin font-bold text-emerald-600">38 Pagadas</span>
+</div>
+</div>
+<!-- KPI 4: OCUPACIÓN DE GALERAS & BAHÍAS -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group">
+<div class="flex items-center justify-between">
+<span class="font-label-tag text-label-tag uppercase text-on-surface-variant">LOAD MATRIX // BAHÍAS</span>
+<span class="text-[11px] font-mono text-primary font-bold">4 ACTIVAS</span>
+</div>
+<div class="my-space-sm flex flex-col gap-2">
+<!-- VCARS -->
+<div>
+<div class="flex justify-between text-[11px] font-medium mb-0.5">
+<span class="text-on-surface">VCARS (Livianos)</span>
+<span class="font-label-vin text-label-vin text-on-surface font-bold">88%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-700" style="width: 88%"></div>
+</div>
+</div>
+<!-- VCOMP -->
+<div>
+<div class="flex justify-between text-[11px] font-medium mb-0.5">
+<span class="text-on-surface">VCOMP (Comerciales)</span>
+<span class="font-label-vin text-label-vin text-on-surface font-bold">80%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-secondary-container h-full rounded-full transition-all duration-700" style="width: 80%"></div>
+</div>
+</div>
+<!-- VIPCO -->
+<div>
+<div class="flex justify-between text-[11px] font-medium mb-0.5">
+<span class="text-on-surface">VIPCO (Pesados)</span>
+<span class="font-label-vin text-label-vin text-on-surface font-bold">74%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-700" style="width: 74%"></div>
+</div>
+</div>
+<!-- VINDU -->
+<div>
+<div class="flex justify-between text-[11px] font-medium mb-0.5">
+<span class="text-on-surface">VINDU (Especiales)</span>
+<span class="font-label-vin text-label-vin text-on-surface font-bold">68%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-secondary h-full rounded-full transition-all duration-700" style="width: 68%"></div>
+</div>
+</div>
+</div>
+<div class="pt-space-xs text-[11px] text-tertiary flex items-center justify-between border-t border-surface-container-high/50">
+<span>Capacidad operativa nominal:</span>
+<span class="font-bold text-on-surface">94.2% Peak</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: SMART BADGES & MICRO-TAGS // SEMÁFORO INTELIGENTE -->
+<section class="component-section my-space-xl" id="section-smart-badges">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container font-headline-sm text-headline-sm">
+            03
+          </div>
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Smart Badges &amp; Micro-tags // Semáforo Inteligente</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Micro-indicadores atómicos con estados semánticos directos, badges de placas y etiquetas de gravamen.</p>
+</div>
+</div>
+<span class="font-label-tag text-label-tag text-secondary uppercase bg-surface-container px-space-sm py-1 rounded">MATRIZ ATÓMICA DE ELEMENTOS</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+<!-- COLUMN 1: Dynamic Status Indicators -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Status Badges</h3>
+<span class="font-label-vin text-label-vin text-tertiary">#SEMÁFORO</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-space-md">Badges de estatus con halos de pulso para tablas, tarjetas y visores de expediente.</p>
+<div class="flex flex-col gap-2.5">
+<!-- VIGENTE RUV -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-emerald-50/60 hover:bg-emerald-100/60 transition-colors cursor-pointer group" onclick="copyBadgeSnippet('Vigente_Badge')">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+</span>
+<span class="font-label-tag text-label-tag font-bold text-emerald-800 tracking-wide uppercase">VIGENTE RUV</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+<!-- PERITAJE DIJ -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-amber-50 hover:bg-amber-100/80 transition-colors cursor-pointer group" onclick="copyBadgeSnippet('Peritaje_Badge')">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-amber-600">search</span>
+<span class="font-label-tag text-label-tag font-bold text-amber-800 tracking-wide uppercase">PERITAJE DIJ // OBSERVADO</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-amber-700 opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+<!-- BLOQUEO PASARELA -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-error-container/40 hover:bg-error-container/70 transition-colors cursor-pointer group" onclick="copyBadgeSnippet('Bloqueo_Badge')">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-error">lock</span>
+<span class="font-label-tag text-label-tag font-bold text-on-error-container tracking-wide uppercase">BLOQUEO PASARELA ATTT</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-error opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+<!-- CALCOMANÍA VERIFICADA -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer group" onclick="copyBadgeSnippet('Calcomania_Badge')">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary-container">verified</span>
+<span class="font-label-tag text-label-tag font-bold text-primary-container tracking-wide uppercase">CALCOMANÍA VERIFICADA 2026</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+<!-- SIN CUPO ASIGNADO -->
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-high/40 hover:bg-surface-container-high transition-colors cursor-pointer group" onclick="copyBadgeSnippet('SinCupo_Badge')">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary">hourglass_top</span>
+<span class="font-label-tag text-label-tag font-bold text-on-surface-variant tracking-wide uppercase">SIN CUPO ASIGNADO</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-tertiary opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md text-[11px] text-tertiary text-center">
+            Click en cualquier badge para copiar su estructura HTML
+          </div>
+</div>
+<!-- COLUMN 2: Vehicle Plate Micro-badges -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Micro-Placas Físicas</h3>
+<span class="font-label-vin text-label-vin text-tertiary">#PLATES</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-space-md">Representación miniatura fotográfica de placas vehiculares oficiales del parque nacional.</p>
+<div class="flex flex-col gap-3">
+<!-- Plate Particular -->
+<div class="bg-slate-100 hover:bg-slate-200 transition-all p-2 rounded-lg border-b-2 border-slate-300 flex items-center justify-between cursor-pointer" onclick="triggerToast('Micro-placa Particular CU-9475 referenciada')">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+<div class="flex flex-col">
+<span class="text-[9px] font-mono font-bold text-slate-500 uppercase">Panamá Particular</span>
+<span class="font-label-plate text-sm text-slate-900 tracking-wider">CU · 9475</span>
+</div>
+</div>
+<span class="text-[10px] font-mono bg-white px-1.5 py-0.5 rounded text-slate-600 shadow-xs">PART</span>
+</div>
+<!-- Plate Comercial -->
+<div class="bg-amber-50 hover:bg-amber-100 transition-all p-2 rounded-lg border-b-2 border-amber-200 flex items-center justify-between cursor-pointer" onclick="triggerToast('Micro-placa Comercial RYM-7102 referenciada')">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+<div class="flex flex-col">
+<span class="text-[9px] font-mono font-bold text-amber-700 uppercase">Panamá Comercial</span>
+<span class="font-label-plate text-sm text-stone-900 tracking-wider">RYM · 7102</span>
+</div>
+</div>
+<span class="text-[10px] font-mono bg-amber-600 text-white px-1.5 py-0.5 rounded shadow-xs">COM</span>
+</div>
+<!-- Plate Transporte Publico -->
+<div class="bg-sky-50 hover:bg-sky-100 transition-all p-2 rounded-lg border-b-2 border-sky-200 flex items-center justify-between cursor-pointer" onclick="triggerToast('Micro-placa Transporte MB-9021 referenciada')">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
+<div class="flex flex-col">
+<span class="text-[9px] font-mono font-bold text-sky-700 uppercase">Metrobus / Transp.</span>
+<span class="font-label-plate text-sm text-sky-950 tracking-wider">MB · 9021</span>
+</div>
+</div>
+<span class="text-[10px] font-mono bg-sky-600 text-white px-1.5 py-0.5 rounded shadow-xs">PUB</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md text-[11px] text-tertiary text-center">
+            Diseñadas con proporciones DIN exactas para tablas densas
+          </div>
+</div>
+<!-- COLUMN 3: Gravamen & Debt Tag Pills -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Gravamen &amp; Debt Pills</h3>
+<span class="font-label-vin text-label-vin text-tertiary">#DEBT_TAGS</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mb-space-md">Píldoras de retención fiscal y penalizaciones monetarias con micro-estados bloqueantes.</p>
+<div class="flex flex-col gap-2.5">
+<!-- Boleta Patronal Bloqueante -->
+<div class="p-2.5 rounded-lg bg-error-container/30 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-tag text-label-tag text-error font-bold uppercase">Boleta Patronal</span>
+<span class="font-label-data-metric text-label-data-metric text-on-surface font-bold">$150.00 USD</span>
+</div>
+<span class="bg-error text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">BLOQUEANTE</span>
+</div>
+<!-- Multa Conductor Paz y Salvo -->
+<div class="p-2.5 rounded-lg bg-emerald-50 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-tag text-label-tag text-emerald-800 font-bold uppercase">Multa Conductor</span>
+<span class="font-label-data-metric text-label-data-metric text-on-surface font-bold">$45.00 USD</span>
+</div>
+<span class="bg-emerald-600 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">PAZ Y SALVO OK</span>
+</div>
+<!-- Prenda Bancaria -->
+<div class="p-2.5 rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-tag text-label-tag text-tertiary font-bold uppercase">Prenda Bancaria</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Banco General S.A.</span>
+</div>
+<span class="bg-surface-container text-tertiary text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">EN TRÁMITE</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md text-[11px] text-tertiary text-center">
+            Validación bidireccional en línea con juzgados de tránsito
+          </div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: INTERACTIVE PLAYGROUND DOCK -->
+<section class="mt-space-lg p-space-lg bg-surface-container-low rounded-xl shadow-inner">
+<div class="flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[24px]">terminal</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Portal RYM Design System Inspector</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Prueba de respuesta de eventos tácticos, micro-animaciones en vivo y acoplamiento a Vue 3 Composition API.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5" onclick="triggerSimulation()">
+<span class="material-symbols-outlined text-[16px] text-secondary">play_circle</span>
+<span>Simular Infracción en Vivo</span>
+</button>
+<button class="px-space-md py-2 bg-primary-container hover:bg-surface-tint text-on-primary font-body-sm text-body-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5" onclick="triggerToast('Exportando biblioteca de componentes JSON...')">
+<span class="material-symbols-outlined text-[16px]">integration_instructions</span>
+<span>Exportar Todo</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- TOAST NOTIFICATION CONTAINER -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 ease-out flex items-center gap-space-sm bg-inverse-surface text-inverse-on-surface px-space-md py-space-sm rounded-xl shadow-2xl" id="studioToast">
+<span class="material-symbols-outlined text-secondary-container text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md" id="studioToastMessage">Notificación de acción realizada</span>
+</div>
+<!-- INLINE JAVASCRIPT FOR MICRO-INTERACTIONS -->
+<script>
+    function triggerToast(message) {
+      const toast = document.getElementById('studioToast');
+      const toastMsg = document.getElementById('studioToastMessage');
+      if (!toast || !toastMsg) return;
+
+      toastMsg.innerText = message;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+
+    function copySnippet(componentName) {
+      triggerToast('¡Componente Vue 3 <' + componentName + ' /> copiado al portapapeles!');
+    }
+
+    function copyBadgeSnippet(badgeName) {
+      triggerToast('Código de Micro-Badge ' + badgeName + ' copiado');
+    }
+
+    function filterComponents(category, btnElement) {
+      // Toggle active states on buttons
+      document.querySelectorAll('.studio-tab').forEach(b => {
+        b.classList.remove('bg-primary-container', 'text-on-primary');
+        b.classList.add('text-on-surface-variant');
+      });
+      if (btnElement) {
+        btnElement.classList.add('bg-primary-container', 'text-on-primary');
+        btnElement.classList.remove('text-on-surface-variant');
+      }
+
+      const secBadges = document.getElementById('section-vehicle-badges');
+      const secKpis = document.getElementById('section-kinetic-kpis');
+      const secSmart = document.getElementById('section-smart-badges');
+
+      if (category === 'all') {
+        if(secBadges) secBadges.style.display = 'block';
+        if(secKpis) secKpis.style.display = 'block';
+        if(secSmart) secSmart.style.display = 'block';
+        triggerToast('Mostrando toda la suite de componentes tácticos');
+      } else if (category === 'vehicle-badges') {
+        if(secBadges) secBadges.style.display = 'block';
+        if(secKpis) secKpis.style.display = 'none';
+        if(secSmart) secSmart.style.display = 'none';
+        triggerToast('Filtrado por: Tarjetas de Identidad Vehicular');
+      } else if (category === 'kinetic-kpis') {
+        if(secBadges) secBadges.style.display = 'none';
+        if(secKpis) secKpis.style.display = 'block';
+        if(secSmart) secSmart.style.display = 'none';
+        triggerToast('Filtrado por: KPIs Cinéticos de Telemetría');
+      } else if (category === 'smart-badges') {
+        if(secBadges) secBadges.style.display = 'none';
+        if(secKpis) secKpis.style.display = 'none';
+        if(secSmart) secSmart.style.display = 'block';
+        triggerToast('Filtrado por: Semáforo Inteligente y Badges');
+      } else {
+        triggerToast('Filtrando vista para ' + category);
+      }
+    }
+
+    function setPasarelaToggle(type) {
+      const btnEmpresa = document.getElementById('toggleEmpresa');
+      const btnChofer = document.getElementById('toggleChofer');
+
+      if (type === 'empresa') {
+        btnEmpresa.className = 'px-2 py-0.5 rounded bg-surface-container-lowest shadow-xs text-on-surface font-bold';
+        btnChofer.className = 'px-2 py-0.5 rounded text-tertiary';
+        triggerToast('Mostrando pasivo fiscal por RUC Empresarial');
+      } else {
+        btnChofer.className = 'px-2 py-0.5 rounded bg-surface-container-lowest shadow-xs text-on-surface font-bold';
+        btnEmpresa.className = 'px-2 py-0.5 rounded text-tertiary';
+        triggerToast('Mostrando pasivo fiscal imputado a choferes activos');
+      }
+    }
+
+    function triggerSimulation() {
+      const metric = document.getElementById('fleetMetricNumber');
+      if (metric) {
+        metric.innerText = '74.1';
+        setTimeout(() => {
+          metric.innerText = '79.4';
+        }, 1800);
+      }
+      triggerToast('Simulación inyectada: Unidad #088 ha entrado en estado de Báscula Crítica');
+    }
+  </script>
+</div></main></div></body></html>
