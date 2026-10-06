@@ -93,17 +93,17 @@ let variants;
 try{
   variants=await source.variants(prompt,{
     variantCount:3,
-    creativeRange:'REIMAGINE',
-    aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']
-  },{deviceType:'DESKTOP'});
+    creativeRange:'EXPLORE',
+    aspects:['LAYOUT','COLOR_SCHEME']
+  });
 }catch(error){
   if(error instanceof StitchError&&error.code==='CLARIFICATION_REQUIRED'){
     const reply=error.clarification?.suggestions?.[0]||'Keep every required function and create three distinct enterprise desktop variants.';
     variants=await source.variants(reply,{
       variantCount:3,
-      creativeRange:'REIMAGINE',
-      aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']
-    },{deviceType:'DESKTOP'});
+      creativeRange:'EXPLORE',
+      aspects:['LAYOUT','COLOR_SCHEME']
+    });
   }else throw error;
 }
 
@@ -115,9 +115,9 @@ await fs.writeFile(path.join(outDir,'operations-emitted-stitch-latest.json'),JSO
   projectId,
   sourceScreenId:String(source.id||source.screenId||''),
   variantScreenIds:screens.map(screen=>String(screen.id||screen.screenId||'')),
-  method:'upload-functional-contract-then-reimagine-variants',
-  creativeRange:'REIMAGINE',
-  aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT'],
+  method:'upload-functional-contract-then-explore-variants',
+  creativeRange:'EXPLORE',
+  aspects:['LAYOUT','COLOR_SCHEME'],
   functionalContract:['emitted/limit','percentage','remaining capacity','progress','copy WhatsApp','view all','recent emitted list','open vehicle']
 },null,2)+'\n');
 
