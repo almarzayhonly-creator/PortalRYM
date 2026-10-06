@@ -89,26 +89,37 @@ DESIGN DIRECTION:
 Return a polished production-oriented screen/component proposal that can be translated into Vue 3.
 `.trim();
 
-let finalScreen=source;
+let variants;
 try{
-  const edited=await source.edit(prompt);
-  if(edited?.first)finalScreen=edited.first;
+  variants=await source.variants(prompt,{
+    variantCount:3,
+    creativeRange:'REIMAGINE',
+    aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']
+  },{deviceType:'DESKTOP'});
 }catch(error){
-  if(!(error instanceof StitchError&&error.code==='CLARIFICATION_REQUIRED'))throw error;
+  if(error instanceof StitchError&&error.code==='CLARIFICATION_REQUIRED'){
+    const reply=error.clarification?.suggestions?.[0]||'Keep every required function and create three distinct enterprise desktop variants.';
+    variants=await source.variants(reply,{
+      variantCount:3,
+      creativeRange:'REIMAGINE',
+      aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']
+    },{deviceType:'DESKTOP'});
+  }else throw error;
 }
 
-const html=await finalScreen.getHtml();
-const image=await finalScreen.getImage();
-await fs.writeFile(path.join(outDir,'operations-emitted-stitch-latest.html'),html);
-await fs.writeFile(path.join(outDir,'operations-emitted-stitch-latest.png'),Buffer.from(image));
+const screens=Array.isArray(variants?.screens)?variants.screens:[];
+if(!screens.length)throw new Error('Stitch variants returned no screens');
+
 await fs.writeFile(path.join(outDir,'operations-emitted-stitch-latest.json'),JSON.stringify({
   generatedAt:new Date().toISOString(),
   projectId,
   sourceScreenId:String(source.id||source.screenId||''),
-  finalScreenId:String(finalScreen.id||finalScreen.screenId||''),
-  method:'upload-functional-contract-then-edit',
+  variantScreenIds:screens.map(screen=>String(screen.id||screen.screenId||'')),
+  method:'upload-functional-contract-then-reimagine-variants',
+  creativeRange:'REIMAGINE',
+  aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT'],
   functionalContract:['emitted/limit','percentage','remaining capacity','progress','copy WhatsApp','view all','recent emitted list','open vehicle']
 },null,2)+'\n');
 
 console.log('Stitch emitted-today source:',String(source.id||source.screenId||'unknown'));
-console.log('Stitch emitted-today refined:',String(finalScreen.id||finalScreen.screenId||'unknown'));
+console.log('Stitch emitted-today variants:',screens.map(screen=>String(screen.id||screen.screenId||'')).join(','));
