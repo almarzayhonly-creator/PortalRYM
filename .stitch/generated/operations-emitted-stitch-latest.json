@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-06T20:55:22.587Z",
+  "projectId": "1412531415043982793",
+  "sourceScreenId": "10225280178299631515",
+  "finalScreenId": "10225280178299631515",
+  "method": "upload-functional-contract-then-edit",
+  "functionalContract": [
+    "emitted/limit",
+    "percentage",
+    "remaining capacity",
+    "progress",
+    "copy WhatsApp",
+    "view all",
+    "recent emitted list",
+    "open vehicle"
+  ]
+}
