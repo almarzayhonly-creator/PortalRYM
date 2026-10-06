@@ -2276,3 +2276,119 @@ onMounted(()=>load())
   background:#103d7d!important
 }
 </style>
+
+
+<style scoped>
+/* Sandbox typography system · Stitch Next-Gen
+   Display: Space Grotesk · UI: Inter · Technical data: JetBrains Mono */
+.rym-revisados-vue{
+  --rym-font-display:"Space Grotesk",Inter,system-ui,sans-serif;
+  --rym-font-ui:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --rym-font-data:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  font-family:var(--rym-font-ui)!important;
+  font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility
+}
+
+/* UI copy stays neutral and highly readable */
+.rym-revisados-vue :deep(button),
+.rym-revisados-vue :deep(input),
+.rym-revisados-vue :deep(select),
+.rym-revisados-vue :deep(textarea),
+.rym-revisados-vue :deep(label),
+.rym-revisados-vue :deep(p),
+.rym-revisados-vue :deep(td),
+.rym-revisados-vue :deep(th){
+  font-family:var(--rym-font-ui)!important
+}
+
+/* Space Grotesk: hierarchy, product identity and executive metrics */
+.rym-revisados-vue :deep(h1),
+.rym-revisados-vue :deep(h2),
+.rym-revisados-vue :deep(h3),
+.rym-revisados-vue :deep(h4),
+.rym-revisados-vue .rv-brand-copy>b,
+.rym-revisados-vue :deep(.rv-command-copy h2),
+.rym-revisados-vue :deep(.rv-panel-title h3),
+.rym-revisados-vue :deep(.rv-control-heading h3),
+.rym-revisados-vue :deep(.rv-tab-hero h2),
+.rym-revisados-vue :deep(.rv-data-panel-head h3),
+.rym-revisados-vue :deep(.rv-section-title b),
+.rym-revisados-vue :deep(.rv-stitch-report-copy h2),
+.rym-revisados-vue :deep(.rv-stitch-matrix-title h3),
+.rym-revisados-vue :deep(.rv-stitch-kpi-value strong),
+.rym-revisados-vue :deep(.rv-gallery-card h4),
+.rym-revisados-vue :deep(.rv-company-results-head h3),
+.rym-revisados-vue :deep(.rv-boletas-command-copy h2){
+  font-family:var(--rym-font-display)!important;
+  letter-spacing:-.025em
+}
+
+/* Executive figures: Space Grotesk, not generic bold Inter */
+.rym-revisados-vue :deep(.rv-score-orbit strong),
+.rym-revisados-vue :deep(.rv-ribbon-copy b),
+.rym-revisados-vue :deep(.rv-stats-score strong),
+.rym-revisados-vue :deep(.rv-boletas-summary-focus b),
+.rym-revisados-vue :deep(.rv-stitch-kpis strong),
+.rym-revisados-vue :deep(.rv-history-status b),
+.rym-revisados-vue :deep(.rv-daily-pulse-v2 b),
+.rym-revisados-vue :deep(.rv-cupos-summary b){
+  font-family:var(--rym-font-display)!important;
+  font-variant-numeric:tabular-nums
+}
+
+/* Technical / operational data */
+.rym-revisados-vue :deep(.mono),
+.rym-revisados-vue :deep(.plate),
+.rym-revisados-vue :deep(.rv-drawer-plate),
+.rym-revisados-vue :deep(.rv-company-plates span),
+.rym-revisados-vue :deep(.rv-company-detail-identity strong),
+.rym-revisados-vue :deep(.rv-stitch-cell strong),
+.rym-revisados-vue :deep(.rv-stitch-month-total strong),
+.rym-revisados-vue :deep(.rv-stitch-table tfoot strong),
+.rym-revisados-vue :deep(.rv-stitch-table tfoot b),
+.rym-revisados-vue :deep(.rv-monthly-total strong),
+.rym-revisados-vue :deep(.rv-monthly-cell-main strong),
+.rym-revisados-vue :deep(.rv-version),
+.rym-revisados-vue :deep(kbd){
+  font-family:var(--rym-font-data)!important;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.01em
+}
+
+/* Monthly ratios and percentages read like operational data */
+.rym-revisados-vue :deep(.rv-stitch-cell b),
+.rym-revisados-vue :deep(.rv-stitch-month-total b),
+.rym-revisados-vue :deep(.rv-stitch-month-total span),
+.rym-revisados-vue :deep(.rv-stitch-table tfoot span){
+  font-family:var(--rym-font-data)!important;
+  font-variant-numeric:tabular-nums
+}
+
+/* Labels/badges stay Inter, with modern compact tracking */
+.rym-revisados-vue :deep(small),
+.rym-revisados-vue :deep(em),
+.rym-revisados-vue :deep(.rv-nav-label),
+.rym-revisados-vue :deep(.rv-company-status),
+.rym-revisados-vue :deep(.rv-stitch-kpis article header span),
+.rym-revisados-vue :deep(.rv-stitch-legend span),
+.rym-revisados-vue :deep(.rv-top-scope){
+  font-family:var(--rym-font-ui)!important
+}
+
+/* Slightly stronger display treatment without changing layout */
+.rym-revisados-vue .rv-page-heading h1{
+  font-family:var(--rym-font-display)!important;
+  font-weight:700!important;
+  letter-spacing:-.035em!important
+}
+.rym-revisados-vue :deep(.rv-stitch-report-copy h2){
+  font-weight:700!important;
+  letter-spacing:-.035em!important
+}
+.rym-revisados-vue :deep(.rv-stitch-kpi-value strong){
+  font-weight:700!important;
+  letter-spacing:-.035em!important
+}
+</style>
