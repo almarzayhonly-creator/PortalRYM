@@ -39,6 +39,8 @@ const supervisoras=ref<string[]>([])
 const statuses2=ref<string[]>([])
 const ecarStates=ref<string[]>([])
 const resultModalOpen=ref(false)
+const emittedExpanded=ref(false)
+const emittedCopyState=ref('')
 const syncPercent=computed(()=>{
   const total=Math.max(0,Number(props.syncProgress?.total||0))
   const done=Math.max(0,Number(props.syncProgress?.procesadas||0))
@@ -51,6 +53,7 @@ const emittedCount=computed(()=>props.emittedRows.length)
 const emittedPct=computed(()=>Math.min(100,Math.round((emittedCount.value/Math.max(1,props.emittedLimit||33))*100)))
 const emittedRemaining=computed(()=>Math.max(0,(props.emittedLimit||33)-emittedCount.value))
 const emittedPreview=computed(()=>props.emittedRows.slice(0,3))
+const emittedVisible=computed(()=>emittedExpanded.value?props.emittedRows:props.emittedRows.slice(0,8))
 
 function s(v:unknown){return String(v??'').trim()}
 function n(v:unknown){return s(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()}
@@ -247,7 +250,41 @@ async function copyList(){
     area.select()
     document.execCommand('copy')
     area.remove()
+
   }
+}
+
+async function copyEmittedToday(){
+  if(!props.emittedRows.length)return
+  const lines:string[]=[
+    '*Portal RYM · Revisados emitidos hoy*',
+    `*Emitidos:* ${emittedCount.value} / ${props.emittedLimit} · *Disponibles:* ${emittedRemaining.value}`,
+    ''
+  ]
+  for(const row of props.emittedRows){
+    const unit=s(row.unidad)||'—'
+    const plate=s(row.placa)||'—'
+    const company=s(row.empresa)||'—'
+    const supervisor=s(row.supervisora)||'Sin supervisora'
+    const stamp=formatPanamaDateTime(row.ultimo_revisado)
+    lines.push(`• ${unit} · ${plate} · ${company} · ${supervisor} · ${stamp}`)
+  }
+  const value=lines.join('\n').trim()
+  try{
+    await navigator.clipboard.writeText(value)
+  }catch{
+    const area=document.createElement('textarea')
+    area.value=value
+    area.style.position='fixed'
+    area.style.opacity='0'
+    document.body.appendChild(area)
+    area.focus()
+    area.select()
+    document.execCommand('copy')
+    area.remove()
+  }
+  emittedCopyState.value='Copiado para WhatsApp'
+  window.setTimeout(()=>{emittedCopyState.value=''},1800)
 }
 
 function formatPanamaDateOnly(v:unknown){
@@ -710,26 +747,63 @@ function exportPdf(){
     </div>
   </section>
 
-  <section class="daily-pulse">
-    <div class="daily-orbit" :style="{'--pulse':emittedPct+'%'}">
-      <div><b>{{emittedCount}}</b><span>/ {{emittedLimit}}</span></div>
-      <small>{{emittedPct}}% del día</small>
+  <section class="emitted-hub">
+    <header class="emitted-hub-head">
+      <div class="emitted-hub-title">
+        <span>CAPACIDAD DIARIA ECARCHECK</span>
+        <h3>Emitidos hoy <b>{{emittedCount}} / {{emittedLimit}}</b></h3>
+        <p>Quedan <strong>{{emittedRemaining}}</strong> cupo{{emittedRemaining===1?'':'s'}} disponible{{emittedRemaining===1?'':'s'}} hoy.</p>
+      </div>
+
+      <div class="emitted-hub-score">
+        <div class="emitted-orbit" :style="{'--pulse':emittedPct+'%'}">
+          <strong>{{emittedPct}}</strong>
+          <span>% del día</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="emitted-progress">
+      <i :style="{width:emittedPct+'%'}"></i>
     </div>
-    <div class="daily-pulse-copy">
-      <span>RITMO DEL DÍA</span>
-      <h3>Emitidos hoy</h3>
-      <p><b>{{emittedRemaining}}</b> cupos disponibles · límite operativo {{emittedLimit}}</p>
-      <div class="daily-line"><i :style="{width:emittedPct+'%'}"></i></div>
+
+    <div class="emitted-share-row">
+      <span>Resumen operativo listo para compartir</span>
+      <div>
+        <em v-if="emittedCopyState">{{emittedCopyState}}</em>
+        <button class="emitted-ws" type="button" :disabled="!emittedRows.length" @click="copyEmittedToday">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16.02 3.2A12.76 12.76 0 0 0 5.1 22.55L3.2 28.8l6.43-1.84a12.8 12.8 0 1 0 6.39-23.76Zm0 2.55a10.24 10.24 0 0 1 8.86 15.36 10.21 10.21 0 0 1-13.66 3.8l-.47-.28-3.81 1.09 1.12-3.71-.3-.48A10.22 10.22 0 0 1 16.02 5.75Zm-5.68 4.28c-.24 0-.62.09-.95.45-.33.36-1.25 1.22-1.25 2.98 0 1.75 1.28 3.45 1.46 3.69.18.24 2.51 3.83 6.08 5.37.85.37 1.51.58 2.03.74.85.27 1.63.23 2.24.14.68-.1 2.1-.86 2.4-1.69.3-.82.3-1.53.21-1.68-.09-.15-.33-.24-.7-.42-.36-.18-2.1-1.04-2.43-1.16-.32-.12-.56-.18-.8.18-.23.36-.91 1.16-1.12 1.4-.2.24-.41.27-.77.09-.36-.18-1.52-.56-2.89-1.79-1.07-.95-1.79-2.13-2-2.49-.21-.36-.02-.56.16-.74.16-.16.36-.41.54-.62.18-.21.24-.36.36-.6.12-.24.06-.45-.03-.62-.09-.18-.8-1.93-1.1-2.64-.28-.69-.58-.6-.8-.61h-.66Z"/></svg>
+          Copiar WS
+        </button>
+      </div>
     </div>
-    <div class="daily-recent" v-if="emittedPreview.length">
-      <span v-for="r in emittedPreview" :key="String(r.ultimo_revisado_id||r.unidad_id||r.placa)">
-        <b>{{r.unidad||'—'}} · {{r.placa||'—'}}</b>
-        <small>{{r.galera||'—'}} · {{formatPanamaDateTime(r.ultimo_revisado)}}</small>
-      </span>
+
+    <div class="emitted-list-head">
+      <div>
+        <h4>Emitidos recientes</h4>
+        <p>Últimos revisados emitidos hoy dentro de tu alcance.</p>
+      </div>
+      <button v-if="emittedRows.length>8" type="button" @click="emittedExpanded=!emittedExpanded">
+        {{emittedExpanded?'Ver menos':'Ver todos'}} <RymIcon :name="emittedExpanded?'expand_less':'arrow_forward'" :size="14"/>
+      </button>
     </div>
-    <div v-else class="daily-recent empty">
-      <b>Sin emisiones registradas hoy</b>
-      <small>El primer revisado aparecerá aquí automáticamente.</small>
+
+    <div v-if="emittedVisible.length" class="emitted-grid" :class="{expanded:emittedExpanded}">
+      <button v-for="r in emittedVisible" :key="String(r.ultimo_revisado_id||r.unidad_id||r.placa)" type="button" @click="emit('open',r)">
+        <div class="emitted-card-id">
+          <strong>{{r.unidad||'—'}}</strong>
+          <span>·</span>
+          <b>{{r.placa||'—'}}</b>
+        </div>
+        <p>{{r.empresa||'—'}} · {{r.supervisora||'Sin supervisora'}}</p>
+        <small>{{formatPanamaDateTime(r.ultimo_revisado)}}<template v-if="r.ultimo_revisado_id"> · ID {{r.ultimo_revisado_id}}</template></small>
+        <RymIcon name="chevron_right" :size="15"/>
+      </button>
+    </div>
+
+    <div v-else class="emitted-empty">
+      <RymIcon name="schedule" :size="22"/>
+      <div><b>Sin emisiones registradas hoy</b><span>El primer revisado aparecerá aquí automáticamente.</span></div>
     </div>
   </section>
 
@@ -1109,4 +1183,72 @@ function exportPdf(){
 
 <style scoped>
 @media(max-width:980px){.daily-pulse{grid-template-columns:auto 1fr}.daily-recent{grid-column:1/-1}}
+
+/* Emitidos hoy · main parity + Stitch treatment */
+.emitted-hub{
+  display:grid;gap:11px;padding:16px;
+  border:1px solid #bed0e7;border-radius:15px;
+  background:linear-gradient(135deg,#fff 0%,#f9fbff 100%);
+  box-shadow:0 8px 22px rgba(18,58,110,.055)
+}
+.emitted-hub-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center}
+.emitted-hub-title{display:grid;gap:3px}
+.emitted-hub-title>span{font-size:7px;font-weight:900;letter-spacing:.1em;color:#2b6ec8}
+.emitted-hub-title h3{margin:0;font-family:"Space Grotesk",Inter,sans-serif;font-size:18px;letter-spacing:-.025em;color:#102d58}
+.emitted-hub-title h3 b{color:#4b84e6}
+.emitted-hub-title p{margin:0;font-size:8px;color:#6a7c93}.emitted-hub-title p strong{color:#173d70}
+.emitted-hub-score{display:grid;place-items:center}
+.emitted-orbit{
+  --pulse:0%;width:66px;height:66px;border-radius:50%;
+  display:grid;place-items:center;align-content:center;
+  background:radial-gradient(circle at center,#fff 58%,transparent 59%),conic-gradient(#5e95ee var(--pulse),#dce7f5 0);
+  box-shadow:inset 0 0 0 1px #e0e9f5
+}
+.emitted-orbit strong{font-family:"Space Grotesk",Inter,sans-serif;font-size:18px;line-height:1;color:#12345f}
+.emitted-orbit span{margin-top:2px;font-size:6px;color:#7c8ea5}
+.emitted-progress{height:7px;border-radius:999px;background:#e4edf8;overflow:hidden}
+.emitted-progress i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#3f7fe2,#8bb9f8);transition:width .25s ease}
+.emitted-share-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-height:40px;padding:8px 10px;border:1px solid #dbe6f2;border-radius:9px;
+  background:#f7faff
+}
+.emitted-share-row>span{font-size:8px;color:#60748e}
+.emitted-share-row>div{display:flex;align-items:center;gap:8px}
+.emitted-share-row em{font-size:7px;font-style:normal;color:#18805a;font-weight:800}
+.emitted-ws{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;
+  min-height:31px!important;padding:0 10px!important;border:1px solid #a9dec2!important;
+  border-radius:7px!important;background:#effcf5!important;color:#157b50!important;
+  font-size:8px!important;font-weight:900!important;cursor:pointer!important
+}
+.emitted-ws svg{width:15px;height:15px;color:#21b56d}.emitted-ws:disabled{opacity:.45!important;cursor:not-allowed!important}
+.emitted-list-head{display:flex;align-items:end;justify-content:space-between;gap:12px;padding-top:2px}
+.emitted-list-head h4{margin:0;font-family:"Space Grotesk",Inter,sans-serif;font-size:13px;color:#14365f}
+.emitted-list-head p{margin:2px 0 0;font-size:7px;color:#78899f}
+.emitted-list-head button{
+  display:inline-flex!important;align-items:center!important;gap:4px!important;
+  padding:4px 0!important;border:0!important;background:transparent!important;
+  color:#2a67bc!important;font-size:8px!important;font-weight:900!important;cursor:pointer!important
+}
+.emitted-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.emitted-grid button{
+  position:relative;min-width:0;display:grid;gap:3px;padding:10px 30px 9px 10px!important;
+  border:1px solid #d7e3f1!important;border-radius:9px!important;background:#fbfdff!important;
+  text-align:left!important;box-shadow:none!important;cursor:pointer!important
+}
+.emitted-grid button:hover{border-color:#80aef0!important;background:#f6faff!important;transform:translateY(-1px)}
+.emitted-card-id{display:flex;align-items:center;gap:4px;min-width:0}
+.emitted-card-id strong,.emitted-card-id b{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;color:#123961;white-space:nowrap
+}
+.emitted-card-id span{font-size:8px;color:#94a3b8}
+.emitted-grid p{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px;color:#657991}
+.emitted-grid small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:6px;color:#8a99ab}
+.emitted-grid button>.rym-icon{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#6494d8}
+.emitted-empty{display:flex;align-items:center;gap:9px;padding:15px;border:1px dashed #cad9ea;border-radius:9px;background:#fbfdff;color:#72859d}
+.emitted-empty>div{display:grid;gap:2px}.emitted-empty b{font-size:9px;color:#345371}.emitted-empty span{font-size:7px}
+@media(max-width:1180px){.emitted-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.emitted-hub-head{grid-template-columns:1fr}.emitted-hub-score{justify-content:start}.emitted-share-row,.emitted-list-head{align-items:flex-start;flex-direction:column}.emitted-grid{grid-template-columns:1fr}}
+
 </style>
