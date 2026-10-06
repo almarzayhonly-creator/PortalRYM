@@ -1,40 +1,116 @@
 {
-  "generatedAt": "2026-10-06T21:00:17.861Z",
+  "generatedAt": "2026-10-06T21:09:37.260Z",
   "projects": [
     {
       "id": "1412531415043982793",
       "title": "Revisados RYM Operations Hub",
       "screens": [
         {
-          "id": "276a9a54fd9c4c869dcdb1b9772d452c",
-          "title": "Dashboard - Revisados RYM (Fidelidad de Producción)"
+          "id": "6b557d6b6fcf4ed38007a43d6021d164",
+          "title": "5. Ficha de Unidad - Revisados RYM"
+        },
+        {
+          "id": "07f698840a9b4783bbd6453aaafd66d6",
+          "title": "Executive + Operations - Control Integral"
+        },
+        {
+          "id": "fc0dbdad611b4aeb934576228f37bec6",
+          "title": "1. Mission Control - Revisados RYM"
+        },
+        {
+          "id": "dd6da41cb454413cba2527cbbf003ddb",
+          "title": "1. Mission Control - Revisados RYM (eCarCheck Theme)"
+        },
+        {
+          "id": "9833d797c46546769195f7eade7fd8ec",
+          "title": "2. Avance y Auditoría - Revisados RYM (Light Mode)"
+        },
+        {
+          "id": "c5ae5cac75bc4c5880c0939485c11bfa",
+          "title": "Operaciones - Cards View (Production Final)"
+        },
+        {
+          "id": "a98a2bb4f8df45f79dda0091db28af8e",
+          "title": "Dashboard - Revisados RYM (Producción Reskin)"
+        },
+        {
+          "id": "6981218175232072635",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
+        },
+        {
+          "id": "2765045109541220019",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
+        },
+        {
+          "id": "9047711944620758723",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
+        },
+        {
+          "id": "7d2cef68384f4adb8a5172d3fab7e545",
+          "title": "4. Ficha de Unidad - Revisados RYM"
+        },
+        {
+          "id": "cf1c2d71a318408ebcc3875721e8406a",
+          "title": "2. Avance y Auditoría - Revisados RYM (Vue 3 Ready)"
+        },
+        {
+          "id": "31a22c25f3a94053b45577f528bf782d",
+          "title": "Operaciones - Vehicle Operations Workspace (Table View)"
+        },
+        {
+          "id": "9723419093781143570",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
+        },
+        {
+          "id": "f2ffba9d32234930af8f4e87b8517ad3",
+          "title": "1. Dashboard / Mission Control - Revisados RYM (Light Mode)"
+        },
+        {
+          "id": "6708360399076774577",
+          "title": "Revisados RYM - Avance mensual - Main reference"
         },
         {
           "id": "15573130869295536766",
           "title": "Revisados RYM - Avance mensual - Main reference"
         },
         {
+          "id": "d2ec5c8ae9ed4e0db264ea5ae25a2bf6",
+          "title": "3. Operaciones - Revisados RYM"
+        },
+        {
+          "id": "9ffe9d6cbb86472fb4cea109037b7889",
+          "title": "2. Avance y Auditoría - Revisados RYM (Light Mode Refined)"
+        },
+        {
+          "id": "7830ff417a70466bb0f0ea1badb6da36",
+          "title": "Avance mensual - Revisados RYM (Refinado)"
+        },
+        {
+          "id": "f9b7af930cef441f8dfcee907858f6a8",
+          "title": "2. Operaciones - Revisados RYM"
+        },
+        {
+          "id": "79172f93e10d4a60ad2da435254e4530",
+          "title": "Mission Control - Matriz Táctica"
+        },
+        {
           "id": "fb1096f30093457c8289b83b264549ea",
           "title": "2. Avance y Auditoría - Revisados RYM"
         },
         {
-          "id": "1da31851e53a43318768500f2cc8d23e",
-          "title": "Operaciones - Cards View (Production Ready)"
+          "id": "ae2d65cb377d46dab7587faa23c98f28",
+          "title": "Operaciones - Vehicle Operations Workspace (Cards + Drawer)"
         },
         {
-          "id": "6c173da844bb42ae92fc36a03efe2702",
-          "title": "3. Operaciones - Revisados RYM (Light Mode)"
+          "id": "d0a88582a1c3429789bd4473d4a1fd8f",
+          "title": "Operaciones - Table View (Production Final)"
         },
         {
-          "id": "343f985df80046838679e98917cbccc6",
-          "title": "1. Mission Control - Revisados RYM (Vue 3 Ready)"
+          "id": "d7386870cef54ba793c07c10d5c91422",
+          "title": "3. Avance Mensual - Revisados RYM"
         },
         {
-          "id": "377e826f783c4d2fbf44b03eee1697da",
-          "title": "4. Reporte Diario - Revisados RYM"
-        },
-        {
-          "id": "d2ec5c8ae9ed4e0db264ea5ae25a2bf6",
+          "id": "dd4d4510ef4746e6881f99e337e5b4d5",
           "title": "3. Operaciones - Revisados RYM"
         },
         {
@@ -42,20 +118,20 @@
           "title": "2. Avance y Auditoría - Revisados RYM"
         },
         {
-          "id": "7830ff417a70466bb0f0ea1badb6da36",
-          "title": "Avance mensual - Revisados RYM (Refinado)"
+          "id": "8b6a24dc89254a069d7a30a116787f45",
+          "title": "1. Mission Control - Nueva Identidad RYM"
         },
         {
-          "id": "9ffe9d6cbb86472fb4cea109037b7889",
-          "title": "2. Avance y Auditoría - Revisados RYM (Light Mode Refined)"
+          "id": "6c173da844bb42ae92fc36a03efe2702",
+          "title": "3. Operaciones - Revisados RYM (Light Mode)"
         },
         {
-          "id": "be18099324a1484e82f94b1b3614a807",
-          "title": "Dashboard - Revisados RYM (Portal RYM Main)"
+          "id": "7198b1cfaffa40c78745e1d57d1673ba",
+          "title": "5. Ficha de Unidad - Revisados RYM"
         },
         {
-          "id": "0091603aebfd4b2e95cd20f54a4a13f2",
-          "title": "Operations Desk - Mesa de Trabajo Legal"
+          "id": "12444923710617565965",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
         },
         {
           "id": "1b4168b9add8416487c6a8001bfd9d70",
@@ -66,148 +142,104 @@
           "title": "Mission Control - Portal RYM Revisados"
         },
         {
+          "id": "1561073041443329836",
+          "title": "Revisados RYM - Avance mensual - Main reference"
+        },
+        {
           "id": "3e9b38c00a434c89aef98b667bd9891f",
           "title": "1. Dashboard / Mission Control - Revisados RYM (Light Mode Refined)"
         },
         {
-          "id": "4961644c6190416d9ff48efa90175e22",
-          "title": "2. Avance y Auditoría - Revisados RYM (eCarCheck Theme)"
-        },
-        {
-          "id": "c5ae5cac75bc4c5880c0939485c11bfa",
-          "title": "Operaciones - Cards View (Production Final)"
-        },
-        {
-          "id": "b96a64acfc1d45e987b9945a570b37ec",
-          "title": "Operaciones - Table View (Production Ready)"
+          "id": "1da31851e53a43318768500f2cc8d23e",
+          "title": "Operaciones - Cards View (Production Ready)"
         },
         {
           "id": "8aecdfa659a24134a6fbe433591621d6",
           "title": "1. Dashboard - Revisados RYM"
         },
         {
+          "id": "d8b7665b670f4ee6a360adc993004f3b",
+          "title": "1. Dashboard / Mission Control - Revisados RYM"
+        },
+        {
+          "id": "343f985df80046838679e98917cbccc6",
+          "title": "1. Mission Control - Revisados RYM (Vue 3 Ready)"
+        },
+        {
           "id": "6094365896172476872",
           "title": "Revisados RYM - Avance mensual - Main reference"
         },
         {
-          "id": "8fc40eb35ff549afa35492d95b15891c",
-          "title": "Operaciones - Portal RYM Revisados"
-        },
-        {
-          "id": "6b557d6b6fcf4ed38007a43d6021d164",
-          "title": "5. Ficha de Unidad - Revisados RYM"
+          "id": "276a9a54fd9c4c869dcdb1b9772d452c",
+          "title": "Dashboard - Revisados RYM (Fidelidad de Producción)"
         },
         {
           "id": "37e5a276a3e8495f80b087dba270052c",
           "title": "Portal RYM // Component Studio: Next-Gen Cards, Badges & KPIs"
         },
         {
-          "id": "dd4d4510ef4746e6881f99e337e5b4d5",
-          "title": "3. Operaciones - Revisados RYM"
-        },
-        {
-          "id": "31a22c25f3a94053b45577f528bf782d",
-          "title": "Operaciones - Vehicle Operations Workspace (Table View)"
-        },
-        {
-          "id": "9047711944620758723",
-          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
-        },
-        {
-          "id": "f9b7af930cef441f8dfcee907858f6a8",
-          "title": "2. Operaciones - Revisados RYM"
-        },
-        {
-          "id": "07fe18dd4fff46eb829c97835aa0b18b",
-          "title": "4. Ficha de Unidad - Revisados RYM (eCarCheck Theme)"
-        },
-        {
-          "id": "bcf26bd41d3c4f9593ec7acabafff96d",
-          "title": "3. Operaciones - Revisados RYM (Light Mode Refined)"
-        },
-        {
-          "id": "cf1c2d71a318408ebcc3875721e8406a",
-          "title": "2. Avance y Auditoría - Revisados RYM (Vue 3 Ready)"
-        },
-        {
-          "id": "7d2cef68384f4adb8a5172d3fab7e545",
-          "title": "4. Ficha de Unidad - Revisados RYM"
+          "id": "377e826f783c4d2fbf44b03eee1697da",
+          "title": "4. Reporte Diario - Revisados RYM"
         },
         {
           "id": "847e902c15fd49ad9ac30d5ee68303fb",
           "title": "4. Ficha de Unidad - Revisados RYM (Vue 3 Ready)"
         },
         {
-          "id": "fc0dbdad611b4aeb934576228f37bec6",
-          "title": "1. Mission Control - Revisados RYM"
+          "id": "0091603aebfd4b2e95cd20f54a4a13f2",
+          "title": "Operations Desk - Mesa de Trabajo Legal"
         },
         {
           "id": "b827fca8473f453391eb9a67bb0d9f73",
           "title": "3. Operaciones - Revisados RYM (Vue 3 Ready)"
         },
         {
-          "id": "d7386870cef54ba793c07c10d5c91422",
-          "title": "3. Avance Mensual - Revisados RYM"
+          "id": "363383051852878571",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
         },
         {
-          "id": "8b6a24dc89254a069d7a30a116787f45",
-          "title": "1. Mission Control - Nueva Identidad RYM"
+          "id": "18051371336532017036",
+          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
         },
         {
-          "id": "d0a88582a1c3429789bd4473d4a1fd8f",
-          "title": "Operaciones - Table View (Production Final)"
+          "id": "be18099324a1484e82f94b1b3614a807",
+          "title": "Dashboard - Revisados RYM (Portal RYM Main)"
         },
         {
-          "id": "a98a2bb4f8df45f79dda0091db28af8e",
-          "title": "Dashboard - Revisados RYM (Producción Reskin)"
+          "id": "4961644c6190416d9ff48efa90175e22",
+          "title": "2. Avance y Auditoría - Revisados RYM (eCarCheck Theme)"
         },
         {
-          "id": "6708360399076774577",
+          "id": "13016623546188028711",
           "title": "Revisados RYM - Avance mensual - Main reference"
-        },
-        {
-          "id": "79172f93e10d4a60ad2da435254e4530",
-          "title": "Mission Control - Matriz Táctica"
-        },
-        {
-          "id": "11d2522ab5ab4cad94a402de901dea4a",
-          "title": "Avance Mensual - Portal RYM Revisados"
         },
         {
           "id": "10225280178299631515",
           "title": "Portal RYM - Operaciones - Emitidos hoy contract"
         },
         {
-          "id": "7198b1cfaffa40c78745e1d57d1673ba",
-          "title": "5. Ficha de Unidad - Revisados RYM"
+          "id": "b96a64acfc1d45e987b9945a570b37ec",
+          "title": "Operaciones - Table View (Production Ready)"
         },
         {
-          "id": "6981218175232072635",
-          "title": "Portal RYM - Operaciones - Emitidos hoy contract"
+          "id": "15192567834623193077",
+          "title": "Revisados RYM - Avance mensual - Main reference"
         },
         {
-          "id": "f2ffba9d32234930af8f4e87b8517ad3",
-          "title": "1. Dashboard / Mission Control - Revisados RYM (Light Mode)"
+          "id": "07fe18dd4fff46eb829c97835aa0b18b",
+          "title": "4. Ficha de Unidad - Revisados RYM (eCarCheck Theme)"
         },
         {
-          "id": "07f698840a9b4783bbd6453aaafd66d6",
-          "title": "Executive + Operations - Control Integral"
+          "id": "11d2522ab5ab4cad94a402de901dea4a",
+          "title": "Avance Mensual - Portal RYM Revisados"
         },
         {
-          "id": "9833d797c46546769195f7eade7fd8ec",
-          "title": "2. Avance y Auditoría - Revisados RYM (Light Mode)"
+          "id": "8fc40eb35ff549afa35492d95b15891c",
+          "title": "Operaciones - Portal RYM Revisados"
         },
         {
-          "id": "ae2d65cb377d46dab7587faa23c98f28",
-          "title": "Operaciones - Vehicle Operations Workspace (Cards + Drawer)"
-        },
-        {
-          "id": "dd6da41cb454413cba2527cbbf003ddb",
-          "title": "1. Mission Control - Revisados RYM (eCarCheck Theme)"
-        },
-        {
-          "id": "d8b7665b670f4ee6a360adc993004f3b",
-          "title": "1. Dashboard / Mission Control - Revisados RYM"
+          "id": "bcf26bd41d3c4f9593ec7acabafff96d",
+          "title": "3. Operaciones - Revisados RYM (Light Mode Refined)"
         }
       ]
     },
@@ -216,39 +248,39 @@
       "title": "Portal RYM Dashboard",
       "screens": [
         {
-          "id": "4702766054102149834",
-          "title": "image.png"
+          "id": "29bbfd799f4046d0bddcd0170113a36d",
+          "title": "Portal RYM Logo"
         },
         {
           "id": "063d84436b144e3ab399a1f69618644c",
           "title": "Dashboard Vue 3 - Portal RYM"
         },
         {
-          "id": "07d9d08d46994678b097afb3a1733d81",
-          "title": "Avance Mensual - Matriz Ejecutiva de Cobertura"
-        },
-        {
-          "id": "29bbfd799f4046d0bddcd0170113a36d",
-          "title": "Portal RYM Logo"
-        },
-        {
-          "id": "7465426723bf42e3aff27e7b2dd6d64e",
-          "title": "Operaciones - Portal RYM"
-        },
-        {
-          "id": "4702766054102150108",
+          "id": "4702766054102149560",
           "title": "image.png"
+        },
+        {
+          "id": "4702766054102149834",
+          "title": "image.png"
+        },
+        {
+          "id": "4bd9ae9abdff40169d9399b7c5472e18",
+          "title": "Dashboard Ejecutivo - Portal RYM"
         },
         {
           "id": "8bb02c5d53124b62ad53c000d2d9baf0",
           "title": "Operaciones - Command Center Portal RYM"
         },
         {
-          "id": "16027762000251287792",
+          "id": "07d9d08d46994678b097afb3a1733d81",
+          "title": "Avance Mensual - Matriz Ejecutiva de Cobertura"
+        },
+        {
+          "id": "4702766054102150108",
           "title": "image.png"
         },
         {
-          "id": "4702766054102149560",
+          "id": "16027762000251287792",
           "title": "image.png"
         },
         {
@@ -260,8 +292,8 @@
           "title": "Dashboard - Portal RYM"
         },
         {
-          "id": "4bd9ae9abdff40169d9399b7c5472e18",
-          "title": "Dashboard Ejecutivo - Portal RYM"
+          "id": "7465426723bf42e3aff27e7b2dd6d64e",
+          "title": "Operaciones - Portal RYM"
         }
       ]
     }

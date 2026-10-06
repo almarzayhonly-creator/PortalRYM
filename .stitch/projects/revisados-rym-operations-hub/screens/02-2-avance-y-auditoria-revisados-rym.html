@@ -1,4 +1,959 @@
 <!DOCTYPE html>
 
-<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"tertiary-container":"#e79400","surface-dim":"#031427","surface-container-low":"#0b1c30","on-tertiary-container":"#563400","on-secondary-fixed-variant":"#005236","inverse-on-surface":"#213145","error":"#ffb4ab","surface":"#031427","tertiary-fixed":"#ffddb8","error-container":"#93000a","on-primary-container":"#00424f","on-secondary":"#003824","surface-bright":"#2a3a4f","on-tertiary-fixed-variant":"#653e00","secondary-fixed-dim":"#4edea3","secondary-container":"#00a572","on-secondary-fixed":"#002113","outline-variant":"#3d494c","on-tertiary":"#472a00","on-background":"#d3e4fe","on-error":"#690005","tertiary-fixed-dim":"#ffb95f","primary-container":"#06b6d4","secondary-fixed":"#6ffbbe","on-surface":"#d3e4fe","tertiary":"#ffb95f","background":"#031427","inverse-surface":"#d3e4fe","primary":"#4cd7f6","on-primary":"#003640","on-secondary-container":"#00311f","secondary":"#4edea3","on-tertiary-fixed":"#2a1700","on-primary-fixed-variant":"#004e5c","surface-container-lowest":"#000f21","surface-variant":"#26364a","primary-fixed":"#acedff","on-surface-variant":"#bcc9cd","surface-container":"#102034","on-error-container":"#ffdad6","outline":"#869397","inverse-primary":"#00687a","on-primary-fixed":"#001f26","primary-fixed-dim":"#4cd7f6","surface-container-highest":"#26364a","surface-tint":"#4cd7f6","surface-container-high":"#1b2b3f"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-xs":"0.25rem","gutter-dense":"0.5rem","margin":"1.5rem","space-sm":"0.375rem","space-2xl":"1.5rem","space-xxs":"0.125rem","space-lg":"0.75rem","gutter":"1rem","space-md":"0.5rem","space-xl":"1rem"},"fontFamily":{"headline-xl":["Inter"],"label-caps":["Inter"],"mono-data":["JetBrains Mono"],"body-strong":["Inter"],"headline-lg":["Inter"],"body-default":["Inter"],"mono-badge":["JetBrains Mono"],"headline-md":["Inter"],"body-compact":["Inter"]},"fontSize":{"headline-xl":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"label-caps":["10px",{"lineHeight":"12px","letterSpacing":"0.06em","fontWeight":"700"}],"mono-data":["12px",{"lineHeight":"16px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-strong":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-default":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"400"}],"mono-badge":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-compact":["12px",{"lineHeight":"16px","letterSpacing":"0em","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-default text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.45)]"><div class="flex flex-col"><div class="h-14 px-margin bg-surface-container-low flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-2.5 h-2.5 rounded-DEFAULT bg-primary"></div><span class="font-headline-md text-headline-md tracking-tight text-on-surface uppercase">Portal RYM</span></div><span class="font-mono-badge text-mono-badge px-space-xs py-space-xxs rounded-DEFAULT bg-surface-container-highest text-primary font-bold">FLOTA 2K+</span></div><div class="px-margin py-space-sm bg-surface-container"><div class="flex items-center justify-between text-on-surface-variant font-label-caps text-label-caps uppercase"><span>Red Operativa</span><span class="text-secondary font-mono-badge text-mono-badge flex items-center gap-space-xxs"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-secondary inline-block animate-pulse"></span>ONLINE</span></div><div class="mt-space-xs flex items-center justify-between text-on-surface font-body-compact text-body-compact"><span class="truncate">Sede Central - Galera 04</span><span class="material-symbols-outlined text-primary text-[14px]">expand_more</span></div></div><div class="px-margin pt-space-lg pb-space-xs text-on-surface-variant font-label-caps text-label-caps uppercase">Módulos de Inspección</div><nav class="flex flex-col gap-space-xxs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-headline-md text-headline-md"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="mission-control" href="#"><span class="material-symbols-outlined text-[18px]">radar</span><span>Mission Control</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT transition-colors bg-primary-container text-on-primary-container font-headline-md text-headline-md" data-path="avance-y-auditoria" href="#"><span class="material-symbols-outlined text-[18px]">fact_check</span><span>Avance y Auditoría</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="operations-desk" href="#"><span class="material-symbols-outlined text-[18px]">checklist_rtl</span><span>Mesa de Revisados</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="galeras-and-bays" href="#"><span class="material-symbols-outlined text-[18px]">warehouse</span><span>Galeras y Bahías</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="infractions-and-impounds" href="#"><span class="material-symbols-outlined text-[18px]">warning</span><span>Boletas y Retenciones</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="telemetry-audit-ledger" href="#"><span class="material-symbols-outlined text-[18px]">history_edu</span><span>Auditoría Forense</span></a></nav><div class="px-margin pt-space-lg pb-space-xs text-on-surface-variant font-label-caps text-label-caps uppercase">Administración</div><nav class="flex flex-col gap-space-xxs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-headline-md text-headline-md"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="supervisor-dispatch" href="#"><span class="material-symbols-outlined text-[18px]">badge</span><span>Supervisores y Turnos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-body-default text-body-default" data-path="compliance-analytics" href="#"><span class="material-symbols-outlined text-[18px]">query_stats</span><span>Métricas Ejecutivas</span></a></nav></div><div class="p-space-md bg-surface-container-low flex flex-col gap-space-xs"><div class="flex items-center justify-between font-label-caps text-label-caps text-on-surface-variant uppercase"><span>Servidor Sede #01</span><span class="font-mono-data text-mono-data text-secondary">24ms</span></div><div class="flex items-center gap-space-sm pt-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col min-w-0"><span class="font-body-strong text-body-strong text-on-surface truncate">Ing. C. Navarro</span><span class="font-mono-badge text-mono-badge text-on-surface-variant uppercase truncate">Sup. Fiscalización</span></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-14 bg-surface-container-low z-40 flex items-center justify-between px-space-xl shadow-[0_1px_8px_rgba(0,0,0,0.35)]"><div class="flex items-center gap-space-md flex-1 max-w-4xl"><div class="flex items-center gap-space-xs font-mono-data text-mono-data text-on-surface-variant shrink-0"><span class="text-on-surface font-body-strong text-body-strong">RYM Ops</span><span class="text-outline">/</span><span class="text-primary font-semibold">Avance y Auditoría</span></div><div class="relative flex-1 max-w-xs"><span class="material-symbols-outlined absolute left-space-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span><input class="w-full h-8 pl-7 pr-space-sm bg-surface-container-lowest text-on-surface font-mono-data text-[12px] placeholder:text-outline rounded-DEFAULT outline-none focus:bg-surface-container-high transition-colors" placeholder="Buscar Unidad / Placa..." type="text"/></div><div class="flex items-center gap-space-xs"><div class="flex items-center bg-surface-container px-space-xs py-0.5 rounded-DEFAULT text-[11px]"><span class="text-outline font-label-caps uppercase mr-1">Galera:</span><select class="bg-transparent text-secondary font-mono-badge outline-none cursor-pointer"><option value="all">Todas</option><option value="norte">Norte A</option><option value="central">Central B</option><option value="sur">Sur Express</option></select></div><div class="flex items-center bg-surface-container px-space-xs py-0.5 rounded-DEFAULT text-[11px]"><span class="text-outline font-label-caps uppercase mr-1">Sup:</span><select class="bg-transparent text-on-surface font-body-compact outline-none cursor-pointer"><option value="all">Todas</option><option value="mv">Lic. Marcela Vega</option><option value="cm">Ing. Carlos Mendoza</option><option value="eo">Lic. Elena Ortiz</option></select></div><div class="flex items-center bg-surface-container px-space-xs py-0.5 rounded-DEFAULT text-[11px]"><span class="text-outline font-label-caps uppercase mr-1">Estatus:</span><select class="bg-transparent text-primary font-mono-badge outline-none cursor-pointer max-w-[110px] truncate"><option value="all">Todos (10)</option><option value="vig">Vigente</option><option value="pc">Pendiente por ciclo</option><option value="pcc">Pendiente cambio de color</option><option value="inc">Incidencia</option><option value="bemp">Boleta de empresa/doc</option><option value="bplc">Boleta asociada a placa</option><option value="rplc">Restricción a placa</option><option value="scup">Sin cupo</option><option value="dcol">Diferencia de color</option><option value="dprop">Diferencia de propietario</option></select></div><div class="flex items-center bg-surface-container px-space-xs py-0.5 rounded-DEFAULT text-[11px]"><span class="text-outline font-label-caps uppercase mr-1">Ciclo:</span><span class="font-mono-data text-on-surface">Q1 2025</span></div></div></div><div class="flex items-center gap-space-md shrink-0"><div class="flex items-center gap-space-xs bg-surface-container-high px-space-sm py-space-xs rounded-DEFAULT"><div class="w-2 h-2 rounded-DEFAULT bg-secondary animate-ping"></div><span class="font-mono-badge text-mono-badge text-secondary font-bold uppercase">Live Sync ATTT</span></div><button class="w-8 h-8 rounded-DEFAULT bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors"><span class="material-symbols-outlined text-[18px]">notifications</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">shield_person</span></div></div></header><main class="w-full pt-14 bg-surface px-space-xl"><div class="flex flex-col w-full text-on-surface pb-space-2xl"><!-- 1. CONSOLIDADO Y RITMO DE CUMPLIMIENTO --><section class="w-full bg-surface-container-low shadow-sm rounded-lg p-space-lg mb-gutter"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md mb-space-md"><div><div class="flex items-center gap-space-sm mb-space-xxs"><span class="w-2 h-2 rounded-DEFAULT bg-primary inline-block"></span><span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">Revisados RYM Operations Hub</span><span class="px-space-xs py-0.5 rounded-DEFAULT bg-surface-container font-mono-badge text-mono-badge text-primary font-semibold">CICLO Q1 2025 · FISCALIZACIÓN NACIONAL</span></div><div class="flex flex-wrap items-baseline gap-x-space-md gap-y-space-xxs"><h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Avance de Certificación y Auditoría eCarCheck</h1><span class="font-mono-data text-mono-data text-on-surface-variant">Universo Flota Fiscalizada: <strong class="text-secondary">2,148 Unidades</strong> | Periodo: <strong class="text-on-surface">Q1 Semestre 2025</strong></span></div></div><div class="flex items-center gap-space-xs shrink-0"><button class="flex items-center gap-space-xs h-8 px-space-md rounded-DEFAULT bg-surface-container hover:bg-surface-container-high text-on-surface font-body-strong text-body-strong transition-colors shadow-sm"><span class="material-symbols-outlined text-[16px] text-primary">file_download</span><span>Exportar Matriz</span></button><button class="flex items-center gap-space-xs h-8 px-space-md rounded-DEFAULT bg-primary text-on-primary font-body-strong text-body-strong hover:bg-primary-fixed-dim transition-colors shadow-sm"><span class="material-symbols-outlined text-[16px]">sync_alt</span><span>Sincronizar RUV ATTT</span></button></div></div><!-- Barra de Avance Semestral --><div class="bg-surface-container-lowest p-space-md rounded-DEFAULT mb-space-md"><div class="flex items-center justify-between font-label-caps text-label-caps text-on-surface-variant mb-space-xs uppercase"><span class="flex items-center gap-space-xs font-mono-data text-mono-data text-on-surface"><span class="material-symbols-outlined text-[15px] text-secondary">verified_user</span>Consolidado General de Certificación Semestral</span><span class="font-mono-badge text-mono-badge text-secondary font-bold text-[13px]">1,607 / 2,148 UNIDADES (74.8% COMPLETADO)</span></div><div class="h-3 w-full rounded-DEFAULT flex overflow-hidden bg-surface-container-high gap-0.5"><div class="bg-secondary h-full relative cursor-pointer" style="width: 69.46%;" title="Vigente Conforme: 1,492 uds (69.5%)"></div><div class="bg-surface-bright h-full relative cursor-pointer" style="width: 13.22%;" title="Pendiente por Ciclo: 284 uds (13.2%)"></div><div class="bg-tertiary-container h-full relative cursor-pointer" style="width: 3.54%;" title="Cambio de Color: 76 uds (3.5%)"></div><div class="bg-error h-full relative cursor-pointer" style="width: 13.78%;" title="Incidencias / Boletas / Restricciones: 296 uds (13.8%)"></div></div><div class="flex flex-wrap items-center justify-between gap-space-sm mt-space-sm pt-space-xs text-on-surface-variant"><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2 rounded-DEFAULT bg-secondary inline-block"></span><span class="font-body-compact text-body-compact text-on-surface">Vigente Conforme: <strong class="font-mono-data text-secondary">1,492</strong> (69.5%)</span></div><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2 rounded-DEFAULT bg-surface-bright inline-block"></span><span class="font-body-compact text-body-compact">Pendiente Ciclo: <strong class="font-mono-data text-on-surface">284</strong> (13.2%)</span></div><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2 rounded-DEFAULT bg-tertiary-container inline-block"></span><span class="font-body-compact text-body-compact">Cambio de Color: <strong class="font-mono-data text-tertiary">76</strong> (3.5%)</span></div><div class="flex items-center gap-space-xs"><span class="w-2.5 h-2 rounded-DEFAULT bg-error inline-block"></span><span class="font-body-compact text-body-compact">Incidencias / Boletas / Restricciones: <strong class="font-mono-data text-error">296</strong> (13.8%)</span></div></div></div><!-- 2. AVANCE POR GALERA Y TURNOS --><div class="grid grid-cols-1 md:grid-cols-3 gap-space-md"><!-- Galera Central B --><div class="bg-surface-container p-space-md rounded-DEFAULT flex flex-col justify-between border-l-2 border-secondary"><div class="flex items-center justify-between mb-space-xs"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[16px] text-primary">warehouse</span><span class="font-body-strong text-body-strong text-on-surface">Galera Central B</span></div><span class="font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-secondary-container/20 text-secondary font-bold">84% AVANCE</span></div><div class="grid grid-cols-3 gap-space-xs py-space-xs my-space-xs bg-surface-container-lowest/60 rounded-DEFAULT px-space-sm text-center"><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Dotación</div><div class="font-mono-data text-mono-data text-on-surface font-semibold">890 uds</div></div><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Bloqueos</div><div class="font-mono-data text-mono-data text-tertiary font-semibold">18 leg.</div></div><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Cupos Mes</div><div class="font-mono-data text-mono-data text-secondary font-semibold">748 / 890</div></div></div><div class="flex items-center justify-between text-on-surface-variant font-body-compact text-body-compact pt-space-xxs"><div class="flex items-center gap-1"><span class="text-outline">Supervisora:</span><span class="font-body-strong text-body-strong text-on-surface">Lic. Marcela Vega</span></div><span class="font-mono-badge text-mono-badge text-secondary">Turno A (Flujo OK)</span></div></div><!-- Galera Norte A --><div class="bg-surface-container p-space-md rounded-DEFAULT flex flex-col justify-between border-l-2 border-error"><div class="flex items-center justify-between mb-space-xs"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[16px] text-error">warning</span><span class="font-body-strong text-body-strong text-on-surface">Galera Norte A</span></div><span class="font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-error-container/40 text-error font-bold">69% AVANCE</span></div><div class="grid grid-cols-3 gap-space-xs py-space-xs my-space-xs bg-surface-container-lowest/60 rounded-DEFAULT px-space-sm text-center"><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Dotación</div><div class="font-mono-data text-mono-data text-on-surface font-semibold">740 uds</div></div><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Bloqueos</div><div class="font-mono-data text-mono-data text-error font-semibold">42 leg.</div></div><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Cupos Mes</div><div class="font-mono-data text-mono-data text-error font-semibold">510 / 740</div></div></div><div class="flex items-center justify-between text-on-surface-variant font-body-compact text-body-compact pt-space-xxs"><div class="flex items-center gap-1"><span class="text-outline">Supervisor:</span><span class="font-body-strong text-body-strong text-on-surface">Ing. Carlos Mendoza</span></div><span class="font-mono-badge text-mono-badge px-1 bg-error-container/30 text-error font-semibold">¡14 Sin Cupo!</span></div></div><!-- Galera Sur Express --><div class="bg-surface-container p-space-md rounded-DEFAULT flex flex-col justify-between border-l-2 border-primary"><div class="flex items-center justify-between mb-space-xs"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[16px] text-primary">local_shipping</span><span class="font-body-strong text-body-strong text-on-surface">Galera Sur Express</span></div><span class="font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-surface-container-high text-primary font-bold">76% AVANCE</span></div><div class="grid grid-cols-3 gap-space-xs py-space-xs my-space-xs bg-surface-container-lowest/60 rounded-DEFAULT px-space-sm text-center"><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Dotación</div><div class="font-mono-data text-mono-data text-on-surface font-semibold">518 uds</div></div><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Bloqueos</div><div class="font-mono-data text-mono-data text-tertiary font-semibold">19 leg.</div></div><div><div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Cupos Mes</div><div class="font-mono-data text-mono-data text-primary font-semibold">394 / 518</div></div></div><div class="flex items-center justify-between text-on-surface-variant font-body-compact text-body-compact pt-space-xxs"><div class="flex items-center gap-1"><span class="text-outline">Supervisora:</span><span class="font-body-strong text-body-strong text-on-surface">Lic. Elena Ortiz</span></div><span class="font-mono-badge text-mono-badge text-primary">Ruta Dinámica OK</span></div></div></div></section><!-- 3. MATRIZ DE AUDITORÍA Y FISCALIZACIÓN DE ESTADOS CRÍTICOS --><div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter mb-gutter items-start"><!-- COLUMNA A: Auditoría de Discrepancias Legales y Registrales (5 cols) --><div class="xl:col-span-5 flex flex-col gap-space-md"><div class="bg-surface-container-low rounded-lg p-space-md shadow-sm"><div class="flex items-center justify-between pb-space-sm mb-space-xs border-b border-surface-container-highest"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-tertiary text-[18px]">balance</span><h2 class="font-headline-md text-headline-md text-on-surface">Discrepancias Legales y Registrales</h2></div><span class="font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-tertiary-container/30 text-tertiary font-bold">5 TIPOLOGÍAS</span></div><p class="font-body-compact text-body-compact text-on-surface-variant mb-space-sm">Monitoreo de expedientes bloqueantes ante ATTT, Municipios y Registro Vehicular.</p><div class="flex flex-col gap-space-sm"><!-- Item 1: Boleta de Empresa --><div class="bg-surface-container p-space-sm rounded-DEFAULT border-l-2 border-error"><div class="flex items-center justify-between mb-1"><span class="font-body-strong text-body-strong text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-error"></span>Boleta de Empresa / Documento</span><span class="font-mono-badge text-mono-badge text-error font-bold">$14,250 TOTAL</span></div><p class="font-body-compact text-body-compact text-on-surface-variant">11 trámites corporativos retenidos por mora patronal en ATTT. Afecta flotas contratistas.</p><div class="flex items-center justify-between pt-space-xs mt-1 text-[11px]"><span class="text-outline">Retención ATTT Sede Central</span><button class="px-2 py-0.5 bg-error text-on-error rounded-DEFAULT font-mono-badge text-[11px] font-semibold hover:opacity-90">Pagar Mora</button></div></div><!-- Item 2: Boleta Asociada a Placa --><div class="bg-surface-container p-space-sm rounded-DEFAULT border-l-2 border-tertiary"><div class="flex items-center justify-between mb-1"><span class="font-body-strong text-body-strong text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-tertiary"></span>Boleta Asociada a Placa</span><span class="font-mono-badge text-mono-badge text-tertiary font-bold">$4,170 (44 MULTAS)</span></div><p class="font-body-compact text-body-compact text-on-surface-variant">Multas de fotoradar y semáforo con conductor registrado. Exige descargo de nómina.</p><div class="flex items-center justify-between pt-space-xs mt-1 text-[11px]"><span class="text-outline">36 Choferes notificados</span><button class="px-2 py-0.5 bg-surface-container-highest hover:bg-surface-bright text-on-surface rounded-DEFAULT font-mono-badge text-[11px]">Descargar Nómina</button></div></div><!-- Item 3: Restricción Asociada a Placa --><div class="bg-surface-container p-space-sm rounded-DEFAULT border-l-2 border-error"><div class="flex items-center justify-between mb-1"><span class="font-body-strong text-body-strong text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-error"></span>Restricción Asociada a Placa</span><span class="font-mono-badge text-mono-badge text-error font-bold">8 MANDAMIENTOS</span></div><p class="font-body-compact text-body-compact text-on-surface-variant">Mandamientos de retención preventiva por juzgado ejecutor y reclamos de terceros.</p><div class="flex items-center justify-between pt-space-xs mt-1 text-[11px]"><span class="text-outline">Juzgado 3ero de Tránsito</span><button class="px-2 py-0.5 bg-surface-container-highest hover:bg-surface-bright text-on-surface rounded-DEFAULT font-mono-badge text-[11px]">Ver Oficios</button></div></div><!-- Item 4: Diferencia de Propietario --><div class="bg-surface-container p-space-sm rounded-DEFAULT border-l-2 border-primary"><div class="flex items-center justify-between mb-1"><span class="font-body-strong text-body-strong text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-primary"></span>Diferencia de Propietario</span><span class="font-mono-badge text-mono-badge text-primary font-bold">23 CONTRATOS</span></div><p class="font-body-compact text-body-compact text-on-surface-variant">Contratos de leasing operativo pendientes de inscripción y timbrado en Tesorería Municipal.</p><div class="flex items-center justify-between pt-space-xs mt-1 text-[11px]"><span class="text-outline">Subsanación bancaria en curso</span><button class="px-2 py-0.5 bg-surface-container-highest hover:bg-surface-bright text-on-surface rounded-DEFAULT font-mono-badge text-[11px]">Validar Adenda</button></div></div><!-- Item 5: Diferencia de Color --><div class="bg-surface-container p-space-sm rounded-DEFAULT border-l-2 border-tertiary-container"><div class="flex items-center justify-between mb-1"><span class="font-body-strong text-body-strong text-on-surface flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-tertiary-container"></span>Diferencia de Color / Rotulado</span><span class="font-mono-badge text-mono-badge text-tertiary font-bold">18 UNIDADES</span></div><p class="font-body-compact text-body-compact text-on-surface-variant">Pintura de mantenimiento o vinilo corporativo que difiere de datos oficiales del RUV.</p><div class="flex items-center justify-between pt-space-xs mt-1 text-[11px]"><span class="text-outline">DIJ Certificación requerida</span><button class="px-2 py-0.5 bg-surface-container-highest hover:bg-surface-bright text-on-surface rounded-DEFAULT font-mono-badge text-[11px]">Minuta Notarial</button></div></div></div></div></div><!-- COLUMNA B: Avance Mensual y Ritmo de Inspecciones eCarCheck (7 cols) --><div class="xl:col-span-7 flex flex-col gap-space-md"><div class="bg-surface-container-low rounded-lg p-space-md shadow-sm"><div class="flex items-center justify-between pb-space-sm mb-space-xs border-b border-surface-container-highest"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[18px]">insights</span><h2 class="font-headline-md text-headline-md text-on-surface">Ritmo de Inspecciones eCarCheck y Certificación Digital</h2></div><span class="font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-secondary-container/20 text-secondary font-bold">RITMO: 48 UDS / DÍA</span></div><!-- Gráfico de Avance Semanal Visual (SVG) --><div class="bg-surface-container-lowest p-space-md rounded-DEFAULT mt-space-sm"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Curva Semanal: Inspeccionadas vs Re-inspección Subsanada</span><div class="flex items-center gap-space-md text-[11px] font-mono-data"><span class="flex items-center gap-1"><span class="w-2 h-2 bg-secondary rounded-full"></span>Conformes (1er intento: 82%)</span><span class="flex items-center gap-1"><span class="w-2 h-2 bg-tertiary rounded-full"></span>Subsanadas (14%)</span><span class="flex items-center gap-1"><span class="w-2 h-2 bg-error rounded-full"></span>Rechazo persistente (4%)</span></div></div><div class="h-28 w-full flex items-end gap-2 pt-2 px-1 border-b border-surface-container-high"><div class="flex-1 flex flex-col items-center gap-1 h-full justify-end"><div class="w-full flex items-end gap-0.5 h-20"><div class="w-1/2 bg-secondary rounded-DEFAULT" style="height: 85%;" title="Lun: 42 conformes"></div><div class="w-1/2 bg-tertiary rounded-DEFAULT" style="height: 15%;" title="Lun: 7 subsanadas"></div></div><span class="font-mono-badge text-[10px] text-outline">LUN</span></div><div class="flex-1 flex flex-col items-center gap-1 h-full justify-end"><div class="w-full flex items-end gap-0.5 h-20"><div class="w-1/2 bg-secondary rounded-DEFAULT" style="height: 90%;" title="Mar: 46 conformes"></div><div class="w-1/2 bg-tertiary rounded-DEFAULT" style="height: 10%;" title="Mar: 5 subsanadas"></div></div><span class="font-mono-badge text-[10px] text-outline">MAR</span></div><div class="flex-1 flex flex-col items-center gap-1 h-full justify-end"><div class="w-full flex items-end gap-0.5 h-20"><div class="w-1/2 bg-secondary rounded-DEFAULT" style="height: 78%;" title="Mié: 39 conformes"></div><div class="w-1/2 bg-tertiary rounded-DEFAULT" style="height: 22%;" title="Mié: 11 subsanadas"></div></div><span class="font-mono-badge text-[10px] text-outline">MIÉ</span></div><div class="flex-1 flex flex-col items-center gap-1 h-full justify-end"><div class="w-full flex items-end gap-0.5 h-20"><div class="w-1/2 bg-secondary rounded-DEFAULT" style="height: 94%;" title="Jue: 49 conformes"></div><div class="w-1/2 bg-tertiary rounded-DEFAULT" style="height: 6%;" title="Jue: 3 subsanadas"></div></div><span class="font-mono-badge text-[10px] text-outline">JUE</span></div><div class="flex-1 flex flex-col items-center gap-1 h-full justify-end"><div class="w-full flex items-end gap-0.5 h-20"><div class="w-1/2 bg-secondary rounded-DEFAULT" style="height: 88%;" title="Vie: 44 conformes"></div><div class="w-1/2 bg-tertiary rounded-DEFAULT" style="height: 12%;" title="Vie: 6 subsanadas"></div></div><span class="font-mono-badge text-[10px] text-outline">VIE</span></div><div class="flex-1 flex flex-col items-center gap-1 h-full justify-end"><div class="w-full flex items-end gap-0.5 h-20"><div class="w-1/2 bg-secondary rounded-DEFAULT" style="height: 96%;" title="Sáb: 32 conformes"></div><div class="w-1/2 bg-tertiary rounded-DEFAULT" style="height: 4%;" title="Sáb: 1 subsanadas"></div></div><span class="font-mono-badge text-[10px] text-primary font-bold">HOY</span></div></div></div><!-- Log de Auditoría Notarial y Firmas Digitales en Tiempo Real --><div class="mt-space-md"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[15px] text-secondary">fingerprint</span>Log Notarial de Sellado Digital (Hash sha256)</span><span class="font-mono-badge text-mono-badge text-secondary font-semibold">3 FIRMAS HOY</span></div><div class="flex flex-col gap-1.5 font-mono-badge text-[11px]"><div class="p-space-xs bg-surface-container rounded-DEFAULT flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">verified</span><div><span class="text-on-surface font-body-strong text-body-strong">Lic. Marcela Vega</span><span class="text-outline ml-2">11:42:09</span></div></div><div class="text-right"><span class="text-primary font-mono-data">a8f94d...77e2</span><span class="text-on-surface-variant ml-2">(Lote 24 Uds Central B)</span></div></div><div class="p-space-xs bg-surface-container rounded-DEFAULT flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">verified</span><div><span class="text-on-surface font-body-strong text-body-strong">Ing. Carlos Mendoza</span><span class="text-outline ml-2">10:15:33</span></div></div><div class="text-right"><span class="text-primary font-mono-data">c12e8b...091f</span><span class="text-on-surface-variant ml-2">(Lote 15 Uds Norte A)</span></div></div><div class="p-space-xs bg-surface-container rounded-DEFAULT flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">verified</span><div><span class="text-on-surface font-body-strong text-body-strong">Lic. Elena Ortiz</span><span class="text-outline ml-2">09:04:12</span></div></div><div class="text-right"><span class="text-primary font-mono-data">f44c90...a13c</span><span class="text-on-surface-variant ml-2">(Lote 18 Uds Sur Express)</span></div></div></div></div></div></div></div><!-- 4. TABLA COMPACTA DE AUDITORÍA GRANULAR POR UNIDAD --><section class="w-full bg-surface-container-low rounded-lg p-space-md shadow-sm"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm mb-space-sm border-b border-surface-container-highest"><div><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-[18px]">table_chart</span><h2 class="font-headline-md text-headline-md text-on-surface">Auditoría Granular por Unidad Fiscalizada</h2></div><p class="font-body-compact text-body-compact text-on-surface-variant">Detalle de chasis, validación de eCarCheck y emisión de Vo.Bo. notarial</p></div><div class="flex items-center gap-space-sm"><span class="font-mono-badge text-mono-badge text-on-surface-variant">MOSTRANDO 6 DE 2,148 REGISTROS</span><button class="h-7 px-space-sm bg-surface-container hover:bg-surface-container-high rounded-DEFAULT text-on-surface font-mono-badge flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">filter_list</span>Filtro Activo</button></div></div><div class="overflow-x-auto rounded-DEFAULT"><table class="w-full text-left border-collapse"><thead><tr class="bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps uppercase"><th class="py-space-xs px-space-sm">Placa / Unidad</th><th class="py-space-xs px-space-sm">Galera / Sup.</th><th class="py-space-xs px-space-sm">Empresa / Flota</th><th class="py-space-xs px-space-sm">Último eCarCheck</th><th class="py-space-xs px-space-sm">Estatus Detallado</th><th class="py-space-xs px-space-sm">Hallazgo de Auditoría</th><th class="py-space-xs px-space-sm text-right">Acción Auditoría</th></tr></thead><tbody class="divide-y-0 font-body-compact text-body-compact"><!-- ROW 1 --><tr class="bg-surface-container hover:bg-surface-container-high transition-colors"><td class="py-space-sm px-space-sm align-top"><div class="flex items-center gap-space-xs"><span class="font-mono-data text-mono-data font-bold text-primary px-1.5 py-0.5 bg-surface-container-lowest rounded-DEFAULT">RYM-1044</span></div><div class="font-body-compact text-on-surface mt-0.5 font-semibold">Kenworth T680</div><div class="font-mono-badge text-outline text-[11px]">VIN: 1NKDX4EX0JJ</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-body-strong text-body-strong text-on-surface">Central B</div><div class="text-on-surface-variant text-[11px]">Lic. M. Vega</div></td><td class="py-space-sm px-space-sm align-top"><div class="text-on-surface font-semibold">Logística RYM S.A.</div><div class="text-outline text-[11px]">RUC 15569-2-890</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-mono-data text-on-surface">05-Mar-2024</div><span class="font-mono-badge text-mono-badge text-tertiary">Vence HOY</span></td><td class="py-space-sm px-space-sm align-top"><span class="inline-flex items-center gap-1 font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-primary-container/20 text-primary font-semibold"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-primary"></span>Pendiente por ciclo</span></td><td class="py-space-sm px-space-sm align-top"><div class="flex flex-col gap-0.5"><span class="font-mono-badge text-mono-badge text-error">Boleta empresa #EMP-810 ($200)</span><span class="text-outline text-[11px]">Gases aprobados k=0.82</span></div></td><td class="py-space-sm px-space-sm align-top text-right"><button class="h-7 px-space-sm rounded-DEFAULT bg-primary text-on-primary font-body-strong text-body-strong hover:bg-primary-fixed-dim transition-colors text-right inline-flex items-center gap-space-xxs shadow-sm"><span class="material-symbols-outlined text-[14px]">assignment_turned_in</span><span>Emitir Vo.Bo.</span></button></td></tr><!-- ROW 2 --><tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors"><td class="py-space-sm px-space-sm align-top"><div class="flex items-center gap-space-xs"><span class="font-mono-data text-mono-data font-bold text-error px-1.5 py-0.5 bg-surface-container-lowest rounded-DEFAULT">RYM-8820</span></div><div class="font-body-compact text-on-surface mt-0.5 font-semibold">Isuzu NQR 75L</div><div class="font-mono-badge text-outline text-[11px]">VIN: 4JAB118K891</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-body-strong text-body-strong text-error">Norte A</div><div class="text-on-surface-variant text-[11px]">Ing. C. Mendoza</div></td><td class="py-space-sm px-space-sm align-top"><div class="text-on-surface font-semibold">TransExpress Panamá</div><div class="text-outline text-[11px]">RUC 8812-4-1029</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-mono-data text-error line-through">19-Feb-2024</div><span class="font-mono-badge text-mono-badge text-error font-bold">Expirado 18d</span></td><td class="py-space-sm px-space-sm align-top"><span class="inline-flex items-center gap-1 font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-error-container/40 text-error font-semibold"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-error"></span>Boleta asociada a placa</span></td><td class="py-space-sm px-space-sm align-top"><div class="flex flex-col gap-0.5"><span class="font-mono-badge text-mono-badge text-error">Boleta #B-19920 ($120)</span><span class="text-error text-[11px]">Freno de emergencia descalibrado</span></div></td><td class="py-space-sm px-space-sm align-top text-right"><button class="h-7 px-space-sm rounded-DEFAULT bg-surface-container-highest hover:bg-surface-bright text-on-surface font-body-strong text-body-strong transition-colors inline-flex items-center gap-space-xxs"><span class="material-symbols-outlined text-[14px] text-error">policy</span><span>Retener Bahía</span></button></td></tr><!-- ROW 3 --><tr class="bg-surface-container hover:bg-surface-container-high transition-colors"><td class="py-space-sm px-space-sm align-top"><div class="flex items-center gap-space-xs"><span class="font-mono-data text-mono-data font-bold text-secondary px-1.5 py-0.5 bg-surface-container-lowest rounded-DEFAULT">RYM-6611</span></div><div class="font-body-compact text-on-surface mt-0.5 font-semibold">Mack Granite HD</div><div class="font-mono-badge text-outline text-[11px]">VIN: 1M2AX19C338</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-body-strong text-body-strong text-on-surface">Central B</div><div class="text-on-surface-variant text-[11px]">Lic. M. Vega</div></td><td class="py-space-sm px-space-sm align-top"><div class="text-on-surface font-semibold">Logística RYM S.A.</div><div class="text-outline text-[11px]">RUC 15569-2-890</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-mono-data text-secondary">10-Mar-2025</div><span class="font-mono-badge text-mono-badge text-secondary font-bold">RENOVADO OK</span></td><td class="py-space-sm px-space-sm align-top"><span class="inline-flex items-center gap-1 font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-secondary-container/20 text-secondary font-semibold"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-secondary"></span>Vigente</span></td><td class="py-space-sm px-space-sm align-top"><div class="text-secondary text-[11px] font-mono-data font-semibold">Todo Conforme (0 Multas)</div><div class="text-outline text-[11px]">Calcomanía oficial #CK-901</div></td><td class="py-space-sm px-space-sm align-top text-right"><button class="h-7 px-space-sm rounded-DEFAULT bg-surface-container-highest hover:bg-surface-bright text-on-surface font-body-strong text-body-strong transition-colors inline-flex items-center gap-space-xxs"><span class="material-symbols-outlined text-[14px] text-secondary">print</span><span>Certificado</span></button></td></tr><!-- ROW 4 --><tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors"><td class="py-space-sm px-space-sm align-top"><div class="flex items-center gap-space-xs"><span class="font-mono-data text-mono-data font-bold text-tertiary px-1.5 py-0.5 bg-surface-container-lowest rounded-DEFAULT">RYM-3902</span></div><div class="font-body-compact text-on-surface mt-0.5 font-semibold">Hino 500 Series</div><div class="font-mono-badge text-outline text-[11px]">VIN: JHD78810283</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-body-strong text-body-strong text-on-surface">Sur Express</div><div class="text-on-surface-variant text-[11px]">Lic. E. Ortiz</div></td><td class="py-space-sm px-space-sm align-top"><div class="text-on-surface font-semibold">Servifletes del Istmo</div><div class="text-outline text-[11px]">RUC 3491-1-9844</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-mono-data text-on-surface">22-Mar-2024</div><span class="font-mono-badge text-mono-badge text-tertiary">Vence en 14d</span></td><td class="py-space-sm px-space-sm align-top"><span class="inline-flex items-center gap-1 font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-tertiary-container/30 text-tertiary font-semibold"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-tertiary-container"></span>Pendiente por cambio de color</span></td><td class="py-space-sm px-space-sm align-top"><div class="text-tertiary text-[11px] font-mono-data font-semibold">Blanco → Gris/Rojo RYM</div><div class="text-on-surface-variant text-[11px]">Inspección visual DIJ pendiente</div></td><td class="py-space-sm px-space-sm align-top text-right"><button class="h-7 px-space-sm rounded-DEFAULT bg-surface-container-highest hover:bg-surface-bright text-on-surface font-body-strong text-body-strong transition-colors inline-flex items-center gap-space-xxs"><span class="material-symbols-outlined text-[14px] text-tertiary">upload_file</span><span>Adjuntar DIJ</span></button></td></tr><!-- ROW 5 --><tr class="bg-surface-container hover:bg-surface-container-high transition-colors"><td class="py-space-sm px-space-sm align-top"><div class="flex items-center gap-space-xs"><span class="font-mono-data text-mono-data font-bold text-error px-1.5 py-0.5 bg-surface-container-lowest rounded-DEFAULT">RYM-7230</span></div><div class="font-body-compact text-on-surface mt-0.5 font-semibold">Volvo FH 540</div><div class="font-mono-badge text-outline text-[11px]">VIN: YV2RT40A9KB</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-body-strong text-body-strong text-error">Norte A</div><div class="text-on-surface-variant text-[11px]">Ing. C. Mendoza</div></td><td class="py-space-sm px-space-sm align-top"><div class="text-on-surface font-semibold">Transportes Andinos</div><div class="text-outline text-[11px]">RUC 9028-1-5542</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-mono-data text-on-surface">12-Mar-2024</div><span class="font-mono-badge text-mono-badge text-error font-bold">Sin cupo asignado</span></td><td class="py-space-sm px-space-sm align-top"><span class="inline-flex items-center gap-1 font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-error-container/30 text-error font-semibold"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-error"></span>Sin cupo</span></td><td class="py-space-sm px-space-sm align-top"><div class="flex flex-col gap-0.5"><span class="text-error font-mono-badge text-mono-badge">Exceso cupo bahía Norte A</span><span class="text-outline text-[11px]">Reasignación Bahía Sur requerida</span></div></td><td class="py-space-sm px-space-sm align-top text-right"><button class="h-7 px-space-sm rounded-DEFAULT bg-primary text-on-primary font-body-strong text-body-strong hover:bg-primary-fixed-dim transition-colors text-right inline-flex items-center gap-space-xxs shadow-sm"><span class="material-symbols-outlined text-[14px]">move_down</span><span>Asignar Cupo</span></button></td></tr><!-- ROW 6 --><tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors"><td class="py-space-sm px-space-sm align-top"><div class="flex items-center gap-space-xs"><span class="font-mono-data text-mono-data font-bold text-primary px-1.5 py-0.5 bg-surface-container-lowest rounded-DEFAULT">RYM-5108</span></div><div class="font-body-compact text-on-surface mt-0.5 font-semibold">Freightliner M2</div><div class="font-mono-badge text-outline text-[11px]">VIN: 1FVACWDT8DH</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-body-strong text-body-strong text-on-surface">Central B</div><div class="text-on-surface-variant text-[11px]">Lic. M. Vega</div></td><td class="py-space-sm px-space-sm align-top"><div class="text-on-surface font-semibold">Leasing Banistmo S.A.</div><div class="text-outline text-[11px]">RUC 410-09-118</div></td><td class="py-space-sm px-space-sm align-top"><div class="font-mono-data text-on-surface">01-Mar-2024</div><span class="font-mono-badge text-mono-badge text-tertiary">En revisión</span></td><td class="py-space-sm px-space-sm align-top"><span class="inline-flex items-center gap-1 font-mono-badge text-mono-badge px-space-xs py-0.5 rounded-DEFAULT bg-primary-container/20 text-primary font-semibold"><span class="w-1.5 h-1.5 rounded-DEFAULT bg-primary"></span>Diferencia de propietario</span></td><td class="py-space-sm px-space-sm align-top"><div class="flex flex-col gap-0.5"><span class="text-primary font-mono-badge text-mono-badge">Adenda leasing no registrada</span><span class="text-outline text-[11px]">Poder notarial recibido</span></div></td><td class="py-space-sm px-space-sm align-top text-right"><button class="h-7 px-space-sm rounded-DEFAULT bg-primary text-on-primary font-body-strong text-body-strong hover:bg-primary-fixed-dim transition-colors text-right inline-flex items-center gap-space-xxs shadow-sm"><span class="material-symbols-outlined text-[14px]">assignment_turned_in</span><span>Emitir Vo.Bo.</span></button></td></tr></tbody></table></div></section></div></main></div></body></html>
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary": "#006398", "tertiary-fixed-dim": "#6cd3f7", "error-container": "#ffdad6", "error": "#ba1a1a", "secondary-fixed-dim": "#93ccff", "tertiary": "#000000", "on-tertiary-fixed-variant": "#004e61", "secondary-container": "#5bb8fe", "on-tertiary-container": "#028fb0", "outline-variant": "#c6c6cd", "tertiary-container": "#001f28", "on-surface-variant": "#45464d", "background": "#f8f9ff", "inverse-surface": "#213145", "surface-bright": "#f8f9ff", "on-background": "#0b1c30", "on-error": "#ffffff", "on-primary": "#ffffff", "on-secondary-container": "#00476e", "tertiary-fixed": "#b7eaff", "primary-fixed": "#dae2fd", "surface-tint": "#565e74", "inverse-primary": "#bec6e0", "surface-container-lowest": "#ffffff", "primary-fixed-dim": "#bec6e0", "primary": "#000000", "surface-container-highest": "#d3e4fe", "surface-container-low": "#eff4ff", "outline": "#76777d", "on-secondary-fixed-variant": "#004b73", "on-error-container": "#93000a", "surface-container-high": "#dce9ff", "on-secondary-fixed": "#001d31", "surface-container": "#e5eeff", "on-tertiary": "#ffffff", "on-surface": "#0b1c30", "primary-container": "#131b2e", "on-tertiary-fixed": "#001f28", "inverse-on-surface": "#eaf1ff", "surface": "#f8f9ff", "on-primary-fixed": "#131b2e", "surface-variant": "#d3e4fe", "surface-dim": "#cbdbf5", "on-primary-container": "#7c839b", "secondary-fixed": "#cce5ff", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#3f465c" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-lg": "1.25rem", "space-xl": "1.75rem", "gutter": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-md": "0.875rem", "margin": "1.5rem" }, "fontFamily": { "headline-lg": [ "Inter" ], "body-lg": [ "Inter" ], "body-sm": [ "Inter" ], "headline-sm": [ "Inter" ], "label-caps": [ "Inter" ], "data-mono-sm": [ "JetBrains Mono" ], "data-mono-lg": [ "JetBrains Mono" ], "headline-xl": [ "Inter" ], "data-mono-md": [ "JetBrains Mono" ], "body-md": [ "Inter" ] }, "fontSize": { "headline-lg": [ "1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-lg": [ "0.9375rem", { "lineHeight": "1.5rem", "fontWeight": "400" } ], "body-sm": [ "0.8125rem", { "lineHeight": "1.125rem", "fontWeight": "400" } ], "headline-sm": [ "1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "label-caps": [ "0.6875rem", { "lineHeight": "1rem", "letterSpacing": "0.06em", "fontWeight": "700" } ], "data-mono-sm": [ "0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.015em", "fontWeight": "500" } ], "data-mono-lg": [ "0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0.025em", "fontWeight": "600" } ], "headline-xl": [ "1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "data-mono-md": [ "0.8125rem", { "lineHeight": "1.125rem", "letterSpacing": "0.02em", "fontWeight": "500" } ], "body-md": [ "0.875rem", { "lineHeight": "1.25rem", "fontWeight": "400" } ] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest flex flex-col z-50 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-space-md flex items-center justify-between bg-surface-container-low"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-headline-sm"><span class="material-symbols-outlined text-[20px]">verified_user</span></div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface">PORTAL RYM</span></div><span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant uppercase">Revisados Ops</span></div></div><span class="font-label-caps text-label-caps px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed uppercase tracking-wider">2k+ UDS</span></div><div class="px-space-md py-space-xs bg-surface-container-low/50"><p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Control Legal &amp; Fiscalización</p></div><div class="flex-1 overflow-y-auto px-space-sm py-space-md flex flex-col gap-space-md"><div class="flex flex-col gap-1"><div class="px-space-xs py-1"><span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Control Operativo</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary rounded-lg font-headline-sm"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="mission-control" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-body-sm text-body-sm">1. Mission Control</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="avance-y-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="font-body-sm text-body-sm">2. Avance y Auditoría</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="operaciones" href="#"><span class="material-symbols-outlined text-[20px]">table_chart</span><span class="font-body-sm text-body-sm">3. Operaciones</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ficha-de-unidad" href="#"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span class="font-body-sm text-body-sm">4. Ficha de Unidad</span></a></nav></div><div class="flex flex-col gap-1"><div class="px-space-xs py-1"><span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Instalaciones &amp; Cumplimiento</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary rounded-lg font-headline-sm"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="galeras-y-bahias" href="#"><span class="material-symbols-outlined text-[20px]">garage_home</span><span class="font-body-sm text-body-sm">Galeras y Bahías</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="boletas-y-retenciones" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span><span class="font-body-sm text-body-sm">Boletas y Retenciones</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="auditoria-forense" href="#"><span class="material-symbols-outlined text-[20px]">policy</span><span class="font-body-sm text-body-sm">Auditoría Forense</span></a></nav></div></div><div class="p-space-sm bg-surface-container-low"><div class="flex items-center justify-between px-space-xs py-1 rounded bg-surface-container-lowest"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-data-mono-sm text-data-mono-sm text-on-surface">#01 Node Telemetry</span></div><span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">24ms</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-xl z-40 flex items-center justify-between px-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg w-72 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-outline">search</span><input class="bg-transparent border-0 outline-none w-full font-body-sm text-body-sm placeholder:text-outline text-on-surface" placeholder="Buscar VIN, placa o expediente..." readonly="" type="text"/><kbd class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant shadow-sm">⌘K</kbd></div><div class="h-6 w-px bg-surface-container-highest"></div><div class="flex items-center gap-space-xs"><div class="flex items-center gap-1 px-space-xs py-1 rounded bg-surface-container-low text-on-surface"><span class="material-symbols-outlined text-[16px] text-secondary">warehouse</span><span class="font-body-sm text-body-sm font-semibold">Galera Central B - Metro</span><span class="material-symbols-outlined text-[16px] text-outline">expand_more</span></div><div class="flex items-center gap-1 px-space-xs py-1 rounded bg-surface-container-low text-on-surface"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">badge</span><span class="font-body-sm text-body-sm">Sup: Lic. Marcela Vega</span><span class="material-symbols-outlined text-[16px] text-outline">expand_more</span></div></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs px-space-xs py-1 rounded-full bg-surface-container-low"><span class="relative flex h-2 w-2 ml-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-data-mono-sm text-data-mono-sm text-on-secondary-container font-semibold uppercase pr-1">ATTT GATEWAY 0.4s</span></div><div class="flex items-center p-0.5 rounded-full bg-surface-container-high h-8"><div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-lowest shadow-sm text-on-surface"><span class="material-symbols-outlined text-[14px]">light_mode</span><span class="font-label-caps text-label-caps font-semibold">Claro</span></div><div class="flex items-center gap-1 px-2 py-1 rounded-full text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[14px]">dark_mode</span></div></div><div class="h-6 w-px bg-surface-container-highest"></div><div class="flex items-center gap-space-xs"><div class="flex flex-col text-right"><span class="font-headline-sm text-body-sm text-on-surface leading-tight">Ing. C. Navarro</span><span class="font-label-caps text-label-caps text-secondary font-bold uppercase tracking-wider">SUPERVISOR MÁSTER</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Micro Top Progress Bar -->
+<div class="w-full bg-surface-container-high h-1 overflow-hidden">
+<div class="bg-secondary h-full transition-all duration-700 ease-out" style="width: 74.8%;"></div>
+</div>
+<div class="px-margin py-space-lg flex flex-col gap-space-lg">
+<!-- Header & Executive Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-data-mono-sm text-data-mono-sm px-space-xs py-0.5 rounded bg-primary-container text-on-primary uppercase tracking-wider">Módulo 02</span>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Control Registral &amp; Fiduciario</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">Cierre Ciclo Q1-2025</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Avance y Auditoría de Flota</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">
+          Fiscalización reglamentaria en tiempo real contra registros de la ATTT y RUV. Balance global de 2,148 unidades bajo tutela corporativa.
+        </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-space-xs flex-wrap">
+<button class="flex items-center gap-1.5 px-space-md py-2 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container transition-all text-body-sm font-semibold active:scale-95" id="btn-sync-ruv">
+<span class="material-symbols-outlined text-[18px] text-secondary" id="sync-icon">sync</span>
+<span>Sincronizar RUV ATTT</span>
+<span class="font-data-mono-sm text-data-mono-sm px-1 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-[10px]">LIVE</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-2 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm hover:bg-surface-container transition-all text-body-sm font-semibold active:scale-95">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">file_download</span>
+<span>Exportar Matriz Excel</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-2 rounded-lg bg-primary text-on-primary shadow-sm hover:bg-inverse-surface transition-all text-body-sm font-semibold active:scale-95">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Emitir Dictamen Certificado</span>
+</button>
+</div>
+</div>
+<!-- Global Filter Bar -->
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-sm">
+<div class="flex flex-wrap items-center gap-space-xs flex-1">
+<!-- Galera Selector -->
+<div class="flex items-center gap-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">warehouse</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mr-1">Galera:</span>
+<select class="bg-transparent font-body-sm text-body-sm text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option>Todas las Galeras (3)</option>
+<option selected="">Galera Central B - Metro</option>
+<option>Galera Norte A - Transístmica</option>
+<option>Galera Sur Express - Costanera</option>
+</select>
+</div>
+<!-- Supervisora Selector -->
+<div class="flex items-center gap-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">person_check</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mr-1">Auditor:</span>
+<select class="bg-transparent font-body-sm text-body-sm text-on-surface font-semibold focus:outline-none cursor-pointer">
+<option>Todos los Auditores</option>
+<option selected="">Lic. Marcela Vega (Sup. Master)</option>
+<option>Ing. Carlos Navarro (Perito)</option>
+<option>Lic. Roberto Arias (Fiduciario)</option>
+</select>
+</div>
+<!-- Estatus Multi-select Dropdown Filter -->
+<div class="flex items-center gap-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">filter_alt</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase mr-1">Estatus:</span>
+<div class="flex items-center gap-1">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-semibold">1,607 OK</span>
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-semibold">184 Bloqueos</span>
+</div>
+</div>
+<!-- Periodo -->
+<div class="flex items-center gap-1 px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_month</span>
+<span class="font-body-sm text-body-sm font-semibold">Q1-2025 (Ene - Mar)</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</div>
+</div>
+<!-- Quick Search Plate / Unit -->
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg w-full lg:w-72">
+<span class="material-symbols-outlined text-[18px] text-outline">search</span>
+<input class="bg-transparent border-0 outline-none w-full font-body-sm text-body-sm placeholder:text-outline text-on-surface" id="table-search" placeholder="Filtrar por placa, VIN o código..." type="text"/>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">ESC</span>
+</div>
+</div>
+<!-- Executive KPI Row: Global Progress & Operational Health -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Main Metric: Global Conformance -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Certificación Consolidada</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">74.8%</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">1,607 / 2,148 Uds</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[22px]">verified_user</span>
+</div>
+</div>
+<div class="mt-space-md">
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden flex">
+<div class="bg-secondary h-full" style="width: 74.8%;" title="Conforme 74.8%"></div>
+<div class="bg-surface-container-highest h-full" style="width: 13.2%;" title="En Ciclo Ordinario 13.2%"></div>
+<div class="bg-error h-full" style="width: 8.6%;" title="Bloqueo Crítico 8.6%"></div>
+<div class="bg-outline h-full" style="width: 3.4%;" title="Discrepancia Administrativa 3.4%"></div>
+</div>
+<div class="flex items-center justify-between mt-2 font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span>Objetivo mensual: 72.0%</span>
+<span class="text-secondary font-bold">+2.8% vs cuota</span>
+</div>
+</div>
+</div>
+<!-- Pendientes Ordinarios de Ciclo -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Pendientes de Ciclo Ordinario</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">284</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-semibold">EN CRONOGRAMA</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[22px]">schedule</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm">
+          Unidades asignadas para revisión mecánica en semanas 12 a 14. Sin impedimento legal ni fiscal en base RUV.
+        </p>
+</div>
+<!-- Incidencias Reales Bloqueantes -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-error uppercase tracking-wider font-bold">Incidencias Bloqueantes</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-headline-xl text-headline-xl text-error font-bold">184</span>
+<span class="font-data-mono-sm text-data-mono-sm text-error font-semibold">8.6% Flota Total</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined text-[22px]">gavel</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-space-sm pt-space-xs bg-surface-container-low px-space-xs py-1 rounded">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pasivo Fiscal Estimado:</span>
+<span class="font-data-mono-md text-data-mono-md text-error font-bold">$18,420.00</span>
+</div>
+</div>
+<!-- Estado Sincronización Telemetría ATTT -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Estado Pasarela RUV ATTT</span>
+<div class="flex items-center gap-space-xs mt-1">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Enlace Activo</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">dns</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant mt-space-sm">
+<span class="font-body-sm text-body-sm">Último barrido general:</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">Hoy, 11:42 AM</span>
+</div>
+</div>
+</div>
+<!-- Comparativa Directa de Flotas / Operaciones (VCOMP, VIPCO, VINDU, VCARS) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">hub</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Comparación de Flotas Corporativas</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Indicadores de certificación técnica, masa vehicular y riesgo de bloqueo por filial operativa.</p>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">4 DIVISIONES ACTIVAS</span>
+</div>
+<!-- 4-Card Fleet Benchmark Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- VCOMP -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md hover:bg-surface-container-high transition-all">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">VCOMP</span>
+<span class="font-label-caps text-label-caps px-1 rounded bg-secondary-fixed text-on-secondary-fixed">PESADOS</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[12px] mt-0.5">Vehículos Comerciales y Pesados</span>
+</div>
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-secondary">81%</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 81%;"></div>
+</div>
+<div class="flex items-center justify-between font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span>664 conformes</span>
+<span class="font-semibold text-on-surface">820 Total</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs bg-surface-container-lowest px-space-xs py-1.5 rounded">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bloqueos Activos</span>
+</div>
+<span class="font-data-mono-md text-data-mono-md text-error font-bold">12 uds</span>
+</div>
+</div>
+<!-- VIPCO -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md hover:bg-surface-container-high transition-all">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">VIPCO</span>
+<span class="font-label-caps text-label-caps px-1 rounded bg-primary-fixed text-on-primary-fixed">CARGA INTER</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[12px] mt-0.5">Transporte Interurbano y Carga</span>
+</div>
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-secondary">73%</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 73%;"></div>
+</div>
+<div class="flex items-center justify-between font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span>467 conformes</span>
+<span class="font-semibold text-on-surface">640 Total</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs bg-surface-container-lowest px-space-xs py-1.5 rounded">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bloqueos Activos</span>
+</div>
+<span class="font-data-mono-md text-data-mono-md text-error font-bold">24 uds</span>
+</div>
+</div>
+<!-- VINDU -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md hover:bg-surface-container-high transition-all">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">VINDU</span>
+<span class="font-label-caps text-label-caps px-1 rounded bg-error-container text-on-error-container">EN RIESGO</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[12px] mt-0.5">Flota Industrial &amp; Distribución</span>
+</div>
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">68%</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-outline h-full rounded-full" style="width: 68%;"></div>
+</div>
+<div class="flex items-center justify-between font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span>279 conformes</span>
+<span class="font-semibold text-on-surface">410 Total</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs bg-surface-container-lowest px-space-xs py-1.5 rounded">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bloqueos Activos</span>
+</div>
+<span class="font-data-mono-md text-data-mono-md text-error font-bold">31 uds</span>
+</div>
+</div>
+<!-- VCARS -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col justify-between gap-space-md hover:bg-surface-container-high transition-all">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">VCARS</span>
+<span class="font-label-caps text-label-caps px-1 rounded bg-secondary-fixed text-on-secondary-fixed">LÍDER</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[12px] mt-0.5">Flota Ligera &amp; Utilitarios</span>
+</div>
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-secondary">89%</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 89%;"></div>
+</div>
+<div class="flex items-center justify-between font-data-mono-sm text-data-mono-sm text-on-surface-variant">
+<span>247 conformes</span>
+<span class="font-semibold text-on-surface">278 Total</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs bg-surface-container-lowest px-space-xs py-1.5 rounded">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bloqueos Activos</span>
+</div>
+<span class="font-data-mono-md text-data-mono-md text-on-surface font-bold">5 uds</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2-Column Split: Matriz Mensual por Galera & Desglose de Discrepancias Legales -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left Column: Matriz Mensual por Galera (7 cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col justify-between gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">calendar_view_month</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Matriz Mensual de Cumplimiento</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rendimiento por centro de inspección técnica en el primer trimestre.</p>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm px-2 py-1 rounded bg-surface-container-low text-on-surface font-semibold">Q1 / 2025</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
+<th class="py-2.5 px-space-sm rounded-l">Galera de Inspección</th>
+<th class="py-2.5 px-space-sm">Enero</th>
+<th class="py-2.5 px-space-sm">Febrero</th>
+<th class="py-2.5 px-space-sm">Marzo (En curso)</th>
+<th class="py-2.5 px-space-sm rounded-r text-right">Bloqueos Activos</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm divide-y divide-surface-container">
+<!-- Galera Central B -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Central B</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">Metro • 840 Uds</span>
+</div>
+</td>
+<td class="py-3 px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">check_circle</span>
+                    100% OK
+                  </span>
+</td>
+<td class="py-3 px-space-sm">
+<span class="inline-flex items-center gap-1 font-data-mono-sm text-data-mono-sm font-semibold text-on-surface">
+                    94% OK
+                  </span>
+</td>
+<td class="py-3 px-space-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-data-mono-sm">
+<span class="text-secondary font-semibold">64%</span>
+<span class="text-outline">En curso</span>
+</div>
+<div class="w-24 bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 64%;"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-right">
+<span class="font-data-mono-md text-data-mono-md px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold">18 uds</span>
+</td>
+</tr>
+<!-- Galera Norte A -->
+<tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-lowest">
+<td class="py-3 px-space-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Norte A</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">Transístmica • 710 Uds</span>
+</div>
+</td>
+<td class="py-3 px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">check_circle</span>
+                    100% OK
+                  </span>
+</td>
+<td class="py-3 px-space-sm">
+<span class="inline-flex items-center gap-1 font-data-mono-sm text-data-mono-sm font-semibold text-error">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                    88% Alerta
+                  </span>
+</td>
+<td class="py-3 px-space-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-data-mono-sm">
+<span class="text-error font-semibold">51%</span>
+<span class="text-error">Retraso</span>
+</div>
+<div class="w-24 bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 51%;"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-right">
+<span class="font-data-mono-md text-data-mono-md px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold">42 uds</span>
+</td>
+</tr>
+<!-- Galera Sur Express -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-space-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Sur Express</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">Costanera • 598 Uds</span>
+</div>
+</td>
+<td class="py-3 px-space-sm">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">check_circle</span>
+                    100% OK
+                  </span>
+</td>
+<td class="py-3 px-space-sm">
+<span class="inline-flex items-center gap-1 font-data-mono-sm text-data-mono-sm font-semibold text-on-surface">
+                    91% OK
+                  </span>
+</td>
+<td class="py-3 px-space-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-data-mono-sm">
+<span class="text-secondary font-semibold">62%</span>
+<span class="text-outline">En curso</span>
+</div>
+<div class="w-24 bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 62%;"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-sm text-right">
+<span class="font-data-mono-md text-data-mono-md px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold">19 uds</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Enero auditado 100% en las 3 terminales operativas.</span>
+</div>
+<button class="font-label-caps text-label-caps text-secondary font-bold uppercase hover:underline">Ver Historial 2024</button>
+</div>
+</div>
+<!-- Right Column: Desglose Analítico de Discrepancias Legales (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col justify-between gap-space-md">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-error">assignment_late</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Discrepancias Legales &amp; Registrales</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Causales de retención en pasarela RUV ATTT.</p>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm px-2 py-0.5 rounded bg-error-container text-on-error-container font-bold">184 Casos</span>
+</div>
+<!-- Discrepancy Breakdown List -->
+<div class="flex flex-col gap-space-xs">
+<!-- Item 1: Boleta de Empresa Patronal -->
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-error-container text-on-error-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Boleta Patronal / Documento Empresa</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">11 trámites pendientes</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-data-mono-md text-data-mono-md text-error font-bold">$14,250</span>
+<span class="block font-label-caps text-label-caps text-outline uppercase">Retención RUC</span>
+</div>
+</div>
+<!-- Item 2: Boleta Asociada a Placa -->
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container-high text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Boleta Asociada a Placa (Multa Chofer)</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">44 infracciones activas</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-data-mono-md text-data-mono-md text-on-surface font-bold">$4,170</span>
+<span class="block font-label-caps text-label-caps text-outline uppercase">Infracción Vial</span>
+</div>
+</div>
+<!-- Item 3: Restricción Judicial / Secuestro -->
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-error text-on-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">gavel</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Restricción Judicial / Secuestro</span>
+<span class="font-data-mono-sm text-data-mono-sm text-error font-semibold">8 mandamientos de retención</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-error-container text-on-error-container uppercase font-bold">Bloqueo Total</span>
+</div>
+</div>
+<!-- Item 4: Diferencia de Propietario / Leasing -->
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container-high text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Diferencia Propietario / Leasing</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">23 casos sin traspaso fiduciario</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-surface uppercase font-bold">Docs Pendientes</span>
+</div>
+</div>
+<!-- Item 5: Diferencia de Color / Rotulado Comercial -->
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container-high text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">format_paint</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Diferencia de Color / Rotulado</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">18 casos sin dictamen pericial</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-surface uppercase font-bold">Inspección Extra</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 rounded-lg bg-surface-container text-on-surface font-body-sm text-body-sm font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+<span>Descargar Informe Pericial Forense (PDF)</span>
+</button>
+</div>
+</div>
+<!-- Granular Audit Table by Vehicle Unit -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm flex flex-col overflow-hidden">
+<!-- Table Header & Controls -->
+<div class="p-space-md bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">ballot</span>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Matriz Granular de Auditoría por Unidad</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Detalle de expedientes con hallazgos e intervenciones requeridas.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps text-outline uppercase">Mostrando 6 de 184 casos</span>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded bg-surface-container-lowest text-on-surface disabled:opacity-40">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="p-1 rounded bg-surface-container-lowest text-on-surface">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/70 text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
+<th class="py-3 px-space-md">Placa &amp; Unidad</th>
+<th class="py-3 px-space-md">Galera &amp; Auditor</th>
+<th class="py-3 px-space-md">Empresa Titular</th>
+<th class="py-3 px-space-md">Último eCarCheck</th>
+<th class="py-3 px-space-md">Estatus Detallado</th>
+<th class="py-3 px-space-md">Hallazgo de Auditoría</th>
+<th class="py-3 px-space-md text-right">Acción Directa</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container font-body-sm text-body-sm" id="audit-table-body">
+<!-- Row 1: Boleta RUC -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-data-mono-sm text-data-mono-sm font-bold text-on-surface">
+                    🚛
+                  </div>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">872911</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">VIN: ...8829-X</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Central B</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Lic. Marcela Vega</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-bold">VCOMP</span>
+<span class="text-on-surface-variant text-[13px]">Pesados S.A.</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">12 Mar 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">08:14 AM</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-data-mono-sm text-data-mono-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                  BLOQUEO RUV
+                </span>
+</td>
+<td class="py-3 px-space-md max-w-xs">
+<div class="flex flex-col">
+<span class="font-semibold text-error text-[13px]">Boleta RUC patronal ($3,200)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Infracción fiscal pendiente en sistema ATTT Central.</span>
+</div>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-semibold transition-all">
+                    Ver Boleta
+                  </button>
+<button class="px-2.5 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm font-semibold hover:bg-inverse-surface transition-all">
+                    Levantar
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Descalibración de Gases -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-data-mono-sm text-data-mono-sm font-bold text-on-surface">
+                    🚌
+                  </div>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">542099</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">VIN: ...4410-B</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Norte A</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Ing. Carlos Navarro</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">VIPCO</span>
+<span class="text-on-surface-variant text-[13px]">Interurbano</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">13 Mar 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">10:45 AM</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                  RECHAZO OPACIDAD
+                </span>
+</td>
+<td class="py-3 px-space-md max-w-xs">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-[13px]">Descalibración Gases Opacímetro</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Excede 68 Hartridge en banco de prueba N°2.</span>
+</div>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-semibold transition-all">
+                    Telemetría
+                  </button>
+<button class="px-2.5 py-1.5 rounded bg-secondary text-on-secondary font-body-sm text-body-sm font-semibold hover:bg-secondary-container hover:text-on-secondary-container transition-all">
+                    Re-inspección
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Restricción Judicial / Mandamiento -->
+<tr class="hover:bg-surface-container-low/50 transition-colors bg-error-container/20">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-error-container text-on-error-container flex items-center justify-center font-data-mono-sm text-data-mono-sm font-bold">
+                    ⚖️
+                  </div>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-error">993412</span>
+<span class="font-data-mono-sm text-data-mono-sm text-error">VIN: ...0118-K</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Norte A</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Lic. Marcela Vega</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-error text-on-error font-bold">VINDU</span>
+<span class="text-on-surface-variant text-[13px]">Industrial</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">14 Mar 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">09:02 AM</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error text-on-error font-data-mono-sm text-data-mono-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-on-error animate-ping"></span>
+                  SECUESTRO JUDICIAL
+                </span>
+</td>
+<td class="py-3 px-space-md max-w-xs">
+<div class="flex flex-col">
+<span class="font-semibold text-error text-[13px]">Juzgado 3° Civil - Mandamiento 22/04</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Orden perentoria de inmovilización vehicular.</span>
+</div>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-semibold transition-all">
+                    Expediente
+                  </button>
+<button class="px-2.5 py-1.5 rounded bg-error text-on-error font-body-sm text-body-sm font-semibold hover:bg-on-error-container transition-all">
+                    Avisar Jurídico
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Diferencia de Color / Rotulado -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-data-mono-sm text-data-mono-sm font-bold text-on-surface">
+                    🚐
+                  </div>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">331480</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">VIN: ...9912-W</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Sur Express</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Lic. Roberto Arias</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-secondary-fixed-dim text-on-secondary font-bold">VCARS</span>
+<span class="text-on-surface-variant text-[13px]">Utilitarios</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">14 Mar 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">11:15 AM</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                  DISCREPANCIA VISUAL
+                </span>
+</td>
+<td class="py-3 px-space-md max-w-xs">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-[13px]">Color Registrado: Blanco / Actual: Azul</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Rotulado de marca sin dictamen pericial ATTT.</span>
+</div>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-semibold transition-all">
+                    Fotos
+                  </button>
+<button class="px-2.5 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm font-semibold hover:bg-inverse-surface transition-all">
+                    Emitir Anexo
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Diferencia de Propietario / Leasing -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-data-mono-sm text-data-mono-sm font-bold text-on-surface">
+                    🚛
+                  </div>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">719002</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">VIN: ...3301-P</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Central B</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Lic. Marcela Vega</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-bold">VCOMP</span>
+<span class="text-on-surface-variant text-[13px]">Pesados S.A.</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">15 Mar 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">08:50 AM</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-highest text-on-surface font-data-mono-sm text-data-mono-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                  LEASING PENDIENTE
+                </span>
+</td>
+<td class="py-3 px-space-md max-w-xs">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface text-[13px]">Contrato Banco General no endosado</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Falta certificación fiduciaria para traspaso a filial.</span>
+</div>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-semibold transition-all">
+                    Cotejar RUV
+                  </button>
+<button class="px-2.5 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm font-semibold hover:bg-inverse-surface transition-all">
+                    Cargar Res.
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Boleta de Tránsito con Chofer -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-data-mono-sm text-data-mono-sm font-bold text-on-surface">
+                    🚚
+                  </div>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">412809</span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">VIN: ...7719-M</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Galera Sur Express</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Lic. Roberto Arias</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex items-center gap-1.5">
+<span class="font-data-mono-sm text-data-mono-sm px-1.5 py-0.5 rounded bg-error text-on-error font-bold">VINDU</span>
+<span class="text-on-surface-variant text-[13px]">Industrial</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<div class="flex flex-col">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">15 Mar 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">09:30 AM</span>
+</div>
+</td>
+<td class="py-3 px-space-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-data-mono-sm text-data-mono-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                  MULTA POLICÍA TRÁNSITO
+                </span>
+</td>
+<td class="py-3 px-space-md max-w-xs">
+<div class="flex flex-col">
+<span class="font-semibold text-error text-[13px]">Infracción Art. 142 - Mal estacionado ($95.00)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Chofer: J. Morales. Pendiente de pago para paz y salvo.</span>
+</div>
+</td>
+<td class="py-3 px-space-md text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="px-2.5 py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-semibold transition-all">
+                    Imputar Chofer
+                  </button>
+<button class="px-2.5 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm font-semibold hover:bg-inverse-surface transition-all">
+                    Pagar ATTT
+                  </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Telemetry Micro Bar -->
+<div class="p-space-sm bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs text-outline">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span class="font-data-mono-sm text-data-mono-sm">Audit Trail Cryptographic SHA-256: 8f4a...92de</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Página 1 de 31</span>
+<div class="flex items-center gap-1">
+<span class="w-7 h-7 rounded bg-primary text-on-primary font-data-mono-sm text-data-mono-sm flex items-center justify-center font-bold">1</span>
+<span class="w-7 h-7 rounded bg-surface-container-lowest text-on-surface font-data-mono-sm text-data-mono-sm flex items-center justify-center hover:bg-surface-container cursor-pointer">2</span>
+<span class="w-7 h-7 rounded bg-surface-container-lowest text-on-surface font-data-mono-sm text-data-mono-sm flex items-center justify-center hover:bg-surface-container cursor-pointer">3</span>
+<span class="text-outline">...</span>
+<span class="w-7 h-7 rounded bg-surface-container-lowest text-on-surface font-data-mono-sm text-data-mono-sm flex items-center justify-center hover:bg-surface-container cursor-pointer">31</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive script for client actions -->
+<script>
+    // Search filter interaction
+    const searchInput = document.getElementById('table-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#audit-table-body tr');
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(val) ? '' : 'none';
+        });
+      });
+    }
+
+    // Live Sync simulation button
+    const syncBtn = document.getElementById('btn-sync-ruv');
+    const syncIcon = document.getElementById('sync-icon');
+    if (syncBtn && syncIcon) {
+      syncBtn.addEventListener('click', function() {
+        syncIcon.classList.add('animate-spin');
+        syncBtn.classList.add('opacity-75');
+        setTimeout(() => {
+          syncIcon.classList.remove('animate-spin');
+          syncBtn.classList.remove('opacity-75');
+        }, 1200);
+      });
+    }
+  </script>
+</div></main></div></body></html>

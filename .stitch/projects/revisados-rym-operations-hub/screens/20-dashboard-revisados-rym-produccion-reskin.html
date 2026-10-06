@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Portal RYM Revisados - Control Legal Vehicular</title>
+<!-- Tailwind CSS v3 with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#10224E',
+              blue: '#244AA5',
+              'blue-hover': '#1A3982',
+              'blue-light': '#EBF3FC',
+              'blue-subtle': '#F0F5FD',
+              muted: '#62708C',
+              canvas: '#F4F7FB',
+              border: '#D8E3F2',
+              orange: '#F47C20',
+              green: '#047857',
+              red: '#DC2626'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 1px 3px rgba(16, 34, 78, 0.04)',
+            'card-hover': '0 4px 12px rgba(16, 34, 78, 0.08)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Font Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="base-styling">
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #F4F7FB;
+      color: #10224E;
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #D8E3F2;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden text-brand-navy">
+<!-- BEGIN: MainSidebar -->
+<aside class="w-64 min-w-[16rem] bg-white border-r border-brand-border flex flex-col justify-between h-screen shrink-0 select-none z-20">
+<div class="p-5 flex flex-col gap-6">
+<!-- Brand Logo Header -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center relative shadow-sm border border-slate-700/50">
+<svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+</svg>
+<span class="absolute -top-1 -right-1 w-3 h-3 bg-brand-orange border-2 border-white rounded-full"></span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-base leading-tight tracking-tight text-brand-navy">Revisados RYM</span>
+<span class="text-[10px] font-semibold tracking-wider text-brand-muted uppercase">CONTROL LEGAL VEHICULAR</span>
+</div>
+</div>
+<!-- User Profile Card -->
+<div class="bg-brand-blue-subtle/50 rounded-2xl p-3.5 border border-brand-border/80 flex flex-col gap-1.5" data-purpose="user-profile-card">
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-brand-navy">Yhonly Almarza</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-white border border-brand-border text-brand-navy">
+            ADMIN_TOTAL
+          </span>
+</div>
+<span class="text-xs text-brand-muted">Todas las galeras</span>
+</div>
+<!-- Navigation Links -->
+<nav aria-label="Navegación principal" class="flex flex-col gap-1">
+<!-- Item: Dashboard (Active) -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-semibold text-sm bg-brand-blue-light text-brand-blue border border-brand-blue/20 transition-colors" href="#dashboard">
+<svg class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Dashboard
+        </a>
+<!-- Item: Operaciones -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#operaciones">
+<svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Operaciones
+        </a>
+<!-- Item: Avance mensual -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#avance-mensual">
+<svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Avance mensual
+        </a>
+<!-- Item: Reporte diario -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#reporte-diario">
+<svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Reporte diario
+        </a>
+<!-- Item: Historial -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#historial">
+<svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Historial
+        </a>
+<!-- Item: Estadísticas -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#estadisticas">
+<svg class="w-4 h-4 text-brand-muted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Estadísticas
+        </a>
+<!-- Item: Boletas -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#boletas">
+<span class="w-4 flex items-center justify-center text-base leading-none">•</span>
+          Boletas
+        </a>
+<!-- Item: Cupos -->
+<a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl font-medium text-sm text-brand-muted hover:text-brand-navy hover:bg-slate-50 transition-colors" href="#cupos">
+<span class="w-4 font-bold text-center text-sm leading-none">$</span>
+          Cupos
+        </a>
+</nav>
+</div>
+<!-- Sidebar Bottom Action -->
+<div class="p-5 border-t border-brand-border/60">
+<a class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs text-brand-navy bg-brand-blue-subtle hover:bg-brand-blue-light border border-brand-border transition-colors" href="#portal">
+<span>←</span> Volver al Portal
+      </a>
+</div>
+</aside>
+<!-- END: MainSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar">
+<div class="p-6 md:p-8 flex flex-col gap-6 max-w-[1720px] mx-auto w-full">
+<!-- BEGIN: HeroHeader -->
+<section aria-labelledby="dashboard-title" class="flex flex-col gap-3">
+<!-- Category Breadcrumb -->
+<div class="text-[11px] font-bold tracking-wider text-brand-blue uppercase flex items-center gap-1.5">
+<span>REVISADOS</span>
+<span class="text-brand-border">•</span>
+<span>CONTROL LEGAL</span>
+</div>
+<!-- Headline & Summary -->
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl lg:text-4xl font-extrabold text-brand-navy tracking-tight" id="dashboard-title">
+            411 unidades necesitan atención
+          </h1>
+<p class="text-sm text-brand-muted font-medium">
+            24 están más atrasadas <span class="text-slate-300">•</span> 108 corresponden al mes anterior <span class="text-slate-300">•</span> 279 al mes en curso. 1,751 unidades están al día.
+          </p>
+</div>
+<!-- Action Callouts -->
+<div class="flex flex-wrap items-center gap-3 mt-1">
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white text-sm font-semibold shadow-sm transition-colors" type="button">
+            Atender pendientes
+            <span class="text-base leading-none">→</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-blue-light/70 hover:bg-brand-blue-light text-brand-blue border border-brand-blue/30 text-sm font-semibold transition-colors" type="button">
+            Pendiente Revisado Taxi: 44
+          </button>
+</div>
+</section>
+<!-- END: HeroHeader -->
+<!-- BEGIN: MetricsOverview (7 KPI Cards) -->
+<section aria-label="Métricas principales de unidades" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3.5">
+<!-- Card 1: UNIDADES EN TU ALCANCE -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-brand-blue hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-brand-navy">UNIDADES EN TU ALCANCE</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              2,202
+            </div>
+</div>
+<p class="text-[11px] text-brand-muted mt-2 truncate">Población visible</p>
+</article>
+<!-- Card 2: AL DÍA -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-brand-green hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-brand-navy">AL DÍA</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              1,751
+            </div>
+</div>
+<p class="text-[11px] text-brand-muted mt-2 truncate">Ciclo vigente cubierto</p>
+</article>
+<!-- Card 3: PENDIENTES AHORA -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-brand-red hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-brand-navy">PENDIENTES AHORA</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              411
+            </div>
+</div>
+<p class="text-[11px] text-brand-muted mt-2 truncate">Requieren gestión</p>
+</article>
+<!-- Card 4: ALERTAS REALES -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-sky-500 hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-brand-navy">ALERTAS REALES</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              129
+            </div>
+</div>
+<p class="text-[10px] text-brand-muted mt-2 leading-tight">
+            Pendiente Revisado Taxi: 44 <span class="text-slate-300">•</span> Boleta a la empresa: 34 <span class="text-slate-300">•</span> Sin cupo: 25
+          </p>
+</article>
+<!-- Card 5: PENDIENTES REVISADO TAXI -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-brand-orange hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold uppercase tracking-wider text-brand-navy">PENDIENTES REVISADO TAXI</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              44
+            </div>
+</div>
+<p class="text-[10px] text-brand-muted mt-2 leading-tight">
+            Cambio a Amarillo <span class="text-slate-300">•</span> requiere nuevo revisado
+          </p>
+</article>
+<!-- Card 6: SIN FOTOS -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-brand-blue hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-brand-navy">SIN FOTOS</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              83
+            </div>
+</div>
+<p class="text-[10px] text-brand-muted mt-2 truncate">Synology • unidades sin evidencia fotográfica</p>
+</article>
+<!-- Card 7: EMITIDOS HOY -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between border-t-4 border-t-brand-blue hover:shadow-card-hover transition-shadow min-h-[136px]">
+<div>
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-brand-navy">EMITIDOS HOY</span>
+<span class="text-brand-blue text-xs font-bold leading-none">›</span>
+</div>
+<div class="mt-2 text-2xl lg:text-3xl font-extrabold text-brand-navy tracking-tight tabular-nums">
+              7
+            </div>
+</div>
+<p class="text-[11px] text-brand-muted mt-2 truncate">de 33 cupos diarios</p>
+</article>
+</section>
+<!-- END: MetricsOverview -->
+<!-- BEGIN: LowerContentColumns -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Column Left: Estado por galera (Span 8) -->
+<section aria-labelledby="galeras-title" class="lg:col-span-8 flex flex-col gap-4">
+<!-- Galera Header -->
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-xl font-bold text-brand-navy" id="galeras-title">Estado por galera</h2>
+<p class="text-xs text-brand-muted">Pendientes primero; lo cubierto queda como referencia.</p>
+</div>
+<a class="text-sm font-semibold text-brand-blue hover:text-brand-blue-hover inline-flex items-center gap-1 transition-colors" href="#operaciones">
+              Abrir Operaciones <span>→</span>
+</a>
+</div>
+<!-- Galeras Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
+<!-- Galera 1: VCOMP -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-shadow">
+<div>
+<div class="flex items-baseline justify-between">
+<h3 class="font-extrabold text-base text-brand-navy">VCOMP</h3>
+<span class="text-[11px] text-brand-muted">520 unidades</span>
+</div>
+<div class="mt-2 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-brand-navy tabular-nums">91</span>
+<span class="text-xs font-semibold text-brand-muted">pendientes</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 81%"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-medium text-brand-muted mt-2">
+<span>✓ 419 al día</span>
+<span class="font-bold text-brand-navy">81%</span>
+</div>
+</div>
+<div class="mt-4 pt-2.5 border-t border-slate-100">
+<a class="text-[11px] font-semibold text-brand-muted hover:text-brand-blue flex items-center justify-between transition-colors" href="#alertas-vcomp">
+<span>8 con alertas de datos</span>
+<span>›</span>
+</a>
+</div>
+</article>
+<!-- Galera 2: VIPCO -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-shadow">
+<div>
+<div class="flex items-baseline justify-between">
+<h3 class="font-extrabold text-base text-brand-navy">VIPCO</h3>
+<span class="text-[11px] text-brand-muted">541 unidades</span>
+</div>
+<div class="mt-2 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-brand-navy tabular-nums">124</span>
+<span class="text-xs font-semibold text-brand-muted">pendientes</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 74%"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-medium text-brand-muted mt-2">
+<span>✓ 402 al día</span>
+<span class="font-bold text-brand-navy">74%</span>
+</div>
+</div>
+<div class="mt-4 pt-2.5 border-t border-slate-100">
+<a class="text-[11px] font-semibold text-brand-muted hover:text-brand-blue flex items-center justify-between transition-colors" href="#alertas-vipco">
+<span>10 con alertas de datos</span>
+<span>›</span>
+</a>
+</div>
+</article>
+<!-- Galera 3: VINDU -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-shadow">
+<div>
+<div class="flex items-baseline justify-between">
+<h3 class="font-extrabold text-base text-brand-navy">VINDU</h3>
+<span class="text-[11px] text-brand-muted">539 unidades</span>
+</div>
+<div class="mt-2 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-brand-navy tabular-nums">127</span>
+<span class="text-xs font-semibold text-brand-muted">pendientes</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 74%"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-medium text-brand-muted mt-2">
+<span>✓ 397 al día</span>
+<span class="font-bold text-brand-navy">74%</span>
+</div>
+</div>
+<div class="mt-4 pt-2.5 border-t border-slate-100">
+<a class="text-[11px] font-semibold text-brand-muted hover:text-brand-blue flex items-center justify-between transition-colors" href="#alertas-vindu">
+<span>13 con alertas de datos</span>
+<span>›</span>
+</a>
+</div>
+</article>
+<!-- Galera 4: VCARS -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-shadow">
+<div>
+<div class="flex items-baseline justify-between">
+<h3 class="font-extrabold text-base text-brand-navy">VCARS</h3>
+<span class="text-[11px] text-brand-muted">598 unidades</span>
+</div>
+<div class="mt-2 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-brand-navy tabular-nums">68</span>
+<span class="text-xs font-semibold text-brand-muted">pendientes</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 89%"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-medium text-brand-muted mt-2">
+<span>✓ 530 al día</span>
+<span class="font-bold text-brand-navy">89%</span>
+</div>
+</div>
+<div class="mt-4 pt-2.5 border-t border-slate-100">
+<a class="text-[11px] font-semibold text-brand-muted hover:text-brand-blue flex items-center justify-between transition-colors" href="#alertas-vcars">
+<span>1 con alertas de datos</span>
+<span>›</span>
+</a>
+</div>
+</article>
+<!-- Galera 5: PANELES -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-shadow">
+<div>
+<div class="flex items-baseline justify-between">
+<h3 class="font-extrabold text-base text-brand-navy">PANELES</h3>
+<span class="text-[11px] text-brand-muted">3 unidades</span>
+</div>
+<div class="mt-2 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-brand-navy tabular-nums">1</span>
+<span class="text-xs font-semibold text-brand-muted">pendientes</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 67%"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-medium text-brand-muted mt-2">
+<span>✓ 2 al día</span>
+<span class="font-bold text-brand-navy">67%</span>
+</div>
+</div>
+</article>
+<!-- Galera 6: OTROS -->
+<article class="bg-white rounded-2xl border border-brand-border p-4 shadow-card flex flex-col justify-between hover:shadow-card-hover transition-shadow">
+<div>
+<div class="flex items-baseline justify-between">
+<h3 class="font-extrabold text-base text-brand-navy">OTROS</h3>
+<span class="text-[11px] text-brand-muted">1 unidades</span>
+</div>
+<div class="mt-2 flex items-baseline gap-1.5">
+<span class="text-3xl font-black text-brand-navy tabular-nums">0</span>
+<span class="text-xs font-semibold text-brand-muted">pendientes</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+<div class="bg-emerald-500 h-1.5 rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-medium text-brand-muted mt-2">
+<span>✓ 1 al día</span>
+<span class="font-bold text-brand-navy">100%</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Column Right: Avance por mes (Span 4) -->
+<section aria-labelledby="avance-title" class="lg:col-span-4 flex flex-col gap-4">
+<div class="bg-white rounded-2xl border border-brand-border p-6 shadow-card h-full flex flex-col justify-between">
+<div class="flex flex-col gap-5">
+<!-- Panel Header -->
+<div class="flex items-start justify-between">
+<div>
+<h2 class="text-xl font-bold text-brand-navy" id="avance-title">Avance por mes</h2>
+<p class="text-xs text-brand-muted mt-0.5">Semáforo de cobertura por ciclo.</p>
+</div>
+<a class="text-sm font-semibold text-brand-blue hover:text-brand-blue-hover inline-flex items-center gap-1 transition-colors" href="#avance-mensual">
+                  Ver completo <span>→</span>
+</a>
+</div>
+<!-- Dashed Notification Box -->
+<div class="border-2 border-dashed border-brand-border/90 rounded-2xl p-5 bg-brand-canvas/50 flex items-center justify-center min-h-[140px] text-center">
+<p class="text-sm text-brand-muted leading-relaxed">
+                  Consulta el detalle completo y cada unidad pendiente en <strong class="text-brand-navy font-semibold">“Avance mensual”</strong>.
+                </p>
+</div>
+</div>
+<!-- Verification & Status Footer -->
+<div class="pt-4 border-t border-brand-border/60 flex items-center justify-between text-xs text-brand-muted">
+<span class="inline-flex items-center gap-2 font-medium">
+<span class="w-2 h-2 rounded-full bg-brand-green"></span>
+                Ciclo activo verificado
+              </span>
+<span>Actualizado hoy</span>
+</div>
+</div>
+</section>
+</div>
+<!-- END: LowerContentColumns -->
+</div>
+</main>
+<!-- END: MainContent -->
+</body></html>

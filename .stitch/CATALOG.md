@@ -2,70 +2,78 @@
 
 ## Revisados RYM Operations Hub
 - Project ID: 1412531415043982793
-  - Dashboard - Revisados RYM (Fidelidad de Producción) — 276a9a54fd9c4c869dcdb1b9772d452c
+  - 5. Ficha de Unidad - Revisados RYM — 6b557d6b6fcf4ed38007a43d6021d164
+  - Executive + Operations - Control Integral — 07f698840a9b4783bbd6453aaafd66d6
+  - 1. Mission Control - Revisados RYM — fc0dbdad611b4aeb934576228f37bec6
+  - 1. Mission Control - Revisados RYM (eCarCheck Theme) — dd6da41cb454413cba2527cbbf003ddb
+  - 2. Avance y Auditoría - Revisados RYM (Light Mode) — 9833d797c46546769195f7eade7fd8ec
+  - Operaciones - Cards View (Production Final) — c5ae5cac75bc4c5880c0939485c11bfa
+  - Dashboard - Revisados RYM (Producción Reskin) — a98a2bb4f8df45f79dda0091db28af8e
+  - Portal RYM - Operaciones - Emitidos hoy contract — 6981218175232072635
+  - Portal RYM - Operaciones - Emitidos hoy contract — 2765045109541220019
+  - Portal RYM - Operaciones - Emitidos hoy contract — 9047711944620758723
+  - 4. Ficha de Unidad - Revisados RYM — 7d2cef68384f4adb8a5172d3fab7e545
+  - 2. Avance y Auditoría - Revisados RYM (Vue 3 Ready) — cf1c2d71a318408ebcc3875721e8406a
+  - Operaciones - Vehicle Operations Workspace (Table View) — 31a22c25f3a94053b45577f528bf782d
+  - Portal RYM - Operaciones - Emitidos hoy contract — 9723419093781143570
+  - 1. Dashboard / Mission Control - Revisados RYM (Light Mode) — f2ffba9d32234930af8f4e87b8517ad3
+  - Revisados RYM - Avance mensual - Main reference — 6708360399076774577
   - Revisados RYM - Avance mensual - Main reference — 15573130869295536766
-  - 2. Avance y Auditoría - Revisados RYM — fb1096f30093457c8289b83b264549ea
-  - Operaciones - Cards View (Production Ready) — 1da31851e53a43318768500f2cc8d23e
-  - 3. Operaciones - Revisados RYM (Light Mode) — 6c173da844bb42ae92fc36a03efe2702
-  - 1. Mission Control - Revisados RYM (Vue 3 Ready) — 343f985df80046838679e98917cbccc6
-  - 4. Reporte Diario - Revisados RYM — 377e826f783c4d2fbf44b03eee1697da
   - 3. Operaciones - Revisados RYM — d2ec5c8ae9ed4e0db264ea5ae25a2bf6
-  - 2. Avance y Auditoría - Revisados RYM — 400d4465e6214e4dbfb7ca512a3978bf
-  - Avance mensual - Revisados RYM (Refinado) — 7830ff417a70466bb0f0ea1badb6da36
   - 2. Avance y Auditoría - Revisados RYM (Light Mode Refined) — 9ffe9d6cbb86472fb4cea109037b7889
-  - Dashboard - Revisados RYM (Portal RYM Main) — be18099324a1484e82f94b1b3614a807
-  - Operations Desk - Mesa de Trabajo Legal — 0091603aebfd4b2e95cd20f54a4a13f2
+  - Avance mensual - Revisados RYM (Refinado) — 7830ff417a70466bb0f0ea1badb6da36
+  - 2. Operaciones - Revisados RYM — f9b7af930cef441f8dfcee907858f6a8
+  - Mission Control - Matriz Táctica — 79172f93e10d4a60ad2da435254e4530
+  - 2. Avance y Auditoría - Revisados RYM — fb1096f30093457c8289b83b264549ea
+  - Operaciones - Vehicle Operations Workspace (Cards + Drawer) — ae2d65cb377d46dab7587faa23c98f28
+  - Operaciones - Table View (Production Final) — d0a88582a1c3429789bd4473d4a1fd8f
+  - 3. Avance Mensual - Revisados RYM — d7386870cef54ba793c07c10d5c91422
+  - 3. Operaciones - Revisados RYM — dd4d4510ef4746e6881f99e337e5b4d5
+  - 2. Avance y Auditoría - Revisados RYM — 400d4465e6214e4dbfb7ca512a3978bf
+  - 1. Mission Control - Nueva Identidad RYM — 8b6a24dc89254a069d7a30a116787f45
+  - 3. Operaciones - Revisados RYM (Light Mode) — 6c173da844bb42ae92fc36a03efe2702
+  - 5. Ficha de Unidad - Revisados RYM — 7198b1cfaffa40c78745e1d57d1673ba
+  - Portal RYM - Operaciones - Emitidos hoy contract — 12444923710617565965
   - 3. Operaciones - Revisados RYM (eCarCheck Theme) — 1b4168b9add8416487c6a8001bfd9d70
   - Mission Control - Portal RYM Revisados — 69490380e3a6446f861b448803cc6a15
+  - Revisados RYM - Avance mensual - Main reference — 1561073041443329836
   - 1. Dashboard / Mission Control - Revisados RYM (Light Mode Refined) — 3e9b38c00a434c89aef98b667bd9891f
-  - 2. Avance y Auditoría - Revisados RYM (eCarCheck Theme) — 4961644c6190416d9ff48efa90175e22
-  - Operaciones - Cards View (Production Final) — c5ae5cac75bc4c5880c0939485c11bfa
-  - Operaciones - Table View (Production Ready) — b96a64acfc1d45e987b9945a570b37ec
+  - Operaciones - Cards View (Production Ready) — 1da31851e53a43318768500f2cc8d23e
   - 1. Dashboard - Revisados RYM — 8aecdfa659a24134a6fbe433591621d6
-  - Revisados RYM - Avance mensual - Main reference — 6094365896172476872
-  - Operaciones - Portal RYM Revisados — 8fc40eb35ff549afa35492d95b15891c
-  - 5. Ficha de Unidad - Revisados RYM — 6b557d6b6fcf4ed38007a43d6021d164
-  - Portal RYM // Component Studio: Next-Gen Cards, Badges & KPIs — 37e5a276a3e8495f80b087dba270052c
-  - 3. Operaciones - Revisados RYM — dd4d4510ef4746e6881f99e337e5b4d5
-  - Operaciones - Vehicle Operations Workspace (Table View) — 31a22c25f3a94053b45577f528bf782d
-  - Portal RYM - Operaciones - Emitidos hoy contract — 9047711944620758723
-  - 2. Operaciones - Revisados RYM — f9b7af930cef441f8dfcee907858f6a8
-  - 4. Ficha de Unidad - Revisados RYM (eCarCheck Theme) — 07fe18dd4fff46eb829c97835aa0b18b
-  - 3. Operaciones - Revisados RYM (Light Mode Refined) — bcf26bd41d3c4f9593ec7acabafff96d
-  - 2. Avance y Auditoría - Revisados RYM (Vue 3 Ready) — cf1c2d71a318408ebcc3875721e8406a
-  - 4. Ficha de Unidad - Revisados RYM — 7d2cef68384f4adb8a5172d3fab7e545
-  - 4. Ficha de Unidad - Revisados RYM (Vue 3 Ready) — 847e902c15fd49ad9ac30d5ee68303fb
-  - 1. Mission Control - Revisados RYM — fc0dbdad611b4aeb934576228f37bec6
-  - 3. Operaciones - Revisados RYM (Vue 3 Ready) — b827fca8473f453391eb9a67bb0d9f73
-  - 3. Avance Mensual - Revisados RYM — d7386870cef54ba793c07c10d5c91422
-  - 1. Mission Control - Nueva Identidad RYM — 8b6a24dc89254a069d7a30a116787f45
-  - Operaciones - Table View (Production Final) — d0a88582a1c3429789bd4473d4a1fd8f
-  - Dashboard - Revisados RYM (Producción Reskin) — a98a2bb4f8df45f79dda0091db28af8e
-  - Revisados RYM - Avance mensual - Main reference — 6708360399076774577
-  - Mission Control - Matriz Táctica — 79172f93e10d4a60ad2da435254e4530
-  - Avance Mensual - Portal RYM Revisados — 11d2522ab5ab4cad94a402de901dea4a
-  - Portal RYM - Operaciones - Emitidos hoy contract — 10225280178299631515
-  - 5. Ficha de Unidad - Revisados RYM — 7198b1cfaffa40c78745e1d57d1673ba
-  - Portal RYM - Operaciones - Emitidos hoy contract — 6981218175232072635
-  - 1. Dashboard / Mission Control - Revisados RYM (Light Mode) — f2ffba9d32234930af8f4e87b8517ad3
-  - Executive + Operations - Control Integral — 07f698840a9b4783bbd6453aaafd66d6
-  - 2. Avance y Auditoría - Revisados RYM (Light Mode) — 9833d797c46546769195f7eade7fd8ec
-  - Operaciones - Vehicle Operations Workspace (Cards + Drawer) — ae2d65cb377d46dab7587faa23c98f28
-  - 1. Mission Control - Revisados RYM (eCarCheck Theme) — dd6da41cb454413cba2527cbbf003ddb
   - 1. Dashboard / Mission Control - Revisados RYM — d8b7665b670f4ee6a360adc993004f3b
+  - 1. Mission Control - Revisados RYM (Vue 3 Ready) — 343f985df80046838679e98917cbccc6
+  - Revisados RYM - Avance mensual - Main reference — 6094365896172476872
+  - Dashboard - Revisados RYM (Fidelidad de Producción) — 276a9a54fd9c4c869dcdb1b9772d452c
+  - Portal RYM // Component Studio: Next-Gen Cards, Badges & KPIs — 37e5a276a3e8495f80b087dba270052c
+  - 4. Reporte Diario - Revisados RYM — 377e826f783c4d2fbf44b03eee1697da
+  - 4. Ficha de Unidad - Revisados RYM (Vue 3 Ready) — 847e902c15fd49ad9ac30d5ee68303fb
+  - Operations Desk - Mesa de Trabajo Legal — 0091603aebfd4b2e95cd20f54a4a13f2
+  - 3. Operaciones - Revisados RYM (Vue 3 Ready) — b827fca8473f453391eb9a67bb0d9f73
+  - Portal RYM - Operaciones - Emitidos hoy contract — 363383051852878571
+  - Portal RYM - Operaciones - Emitidos hoy contract — 18051371336532017036
+  - Dashboard - Revisados RYM (Portal RYM Main) — be18099324a1484e82f94b1b3614a807
+  - 2. Avance y Auditoría - Revisados RYM (eCarCheck Theme) — 4961644c6190416d9ff48efa90175e22
+  - Revisados RYM - Avance mensual - Main reference — 13016623546188028711
+  - Portal RYM - Operaciones - Emitidos hoy contract — 10225280178299631515
+  - Operaciones - Table View (Production Ready) — b96a64acfc1d45e987b9945a570b37ec
+  - Revisados RYM - Avance mensual - Main reference — 15192567834623193077
+  - 4. Ficha de Unidad - Revisados RYM (eCarCheck Theme) — 07fe18dd4fff46eb829c97835aa0b18b
+  - Avance Mensual - Portal RYM Revisados — 11d2522ab5ab4cad94a402de901dea4a
+  - Operaciones - Portal RYM Revisados — 8fc40eb35ff549afa35492d95b15891c
+  - 3. Operaciones - Revisados RYM (Light Mode Refined) — bcf26bd41d3c4f9593ec7acabafff96d
 
 ## Portal RYM Dashboard
 - Project ID: 17378371674899103598
-  - image.png — 4702766054102149834
-  - Dashboard Vue 3 - Portal RYM — 063d84436b144e3ab399a1f69618644c
-  - Avance Mensual - Matriz Ejecutiva de Cobertura — 07d9d08d46994678b097afb3a1733d81
   - Portal RYM Logo — 29bbfd799f4046d0bddcd0170113a36d
-  - Operaciones - Portal RYM — 7465426723bf42e3aff27e7b2dd6d64e
-  - image.png — 4702766054102150108
-  - Operaciones - Command Center Portal RYM — 8bb02c5d53124b62ad53c000d2d9baf0
-  - image.png — 16027762000251287792
+  - Dashboard Vue 3 - Portal RYM — 063d84436b144e3ab399a1f69618644c
   - image.png — 4702766054102149560
+  - image.png — 4702766054102149834
+  - Dashboard Ejecutivo - Portal RYM — 4bd9ae9abdff40169d9399b7c5472e18
+  - Operaciones - Command Center Portal RYM — 8bb02c5d53124b62ad53c000d2d9baf0
+  - Avance Mensual - Matriz Ejecutiva de Cobertura — 07d9d08d46994678b097afb3a1733d81
+  - image.png — 4702766054102150108
+  - image.png — 16027762000251287792
   - image.png — 16027762000251289394
   - Dashboard - Portal RYM — cf8f8701947b4f62a3177f66b8584774
-  - Dashboard Ejecutivo - Portal RYM — 4bd9ae9abdff40169d9399b7c5472e18
+  - Operaciones - Portal RYM — 7465426723bf42e3aff27e7b2dd6d64e
 
