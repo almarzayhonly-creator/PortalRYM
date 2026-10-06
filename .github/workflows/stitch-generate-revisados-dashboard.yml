@@ -14,8 +14,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: stitch-refine-revisados-main
-  cancel-in-progress: true
+  group: stitch-refine-revisados-main-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   generate:
