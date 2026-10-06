@@ -1,244 +1,244 @@
 {
-  "generatedAt": "2026-10-03T23:24:47.794Z",
+  "generatedAt": "2026-10-06T21:00:18.760Z",
   "projectId": "1412531415043982793",
   "projectTitle": "Revisados RYM Operations Hub",
   "screens": [
     {
-      "id": "b827fca8473f453391eb9a67bb0d9f73",
-      "title": "3. Operaciones - Revisados RYM (Vue 3 Ready)",
-      "html": "screens/01-3-operaciones-revisados-rym-vue-3-ready.html",
-      "image": "screens/01-3-operaciones-revisados-rym-vue-3-ready.png",
-      "error": null
-    },
-    {
-      "id": "d7386870cef54ba793c07c10d5c91422",
-      "title": "3. Avance Mensual - Revisados RYM",
-      "html": "screens/02-3-avance-mensual-revisados-rym.html",
-      "image": "screens/02-3-avance-mensual-revisados-rym.png",
-      "error": null
-    },
-    {
-      "id": "fb1096f30093457c8289b83b264549ea",
-      "title": "2. Avance y Auditoría - Revisados RYM",
-      "html": "screens/03-2-avance-y-auditoria-revisados-rym.html",
-      "image": "screens/03-2-avance-y-auditoria-revisados-rym.png",
-      "error": null
-    },
-    {
-      "id": "bcf26bd41d3c4f9593ec7acabafff96d",
-      "title": "3. Operaciones - Revisados RYM (Light Mode Refined)",
-      "html": "screens/04-3-operaciones-revisados-rym-light-mode-refined.html",
-      "image": "screens/04-3-operaciones-revisados-rym-light-mode-refined.png",
-      "error": null
-    },
-    {
-      "id": "d2ec5c8ae9ed4e0db264ea5ae25a2bf6",
-      "title": "3. Operaciones - Revisados RYM",
-      "html": "screens/05-3-operaciones-revisados-rym.html",
-      "image": "screens/05-3-operaciones-revisados-rym.png",
-      "error": null
-    },
-    {
-      "id": "8fc40eb35ff549afa35492d95b15891c",
-      "title": "Operaciones - Portal RYM Revisados",
-      "html": "screens/06-operaciones-portal-rym-revisados.html",
-      "image": "screens/06-operaciones-portal-rym-revisados.png",
-      "error": null
-    },
-    {
-      "id": "c5ae5cac75bc4c5880c0939485c11bfa",
-      "title": "Operaciones - Cards View (Production Final)",
-      "html": "screens/07-operaciones-cards-view-production-final.html",
-      "image": "screens/07-operaciones-cards-view-production-final.png",
-      "error": null
-    },
-    {
-      "id": "9ffe9d6cbb86472fb4cea109037b7889",
-      "title": "2. Avance y Auditoría - Revisados RYM (Light Mode Refined)",
-      "html": "screens/08-2-avance-y-auditoria-revisados-rym-light-mode-refined.html",
-      "image": "screens/08-2-avance-y-auditoria-revisados-rym-light-mode-refined.png",
-      "error": null
-    },
-    {
-      "id": "d0a88582a1c3429789bd4473d4a1fd8f",
-      "title": "Operaciones - Table View (Production Final)",
-      "html": "screens/09-operaciones-table-view-production-final.html",
-      "image": "screens/09-operaciones-table-view-production-final.png",
-      "error": null
-    },
-    {
-      "id": "79172f93e10d4a60ad2da435254e4530",
-      "title": "Mission Control - Matriz Táctica",
-      "html": "screens/10-mission-control-matriz-tactica.html",
-      "image": "screens/10-mission-control-matriz-tactica.png",
-      "error": null
-    },
-    {
-      "id": "7198b1cfaffa40c78745e1d57d1673ba",
-      "title": "5. Ficha de Unidad - Revisados RYM",
-      "html": "screens/11-5-ficha-de-unidad-revisados-rym.html",
-      "image": null,
-      "error": "Image: Tool Call Failed [get_screen]: Request contains an invalid argument."
-    },
-    {
-      "id": "847e902c15fd49ad9ac30d5ee68303fb",
-      "title": "4. Ficha de Unidad - Revisados RYM (Vue 3 Ready)",
-      "html": "screens/12-4-ficha-de-unidad-revisados-rym-vue-3-ready.html",
-      "image": "screens/12-4-ficha-de-unidad-revisados-rym-vue-3-ready.png",
-      "error": null
-    },
-    {
-      "id": "f9b7af930cef441f8dfcee907858f6a8",
-      "title": "2. Operaciones - Revisados RYM",
-      "html": "screens/13-2-operaciones-revisados-rym.html",
-      "image": "screens/13-2-operaciones-revisados-rym.png",
-      "error": null
-    },
-    {
-      "id": "8aecdfa659a24134a6fbe433591621d6",
-      "title": "1. Dashboard - Revisados RYM",
-      "html": "screens/14-1-dashboard-revisados-rym.html",
-      "image": "screens/14-1-dashboard-revisados-rym.png",
-      "error": null
-    },
-    {
-      "id": "69490380e3a6446f861b448803cc6a15",
-      "title": "Mission Control - Portal RYM Revisados",
-      "html": "screens/15-mission-control-portal-rym-revisados.html",
-      "image": "screens/15-mission-control-portal-rym-revisados.png",
-      "error": null
-    },
-    {
-      "id": "1b4168b9add8416487c6a8001bfd9d70",
-      "title": "3. Operaciones - Revisados RYM (eCarCheck Theme)",
-      "html": "screens/16-3-operaciones-revisados-rym-ecarcheck-theme.html",
-      "image": "screens/16-3-operaciones-revisados-rym-ecarcheck-theme.png",
+      "id": "1da31851e53a43318768500f2cc8d23e",
+      "title": "Operaciones - Cards View (Production Ready)",
+      "html": "screens/01-operaciones-cards-view-production-ready.html",
+      "image": "screens/01-operaciones-cards-view-production-ready.png",
       "error": null
     },
     {
       "id": "07fe18dd4fff46eb829c97835aa0b18b",
       "title": "4. Ficha de Unidad - Revisados RYM (eCarCheck Theme)",
-      "html": "screens/17-4-ficha-de-unidad-revisados-rym-ecarcheck-theme.html",
-      "image": "screens/17-4-ficha-de-unidad-revisados-rym-ecarcheck-theme.png",
+      "html": "screens/02-4-ficha-de-unidad-revisados-rym-ecarcheck-theme.html",
+      "image": "screens/02-4-ficha-de-unidad-revisados-rym-ecarcheck-theme.png",
       "error": null
     },
     {
-      "id": "b96a64acfc1d45e987b9945a570b37ec",
-      "title": "Operaciones - Table View (Production Ready)",
-      "html": "screens/18-operaciones-table-view-production-ready.html",
-      "image": "screens/18-operaciones-table-view-production-ready.png",
+      "id": "6981218175232072635",
+      "title": "Portal RYM - Operaciones - Emitidos hoy contract",
+      "html": "screens/03-portal-rym-operaciones-emitidos-hoy-contract.html",
+      "image": "screens/03-portal-rym-operaciones-emitidos-hoy-contract.png",
       "error": null
     },
     {
-      "id": "ae2d65cb377d46dab7587faa23c98f28",
-      "title": "Operaciones - Vehicle Operations Workspace (Cards + Drawer)",
-      "html": "screens/19-operaciones-vehicle-operations-workspace-cards-drawer.html",
-      "image": "screens/19-operaciones-vehicle-operations-workspace-cards-drawer.png",
+      "id": "1b4168b9add8416487c6a8001bfd9d70",
+      "title": "3. Operaciones - Revisados RYM (eCarCheck Theme)",
+      "html": "screens/04-3-operaciones-revisados-rym-ecarcheck-theme.html",
+      "image": "screens/04-3-operaciones-revisados-rym-ecarcheck-theme.png",
       "error": null
     },
     {
-      "id": "400d4465e6214e4dbfb7ca512a3978bf",
-      "title": "2. Avance y Auditoría - Revisados RYM",
-      "html": "screens/20-2-avance-y-auditoria-revisados-rym.html",
-      "image": "screens/20-2-avance-y-auditoria-revisados-rym.png",
+      "id": "15573130869295536766",
+      "title": "Revisados RYM - Avance mensual - Main reference",
+      "html": "screens/05-revisados-rym-avance-mensual-main-reference.html",
+      "image": "screens/05-revisados-rym-avance-mensual-main-reference.png",
       "error": null
     },
     {
-      "id": "dd4d4510ef4746e6881f99e337e5b4d5",
-      "title": "3. Operaciones - Revisados RYM",
-      "html": "screens/21-3-operaciones-revisados-rym.html",
-      "image": "screens/21-3-operaciones-revisados-rym.png",
-      "error": null
-    },
-    {
-      "id": "07f698840a9b4783bbd6453aaafd66d6",
-      "title": "Executive + Operations - Control Integral",
-      "html": "screens/22-executive-operations-control-integral.html",
-      "image": "screens/22-executive-operations-control-integral.png",
-      "error": null
-    },
-    {
-      "id": "6c173da844bb42ae92fc36a03efe2702",
-      "title": "3. Operaciones - Revisados RYM (Light Mode)",
-      "html": "screens/23-3-operaciones-revisados-rym-light-mode.html",
-      "image": "screens/23-3-operaciones-revisados-rym-light-mode.png",
+      "id": "79172f93e10d4a60ad2da435254e4530",
+      "title": "Mission Control - Matriz Táctica",
+      "html": "screens/06-mission-control-matriz-tactica.html",
+      "image": "screens/06-mission-control-matriz-tactica.png",
       "error": null
     },
     {
       "id": "f2ffba9d32234930af8f4e87b8517ad3",
       "title": "1. Dashboard / Mission Control - Revisados RYM (Light Mode)",
-      "html": "screens/24-1-dashboard-mission-control-revisados-rym-light-mode.html",
-      "image": "screens/24-1-dashboard-mission-control-revisados-rym-light-mode.png",
+      "html": "screens/07-1-dashboard-mission-control-revisados-rym-light-mode.html",
+      "image": "screens/07-1-dashboard-mission-control-revisados-rym-light-mode.png",
       "error": null
     },
     {
-      "id": "10659892704481236931",
-      "title": "image.png",
-      "html": null,
-      "image": "screens/25-image-png.png",
-      "error": "HTML: Tool Call Failed [get_screen]: Request contains an invalid argument."
-    },
-    {
-      "id": "11d2522ab5ab4cad94a402de901dea4a",
-      "title": "Avance Mensual - Portal RYM Revisados",
-      "html": "screens/26-avance-mensual-portal-rym-revisados.html",
-      "image": "screens/26-avance-mensual-portal-rym-revisados.png",
+      "id": "7830ff417a70466bb0f0ea1badb6da36",
+      "title": "Avance mensual - Revisados RYM (Refinado)",
+      "html": "screens/08-avance-mensual-revisados-rym-refinado.html",
+      "image": "screens/08-avance-mensual-revisados-rym-refinado.png",
       "error": null
     },
     {
-      "id": "37e5a276a3e8495f80b087dba270052c",
-      "title": "Portal RYM // Component Studio: Next-Gen Cards, Badges & KPIs",
-      "html": "screens/27-portal-rym-component-studio-next-gen-cards-badges-kpis.html",
-      "image": "screens/27-portal-rym-component-studio-next-gen-cards-badges-kpis.png",
+      "id": "d8b7665b670f4ee6a360adc993004f3b",
+      "title": "1. Dashboard / Mission Control - Revisados RYM",
+      "html": "screens/09-1-dashboard-mission-control-revisados-rym.html",
+      "image": "screens/09-1-dashboard-mission-control-revisados-rym.png",
       "error": null
     },
     {
-      "id": "8b6a24dc89254a069d7a30a116787f45",
-      "title": "1. Mission Control - Nueva Identidad RYM",
-      "html": "screens/28-1-mission-control-nueva-identidad-rym.html",
-      "image": "screens/28-1-mission-control-nueva-identidad-rym.png",
+      "id": "10225280178299631515",
+      "title": "Portal RYM - Operaciones - Emitidos hoy contract",
+      "html": "screens/10-portal-rym-operaciones-emitidos-hoy-contract.html",
+      "image": "screens/10-portal-rym-operaciones-emitidos-hoy-contract.png",
+      "error": null
+    },
+    {
+      "id": "6c173da844bb42ae92fc36a03efe2702",
+      "title": "3. Operaciones - Revisados RYM (Light Mode)",
+      "html": "screens/11-3-operaciones-revisados-rym-light-mode.html",
+      "image": "screens/11-3-operaciones-revisados-rym-light-mode.png",
       "error": null
     },
     {
       "id": "4961644c6190416d9ff48efa90175e22",
       "title": "2. Avance y Auditoría - Revisados RYM (eCarCheck Theme)",
-      "html": "screens/29-2-avance-y-auditoria-revisados-rym-ecarcheck-theme.html",
-      "image": "screens/29-2-avance-y-auditoria-revisados-rym-ecarcheck-theme.png",
+      "html": "screens/12-2-avance-y-auditoria-revisados-rym-ecarcheck-theme.html",
+      "image": "screens/12-2-avance-y-auditoria-revisados-rym-ecarcheck-theme.png",
       "error": null
     },
     {
-      "id": "3e9b38c00a434c89aef98b667bd9891f",
-      "title": "1. Dashboard / Mission Control - Revisados RYM (Light Mode Refined)",
-      "html": "screens/30-1-dashboard-mission-control-revisados-rym-light-mode-refined.html",
-      "image": "screens/30-1-dashboard-mission-control-revisados-rym-light-mode-refined.png",
+      "id": "d0a88582a1c3429789bd4473d4a1fd8f",
+      "title": "Operaciones - Table View (Production Final)",
+      "html": "screens/13-operaciones-table-view-production-final.html",
+      "image": "screens/13-operaciones-table-view-production-final.png",
+      "error": null
+    },
+    {
+      "id": "11d2522ab5ab4cad94a402de901dea4a",
+      "title": "Avance Mensual - Portal RYM Revisados",
+      "html": "screens/14-avance-mensual-portal-rym-revisados.html",
+      "image": "screens/14-avance-mensual-portal-rym-revisados.png",
+      "error": null
+    },
+    {
+      "id": "07f698840a9b4783bbd6453aaafd66d6",
+      "title": "Executive + Operations - Control Integral",
+      "html": "screens/15-executive-operations-control-integral.html",
+      "image": "screens/15-executive-operations-control-integral.png",
+      "error": null
+    },
+    {
+      "id": "fb1096f30093457c8289b83b264549ea",
+      "title": "2. Avance y Auditoría - Revisados RYM",
+      "html": "screens/16-2-avance-y-auditoria-revisados-rym.html",
+      "image": "screens/16-2-avance-y-auditoria-revisados-rym.png",
       "error": null
     },
     {
       "id": "343f985df80046838679e98917cbccc6",
       "title": "1. Mission Control - Revisados RYM (Vue 3 Ready)",
-      "html": "screens/31-1-mission-control-revisados-rym-vue-3-ready.html",
-      "image": "screens/31-1-mission-control-revisados-rym-vue-3-ready.png",
+      "html": "screens/17-1-mission-control-revisados-rym-vue-3-ready.html",
+      "image": "screens/17-1-mission-control-revisados-rym-vue-3-ready.png",
+      "error": null
+    },
+    {
+      "id": "be18099324a1484e82f94b1b3614a807",
+      "title": "Dashboard - Revisados RYM (Portal RYM Main)",
+      "html": "screens/18-dashboard-revisados-rym-portal-rym-main.html",
+      "image": "screens/18-dashboard-revisados-rym-portal-rym-main.png",
+      "error": null
+    },
+    {
+      "id": "0091603aebfd4b2e95cd20f54a4a13f2",
+      "title": "Operations Desk - Mesa de Trabajo Legal",
+      "html": "screens/19-operations-desk-mesa-de-trabajo-legal.html",
+      "image": "screens/19-operations-desk-mesa-de-trabajo-legal.png",
+      "error": null
+    },
+    {
+      "id": "9ffe9d6cbb86472fb4cea109037b7889",
+      "title": "2. Avance y Auditoría - Revisados RYM (Light Mode Refined)",
+      "html": "screens/20-2-avance-y-auditoria-revisados-rym-light-mode-refined.html",
+      "image": "screens/20-2-avance-y-auditoria-revisados-rym-light-mode-refined.png",
+      "error": null
+    },
+    {
+      "id": "6708360399076774577",
+      "title": "Revisados RYM - Avance mensual - Main reference",
+      "html": "screens/21-revisados-rym-avance-mensual-main-reference.html",
+      "image": "screens/21-revisados-rym-avance-mensual-main-reference.png",
+      "error": null
+    },
+    {
+      "id": "fc0dbdad611b4aeb934576228f37bec6",
+      "title": "1. Mission Control - Revisados RYM",
+      "html": "screens/22-1-mission-control-revisados-rym.html",
+      "image": "screens/22-1-mission-control-revisados-rym.png",
+      "error": null
+    },
+    {
+      "id": "6094365896172476872",
+      "title": "Revisados RYM - Avance mensual - Main reference",
+      "html": "screens/23-revisados-rym-avance-mensual-main-reference.html",
+      "image": "screens/23-revisados-rym-avance-mensual-main-reference.png",
+      "error": null
+    },
+    {
+      "id": "8aecdfa659a24134a6fbe433591621d6",
+      "title": "1. Dashboard - Revisados RYM",
+      "html": "screens/24-1-dashboard-revisados-rym.html",
+      "image": "screens/24-1-dashboard-revisados-rym.png",
+      "error": null
+    },
+    {
+      "id": "d7386870cef54ba793c07c10d5c91422",
+      "title": "3. Avance Mensual - Revisados RYM",
+      "html": "screens/25-3-avance-mensual-revisados-rym.html",
+      "image": "screens/25-3-avance-mensual-revisados-rym.png",
       "error": null
     },
     {
       "id": "7d2cef68384f4adb8a5172d3fab7e545",
       "title": "4. Ficha de Unidad - Revisados RYM",
-      "html": "screens/32-4-ficha-de-unidad-revisados-rym.html",
-      "image": "screens/32-4-ficha-de-unidad-revisados-rym.png",
+      "html": "screens/26-4-ficha-de-unidad-revisados-rym.html",
+      "image": "screens/26-4-ficha-de-unidad-revisados-rym.png",
       "error": null
     },
     {
-      "id": "9816211055623447735",
-      "title": "Revisados RYM - Avance mensual - Main reference",
-      "html": "screens/33-revisados-rym-avance-mensual-main-reference.html",
-      "image": "screens/33-revisados-rym-avance-mensual-main-reference.png",
+      "id": "ae2d65cb377d46dab7587faa23c98f28",
+      "title": "Operaciones - Vehicle Operations Workspace (Cards + Drawer)",
+      "html": "screens/27-operaciones-vehicle-operations-workspace-cards-drawer.html",
+      "image": "screens/27-operaciones-vehicle-operations-workspace-cards-drawer.png",
       "error": null
     },
     {
-      "id": "1da31851e53a43318768500f2cc8d23e",
-      "title": "Operaciones - Cards View (Production Ready)",
-      "html": "screens/34-operaciones-cards-view-production-ready.html",
-      "image": "screens/34-operaciones-cards-view-production-ready.png",
+      "id": "b827fca8473f453391eb9a67bb0d9f73",
+      "title": "3. Operaciones - Revisados RYM (Vue 3 Ready)",
+      "html": "screens/28-3-operaciones-revisados-rym-vue-3-ready.html",
+      "image": "screens/28-3-operaciones-revisados-rym-vue-3-ready.png",
+      "error": null
+    },
+    {
+      "id": "cf1c2d71a318408ebcc3875721e8406a",
+      "title": "2. Avance y Auditoría - Revisados RYM (Vue 3 Ready)",
+      "html": "screens/29-2-avance-y-auditoria-revisados-rym-vue-3-ready.html",
+      "image": "screens/29-2-avance-y-auditoria-revisados-rym-vue-3-ready.png",
+      "error": null
+    },
+    {
+      "id": "9047711944620758723",
+      "title": "Portal RYM - Operaciones - Emitidos hoy contract",
+      "html": "screens/30-portal-rym-operaciones-emitidos-hoy-contract.html",
+      "image": "screens/30-portal-rym-operaciones-emitidos-hoy-contract.png",
+      "error": null
+    },
+    {
+      "id": "c5ae5cac75bc4c5880c0939485c11bfa",
+      "title": "Operaciones - Cards View (Production Final)",
+      "html": "screens/31-operaciones-cards-view-production-final.html",
+      "image": "screens/31-operaciones-cards-view-production-final.png",
+      "error": null
+    },
+    {
+      "id": "dd4d4510ef4746e6881f99e337e5b4d5",
+      "title": "3. Operaciones - Revisados RYM",
+      "html": "screens/32-3-operaciones-revisados-rym.html",
+      "image": "screens/32-3-operaciones-revisados-rym.png",
+      "error": null
+    },
+    {
+      "id": "37e5a276a3e8495f80b087dba270052c",
+      "title": "Portal RYM // Component Studio: Next-Gen Cards, Badges & KPIs",
+      "html": "screens/33-portal-rym-component-studio-next-gen-cards-badges-kpis.html",
+      "image": "screens/33-portal-rym-component-studio-next-gen-cards-badges-kpis.png",
+      "error": null
+    },
+    {
+      "id": "8b6a24dc89254a069d7a30a116787f45",
+      "title": "1. Mission Control - Nueva Identidad RYM",
+      "html": "screens/34-1-mission-control-nueva-identidad-rym.html",
+      "image": "screens/34-1-mission-control-nueva-identidad-rym.png",
       "error": null
     },
     {
@@ -249,66 +249,115 @@
       "error": null
     },
     {
-      "id": "dd6da41cb454413cba2527cbbf003ddb",
-      "title": "1. Mission Control - Revisados RYM (eCarCheck Theme)",
-      "html": "screens/36-1-mission-control-revisados-rym-ecarcheck-theme.html",
-      "image": "screens/36-1-mission-control-revisados-rym-ecarcheck-theme.png",
+      "id": "a98a2bb4f8df45f79dda0091db28af8e",
+      "title": "Dashboard - Revisados RYM (Producción Reskin)",
+      "html": "screens/36-dashboard-revisados-rym-produccion-reskin.html",
+      "image": "screens/36-dashboard-revisados-rym-produccion-reskin.png",
       "error": null
     },
     {
-      "id": "0091603aebfd4b2e95cd20f54a4a13f2",
-      "title": "Operations Desk - Mesa de Trabajo Legal",
-      "html": "screens/37-operations-desk-mesa-de-trabajo-legal.html",
-      "image": "screens/37-operations-desk-mesa-de-trabajo-legal.png",
-      "error": null
-    },
-    {
-      "id": "31a22c25f3a94053b45577f528bf782d",
-      "title": "Operaciones - Vehicle Operations Workspace (Table View)",
-      "html": "screens/38-operaciones-vehicle-operations-workspace-table-view.html",
-      "image": "screens/38-operaciones-vehicle-operations-workspace-table-view.png",
+      "id": "3e9b38c00a434c89aef98b667bd9891f",
+      "title": "1. Dashboard / Mission Control - Revisados RYM (Light Mode Refined)",
+      "html": "screens/37-1-dashboard-mission-control-revisados-rym-light-mode-refined.html",
+      "image": "screens/37-1-dashboard-mission-control-revisados-rym-light-mode-refined.png",
       "error": null
     },
     {
       "id": "377e826f783c4d2fbf44b03eee1697da",
       "title": "4. Reporte Diario - Revisados RYM",
-      "html": "screens/39-4-reporte-diario-revisados-rym.html",
-      "image": "screens/39-4-reporte-diario-revisados-rym.png",
+      "html": "screens/38-4-reporte-diario-revisados-rym.html",
+      "image": "screens/38-4-reporte-diario-revisados-rym.png",
       "error": null
     },
     {
-      "id": "cf1c2d71a318408ebcc3875721e8406a",
-      "title": "2. Avance y Auditoría - Revisados RYM (Vue 3 Ready)",
-      "html": "screens/40-2-avance-y-auditoria-revisados-rym-vue-3-ready.html",
-      "image": "screens/40-2-avance-y-auditoria-revisados-rym-vue-3-ready.png",
+      "id": "400d4465e6214e4dbfb7ca512a3978bf",
+      "title": "2. Avance y Auditoría - Revisados RYM",
+      "html": "screens/39-2-avance-y-auditoria-revisados-rym.html",
+      "image": "screens/39-2-avance-y-auditoria-revisados-rym.png",
       "error": null
     },
     {
-      "id": "d8b7665b670f4ee6a360adc993004f3b",
-      "title": "1. Dashboard / Mission Control - Revisados RYM",
-      "html": "screens/41-1-dashboard-mission-control-revisados-rym.html",
-      "image": "screens/41-1-dashboard-mission-control-revisados-rym.png",
+      "id": "dd6da41cb454413cba2527cbbf003ddb",
+      "title": "1. Mission Control - Revisados RYM (eCarCheck Theme)",
+      "html": "screens/40-1-mission-control-revisados-rym-ecarcheck-theme.html",
+      "image": "screens/40-1-mission-control-revisados-rym-ecarcheck-theme.png",
       "error": null
     },
     {
-      "id": "fc0dbdad611b4aeb934576228f37bec6",
-      "title": "1. Mission Control - Revisados RYM",
-      "html": "screens/42-1-mission-control-revisados-rym.html",
-      "image": "screens/42-1-mission-control-revisados-rym.png",
+      "id": "f9b7af930cef441f8dfcee907858f6a8",
+      "title": "2. Operaciones - Revisados RYM",
+      "html": "screens/41-2-operaciones-revisados-rym.html",
+      "image": "screens/41-2-operaciones-revisados-rym.png",
       "error": null
     },
     {
-      "id": "10659892704481237373",
-      "title": "image.png",
-      "html": null,
-      "image": "screens/43-image-png.png",
-      "error": "HTML: Tool Call Failed [get_screen]: Request contains an invalid argument."
+      "id": "bcf26bd41d3c4f9593ec7acabafff96d",
+      "title": "3. Operaciones - Revisados RYM (Light Mode Refined)",
+      "html": "screens/42-3-operaciones-revisados-rym-light-mode-refined.html",
+      "image": "screens/42-3-operaciones-revisados-rym-light-mode-refined.png",
+      "error": null
+    },
+    {
+      "id": "847e902c15fd49ad9ac30d5ee68303fb",
+      "title": "4. Ficha de Unidad - Revisados RYM (Vue 3 Ready)",
+      "html": "screens/43-4-ficha-de-unidad-revisados-rym-vue-3-ready.html",
+      "image": "screens/43-4-ficha-de-unidad-revisados-rym-vue-3-ready.png",
+      "error": null
     },
     {
       "id": "9833d797c46546769195f7eade7fd8ec",
       "title": "2. Avance y Auditoría - Revisados RYM (Light Mode)",
       "html": "screens/44-2-avance-y-auditoria-revisados-rym-light-mode.html",
       "image": "screens/44-2-avance-y-auditoria-revisados-rym-light-mode.png",
+      "error": null
+    },
+    {
+      "id": "31a22c25f3a94053b45577f528bf782d",
+      "title": "Operaciones - Vehicle Operations Workspace (Table View)",
+      "html": "screens/45-operaciones-vehicle-operations-workspace-table-view.html",
+      "image": "screens/45-operaciones-vehicle-operations-workspace-table-view.png",
+      "error": null
+    },
+    {
+      "id": "276a9a54fd9c4c869dcdb1b9772d452c",
+      "title": "Dashboard - Revisados RYM (Fidelidad de Producción)",
+      "html": "screens/46-dashboard-revisados-rym-fidelidad-de-produccion.html",
+      "image": "screens/46-dashboard-revisados-rym-fidelidad-de-produccion.png",
+      "error": null
+    },
+    {
+      "id": "69490380e3a6446f861b448803cc6a15",
+      "title": "Mission Control - Portal RYM Revisados",
+      "html": "screens/47-mission-control-portal-rym-revisados.html",
+      "image": "screens/47-mission-control-portal-rym-revisados.png",
+      "error": null
+    },
+    {
+      "id": "7198b1cfaffa40c78745e1d57d1673ba",
+      "title": "5. Ficha de Unidad - Revisados RYM",
+      "html": "screens/48-5-ficha-de-unidad-revisados-rym.html",
+      "image": null,
+      "error": "Image: Tool Call Failed [get_screen]: Request contains an invalid argument."
+    },
+    {
+      "id": "b96a64acfc1d45e987b9945a570b37ec",
+      "title": "Operaciones - Table View (Production Ready)",
+      "html": "screens/49-operaciones-table-view-production-ready.html",
+      "image": "screens/49-operaciones-table-view-production-ready.png",
+      "error": null
+    },
+    {
+      "id": "d2ec5c8ae9ed4e0db264ea5ae25a2bf6",
+      "title": "3. Operaciones - Revisados RYM",
+      "html": "screens/50-3-operaciones-revisados-rym.html",
+      "image": "screens/50-3-operaciones-revisados-rym.png",
+      "error": null
+    },
+    {
+      "id": "8fc40eb35ff549afa35492d95b15891c",
+      "title": "Operaciones - Portal RYM Revisados",
+      "html": "screens/51-operaciones-portal-rym-revisados.html",
+      "image": "screens/51-operaciones-portal-rym-revisados.png",
       "error": null
     }
   ],

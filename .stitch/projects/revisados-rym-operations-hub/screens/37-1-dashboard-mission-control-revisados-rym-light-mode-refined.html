@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary-fixed-variant": "#3f465c", "error-container": "#ffdad6", "on-secondary-container": "#00476e", "on-secondary-fixed": "#001d31", "on-secondary-fixed-variant": "#004b73", "on-surface": "#0b1c30", "surface-tint": "#565e74", "on-error-container": "#93000a", "on-primary-fixed": "#131b2e", "surface-container": "#e5eeff", "surface-container-lowest": "#ffffff", "on-primary-container": "#7c839b", "on-secondary": "#ffffff", "primary-fixed-dim": "#bec6e0", "on-surface-variant": "#45464d", "background": "#f8f9ff", "surface-container-high": "#dce9ff", "primary": "#000000", "surface-dim": "#cbdbf5", "surface-container-highest": "#d3e4fe", "inverse-surface": "#213145", "surface": "#f8f9ff", "primary-fixed": "#dae2fd", "secondary": "#006398", "inverse-primary": "#bec6e0", "on-tertiary-fixed-variant": "#004e61", "on-primary": "#ffffff", "on-tertiary-fixed": "#001f28", "secondary-fixed": "#cce5ff", "surface-variant": "#d3e4fe", "tertiary": "#000000", "secondary-fixed-dim": "#93ccff", "on-tertiary": "#ffffff", "surface-container-low": "#eff4ff", "tertiary-container": "#001f28", "tertiary-fixed": "#b7eaff", "outline": "#76777d", "primary-container": "#131b2e", "on-tertiary-container": "#028fb0", "tertiary-fixed-dim": "#6cd3f7", "secondary-container": "#5bb8fe", "surface-bright": "#f8f9ff", "outline-variant": "#c6c6cd", "error": "#ba1a1a", "on-background": "#0b1c30", "inverse-on-surface": "#eaf1ff", "on-error": "#ffffff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-sm": "0.5rem", "margin": "1.5rem", "space-md": "0.875rem", "space-xl": "1.75rem", "gutter": "1rem", "space-xs": "0.25rem", "space-lg": "1.25rem" }, "fontFamily": { "body-sm": [ "Inter" ], "data-mono-sm": [ "JetBrains Mono" ], "headline-xl": [ "Inter" ], "body-lg": [ "Inter" ], "headline-lg": [ "Inter" ], "body-md": [ "Inter" ], "data-mono-md": [ "JetBrains Mono" ], "label-caps": [ "Inter" ], "headline-sm": [ "Inter" ], "data-mono-lg": [ "JetBrains Mono" ] }, "fontSize": { "body-sm": [ "0.8125rem", { "lineHeight": "1.125rem", "fontWeight": "400" } ], "data-mono-sm": [ "0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.015em", "fontWeight": "500" } ], "headline-xl": [ "1.75rem", { "lineHeight": "2.25rem", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "body-lg": [ "0.9375rem", { "lineHeight": "1.5rem", "fontWeight": "400" } ], "headline-lg": [ "1.375rem", { "lineHeight": "1.875rem", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-md": [ "0.875rem", { "lineHeight": "1.25rem", "fontWeight": "400" } ], "data-mono-md": [ "0.8125rem", { "lineHeight": "1.125rem", "letterSpacing": "0.02em", "fontWeight": "500" } ], "label-caps": [ "0.6875rem", { "lineHeight": "1rem", "letterSpacing": "0.06em", "fontWeight": "700" } ], "headline-sm": [ "1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "data-mono-lg": [ "0.875rem", { "lineHeight": "1.25rem", "letterSpacing": "0.025em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center justify-between border-b border-outline-variant/20 bg-surface-container-lowest"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">PORTAL RYM</span><span class="font-label-caps text-label-caps px-space-xs py-0.5 bg-surface-container text-secondary font-semibold rounded">FLOTA 2,000+ UDS</span></div></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Control Operativo</div><nav class="space-y-1 mt-1" data-active-classes="bg-primary-container text-on-primary font-semibold"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="dashboard-mission-control" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Mission Control</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="avance-y-auditoria" href="#"><span class="material-symbols-outlined text-[20px]">verified</span><span class="font-body-md text-body-md">Avance y Auditoría</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="operaciones-mesa-de-trabajo" href="#"><span class="material-symbols-outlined text-[20px]">engineering</span><span class="font-body-md text-body-md">Mesa de Trabajo</span></a></nav></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Instalaciones &amp; Cumplimiento</div><nav class="space-y-1 mt-1" data-active-classes="bg-primary-container text-on-primary font-semibold"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="galeras-y-bahias" href="#"><span class="material-symbols-outlined text-[20px]">warehouse</span><span class="font-body-md text-body-md">Galeras y Bahías</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="boletas-y-retenciones" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span><span class="font-body-md text-body-md">Boletas y Retenciones</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="auditoria-forense" href="#"><span class="material-symbols-outlined text-[20px]">policy</span><span class="font-body-md text-body-md">Auditoría Forense</span></a></nav></div></div><div class="p-space-md border-t border-outline-variant/20 bg-surface-container-low/40"><div class="flex items-center justify-between p-space-sm bg-surface-container-lowest rounded border border-outline-variant/30 shadow-[0_1px_3px_rgba(15,23,42,0.03)]"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span><span class="font-data-mono-sm text-data-mono-sm text-on-surface font-semibold">#01 Node Telemetry</span></div><span class="font-data-mono-sm text-data-mono-sm text-secondary bg-surface-container px-space-xs py-0.5 rounded font-bold">24ms</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 z-40 flex items-center justify-between px-margin shadow-[0_1px_4px_rgba(15,23,42,0.02)]"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="hover:text-on-surface cursor-pointer font-medium">Plataforma</span><span class="text-outline">/</span><span class="text-on-surface font-semibold">Telemetría Ejecutiva</span></div><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-sm text-outline text-[18px]">search</span><input class="h-9 pl-8 pr-12 rounded bg-surface-container-low border border-outline-variant/40 font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-secondary w-72 transition-all" placeholder="Buscar VIN, Placa, Chofer o Boleta..." type="text"/><kbd class="absolute right-space-sm font-data-mono-sm text-data-mono-sm text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded border border-outline-variant/40">Ctrl+K</kbd></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded border border-outline-variant/30"><span class="material-symbols-outlined text-secondary text-[18px]">domain</span><span class="font-body-sm text-body-sm font-semibold text-on-surface">Galera Central B</span><span class="material-symbols-outlined text-outline text-[16px]">expand_more</span></div><div class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container text-on-secondary-container border border-secondary-container/30"><span class="w-2 h-2 rounded-full bg-secondary-container animate-ping"></span><span class="font-label-caps text-label-caps font-bold">ATTT GATEWAY</span><span class="font-data-mono-sm text-data-mono-sm text-on-secondary-container/80">0.4s</span></div><div class="flex items-center bg-surface-container-low p-0.5 rounded-full border border-outline-variant/30"><button class="flex items-center gap-1 px-2.5 py-1 bg-surface-container-lowest rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.08)] text-on-surface font-body-sm text-body-sm font-medium" type="button"><span class="material-symbols-outlined text-[15px] text-secondary">light_mode</span><span>Claro</span></button><button class="flex items-center gap-1 px-2.5 py-1 text-on-surface-variant hover:text-on-surface font-body-sm text-body-sm" type="button"><span class="material-symbols-outlined text-[15px]">dark_mode</span><span>Oscuro</span></button></div><div class="flex items-center gap-space-xs pl-space-xs border-l border-outline-variant/30"><div class="flex flex-col text-right"><span class="font-body-sm text-body-sm font-semibold text-on-surface leading-tight">Ing. C. Navarro</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Supervisor Máster</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 w-full px-margin py-margin min-h-screen bg-background"><div class="flex flex-col w-full space-y-space-xl">
+<!-- HEADER CONTEXT & QUICK METRICS BAR -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-secondary font-label-caps uppercase tracking-wider mb-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+        Fiscalización Nacional Vehicular • Auditoría Continua
+      </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">
+        Mission Control — Revisados eCarCheck RYM
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+        Monitoreo consolidado de inspecciones técnicas, solvencia municipal y tramitología RUV en tiempo real.
+      </p>
+</div>
+<!-- Quick System Diagnostics Pill -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest p-space-xs rounded-xl shadow-sm border-0">
+<div class="px-space-md py-1.5 rounded-lg bg-surface-container-low flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Sincronización ATTT</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-on-surface">Activa • 99.8% SLA</span>
+</div>
+</div>
+<div class="px-space-md py-1.5 rounded-lg bg-surface-container-low flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">schedule</span>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Corte de Ciclo Q1</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-on-surface">14 Días Restantes</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 1. TOP FILTER BAR: Clean, integrated light-gray canvas -->
+<section class="bg-surface-container-low rounded-xl p-space-md shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center">
+<!-- Search Input -->
+<div class="md:col-span-3 relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline text-[20px]">search</span>
+<input class="w-full h-11 pl-10 pr-3 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-secondary/40 shadow-sm" placeholder="Buscar Placa, VIN o Código Unidad..." type="text"/>
+</div>
+<!-- Selector: Galera -->
+<div class="md:col-span-2">
+<label class="sr-only">Galera</label>
+<div class="relative">
+<select class="w-full h-11 px-3 pr-8 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/40 shadow-sm cursor-pointer">
+<option value="all">Todas las Galeras (3)</option>
+<option value="central_b">Galera Central B (Metro)</option>
+<option value="norte_a">Galera Norte A (Transístmica)</option>
+<option value="sur_express">Galera Sur Express (Pacífico)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-3 text-outline pointer-events-none text-[20px]">arrow_drop_down</span>
+</div>
+</div>
+<!-- Selector: Supervisora Responsable -->
+<div class="md:col-span-2">
+<label class="sr-only">Supervisora</label>
+<div class="relative">
+<select class="w-full h-11 px-3 pr-8 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/40 shadow-sm cursor-pointer">
+<option value="all">Todas las Supervisoras</option>
+<option value="ing_c_navarro">Ing. C. Navarro (Central)</option>
+<option value="lic_m_delgado">Lic. M. Delgado (Norte)</option>
+<option value="ing_f_orozco">Ing. F. Orozco (Sur)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-3 text-outline pointer-events-none text-[20px]">arrow_drop_down</span>
+</div>
+</div>
+<!-- Selector: Estatus Multiselección -->
+<div class="md:col-span-3">
+<label class="sr-only">Estatus Legal</label>
+<div class="relative">
+<select class="w-full h-11 px-3 pr-8 rounded-lg bg-surface-container-lowest font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/40 shadow-sm cursor-pointer">
+<option value="all">Estatus: Filtrar por Condición (Todos)</option>
+<option value="vigente">Vigente eCarCheck (1,492)</option>
+<option value="pendiente">Pendiente por Ciclo (284)</option>
+<option value="color">Cambio de Color / RUV (76)</option>
+<option value="bloqueo">Bloqueo Técnico / Legal (184)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-3 text-outline pointer-events-none text-[20px]">tune</span>
+</div>
+</div>
+<!-- Selector: Periodo & Actions -->
+<div class="md:col-span-2 flex items-center gap-space-xs">
+<div class="relative flex-1">
+<select class="w-full h-11 px-3 pr-7 rounded-lg bg-surface-container-lowest font-body-md text-body-md font-medium text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-secondary/40 shadow-sm cursor-pointer">
+<option>Q1 2025 Regular</option>
+<option>Q4 2024 Auditado</option>
+<option>Histórico Anual</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-3 text-outline pointer-events-none text-[18px]">calendar_today</span>
+</div>
+<button class="h-11 px-3 rounded-lg bg-primary text-on-primary hover:bg-inverse-surface transition-colors flex items-center justify-center shadow-sm" title="Aplicar Filtros" type="button">
+<span class="material-symbols-outlined text-[20px]">filter_alt</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 2. HERO SUMMARY BANNER: Consolidated Universe & Distribution -->
+<section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-md flex flex-col space-y-space-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
+<!-- Left Column: Primary Universe Display -->
+<div class="lg:col-span-3 flex flex-col justify-center pr-0 lg:pr-space-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest font-bold">Universo Total Fiscalizado</span>
+<div class="flex items-baseline gap-space-xs mt-1">
+<span class="font-data-mono-lg text-[2.75rem] font-bold text-on-surface leading-none tracking-tight">2,148</span>
+<span class="font-body-sm text-body-sm text-secondary font-semibold">UDS TOTAL</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 leading-snug">
+          100% de la flota comercial distribuida operativamente en las 3 galeras maestras.
+        </p>
+<div class="mt-4 flex items-center gap-space-xs">
+<span class="inline-flex items-center px-2.5 py-1 rounded bg-surface-container text-on-secondary-container font-label-caps text-label-caps font-bold">
+            AUDITORÍA RYM • V.25
+          </span>
+<span class="font-data-mono-sm text-data-mono-sm text-outline">Refresco: Hace 3m</span>
+</div>
+</div>
+<!-- Center & Right: The 4 Core Status Pillars -->
+<div class="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Pillar 1: Vigente -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md flex flex-col justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps font-bold uppercase text-on-surface-variant">Vigente eCarCheck</span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+</div>
+<div class="mt-2 flex items-baseline gap-space-xs">
+<span class="font-data-mono-lg text-[1.85rem] font-bold text-secondary leading-none">1,492</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-secondary">69.5%</span>
+</div>
+</div>
+<div class="mt-4 pt-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Con calcomanía ATTT y sticker municipal emitido.</span>
+</div>
+</div>
+<!-- Pillar 2: Pendiente por Ciclo -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md flex flex-col justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps font-bold uppercase text-on-surface-variant">Pendiente por Ciclo</span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+</div>
+<div class="mt-2 flex items-baseline gap-space-xs">
+<span class="font-data-mono-lg text-[1.85rem] font-bold text-on-secondary-container leading-none">284</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-on-secondary-container">13.2%</span>
+</div>
+</div>
+<div class="mt-4 pt-2 flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">Cierre en 14 días</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">timelapse</span>
+</div>
+</div>
+<!-- Pillar 3: Cambio de Color / RUV -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md flex flex-col justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps font-bold uppercase text-on-surface-variant">Cambio de Color</span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed-dim"></span>
+</div>
+<div class="mt-2 flex items-baseline gap-space-xs">
+<span class="font-data-mono-lg text-[1.85rem] font-bold text-on-surface leading-none">76</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-on-surface-variant">3.5%</span>
+</div>
+</div>
+<div class="mt-4 pt-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Trámite pericial RUV pendiente de certificación.</span>
+</div>
+</div>
+<!-- Pillar 4: Incidencias / Bloqueos -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-md flex flex-col justify-between hover:bg-surface-container-low transition-colors">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps font-bold uppercase text-error">Bloqueos Reales</span>
+<span class="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></span>
+</div>
+<div class="mt-2 flex items-baseline gap-space-xs">
+<span class="font-data-mono-lg text-[1.85rem] font-bold text-error leading-none">184</span>
+<span class="font-data-mono-sm text-data-mono-sm font-semibold text-error">8.6%</span>
+</div>
+</div>
+<div class="mt-4 pt-2">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Fallas mecánicas o boletas sumarias pendientes.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Segmented High-Contrast Linear Progress Bar -->
+<div class="flex flex-col space-y-1.5 pt-space-xs">
+<div class="flex justify-between items-center text-label-caps font-label-caps uppercase text-on-surface-variant">
+<span>Distribución Relativa del Universo Flota (2,148 Unidades)</span>
+<span class="font-data-mono-sm text-data-mono-sm font-bold text-on-surface">94.8% Capacidad Operativa</span>
+</div>
+<div class="h-3 w-full bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-secondary transition-all" style="width: 69.5%;" title="Vigente: 69.5%"></div>
+<div class="h-full bg-secondary-container transition-all" style="width: 13.2%;" title="Pendiente por Ciclo: 13.2%"></div>
+<div class="h-full bg-outline-variant transition-all" style="width: 3.5%;" title="Cambio de Color: 3.5%"></div>
+<div class="h-full bg-error transition-all" style="width: 8.6%;" title="Bloqueos Reales: 8.6%"></div>
+<div class="h-full bg-surface-dim transition-all" style="width: 5.2%;" title="En Tránsito o Taller: 5.2%"></div>
+</div>
+<div class="flex items-center gap-space-md font-body-sm text-body-sm text-on-surface-variant pt-1 flex-wrap">
+<div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-secondary"></span><span>Vigente (1,492)</span></div>
+<div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-secondary-container"></span><span>Pendiente Ciclo (284)</span></div>
+<div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-outline-variant"></span><span>Cambio de Color (76)</span></div>
+<div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-error"></span><span>Bloqueos Críticos (184)</span></div>
+<div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-surface-dim"></span><span>En Taller Auxiliar (112)</span></div>
+</div>
+</div>
+</section>
+<!-- 3. TWO BALANCED OPERATIONAL BLOCKS (60/40 Split) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-stretch">
+<!-- BLOCK A: Desglose y Rendimiento por Galera (7 Cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-space-xl shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Desglose y Rendimiento por Galera
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Productividad de bahías físicas, avance pericial y contención de incidentes legales.
+            </p>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container font-label-caps text-label-caps font-bold text-secondary hover:bg-surface-container-high transition-colors" type="button">
+            CONFIGURAR BAHÍAS
+          </button>
+</div>
+<div class="space-y-space-md mt-space-sm">
+<!-- Galera Central B -->
+<div class="p-space-md rounded-xl bg-surface-container-low/70 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">warehouse</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-[1rem] font-bold text-on-surface">Galera Central B</span>
+<span class="px-2 py-0.5 rounded bg-surface-container font-data-mono-sm text-data-mono-sm text-secondary font-bold">Metro</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Supervisora: Ing. Camila Navarro</span>
+</div>
+</div>
+<div class="flex items-center gap-space-lg mt-2 sm:mt-0">
+<div class="text-right">
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">890 Uds</div>
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Capacidad: 1,000</div>
+</div>
+<div class="text-right pl-space-sm">
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-secondary">84%</div>
+<div class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Avance</div>
+</div>
+</div>
+</div>
+<!-- Meter and sub-status -->
+<div class="mt-3">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 84%;"></div>
+</div>
+<div class="flex justify-between items-center mt-2 text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Bahías activas: 6/6 • Ritmo: 28 uds/día</span>
+<span class="text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">flag</span>
+                  18 Bloqueos Legales
+                </span>
+</div>
+</div>
+</div>
+<!-- Galera Norte A -->
+<div class="p-space-md rounded-xl bg-surface-container-low/70 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[24px]">garage_home</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-[1rem] font-bold text-on-surface">Galera Norte A</span>
+<span class="px-2 py-0.5 rounded bg-surface-container font-data-mono-sm text-data-mono-sm text-on-surface-variant font-bold">Transístmica</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Supervisora: Lic. Mariana Delgado</span>
+</div>
+</div>
+<div class="flex items-center gap-space-lg mt-2 sm:mt-0">
+<div class="text-right">
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">740 Uds</div>
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Capacidad: 850</div>
+</div>
+<div class="text-right pl-space-sm">
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">69%</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase font-semibold">Avance</div>
+</div>
+</div>
+</div>
+<!-- Meter and sub-status -->
+<div class="mt-3">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 69%;"></div>
+</div>
+<div class="flex justify-between items-center mt-2 text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Bahías activas: 4/5 • Ritmo: 16 uds/día</span>
+<span class="text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">flag</span>
+                  42 Bloqueos Legales (Alerta)
+                </span>
+</div>
+</div>
+</div>
+<!-- Galera Sur Express -->
+<div class="p-space-md rounded-xl bg-surface-container-low/70 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">local_shipping</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-[1rem] font-bold text-on-surface">Galera Sur Express</span>
+<span class="px-2 py-0.5 rounded bg-surface-container font-data-mono-sm text-data-mono-sm text-secondary font-bold">Pacífico</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Supervisor: Ing. Fernando Orozco</span>
+</div>
+</div>
+<div class="flex items-center gap-space-lg mt-2 sm:mt-0">
+<div class="text-right">
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">518 Uds</div>
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Capacidad: 600</div>
+</div>
+<div class="text-right pl-space-sm">
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-secondary">76%</div>
+<div class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Avance</div>
+</div>
+</div>
+</div>
+<!-- Meter and sub-status -->
+<div class="mt-3">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 76%;"></div>
+</div>
+<div class="flex justify-between items-center mt-2 text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Bahías activas: 3/4 • Ritmo: 14 uds/día</span>
+<span class="text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">flag</span>
+                  19 Bloqueos Legales
+                </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Resumen de solvencias actualizado periódicamente con el municipio.</span>
+<a class="font-body-sm text-body-sm font-semibold text-secondary hover:underline flex items-center gap-1" href="#">
+          Auditoría de Galeras Detallada <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- BLOCK B: Avance Mensual y Ritmo de Cierre Q1 (5 Cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-space-xl shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-md">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Ritmo de Cierre Q1 2025
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Proyección de cumplimiento ante plazo límite legal de circulación.
+            </p>
+</div>
+<span class="px-2.5 py-1 rounded bg-surface-container text-secondary font-data-mono-sm text-data-mono-sm font-bold">
+            Día 76 / 90
+          </span>
+</div>
+<!-- Velocity Indicator Card -->
+<div class="bg-surface-container p-space-md rounded-xl mb-space-md flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-lowest flex items-center justify-center text-secondary shadow-sm">
+<span class="material-symbols-outlined text-[28px]">speed</span>
+</div>
+<div>
+<div class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">48 uds / día</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Velocidad promedio requerida para 100% de cumplimiento</div>
+</div>
+</div>
+<!-- Monthly Projection Trackers -->
+<div class="space-y-space-md">
+<!-- Enero -->
+<div class="flex flex-col space-y-1">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="font-semibold text-on-surface">Enero 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-bold">100% • 716 Uds Completadas</span>
+</div>
+<div class="h-2.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 100%;"></div>
+</div>
+</div>
+<!-- Febrero -->
+<div class="flex flex-col space-y-1">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="font-semibold text-on-surface">Febrero 2025</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-bold">92% • 658 Uds Fiscalizadas</span>
+</div>
+<div class="h-2.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 92%;"></div>
+</div>
+</div>
+<!-- Marzo (En Curso) -->
+<div class="flex flex-col space-y-1">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="font-semibold text-on-surface">Marzo 2025 (En curso)</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-secondary-container font-bold">58% • 442 de 774 Uds</span>
+</div>
+<div class="h-2.5 w-full bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-secondary-container" style="width: 58%;"></div>
+<div class="h-full bg-outline-variant/40" style="width: 42%;"></div>
+</div>
+</div>
+</div>
+<!-- Mini Visual Stat: Status Ring SVG (Inlined cleanly) -->
+<div class="mt-space-lg p-space-md rounded-xl bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<svg class="w-14 h-14 transform -rotate-90" viewbox="0 0 36 36">
+<circle class="text-surface-container" cx="18" cy="18" fill="none" r="15.5" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-secondary" cx="18" cy="18" fill="none" r="15.5" stroke="currentColor" stroke-dasharray="97.4" stroke-dashoffset="18" stroke-linecap="round" stroke-width="3.5"></circle>
+</svg>
+<div class="flex flex-col">
+<span class="font-data-mono-lg text-data-mono-lg font-bold text-on-surface">81.5% Global</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Eficiencia en primera pasada</span>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold">Meta Trimestral</span>
+<div class="font-data-mono-md text-data-mono-md font-bold text-on-surface">2,148 Uds</div>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>Próximo simulacro RUV: 28 Marzo</span>
+<button class="text-secondary font-semibold hover:underline" type="button">Descargar Cronograma</button>
+</div>
+</div>
+</section>
+<!-- 4. MESA CENTRAL DE DESPACHO INMEDIATO (High legibility enterprise table) -->
+<section class="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col">
+<!-- Table Header & Controls -->
+<div class="p-space-lg bg-surface-container-lowest flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+            Mesa Central de Despacho Inmediato
+          </h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-data-mono-sm text-data-mono-sm font-semibold">
+            184 Unidades Requieren Acción
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+          Lista priorizada de inspección técnica pericial, desbloqueo de gravamen municipal y emisión de stickers ATTT.
+        </p>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container font-body-sm text-body-sm font-medium text-on-surface flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Columnas</span>
+</button>
+<button class="px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container font-body-sm text-body-sm font-medium text-on-surface flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Exportar CSV</span>
+</button>
+</div>
+</div>
+<!-- The Fleet Data Table -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
+<th class="py-3 px-4 w-12 text-center">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer" type="checkbox"/>
+</th>
+<th class="py-3 px-4">Unidad &amp; Modelo</th>
+<th class="py-3 px-4">Placa Oficial</th>
+<th class="py-3 px-4">Galera &amp; Bahía</th>
+<th class="py-3 px-4">Supervisora</th>
+<th class="py-3 px-4">Estado Legal / Técnico</th>
+<th class="py-3 px-4">Último Revisado</th>
+<th class="py-3 px-4 text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-body-md font-body-md text-on-surface">
+<!-- Row 1: Vigente -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant font-data-mono-sm text-data-mono-sm font-bold">
+                  #104
+                </div>
+<div>
+<div class="font-semibold text-on-surface">Isuzu Forward 12T</div>
+<div class="font-data-mono-sm text-data-mono-sm text-outline">VIN: 3N1AB7AP6KL294812</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="font-data-mono-lg text-data-mono-lg font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface tracking-wider">
+                RYM-8492
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Central B</div>
+<div class="font-body-sm text-body-sm text-outline">Bahía 02 (Pesados)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Ing. C. Navarro</div>
+<div class="font-body-sm text-body-sm text-outline">Turno Mañana</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-secondary font-label-caps text-label-caps font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                VIGENTE ECARCHECK
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface">18/03/2025</div>
+<div class="font-body-sm text-body-sm text-outline">Certificado #88219</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Ver Expediente" type="button">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary font-body-sm text-body-sm font-semibold transition-colors" type="button">
+                  Despachar
+                </button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Bloqueo Legal -->
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant font-data-mono-sm text-data-mono-sm font-bold">
+                  #088
+                </div>
+<div>
+<div class="font-semibold text-on-surface">Hino Dutro 300</div>
+<div class="font-data-mono-sm text-data-mono-sm text-outline">VIN: 2HJ1093JJK4810294</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="font-data-mono-lg text-data-mono-lg font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface tracking-wider">
+                RYM-1029
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Norte A</div>
+<div class="font-body-sm text-body-sm text-error font-medium">Bahía Retención</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Lic. M. Delgado</div>
+<div class="font-body-sm text-body-sm text-outline">Juzgado Ejecución</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+                BLOQUEO LEGAL (BOLETA ATTT)
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-data-mono-sm text-data-mono-sm text-error font-bold">Venció 04/03/2025</div>
+<div class="font-body-sm text-body-sm text-outline">Sumario #BO-4910</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-error" title="Ver Expediente Forense" type="button">
+<span class="material-symbols-outlined text-[20px]">policy</span>
+</button>
+<button class="px-2.5 py-1 rounded-lg bg-primary text-on-primary hover:bg-inverse-surface font-body-sm text-body-sm font-semibold transition-colors" type="button">
+                  Resolver Boleta
+                </button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Cambio de Color -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant font-data-mono-sm text-data-mono-sm font-bold">
+                  #211
+                </div>
+<div>
+<div class="font-semibold text-on-surface">Fuso Canter 4.5T</div>
+<div class="font-data-mono-sm text-data-mono-sm text-outline">VIN: 9BM540XKJ91823902</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="font-data-mono-lg text-data-mono-lg font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface tracking-wider">
+                RYM-3190
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Central B</div>
+<div class="font-body-sm text-body-sm text-outline">Bahía 05 (Peritaje)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Ing. C. Navarro</div>
+<div class="font-body-sm text-body-sm text-outline">Perito RUV</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-caps text-label-caps font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                CAMBIO DE COLOR (BLANCO/AZUL)
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface">15/03/2025</div>
+<div class="font-body-sm text-body-sm text-outline">Inspección ocular OK</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Ver Expediente" type="button">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary font-body-sm text-body-sm font-semibold transition-colors" type="button">
+                  Emitir Acta
+                </button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Pendiente por Ciclo -->
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant font-data-mono-sm text-data-mono-sm font-bold">
+                  #119
+                </div>
+<div>
+<div class="font-semibold text-on-surface">Toyota HiAce Cargo</div>
+<div class="font-data-mono-sm text-data-mono-sm text-outline">VIN: JT2DK30489F019283</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="font-data-mono-lg text-data-mono-lg font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface tracking-wider">
+                RYM-4401
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Sur Express</div>
+<div class="font-body-sm text-body-sm text-outline">Bahía 01 (Livianos)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Ing. F. Orozco</div>
+<div class="font-body-sm text-body-sm text-outline">Turno Tarde</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-secondary-container font-label-caps text-label-caps font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+                PENDIENTE POR CICLO (D-14)
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface">22/02/2024</div>
+<div class="font-body-sm text-body-sm text-outline">Vence: 31/03/2025</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Ver Expediente" type="button">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary font-body-sm text-body-sm font-semibold transition-colors" type="button">
+                  Agendar Bahía
+                </button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Vigente con Observación de Mantenimiento -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant font-data-mono-sm text-data-mono-sm font-bold">
+                  #015
+                </div>
+<div>
+<div class="font-semibold text-on-surface">Volvo FH 540 Tractor</div>
+<div class="font-data-mono-sm text-data-mono-sm text-outline">VIN: YV2RT40A5NA781043</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="font-data-mono-lg text-data-mono-lg font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface tracking-wider">
+                RYM-0199
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Central B</div>
+<div class="font-body-sm text-body-sm text-outline">Bahía 03 (Pesados)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-on-surface">Ing. C. Navarro</div>
+<div class="font-body-sm text-body-sm text-outline">Flota Internacional</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-secondary font-label-caps text-label-caps font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                VIGENTE ECARCHECK
+              </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-data-mono-sm text-data-mono-sm text-on-surface">19/03/2025</div>
+<div class="font-body-sm text-body-sm text-outline">Certificado #88450</div>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="inline-flex items-center gap-1">
+<button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Ver Expediente" type="button">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary font-body-sm text-body-sm font-semibold transition-colors" type="button">
+                  Despachar
+                </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- 5. BOTTOM BATCH ACTION TRAY & PAGINATION -->
+<div class="p-space-md bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md">
+<!-- Batch Action Buttons -->
+<div class="flex items-center gap-space-sm flex-wrap w-full md:w-auto">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold pr-2">
+          Acciones en Lote (2 Seleccionados):
+        </span>
+<button class="px-3.5 py-2 rounded-lg bg-primary text-on-primary hover:bg-inverse-surface font-body-sm text-body-sm font-semibold shadow-sm flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span>Generar Lote de Pago</span>
+</button>
+<button class="px-3.5 py-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container font-body-sm text-body-sm font-semibold text-on-surface shadow-sm flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>
+<span>Imprimir Calcomanías</span>
+</button>
+<button class="px-3.5 py-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container font-body-sm text-body-sm font-semibold text-on-surface shadow-sm flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">assignment_turned_in</span>
+<span>Exportar Acta Fiscal</span>
+</button>
+</div>
+<!-- Compact Pagination -->
+<div class="flex items-center gap-space-sm">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mostrando 1 - 5 de 184 incidencias</span>
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="px-2.5 py-1 rounded bg-secondary text-on-secondary font-data-mono-sm text-data-mono-sm font-bold">1</span>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm" type="button">2</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface font-data-mono-sm text-data-mono-sm" type="button">3</button>
+<button class="p-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-on-surface" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div></main></div></body></html>
