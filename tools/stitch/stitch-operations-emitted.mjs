@@ -107,7 +107,7 @@ try{
   }else throw error;
 }
 
-const screens=Array.isArray(variants?.screens)?variants.screens:[];
+const screens=Array.isArray(variants)?variants:(Array.isArray(variants?.screens)?variants.screens:[]);
 if(!screens.length)throw new Error('Stitch variants returned no screens');
 
 await fs.writeFile(path.join(outDir,'operations-emitted-stitch-latest.json'),JSON.stringify({
