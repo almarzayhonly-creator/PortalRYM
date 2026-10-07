@@ -1,0 +1,19 @@
+{
+  "name": "Portal RYM · Validador de Unidad",
+  "short_name": "RYM Validador",
+  "description": "Validador eCarCheck de Portal RYM optimizado para tablet.",
+  "start_url": "/?app=validador",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4F7FB",
+  "theme_color": "#0A1B4D",
+  "icons": [
+    {
+      "src": "/assets/validator-tablet-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
