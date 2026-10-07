@@ -1,0 +1,67 @@
+name: Stitch generate tablet unit validator
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [sandbox/panapass-v2]
+    paths:
+      - 'tools/stitch/stitch-unit-validator-tablet.mjs'
+      - 'tools/stitch/package.json'
+      - '.github/workflows/stitch-generate-unit-validator-tablet.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stitch-unit-validator-tablet-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sandbox/panapass-v2
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Fetch current main validator contract
+        run: |
+          git fetch --depth=1 origin main
+          mkdir -p .stitch
+          git show FETCH_HEAD:index.html > .stitch/main-index-reference.html
+          test -s .stitch/main-index-reference.html
+          grep -Fq 'control_auto.validar_ecarcheck' .stitch/main-index-reference.html
+          grep -Fq '/functions/v1/control-auto-auditoria-validar' .stitch/main-index-reference.html
+          grep -Fq 'Validador por selección' .stitch/main-index-reference.html
+
+      - name: Install Stitch SDK
+        working-directory: tools/stitch
+        run: npm install --no-audit --no-fund --package-lock=false
+
+      - name: Generate tablet variants from main contract
+        working-directory: tools/stitch
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+          MAIN_INDEX_HTML: ${{ github.workspace }}/.stitch/main-index-reference.html
+        run: npm run stitch:unit-validator-tablet
+
+      - name: Remove transient main reference
+        run: rm -f .stitch/main-index-reference.html
+
+      - name: Commit Stitch tablet variants
+        run: |
+          if git diff --quiet -- .stitch/generated && [ -z "$(git status --porcelain .stitch/generated)" ]; then
+            echo "No Stitch changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .stitch/generated
+          git commit -m "chore(stitch): generate tablet validator variants"
+          git push origin HEAD:sandbox/panapass-v2
