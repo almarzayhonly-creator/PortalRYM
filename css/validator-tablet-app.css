@@ -1,469 +1,169 @@
-
-/* Pre-paint isolation: the Worker adds this class in <head> for the dedicated route. */
-html.rym-unit-validator-route body:not(.rym-unit-validator-app) #app{
-  visibility:hidden!important;
+/* Base: shell and host share tokens. Overrides are scoped to the dedicated host;
+   !important is necessary only where main's legacy inline styles also use it. */
+.rym-validator-shell,html.rym-unit-validator-app{
+  --uva-navy:#0A1B4D;--uva-blue:#244AA5;--uva-sky:#53B7E8;--uva-orange:#F47C20;
+  --uva-bg:#F4F7FB;--uva-border:#D8E3F2;--uva-text:#10224E;--uva-muted:#62708C;
+  --uva-green:#047857;--uva-red:#DC2626;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--uva-text);background:var(--uva-bg);
 }
-html.rym-unit-validator-route body:not(.rym-unit-validator-app){
-  background:#F4F7FB!important;
+.rym-validator-shell{margin:0;overflow:hidden}
+.rym-validator-shell *{box-sizing:border-box}
+.rym-validator-shell [hidden]{display:none}
+.uva-bar{height:64px;padding:8px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:white;border-bottom:1px solid var(--uva-border)}
+.uva-brand{display:flex;align-items:center;gap:12px;min-width:0}
+.uva-brand img{object-fit:contain;flex-shrink:0}
+.uva-brand b{display:block;font-size:17px;letter-spacing:-.02em}
+.uva-brand span{display:block;font-size:12px;color:var(--uva-muted);max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uva-actions{display:flex;align-items:center;gap:12px}
+.uva-actions #status{font-size:12px;color:var(--uva-muted)}
+.uva-actions button{min-height:44px;padding:0 16px;border:1px solid var(--uva-border);background:white;border-radius:10px;color:var(--uva-blue);font:600 13px inherit;cursor:pointer}
+.uva-actions #exit{color:var(--uva-navy)}
+.uva-stage{height:calc(100dvh - 64px);position:relative}
+.uva-stage iframe{width:100%;height:100%;border:0;display:block;opacity:0}
+.uva-stage iframe.ready{opacity:1}
+.uva-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;color:var(--uva-muted)}
+/* Host isolation is active before any portal markup is painted. Login remains visible. */
+html.rym-unit-validator-app body{margin:0!important;background:var(--uva-bg)!important;color:var(--uva-text)!important}
+html.rym-unit-validator-app:not(.uva-authorized) .v101-shell,
+html.rym-unit-validator-app:not(.uva-authorized) #v101CheckModal,
+html.rym-unit-validator-app .v101-side,
+html.rym-unit-validator-app .v101-top,
+html.rym-unit-validator-app #v115MobileNav,
+html.rym-unit-validator-app .v101-content>*:not(.v101-validator),
+html.rym-unit-validator-app #v101OpenModule{display:none!important}
+html.rym-unit-validator-app .v101-shell{display:block!important;min-height:100dvh!important;width:100%!important;background:transparent!important}
+html.rym-unit-validator-app .v101-main{width:100%!important;min-width:0!important;margin:0!important;padding:0!important;background:transparent!important}
+html.rym-unit-validator-app .v101-content{width:min(1120px,100%)!important;min-height:100dvh!important;margin:auto!important;padding:clamp(32px,12vh,110px) 32px 32px!important;display:block!important;box-sizing:border-box!important}
+html.rym-unit-validator-app .v101-validator{width:min(760px,100%)!important;margin:0 auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+html.rym-unit-validator-app .v101-validator:before{display:none!important}
+html.rym-unit-validator-app .v101-validator-head{display:block!important;margin:0 0 24px!important}
+html.rym-unit-validator-app .v101-validator-head h3{font-size:32px!important;line-height:1.15!important;letter-spacing:-.04em!important;color:var(--uva-navy)!important;margin:0!important}
+html.rym-unit-validator-app .v101-validator-head p{display:block!important;font-size:15px!important;line-height:1.5!important;font-weight:400!important;color:var(--uva-muted)!important;margin:10px 0 0!important}
+html.rym-unit-validator-app .v101-validator-badge,
+html.rym-unit-validator-app .v101-validator-note{display:none!important}
+html.rym-unit-validator-app .v101-validator-tools{display:grid!important;grid-template-columns:minmax(0,1fr) 150px!important;gap:12px!important;align-items:stretch!important}
+html.rym-unit-validator-app .v101-validator-box{position:relative!important;min-width:0!important}
+html.rym-unit-validator-app .v101-validator-input{width:100%!important;box-sizing:border-box!important;height:60px!important;padding:0 16px!important;font-size:17px!important;font-weight:500!important;border:1px solid var(--uva-border)!important;border-radius:12px!important;background:white!important;color:var(--uva-text)!important;margin:0!important}
+html.rym-unit-validator-app .v101-validator-input:focus{outline:3px solid #244AA522!important;border-color:var(--uva-blue)!important}
+html.rym-unit-validator-app .v101-validator-go{height:60px!important;margin:0!important;padding:0 20px!important;border:0!important;border-radius:12px!important;background:var(--uva-blue)!important;color:white!important;font-size:15px!important;font-weight:700!important;box-shadow:none!important}
+html.rym-unit-validator-app .v101-validator-list{top:68px!important;max-height:min(420px,55dvh)!important;z-index:20!important;border:1px solid var(--uva-border)!important;border-radius:12px!important;background:white!important;box-shadow:0 12px 32px #0A1B4D12!important;overflow:auto!important}
+html.rym-unit-validator-app .v101-validator-item{width:100%!important;min-height:72px!important;padding:12px 14px!important;gap:12px!important;text-align:left!important}
+html.rym-unit-validator-app .v101-validator-item b{font-size:17px!important}
+html.rym-unit-validator-app .v101-validator-item small{display:block!important;font-size:12px!important;line-height:1.5!important;white-space:normal!important}
+html.rym-unit-validator-app .v101-validator-state{font-size:11px!important;flex-shrink:0!important}
+/* Result is a dedicated detail screen, not a floating desktop modal. */
+html.rym-unit-validator-app .v117-check-modal{inset:0!important;padding:0!important;display:block!important;background:var(--uva-bg)!important;backdrop-filter:none!important;overflow:auto!important;z-index:100500!important}
+html.rym-unit-validator-app .v117-check-card{width:min(1180px,100%)!important;max-width:none!important;max-height:none!important;min-height:100dvh!important;box-sizing:border-box!important;margin:0 auto!important;padding:28px 32px 96px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;display:block!important}
+html.rym-unit-validator-app .v117-check-head{display:flex!important;align-items:flex-start!important;gap:16px!important;margin:0 0 16px!important;padding:0!important;border:0!important;background:transparent!important;color:var(--uva-text)!important}
+html.rym-unit-validator-app .v117-check-title{flex:1!important;min-width:0!important}
+html.rym-unit-validator-app .v117-title-row{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:16px!important}
+html.rym-unit-validator-app .v117-title-row h2{font:800 46px/1.05 ui-monospace,SFMono-Regular,Consolas,monospace!important;letter-spacing:-.05em!important;color:var(--uva-navy)!important;margin:0!important}
+html.rym-unit-validator-app .v117-overall{min-height:36px!important;padding:8px 12px!important;border:0!important;border-radius:8px!important;font-size:13px!important;font-weight:800!important;letter-spacing:.01em!important}
+html.rym-unit-validator-app .v117-overall.ok{color:var(--uva-green)!important;background:#E6F5EE!important}
+html.rym-unit-validator-app .v117-overall.warn,html.rym-unit-validator-app .v117-overall.pending{color:#955000!important;background:#FFF0DC!important}
+html.rym-unit-validator-app .v117-overall.bad{color:var(--uva-red)!important;background:#FDEAEA!important}
+html.rym-unit-validator-app .v117-meta{display:flex!important;flex-wrap:wrap!important;gap:8px 20px!important;margin-top:12px!important}
+html.rym-unit-validator-app .v117-meta>span{display:inline-block!important;min-width:0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;font-size:12px!important;line-height:1.5!important;color:var(--uva-muted)!important;white-space:normal!important}
+html.rym-unit-validator-app .v117-meta b{color:var(--uva-text)!important;font-size:14px!important;font-weight:650!important;overflow-wrap:anywhere!important}
+html.rym-unit-validator-app .v117-close{width:44px!important;height:44px!important;min-width:44px!important;padding:0!important;border:1px solid var(--uva-border)!important;border-radius:12px!important;background:white!important;color:var(--uva-muted)!important;font-size:24px!important;box-shadow:none!important}
+html.rym-unit-validator-app .v117-identity-line,html.rym-unit-validator-app .v117-identity-line.v125-clean{display:flex!important;flex-wrap:wrap!important;gap:8px 20px!important;margin:0 0 20px!important;padding:0!important;border:0!important;background:transparent!important}
+html.rym-unit-validator-app .v117-identity-line>span{display:block!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;padding:0!important;border:0!important;background:transparent!important;font-size:12px!important;line-height:1.4!important;color:var(--uva-muted)!important}
+html.rym-unit-validator-app .v117-identity-line b{font-size:12px!important;color:var(--uva-text)!important}
+html.rym-unit-validator-app .v133-closed-notice{margin:0 0 16px!important;padding:12px!important;font-size:12px!important;line-height:1.5!important;border-radius:10px!important}
+html.rym-unit-validator-app .v133-closed-notice>b{font-size:11px!important}
+html.rym-unit-validator-app .v117-quick-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important}
+html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.rym-unit-validator-app .v117-status-card{--domain:#244AA5;--domain-bg:#EDF3FF;min-width:0!important;min-height:0!important;padding:20px!important;border:0!important;border-radius:16px!important;background:white!important;box-shadow:0 2px 8px #0A1B4D05!important;overflow:visible!important;position:relative!important}
+html.rym-unit-validator-app .v117-status-card.rev{--domain:#555CB1;--domain-bg:#F0F0FB}
+html.rym-unit-validator-app .v117-status-card.gps{--domain:#087E8B;--domain-bg:#EAF7F8}
+html.rym-unit-validator-app .v117-status-card.ctl{--domain:#0A1B4D;--domain-bg:#EDF1F8}
+html.rym-unit-validator-app .v117-status-card:before{display:none!important}
+html.rym-unit-validator-app .v117-status-card header{display:grid!important;grid-template-columns:40px minmax(0,1fr) 26px!important;gap:10px!important;align-items:center!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}
+html.rym-unit-validator-app .v117-card-icon{width:40px!important;height:40px!important;border-radius:12px!important;background:var(--domain-bg)!important;color:var(--domain)!important;font-size:18px!important;display:grid!important;place-items:center!important}
+html.rym-unit-validator-app .v117-status-card header small{font-size:11px!important;line-height:1.4!important;letter-spacing:.05em!important;color:var(--domain)!important}
+html.rym-unit-validator-app .v117-status-card header strong{font-size:14px!important;line-height:1.3!important;margin-top:3px!important;white-space:normal!important;overflow:visible!important;color:var(--uva-text)!important}
+html.rym-unit-validator-app .v117-state-dot{width:26px!important;height:26px!important;font-size:14px!important}
+html.rym-unit-validator-app .v117-status-card.ok .v117-state-dot{background:#E6F5EE!important;color:var(--uva-green)!important}
+html.rym-unit-validator-app .v117-status-card.bad .v117-state-dot{background:#FDEAEA!important;color:var(--uva-red)!important}
+html.rym-unit-validator-app .v117-status-card.warn .v117-state-dot,html.rym-unit-validator-app .v117-status-card.pending .v117-state-dot{background:#FFF0DC!important;color:#955000!important}
+html.rym-unit-validator-app .v117-card-value{position:static!important;margin:20px 0 12px!important;font-size:24px!important;font-weight:750!important;line-height:1.3!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;display:block!important;min-height:0!important;-webkit-line-clamp:unset!important;overflow-wrap:anywhere!important;color:var(--uva-text)!important}
+html.rym-unit-validator-app .v117-status-card.gps .v117-card-value{font-size:16px!important}
+html.rym-unit-validator-app .v117-status-card.bad .v117-card-value{color:var(--uva-red)!important}
+html.rym-unit-validator-app .v117-status-card.ok .v117-card-value{color:var(--uva-green)!important}
+html.rym-unit-validator-app .uva-details{margin:0;border-top:1px solid #EEF2F7;padding-top:8px}
+html.rym-unit-validator-app .uva-details summary{cursor:pointer;color:var(--uva-blue);font-size:12px;font-weight:600;min-height:32px;display:flex;align-items:center;gap:8px}
+html.rym-unit-validator-app .uva-details summary:after{content:'+';margin-left:auto;font-size:18px}
+html.rym-unit-validator-app .uva-details[open] summary:after{content:'−'}
+html.rym-unit-validator-app .v117-card-sub{display:block!important;min-height:0!important;font-size:12px!important;line-height:1.5!important;margin:8px 0!important;color:var(--uva-muted)!important}
+html.rym-unit-validator-app .v117-card-details{display:grid!important;gap:8px!important;margin:8px 0 0!important;padding:0!important;border:0!important}
+html.rym-unit-validator-app .v117-card-detail{display:grid!important;grid-template-columns:minmax(70px,.8fr) minmax(0,1fr)!important;gap:8px!important;padding:0!important;border:0!important}
+html.rym-unit-validator-app .v117-card-detail span{font-size:11px!important;color:var(--uva-muted)!important}
+html.rym-unit-validator-app .v117-card-detail b{font-size:12px!important;line-height:1.5!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;color:var(--uva-text)!important}
+html.rym-unit-validator-app .v117-card-detail.v125-duplicate{display:none!important}
+html.rym-unit-validator-app .v117-check-actions{position:fixed!important;inset:auto 0 0!important;margin:0!important;padding:12px 32px max(12px,env(safe-area-inset-bottom))!important;display:flex!important;justify-content:flex-end!important;background:white!important;border-top:1px solid var(--uva-border)!important;z-index:5!important}
+html.rym-unit-validator-app #v101AgainCheck{height:52px!important;min-width:220px!important;margin:0!important;padding:0 24px!important;border:0!important;border-radius:12px!important;background:var(--uva-blue)!important;color:white!important;font-size:15px!important;font-weight:700!important;box-shadow:none!important;flex:none!important}
+html.rym-unit-validator-app .v101-check-loading,html.rym-unit-validator-app .v101-check-empty{font-size:16px!important;line-height:1.5!important;padding:24px!important}
+.uva-denied{max-width:480px;margin:15vh auto;padding:32px;text-align:center}
+.uva-denied>span{font-size:36px;color:var(--uva-blue)}
+.uva-denied h1{font-size:26px;color:var(--uva-navy)}
+.uva-denied p{font-size:15px;line-height:1.6;color:var(--uva-muted)}
+html.rym-unit-validator-app button:focus-visible,html.rym-unit-validator-app summary:focus-visible,.rym-validator-shell button:focus-visible{outline:3px solid var(--uva-sky)!important;outline-offset:3px}
+/* Tablet portrait and medium landscape: deliberate 2 × 2 composition. */
+@media(min-width:651px) and (max-width:1100px){
+  html.rym-unit-validator-app .v117-quick-grid,html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html.rym-unit-validator-app .v117-status-card{padding:20px 24px!important}
 }
-
-/* Portal RYM · Validador de Unidad · Tablet app
-   Visual-only layer for main's Centro de Control quick unit validator. */
-
-body.rym-unit-validator-app{
-  --uva-navy:#0A1B4D;
-  --uva-blue:#244AA5;
-  --uva-sky:#53B7E8;
-  --uva-orange:#F47C20;
-  --uva-bg:#F4F7FB;
-  --uva-card:#FFFFFF;
-  --uva-border:#D8E3F2;
-  --uva-text:#10224E;
-  --uva-muted:#62708C;
-  --uva-green:#047857;
-  --uva-red:#DC2626;
-  margin:0!important;
-  background:
-    radial-gradient(circle at 8% 12%,rgba(83,183,232,.12),transparent 28%),
-    radial-gradient(circle at 92% 84%,rgba(244,124,32,.08),transparent 24%),
-    var(--uva-bg)!important;
-  color:var(--uva-text)!important;
-  overscroll-behavior:none;
+@media(min-width:1000px) and (orientation:landscape){
+  html.rym-unit-validator-app .v117-quick-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
-
-body.rym-unit-validator-app .v101-shell{
-  display:block!important;
-  min-height:100dvh!important;
-  width:100%!important;
-  background:transparent!important;
-}
-
-body.rym-unit-validator-app .v101-side,
-body.rym-unit-validator-app .v101-top,
-body.rym-unit-validator-app #v115MobileNav{
-  display:none!important;
-}
-
-body.rym-unit-validator-app .v101-main{
-  width:100%!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-  background:transparent!important;
-}
-
-body.rym-unit-validator-app .v101-content{
-  width:min(1180px,100%)!important;
-  min-height:100dvh!important;
-  margin:0 auto!important;
-  padding:116px 26px 38px!important;
-  display:flex!important;
-  flex-direction:column!important;
-  justify-content:center!important;
-  box-sizing:border-box!important;
-}
-
-body.rym-unit-validator-app .v101-content > *:not(.v101-validator){
-  display:none!important;
-}
-
-.rym-unit-validator-appbar{
-  position:fixed;
-  inset:0 0 auto 0;
-  z-index:100200;
-  min-height:78px;
-  padding:12px max(22px,env(safe-area-inset-right)) 12px max(22px,env(safe-area-inset-left));
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  background:rgba(255,255,255,.96);
-  border-bottom:1px solid var(--uva-border);
-  box-shadow:0 10px 30px rgba(10,27,77,.07);
-  backdrop-filter:blur(16px);
-}
-
-.rym-unit-validator-brand{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:13px;
-}
-
-.rym-unit-validator-mark{
-  width:48px;
-  height:48px;
-  flex:0 0 48px;
-  display:grid;
-  place-items:center;
-  border-radius:15px;
-  background:linear-gradient(145deg,var(--uva-navy),var(--uva-blue));
-  color:#fff;
-  font-size:22px;
-  font-weight:1000;
-  box-shadow:0 9px 24px rgba(36,74,165,.22);
-}
-
-.rym-unit-validator-heading{min-width:0}
-.rym-unit-validator-heading b{
-  display:block;
-  color:var(--uva-navy);
-  font-size:20px;
-  line-height:1.05;
-  letter-spacing:-.025em;
-}
-.rym-unit-validator-heading span{
-  display:block;
-  margin-top:5px;
-  color:var(--uva-muted);
-  font-size:11px;
-  font-weight:800;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.rym-unit-validator-actions{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.rym-unit-validator-online{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  padding:9px 11px;
-  border-radius:999px;
-  background:#F0FDF4;
-  border:1px solid #BDE6CA;
-  color:#166534;
-  font-size:11px;
-  font-weight:900;
-}
-.rym-unit-validator-online:before{
-  content:"";
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#22C55E;
-}
-.rym-unit-validator-online.offline{
-  background:#FFF7ED;
-  border-color:#FED7AA;
-  color:#9A3412;
-}
-.rym-unit-validator-online.offline:before{background:#F97316}
-
-.rym-unit-validator-exit{
-  min-height:46px!important;
-  margin:0!important;
-  padding:0 16px!important;
-  border:1px solid #F4C6C6!important;
-  border-radius:13px!important;
-  background:#FFF7F7!important;
-  color:#B42318!important;
-  box-shadow:none!important;
-  font-size:12px!important;
-  font-weight:1000!important;
-}
-
-/* The one and only app task */
-body.rym-unit-validator-app .v101-validator{
-  position:relative!important;
-  width:100%!important;
-  margin:0!important;
-  padding:28px!important;
-  border:1px solid #C9D9ED!important;
-  border-radius:26px!important;
-  background:rgba(255,255,255,.98)!important;
-  box-shadow:0 28px 70px rgba(13,45,87,.13)!important;
-  overflow:visible!important;
-}
-
-body.rym-unit-validator-app .v101-validator:before{
-  content:"";
-  position:absolute;
-  left:28px;
-  right:28px;
-  top:0;
-  height:4px;
-  border-radius:0 0 99px 99px;
-  background:linear-gradient(90deg,var(--uva-navy),var(--uva-blue),var(--uva-sky),var(--uva-orange));
-}
-
-body.rym-unit-validator-app .v101-validator-head{
-  display:flex!important;
-  align-items:flex-start!important;
-  justify-content:space-between!important;
-  gap:20px!important;
-  margin:0 0 22px!important;
-}
-
-body.rym-unit-validator-app .v101-validator-head h3{
-  margin:0!important;
-  color:var(--uva-navy)!important;
-  font-size:31px!important;
-  line-height:1.05!important;
-  letter-spacing:-.04em!important;
-}
-
-body.rym-unit-validator-app .v101-validator-head p{
-  display:block!important;
-  max-width:720px!important;
-  margin:8px 0 0!important;
-  color:var(--uva-muted)!important;
-  font-size:14px!important;
-  line-height:1.5!important;
-  font-weight:700!important;
-}
-
-body.rym-unit-validator-app .v101-validator-badge{
-  flex:0 0 auto!important;
-  margin:2px 0 0!important;
-  padding:9px 12px!important;
-  border-radius:999px!important;
-  background:#EEF5FF!important;
-  border:1px solid #C9DAF2!important;
-  color:var(--uva-blue)!important;
-  font-size:10px!important;
-  font-weight:1000!important;
-}
-
-body.rym-unit-validator-app .v101-validator-tools{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 190px!important;
-  gap:12px!important;
-  align-items:stretch!important;
-}
-
-body.rym-unit-validator-app .v101-validator-box{
-  position:relative!important;
-  min-width:0!important;
-}
-
-body.rym-unit-validator-app .v101-validator-input{
-  width:100%!important;
-  height:62px!important;
-  margin:0!important;
-  padding:0 18px!important;
-  border:1px solid #B9CAE0!important;
-  border-radius:17px!important;
-  background:#fff!important;
-  color:var(--uva-text)!important;
-  outline:none!important;
-  font-size:18px!important;
-  font-weight:800!important;
-  box-shadow:inset 0 1px 0 rgba(10,27,77,.02)!important;
-}
-
-body.rym-unit-validator-app .v101-validator-input::placeholder{
-  color:#8A96AA!important;
-  font-weight:700!important;
-}
-
-body.rym-unit-validator-app .v101-validator-input:focus{
-  border-color:var(--uva-blue)!important;
-  box-shadow:0 0 0 4px rgba(36,74,165,.10)!important;
-}
-
-body.rym-unit-validator-app .v101-validator-go{
-  width:100%!important;
-  min-width:0!important;
-  height:62px!important;
-  margin:0!important;
-  padding:0 18px!important;
-  border:0!important;
-  border-radius:17px!important;
-  background:linear-gradient(180deg,#2A61BD,#174A9B)!important;
-  color:#fff!important;
-  box-shadow:0 10px 24px rgba(36,74,165,.20)!important;
-  font-size:14px!important;
-  font-weight:1000!important;
-}
-
-body.rym-unit-validator-app .v101-validator-note{
-  display:flex!important;
-  align-items:center!important;
-  gap:8px!important;
-  margin-top:15px!important;
-  color:var(--uva-muted)!important;
-  font-size:12px!important;
-  font-weight:800!important;
-}
-body.rym-unit-validator-app .v101-validator-note:before{
-  content:"✓";
-  width:22px;
-  height:22px;
-  display:grid;
-  place-items:center;
-  border-radius:7px;
-  background:#EAF8F0;
-  color:var(--uva-green);
-  font-weight:1000;
-}
-
-body.rym-unit-validator-app .v101-validator-list{
-  top:70px!important;
-  z-index:100400!important;
-  max-height:340px!important;
-  border:1px solid #CFDCEE!important;
-  border-radius:17px!important;
-  background:#fff!important;
-  box-shadow:0 20px 55px rgba(10,27,77,.20)!important;
-  overflow:auto!important;
-}
-
-body.rym-unit-validator-app .v101-validator-item{
-  min-height:68px!important;
-  padding:12px 14px!important;
-  gap:14px!important;
-}
-body.rym-unit-validator-app .v101-validator-item b{font-size:15px!important}
-body.rym-unit-validator-app .v101-validator-item small{
-  margin-top:4px!important;
-  font-size:11px!important;
-  line-height:1.35!important;
-}
-body.rym-unit-validator-app .v101-validator-state{
-  font-size:9.5px!important;
-  padding:6px 8px!important;
-}
-
-/* Result modal: keep main data/logic, make it tablet-first. */
-body.rym-unit-validator-app .v101-check-modal,
-body.rym-unit-validator-app .v117-check-modal{
-  z-index:100500!important;
-  padding:18px!important;
-  align-items:center!important;
-  background:rgba(5,18,52,.62)!important;
-  backdrop-filter:blur(7px)!important;
-}
-
-body.rym-unit-validator-app .v101-check-card,
-body.rym-unit-validator-app .v117-check-card{
-  width:min(1120px,96vw)!important;
-  max-width:1120px!important;
-  max-height:92dvh!important;
-  margin:auto!important;
-  padding:22px!important;
-  border-radius:25px!important;
-  border:1px solid rgba(255,255,255,.8)!important;
-  background:#fff!important;
-  box-shadow:0 30px 90px rgba(5,28,73,.30)!important;
-  overflow:auto!important;
-}
-
-body.rym-unit-validator-app .v117-check-head h2{
-  font-size:34px!important;
-  letter-spacing:-.04em!important;
-}
-body.rym-unit-validator-app .v117-meta,
-body.rym-unit-validator-app .v117-identity-line{
-  font-size:11.5px!important;
-}
-body.rym-unit-validator-app .v117-quick-grid{
-  gap:12px!important;
-}
-body.rym-unit-validator-app .v117-status-card{
-  min-height:210px!important;
-  padding:15px!important;
-  border-radius:18px!important;
-}
-body.rym-unit-validator-app .v117-card-value{
-  font-size:22px!important;
-}
-body.rym-unit-validator-app .v117-card-detail span{font-size:9px!important}
-body.rym-unit-validator-app .v117-card-detail b{font-size:11.5px!important}
-
-/* Dedicated app must never navigate into the full portal. */
-body.rym-unit-validator-app #v101OpenModule{
-  display:none!important;
-}
-body.rym-unit-validator-app .v117-check-actions{
-  justify-content:flex-end!important;
-}
-body.rym-unit-validator-app #v101AgainCheck{
-  min-width:180px!important;
-  min-height:48px!important;
-}
-
-/* Simple loading/access states owned by the tablet shell. */
-.rym-unit-validator-state{
-  min-height:100dvh;
-  display:grid;
-  place-items:center;
-  padding:28px;
-  background:var(--uva-bg);
-}
-.rym-unit-validator-state-card{
-  width:min(620px,100%);
-  padding:30px;
-  border:1px solid var(--uva-border);
-  border-radius:25px;
-  background:#fff;
-  box-shadow:0 22px 70px rgba(10,27,77,.13);
-  text-align:center;
-}
-.rym-unit-validator-state-card h1{
-  margin:0;
-  color:var(--uva-navy);
-  font-size:27px;
-}
-.rym-unit-validator-state-card p{
-  margin:10px 0 0;
-  color:var(--uva-muted);
-  line-height:1.55;
-}
-.rym-unit-validator-state-card button{
-  min-height:48px;
-  margin-top:18px;
-  border:0;
-  border-radius:13px;
-  padding:0 18px;
-  background:var(--uva-blue);
-  color:#fff;
-  font-weight:1000;
-}
-
-@media(max-width:900px){
-  body.rym-unit-validator-app .v101-content{
-    padding:102px 16px 26px!important;
-    justify-content:flex-start!important;
-  }
-  body.rym-unit-validator-app .v101-validator{
-    padding:22px!important;
-    border-radius:22px!important;
-  }
-  body.rym-unit-validator-app .v101-validator-head h3{font-size:27px!important}
-  body.rym-unit-validator-app .v101-validator-tools{
-    grid-template-columns:minmax(0,1fr) 160px!important;
-  }
-  body.rym-unit-validator-app .v101-validator-input,
-  body.rym-unit-validator-app .v101-validator-go{height:58px!important}
-  body.rym-unit-validator-app .v117-quick-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  }
-}
-
+/* Mobile: compact rows, with secondary data available through native disclosures. */
 @media(max-width:650px){
-  .rym-unit-validator-appbar{min-height:68px;padding:9px 12px}
-  .rym-unit-validator-mark{width:42px;height:42px;flex-basis:42px;border-radius:13px}
-  .rym-unit-validator-heading b{font-size:17px}
-  .rym-unit-validator-heading span,.rym-unit-validator-online{display:none}
-  .rym-unit-validator-exit{min-height:42px!important;padding:0 12px!important}
-  body.rym-unit-validator-app .v101-content{padding:86px 10px 18px!important}
-  body.rym-unit-validator-app .v101-validator{padding:17px!important}
-  body.rym-unit-validator-app .v101-validator-head{margin-bottom:14px!important}
-  body.rym-unit-validator-app .v101-validator-head h3{font-size:23px!important}
-  body.rym-unit-validator-app .v101-validator-head p{font-size:12px!important}
-  body.rym-unit-validator-app .v101-validator-badge{display:none!important}
-  body.rym-unit-validator-app .v101-validator-tools{grid-template-columns:1fr!important}
-  body.rym-unit-validator-app .v101-validator-go{height:52px!important}
-  body.rym-unit-validator-app .v101-validator-input{height:54px!important;font-size:16px!important}
-  body.rym-unit-validator-app .v101-validator-list{top:61px!important}
-  body.rym-unit-validator-app .v117-quick-grid{grid-template-columns:1fr!important}
-  body.rym-unit-validator-app .v101-check-modal{padding:8px!important;align-items:flex-start!important}
-  body.rym-unit-validator-app .v101-check-card{width:100%!important;max-width:100%!important;padding:14px!important;border-radius:19px!important}
-  body.rym-unit-validator-app .v117-check-head h2{font-size:27px!important}
+  .uva-bar{height:60px;padding:8px 12px;gap:8px}
+  .uva-brand{gap:8px}.uva-brand img{width:34px;height:34px}
+  .uva-brand b{font-size:15px}.uva-brand span,.uva-actions #status{display:none}
+  .uva-actions{gap:6px}.uva-actions button{padding:0 10px;font-size:12px}
+  .uva-stage{height:calc(100dvh - 60px)}
+  html.rym-unit-validator-app .v101-content{padding:48px 20px 20px!important}
+  html.rym-unit-validator-app .v101-validator-head h3{font-size:28px!important}
+  html.rym-unit-validator-app .v101-validator-head p{font-size:14px!important}
+  html.rym-unit-validator-app .v101-validator-tools{grid-template-columns:1fr!important;gap:12px!important}
+  html.rym-unit-validator-app .v101-validator-input{height:58px!important;font-size:16px!important}
+  html.rym-unit-validator-app .v101-validator-go{height:52px!important}
+  html.rym-unit-validator-app .v101-validator-list{position:static!important;top:auto!important;margin-top:8px!important;max-height:48dvh!important}
+  html.rym-unit-validator-app .v117-check-card{padding:20px 16px 90px!important}
+  html.rym-unit-validator-app .v117-title-row{gap:10px!important}
+  html.rym-unit-validator-app .v117-title-row h2{font-size:34px!important}
+  html.rym-unit-validator-app .v117-overall{font-size:12px!important;min-height:30px!important;padding:7px 10px!important}
+  html.rym-unit-validator-app .v117-meta{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px 12px!important;margin-top:10px!important}
+  html.rym-unit-validator-app .v117-meta .v133-mobile-supervisor,html.rym-unit-validator-app .v117-meta .v130-mobile-owner{grid-column:1/-1!important}
+  html.rym-unit-validator-app .v117-identity-line,html.rym-unit-validator-app .v117-identity-line.v125-clean{gap:6px 12px!important;margin-bottom:14px!important}
+  html.rym-unit-validator-app .v117-quick-grid,html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:1fr!important;gap:8px!important}
+  html.rym-unit-validator-app .v117-status-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:2px 8px!important;padding:12px!important;border-radius:12px!important}
+  html.rym-unit-validator-app .v117-status-card header{grid-column:1/-1!important;grid-template-columns:36px minmax(0,1fr) 26px!important;gap:10px!important}
+  html.rym-unit-validator-app .v117-card-icon{width:36px!important;height:36px!important;border-radius:10px!important;font-size:16px!important}
+  html.rym-unit-validator-app .v117-status-card header strong{font-size:14px!important;margin-top:1px!important}
+  html.rym-unit-validator-app .v117-card-value{margin:0 0 0 46px!important;font-size:15px!important;align-self:center!important}
+  html.rym-unit-validator-app .v117-status-card.gps .v117-card-value{font-size:12px!important}
+  html.rym-unit-validator-app .uva-details{border:0;padding:0;align-self:start}
+  html.rym-unit-validator-app .uva-details summary{min-height:24px;font-size:11px;gap:5px}
+  html.rym-unit-validator-app .uva-details[open]{grid-column:1/-1;margin-left:46px}
+  html.rym-unit-validator-app .v117-check-actions{padding:10px 16px max(10px,env(safe-area-inset-bottom))!important}
+  html.rym-unit-validator-app #v101AgainCheck{width:100%!important;min-width:0!important}
+}
+/* Small mobile: keep operational text >= 11px. */
+@media(max-width:380px){
+  .uva-brand b{font-size:14px}
+  html.rym-unit-validator-app .v117-check-card{padding-left:12px!important;padding-right:12px!important}
+  html.rym-unit-validator-app .v117-title-row{gap:8px!important}
+  html.rym-unit-validator-app .v117-title-row h2{font-size:32px!important}
+  html.rym-unit-validator-app .v117-overall{font-size:11px!important}
+}
+/* Mobile landscape: two compact columns, with vertical scrolling when needed. */
+@media(max-height:540px) and (orientation:landscape){
+  html.rym-unit-validator-app .v101-content{padding-top:24px!important}
+  html.rym-unit-validator-app .v117-check-card{padding:16px 20px 88px!important}
+  html.rym-unit-validator-app .v117-quick-grid,html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html.rym-unit-validator-app .v117-title-row h2{font-size:32px!important}
 }

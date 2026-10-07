@@ -12,7 +12,12 @@
   }
   function open(){location.href='/?app=validador-unidad'}
   function ensure(){
-    if(!allowed()){d.querySelector('#rymUnitValidatorLauncher')?.remove();return}
+    if(!allowed()){
+      d.querySelector('#rymUnitValidatorLauncher')?.remove();
+      const mobile=d.querySelector('#rymUnitValidatorMobile');
+      if(mobile){mobile.parentElement.style.removeProperty('grid-template-columns');mobile.remove()}
+      return;
+    }
     const nav=d.querySelector('.v101-nav');
     if(nav&&!d.querySelector('#rymUnitValidatorLauncher')){
       const b=d.createElement('button');

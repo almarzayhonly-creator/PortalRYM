@@ -1,5 +1,5 @@
 {
-  "name": "Portal RYM · Validador de Unidad",
+  "name": "Validador RYM",
   "short_name": "Validador RYM",
   "description": "Validador rápido de unidad de Portal RYM, acceso dedicado para personal autorizado.",
   "start_url": "/?app=validador-unidad",
@@ -7,7 +7,6 @@
   "scope": "/",
   "display": "standalone",
   "display_override": [
-    "window-controls-overlay",
     "standalone"
   ],
   "orientation": "any",
@@ -15,21 +14,15 @@
   "theme_color": "#0A1B4D",
   "icons": [
     {
-      "src": "https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w192",
+      "src": "/assets/rym-validator-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w512",
+      "src": "/assets/rym-validator-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/validator-tablet-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
       "purpose": "any"
     }
   ]

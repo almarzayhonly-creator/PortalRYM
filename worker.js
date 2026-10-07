@@ -37,6 +37,10 @@ export default {
       const unitValidatorLauncher = '<script id="rym-unit-validator-launcher-owner" src="/modules/core/unit-validator-launcher.js?v=1" defer></script>';
 
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
+      if (url.pathname === "/" && url.searchParams.get("validator-host") === "1") {
+        body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=3"><script src="/modules/control-auto/validator-tablet-app.js?v=3" defer></script></head>');
+      }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
         ? body.slice(0, bodyEnd) + owner + rankingOwner + negativosLastOwner + unitValidatorLauncher + body.slice(bodyEnd)

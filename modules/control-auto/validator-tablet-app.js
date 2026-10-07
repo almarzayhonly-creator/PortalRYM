@@ -1,171 +1,68 @@
-/* Portal RYM · Dedicated tablet shell for main's quick Unit Validator.
-   IMPORTANT: search/result logic stays in main (bindValidator99/openValidator99). */
+/* Presentation adapter for main's validator. No queries, state calculations or endpoint changes. */
 (function(w,d){
   'use strict';
-  if(w.__RYM_UNIT_VALIDATOR_TABLET_APP__)return;
-
-  const params=new URLSearchParams(w.location.search);
-  const appMode=['validador','validator','validador-unidad','unit-validator'].includes(String(params.get('app')||'').toLowerCase());
-  if(!appMode)return;
-  w.__RYM_UNIT_VALIDATOR_TABLET_APP__=true;
-
-  let wrapped=false;
-
-  function getState(){
-    try{return typeof state!=='undefined'?state:null}catch(_){return null}
-  }
-
-  function ensurePwa(){
-    if(!d.querySelector('link[data-rym-unit-validator-manifest]')){
-      const l=d.createElement('link');
-      l.rel='manifest';
-      l.href='/validator-tablet.webmanifest';
-      l.dataset.rymUnitValidatorManifest='1';
-      d.head.appendChild(l);
-    }
-    let theme=d.querySelector('meta[name="theme-color"]');
-    if(!theme){
-      theme=d.createElement('meta');
-      theme.name='theme-color';
-      d.head.appendChild(theme);
-    }
-    theme.content='#0A1B4D';
-    if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
-      navigator.serviceWorker.register('/validator-tablet-sw.js',{scope:'/'}).catch(()=>{});
-    }
-  }
-
-  function removeShell(){
-    d.body.classList.remove('rym-unit-validator-app');
-    d.querySelector('#rymUnitValidatorAppbar')?.remove();
-  }
-
+  if(new URLSearchParams(location.search).get('validator-host')!=='1'||w.RYM_UNIT_VALIDATOR)return;
+  const PERMISSION='control_auto.validador_unidad_app';
+  d.documentElement.classList.add('rym-unit-validator-app');
+  function profile(){try{return state.profile}catch(_){return null}}
+  function allowed(){try{return !!profile()&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
+  function session(){const p=profile();return {authenticated:!!p,denied:!!p&&!allowed(),user:p?.nombre||p?.email||''}}
+  function notify(){w.parent.postMessage({type:'rym-validator-state'},location.origin)}
   function logout(){
-    removeShell();
-    try{if(typeof clearSession==='function')clearSession()}catch(_){}
-    try{
-      if(typeof loginView==='function')loginView();
-      else location.reload();
-    }catch(_){location.reload()}
+    d.getElementById('v101CheckModal')?.remove();
+    if(typeof clearSession==='function')clearSession();
+    if(typeof loginView==='function')loginView();
+    refresh();
   }
-
-  function updateOnline(){
-    const el=d.querySelector('#rymUnitValidatorOnline');
-    if(!el)return;
-    const on=navigator.onLine;
-    el.classList.toggle('offline',!on);
-    el.textContent=on?'Conectado':'Sin conexión';
-  }
-
-  function appbar(){
-    const p=getState()?.profile||{};
-    let bar=d.querySelector('#rymUnitValidatorAppbar');
-    if(!bar){
-      bar=d.createElement('header');
-      bar.id='rymUnitValidatorAppbar';
-      bar.className='rym-unit-validator-appbar';
-      bar.innerHTML='<div class="rym-unit-validator-brand"><div class="rym-unit-validator-mark">R</div><div class="rym-unit-validator-heading"><b>Validador de Unidad</b><span id="rymUnitValidatorUser">Portal RYM</span></div></div><div class="rym-unit-validator-actions"><span class="rym-unit-validator-online" id="rymUnitValidatorOnline">Conectado</span><button type="button" class="rym-unit-validator-exit" id="rymUnitValidatorExit">Salir</button></div>';
-      d.body.appendChild(bar);
-      bar.querySelector('#rymUnitValidatorExit')?.addEventListener('click',logout);
+  w.RYM_UNIT_VALIDATOR=Object.freeze({session,logout});
+  function refresh(){
+    const p=profile(),ok=allowed();
+    d.documentElement.classList.toggle('uva-authorized',ok);
+    d.documentElement.classList.toggle('uva-authenticated',!!p);
+    if(p&&!ok){
+      d.getElementById('v101CheckModal')?.remove();
+      const root=d.getElementById('app');
+      if(root&&!root.querySelector('.uva-denied'))root.innerHTML='<section class="uva-denied"><span aria-hidden="true">⌑</span><h1>Acceso restringido</h1><p>Tu usuario no tiene habilitado el permiso de App Validador de Unidad.</p></section>';
+      notify();return;
     }
-    const label=bar.querySelector('#rymUnitValidatorUser');
-    if(label)label.textContent=[p.nombre||p.email||'Usuario','Portal RYM'].filter(Boolean).join(' · ');
-    updateOnline();
-  }
-
-  function activate(){
-    const s=getState();
-    if(!s?.profile)return false;
-
-    const validator=d.querySelector('.v101-validator');
-    const input=d.querySelector('#v101ValidatorQ');
-    const go=d.querySelector('#v101ValidatorGo');
-    if(!validator||!input||!go)return false;
-
-    d.body.classList.add('rym-unit-validator-app');
-    appbar();
-
-    input.setAttribute('inputmode','search');
-    input.setAttribute('autocomplete','off');
-    input.setAttribute('enterkeyhint','search');
-    input.setAttribute('aria-label','Buscar unidad, empresa, placa o Panapass');
-    go.setAttribute('aria-label','Validar unidad');
-
-    /* The dedicated app must never expose a route into the full Control de Auto module. */
-    const blockFullPortalAction=()=>{
-      const b=d.querySelector('#v101OpenModule');
-      if(b){
-        b.style.display='none';
-        b.disabled=true;
-        b.onclick=null;
-      }
-    };
-    blockFullPortalAction();
-
-    if(!w.__RYM_UNIT_VALIDATOR_MODAL_WATCH__){
-      w.__RYM_UNIT_VALIDATOR_MODAL_WATCH__=new MutationObserver(muts=>{
-        if(muts.some(m=>[...m.addedNodes].some(n=>n?.nodeType===1&&(n.id==='v101CheckModal'||n.querySelector?.('#v101CheckModal'))))){
-          blockFullPortalAction();
-        }
+    const input=d.getElementById('v101ValidatorQ');
+    if(ok&&input){
+      input.setAttribute('inputmode','search');input.setAttribute('enterkeyhint','search');
+      input.setAttribute('autocomplete','off');input.setAttribute('aria-label','Buscar unidad, placa o Panapass');
+      input.placeholder='Buscar unidad, placa o Panapass';
+      const title=d.querySelector('.v101-validator-head h3'),copy=d.querySelector('.v101-validator-head p');
+      if(title&&title.textContent!=='Validador de Unidad')title.textContent='Validador de Unidad';
+      if(copy&&copy.textContent!=='Busca una unidad, placa o Panapass')copy.textContent='Busca una unidad, placa o Panapass';
+    }
+    const modal=d.getElementById('v101CheckModal');
+    if(ok&&modal){
+      modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
+      modal.setAttribute('aria-label','Resultado de validación de unidad');
+      const close=modal.querySelector('#v101CloseCheck');if(close)close.setAttribute('aria-label','Cerrar resultado');
+      const overall=modal.querySelector('#v117Overall');if(overall)overall.setAttribute('aria-live','polite');
+      const full=modal.querySelector('#v101OpenModule');if(full){full.hidden=true;full.disabled=true;full.onclick=null}
+      modal.querySelectorAll('.v117-status-card').forEach(card=>{
+        if(card.querySelector('.uva-details'))return;
+        const details=d.createElement('details'),summary=d.createElement('summary');
+        details.className='uva-details';summary.textContent='Detalles';details.appendChild(summary);
+        details.open=w.matchMedia('(min-width:651px)').matches;
+        card.querySelectorAll('.v117-card-sub,.v117-card-details').forEach(el=>details.appendChild(el));
+        card.appendChild(details);
       });
-      w.__RYM_UNIT_VALIDATOR_MODAL_WATCH__.observe(d.body,{childList:true,subtree:false});
     }
-
-    requestAnimationFrame(()=>input.focus({preventScroll:true}));
-    return true;
+    notify();
   }
-
-  async function renderDedicatedFromMain(base,args,ctx){
-    const result=await base.apply(ctx,args);
-    let tries=0;
-    while(tries<30 && !activate()){
-      await new Promise(resolve=>setTimeout(resolve,100));
-      tries++;
-    }
-    if(!d.querySelector('.v101-validator')){
-      const root=d.querySelector('#app');
-      if(root){
-        root.innerHTML='<main class="rym-unit-validator-state"><section class="rym-unit-validator-state-card"><h1>Validador de Unidad no disponible</h1><p>El Centro de Control cargó, pero no encontró el Validador rápido de unidad de main.</p><button type="button" id="rymUnitValidatorReload">Reintentar</button></section></main>';
-        root.querySelector('#rymUnitValidatorReload')?.addEventListener('click',()=>location.reload());
-      }
-    }
-    return result;
+  /* Deny the dedicated home before invoking main; main remains untouched. */
+  const base=w.v36PortalHome;
+  if(typeof base==='function'){
+    const home=async function(){
+      if(profile()&&!allowed()){refresh();return}
+      const result=await base.apply(this,arguments);refresh();return result;
+    };
+    w.v36PortalHome=home;try{v36PortalHome=home}catch(_){}
   }
-
-  function installRoute(){
-    if(wrapped)return true;
-    const base=w.v36PortalHome;
-    if(typeof base!=='function')return false;
-
-    async function dedicatedPortalHome(){
-      if(!appMode)return base.apply(this,arguments);
-      return renderDedicatedFromMain(base,arguments,this);
-    }
-    dedicatedPortalHome.__rymUnitValidatorTablet=true;
-    dedicatedPortalHome.__rymUnitValidatorBase=base;
-    w.v36PortalHome=dedicatedPortalHome;
-    try{v36PortalHome=dedicatedPortalHome}catch(_){}
-    wrapped=true;
-
-    /* Already authenticated when the route script arrives: render through main immediately. */
-    if(getState()?.profile){
-      setTimeout(()=>void w.v36PortalHome(),0);
-    }
-    return true;
-  }
-
-  function installWithRetry(attempt=0){
-    if(installRoute())return;
-    if(attempt<30)setTimeout(()=>installWithRetry(attempt+1),120);
-  }
-
-  ensurePwa();
-  addEventListener('online',updateOnline);
-  addEventListener('offline',updateOnline);
-
-  if(d.readyState==='loading'){
-    d.addEventListener('DOMContentLoaded',()=>installWithRetry(),{once:true});
-  }else{
-    installWithRetry();
-  }
+  const observer=new MutationObserver(()=>{
+    observer.disconnect();refresh();observer.observe(d.body,{childList:true,subtree:true});
+  });
+  refresh();observer.observe(d.body,{childList:true,subtree:true});
 })(window,document);

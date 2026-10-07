@@ -25,14 +25,19 @@ jobs:
       - name: Verify main parity and tablet app files
         run: |
           git fetch --depth=1 origin main
+          git diff --exit-code origin/main -- index.html
           test "$(git rev-parse HEAD^0)" != ""
           node --check worker.js
           node --check modules/v171-loader.js
           node --check modules/control-auto/validator-tablet-app.js
+          node --check modules/core/unit-validator-shell.js
+          node --check modules/core/unit-validator-launcher.js
           node --check validator-tablet-sw.js
           test -s css/validator-tablet-app.css
           test -s validator-tablet.webmanifest
           test -s assets/validator-tablet-icon.svg
+          test -s assets/rym-validator-192.png
+          test -s assets/rym-validator-512.png
           test -s unit-validator.html
           test -s modules/core/unit-validator-launcher.js
           grep -Fq 'control_auto.validador_unidad_app' unit-validator.html
@@ -41,6 +46,21 @@ jobs:
           grep -Fq 'validator-tablet-app.js' modules/v171-loader.js
           grep -Fq 'validator-tablet-app.css' modules/v171-loader.js
           grep -Fq '"start_url": "/?app=validador-unidad"' validator-tablet.webmanifest
+
+      - name: Test dedicated validator against main functions
+        run: |
+          npm install --no-save --package-lock=false playwright@1.62.1
+          npx playwright install --with-deps chromium
+          PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$(node -e "const {chromium}=require('playwright');process.stdout.write(chromium.executablePath())")" node qa/validator-tablet-responsive.mjs
+          node qa/validator-tablet-contract.mjs
+
+      - name: Upload responsive evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validator-responsive-evidence
+          path: .sandbox/validator-qa
+
 
       - name: Deploy isolated Cloudflare preview
         id: deploy

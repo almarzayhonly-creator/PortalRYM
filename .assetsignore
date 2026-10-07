@@ -3,3 +3,6 @@ worker.js
 .assetsignore
 .git/
 .github/
+.sandbox/
+qa/
+node_modules/
