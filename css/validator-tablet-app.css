@@ -1,166 +1,460 @@
-/* Portal RYM · Validador de Unidad · Tablet PWA
-   Visual-only layer. Business rules remain in main's v80 validator. */
-body.rym-validator-tablet-app{
-  --tv-navy:#0A1B4D;--tv-blue:#244AA5;--tv-sky:#53B7E8;--tv-orange:#F47C20;
-  --tv-bg:#F4F7FB;--tv-card:#FFFFFF;--tv-border:#D8E3F2;--tv-text:#10224E;
-  --tv-muted:#62708C;--tv-green:#047857;--tv-red:#DC2626;
-  background:var(--tv-bg)!important;color:var(--tv-text)!important;
+/* Portal RYM · Validador de Unidad · Tablet app
+   Visual-only layer for main's Centro de Control quick unit validator. */
+
+body.rym-unit-validator-app{
+  --uva-navy:#0A1B4D;
+  --uva-blue:#244AA5;
+  --uva-sky:#53B7E8;
+  --uva-orange:#F47C20;
+  --uva-bg:#F4F7FB;
+  --uva-card:#FFFFFF;
+  --uva-border:#D8E3F2;
+  --uva-text:#10224E;
+  --uva-muted:#62708C;
+  --uva-green:#047857;
+  --uva-red:#DC2626;
+  margin:0!important;
+  background:
+    radial-gradient(circle at 8% 12%,rgba(83,183,232,.12),transparent 28%),
+    radial-gradient(circle at 92% 84%,rgba(244,124,32,.08),transparent 24%),
+    var(--uva-bg)!important;
+  color:var(--uva-text)!important;
   overscroll-behavior:none;
 }
-body.rym-validator-tablet-app .side,
-body.rym-validator-tablet-app .sidebar,
-body.rym-validator-tablet-app .v70-home,
-body.rym-validator-tablet-app .v75-control-note,
-body.rym-validator-tablet-app .top,
-body.rym-validator-tablet-app .portal-kicker{display:none!important}
-body.rym-validator-tablet-app #app{min-height:100dvh;background:var(--tv-bg)!important}
-body.rym-validator-tablet-app .layout,
-body.rym-validator-tablet-app .shell,
-body.rym-validator-tablet-app .main,
-body.rym-validator-tablet-app .content{display:block!important;margin:0!important;padding:0!important;max-width:none!important}
-body.rym-validator-tablet-app #view{max-width:1240px!important;margin:0 auto!important;padding:92px 24px 32px!important}
-.rym-validator-appbar{
-  position:fixed;inset:0 0 auto 0;height:72px;z-index:200500;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:10px max(20px,env(safe-area-inset-right)) 10px max(20px,env(safe-area-inset-left));
-  background:rgba(255,255,255,.96);border-bottom:1px solid var(--tv-border);
-  box-shadow:0 8px 28px rgba(10,27,77,.07);backdrop-filter:blur(16px);
-}
-.rym-validator-brand{display:flex;align-items:center;gap:12px;min-width:0}
-.rym-validator-mark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
-  background:linear-gradient(145deg,var(--tv-navy),var(--tv-blue));color:#fff;font-weight:900;font-size:20px;
-  box-shadow:0 8px 20px rgba(36,74,165,.22)}
-.rym-validator-title{min-width:0}.rym-validator-title b{display:block;font-size:18px;line-height:1.05;letter-spacing:-.02em;color:var(--tv-navy)}
-.rym-validator-title span{display:block;margin-top:4px;font-size:11px;color:var(--tv-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rym-validator-app-actions{display:flex;align-items:center;gap:10px}
-.rym-validator-online{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:999px;
-  background:#F0FDF4;border:1px solid #BBE4C8;color:#166534;font-size:11px;font-weight:800}
-.rym-validator-online::before{content:"";width:8px;height:8px;border-radius:50%;background:#22C55E}
-.rym-validator-online.offline{background:#FFF7ED;border-color:#FED7AA;color:#9A3412}
-.rym-validator-online.offline::before{background:#F97316}
-.rym-validator-exit{min-height:44px;border:1px solid var(--tv-border)!important;border-radius:12px!important;padding:0 15px!important;
-  background:#fff!important;color:var(--tv-navy)!important;font-size:12px!important;font-weight:900!important;box-shadow:none!important}
-body.rym-validator-tablet-app .v80-validator{display:flex!important;flex-direction:column;gap:14px!important}
-body.rym-validator-tablet-app .v80-status{order:0}
-body.rym-validator-tablet-app .v80-manual{order:1}
-body.rym-validator-tablet-app .v80-policy{order:2}
-body.rym-validator-tablet-app .v80-gals{order:3}
-body.rym-validator-tablet-app .v86-ex{order:4}
-body.rym-validator-tablet-app .v80-manual,
-body.rym-validator-tablet-app .v80-policy,
-body.rym-validator-tablet-app .v80-gal,
-body.rym-validator-tablet-app .v86-ex{
-  border-color:var(--tv-border)!important;border-radius:20px!important;box-shadow:0 8px 28px rgba(10,27,77,.055)!important
-}
-body.rym-validator-tablet-app .v80-manual{padding:20px!important;border:2px solid #C9DAF2!important}
-body.rym-validator-tablet-app .v80-manual-head{align-items:center!important;margin-bottom:14px!important}
-body.rym-validator-tablet-app .v80-manual h3{font-size:23px!important;color:var(--tv-navy)!important;letter-spacing:-.02em}
-body.rym-validator-tablet-app .v80-manual p{font-size:13px!important;line-height:1.5!important;max-width:760px}
-body.rym-validator-tablet-app #v80SelCount{min-width:74px;text-align:center;padding:9px 12px;border-radius:999px;
-  background:#EEF5FF;color:var(--tv-blue);font-size:13px!important;border:1px solid #C9DAF2}
-body.rym-validator-tablet-app .v80-search-row{grid-template-columns:minmax(0,1fr) 230px auto!important;gap:10px!important}
-body.rym-validator-tablet-app .v80-search-row input,
-body.rym-validator-tablet-app .v80-search-row select{
-  min-height:52px!important;border:1px solid #BBCBE0!important;border-radius:14px!important;padding:0 15px!important;
-  font-size:15px!important;color:var(--tv-text)!important;background:#fff!important;outline:none!important
-}
-body.rym-validator-tablet-app .v80-search-row input:focus,
-body.rym-validator-tablet-app .v80-search-row select:focus{border-color:var(--tv-blue)!important;box-shadow:0 0 0 4px rgba(36,74,165,.11)!important}
-body.rym-validator-tablet-app .v80-select-count{font-size:11px!important;justify-content:center}
-body.rym-validator-tablet-app .v80-units{max-height:390px!important;margin-top:12px!important;border-radius:16px!important;border-color:var(--tv-border)!important}
-body.rym-validator-tablet-app .v80-unit{
-  grid-template-columns:42px 110px 110px 100px minmax(160px,1fr) minmax(150px,1fr)!important;
-  min-height:58px!important;padding:10px 12px!important;font-size:12px!important;gap:10px!important
-}
-body.rym-validator-tablet-app .v80-unit:has(input:checked){background:#F2F7FF!important;box-shadow:inset 4px 0 0 var(--tv-blue)}
-body.rym-validator-tablet-app .v80-unit input{width:22px!important;height:22px!important;accent-color:var(--tv-blue)}
-body.rym-validator-tablet-app .v80-unit b{font-size:13px!important}
-body.rym-validator-tablet-app .v80-manual-actions{margin-top:14px!important;gap:10px!important}
-body.rym-validator-tablet-app .v80-manual-actions button,
-body.rym-validator-tablet-app .v80-run-btn{
-  min-height:48px!important;border-radius:13px!important;font-size:12px!important;font-weight:900!important
-}
-body.rym-validator-tablet-app .v80-manual-actions .primary,
-body.rym-validator-tablet-app .v80-run-btn:not(:disabled){background:var(--tv-blue)!important;color:#fff!important}
-body.rym-validator-tablet-app .v80-status-box{font-size:12px!important;padding:13px 15px!important;border-radius:14px!important}
-body.rym-validator-tablet-app .v80-policy{padding:15px 17px!important;background:#FFF9EF!important}
-body.rym-validator-tablet-app .v80-policy h2{font-size:17px!important}
-body.rym-validator-tablet-app .v80-policy p{font-size:11px!important;line-height:1.5!important}
-body.rym-validator-tablet-app .v80-gals{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
-body.rym-validator-tablet-app .v80-gal{padding:15px!important}
-body.rym-validator-tablet-app .v80-gal .v80-count{font-size:28px!important}
-body.rym-validator-tablet-app .v80-gal small,
-body.rym-validator-tablet-app .v80-gal-meta,
-body.rym-validator-tablet-app .v80-today{font-size:10px!important}
-body.rym-validator-tablet-app .v86-ex{padding:16px!important}
-body.rym-validator-tablet-app .v86-ex-head h3{font-size:16px!important}
-body.rym-validator-tablet-app .v86-ex-head p,
-body.rym-validator-tablet-app .v86-ex-row{font-size:10.5px!important}
-.rym-validator-access{
-  min-height:100dvh;display:grid;place-items:center;padding:28px;background:var(--tv-bg);
-}
-.rym-validator-access-card{width:min(620px,100%);padding:28px;border:1px solid var(--tv-border);border-radius:24px;background:#fff;
-  box-shadow:0 20px 60px rgba(10,27,77,.12);text-align:center}
-.rym-validator-access-card .lock{width:58px;height:58px;margin:0 auto 14px;border-radius:18px;display:grid;place-items:center;
-  background:#FFF7ED;color:#C2410C;font-size:26px}
-.rym-validator-access-card h1{margin:0;color:var(--tv-navy);font-size:26px}.rym-validator-access-card p{color:var(--tv-muted);line-height:1.55}
-.rym-validator-access-card button{min-height:48px;border:0;border-radius:13px;background:var(--tv-blue);color:#fff;padding:0 18px;font-weight:900}
-@media(orientation:portrait) and (max-width:900px){
-  body.rym-validator-tablet-app #view{padding:88px 16px 28px!important}
-  body.rym-validator-tablet-app .v80-search-row{grid-template-columns:1fr 180px!important}
-  body.rym-validator-tablet-app .v80-select-count{grid-column:1/-1;justify-content:flex-start;padding:0 2px}
-  body.rym-validator-tablet-app .v80-unit{grid-template-columns:38px 95px 105px 90px minmax(140px,1fr)!important}
-  body.rym-validator-tablet-app .v80-unit .hide-mobile:last-child{display:none!important}
-}
-@media(max-width:700px){
-  .rym-validator-title span,.rym-validator-online{display:none}
-  .rym-validator-appbar{height:64px}.rym-validator-mark{width:40px;height:40px;border-radius:12px}
-  body.rym-validator-tablet-app #view{padding:78px 12px 22px!important}
-  body.rym-validator-tablet-app .v80-search-row{grid-template-columns:1fr!important}
-  body.rym-validator-tablet-app .v80-gals{grid-template-columns:1fr!important}
-  body.rym-validator-tablet-app .v80-unit{grid-template-columns:34px 82px 92px 1fr!important}
-  body.rym-validator-tablet-app .v80-unit .hide-mobile{display:none!important}
+
+body.rym-unit-validator-app .v101-shell{
+  display:block!important;
+  min-height:100dvh!important;
+  width:100%!important;
+  background:transparent!important;
 }
 
+body.rym-unit-validator-app .v101-side,
+body.rym-unit-validator-app .v101-top,
+body.rym-unit-validator-app #v115MobileNav{
+  display:none!important;
+}
 
-/* Dedicated-route isolation.
-   This stylesheet is injected ONLY for ?app=validador, so these rules do not touch normal Portal RYM. */
-.shell{display:block!important;min-height:100dvh!important}
-.side{display:none!important}
-.main{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important}
-.top{display:none!important}
-#view{width:min(1480px,100%)!important;max-width:1480px!important;margin:0 auto!important;padding:92px 22px 32px!important}
-#view>.source-card,
-#view>#ca6Summary,
-#view>.v125-count-equation,
-#view>.ca6-tabs,
-#view>.section-tools{display:none!important}
-#ca6Out{width:100%!important;margin:0!important}
-#ca6Out>.v80-validator{width:100%!important}
-.v80-validator{gap:16px!important}
-.v80-policy{padding:18px 20px!important}
-.v80-policy h2{font-size:22px!important;letter-spacing:-.025em!important}
-.v80-policy p{font-size:13px!important;line-height:1.5!important}
-.v80-policy-badge{font-size:11px!important;padding:9px 12px!important}
-.v80-gals{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
-.v80-gal{padding:18px!important}
-.v80-gal h3{font-size:19px!important}
-.v80-gal .v80-count{font-size:32px!important;margin-top:10px!important}
-.v80-gal small{font-size:11px!important}
-.v80-gal-meta{font-size:10.5px!important;margin:10px 0 12px!important}
-.v80-run-btn{min-height:50px!important;font-size:13px!important}
-.v80-today{font-size:10.5px!important;min-height:46px!important;padding:10px!important}
-.v86-ex{padding:18px!important}
-.v86-ex-head h3{font-size:18px!important}
-.v86-ex-head p{font-size:11.5px!important}
-.v86-ex-head b{font-size:11px!important}
-.v86-ex-row{font-size:11px!important;min-height:48px!important}
-.v86-ex-row small{font-size:10.5px!important}
-.v111-manual-banner{font-size:12px!important;line-height:1.45!important;padding:12px 14px!important}
-.v112-progress{border-radius:18px!important}
+body.rym-unit-validator-app .v101-main{
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+
+body.rym-unit-validator-app .v101-content{
+  width:min(1180px,100%)!important;
+  min-height:100dvh!important;
+  margin:0 auto!important;
+  padding:116px 26px 38px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+}
+
+body.rym-unit-validator-app .v101-content > *:not(.v101-validator){
+  display:none!important;
+}
+
+.rym-unit-validator-appbar{
+  position:fixed;
+  inset:0 0 auto 0;
+  z-index:100200;
+  min-height:78px;
+  padding:12px max(22px,env(safe-area-inset-right)) 12px max(22px,env(safe-area-inset-left));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  background:rgba(255,255,255,.96);
+  border-bottom:1px solid var(--uva-border);
+  box-shadow:0 10px 30px rgba(10,27,77,.07);
+  backdrop-filter:blur(16px);
+}
+
+.rym-unit-validator-brand{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.rym-unit-validator-mark{
+  width:48px;
+  height:48px;
+  flex:0 0 48px;
+  display:grid;
+  place-items:center;
+  border-radius:15px;
+  background:linear-gradient(145deg,var(--uva-navy),var(--uva-blue));
+  color:#fff;
+  font-size:22px;
+  font-weight:1000;
+  box-shadow:0 9px 24px rgba(36,74,165,.22);
+}
+
+.rym-unit-validator-heading{min-width:0}
+.rym-unit-validator-heading b{
+  display:block;
+  color:var(--uva-navy);
+  font-size:20px;
+  line-height:1.05;
+  letter-spacing:-.025em;
+}
+.rym-unit-validator-heading span{
+  display:block;
+  margin-top:5px;
+  color:var(--uva-muted);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.rym-unit-validator-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.rym-unit-validator-online{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 11px;
+  border-radius:999px;
+  background:#F0FDF4;
+  border:1px solid #BDE6CA;
+  color:#166534;
+  font-size:11px;
+  font-weight:900;
+}
+.rym-unit-validator-online:before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#22C55E;
+}
+.rym-unit-validator-online.offline{
+  background:#FFF7ED;
+  border-color:#FED7AA;
+  color:#9A3412;
+}
+.rym-unit-validator-online.offline:before{background:#F97316}
+
+.rym-unit-validator-exit{
+  min-height:46px!important;
+  margin:0!important;
+  padding:0 16px!important;
+  border:1px solid #F4C6C6!important;
+  border-radius:13px!important;
+  background:#FFF7F7!important;
+  color:#B42318!important;
+  box-shadow:none!important;
+  font-size:12px!important;
+  font-weight:1000!important;
+}
+
+/* The one and only app task */
+body.rym-unit-validator-app .v101-validator{
+  position:relative!important;
+  width:100%!important;
+  margin:0!important;
+  padding:28px!important;
+  border:1px solid #C9D9ED!important;
+  border-radius:26px!important;
+  background:rgba(255,255,255,.98)!important;
+  box-shadow:0 28px 70px rgba(13,45,87,.13)!important;
+  overflow:visible!important;
+}
+
+body.rym-unit-validator-app .v101-validator:before{
+  content:"";
+  position:absolute;
+  left:28px;
+  right:28px;
+  top:0;
+  height:4px;
+  border-radius:0 0 99px 99px;
+  background:linear-gradient(90deg,var(--uva-navy),var(--uva-blue),var(--uva-sky),var(--uva-orange));
+}
+
+body.rym-unit-validator-app .v101-validator-head{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+  margin:0 0 22px!important;
+}
+
+body.rym-unit-validator-app .v101-validator-head h3{
+  margin:0!important;
+  color:var(--uva-navy)!important;
+  font-size:31px!important;
+  line-height:1.05!important;
+  letter-spacing:-.04em!important;
+}
+
+body.rym-unit-validator-app .v101-validator-head p{
+  display:block!important;
+  max-width:720px!important;
+  margin:8px 0 0!important;
+  color:var(--uva-muted)!important;
+  font-size:14px!important;
+  line-height:1.5!important;
+  font-weight:700!important;
+}
+
+body.rym-unit-validator-app .v101-validator-badge{
+  flex:0 0 auto!important;
+  margin:2px 0 0!important;
+  padding:9px 12px!important;
+  border-radius:999px!important;
+  background:#EEF5FF!important;
+  border:1px solid #C9DAF2!important;
+  color:var(--uva-blue)!important;
+  font-size:10px!important;
+  font-weight:1000!important;
+}
+
+body.rym-unit-validator-app .v101-validator-tools{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 190px!important;
+  gap:12px!important;
+  align-items:stretch!important;
+}
+
+body.rym-unit-validator-app .v101-validator-box{
+  position:relative!important;
+  min-width:0!important;
+}
+
+body.rym-unit-validator-app .v101-validator-input{
+  width:100%!important;
+  height:62px!important;
+  margin:0!important;
+  padding:0 18px!important;
+  border:1px solid #B9CAE0!important;
+  border-radius:17px!important;
+  background:#fff!important;
+  color:var(--uva-text)!important;
+  outline:none!important;
+  font-size:18px!important;
+  font-weight:800!important;
+  box-shadow:inset 0 1px 0 rgba(10,27,77,.02)!important;
+}
+
+body.rym-unit-validator-app .v101-validator-input::placeholder{
+  color:#8A96AA!important;
+  font-weight:700!important;
+}
+
+body.rym-unit-validator-app .v101-validator-input:focus{
+  border-color:var(--uva-blue)!important;
+  box-shadow:0 0 0 4px rgba(36,74,165,.10)!important;
+}
+
+body.rym-unit-validator-app .v101-validator-go{
+  width:100%!important;
+  min-width:0!important;
+  height:62px!important;
+  margin:0!important;
+  padding:0 18px!important;
+  border:0!important;
+  border-radius:17px!important;
+  background:linear-gradient(180deg,#2A61BD,#174A9B)!important;
+  color:#fff!important;
+  box-shadow:0 10px 24px rgba(36,74,165,.20)!important;
+  font-size:14px!important;
+  font-weight:1000!important;
+}
+
+body.rym-unit-validator-app .v101-validator-note{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin-top:15px!important;
+  color:var(--uva-muted)!important;
+  font-size:12px!important;
+  font-weight:800!important;
+}
+body.rym-unit-validator-app .v101-validator-note:before{
+  content:"✓";
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  border-radius:7px;
+  background:#EAF8F0;
+  color:var(--uva-green);
+  font-weight:1000;
+}
+
+body.rym-unit-validator-app .v101-validator-list{
+  top:70px!important;
+  z-index:100400!important;
+  max-height:340px!important;
+  border:1px solid #CFDCEE!important;
+  border-radius:17px!important;
+  background:#fff!important;
+  box-shadow:0 20px 55px rgba(10,27,77,.20)!important;
+  overflow:auto!important;
+}
+
+body.rym-unit-validator-app .v101-validator-item{
+  min-height:68px!important;
+  padding:12px 14px!important;
+  gap:14px!important;
+}
+body.rym-unit-validator-app .v101-validator-item b{font-size:15px!important}
+body.rym-unit-validator-app .v101-validator-item small{
+  margin-top:4px!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+body.rym-unit-validator-app .v101-validator-state{
+  font-size:9.5px!important;
+  padding:6px 8px!important;
+}
+
+/* Result modal: keep main data/logic, make it tablet-first. */
+body.rym-unit-validator-app .v101-check-modal,
+body.rym-unit-validator-app .v117-check-modal{
+  z-index:100500!important;
+  padding:18px!important;
+  align-items:center!important;
+  background:rgba(5,18,52,.62)!important;
+  backdrop-filter:blur(7px)!important;
+}
+
+body.rym-unit-validator-app .v101-check-card,
+body.rym-unit-validator-app .v117-check-card{
+  width:min(1120px,96vw)!important;
+  max-width:1120px!important;
+  max-height:92dvh!important;
+  margin:auto!important;
+  padding:22px!important;
+  border-radius:25px!important;
+  border:1px solid rgba(255,255,255,.8)!important;
+  background:#fff!important;
+  box-shadow:0 30px 90px rgba(5,28,73,.30)!important;
+  overflow:auto!important;
+}
+
+body.rym-unit-validator-app .v117-check-head h2{
+  font-size:34px!important;
+  letter-spacing:-.04em!important;
+}
+body.rym-unit-validator-app .v117-meta,
+body.rym-unit-validator-app .v117-identity-line{
+  font-size:11.5px!important;
+}
+body.rym-unit-validator-app .v117-quick-grid{
+  gap:12px!important;
+}
+body.rym-unit-validator-app .v117-status-card{
+  min-height:210px!important;
+  padding:15px!important;
+  border-radius:18px!important;
+}
+body.rym-unit-validator-app .v117-card-value{
+  font-size:22px!important;
+}
+body.rym-unit-validator-app .v117-card-detail span{font-size:9px!important}
+body.rym-unit-validator-app .v117-card-detail b{font-size:11.5px!important}
+
+/* Dedicated app must never navigate into the full portal. */
+body.rym-unit-validator-app #v101OpenModule{
+  display:none!important;
+}
+body.rym-unit-validator-app .v117-check-actions{
+  justify-content:flex-end!important;
+}
+body.rym-unit-validator-app #v101AgainCheck{
+  min-width:180px!important;
+  min-height:48px!important;
+}
+
+/* Simple loading/access states owned by the tablet shell. */
+.rym-unit-validator-state{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:28px;
+  background:var(--uva-bg);
+}
+.rym-unit-validator-state-card{
+  width:min(620px,100%);
+  padding:30px;
+  border:1px solid var(--uva-border);
+  border-radius:25px;
+  background:#fff;
+  box-shadow:0 22px 70px rgba(10,27,77,.13);
+  text-align:center;
+}
+.rym-unit-validator-state-card h1{
+  margin:0;
+  color:var(--uva-navy);
+  font-size:27px;
+}
+.rym-unit-validator-state-card p{
+  margin:10px 0 0;
+  color:var(--uva-muted);
+  line-height:1.55;
+}
+.rym-unit-validator-state-card button{
+  min-height:48px;
+  margin-top:18px;
+  border:0;
+  border-radius:13px;
+  padding:0 18px;
+  background:var(--uva-blue);
+  color:#fff;
+  font-weight:1000;
+}
+
 @media(max-width:900px){
-  #view{padding:84px 14px 24px!important}
-  .v80-gals{grid-template-columns:1fr!important}
-  .v80-policy{align-items:flex-start!important;flex-direction:column!important}
-  .v80-policy-badge{white-space:normal!important}
+  body.rym-unit-validator-app .v101-content{
+    padding:102px 16px 26px!important;
+    justify-content:flex-start!important;
+  }
+  body.rym-unit-validator-app .v101-validator{
+    padding:22px!important;
+    border-radius:22px!important;
+  }
+  body.rym-unit-validator-app .v101-validator-head h3{font-size:27px!important}
+  body.rym-unit-validator-app .v101-validator-tools{
+    grid-template-columns:minmax(0,1fr) 160px!important;
+  }
+  body.rym-unit-validator-app .v101-validator-input,
+  body.rym-unit-validator-app .v101-validator-go{height:58px!important}
+  body.rym-unit-validator-app .v117-quick-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:650px){
+  .rym-unit-validator-appbar{min-height:68px;padding:9px 12px}
+  .rym-unit-validator-mark{width:42px;height:42px;flex-basis:42px;border-radius:13px}
+  .rym-unit-validator-heading b{font-size:17px}
+  .rym-unit-validator-heading span,.rym-unit-validator-online{display:none}
+  .rym-unit-validator-exit{min-height:42px!important;padding:0 12px!important}
+  body.rym-unit-validator-app .v101-content{padding:86px 10px 18px!important}
+  body.rym-unit-validator-app .v101-validator{padding:17px!important}
+  body.rym-unit-validator-app .v101-validator-head{margin-bottom:14px!important}
+  body.rym-unit-validator-app .v101-validator-head h3{font-size:23px!important}
+  body.rym-unit-validator-app .v101-validator-head p{font-size:12px!important}
+  body.rym-unit-validator-app .v101-validator-badge{display:none!important}
+  body.rym-unit-validator-app .v101-validator-tools{grid-template-columns:1fr!important}
+  body.rym-unit-validator-app .v101-validator-go{height:52px!important}
+  body.rym-unit-validator-app .v101-validator-input{height:54px!important;font-size:16px!important}
+  body.rym-unit-validator-app .v101-validator-list{top:61px!important}
+  body.rym-unit-validator-app .v117-quick-grid{grid-template-columns:1fr!important}
+  body.rym-unit-validator-app .v101-check-modal{padding:8px!important;align-items:flex-start!important}
+  body.rym-unit-validator-app .v101-check-card{width:100%!important;max-width:100%!important;padding:14px!important;border-radius:19px!important}
+  body.rym-unit-validator-app .v117-check-head h2{font-size:27px!important}
 }
