@@ -1,0 +1,7 @@
+{
+  "name":"portal-rym-unit-validator-stitch",
+  "private":true,
+  "type":"module",
+  "dependencies":{"@google/stitch-sdk":"latest"},
+  "scripts":{"stitch:unit-validator-visual":"node stitch-unit-validator-visual.mjs"}
+}
