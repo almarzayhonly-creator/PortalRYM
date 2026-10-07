@@ -1,3 +1,12 @@
+
+/* Pre-paint isolation: the Worker adds this class in <head> for the dedicated route. */
+html.rym-unit-validator-route body:not(.rym-unit-validator-app) #app{
+  visibility:hidden!important;
+}
+html.rym-unit-validator-route body:not(.rym-unit-validator-app){
+  background:#F4F7FB!important;
+}
+
 /* Portal RYM · Validador de Unidad · Tablet app
    Visual-only layer for main's Centro de Control quick unit validator. */
 
