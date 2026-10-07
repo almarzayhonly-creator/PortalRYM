@@ -33,6 +33,10 @@ jobs:
           test -s css/validator-tablet-app.css
           test -s validator-tablet.webmanifest
           test -s assets/validator-tablet-icon.svg
+          test -s unit-validator.html
+          test -s modules/core/unit-validator-launcher.js
+          grep -Fq 'control_auto.validador_unidad_app' unit-validator.html
+          grep -Fq 'control_auto.validador_unidad_app' modules/core/unit-validator-launcher.js
           grep -Fq 'v101ValidatorQ' modules/control-auto/validator-tablet-app.js
           grep -Fq 'validator-tablet-app.js' modules/v171-loader.js
           grep -Fq 'validator-tablet-app.css' modules/v171-loader.js
@@ -54,11 +58,14 @@ jobs:
         env:
           VERSION_URL: ${{ steps.deploy.outputs.version_url }}
         run: |
-          curl -fsSL "$VERSION_URL/?app=validador-unidad" -o /tmp/index.html
+          curl -fsSL -D /tmp/headers.txt "$VERSION_URL/?app=validador-unidad" -o /tmp/index.html
           curl -fsSL "$VERSION_URL/modules/v171-loader.js" -o /tmp/loader.js
           curl -fsSL "$VERSION_URL/modules/control-auto/validator-tablet-app.js" -o /tmp/app.js
           curl -fsSL "$VERSION_URL/css/validator-tablet-app.css" -o /tmp/app.css
           curl -fsSL "$VERSION_URL/validator-tablet.webmanifest" -o /tmp/manifest.json
+          grep -Fq 'Validador de Unidad' /tmp/index.html
+          grep -Fq 'control_auto.validador_unidad_app' /tmp/index.html
+          grep -Fq 'x-rym-app: unit-validator' /tmp/headers.txt
           grep -Fq 'validator-tablet-app.js' /tmp/loader.js
           grep -Fq 'v101ValidatorQ' /tmp/app.js
           grep -Fq 'rym-unit-validator-app' /tmp/app.css
@@ -69,8 +76,10 @@ jobs:
           ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
         run: |
           for attempt in $(seq 1 12); do
-            if curl -fsSL "$ALIAS_URL/modules/control-auto/validator-tablet-app.js" -o /tmp/alias-app.js \
-              && grep -Fq 'v101ValidatorQ' /tmp/alias-app.js \
+            if curl -fsSL "$ALIAS_URL/?app=validador-unidad" -o /tmp/alias-index.html \
+              && grep -Fq 'control_auto.validador_unidad_app' /tmp/alias-index.html \
+              && curl -fsSL "$ALIAS_URL/modules/core/unit-validator-launcher.js" -o /tmp/alias-launcher.js \
+              && grep -Fq 'control_auto.validador_unidad_app' /tmp/alias-launcher.js \
               && curl -fsSL "$ALIAS_URL/validator-tablet.webmanifest" -o /tmp/alias-manifest.json \
               && grep -Fq 'app=validador-unidad' /tmp/alias-manifest.json; then
               echo "Validator tablet preview propagated."
