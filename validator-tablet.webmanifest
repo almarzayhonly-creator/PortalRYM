@@ -1,8 +1,8 @@
 {
   "name": "Portal RYM · Validador de Unidad",
-  "short_name": "RYM Validador",
-  "description": "Validador eCarCheck de Portal RYM optimizado para tablet.",
-  "start_url": "/?app=validador",
+  "short_name": "Validador RYM",
+  "description": "Validador rápido de unidad de Portal RYM optimizado para tablet.",
+  "start_url": "/?app=validador-unidad",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
