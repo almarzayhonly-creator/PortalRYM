@@ -64,14 +64,22 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
     if(scenario==='no-permission'){
       await host.locator('.uva-denied').waitFor();assert.equal(await host.locator('#v101ValidatorQ').count(),0);
       assert.equal(await host.locator('#v101CheckModal').count(),0);
+      await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}.png`)});
       await page.locator('#exit').click();await host.locator('.login-card').waitFor();
     }else{
       assert.equal(await host.locator('.v101-side').isVisible(),false);
       assert.equal(await host.locator('.v99-grid').isVisible(),false);
+      if(width<=650){
+        const button=await host.locator('#v101ValidatorGo').boundingBox(),input=await host.locator('#v101ValidatorQ').boundingBox();
+        assert.equal(Math.round(button.width),Math.round(input.width),'Mobile Validate must fill the input width');
+        assert.ok(button.height>=48);
+        assert.equal(await host.locator('#v101ValidatorGo').evaluate(x=>getComputedStyle(x,':after').content),'none');
+      }
       await host.locator('#v101ValidatorQ').fill(scenario==='not-found'?'ZZZZ':'QA200');
       if(scenario==='not-found'){
         await host.locator('#v101ValidatorGo').click();await host.locator('.v101-check-empty').waitFor();
         assert.match(await host.locator('#v101ValidatorList').innerText(),/Sin coincidencias/);
+        await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}.png`)});
       }else{
         if(count%3===0){await host.locator('[data-v101pick]').waitFor();await host.locator('[data-v101pick]').click()}
         else if(count%3===1)await host.locator('#v101ValidatorQ').press('Enter');
