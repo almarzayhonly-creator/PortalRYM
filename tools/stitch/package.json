@@ -10,6 +10,7 @@
     "sync": "node sync.mjs",
     "generate:revisados-dashboard": "node generate-revisados-dashboard.mjs",
     "stitch:revisados-from-main": "node stitch-revisados-from-main.mjs",
-    "stitch:operations-emitted": "node stitch-operations-emitted.mjs"
+    "stitch:operations-emitted": "node stitch-operations-emitted.mjs",
+    "stitch:unit-validator-tablet": "node stitch-unit-validator-tablet.mjs"
   }
 }
