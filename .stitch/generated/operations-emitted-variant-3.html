@@ -1,517 +1,403 @@
 <!DOCTYPE html>
 
-<html lang="es"><head>
+<html class="h-full" lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Portal RYM · Operaciones · Emitidos hoy (Variante 3)</title>
+<title>Portal RYM · Operaciones · Emitidos hoy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script>
     tailwind.config = {
-      darkMode: "class",
       theme: {
         extend: {
-          colors: {
-            brand: {
-              navy: '#0A1B4D',
-              deep: '#0F172A',
-              blue: '#2563EB',
-              lightBlue: '#3B82F6',
-              softBlue: '#EFF6FF',
-              emerald: '#059669',
-              amber: '#D97706',
-              amberLight: '#FEF3C7',
-            }
-          },
           fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#151f33',
+              950: '#090d16',
+            }
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-[#F8FAFC] text-slate-800 font-sans p-4 sm:p-6 lg:p-10 min-h-screen antialiased flex flex-col items-center justify-start">
-<!-- Contenedor Principal: Componente Vue 3 Operaciones > Emitidos Hoy -->
-<main class="w-full max-w-[1450px] space-y-6">
-<!-- Card Principal -->
-<section class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-7 relative overflow-hidden transition-all duration-300">
-<!-- HEADER CON MEDIDOR TÁCTICO & WIDGET WHATSAPP -->
-<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-5 border-b border-slate-100">
-<!-- Bloque Titular y Capacidad -->
-<div class="space-y-2.5">
-<div class="flex items-center gap-2 flex-wrap">
-<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200/70 text-[11px] font-bold text-blue-700 tracking-wider uppercase font-mono">
-<span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
-              Capacidad Diaria eCarCheck
-            </span>
-<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-300/60 rounded-full px-2.5 py-0.5">
-<span class="material-symbols-outlined text-[13px] text-amber-600">notifications_active</span>
-              Queda 1 cupo disponible hoy
-            </span>
+<body class="bg-[#F1F5F9] text-[#0F172A] font-sans antialiased min-h-screen p-4 md:p-6 lg:p-8 flex flex-col justify-start items-center">
+<!-- Main Tactical Operations Panel Container (Designed for desktop 1440px - 1920px) -->
+<main class="w-full max-w-[1720px] bg-white border border-[#CBD5E1] rounded-2xl shadow-sm p-4 md:p-5 lg:p-6 space-y-4">
+<!-- TOP: Unified Tactical Control Strip -->
+<header class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 lg:p-4.5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+<!-- Left: Indicator & Heading -->
+<div class="flex flex-col gap-1.5 min-w-[280px]">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-widest bg-[#E0E7FF] text-[#244AA5] border border-[#C7D2FE]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#244AA5] animate-pulse"></span>
+            CAPACIDAD DIARIA ECARCHECK
+          </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+            Queda 1 cupo disponible hoy
+          </span>
 </div>
-<div class="flex items-baseline gap-3 flex-wrap">
-<h1 class="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight flex items-center gap-2">
-              Emitidos hoy
-              <span class="font-mono text-xl sm:text-2xl text-blue-600 font-bold bg-blue-50/60 px-2.5 py-0.5 rounded-lg border border-blue-100">
-                32 <span class="text-slate-400 font-normal">/ 33</span>
-</span>
+<div class="flex items-baseline gap-2.5">
+<h1 class="text-2xl lg:text-[28px] font-extrabold tracking-tight text-[#0F172A] leading-none">
+            Emitidos hoy <span class="text-[#2563EB] font-mono">32 / 33</span>
 </h1>
-<span class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-[11px]">Meta operativa: 96.96% cumplida</span>
+<span class="text-xs text-[#64748B] font-medium hidden xl:inline">Turno diurno activo</span>
 </div>
 </div>
-<!-- Widget Lateral WhatsApp Integrado -->
-<div class="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center gap-3 bg-[#F8FAFC] border border-slate-200 p-2.5 sm:p-3 rounded-xl lg:max-w-md w-full">
-<div class="flex-1 min-w-0 px-2">
-<div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
-<span class="material-symbols-outlined text-[15px] text-emerald-600">chat</span>
-              Resumen operativo listo para compartir
-            </div>
-<p class="text-[11px] text-slate-500 truncate mt-0.5 font-mono">
-              [Portal RYM] 32 emitidos de 33 hoy (1 cupo restante).
-            </p>
+<!-- Center: Live Capacity Bar & Micro-Notches -->
+<div class="flex-1 max-w-xl mx-0 lg:mx-4 flex flex-col justify-center gap-1.5 bg-white border border-[#E2E8F0] px-4 py-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-[11px] tracking-wide text-[#334155] uppercase">Monitoreo de Capacidad</span>
+<span class="text-[10px] text-[#94A3B8] font-mono">| 96.96%</span>
 </div>
-<div class="relative group shrink-0">
-<button class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-lg shadow-sm hover:shadow transition-all duration-150" id="btnCopyWs" onclick="copyWhatsAppSummary()">
-<span class="material-symbols-outlined text-sm font-bold">content_copy</span>
+<span class="inline-flex items-center px-2 py-0.2 rounded-full text-[11px] font-black font-mono bg-[#DBEAFE] text-[#1D4ED8] border border-[#BFDBFE]">
+            97% OCUPADO
+          </span>
+</div>
+<!-- Progress bar with micro-notches -->
+<div class="relative w-full h-3 bg-[#E2E8F0] rounded-full overflow-hidden p-0.5 flex items-center">
+<div class="h-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-1" style="width: 97%;">
+<span class="w-1.5 h-1.5 rounded-full bg-white opacity-80"></span>
+</div>
+<!-- Micro-notches for 33 slots overlay visual -->
+<div class="absolute inset-0 grid grid-cols-11 pointer-events-none opacity-20">
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="border-r border-slate-700 h-full"></div>
+<div class="h-full"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-[10px] text-[#64748B] font-mono">
+<span>0 emitidos</span>
+<span class="text-[#059669] font-medium">32 emitidos validados</span>
+<span class="text-[#D97706] font-semibold">Cupo #33 libre</span>
+</div>
+</div>
+<!-- Right: WhatsApp Quick-Action Pod -->
+<div class="flex items-center justify-between gap-3 bg-white border border-[#CBD5E1] p-2.5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] shrink-0">
+<div class="flex items-center gap-2.5 pl-1">
+<div class="w-8 h-8 rounded-full bg-[#ECFDF5] text-[#059669] flex items-center justify-center border border-[#A7F3D0]">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+</div>
+<div class="text-left">
+<div class="text-[11px] font-bold text-[#0F172A] leading-tight">Resumen operativo</div>
+<div class="text-[10px] text-[#64748B] font-mono leading-tight">32/33 (97%) · 1 pendiente</div>
+</div>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#10B981] hover:bg-[#059669] active:bg-[#047857] text-white text-xs font-bold rounded-md shadow-sm transition-colors border border-[#059669] focus:outline-none focus:ring-2 focus:ring-[#10B981]/40" title="Copiar texto formateado para WhatsApp" type="button">
+<span class="material-symbols-outlined text-[15px]">content_copy</span>
 <span>Copiar WS</span>
 </button>
-<!-- Tooltip -->
-<div class="absolute -bottom-8 right-0 hidden group-hover:block pointer-events-none bg-slate-900 text-white text-[10px] py-1 px-2 rounded shadow-md whitespace-nowrap z-20" id="wsTooltip">
-              Copia el reporte con formato WhatsApp
-            </div>
+</div>
+</header>
+<!-- MIDDLE: Continuous Slot Matrix Strip (33 micro-badges) -->
+<section class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 space-y-2.5">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2E8F0] pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#2563EB] text-[18px]">grid_view</span>
+<h2 class="text-[11px] font-extrabold uppercase tracking-wider text-[#334155]">
+            MATRIZ TÁCTICA DE RANURAS DIARIAS (1 A 33)
+          </h2>
+<span class="text-[10px] bg-[#E2E8F0] text-[#475569] font-mono px-1.5 py-0.5 rounded font-semibold">Tiempo Real</span>
+</div>
+<div class="flex items-center gap-4 text-[10px] font-medium text-[#64748B]">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#2563EB]"></span>
+<span>Emitido (32)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#F59E0B] border border-dashed border-[#B45309]"></span>
+<span>Disponible (1)</span>
 </div>
 </div>
 </div>
-<!-- TACTICAL MATRIX RIBBON (33 CUPOS REGLAMENTARIOS) -->
-<div class="pt-5 pb-2">
-<div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-2">
-<span class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-sm text-blue-600">grid_view</span>
-            Matriz Táctica Continua de Capacidad (33 Cupos)
-          </span>
-<span class="font-mono text-[11px] text-slate-500">Progreso: <strong class="text-blue-700">97%</strong></span>
+<!-- 33 numbered compact pills in dense 11x3 grid -->
+<div class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-11 gap-1.5">
+<!-- 01 to 08 -->
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #01: Unidad I218">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#01</span>
+<span class="font-bold text-[#0F172A]">I218</span>
 </div>
-<!-- Barra segmentada con 33 posiciones exactas -->
-<div class="grid grid-cols-11 sm:grid-cols-33 gap-1 p-2 bg-slate-50 border border-slate-200 rounded-xl" title="32 emitidos / 1 vacante">
-<!-- 32 Cupos Emitidos (Completados) -->
-<!-- Loop de 32 items -->
-<script>
-            // Generador de segmentos de ribbon para vista dinámica de alta fidelidad
-            for (let i = 1; i <= 32; i++) {
-              document.write(`
-                <div class="group relative flex flex-col items-center justify-center h-8 sm:h-9 bg-[#0A1B4D] hover:bg-blue-700 text-white rounded transition-colors cursor-pointer select-none" title="Cupo #${i} - Emitido">
-                  <span class="text-[9px] font-mono leading-none font-semibold text-blue-200">${i}</span>
-                  <span class="material-symbols-outlined text-[11px] text-emerald-400 font-bold leading-none mt-0.5">check</span>
-                  <!-- Tooltip flotante táctico -->
-                  <div class="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-30 pointer-events-none">
-                    <span class="bg-slate-900 text-[10px] font-mono text-white px-2 py-0.5 rounded shadow whitespace-nowrap">Cupo #${i}: Emitido</span>
-                  </div>
-                </div>
-              `);
-            }
-          </script>
-<!-- Cupo #33 (Pendiente / Destacado Dashed Ámbar) -->
-<div class="group relative flex flex-col items-center justify-center h-8 sm:h-9 bg-amber-50 hover:bg-amber-100 border-2 border-dashed border-[#D97706] text-amber-700 rounded transition-all cursor-pointer animate-pulse select-none" title="Cupo #33 - Disponible">
-<span class="text-[9px] font-mono font-bold leading-none">33</span>
-<span class="material-symbols-outlined text-[13px] text-amber-600 font-bold leading-none mt-0.5">add</span>
-<!-- Tooltip flotante táctico -->
-<div class="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-30 pointer-events-none">
-<span class="bg-amber-900 text-[10px] font-mono text-amber-100 px-2 py-0.5 rounded shadow whitespace-nowrap font-bold">Cupo #33: DISPONIBLE</span>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #02: Unidad V499">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#02</span>
+<span class="font-bold text-[#0F172A]">V499</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #03: Unidad V828">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#03</span>
+<span class="font-bold text-[#0F172A]">V828</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #04: Unidad V840">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#04</span>
+<span class="font-bold text-[#0F172A]">V840</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #05: Unidad I102">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#05</span>
+<span class="font-bold text-[#0F172A]">I102</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #06: Unidad I115">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#06</span>
+<span class="font-bold text-[#0F172A]">I115</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #07: Unidad V221">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#07</span>
+<span class="font-bold text-[#0F172A]">V221</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #08: Unidad V310">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#08</span>
+<span class="font-bold text-[#0F172A]">V310</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #09: Unidad I404">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#09</span>
+<span class="font-bold text-[#0F172A]">I404</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #10: Unidad I412">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#10</span>
+<span class="font-bold text-[#0F172A]">I412</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #11: Unidad V505">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#11</span>
+<span class="font-bold text-[#0F172A]">V505</span>
+</div>
+<!-- 12 to 22 -->
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #12: Unidad V520">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#12</span>
+<span class="font-bold text-[#0F172A]">V520</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #13: Unidad I550">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#13</span>
+<span class="font-bold text-[#0F172A]">I550</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #14: Unidad I591">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#14</span>
+<span class="font-bold text-[#0F172A]">I591</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #15: Unidad V612">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#15</span>
+<span class="font-bold text-[#0F172A]">V612</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #16: Unidad V630">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#16</span>
+<span class="font-bold text-[#0F172A]">V630</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #17: Unidad I644">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#17</span>
+<span class="font-bold text-[#0F172A]">I644</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #18: Unidad I689">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#18</span>
+<span class="font-bold text-[#0F172A]">I689</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #19: Unidad V701">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#19</span>
+<span class="font-bold text-[#0F172A]">V701</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #20: Unidad V715">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#20</span>
+<span class="font-bold text-[#0F172A]">V715</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #21: Unidad I722">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#21</span>
+<span class="font-bold text-[#0F172A]">I722</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #22: Unidad I740">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#22</span>
+<span class="font-bold text-[#0F172A]">I740</span>
+</div>
+<!-- 23 to 33 -->
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #23: Unidad V755">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#23</span>
+<span class="font-bold text-[#0F172A]">V755</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #24: Unidad V768">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#24</span>
+<span class="font-bold text-[#0F172A]">V768</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #25: Unidad I779">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#25</span>
+<span class="font-bold text-[#0F172A]">I779</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #26: Unidad I790">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#26</span>
+<span class="font-bold text-[#0F172A]">I790</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #27: Unidad V804">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#27</span>
+<span class="font-bold text-[#0F172A]">V804</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #28: Unidad V812">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#28</span>
+<span class="font-bold text-[#0F172A]">V812</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #29: Unidad I819">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#29</span>
+<span class="font-bold text-[#0F172A]">I819</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #30: Unidad V821">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#30</span>
+<span class="font-bold text-[#0F172A]">V821</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #31: Unidad I830">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#31</span>
+<span class="font-bold text-[#0F172A]">I830</span>
+</div>
+<div class="flex items-center justify-between px-2 py-1 bg-white hover:bg-[#EFF6FF] border border-[#CBD5E1] hover:border-[#93C5FD] rounded text-[11px] font-mono transition-colors shadow-2xs cursor-pointer group" title="Ranura #32: Unidad I835">
+<span class="text-[9px] text-[#94A3B8] font-bold group-hover:text-[#2563EB]">#32</span>
+<span class="font-bold text-[#0F172A]">I835</span>
+</div>
+<!-- 33 DISPONIBLE (Amarillo punteado) -->
+<div class="flex items-center justify-between px-2 py-1 bg-[#FEF3C7]/60 hover:bg-[#FEF3C7] border border-dashed border-[#F59E0B] rounded text-[11px] font-mono transition-all text-[#92400E] shadow-2xs cursor-pointer group animate-pulse" title="Ranura #33: DISPONIBLE">
+<span class="text-[9px] font-extrabold text-[#D97706]">#33</span>
+<span class="font-extrabold tracking-wide text-[10px] text-[#B45309]">DISPONIBLE</span>
 </div>
 </div>
+</section>
+<!-- BOTTOM: 'Emitidos recientes' 4-Card Tactical Grid -->
+<section class="space-y-3 pt-1">
+<!-- Section Header -->
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-base font-bold text-[#0F172A] tracking-tight">
+            Emitidos recientes <span class="text-sm font-normal text-[#64748B]">(4 de 32)</span>
+</h2>
+<p class="text-xs text-[#64748B]">Últimos revisados emitidos hoy dentro de tu alcance operativo.</p>
 </div>
-<div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 px-1">
-<div class="flex items-center gap-4">
-<span class="inline-flex items-center gap-1.5">
-<span class="w-2.5 h-2.5 rounded-sm bg-[#0A1B4D]"></span> 32 Registrados y Emitidos
-            </span>
-<span class="inline-flex items-center gap-1.5">
-<span class="w-2.5 h-2.5 rounded-sm border-2 border-dashed border-[#D97706] bg-amber-50"></span> 1 Vacante Disponible
-            </span>
-</div>
-<span class="text-slate-400 font-mono text-[10px]">Corte: Hoy 02:00 p. m.</span>
-</div>
-</div>
-<!-- SECCIÓN: EMITIDOS RECIENTES (GRILLA COMPACTA DE UNIDADES) -->
-<div class="mt-7 pt-5 border-t border-slate-200">
-<!-- Barra de título de la sección de unidades -->
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-<div class="flex items-center gap-2.5">
-<h2 class="text-base sm:text-lg font-bold text-[#0F172A] tracking-tight">Emitidos recientes</h2>
-<span class="inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200" id="badgeCounter">
-              4 visibles de 32
-            </span>
-<p class="hidden md:inline text-xs text-slate-500 font-normal">Últimos revisados emitidos hoy dentro de tu alcance.</p>
-</div>
-<!-- Botón Interactivo Ver Todos (32) / Ver menos -->
-<button class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50/80 hover:bg-blue-100/80 px-3.5 py-1.5 rounded-lg border border-blue-200 transition-all active:scale-95 self-start sm:self-auto" id="btnToggleView" onclick="toggleFleetView()">
-<span id="btnToggleText">Ver todos (32)</span>
-<span class="material-symbols-outlined text-sm font-semibold transition-transform" id="btnToggleIcon">expand_more</span>
+<!-- Interactive Dropdown -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg text-xs font-semibold text-[#1E40AF] transition shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30" type="button">
+<span>Ver todos (32)</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
 </button>
 </div>
-<!-- Grilla de Tarjetas (4 Columnas) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5" id="cardsGrid">
-<!-- TARJETA 1 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<!-- Placa en chapa monospace -->
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight shadow-2xs">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                  I218 · EI2050
-                </div>
-<!-- Badge Validación eCarCheck -->
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                  eCarCheck
-                </span>
+<!-- 4 Identical Modular Cards in 4-column horizontal layout -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+<!-- Card 1 -->
+<div class="bg-white border border-[#CBD5E1] hover:border-[#2563EB] rounded-xl p-3.5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#10B981] ring-4 ring-[#10B981]/20"></span>
+<span class="font-mono font-bold text-sm text-[#0F172A] tracking-tight">I218 · EI2050</span>
 </div>
-<!-- Empresa y Supervisora -->
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate" title="CATALINA SA">CATALINA SA</span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#475569] font-medium border border-[#E2E8F0]">#01</span>
 </div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">LEIBY</strong></span>
+<div class="space-y-0.5 text-xs">
+<div class="font-bold text-[#1E293B] truncate uppercase text-[11px]" title="CATALINA SA">
+                CATALINA SA
+              </div>
+<div class="flex items-center gap-1 text-[11px] text-[#64748B]">
+<span class="material-symbols-outlined text-[13px] text-[#94A3B8]">person</span>
+<span class="font-medium text-[#475569]">LEIBY</span>
 </div>
 </div>
 </div>
-<!-- Footer: Hora y Enlace Ficha -->
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                10/06/2026, 01:41 p. m.
-              </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-i218">
+<div class="mt-3 pt-2.5 border-t border-[#F1F5F9] flex items-center justify-between text-[11px]">
+<span class="text-[#94A3B8] font-mono text-[10px]">10/06/2026, 01:41 p. m.</span>
+<a class="text-[#2563EB] hover:text-[#1D4ED8] font-semibold inline-flex items-center gap-0.5 text-[11px] group-hover:underline" href="#modal-I218">
 <span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
+<span class="text-xs">↗</span>
 </a>
 </div>
-</article>
-<!-- TARJETA 2 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight shadow-2xs">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                  V499 · CX0269
-                </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                  eCarCheck
-                </span>
 </div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate" title="ATALAYA COMPANY S.A.">ATALAYA COMPANY S.A.</span>
+<!-- Card 2 -->
+<div class="bg-white border border-[#CBD5E1] hover:border-[#2563EB] rounded-xl p-3.5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#10B981] ring-4 ring-[#10B981]/20"></span>
+<span class="font-mono font-bold text-sm text-[#0F172A] tracking-tight">V499 · CX0269</span>
 </div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">ROXANA</strong></span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#475569] font-medium border border-[#E2E8F0]">#02</span>
+</div>
+<div class="space-y-0.5 text-xs">
+<div class="font-bold text-[#1E293B] truncate uppercase text-[11px]" title="ATALAYA COMPANY S.A.">
+                ATALAYA COMPANY S.A.
+              </div>
+<div class="flex items-center gap-1 text-[11px] text-[#64748B]">
+<span class="material-symbols-outlined text-[13px] text-[#94A3B8]">person</span>
+<span class="font-medium text-[#475569]">ROXANA</span>
 </div>
 </div>
 </div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                10/06/2026, 12:29 p. m.
-              </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-v499">
+<div class="mt-3 pt-2.5 border-t border-[#F1F5F9] flex items-center justify-between text-[11px]">
+<span class="text-[#94A3B8] font-mono text-[10px]">10/06/2026, 12:29 p. m.</span>
+<a class="text-[#2563EB] hover:text-[#1D4ED8] font-semibold inline-flex items-center gap-0.5 text-[11px] group-hover:underline" href="#modal-V499">
 <span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
+<span class="text-xs">↗</span>
 </a>
 </div>
-</article>
-<!-- TARJETA 3 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight shadow-2xs">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                  V828 · EM5186
-                </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                  eCarCheck
-                </span>
 </div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate" title="TABOGA, S.A.">TABOGA, S.A.</span>
+<!-- Card 3 -->
+<div class="bg-white border border-[#CBD5E1] hover:border-[#2563EB] rounded-xl p-3.5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#10B981] ring-4 ring-[#10B981]/20"></span>
+<span class="font-mono font-bold text-sm text-[#0F172A] tracking-tight">V828 · EM5186</span>
 </div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">ROXANA</strong></span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#475569] font-medium border border-[#E2E8F0]">#03</span>
+</div>
+<div class="space-y-0.5 text-xs">
+<div class="font-bold text-[#1E293B] truncate uppercase text-[11px]" title="TABOGA, S.A.">
+                TABOGA, S.A.
+              </div>
+<div class="flex items-center gap-1 text-[11px] text-[#64748B]">
+<span class="material-symbols-outlined text-[13px] text-[#94A3B8]">person</span>
+<span class="font-medium text-[#475569]">ROXANA</span>
 </div>
 </div>
 </div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                10/06/2026, 01:08 p. m.
-              </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-v828">
+<div class="mt-3 pt-2.5 border-t border-[#F1F5F9] flex items-center justify-between text-[11px]">
+<span class="text-[#94A3B8] font-mono text-[10px]">10/06/2026, 01:08 p. m.</span>
+<a class="text-[#2563EB] hover:text-[#1D4ED8] font-semibold inline-flex items-center gap-0.5 text-[11px] group-hover:underline" href="#modal-V828">
 <span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
+<span class="text-xs">↗</span>
 </a>
 </div>
-</article>
-<!-- TARJETA 4 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight shadow-2xs">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                  V840 · EM5046
-                </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                  eCarCheck
-                </span>
 </div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate" title="TABOGA, S.A.">TABOGA, S.A.</span>
+<!-- Card 4 -->
+<div class="bg-white border border-[#CBD5E1] hover:border-[#2563EB] rounded-xl p-3.5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#10B981] ring-4 ring-[#10B981]/20"></span>
+<span class="font-mono font-bold text-sm text-[#0F172A] tracking-tight">V840 · EM5046</span>
 </div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">MARIFEL</strong></span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#475569] font-medium border border-[#E2E8F0]">#04</span>
+</div>
+<div class="space-y-0.5 text-xs">
+<div class="font-bold text-[#1E293B] truncate uppercase text-[11px]" title="TABOGA, S.A.">
+                TABOGA, S.A.
+              </div>
+<div class="flex items-center gap-1 text-[11px] text-[#64748B]">
+<span class="material-symbols-outlined text-[13px] text-[#94A3B8]">person</span>
+<span class="font-medium text-[#475569]">MARIFEL</span>
 </div>
 </div>
 </div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                10/06/2026, 01:00 p. m.
-              </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-v840">
+<div class="mt-3 pt-2.5 border-t border-[#F1F5F9] flex items-center justify-between text-[11px]">
+<span class="text-[#94A3B8] font-mono text-[10px]">10/06/2026, 01:00 p. m.</span>
+<a class="text-[#2563EB] hover:text-[#1D4ED8] font-semibold inline-flex items-center gap-0.5 text-[11px] group-hover:underline" href="#modal-V840">
 <span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
+<span class="text-xs">↗</span>
 </a>
-</div>
-</article>
-<!-- TARJETAS ADICIONALES (EXPANSIBLES DINÁMICAMENTE) -->
-<div class="hidden contents" id="extendedCards">
-<!-- TARJETA 5 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                    T102 · AB8812
-                  </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                    eCarCheck
-                  </span>
-</div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate">AGROLOGISTICA SUR</span>
-</div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">LEIBY</strong></span>
-</div>
-</div>
-</div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                  10/06/2026, 12:45 p. m.
-                </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-t102">
-<span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
-</a>
-</div>
-</article>
-<!-- TARJETA 6 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                    R554 · KY9920
-                  </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                    eCarCheck
-                  </span>
-</div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate">TRANSPORTE RYM DEL VALLE</span>
-</div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">MARIFEL</strong></span>
-</div>
-</div>
-</div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                  10/06/2026, 12:15 p. m.
-                </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-r554">
-<span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
-</a>
-</div>
-</article>
-<!-- TARJETA 7 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                    K331 · PL1429
-                  </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                    eCarCheck
-                  </span>
-</div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate">CATALINA SA</span>
-</div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">ROXANA</strong></span>
-</div>
-</div>
-</div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                  10/06/2026, 11:50 a. m.
-                </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-k331">
-<span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
-</a>
-</div>
-</article>
-<!-- TARJETA 8 -->
-<article class="bg-white rounded-xl border border-slate-200/90 p-3.5 hover:border-blue-400/80 hover:shadow-md transition-all group flex flex-col justify-between relative overflow-hidden">
-<div class="absolute top-0 left-0 w-1 h-full bg-[#0A1B4D]"></div>
-<div>
-<div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-[#0F172A] border border-slate-300 font-mono text-xs font-bold tracking-tight">
-<span class="material-symbols-outlined text-[13px] text-slate-500">directions_car</span>
-                    J809 · QW4401
-                  </div>
-<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-<span class="material-symbols-outlined text-[12px] text-emerald-600 font-bold">verified</span>
-                    eCarCheck
-                  </span>
-</div>
-<div class="mt-2.5 space-y-1">
-<div class="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
-<span class="truncate">CENTRAL DE CARGAS RYM</span>
-</div>
-<div class="flex items-center gap-1.5 text-[11px] text-slate-600">
-<span class="material-symbols-outlined text-[13px] text-slate-400">person_check</span>
-<span class="truncate">Supervisora: <strong class="text-slate-800 font-semibold">LEIBY</strong></span>
-</div>
-</div>
-</div>
-<div class="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-<span class="inline-flex items-center gap-1 text-slate-500 font-mono text-[10.5px]">
-<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
-                  10/06/2026, 11:22 a. m.
-                </span>
-<a class="inline-flex items-center gap-0.5 font-bold text-blue-600 hover:text-blue-800 hover:underline" href="#ficha-j809">
-<span>Ver ficha</span>
-<span class="material-symbols-outlined text-[12px]">north_east</span>
-</a>
-</div>
-</article>
-<!-- Mensaje de fin de lista completa -->
-<div class="col-span-1 sm:col-span-2 lg:col-span-4 p-4 text-center bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-500">
-              Mostrando los 32 certificados eCarCheck emitidos en la jornada. 
-              <span class="text-blue-700 font-semibold cursor-pointer hover:underline" onclick="toggleFleetView()">Colapsar vista</span>
-</div>
 </div>
 </div>
 </div>
 </section>
-<!-- Barra de estado auxiliar Vue Component Ready -->
-<div class="flex flex-wrap items-center justify-between text-xs text-slate-400 px-2 gap-2">
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-<span>Módulo Vue 3: <code>OperationsDailyIssued.vue</code> activo</span>
-</div>
-<div class="font-mono text-[11px]">
-        Portal RYM · v3.4 Tactical Matrix
-      </div>
-</div>
 </main>
-<!-- LÓGICA INTERACTIVA Y HELPERS (COMPATIBLE CON MÉTODOS VUE 3) -->
-<script>
-    let isExpanded = false;
-
-    function toggleFleetView() {
-      isExpanded = !isExpanded;
-      const extendedContainer = document.getElementById('extendedCards');
-      const toggleText = document.getElementById('btnToggleText');
-      const toggleIcon = document.getElementById('btnToggleIcon');
-      const badgeCounter = document.getElementById('badgeCounter');
-
-      if (isExpanded) {
-        extendedContainer.classList.remove('hidden');
-        toggleText.textContent = 'Ver menos';
-        toggleIcon.textContent = 'expand_less';
-        badgeCounter.textContent = '32 visibles de 32';
-        badgeCounter.className = 'inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200';
-      } else {
-        extendedContainer.classList.add('hidden');
-        toggleText.textContent = 'Ver todos (32)';
-        toggleIcon.textContent = 'expand_more';
-        badgeCounter.textContent = '4 visibles de 32';
-        badgeCounter.className = 'inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200';
-      }
-    }
-
-    function copyWhatsAppSummary() {
-      const summaryText = `*PORTAL RYM · REPORTE OPERACIONES*\n📌 *Capacidad eCarCheck:* 32 / 33 Emitidos (97%)\n⚠️ *Cupos disponibles:* 1 cupo restante hoy\n\n*Últimos emitidos:*\n• I218 · EI2050 (CATALINA SA · LEIBY) - 01:41 p. m.\n• V499 · CX0269 (ATALAYA COMPANY · ROXANA) - 12:29 p. m.\n• V828 · EM5186 (TABOGA SA · ROXANA) - 01:08 p. m.\n• V840 · EM5046 (TABOGA SA · MARIFEL) - 01:00 p. m.`;
-
-      navigator.clipboard.writeText(summaryText).then(() => {
-        const btn = document.getElementById('btnCopyWs');
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = `<span class="material-symbols-outlined text-sm font-bold">done</span><span>¡Copiado!</span>`;
-        btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
-        btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-
-        setTimeout(() => {
-          btn.innerHTML = originalContent;
-          btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
-          btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-        }, 2200);
-      });
-    }
-  </script>
 </body></html>

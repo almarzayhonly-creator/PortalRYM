@@ -3,27 +3,27 @@
 <html lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Portal RYM · Operaciones · Emitidos hoy</title>
+<title>Portal RYM · Operaciones · Emitidos hoy (Split Executive Telemetry &amp; Chrono-Feed)</title>
+<!-- Fonts -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script>
+<script id="tailwind-config">
     tailwind.config = {
+      darkMode: "class",
       theme: {
         extend: {
           colors: {
-            rym: {
-              navy: '#0A1B4D',
-              blue: '#244AA5',
-              cobalt: '#0062FF',
-              sky: '#53B7E8',
-              amber: '#F47C20',
-              bg: '#F4F7FB',
-              line: '#D8E3F2',
-              muted: '#62708C',
-              slotDone: '#0A1B4D'
+            brand: {
+              navy: "#0A1B4D",
+              dark: "#05112E",
+              blue: "#244AA5",
+              sky: "#53B7E8",
+              emerald: "#059669",
+              amber: "#D97706"
             }
           },
           fontFamily: {
@@ -36,373 +36,334 @@
     }
   </script>
 </head>
-<body class="bg-[#F4F7FB] text-[#0A1B4D] font-sans min-h-screen antialiased p-4 md:p-8 lg:p-10 flex flex-col justify-start items-center">
-<!-- COMMAND STRIP CONTAINER -->
-<main class="w-full max-w-[1540px] bg-white border border-[#D8E3F2] rounded-2xl shadow-sm p-5 md:p-7 space-y-6">
-<!-- CABECERA TÁCTICA -->
-<header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#EEF3FA]">
-<div class="space-y-1.5">
-<div class="flex items-center gap-2">
-<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider uppercase text-rym-blue bg-[#EAF0FC] border border-[#D3E1FA]">
-<span class="w-1.5 h-1.5 rounded-full bg-rym-blue animate-pulse"></span>
-            CAPACIDAD DIARIA ECARCHECK
-          </span>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FFF4EC] text-[#D05E09] border border-[#FDDBC2]">
-<span class="material-symbols-outlined text-[13px] leading-none">info</span>
-            Queda 1 cupo disponible hoy
-          </span>
+<body class="bg-[#F4F7FB] text-[#0A1B4D] font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-10 flex items-center justify-center">
+<!-- Main Container -->
+<main class="w-full max-w-[1450px] bg-white rounded-2xl border border-[#D8E3F2] shadow-sm p-6 sm:p-8">
+<!-- Top Context Header -->
+<header class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-8 border-b border-[#E2E8F0]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#0A1B4D] flex items-center justify-center text-white shadow-inner">
+<span class="material-symbols-outlined text-[22px]">analytics</span>
 </div>
-<div class="flex items-baseline gap-3 flex-wrap">
-<h1 class="text-2xl md:text-3xl font-bold font-display tracking-tight text-rym-navy flex items-center gap-2">
-            Emitidos hoy <span class="text-rym-blue font-mono font-bold tracking-tight">32 / 33</span>
-</h1>
-<span class="text-xs font-mono text-rym-muted hidden sm:inline-block">· Turno regular de operación</span>
+<div>
+<div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+<span>Operaciones</span>
+<span class="text-slate-300">/</span>
+<span class="text-[#244AA5]">ECARCHECK</span>
+</div>
+<h1 class="text-xl sm:text-2xl font-bold font-display text-[#0A1B4D]">Panel de Control · Emitidos Hoy</h1>
 </div>
 </div>
-<!-- CIRCULAR KPI MEDIDOR 97% -->
-<div class="flex items-center self-start md:self-auto gap-3.5 bg-[#F9FBFE] border border-[#D8E3F2] px-4 py-2.5 rounded-xl shadow-[0_1px_2px_rgba(10,27,77,0.04)]">
-<div class="relative w-14 h-14 flex items-center justify-center">
-<svg class="w-14 h-14 -rotate-90" viewbox="0 0 48 48">
-<circle cx="24" cy="24" fill="none" r="20" stroke="#E3EBF6" stroke-width="4.5"></circle>
-<circle cx="24" cy="24" fill="none" r="20" stroke="#244AA5" stroke-dasharray="125.66" stroke-dashoffset="3.77" stroke-linecap="round" stroke-width="4.5"></circle>
-</svg>
-<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-<span class="text-sm font-bold font-mono tracking-tighter text-rym-navy leading-none">97%</span>
-</div>
-</div>
-<div class="text-left">
-<div class="text-[11px] font-bold tracking-wide uppercase text-rym-navy">Capacidad</div>
-<div class="text-[10px] text-rym-muted font-medium">97% consumida del día</div>
-</div>
+<div class="flex items-center gap-2.5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Flujo en vivo
+        </span>
+<div class="text-xs text-slate-500 font-mono hidden sm:block bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg">
+          Última act: 01:41 p. m.
+        </div>
 </div>
 </header>
-<!-- CINTA DE MICRO-SLOTS TÁCTICOS (33 RANURAS) -->
-<section aria-label="Cinta de slots tácticos" class="bg-[#F8FAFD] border border-[#DDE5F2] rounded-xl p-3.5 space-y-2.5">
-<div class="flex items-center justify-between text-xs">
-<span class="font-mono text-[11px] font-semibold uppercase tracking-wider text-rym-muted flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[15px] text-rym-blue">grid_view</span>
-          Slots de emisión diarios (33 cupos asignados)
-        </span>
-<div class="flex items-center gap-3 text-[11px] font-medium text-rym-muted">
-<span class="inline-flex items-center gap-1">
-<span class="w-2.5 h-2.5 rounded-[2px] bg-rym-navy inline-block"></span> 32 Emitidos
-          </span>
-<span class="inline-flex items-center gap-1">
-<span class="w-2.5 h-2.5 rounded-[2px] bg-rym-amber inline-block animate-pulse"></span> 1 Disponible
-          </span>
-</div>
-</div>
-<!-- 33 Grid Slots -->
-<div class="grid grid-cols-11 sm:grid-cols-17 lg:grid-cols-33 gap-1.5" id="tactical-slots-container">
-<!-- Generación de 32 slots completados -->
-<!-- Slot 1 to 32 -->
-<!-- Repetidos con micro visual táctico de slot asignado -->
-<div class="group relative h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #1 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">01</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #2 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">02</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #3 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">03</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #4 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">04</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #5 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">05</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #6 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">06</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #7 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">07</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #8 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">08</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #9 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">09</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #10 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">10</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #11 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">11</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #12 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">12</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #13 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">13</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #14 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">14</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #15 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">15</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #16 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">16</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #17 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">17</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #18 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">18</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #19 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">19</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #20 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">20</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #21 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">21</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #22 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">22</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #23 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">23</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #24 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">24</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #25 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">25</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #26 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">26</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #27 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">27</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #28 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">28</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #29 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">29</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #30 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">30</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #31 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">31</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<div class="h-9 bg-rym-navy hover:bg-rym-blue text-white rounded flex flex-col items-center justify-center transition-colors cursor-default" title="Cupo #32 - Emitido">
-<span class="text-[9px] font-mono opacity-60 leading-none">32</span>
-<span class="material-symbols-outlined text-[11px] font-bold leading-none text-[#53B7E8]">check</span>
-</div>
-<!-- SLOT #33: ÁMBAR ALERTIVO DISPONIBLE -->
-<div class="h-9 bg-[#FFF4EC] border-2 border-dashed border-rym-amber text-rym-amber rounded flex flex-col items-center justify-center relative shadow-sm ring-2 ring-rym-amber/20 animate-pulse" title="Cupo #33 - Disponible para emisión">
-<span class="text-[9px] font-mono font-bold leading-none text-[#C85D08]">33</span>
-<span class="material-symbols-outlined text-[13px] font-bold leading-none text-rym-amber">add</span>
-</div>
-</div>
-</section>
-<!-- BARRA DE DESPACHO RÁPIDO PARA WHATSAPP -->
-<section class="bg-[#F8FAFD] border border-[#D8E3F2] rounded-xl p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-<div class="flex items-center gap-2.5 overflow-hidden">
-<span class="inline-flex p-1.5 bg-[#E2ECF8] rounded text-rym-blue shrink-0">
-<span class="material-symbols-outlined text-base">chat</span>
-</span>
-<div class="overflow-hidden">
-<div class="text-[10px] font-bold uppercase tracking-wider text-rym-muted">Texto preparado para despacho</div>
-<code class="text-xs font-mono text-rym-navy font-medium block truncate select-all" id="ws-text">PORTAL RYM · EMITIDOS HOY: 32/33 (97%) · Queda 1 cupo disponible · Último: I218/EI2050 (CATALINA SA)</code>
-</div>
-</div>
-<button class="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95" id="btn-copy-ws" onclick="copyWsSummary()">
-<span class="material-symbols-outlined text-sm" id="btn-copy-icon">content_copy</span>
-<span id="btn-copy-label">Copiar WS</span>
-</button>
-</section>
-<!-- SECCIÓN EMITIDOS RECIENTES -->
-<section class="space-y-3">
-<div class="flex items-center justify-between">
+<!-- Two-Column Balanced Split Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- LEFT COLUMN: Executive Capacity & Status Gauge (~35% -> lg:col-span-4 or 5) -->
+<section class="lg:col-span-5 flex flex-col gap-5 bg-[#F8FAFD] p-6 rounded-2xl border border-[#DFE7F2]">
+<!-- Header Badge & KPI Title -->
 <div>
-<h2 class="text-base font-bold text-rym-navy flex items-center gap-2">
-            Emitidos recientes
-            <span class="text-xs font-normal font-mono text-rym-muted bg-[#EEF3FA] px-2 py-0.5 rounded-full">(4 de 32 mostrados)</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#E8EEFB] text-[#244AA5] text-[11px] font-bold tracking-wider uppercase font-mono mb-3">
+<span class="material-symbols-outlined text-[14px]">speed</span>
+            Capacidad Diaria Ecarcheck
+          </div>
+<div class="flex items-baseline justify-between">
+<h2 class="text-2xl sm:text-3xl font-extrabold font-display text-[#0A1B4D] tracking-tight">
+              Emitidos hoy <span class="text-[#244AA5]">32</span> <span class="text-slate-400 font-normal text-2xl">/ 33</span>
 </h2>
-<p class="text-xs text-rym-muted">Últimos revisados emitidos hoy dentro de tu alcance operacional.</p>
 </div>
-<button class="inline-flex items-center gap-1 text-xs font-bold text-rym-blue hover:text-rym-navy hover:underline transition-colors px-2.5 py-1 rounded" id="toggle-view-btn" onclick="toggleViewAll()">
-<span id="toggle-text">Ver todos (32)</span>
-<span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
+<p class="text-xs text-slate-500 mt-1">Límite operativo calibrado según aforo de peritajes del día.</p>
 </div>
-<!-- GRILLA DE 4 TARJETAS COMPACTAS -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-<!-- Card 1 -->
-<article class="bg-white border border-[#D8E3F2] hover:border-rym-blue/50 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:shadow-md group">
-<div class="space-y-2">
-<div class="flex items-center justify-between">
-<span class="font-mono text-xs font-bold bg-[#0A1B4D] text-white px-2 py-0.5 rounded tracking-wide">
-                I218 · EI2050
-              </span>
-<span class="w-2 h-2 rounded-full bg-[#10B981]" title="Emitido exitosamente"></span>
+<!-- Donut Circular Percentage Gauge & Rhythm Indicator -->
+<div class="bg-white p-5 rounded-xl border border-[#E2E8F0] shadow-sm flex items-center justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-semibold text-emerald-800 uppercase tracking-wide">Ritmo óptimo de despacho</span>
 </div>
-<div>
-<div class="text-[12px] font-semibold text-rym-navy tracking-tight truncate" title="CATALINA SA">CATALINA SA</div>
-<div class="text-[11px] text-rym-muted font-medium flex items-center gap-1 mt-0.5">
-<span class="material-symbols-outlined text-[13px]">person</span>
-                Sup: <span class="text-slate-700 font-semibold">LEIBY</span>
-</div>
-</div>
-</div>
-<div class="pt-3 mt-3 border-t border-[#EEF3FA] flex items-center justify-between">
-<div class="text-[10px] font-mono text-rym-muted flex items-center gap-1">
-<span class="material-symbols-outlined text-[12px]">schedule</span>
-              10/06/2026, 01:41 p. m.
+<p class="text-sm font-medium text-slate-700 leading-snug">Capacidad al 97% alcanzada con holgura controlada</p>
+<div class="flex items-center gap-2 text-[11px] text-slate-500 font-mono pt-1">
+<span class="material-symbols-outlined text-[14px] text-slate-400">check_circle</span>
+              32 peritajes emitidos satisfactoriamente
             </div>
-<a class="inline-flex items-center gap-0.5 text-[11px] font-bold text-rym-blue group-hover:text-rym-cobalt transition-colors" href="#" title="Abrir expediente de inspección">
-              Ver ficha <span class="material-symbols-outlined text-xs transition-transform group-hover:translate-x-0.5">arrow_forward</span>
-</a>
 </div>
-</article>
-<!-- Card 2 -->
-<article class="bg-white border border-[#D8E3F2] hover:border-rym-blue/50 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:shadow-md group">
-<div class="space-y-2">
-<div class="flex items-center justify-between">
-<span class="font-mono text-xs font-bold bg-[#0A1B4D] text-white px-2 py-0.5 rounded tracking-wide">
-                V499 · CX0269
-              </span>
-<span class="w-2 h-2 rounded-full bg-[#10B981]" title="Emitido exitosamente"></span>
-</div>
-<div>
-<div class="text-[12px] font-semibold text-rym-navy tracking-tight truncate" title="ATALAYA COMPANY S.A.">ATALAYA COMPANY S.A.</div>
-<div class="text-[11px] text-rym-muted font-medium flex items-center gap-1 mt-0.5">
-<span class="material-symbols-outlined text-[13px]">person</span>
-                Sup: <span class="text-slate-700 font-semibold">ROXANA</span>
+<!-- Circular SVG Gauge -->
+<div class="relative flex-shrink-0 w-24 h-24 flex items-center justify-center">
+<svg class="w-24 h-24 -rotate-90 transform" viewbox="0 0 100 100">
+<!-- Background circle -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#E2E8F0" stroke-width="8"></circle>
+<!-- Progress ring (32/33 = ~96.96% -> stroke-dashoffset = 251.2 * (1 - 0.97) = ~7.5) -->
+<circle class="transition-all duration-1000 ease-out" cx="50" cy="50" fill="transparent" r="40" stroke="#244AA5" stroke-dasharray="251.2" stroke-dashoffset="7.5" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-2xl font-black font-display text-[#0A1B4D] leading-none">97<span class="text-xs font-semibold">%</span></span>
+<span class="text-[9px] uppercase tracking-wider font-semibold text-slate-500 mt-0.5">del día</span>
 </div>
 </div>
 </div>
-<div class="pt-3 mt-3 border-t border-[#EEF3FA] flex items-center justify-between">
-<div class="text-[10px] font-mono text-rym-muted flex items-center gap-1">
-<span class="material-symbols-outlined text-[12px]">schedule</span>
-              10/06/2026, 12:29 p. m.
+<!-- Amber Capacity Warning Banner -->
+<div class="bg-amber-50/90 border border-amber-200/90 rounded-xl p-3.5 flex items-start gap-3">
+<div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">error_outline</span>
+</div>
+<div class="text-xs">
+<div class="font-bold text-amber-900 flex items-center gap-1.5">
+<span>Queda 1 cupo disponible hoy</span>
+<span class="px-1.5 py-0.2 bg-amber-200 text-amber-900 text-[10px] rounded font-mono font-medium">Slot #33</span>
+</div>
+<p class="text-amber-800/90 mt-0.5 leading-relaxed">
+              La asignación automática pausará nuevas reservas al completarse el slot final.
+            </p>
+</div>
+</div>
+<!-- 11x3 Mini Matrix (33 Daily Slots) -->
+<div class="bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-sm">
+<div class="flex items-center justify-between mb-3 text-xs">
+<span class="font-semibold text-slate-700 uppercase tracking-wider text-[11px] font-mono flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-slate-400">grid_view</span>
+              Matriz de Asignación (11×3)
+            </span>
+<span class="text-[11px] font-mono text-slate-500">32 Ocupados · 1 Libre</span>
+</div>
+<!-- Matrix Grid: 11 columns, 3 rows -->
+<div class="grid grid-cols-11 gap-1.5 sm:gap-2">
+<!-- Slots 1 to 32 (Filled Solid Navy) -->
+<!-- Row 1 (1-11) -->
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #1 - Emitido">1</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #2 - Emitido">2</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #3 - Emitido">3</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #4 - Emitido">4</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #5 - Emitido">5</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #6 - Emitido">6</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #7 - Emitido">7</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #8 - Emitido">8</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #9 - Emitido">9</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #10 - Emitido">10</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #11 - Emitido">11</div>
+<!-- Row 2 (12-22) -->
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #12 - Emitido">12</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #13 - Emitido">13</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #14 - Emitido">14</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #15 - Emitido">15</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #16 - Emitido">16</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #17 - Emitido">17</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #18 - Emitido">18</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #19 - Emitido">19</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #20 - Emitido">20</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #21 - Emitido">21</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #22 - Emitido">22</div>
+<!-- Row 3 (23-33) -->
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #23 - Emitido">23</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #24 - Emitido">24</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #25 - Emitido">25</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #26 - Emitido">26</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #27 - Emitido">27</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #28 - Emitido">28</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #29 - Emitido">29</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #30 - Emitido">30</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #31 - Emitido">31</div>
+<div class="h-6 rounded bg-[#0A1B4D] flex items-center justify-center text-[10px] font-mono font-semibold text-white" title="Cupo #32 - Emitido">32</div>
+<!-- Slot 33: Dashed Amber (Available) -->
+<div class="h-6 rounded border-2 border-dashed border-amber-500 bg-amber-50 flex items-center justify-center text-[10px] font-mono font-bold text-amber-700 animate-pulse" title="Cupo #33 - Disponible">
+              33
             </div>
-<a class="inline-flex items-center gap-0.5 text-[11px] font-bold text-rym-blue group-hover:text-rym-cobalt transition-colors" href="#" title="Abrir expediente de inspección">
-              Ver ficha <span class="material-symbols-outlined text-xs transition-transform group-hover:translate-x-0.5">arrow_forward</span>
-</a>
-</div>
-</article>
-<!-- Card 3 -->
-<article class="bg-white border border-[#D8E3F2] hover:border-rym-blue/50 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:shadow-md group">
-<div class="space-y-2">
-<div class="flex items-center justify-between">
-<span class="font-mono text-xs font-bold bg-[#0A1B4D] text-white px-2 py-0.5 rounded tracking-wide">
-                V828 · EM5186
-              </span>
-<span class="w-2 h-2 rounded-full bg-[#10B981]" title="Emitido exitosamente"></span>
-</div>
-<div>
-<div class="text-[12px] font-semibold text-rym-navy tracking-tight truncate" title="TABOGA, S.A.">TABOGA, S.A.</div>
-<div class="text-[11px] text-rym-muted font-medium flex items-center gap-1 mt-0.5">
-<span class="material-symbols-outlined text-[13px]">person</span>
-                Sup: <span class="text-slate-700 font-semibold">ROXANA</span>
 </div>
 </div>
+<!-- Daily Velocity Metric Banner -->
+<div class="px-3.5 py-3 rounded-xl bg-slate-100/80 border border-slate-200/80 flex items-center justify-between text-xs text-slate-700 font-mono">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-slate-500">trending_up</span>
+<span>~4.1 docs/hora</span>
 </div>
-<div class="pt-3 mt-3 border-t border-[#EEF3FA] flex items-center justify-between">
-<div class="text-[10px] font-mono text-rym-muted flex items-center gap-1">
-<span class="material-symbols-outlined text-[12px]">schedule</span>
-              10/06/2026, 01:08 p. m.
-            </div>
-<a class="inline-flex items-center gap-0.5 text-[11px] font-bold text-rym-blue group-hover:text-rym-cobalt transition-colors" href="#" title="Abrir expediente de inspección">
-              Ver ficha <span class="material-symbols-outlined text-xs transition-transform group-hover:translate-x-0.5">arrow_forward</span>
-</a>
+<span class="text-slate-400">|</span>
+<div class="flex items-center gap-1.5 text-slate-600 font-medium">
+<span>Estimado cierre:</span>
+<span class="font-bold text-[#0A1B4D]">100% a las 02:15 p.m.</span>
 </div>
-</article>
-<!-- Card 4 -->
-<article class="bg-white border border-[#D8E3F2] hover:border-rym-blue/50 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:shadow-md group">
-<div class="space-y-2">
-<div class="flex items-center justify-between">
-<span class="font-mono text-xs font-bold bg-[#0A1B4D] text-white px-2 py-0.5 rounded tracking-wide">
-                V840 · EM5046
-              </span>
-<span class="w-2 h-2 rounded-full bg-[#10B981]" title="Emitido exitosamente"></span>
-</div>
-<div>
-<div class="text-[12px] font-semibold text-rym-navy tracking-tight truncate" title="TABOGA, S.A.">TABOGA, S.A.</div>
-<div class="text-[11px] text-rym-muted font-medium flex items-center gap-1 mt-0.5">
-<span class="material-symbols-outlined text-[13px]">person</span>
-                Sup: <span class="text-slate-700 font-semibold">MARIFEL</span>
-</div>
-</div>
-</div>
-<div class="pt-3 mt-3 border-t border-[#EEF3FA] flex items-center justify-between">
-<div class="text-[10px] font-mono text-rym-muted flex items-center gap-1">
-<span class="material-symbols-outlined text-[12px]">schedule</span>
-              10/06/2026, 01:00 p. m.
-            </div>
-<a class="inline-flex items-center gap-0.5 text-[11px] font-bold text-rym-blue group-hover:text-rym-cobalt transition-colors" href="#" title="Abrir expediente de inspección">
-              Ver ficha <span class="material-symbols-outlined text-xs transition-transform group-hover:translate-x-0.5">arrow_forward</span>
-</a>
-</div>
-</article>
 </div>
 </section>
+<!-- RIGHT COLUMN: Operational Dispatch & Chronological Feed (~65% -> lg:col-span-7) -->
+<section class="lg:col-span-7 flex flex-col gap-6">
+<!-- Fast WhatsApp Dispatch Box -->
+<div class="bg-gradient-to-r from-emerald-50/50 via-white to-blue-50/40 border border-emerald-200/80 rounded-2xl p-4 sm:p-5 shadow-sm">
+<div class="flex items-center justify-between gap-3 mb-2.5">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+</span>
+<span class="text-xs font-bold text-slate-800 uppercase tracking-wide">Despacho Rápido WhatsApp</span>
+</div>
+<span class="text-[11px] text-emerald-700 font-medium bg-emerald-100/60 px-2 py-0.5 rounded-full border border-emerald-200/50">
+              Formato Operaciones Listo
+            </span>
+</div>
+<!-- Pre-formatted WhatsApp summary message preview box -->
+<div class="bg-[#F8FAFC] border border-[#CBD5E1] rounded-xl p-3 font-mono text-[12px] text-slate-700 leading-relaxed overflow-x-auto select-all">
+            *Portal RYM · Reporte Operativo:* Emitidos 32/33 (97% del cupo diario). Queda 1 disponible. Último: I218 · EI2050 (CATALINA SA).
+          </div>
+<!-- Action row -->
+<div class="mt-3 flex items-center justify-between flex-wrap gap-2">
+<span class="text-[11px] text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-slate-400">info</span>
+              Listo para pegar en canales de logística y supervisión
+            </span>
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1" onclick="navigator.clipboard?.writeText('*Portal RYM · Reporte Operativo:* Emitidos 32/33 (97% del cupo diario). Queda 1 disponible. Último: I218 · EI2050 (CATALINA SA).')">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span>Copiar WS</span>
+</button>
+</div>
+</div>
+<!-- Chronological Timeline Section -->
+<div class="bg-white border border-[#D8E3F2] rounded-2xl p-5 sm:p-6 shadow-sm">
+<!-- Header with Counters and Dropdown Trigger -->
+<div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-lg font-bold font-display text-[#0A1B4D]">Emitidos recientes</h3>
+<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[11px] font-semibold border border-slate-200">
+                  Mostrando 4 de 32
+                </span>
+</div>
+<p class="text-xs text-slate-500 mt-0.5">Línea de tiempo cronológica de expedientes firmados hoy.</p>
+</div>
+<button class="inline-flex items-center gap-1 text-xs font-bold text-[#244AA5] hover:text-[#0A1B4D] hover:bg-[#EEF3FD] px-3 py-1.5 rounded-lg transition-colors">
+<span>Ver todos (32)</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+<!-- Vertical Connected Chrono-List -->
+<div class="relative pl-6 space-y-4 before:content-[''] before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-[2px] before:bg-slate-200">
+<!-- Item #1 (Latest) -->
+<div class="relative group">
+<!-- Timeline node indicator -->
+<span class="absolute -left-6 top-4 w-[10px] h-[10px] rounded-full bg-emerald-500 ring-4 ring-emerald-100 group-hover:scale-125 transition-transform"></span>
+<div class="bg-[#F8FAFD] border border-[#D4E0F0] rounded-xl p-3.5 hover:border-[#244AA5]/40 hover:shadow-sm transition-all">
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-mono font-bold text-sm text-[#0A1B4D] tracking-wide bg-white px-2 py-0.5 rounded border border-slate-200">
+                        I218 · EI2050
+                      </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#244AA5] uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-[#244AA5]"></span>
+                        Último emitido
+                      </span>
+</div>
+<div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
+                      CATALINA SA <span class="text-slate-400 font-normal">·</span> Responsable: <span class="text-[#0A1B4D]">LEIBY</span>
+</div>
+<div class="text-[11px] font-mono text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
+                      10/06/2026, 01:41 p. m.
+                    </div>
+</div>
+<a class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-[#EEF3FD] hover:border-[#244AA5] text-xs font-semibold text-[#244AA5] transition-all whitespace-nowrap shadow-2xs" href="#">
+<span>Ver ficha</span>
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Item #2 -->
+<div class="relative group">
+<!-- Timeline node indicator -->
+<span class="absolute -left-6 top-4 w-[10px] h-[10px] rounded-full bg-slate-400 ring-4 ring-slate-100 group-hover:bg-[#244AA5] transition-colors"></span>
+<div class="bg-white border border-[#E2E8F0] rounded-xl p-3.5 hover:border-slate-300 hover:bg-slate-50/50 transition-all">
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-mono font-bold text-sm text-[#0A1B4D] tracking-wide bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                        V828 · EM5186
+                      </span>
+</div>
+<div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
+                      TABOGA, S.A. <span class="text-slate-400 font-normal">·</span> Responsable: <span class="text-[#0A1B4D]">ROXANA</span>
+</div>
+<div class="text-[11px] font-mono text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
+                      10/06/2026, 01:08 p. m.
+                    </div>
+</div>
+<a class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-[#0A1B4D] transition-all whitespace-nowrap shadow-2xs" href="#">
+<span>Ver ficha</span>
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Item #3 -->
+<div class="relative group">
+<!-- Timeline node indicator -->
+<span class="absolute -left-6 top-4 w-[10px] h-[10px] rounded-full bg-slate-400 ring-4 ring-slate-100 group-hover:bg-[#244AA5] transition-colors"></span>
+<div class="bg-white border border-[#E2E8F0] rounded-xl p-3.5 hover:border-slate-300 hover:bg-slate-50/50 transition-all">
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-mono font-bold text-sm text-[#0A1B4D] tracking-wide bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                        V840 · EM5046
+                      </span>
+</div>
+<div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
+                      TABOGA, S.A. <span class="text-slate-400 font-normal">·</span> Responsable: <span class="text-[#0A1B4D]">MARIFEL</span>
+</div>
+<div class="text-[11px] font-mono text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
+                      10/06/2026, 01:00 p. m.
+                    </div>
+</div>
+<a class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-[#0A1B4D] transition-all whitespace-nowrap shadow-2xs" href="#">
+<span>Ver ficha</span>
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Item #4 -->
+<div class="relative group">
+<!-- Timeline node indicator -->
+<span class="absolute -left-6 top-4 w-[10px] h-[10px] rounded-full bg-slate-400 ring-4 ring-slate-100 group-hover:bg-[#244AA5] transition-colors"></span>
+<div class="bg-white border border-[#E2E8F0] rounded-xl p-3.5 hover:border-slate-300 hover:bg-slate-50/50 transition-all">
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-mono font-bold text-sm text-[#0A1B4D] tracking-wide bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                        V499 · CX0269
+                      </span>
+</div>
+<div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-slate-400">business</span>
+                      ATALAYA COMPANY S.A. <span class="text-slate-400 font-normal">·</span> Responsable: <span class="text-[#0A1B4D]">ROXANA</span>
+</div>
+<div class="text-[11px] font-mono text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-slate-400">schedule</span>
+                      10/06/2026, 12:29 p. m.
+                    </div>
+</div>
+<a class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-[#0A1B4D] transition-all whitespace-nowrap shadow-2xs" href="#">
+<span>Ver ficha</span>
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Footer Pagination hint -->
+<div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+<span>28 expedientes anteriores archivados hoy</span>
+<a class="text-[#244AA5] font-semibold hover:underline" href="#">Abrir historial completo →</a>
+</div>
+</div>
+</section>
+</div>
 </main>
-<script>
-    function copyWsSummary() {
-      const summaryText = "PORTAL RYM · EMITIDOS HOY: 32/33 (97%) · Queda 1 cupo disponible · Último: I218/EI2050 (CATALINA SA)";
-      navigator.clipboard.writeText(summaryText).then(() => {
-        const btn = document.getElementById('btn-copy-ws');
-        const icon = document.getElementById('btn-copy-icon');
-        const label = document.getElementById('btn-copy-label');
-        
-        icon.textContent = 'check';
-        label.textContent = '¡Copiado!';
-        btn.classList.remove('bg-[#059669]', 'hover:bg-[#047857]');
-        btn.classList.add('bg-rym-navy');
-        
-        setTimeout(() => {
-          icon.textContent = 'content_copy';
-          label.textContent = 'Copiar WS';
-          btn.classList.add('bg-[#059669]', 'hover:bg-[#047857]');
-          btn.classList.remove('bg-rym-navy');
-        }, 2200);
-      });
-    }
-
-    let isExpanded = false;
-    function toggleViewAll() {
-      isExpanded = !isExpanded;
-      const toggleText = document.getElementById('toggle-text');
-      toggleText.textContent = isExpanded ? 'Ver menos' : 'Ver todos (32)';
-    }
-  </script>
 </body></html>

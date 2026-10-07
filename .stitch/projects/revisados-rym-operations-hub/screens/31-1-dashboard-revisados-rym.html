@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-high": "#e5e8ec", "outline-variant": "#c6c5d0", "surface-variant": "#e0e3e7", "outline": "#767680", "inverse-surface": "#2d3134", "on-tertiary-container": "#1a90bf", "on-primary-fixed-variant": "#364477", "tertiary-container": "#002231", "on-tertiary-fixed-variant": "#004c68", "surface": "#f7fafe", "tertiary-fixed-dim": "#7ad0ff", "on-surface": "#181c1f", "on-secondary": "#ffffff", "on-tertiary": "#ffffff", "secondary-container": "#7f9fff", "primary-container": "#0a1b4d", "on-background": "#181c1f", "surface-container": "#ebeef2", "surface-tint": "#4e5c90", "on-surface-variant": "#45464f", "surface-dim": "#d7dade", "error-container": "#ffdad6", "surface-bright": "#f7fafe", "surface-container-lowest": "#ffffff", "primary-fixed": "#dce1ff", "on-error-container": "#93000a", "surface-container-highest": "#e0e3e7", "on-primary-fixed": "#051749", "error": "#ba1a1a", "secondary-fixed-dim": "#b4c5ff", "secondary": "#3659b4", "on-secondary-container": "#00328a", "on-secondary-fixed": "#00174b", "on-primary": "#ffffff", "tertiary-fixed": "#c3e8ff", "inverse-on-surface": "#eef1f5", "primary-fixed-dim": "#b6c4ff", "inverse-primary": "#b6c4ff", "secondary-fixed": "#dbe1ff", "on-error": "#ffffff", "on-tertiary-fixed": "#001e2c", "on-primary-container": "#7684bc", "on-secondary-fixed-variant": "#17409b", "tertiary": "#00070e", "primary": "#000520", "background": "#f7fafe", "surface-container-low": "#f1f4f8" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "gutter": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "margin": "2rem", "space-xl": "2rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-lg": ["Inter"], "headline-md": ["Inter"], "code-chassis": ["JetBrains Mono"], "display-lg": ["Inter"], "body-md": ["Inter"], "headline-sm": ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "code-plate": ["JetBrains Mono"], "body-lg": ["Inter"] }, "fontSize": { "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "code-chassis": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "400"}], "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600"}], "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}], "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600"}], "code-plate": ["13px", {"lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500"}], "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[250px] bg-surface-container-lowest border-r border-outline-variant/40 z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(10,27,77,0.03)]"><div class="flex flex-col flex-1 min-h-0"><div class="px-space-lg pt-space-lg pb-space-md border-b border-surface-container-high/60"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-primary-fixed"><span class="material-symbols-outlined text-[20px]">verified</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">Portal RYM</span><span class="font-label-md text-[11px] leading-[14px] text-on-surface-variant font-medium">Revisados Vehiculares</span></div></div></div><div class="px-space-md py-space-sm mx-space-sm my-space-sm bg-surface-container-low rounded-lg border border-outline-variant/30 flex items-center gap-space-sm"><div class="relative flex-shrink-0"><div class="w-8 h-8 rounded-full bg-secondary-container/50 flex items-center justify-center text-on-secondary-container font-headline-sm text-[12px] font-semibold">MC</div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-surface-container-lowest"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface font-semibold truncate">Ing. M. Carrizo</span><span class="font-label-md text-[11px] text-on-surface-variant truncate">Supervisor Master</span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-1 overflow-y-auto" data-active-classes="bg-primary-fixed/30 text-secondary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[#F47C20] before:rounded-r"><a aria-current="page" class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg transition-colors bg-primary-fixed/30 text-secondary font-semibold before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:bg-[#F47C20] before:rounded-r" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Dashboard</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="operaciones" href="#"><span class="material-symbols-outlined text-[20px]">directions_car</span><span class="font-body-md text-body-md">Operaciones</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="avance-mensual" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span class="font-body-md text-body-md">Avance Mensual</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="reporte-diario" href="#"><span class="material-symbols-outlined text-[20px]">forward_to_inbox</span><span class="font-body-md text-body-md">Reporte Diario</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="historial" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-body-md text-body-md">Historial</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="estadisticas" href="#"><span class="material-symbols-outlined text-[20px]">bar_chart</span><span class="font-body-md text-body-md">Estadísticas</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="boletas" href="#"><span class="material-symbols-outlined text-[20px]">confirmation_number</span><span class="font-body-md text-body-md">Boletas</span></a><a class="relative flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="cupos" href="#"><span class="material-symbols-outlined text-[20px]">security</span><span class="font-body-md text-body-md">Cupos</span></a></nav></div><div class="p-space-sm border-t border-surface-container-high/60"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">arrow_back</span><span class="font-label-md text-label-md font-medium">Volver al Portal</span></a></div></aside><div class="pl-[250px]"><header class="fixed top-0 left-[250px] right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(10,27,77,0.02)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-md w-96"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full h-10 pl-9 pr-space-md bg-surface-container-low border border-outline-variant/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:border-secondary focus:bg-surface-container-lowest transition-all" placeholder="Buscar placa, chasis (VIN) o boleta..." type="text"/></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#F47C20]"></span></button><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button></div><div class="h-6 w-[1px] bg-outline-variant/40"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden md:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface font-semibold">M. Carrizo</span><span class="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider">MTC-RYM</span></div></div></div></header><main class="w-full pt-16 bg-surface px-space-xl py-space-xl min-h-screen"><div class="flex flex-col w-full space-y-space-xl">
+<!-- Header / Action Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex flex-col space-y-1">
+<h1 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Dashboard</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Lo importante primero: qué está pendiente, qué requiere atención y qué está al día.</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="relative inline-block text-left">
+<select class="appearance-none h-10 pl-3.5 pr-9 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface font-medium shadow-sm hover:bg-surface-container-low transition-colors cursor-pointer focus:outline-none" id="galeraSelector">
+<option value="all">Todas las Galeras (6)</option>
+<option value="vcomp">VCOMP - Principal</option>
+<option value="vipco">VIPCO - Logística</option>
+<option value="vindu">VINDU - Industrial</option>
+<option value="vcars">VCARS - Pasajeros</option>
+<option value="paneles">PANELES - Distribución</option>
+<option value="otros">Otros / Externos</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">expand_more</span>
+</div>
+<button class="h-10 px-4 bg-surface-container-lowest text-on-surface hover:bg-surface-container-low rounded-lg font-body-sm text-body-sm font-medium shadow-sm transition-all flex items-center gap-2 group" id="refreshBtn" type="button">
+<span class="material-symbols-outlined text-outline group-hover:rotate-180 transition-transform duration-500 text-[18px]">sync</span>
+<span>Actualizar vista</span>
+</button>
+</div>
+</div>
+<!-- Resolution Banner -->
+<div class="relative overflow-hidden bg-surface-container-lowest rounded-xl shadow-sm p-space-lg md:p-space-xl">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary"></div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+<div class="space-y-space-md max-w-3xl">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-[#ba1a1a] animate-pulse"></span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-error font-semibold">Resolución Prioritaria</span>
+<span class="text-outline-variant font-label-md">/</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Corte Oficial RUV</span>
+</div>
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">411 unidades necesitan atención</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Requieren trámite de revisado vehicular antes del cierre del ciclo operativo vigente.</p>
+</div>
+<!-- Badges Breakdown -->
+<div class="flex flex-wrap items-center gap-space-xs md:gap-space-sm pt-1">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container/50 text-error font-body-sm text-body-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+            Atrasadas: 84
+          </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff7ed] text-[#c2410c] font-body-sm text-body-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#c2410c]"></span>
+            Mes anterior: 122
+          </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed/40 text-secondary font-body-sm text-body-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            Mes actual: 205
+          </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ecfdf5] text-[#047857] font-body-sm text-body-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#047857]"></span>
+            Unidades al día: 1,791
+          </span>
+</div>
+</div>
+<div class="flex sm:flex-row flex-col items-stretch sm:items-center gap-space-sm shrink-0">
+<a class="h-11 px-6 bg-secondary text-on-secondary hover:bg-on-secondary-container rounded-lg font-body-md text-body-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2 group" href="#operaciones">
+<span>Atender pendientes</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Primary KPI Strip (4 KPIs + Micro Badge) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">Unidades en tu alcance</span>
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[20px]">directions_car</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface font-bold">2,202</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">100% de la flota registrada</p>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">Al día</span>
+<div class="w-9 h-9 rounded-full bg-[#ecfdf5] flex items-center justify-center text-[#047857]">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-[#047857] font-bold">1,791</span>
+<span class="font-label-md text-label-md font-semibold text-[#047857] bg-[#ecfdf5] px-2 py-0.5 rounded-full">81.3%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Con vigencia técnica RUV</p>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">Pendientes ahora</span>
+<div class="w-9 h-9 rounded-full bg-[#fff7ed] flex items-center justify-center text-[#c2410c]">
+<span class="material-symbols-outlined text-[20px]">pending_actions</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-on-surface font-bold">327</span>
+<span class="font-label-md text-label-md font-semibold text-[#c2410c] bg-[#fff7ed] px-2 py-0.5 rounded-full">14.8%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">En proceso de renovación e inspección</p>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">Alertas reales</span>
+<div class="w-9 h-9 rounded-full bg-error-container/60 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline justify-between">
+<span class="font-display-lg text-display-lg text-error font-bold">84</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded">Revisado Taxi: 28</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Infracciones o bloqueos que impiden revisado</p>
+</div>
+</div>
+</div>
+<!-- Operational Distribution & Inspection Flow (Visual Richness) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
+<!-- Visual Inspection Progress Ring & Fleet Readiness -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-2">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Resumen de Cobertura y Desempeño</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Balance operacional frente a las metas mensuales de renovación</p>
+</div>
+<span class="font-label-md text-label-md text-secondary bg-primary-fixed/40 px-3 py-1 rounded-full font-semibold self-start sm:self-auto">Ciclo Q4 2026</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-md items-center py-space-sm">
+<!-- SVG Donut Chart for Fleet Status -->
+<div class="md:col-span-5 flex flex-col items-center justify-center relative">
+<div class="relative w-44 h-44">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle class="text-surface-container-high" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="12"></circle>
+<!-- Al Día: 81.3% -> circumference is 251.32. 81.3% = 204.3 -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#047857" stroke-dasharray="251.32" stroke-dashoffset="47" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Pendientes: 14.8% -> 37.2 -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#c2410c" stroke-dasharray="251.32" stroke-dashoffset="195" stroke-width="12"></circle>
+<!-- Alertas: 3.9% -> 9.8 -->
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#dc2626" stroke-dasharray="251.32" stroke-dashoffset="241.5" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">81.3%</span>
+<span class="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider">Flota Apta</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md mt-space-sm text-center">
+<div class="flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-[#047857]"></span> Al día (81.3%)
+            </div>
+<div class="flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-[#c2410c]"></span> Proceso (14.8%)
+            </div>
+<div class="flex items-center gap-1.5 font-label-md text-label-md text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-[#dc2626]"></span> Alertas (3.9%)
+            </div>
+</div>
+</div>
+<!-- Metric Highlight Bars -->
+<div class="md:col-span-7 flex flex-col space-y-space-md">
+<div class="space-y-1.5">
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-on-surface font-medium">Revisados Técnicos Mecánicos (RTM)</span>
+<span class="text-on-surface font-semibold">1,610 / 1,940</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 83%"></div>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-on-surface font-medium">Revisados de Flota Selectiva / Taxi</span>
+<span class="text-on-surface font-semibold">181 / 262</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 69%"></div>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-on-surface font-medium">Inspecciones con Boletas Verificadas</span>
+<span class="text-on-surface font-semibold">2,118 / 2,202</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-[#047857] rounded-full" style="width: 96.2%"></div>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-between text-on-surface-variant font-label-md text-label-md">
+<span>Última homologación con MTC: Hoy, 08:30 AM</span>
+<span class="text-[#047857] font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span> Servidor RUV Sincronizado
+            </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Center Field Operations Snapshot (Photo Rich) -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Línea de Pista Activa</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#ecfdf5] text-[#047857]">En vivo</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Patios de diagnóstico técnico e inspección física vehicular.</p>
+<div class="relative w-full h-36 rounded-lg overflow-hidden mb-space-md shadow-inner">
+<img class="w-full h-full object-cover" data-alt="Modern indoor vehicular inspection facility with clean concrete floors, bright fluorescent lighting, white and navy corporate signage, mechanics inspecting passenger cars and trucks on mechanical lifts, institutional and pristine calm atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT1Z4sECLj2uiN3OV6Ftkv2OsK3SN1n1r5K2vF9FKeEHt7SONeKZ98AoF3Djy86G4o2o1riIhx_Ekl4C0MwoZ4-xS-5segr-ujuO-CeS8v-BmtFv_xcOOYTJuyyD3QRgWPH81CQ163m9BrPdejDjFhUGEsx4hXQQopEQ0nAUzH68ypHu7fG3fsXYwGb6YN3MS-fOD4bSCbMaRmLTvoOjKsvhGHd5ONzzE4VvI-k81Kcy41kOT_2npP"/>
+<div class="absolute bottom-2 left-2 px-2.5 py-1 bg-surface-container-lowest/90 backdrop-blur-md rounded font-code-plate text-[11px] text-primary font-semibold">
+            VCOMP · Foso 02 Operativo
+          </div>
+</div>
+</div>
+<div class="space-y-space-xs pt-1">
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface-variant">Capacidad diaria estimada:</span>
+<span class="font-semibold text-on-surface">120 unid. / día</span>
+</div>
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface-variant">Turnos activos hoy:</span>
+<span class="font-semibold text-on-surface">3 líneas simultáneas</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECCIÓN: ESTADO POR GALERA -->
+<div class="flex flex-col space-y-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Estado por Galera</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Cumplimiento operacional por centro de inspección y patios logísticos</p>
+</div>
+<a class="self-start sm:self-auto h-9 px-4 bg-surface-container-lowest text-secondary hover:bg-surface-container-low rounded-lg font-body-sm text-body-sm font-semibold transition-all shadow-sm flex items-center gap-1.5 group" href="#operaciones">
+<span>Abrir Operaciones</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+<!-- 6 Galeras Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<!-- 1. VCOMP -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">VCOMP</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Galera Central · Total: 540 unid.</p>
+</div>
+<span class="font-label-md text-label-md font-bold text-[#047857] bg-[#ecfdf5] px-2.5 py-1 rounded-full">85.5%</span>
+</div>
+<div class="mt-space-md mb-space-sm">
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-[#047857] rounded-full" style="width: 85.5%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 py-space-sm text-left">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Al día</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#047857]">462</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Pendientes</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#c2410c]">78</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Alertas</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-error">12</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-code-plate text-[11px] text-outline">PATIO-01</span>
+<button class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded-lg font-medium transition-colors" type="button">
+            Ver unidades
+          </button>
+</div>
+</div>
+<!-- 2. VIPCO -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">VIPCO</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Logística y Carga · Total: 480 unid.</p>
+</div>
+<span class="font-label-md text-label-md font-bold text-[#047857] bg-[#ecfdf5] px-2.5 py-1 rounded-full">82.9%</span>
+</div>
+<div class="mt-space-md mb-space-sm">
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-[#047857] rounded-full" style="width: 82.9%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 py-space-sm text-left">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Al día</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#047857]">398</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Pendientes</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#c2410c]">82</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Alertas</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-error">18</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-code-plate text-[11px] text-outline">PATIO-02</span>
+<button class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded-lg font-medium transition-colors" type="button">
+            Ver unidades
+          </button>
+</div>
+</div>
+<!-- 3. VINDU -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">VINDU</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Equipo Industrial · Total: 420 unid.</p>
+</div>
+<span class="font-label-md text-label-md font-bold text-[#047857] bg-[#ecfdf5] px-2.5 py-1 rounded-full">83.3%</span>
+</div>
+<div class="mt-space-md mb-space-sm">
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-[#047857] rounded-full" style="width: 83.3%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 py-space-sm text-left">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Al día</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#047857]">350</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Pendientes</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#c2410c]">70</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Alertas</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-error">15</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-code-plate text-[11px] text-outline">PATIO-03</span>
+<button class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded-lg font-medium transition-colors" type="button">
+            Ver unidades
+          </button>
+</div>
+</div>
+<!-- 4. VCARS -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">VCARS</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Flota Pasajeros · Total: 450 unid.</p>
+</div>
+<span class="font-label-md text-label-md font-bold text-secondary bg-primary-fixed/40 px-2.5 py-1 rounded-full">80.0%</span>
+</div>
+<div class="mt-space-md mb-space-sm">
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 80.0%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 py-space-sm text-left">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Al día</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">360</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Pendientes</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#c2410c]">90</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Alertas</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-error">24</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-code-plate text-[11px] text-outline">PATIO-04</span>
+<button class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded-lg font-medium transition-colors" type="button">
+            Ver unidades
+          </button>
+</div>
+</div>
+<!-- 5. PANELES -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">PANELES</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Distribución Urbana · Total: 212 unid.</p>
+</div>
+<span class="font-label-md text-label-md font-bold text-[#c2410c] bg-[#fff7ed] px-2.5 py-1 rounded-full">74.5%</span>
+</div>
+<div class="mt-space-md mb-space-sm">
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-[#c2410c] rounded-full" style="width: 74.5%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 py-space-sm text-left">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Al día</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">158</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Pendientes</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#c2410c]">54</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Alertas</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-error">11</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-code-plate text-[11px] text-outline">PATIO-05</span>
+<button class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded-lg font-medium transition-colors" type="button">
+            Ver unidades
+          </button>
+</div>
+</div>
+<!-- 6. OTROS / EXTERNOS -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Otros / Externos</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Talleres Terceros · Total: 100 unid.</p>
+</div>
+<span class="font-label-md text-label-md font-bold text-error bg-error-container/50 px-2.5 py-1 rounded-full">63.0%</span>
+</div>
+<div class="mt-space-md mb-space-sm">
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 63.0%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 py-space-sm text-left">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Al día</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">63</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Pendientes</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-[#c2410c]">37</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant block uppercase">Alertas</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-error">4</span>
+</div>
+</div>
+</div>
+<div class="pt-space-md mt-space-sm flex items-center justify-between">
+<span class="font-code-plate text-[11px] text-outline">EXTERNO</span>
+<button class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded-lg font-medium transition-colors" type="button">
+            Ver unidades
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- SECCIÓN INFERIOR: AVANCE POR MES (Resumen Conciso) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Avance por Mes (Resumen)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Progreso del plan regulatorio de revisiones técnicas semestrales</p>
+</div>
+</div>
+<a class="inline-flex items-center gap-1.5 text-secondary hover:text-on-secondary-container font-body-sm text-body-sm font-semibold group self-start sm:self-auto" href="#avance-mensual">
+<span>Ver avance completo</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg pt-space-sm">
+<!-- Mes Actual -->
+<div class="bg-surface-container-low/70 rounded-lg p-space-md flex flex-col justify-between space-y-space-sm">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-md text-label-md font-semibold text-secondary uppercase tracking-wider">Mes actual</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5">Octubre 2026</h4>
+</div>
+<span class="font-headline-md text-headline-md text-secondary font-bold">68%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 68%"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant">
+<span>205 unidades pendientes</span>
+<span class="font-medium text-on-surface">435 completadas</span>
+</div>
+</div>
+<!-- Mes Próximo -->
+<div class="bg-surface-container-low/70 rounded-lg p-space-md flex flex-col justify-between space-y-space-sm">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-md text-label-md font-semibold text-on-surface-variant uppercase tracking-wider">Mes próximo</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5">Noviembre 2026</h4>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">12%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 12%"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant">
+<span>12% preparado / agendado</span>
+<span class="font-medium text-on-surface">Programación abierta</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple micro-interactions for the Galera dropdown and refresh trigger
+  document.getElementById('refreshBtn')?.addEventListener('click', function() {
+    const icon = this.querySelector('.material-symbols-outlined');
+    if (icon) {
+      icon.classList.add('rotate-[360deg]');
+      setTimeout(() => {
+        icon.classList.remove('rotate-[360deg]');
+      }, 600);
+    }
+  });
+
+  document.getElementById('galeraSelector')?.addEventListener('change', function(e) {
+    const val = e.target.value;
+    // Visual feedback indicator
+    const feedbackToast = document.createElement('div');
+    feedbackToast.className = 'fixed bottom-6 right-6 bg-primary text-on-primary px-4 py-2.5 rounded-lg shadow-lg font-body-sm text-body-sm flex items-center gap-2 z-50 transition-opacity duration-300';
+    feedbackToast.innerHTML = '<span class="material-symbols-outlined text-[18px]">filter_list</span> Filtrando vista: ' + (e.target.options[e.target.selectedIndex].text);
+    document.body.appendChild(feedbackToast);
+    setTimeout(() => {
+      feedbackToast.style.opacity = '0';
+      setTimeout(() => feedbackToast.remove(), 300);
+    }, 2000);
+  });
+</script></main></div></body></html>

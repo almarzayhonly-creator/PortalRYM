@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-06T21:13:24.955Z",
+  "generatedAt": "2026-10-07T17:08:41.433Z",
   "projectId": "1412531415043982793",
-  "sourceScreenId": "11370802973745301890",
+  "sourceScreenId": "4456432605065571379",
   "variantScreenIds": [
-    "c4662923d8704da690e0ad93ec98b200",
-    "8e0aea561738477393f4eca52da58b2a",
-    "04d0bb283d144c97b7088143847d9325"
+    "898e17ca2d8346faa98825dab906c6be",
+    "775db4e9136740f6bc70f8a523ecb4ae",
+    "cf59ffa7e84848da89ee39a3b3529980"
   ],
   "method": "upload-functional-contract-then-explore-variants",
   "creativeRange": "EXPLORE",
