@@ -34,12 +34,13 @@ export default {
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
       const negativosLastOwner = '<script id="rym-negativos-last-query-owner" src="/modules/core/panapass-negativos-ultima-consulta.js?v=1" defer></script>';
+      const unitValidatorLauncher = '<script id="rym-unit-validator-launcher-owner" src="/modules/core/unit-validator-launcher.js?v=1" defer></script>';
 
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
-        ? body.slice(0, bodyEnd) + owner + rankingOwner + negativosLastOwner + body.slice(bodyEnd)
-        : body + owner + rankingOwner + negativosLastOwner;
+        ? body.slice(0, bodyEnd) + owner + rankingOwner + negativosLastOwner + unitValidatorLauncher + body.slice(bodyEnd)
+        : body + owner + rankingOwner + negativosLastOwner + unitValidatorLauncher;
 
       return new Response(body, {
         status: response.status,
