@@ -1,0 +1,54 @@
+name: Stitch unit validator visual
+
+on:
+  push:
+    branches: [sandbox/validator-tablet-app]
+    paths:
+      - 'tools/stitch/stitch-unit-validator-visual.mjs'
+      - 'tools/stitch/package.json'
+      - '.stitch/active-project.json'
+      - '.github/workflows/stitch-unit-validator-visual.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stitch-unit-validator-visual
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sandbox/validator-tablet-app
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install Stitch SDK
+        working-directory: tools/stitch
+        run: npm install --no-audit --no-fund --package-lock=false
+
+      - name: Generate unit validator visual variants
+        working-directory: tools/stitch
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+        run: npm run stitch:unit-validator-visual
+
+      - name: Commit Stitch outputs
+        run: |
+          if git diff --quiet -- .stitch/generated && [ -z "$(git status --porcelain .stitch/generated)" ]; then
+            echo "No Stitch changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .stitch/generated
+          git commit -m "chore(stitch): generate unit validator visual variants"
+          git push origin HEAD:sandbox/validator-tablet-app
