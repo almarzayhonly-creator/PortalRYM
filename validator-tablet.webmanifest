@@ -1,19 +1,36 @@
 {
   "name": "Portal RYM · Validador de Unidad",
   "short_name": "Validador RYM",
-  "description": "Validador rápido de unidad de Portal RYM optimizado para tablet.",
+  "description": "Validador rápido de unidad de Portal RYM, acceso dedicado para personal autorizado.",
   "start_url": "/?app=validador-unidad",
+  "id": "/?app=validador-unidad",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "orientation": "any",
   "background_color": "#F4F7FB",
   "theme_color": "#0A1B4D",
   "icons": [
     {
+      "src": "https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/assets/validator-tablet-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
