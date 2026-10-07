@@ -34,9 +34,9 @@ html.rym-unit-validator-app .v101-content>*:not(.v101-validator),
 html.rym-unit-validator-app #v101OpenModule{display:none!important}
 html.rym-unit-validator-app .v101-shell{display:block!important;min-height:100dvh!important;width:100%!important;background:transparent!important}
 html.rym-unit-validator-app .v101-main{width:100%!important;min-width:0!important;margin:0!important;padding:0!important;background:transparent!important}
-html.rym-unit-validator-app .v101-content{width:min(1120px,100%)!important;min-height:100dvh!important;margin:auto!important;padding:clamp(32px,12vh,110px) 32px 32px!important;display:block!important;box-sizing:border-box!important}
-html.rym-unit-validator-app .v101-validator{width:min(760px,100%)!important;margin:0 auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
-html.rym-unit-validator-app .v101-validator:before{display:none!important}
+html.rym-unit-validator-app .v101-content{width:min(1120px,100%)!important;min-height:100dvh!important;margin:auto!important;padding:clamp(38px,15vh,140px) 32px 32px!important;display:block!important;box-sizing:border-box!important}
+html.rym-unit-validator-app .v101-validator{width:min(820px,100%)!important;margin:0 auto!important;padding:28px!important;border:1px solid #DCE6F1!important;border-radius:24px!important;background:linear-gradient(145deg,#FFFFFF 0%,#F7FAFF 68%,#FFF9F2 100%)!important;box-shadow:0 18px 52px rgba(10,27,77,.09)!important;overflow:visible!important}
+html.rym-unit-validator-app .v101-validator:before{content:""!important;display:block!important;position:absolute!important;left:28px!important;right:28px!important;top:0!important;height:3px!important;border-radius:0 0 999px 999px!important;background:linear-gradient(90deg,#244AA5 0%,#53B7E8 52%,#F47C20 100%)!important}
 html.rym-unit-validator-app .v101-validator-head{display:block!important;margin:0 0 24px!important}
 html.rym-unit-validator-app .v101-validator-head h3{font-size:32px!important;line-height:1.15!important;letter-spacing:-.04em!important;color:var(--uva-navy)!important;margin:0!important}
 html.rym-unit-validator-app .v101-validator-head p{display:block!important;font-size:15px!important;line-height:1.5!important;font-weight:400!important;color:var(--uva-muted)!important;margin:10px 0 0!important}
@@ -75,11 +75,11 @@ html.rym-unit-validator-app .v133-closed-notice{margin:0 0 16px!important;paddin
 html.rym-unit-validator-app .v133-closed-notice>b{font-size:11px!important}
 html.rym-unit-validator-app .v117-quick-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important}
 html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-html.rym-unit-validator-app .v117-status-card{--domain:#244AA5;--domain-bg:#EDF3FF;min-width:0!important;min-height:0!important;padding:20px!important;border:0!important;border-radius:16px!important;background:white!important;box-shadow:0 2px 8px #0A1B4D05!important;overflow:visible!important;position:relative!important}
-html.rym-unit-validator-app .v117-status-card.rev{--domain:#555CB1;--domain-bg:#F0F0FB}
-html.rym-unit-validator-app .v117-status-card.gps{--domain:#087E8B;--domain-bg:#EAF7F8}
-html.rym-unit-validator-app .v117-status-card.ctl{--domain:#0A1B4D;--domain-bg:#EDF1F8}
-html.rym-unit-validator-app .v117-status-card:before{display:none!important}
+html.rym-unit-validator-app .v117-status-card{--domain:#244AA5;--domain-bg:#EDF3FF;--domain-grad:#F4F8FF;min-width:0!important;min-height:0!important;padding:20px!important;border:1px solid #DBE5F1!important;border-radius:18px!important;background:linear-gradient(145deg,#FFFFFF 0%,var(--domain-grad) 100%)!important;box-shadow:0 8px 24px rgba(10,27,77,.055)!important;overflow:visible!important;position:relative!important}
+html.rym-unit-validator-app .v117-status-card.rev{--domain:#555CB1;--domain-bg:#F0F0FB;--domain-grad:#F5F4FF}
+html.rym-unit-validator-app .v117-status-card.gps{--domain:#087E8B;--domain-bg:#EAF7F8;--domain-grad:#EFFBF8}
+html.rym-unit-validator-app .v117-status-card.ctl{--domain:#173E72;--domain-bg:#EDF1F8;--domain-grad:#F3F7FB}
+html.rym-unit-validator-app .v117-status-card:before{content:""!important;display:block!important;position:absolute!important;inset:0 auto 0 0!important;width:4px!important;border-radius:18px 0 0 18px!important;background:var(--domain)!important;opacity:.88!important}
 html.rym-unit-validator-app .v117-status-card header{display:grid!important;grid-template-columns:40px minmax(0,1fr) 26px!important;gap:10px!important;align-items:center!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important}
 html.rym-unit-validator-app .v117-card-icon{width:40px!important;height:40px!important;border-radius:12px!important;background:var(--domain-bg)!important;color:var(--domain)!important;font-size:18px!important;display:grid!important;place-items:center!important}
 html.rym-unit-validator-app .v117-status-card header small{font-size:11px!important;line-height:1.4!important;letter-spacing:.05em!important;color:var(--domain)!important}
@@ -126,22 +126,26 @@ html.rym-unit-validator-app button:focus-visible,html.rym-unit-validator-app sum
   .uva-brand b{font-size:15px}.uva-brand span,.uva-actions #status{display:none}
   .uva-actions{gap:6px}.uva-actions button{padding:0 10px;font-size:12px}
   .uva-stage{height:calc(100dvh - 60px)}
-  html.rym-unit-validator-app .v101-content{padding:48px 20px 20px!important}
+  html.rym-unit-validator-app .v101-content{padding:34px 16px 20px!important}
   html.rym-unit-validator-app .v101-validator-head h3{font-size:28px!important}
   html.rym-unit-validator-app .v101-validator-head p{font-size:14px!important}
   html.rym-unit-validator-app .v101-validator-tools{grid-template-columns:1fr!important;gap:12px!important}
   html.rym-unit-validator-app .v101-validator-input{height:58px!important;font-size:16px!important}
-  html.rym-unit-validator-app .v101-validator-go{height:52px!important}
+  html.rym-unit-validator-app .v101-validator-go{height:54px!important;border-radius:14px!important;font-size:14px!important;background:linear-gradient(180deg,#2D5BB7,#244AA5)!important;box-shadow:0 8px 18px rgba(36,74,165,.18)!important}
   html.rym-unit-validator-app .v101-validator-list{position:static!important;top:auto!important;margin-top:8px!important;max-height:48dvh!important}
   html.rym-unit-validator-app .v117-check-card{padding:20px 16px 90px!important}
   html.rym-unit-validator-app .v117-title-row{gap:10px!important}
   html.rym-unit-validator-app .v117-title-row h2{font-size:34px!important}
   html.rym-unit-validator-app .v117-overall{font-size:12px!important;min-height:30px!important;padding:7px 10px!important}
   html.rym-unit-validator-app .v117-meta{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px 12px!important;margin-top:10px!important}
-  html.rym-unit-validator-app .v117-meta .v133-mobile-supervisor,html.rym-unit-validator-app .v117-meta .v130-mobile-owner{grid-column:1/-1!important}
-  html.rym-unit-validator-app .v117-identity-line,html.rym-unit-validator-app .v117-identity-line.v125-clean{gap:6px 12px!important;margin-bottom:14px!important}
+  html.rym-unit-validator-app .v117-meta .v133-mobile-supervisor{grid-column:1/-1!important}
+  html.rym-unit-validator-app .v117-meta .v130-mobile-owner{display:none!important}
+  html.rym-unit-validator-app .v117-identity-line,html.rym-unit-validator-app .v117-identity-line.v125-clean{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:14px!important}
+  html.rym-unit-validator-app .v117-identity-line>span{padding:9px 10px!important;border:1px solid #E1E8F1!important;border-radius:11px!important;background:#fff!important}
+  html.rym-unit-validator-app .v117-identity-line>span:nth-child(2){display:none!important}
+  html.rym-unit-validator-app .v117-identity-line>span:last-child{background:#F0FAF4!important;border-color:#C7E7D3!important}
   html.rym-unit-validator-app .v117-quick-grid,html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:1fr!important;gap:8px!important}
-  html.rym-unit-validator-app .v117-status-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:2px 8px!important;padding:12px!important;border-radius:12px!important}
+  html.rym-unit-validator-app .v117-status-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:2px 8px!important;padding:13px 13px 12px 16px!important;border-radius:15px!important;box-shadow:0 7px 18px rgba(10,27,77,.055)!important}
   html.rym-unit-validator-app .v117-status-card header{grid-column:1/-1!important;grid-template-columns:36px minmax(0,1fr) 26px!important;gap:10px!important}
   html.rym-unit-validator-app .v117-card-icon{width:36px!important;height:36px!important;border-radius:10px!important;font-size:16px!important}
   html.rym-unit-validator-app .v117-status-card header strong{font-size:14px!important;margin-top:1px!important}
@@ -167,4 +171,25 @@ html.rym-unit-validator-app button:focus-visible,html.rym-unit-validator-app sum
   html.rym-unit-validator-app .v117-check-card{padding:16px 20px 88px!important}
   html.rym-unit-validator-app .v117-quick-grid,html.rym-unit-validator-app .v117-quick-grid.no-gps{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   html.rym-unit-validator-app .v117-title-row h2{font-size:32px!important}
+}
+
+html.rym-unit-validator-app .v117-status-card.bad{
+  --domain:#C92A2A!important;--domain-bg:#FDECEC!important;--domain-grad:#FFF3F3!important;
+  border-color:#F2CACA!important;background:linear-gradient(145deg,#FFFFFF 0%,#FFF1F1 100%)!important;
+  box-shadow:0 10px 28px rgba(201,42,42,.08)!important
+}
+html.rym-unit-validator-app .v117-status-card.warn,
+html.rym-unit-validator-app .v117-status-card.pending{
+  --domain:#B56A00!important;--domain-bg:#FFF2DC!important;--domain-grad:#FFF9EF!important;
+  border-color:#F0D6AA!important
+}
+html.rym-unit-validator-app .v117-status-card.bad header strong,
+html.rym-unit-validator-app .v117-status-card.bad .v117-card-value{color:#B42318!important}
+html.rym-unit-validator-app .v117-status-card.warn header strong,
+html.rym-unit-validator-app .v117-status-card.pending header strong{color:#8A5200!important}
+html.rym-unit-validator-app .v117-status-card:hover{transform:translateY(-1px)!important;box-shadow:0 12px 30px rgba(10,27,77,.08)!important}
+
+@media(min-width:651px){
+  html.rym-unit-validator-app .v101-validator-head{margin-bottom:20px!important}
+  html.rym-unit-validator-app .v101-validator-go{background:linear-gradient(180deg,#2D5BB7,#244AA5)!important;box-shadow:0 8px 18px rgba(36,74,165,.14)!important}
 }
