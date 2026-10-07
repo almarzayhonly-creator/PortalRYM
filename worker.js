@@ -8,7 +8,7 @@ export default {
 
     if (contentType.includes("text/html")) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
-      headers.set("x-portal-build", validatorApp ? "validator-tablet-app-v1" : "panapass-dashboard-owner-v12");
+      headers.set("x-portal-build", validatorApp ? "validator-tablet-app-v3" : "panapass-dashboard-owner-v12");
       if (validatorApp) headers.set("x-rym-app", "validator-tablet");
 
       const html = await response.text();
@@ -19,8 +19,8 @@ export default {
       const owner = '<script id="rym-dashboard-payments-owner" src="/modules/core/dashboard-payments-enhance.js?v=12" defer></script>';
       const rankingOwner = '<script id="rym-ranking-criteria-owner" src="/modules/core/panapass-ranking-criteria-final.js?v=13" defer></script>';
       const negativosLastOwner = '<script id="rym-negativos-last-query-owner" src="/modules/core/panapass-negativos-ultima-consulta.js?v=1" defer></script>';
-      const validatorStyle = '<link id="rym-validator-tablet-style" rel="stylesheet" href="/css/validator-tablet-app.css?v=1">';
-      const validatorScript = '<script id="rym-validator-tablet-script" src="/modules/control-auto/validator-tablet-app.js?v=1"></script>';
+      const validatorStyle = '<link id="rym-validator-tablet-style" rel="stylesheet" href="/css/validator-tablet-app.css?v=3">';
+      const validatorScript = '<script id="rym-validator-tablet-script" src="/modules/control-auto/validator-tablet-app.js?v=3"></script>';
 
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
       if (validatorApp && !body.includes('id="rym-validator-tablet-style"')) {
