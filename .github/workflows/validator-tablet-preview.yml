@@ -33,10 +33,10 @@ jobs:
           test -s css/validator-tablet-app.css
           test -s validator-tablet.webmanifest
           test -s assets/validator-tablet-icon.svg
-          grep -Fq 'control_auto.validar_ecarcheck' modules/control-auto/validator-tablet-app.js
+          grep -Fq 'v101ValidatorQ' modules/control-auto/validator-tablet-app.js
           grep -Fq 'validator-tablet-app.js' modules/v171-loader.js
           grep -Fq 'validator-tablet-app.css' modules/v171-loader.js
-          grep -Fq '"start_url": "/?app=validador"' validator-tablet.webmanifest
+          grep -Fq '"start_url": "/?app=validador-unidad"' validator-tablet.webmanifest
 
       - name: Deploy isolated Cloudflare preview
         id: deploy
@@ -54,15 +54,15 @@ jobs:
         env:
           VERSION_URL: ${{ steps.deploy.outputs.version_url }}
         run: |
-          curl -fsSL "$VERSION_URL/?app=validador" -o /tmp/index.html
+          curl -fsSL "$VERSION_URL/?app=validador-unidad" -o /tmp/index.html
           curl -fsSL "$VERSION_URL/modules/v171-loader.js" -o /tmp/loader.js
           curl -fsSL "$VERSION_URL/modules/control-auto/validator-tablet-app.js" -o /tmp/app.js
           curl -fsSL "$VERSION_URL/css/validator-tablet-app.css" -o /tmp/app.css
           curl -fsSL "$VERSION_URL/validator-tablet.webmanifest" -o /tmp/manifest.json
           grep -Fq 'validator-tablet-app.js' /tmp/loader.js
-          grep -Fq 'control_auto.validar_ecarcheck' /tmp/app.js
-          grep -Fq 'rym-validator-tablet-app' /tmp/app.css
-          grep -Fq 'app=validador' /tmp/manifest.json
+          grep -Fq 'v101ValidatorQ' /tmp/app.js
+          grep -Fq 'rym-unit-validator-app' /tmp/app.css
+          grep -Fq 'app=validador-unidad' /tmp/manifest.json
 
       - name: Verify preview alias
         env:
@@ -70,9 +70,9 @@ jobs:
         run: |
           for attempt in $(seq 1 12); do
             if curl -fsSL "$ALIAS_URL/modules/control-auto/validator-tablet-app.js" -o /tmp/alias-app.js \
-              && grep -Fq 'control_auto.validar_ecarcheck' /tmp/alias-app.js \
+              && grep -Fq 'v101ValidatorQ' /tmp/alias-app.js \
               && curl -fsSL "$ALIAS_URL/validator-tablet.webmanifest" -o /tmp/alias-manifest.json \
-              && grep -Fq 'app=validador' /tmp/alias-manifest.json; then
+              && grep -Fq 'app=validador-unidad' /tmp/alias-manifest.json; then
               echo "Validator tablet preview propagated."
               exit 0
             fi
