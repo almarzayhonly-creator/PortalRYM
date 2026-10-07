@@ -238,7 +238,17 @@
             grid-column:1/-1!important;width:max-content!important;max-width:100%!important;
             min-height:32px!important;padding:6px 9px!important
           }
-          .v117-meta>span.v130-mobile-owner{display:none!important}
+          /* main v130/v133 use #v101CheckModal + !important; beat them explicitly here. */
+          #v101CheckModal .v117-meta span.v130-mobile-owner{display:none!important}
+          #v101CheckModal .v117-meta span.v133-mobile-supervisor{
+            display:inline-flex!important;grid-column:1/-1!important;flex-basis:auto!important;
+            width:max-content!important;max-width:100%!important;min-height:30px!important;
+            padding:5px 8px!important;margin:0!important
+          }
+          #v101CheckModal .v117-meta span.v133-mobile-supervisor b{margin-left:3px!important}
+          #v101CheckModal .v117-meta>span:not(.v133-mobile-supervisor):not(.v130-mobile-owner){
+            flex-basis:auto!important;width:auto!important;max-width:100%!important
+          }
 
           .v117-identity-line,.v117-identity-line.v125-clean{
             display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
@@ -266,9 +276,10 @@
             overflow:hidden!important
           }
           .v117-status-card header{
-            min-height:68px!important;display:grid!important;grid-template-columns:36px minmax(0,1fr) 28px!important;
-            align-items:center!important;gap:10px!important;padding:9px 11px!important;border:0!important
+            min-height:62px!important;display:grid!important;grid-template-columns:36px minmax(0,1fr) 28px!important;
+            align-items:center!important;gap:10px!important;padding:8px 11px!important;border:0!important
           }
+          #v117GpsCard header{min-height:70px!important}
           .v117-card-icon{
             width:36px!important;height:36px!important;flex-basis:36px!important;border-radius:11px!important;
             font-size:15px!important
@@ -281,9 +292,13 @@
 
           /* Key value is pulled into the row; secondary detail stays available without creating giant cards. */
           .v117-card-value{
-            position:absolute!important;left:57px!important;right:46px!important;bottom:9px!important;
-            margin:0!important;font-size:11px!important;line-height:1.1!important;letter-spacing:-.01em!important;
+            position:absolute!important;left:57px!important;right:46px!important;bottom:7px!important;
+            margin:0!important;font-size:10.5px!important;line-height:1.08!important;letter-spacing:-.01em!important;
             white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important
+          }
+          #v117GpsCard .v117-card-value{
+            bottom:7px!important;font-size:9.6px!important;white-space:normal!important;
+            display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important
           }
           .v117-status-card{position:relative!important}
           .v117-card-sub,.v117-card-details{display:none!important}
