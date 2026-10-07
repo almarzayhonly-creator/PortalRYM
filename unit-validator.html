@@ -160,6 +160,150 @@
         #v101AgainCheck{min-width:170px!important;min-height:50px!important;padding:0 20px!important;border-radius:13px!important;border:1px solid #BFD4F0!important;background:#EEF5FF!important;color:#244AA5!important;font-size:12px!important;font-weight:1000!important;box-shadow:none!important}
         #v101AgainCheck:hover{background:#E1EDFC!important}
 
+        /* Premium tablet / desktop result surface — derived from Stitch variant 1. */
+        @media(min-width:701px){
+          .v101-check-modal,.v117-check-modal{
+            padding:32px!important;
+            background:
+              radial-gradient(circle at 18% 18%,rgba(83,183,232,.14),transparent 26%),
+              radial-gradient(circle at 82% 78%,rgba(244,124,32,.08),transparent 24%),
+              rgba(6,20,50,.72)!important;
+            backdrop-filter:blur(12px)!important
+          }
+          .v101-check-card,.v117-check-card{
+            width:min(1320px,96vw)!important;max-width:1320px!important;max-height:90vh!important;
+            padding:0!important;border-radius:30px!important;border:1px solid rgba(255,255,255,.78)!important;
+            background:#F8FAFD!important;box-shadow:0 40px 110px rgba(2,17,46,.38)!important;overflow:auto!important
+          }
+
+          /* Hero identity block */
+          .v117-check-head{
+            position:relative!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;
+            gap:22px!important;margin:0!important;padding:28px 30px 24px!important;border:0!important;border-radius:29px 29px 0 0!important;
+            background:
+              radial-gradient(circle at 88% 18%,rgba(83,183,232,.22),transparent 22%),
+              linear-gradient(135deg,#081A49 0%,#123C7A 62%,#1E58A6 100%)!important;
+            color:#fff!important;overflow:hidden!important
+          }
+          .v117-check-head:after{
+            content:"";position:absolute;inset:auto -5% -54px auto;width:260px;height:140px;border-radius:50%;
+            border:28px solid rgba(255,255,255,.055);pointer-events:none
+          }
+          .v117-title-row{gap:14px!important}
+          .v117-title-row h2{
+            color:#fff!important;font-size:54px!important;line-height:.95!important;letter-spacing:-.065em!important;
+            text-shadow:0 2px 14px rgba(0,0,0,.16)!important
+          }
+          .v117-overall{
+            min-height:38px!important;padding:0 14px!important;border-width:1px!important;
+            font-size:11px!important;letter-spacing:.055em!important;box-shadow:0 6px 18px rgba(0,0,0,.10)!important
+          }
+          .v117-overall.ok{background:#EAFBF1!important;border-color:#8BD6AF!important;color:#036B42!important}
+          .v117-overall.warn,.v117-overall.pending{background:#FFF4D8!important;border-color:#F1CB68!important;color:#8A5200!important}
+          .v117-overall.bad{background:#FFECEC!important;border-color:#F3A7A7!important;color:#A61D1D!important}
+          .v117-meta{gap:8px!important;margin-top:13px!important}
+          .v117-meta>span{
+            min-height:35px!important;padding:6px 10px!important;border:1px solid rgba(255,255,255,.19)!important;
+            background:rgba(255,255,255,.10)!important;color:#DDE9FA!important;font-size:10px!important;
+            backdrop-filter:blur(4px)!important
+          }
+          .v117-meta b{color:#fff!important;font-size:11px!important}
+          .v117-close{
+            position:relative!important;z-index:2!important;width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important;
+            border:1px solid rgba(255,255,255,.22)!important;border-radius:15px!important;
+            background:rgba(255,255,255,.12)!important;color:#fff!important;font-size:25px!important;
+            box-shadow:0 8px 22px rgba(0,0,0,.12)!important
+          }
+          .v117-close:hover{background:rgba(255,255,255,.20)!important;color:#fff!important}
+
+          /* Corporate identity rail */
+          .v117-identity-line,.v117-identity-line.v125-clean{
+            grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;
+            margin:0!important;padding:16px 22px 12px!important;background:#fff!important;border:0!important
+          }
+          .v117-identity-line>span{
+            min-height:46px!important;padding:10px 13px!important;border:1px solid #D9E4F1!important;
+            border-radius:13px!important;background:linear-gradient(180deg,#FFFFFF,#F8FBFF)!important;
+            box-shadow:0 4px 12px rgba(10,27,77,.035)!important;color:#6B7A91!important;font-size:10px!important
+          }
+          .v117-identity-line b{color:#112C5C!important;font-size:10px!important;text-transform:uppercase!important;letter-spacing:.045em!important}
+          .v117-identity-line .ok{background:linear-gradient(180deg,#F0FDF4,#EAF8EF)!important;border-color:#B8E2C9!important;color:#047857!important}
+          .v117-identity-line .bad{background:linear-gradient(180deg,#FFF5F5,#FFF0F0)!important;border-color:#F0C2C2!important;color:#B42318!important}
+
+          /* Live health summary, injected from existing card states only. */
+          .rym-health-strip{
+            margin:0 22px 14px!important;padding:12px 14px!important;border-radius:15px!important;
+            display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;
+            border:1px solid #CFE0F2!important;background:linear-gradient(180deg,#F7FBFF,#EFF6FD)!important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.9)!important
+          }
+          .rym-health-copy{display:flex!important;align-items:center!important;gap:10px!important;min-width:0!important}
+          .rym-health-icon{
+            width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border-radius:12px;
+            background:#EAF3FF;color:#244AA5;font-size:19px;font-weight:1000
+          }
+          .rym-health-strip.ok .rym-health-icon{background:#E8F8EF;color:#047857}
+          .rym-health-strip.warn .rym-health-icon{background:#FFF3D7;color:#9A5B00}
+          .rym-health-strip.bad .rym-health-icon{background:#FFECEC;color:#B42318}
+          .rym-health-copy b{display:block;color:#10224E;font-size:12px;line-height:1.15}
+          .rym-health-copy span{display:block;margin-top:3px;color:#68778F;font-size:9.5px;font-weight:700}
+          .rym-health-items{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:wrap!important;justify-content:flex-end!important}
+          .rym-health-item{
+            display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 8px;border-radius:9px;
+            background:#fff;border:1px solid #D8E3F2;color:#53647E;font-size:8.5px;font-weight:900;text-transform:uppercase;letter-spacing:.035em
+          }
+          .rym-health-item i{width:8px;height:8px;border-radius:50%;background:#AAB6C6}
+          .rym-health-item.ok i{background:#16A36A}.rym-health-item.warn i,.rym-health-item.pending i{background:#E6A12A}.rym-health-item.bad i{background:#D83A3A}
+
+          /* Domain cards get their own identity while status remains semantic. */
+          .v117-quick-grid{
+            grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;
+            padding:0 22px!important;margin:0!important
+          }
+          .v117-status-card{
+            min-height:250px!important;padding:17px!important;border-width:1px!important;border-top-width:5px!important;
+            border-radius:20px!important;background:#fff!important;box-shadow:0 10px 26px rgba(10,27,77,.06)!important;
+            transition:transform .18s ease,box-shadow .18s ease!important
+          }
+          .v117-status-card:hover{transform:translateY(-2px)!important;box-shadow:0 16px 34px rgba(10,27,77,.09)!important}
+          .v117-status-card.pan{background:linear-gradient(180deg,#FFFFFF 0%,#F8FBFF 100%)!important}
+          .v117-status-card.rev{background:linear-gradient(180deg,#FFFFFF 0%,#F8FAFF 100%)!important}
+          .v117-status-card.gps{background:linear-gradient(180deg,#FFFFFF 0%,#F7FCFB 100%)!important}
+          .v117-status-card.ctl{background:linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%)!important}
+          .v117-status-card header{padding:0 0 12px!important}
+          .v117-card-icon{
+            width:38px!important;height:38px!important;flex-basis:38px!important;border-radius:12px!important;font-size:15px!important;
+            box-shadow:inset 0 0 0 1px rgba(36,74,165,.05)!important
+          }
+          .v117-status-card.pan .v117-card-icon{background:#EAF2FF!important;color:#244AA5!important}
+          .v117-status-card.rev .v117-card-icon{background:#EEF0FF!important;color:#4B59B8!important}
+          .v117-status-card.gps .v117-card-icon{background:#EAF9F5!important;color:#087A63!important}
+          .v117-status-card.ctl .v117-card-icon{background:#EDF2F8!important;color:#173E72!important}
+          .v117-status-card header small{font-size:8.5px!important;color:#73839A!important}
+          .v117-status-card header strong{font-size:12px!important;color:#10224E!important}
+          .v117-state-dot{width:28px!important;height:28px!important;font-size:13px!important}
+          .v117-card-value{margin:17px 0 6px!important;font-size:24px!important;line-height:1.08!important}
+          #v117GpsCard .v117-card-value{font-size:18px!important;line-height:1.2!important}
+          .v117-card-sub{min-height:34px!important;font-size:10px!important;line-height:1.4!important}
+          .v117-card-details{margin-top:14px!important;padding-top:10px!important}
+          .v117-card-detail{padding:5px 0!important}
+          .v117-card-detail span{font-size:8.5px!important}
+          .v117-card-detail b{font-size:9.5px!important}
+
+          /* Action dock */
+          .v117-check-actions{
+            margin:18px 0 0!important;padding:16px 22px!important;border-top:1px solid #E3EAF3!important;
+            background:linear-gradient(180deg,#FBFCFE,#F4F8FC)!important;border-radius:0 0 29px 29px!important;
+            display:flex!important;align-items:center!important;justify-content:flex-end!important
+          }
+          #v101AgainCheck{
+            min-width:210px!important;min-height:52px!important;border:0!important;border-radius:14px!important;
+            background:linear-gradient(180deg,#2B63BE,#1E4C9B)!important;color:#fff!important;font-size:12px!important;
+            box-shadow:0 9px 22px rgba(36,74,165,.22)!important
+          }
+          #v101AgainCheck:hover{background:linear-gradient(180deg,#316BC9,#234F9D)!important}
+        }
+
         @media(max-width:1050px){
           .v117-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
           .v117-status-card{min-height:190px!important}
@@ -353,6 +497,37 @@
         loading.innerHTML='<div style="width:min(620px,92vw);padding:28px;border:1px solid #d8e3f2;border-radius:24px;background:#fff;box-shadow:0 22px 70px rgba(10,27,77,.13);text-align:center"><div style="font-size:30px;margin-bottom:10px">🔒</div><b style="display:block;font-size:24px;color:#0A1B4D">Acceso restringido</b><span style="display:block;margin-top:9px;color:#62708C;line-height:1.5">Tu usuario no tiene habilitado el permiso de App Validador de Unidad.</span></div>';
       }
 
+      function decorateResult(doc){
+        const modal=doc?.querySelector('#v101CheckModal');
+        const grid=modal?.querySelector('.v117-quick-grid');
+        if(!modal||!grid)return;
+        const cards=[...grid.querySelectorAll('.v117-status-card')];
+        if(!cards.length)return;
+
+        let strip=modal.querySelector('.rym-health-strip');
+        if(!strip){
+          strip=doc.createElement('section');
+          strip.className='rym-health-strip';
+          grid.before(strip);
+        }
+
+        const states=cards.map(card=>{
+          const tone=card.classList.contains('bad')?'bad':card.classList.contains('warn')?'warn':card.classList.contains('pending')?'pending':card.classList.contains('ok')?'ok':'pending';
+          const title=(card.querySelector('header small')?.textContent||'Sistema').trim();
+          const label=(card.querySelector('header strong')?.textContent||'').trim();
+          return {tone,title,label};
+        });
+        const ok=states.filter(x=>x.tone==='ok').length;
+        const bad=states.filter(x=>x.tone==='bad').length;
+        const waiting=states.filter(x=>x.tone==='pending'||x.tone==='warn').length;
+        const tone=bad?'bad':waiting?'warn':'ok';
+        const headline=bad?'Requiere atención':waiting?'Validación en proceso':`${ok}/${states.length} sistemas conformes`;
+        const detail=bad?'Uno o más controles requieren revisión.':waiting?'Esperando respuesta de todos los controles.':'La unidad cumple los controles visibles en esta validación.';
+        const html=`<div class="rym-health-copy"><span class="rym-health-icon">${tone==='ok'?'✓':tone==='bad'?'!':'…'}</span><div><b>${headline}</b><span>${detail}</span></div></div><div class="rym-health-items">${states.map(x=>`<span class="rym-health-item ${x.tone}"><i></i>${x.title}</span>`).join('')}</div>`;
+        strip.className='rym-health-strip '+tone;
+        if(strip.innerHTML!==html)strip.innerHTML=html;
+      }
+
       function installIsolation(){
         let doc,win;
         try{doc=frame.contentDocument;win=frame.contentWindow}catch(_){return}
@@ -384,6 +559,7 @@
           }
           const full=doc.getElementById('v101OpenModule');
           if(full){full.style.display='none';full.disabled=true;full.onclick=null}
+          decorateResult(doc);
           const user=doc.querySelector('.v101-top-right > div:last-child b')?.textContent?.trim();
           if(user)subtitle.textContent=user+' · Portal RYM';
         }else{
