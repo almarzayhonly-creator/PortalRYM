@@ -8,6 +8,21 @@
   function allowed(){try{return !!profile()&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
   function session(){const p=profile();return {authenticated:!!p,denied:!!p&&!allowed(),user:p?.nombre||p?.email||''}}
   function notify(){w.parent.postMessage({type:'rym-validator-state'},location.origin)}
+  function normalizeIdentity(modal){
+    if(!modal)return;
+    const metaOwner=modal.querySelector('.v130-mobile-owner');
+    const ownerValue=metaOwner?.querySelector('b')?.textContent?.trim()||'';
+    const identity=[...modal.querySelectorAll('.v117-identity-line>span')];
+    const company=identity[0],owner=identity[1];
+    if(company&&ownerValue){
+      const label=company.querySelector('b');
+      if(label)label.textContent='Empresa:';
+      [...company.childNodes].filter(n=>n.nodeType===3).forEach(n=>n.remove());
+      company.append(' '+ownerValue);
+    }
+    if(owner)owner.style.display='none';
+    if(metaOwner)metaOwner.style.display='none';
+  }
   function logout(){
     d.getElementById('v101CheckModal')?.remove();
     if(typeof clearSession==='function')clearSession();
@@ -40,6 +55,7 @@
       modal.setAttribute('aria-label','Resultado de validación de unidad');
       const close=modal.querySelector('#v101CloseCheck');if(close)close.setAttribute('aria-label','Cerrar resultado');
       const overall=modal.querySelector('#v117Overall');if(overall)overall.setAttribute('aria-live','polite');
+      normalizeIdentity(modal);
       const full=modal.querySelector('#v101OpenModule');if(full){full.hidden=true;full.disabled=true;full.onclick=null}
       modal.querySelectorAll('.v117-status-card').forEach(card=>{
         if(card.querySelector('.uva-details'))return;
