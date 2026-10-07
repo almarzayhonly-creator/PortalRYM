@@ -14,17 +14,27 @@
   function ensure(){
     if(!allowed()){d.querySelector('#rymUnitValidatorLauncher')?.remove();return}
     const nav=d.querySelector('.v101-nav');
-    if(!nav)return;
-    let b=d.querySelector('#rymUnitValidatorLauncher');
-    if(b)return;
-    b=d.createElement('button');
-    b.id='rymUnitValidatorLauncher';
-    b.type='button';
-    b.className='rym-unit-validator-launcher';
-    b.innerHTML='<span class="rym-unit-validator-launcher-icon">✓</span><span>Validador</span>';
-    b.title='Abrir Validador de Unidad';
-    b.addEventListener('click',open);
-    nav.appendChild(b);
+    if(nav&&!d.querySelector('#rymUnitValidatorLauncher')){
+      const b=d.createElement('button');
+      b.id='rymUnitValidatorLauncher';
+      b.type='button';
+      b.className='rym-unit-validator-launcher';
+      b.innerHTML='<span class="rym-unit-validator-launcher-icon">✓</span><span>Validador</span>';
+      b.title='Abrir Validador de Unidad';
+      b.addEventListener('click',open);
+      nav.appendChild(b);
+    }
+    const mobile=d.querySelector('#v115MobileNav');
+    if(mobile&&!d.querySelector('#rymUnitValidatorMobile')){
+      const b=d.createElement('button');
+      b.id='rymUnitValidatorMobile';
+      b.type='button';
+      b.innerHTML='<i>✓</i><span>Validador</span>';
+      b.title='Abrir Validador de Unidad';
+      b.addEventListener('click',open);
+      mobile.appendChild(b);
+      mobile.style.gridTemplateColumns='repeat(5,1fr)';
+    }
   }
   const style=d.createElement('style');
   style.textContent=`
