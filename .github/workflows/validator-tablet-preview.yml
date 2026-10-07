@@ -50,8 +50,12 @@ jobs:
       - name: Test dedicated validator against main functions
         run: |
           npm install --no-save --package-lock=false playwright@1.62.1
-          npx playwright install --with-deps chromium
-          PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$(node -e "const {chromium}=require('playwright');process.stdout.write(chromium.executablePath())")" node qa/validator-tablet-responsive.mjs
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || true)"
+          if [ -z "$CHROME_PATH" ]; then
+            npx playwright install --with-deps chromium
+            CHROME_PATH="$(node -e "const {chromium}=require('playwright');process.stdout.write(chromium.executablePath())")"
+          fi
+          PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-tablet-responsive.mjs
           node qa/validator-tablet-contract.mjs
 
       - name: Upload responsive evidence
