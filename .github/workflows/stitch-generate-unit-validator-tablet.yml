@@ -1,4 +1,5 @@
 name: Stitch generate tablet unit validator
+# Main-locked tablet exploration
 
 on:
   workflow_dispatch:
