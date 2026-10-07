@@ -88,8 +88,11 @@ try{
   baseGeneration=await project.generate(prompt,{deviceType:'TABLET'});
 }catch(error){
   if(error instanceof StitchError&&error.code==='CLARIFICATION_REQUIRED'){
-    baseGeneration=await project.generate('Create the Portal RYM Validador de Unidad tablet screen exactly with the functional rules in the prior prompt; change only visual hierarchy and touch-first layout.',{deviceType:'TABLET'});
-  }else throw error;
+    baseGeneration=await project.generate('Create the Portal RYM Validador de Unidad tablet screen exactly with the functional rules in the prior prompt; change only visual hierarchy and touch-first layout.');
+  }else{
+    console.warn('TABLET deviceType was rejected by the current Stitch backend; retrying with the same tablet-locked prompt without the device hint.');
+    baseGeneration=await project.generate(prompt);
+  }
 }
 const source=baseGeneration?.first;
 if(!source)throw new Error('Stitch returned no tablet base screen');
