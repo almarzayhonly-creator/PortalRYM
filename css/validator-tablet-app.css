@@ -121,3 +121,46 @@ body.rym-validator-tablet-app .v86-ex-row{font-size:10.5px!important}
   body.rym-validator-tablet-app .v80-unit{grid-template-columns:34px 82px 92px 1fr!important}
   body.rym-validator-tablet-app .v80-unit .hide-mobile{display:none!important}
 }
+
+
+/* Dedicated-route isolation.
+   This stylesheet is injected ONLY for ?app=validador, so these rules do not touch normal Portal RYM. */
+.shell{display:block!important;min-height:100dvh!important}
+.side{display:none!important}
+.main{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important}
+.top{display:none!important}
+#view{width:min(1480px,100%)!important;max-width:1480px!important;margin:0 auto!important;padding:92px 22px 32px!important}
+#view>.source-card,
+#view>#ca6Summary,
+#view>.v125-count-equation,
+#view>.ca6-tabs,
+#view>.section-tools{display:none!important}
+#ca6Out{width:100%!important;margin:0!important}
+#ca6Out>.v80-validator{width:100%!important}
+.v80-validator{gap:16px!important}
+.v80-policy{padding:18px 20px!important}
+.v80-policy h2{font-size:22px!important;letter-spacing:-.025em!important}
+.v80-policy p{font-size:13px!important;line-height:1.5!important}
+.v80-policy-badge{font-size:11px!important;padding:9px 12px!important}
+.v80-gals{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+.v80-gal{padding:18px!important}
+.v80-gal h3{font-size:19px!important}
+.v80-gal .v80-count{font-size:32px!important;margin-top:10px!important}
+.v80-gal small{font-size:11px!important}
+.v80-gal-meta{font-size:10.5px!important;margin:10px 0 12px!important}
+.v80-run-btn{min-height:50px!important;font-size:13px!important}
+.v80-today{font-size:10.5px!important;min-height:46px!important;padding:10px!important}
+.v86-ex{padding:18px!important}
+.v86-ex-head h3{font-size:18px!important}
+.v86-ex-head p{font-size:11.5px!important}
+.v86-ex-head b{font-size:11px!important}
+.v86-ex-row{font-size:11px!important;min-height:48px!important}
+.v86-ex-row small{font-size:10.5px!important}
+.v111-manual-banner{font-size:12px!important;line-height:1.45!important;padding:12px 14px!important}
+.v112-progress{border-radius:18px!important}
+@media(max-width:900px){
+  #view{padding:84px 14px 24px!important}
+  .v80-gals{grid-template-columns:1fr!important}
+  .v80-policy{align-items:flex-start!important;flex-direction:column!important}
+  .v80-policy-badge{white-space:normal!important}
+}
