@@ -48,9 +48,6 @@ const referencePath=path.join(outDir,'unit-validator-tablet-main-contract.html')
 await fs.writeFile(referencePath,reference);
 
 const project=stitch.project(projectId);
-const uploaded=await project.upload(referencePath,{title:'Portal RYM - Validador de Unidad - Tablet Main Contract'});
-const source=uploaded?.[0];
-if(!source)throw new Error('Stitch upload returned no screen');
 
 const prompt=`
 Design THREE production-grade TABLET variants for the exact Portal RYM Validador de Unidad shown in the functional reference.
@@ -86,12 +83,29 @@ PORTAL RYM VISUAL DNA:
 Goal: propose truly stronger tablet interaction ideas while keeping 100% functional parity with main.
 `.trim();
 
-let generation;
+let baseGeneration;
 try{
-  generation=await source.variants(prompt,{variantCount:3,creativeRange:'EXPLORE',aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']},{deviceType:'TABLET'});
+  baseGeneration=await project.generate(prompt,{deviceType:'TABLET'});
 }catch(error){
   if(error instanceof StitchError&&error.code==='CLARIFICATION_REQUIRED'){
-    generation=await source.variants('Keep every functional rule unchanged. Explore only layout, hierarchy and touch-first tablet interaction.',{variantCount:3,creativeRange:'EXPLORE',aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']},{deviceType:'TABLET'});
+    baseGeneration=await project.generate('Create the Portal RYM Validador de Unidad tablet screen exactly with the functional rules in the prior prompt; change only visual hierarchy and touch-first layout.',{deviceType:'TABLET'});
+  }else throw error;
+}
+const source=baseGeneration?.first;
+if(!source)throw new Error('Stitch returned no tablet base screen');
+
+let generation;
+try{
+  generation=await source.variants(
+    'Explore three clearly different tablet-first layouts. Keep every business rule, action, label and limit unchanged. Improve only hierarchy, density, touch interaction and visual system.',
+    {variantCount:3,creativeRange:'EXPLORE',aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']}
+  );
+}catch(error){
+  if(error instanceof StitchError&&error.code==='CLARIFICATION_REQUIRED'){
+    generation=await source.variants(
+      'Keep the exact same validator functionality. Produce three visual variants only.',
+      {variantCount:3,creativeRange:'EXPLORE',aspects:['LAYOUT','COLOR_SCHEME','TEXT_FONT']}
+    );
   }else throw error;
 }
 const screens=generation?.screens||[];
