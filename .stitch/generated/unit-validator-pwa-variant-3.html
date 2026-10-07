@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Portal RYM · Validador de Unidad</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rymNavy: '#0A1B4D',
+            rymBlue: '#244AA5',
+            rymLightBlue: '#EEF4FF',
+            rymSky: '#53B7E8',
+            rymBg: '#F4F7FB',
+            rymLine: '#D8E3F2',
+            rymText: '#10224E',
+            rymTextMuted: '#62708C',
+            rymGreen: '#047857',
+            rymGreenBg: '#ECFDF3',
+            rymGreenBorder: '#16A34A',
+            rymRedBg: '#FFF7F7',
+            rymRedText: '#DC2626',
+            rymRedBorder: '#F3CCCC'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-rymBg text-rymText font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-blue-100">
+<!-- CABECERA PWA -->
+<header class="h-[76px] bg-white border-b border-rymLine px-6 flex justify-between items-center fixed top-0 left-0 right-0 z-30 shadow-sm">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 border border-rymLine rounded-xl flex items-center justify-center font-black tracking-wider text-rymNavy text-lg bg-[#FAFBFD] shadow-inner select-none">
+        RYM
+      </div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-extrabold text-[17px] text-rymNavy tracking-tight leading-none">Validador de Unidad</span>
+<span class="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-slate-100 text-rymTextMuted">PWA</span>
+</div>
+<p class="text-[12px] text-rymTextMuted font-medium mt-1 leading-none">Yhonly Almarza · Portal RYM</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="inline-flex items-center gap-2 bg-[#ECFDF3] text-rymGreen border border-[#bbf7d0] px-3.5 py-1.5 rounded-full text-xs font-bold tracking-tight shadow-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Listo
+      </div>
+<button class="h-10 px-4 rounded-xl border border-rymRedBorder bg-rymRedBg text-rymRedText hover:bg-red-100 active:scale-95 font-bold text-xs transition duration-150 ease-in-out flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[17px]">logout</span>
+<span>Salir</span>
+</button>
+</div>
+</header>
+<!-- BACKGROUND CONTENT (Buscador central de fondo) -->
+<main class="pt-[110px] pb-16 px-4 sm:px-6 min-h-screen flex flex-col items-center justify-start">
+<div class="w-full max-w-4xl mt-6 bg-white border border-rymLine rounded-3xl p-8 shadow-[0_12px_36px_rgba(10,27,77,0.06)]">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-5">
+<div>
+<h1 class="text-2xl font-extrabold text-rymNavy tracking-tight">Validador rápido de unidad</h1>
+<p class="text-xs sm:text-sm text-rymTextMuted font-normal mt-1">Busca por unidad, empresa, placa o Panapass y revisa en un solo resultado si está lista.</p>
+</div>
+<span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-rymTextMuted text-[11px] font-mono font-medium self-start sm:self-center">
+          Atajo: <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded shadow-xs font-semibold">Enter</kbd>
+</span>
+</div>
+<div class="mt-6">
+<label class="block text-xs font-bold uppercase tracking-wider text-rymNavy mb-2">Ingresar término de búsqueda</label>
+<div class="flex flex-col sm:flex-row gap-3">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full h-14 pl-12 pr-28 rounded-2xl border-2 border-rymLine hover:border-blue-300 focus:border-rymBlue focus:ring-0 text-base font-semibold text-rymNavy placeholder-slate-400 transition" placeholder="Ejemplo: I284, V500, Catalina, EK9233, o Panapass" type="text" value="I284"/>
+<span class="absolute right-3.5 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
+              ESC Limpiar
+            </span>
+</div>
+<button class="h-14 px-8 rounded-2xl bg-rymBlue hover:bg-[#1b3b88] active:scale-[0.98] text-white font-bold text-sm tracking-wide shadow-md shadow-blue-900/20 transition flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+            Validar unidad
+          </button>
+</div>
+</div>
+<div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-rymTextMuted font-medium pt-2">
+<span class="text-[11px] uppercase font-bold text-slate-400">Recientes:</span>
+<button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-rymNavy rounded-md font-mono font-semibold transition">I284</button>
+<button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-rymNavy rounded-md font-mono font-semibold transition">V500</button>
+<button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-rymNavy rounded-md font-mono font-semibold transition">EK9233</button>
+</div>
+</div>
+</main>
+<!-- EXECUTIVE MODAL OVERLAY: BACKDROP & MODAL ELEVADO -->
+<div class="fixed inset-0 top-[76px] z-40 bg-[#051234]/65 backdrop-blur-[2px] flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-y-auto">
+<div class="w-full max-w-[1140px] my-auto bg-white rounded-[26px] border border-rymLine shadow-[0_25px_70px_rgba(5,22,65,0.38)] overflow-hidden flex flex-col">
+<!-- HEADER DE LA FICHA -->
+<div class="p-6 md:px-8 md:pt-7 md:pb-5 border-b border-slate-100 flex items-start justify-between gap-4">
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-3">
+<!-- NÚMERO DE UNIDAD (MONOSPACE ALTO CONTRASTE > 1 METRO) -->
+<span class="font-mono text-4xl sm:text-5xl md:text-[52px] font-black tracking-tight text-rymNavy leading-none">
+              I284
+            </span>
+<!-- STATUS PILL ESPECTRAL VERDE -->
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rymGreenBg border border-[#a3e635]/60 text-rymGreen text-xs sm:text-sm font-black tracking-wider shadow-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+              ACTIVA · TODO OK
+            </div>
+</div>
+<!-- CHIPS DE IDENTIDAD -->
+<div class="flex flex-wrap items-center gap-2 mt-3.5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-rymLine text-rymText text-[12px] font-medium font-sans shadow-2xs">
+<span class="text-slate-400 font-normal">Placa:</span>
+<strong class="font-mono font-bold text-rymNavy tracking-wide">EK9233</strong>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-rymLine text-rymText text-[12px] font-medium shadow-2xs">
+<span class="text-slate-400 font-normal">Galera:</span>
+<strong class="font-bold text-rymNavy">VCARS</strong>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-rymLine text-rymText text-[12px] font-medium shadow-2xs">
+<span class="text-slate-400 font-normal">Supervisora:</span>
+<strong class="font-bold text-rymNavy">JENIFFER</strong>
+</span>
+</div>
+</div>
+<!-- BOTÓN DE CIERRE TÁCTIL (48x48px) -->
+<button aria-label="Cerrar modal" class="w-12 h-12 shrink-0 rounded-2xl border border-rymLine hover:border-slate-300 bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-500 hover:text-rymNavy transition flex items-center justify-center font-black text-xl shadow-xs" type="button">
+          ✕
+        </button>
+</div>
+<div class="p-6 md:p-8 space-y-6">
+<!-- FRANJA DE METADATOS (3 COLUMNAS LIMPIAS) -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div class="p-3.5 rounded-xl border border-rymLine/90 bg-[#FBFDFF] flex flex-col justify-center">
+<span class="text-[11px] uppercase tracking-wider font-semibold text-rymTextMuted">Empresa</span>
+<span class="text-[14px] font-bold text-rymNavy mt-0.5">Vcars</span>
+</div>
+<div class="p-3.5 rounded-xl border border-rymLine/90 bg-[#FBFDFF] flex flex-col justify-center">
+<span class="text-[11px] uppercase tracking-wider font-semibold text-rymTextMuted">Dueña</span>
+<span class="text-[14px] font-bold text-rymNavy mt-0.5">COROZAL S.A.</span>
+</div>
+<div class="p-3.5 rounded-xl border border-rymLine/90 bg-[#FBFDFF] flex flex-col justify-center">
+<span class="text-[11px] uppercase tracking-wider font-semibold text-rymTextMuted">Estado General</span>
+<span class="text-[14px] font-extrabold text-rymGreen mt-0.5 flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rymGreen"></span>
+              ACTIVA
+            </span>
+</div>
+</div>
+<!-- COMPACT HEALTH STRIP HORIZONTAL (RESUMEN EN MENOS DE 5 SEGUNDOS) -->
+<div class="w-full bg-slate-50 border border-rymLine rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-inner">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-extrabold tracking-wider text-rymNavy uppercase">Resumen de Inspección:</span>
+</div>
+<div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-semibold">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[15px] font-bold text-emerald-600">check_circle</span>
+              Panapass OK
+            </span>
+<span class="text-slate-300 font-light">|</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[15px] font-bold text-emerald-600">check_circle</span>
+              Revisado OK
+            </span>
+<span class="text-slate-300 font-light">|</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[15px] font-bold text-emerald-600">check_circle</span>
+              GPS Telemetría (2/2) OK
+            </span>
+<span class="text-slate-300 font-light">|</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[15px] font-bold text-emerald-600">check_circle</span>
+              Control de Auto OK
+            </span>
+</div>
+</div>
+<!-- CUATRO TARJETAS DE DOMINIO HORIZONTALES / RESPONSIVAS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- 1. PANAPASS -->
+<article class="bg-white rounded-2xl border border-rymLine border-t-[4px] border-t-emerald-600 p-4 flex flex-col justify-between shadow-xs hover:shadow-md transition">
+<div>
+<header class="flex items-center justify-between pb-3 border-b border-slate-100">
+<span class="text-[15px] font-extrabold text-rymNavy tracking-tight">Panapass</span>
+<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">✓</span>
+</header>
+<div class="py-3">
+<div class="font-mono text-2xl font-black text-emerald-700 tracking-tight leading-none">
+                  B/. 1.10
+                </div>
+<p class="text-[12px] text-rymTextMuted mt-1.5 font-medium leading-tight">Sin saldo pendiente en ENA.</p>
+</div>
+</div>
+<div class="pt-2 border-t border-slate-100 space-y-1.5 text-[11px]">
+<div class="flex justify-between items-center text-slate-500">
+<span>Consulta ENA</span>
+<span class="font-mono font-bold text-rymNavy">10/07/2026</span>
+</div>
+<div class="flex justify-between items-center text-slate-500">
+<span>Panapass</span>
+<span class="font-mono font-bold text-rymNavy">1143936</span>
+</div>
+</div>
+</article>
+<!-- 2. REVISADO -->
+<article class="bg-white rounded-2xl border border-rymLine border-t-[4px] border-t-emerald-600 p-4 flex flex-col justify-between shadow-xs hover:shadow-md transition">
+<div>
+<header class="flex items-center justify-between pb-3 border-b border-slate-100">
+<span class="text-[15px] font-extrabold text-rymNavy tracking-tight">Revisado</span>
+<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">✓</span>
+</header>
+<div class="py-3">
+<div class="font-mono text-2xl font-black text-emerald-700 tracking-tight leading-none uppercase">
+                  FEBRERO
+                </div>
+<p class="text-[12px] text-rymTextMuted mt-1.5 font-medium leading-tight">Revisado vigente.</p>
+</div>
+</div>
+<div class="pt-2 border-t border-slate-100 space-y-1.5 text-[11px]">
+<div class="flex justify-between items-center text-slate-500">
+<span>Último revisado</span>
+<span class="font-mono font-bold text-rymNavy">02/20/2026</span>
+</div>
+<div class="flex justify-between items-center text-slate-500">
+<span>Fotos</span>
+<span class="font-mono font-bold text-rymNavy">4 fotos</span>
+</div>
+</div>
+</article>
+<!-- 3. GPS -->
+<article class="bg-white rounded-2xl border border-rymLine border-t-[4px] border-t-emerald-600 p-4 flex flex-col justify-between shadow-xs hover:shadow-md transition">
+<div>
+<header class="flex items-center justify-between pb-3 border-b border-slate-100">
+<span class="text-[15px] font-extrabold text-rymNavy tracking-tight">GPS</span>
+<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">✓</span>
+</header>
+<div class="py-2.5">
+<div class="font-mono text-[13px] font-extrabold text-emerald-700 leading-snug tracking-tight">
+                  GPS1: REPORTANDO · GPS2: REPORTANDO
+                </div>
+<p class="text-[12px] text-rymTextMuted mt-1.5 font-medium leading-tight">ACTIVO · 2 GPS reportando</p>
+</div>
+</div>
+<div class="pt-2 border-t border-slate-100 space-y-1.5 text-[11px]">
+<div class="flex justify-between items-center text-slate-500">
+<span>GPS1</span>
+<span class="font-mono font-bold text-emerald-700">REPORTANDO</span>
+</div>
+<div class="flex justify-between items-center text-slate-500">
+<span>GPS2</span>
+<span class="font-mono font-bold text-emerald-700">REPORTANDO</span>
+</div>
+</div>
+</article>
+<!-- 4. CONTROL DE AUTO -->
+<article class="bg-white rounded-2xl border border-rymLine border-t-[4px] border-t-emerald-600 p-4 flex flex-col justify-between shadow-xs hover:shadow-md transition">
+<div>
+<header class="flex items-center justify-between pb-3 border-b border-slate-100">
+<span class="text-[15px] font-extrabold text-rymNavy tracking-tight">Control de Auto</span>
+<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">✓</span>
+</header>
+<div class="py-3">
+<div class="font-mono text-2xl font-black text-emerald-700 tracking-tight leading-none">
+                  ACTIVA
+                </div>
+<p class="text-[12px] text-rymTextMuted mt-1.5 font-medium leading-tight">Unidad activa.</p>
+</div>
+</div>
+<div class="pt-2 border-t border-slate-100 space-y-1.5 text-[11px]">
+<div class="flex justify-between items-center text-slate-500">
+<span>Estado</span>
+<span class="font-mono font-bold text-emerald-700">ACTIVA</span>
+</div>
+<div class="flex justify-between items-center text-slate-500">
+<span>Color / modelo</span>
+<span class="font-medium font-mono text-rymNavy truncate max-w-[130px]" title="Amarillo · Hyundai">Amarillo · Hyundai</span>
+</div>
+</div>
+</article>
+</div>
+</div>
+<!-- PIE DE TARJETA CON ESTADO DE SINCRONIZACIÓN Y ACCIÓN PRINCIPAL DE 48PX -->
+<div class="px-6 md:px-8 py-4 bg-[#F8FAFD] border-t border-rymLine flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-2 text-xs text-rymTextMuted font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+<span>Sincronización en vivo con servidores ENA, GPS Fleet y Registro RYM.</span>
+</div>
+<div class="w-full sm:w-auto flex items-center justify-end">
+<button class="w-full sm:w-auto h-12 px-7 rounded-xl bg-rymBlue hover:bg-[#1c3c8e] active:scale-95 text-white font-extrabold text-[14px] tracking-wide transition shadow-md shadow-blue-900/15 flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[19px]">replay</span>
+<span>Otra unidad</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>
