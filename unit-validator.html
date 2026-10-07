@@ -31,7 +31,14 @@
     iframe.ready{opacity:1}
     .loading{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;color:var(--muted);font-weight:800;font-size:13px}
     .loading.hide{display:none}
-    @media(max-width:650px){.bar{height:68px;padding:9px 12px}.mark{width:42px;height:42px}.mark img{width:37px;height:37px}.heading b{font-size:17px}.heading span,.status{display:none}.exit{min-height:42px;padding:0 12px}.stage{height:calc(100dvh - 68px)}}
+    @media(max-width:700px){
+      .bar{height:64px;padding:8px 10px 8px max(10px,env(safe-area-inset-left));gap:10px}
+      .brand{gap:9px}.mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px}.mark img{width:35px;height:35px}
+      .heading b{font-size:16px;letter-spacing:-.02em}.heading span{font-size:9px;margin-top:3px;max-width:185px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .actions{gap:6px}.status{display:none}.install.show{min-height:40px;padding:0 10px;font-size:10px}.exit{min-height:40px;padding:0 12px;border-radius:11px;font-size:11px}
+      .stage{height:calc(100dvh - 64px)}
+    }
+    @media(max-width:380px){.heading span{display:none}.heading b{font-size:15px}.exit{padding:0 10px}}
   </style>
 </head>
 <body>
@@ -158,7 +165,170 @@
           .v117-status-card{min-height:190px!important}
         }
         @media(max-width:900px){body:has(.v101-validator) .v101-content{padding:24px 16px!important;align-items:flex-start!important}body:has(.v101-validator) .v101-validator{padding:22px!important;border-radius:22px!important}body:has(.v101-validator) .v101-validator-tools{grid-template-columns:minmax(0,1fr) 160px!important}body:has(.v101-validator) .v101-validator-input,body:has(.v101-validator) .v101-validator-go{height:58px!important}}
-        @media(max-width:650px){body:has(.v101-validator) .v101-content{padding:16px 10px!important}body:has(.v101-validator) .v101-validator{padding:17px!important}body:has(.v101-validator) .v101-validator-head h3{font-size:23px!important}body:has(.v101-validator) .v101-validator-badge{display:none!important}body:has(.v101-validator) .v101-validator-tools{grid-template-columns:1fr!important}.v117-title-row h2{font-size:36px!important}.v117-identity-line{grid-template-columns:1fr!important}.v117-quick-grid{grid-template-columns:1fr!important}.v101-check-card,.v117-check-card{padding:14px!important;border-radius:20px!important}}
+        /* Mobile-first inspection mode. Built from the Stitch variants, adapted to the real DOM. */
+        @media(max-width:700px){
+          html,body{overscroll-behavior:none!important}
+          body:has(.v101-validator) .v101-content{
+            width:100%!important;min-height:100vh!important;padding:14px 10px 22px!important;
+            align-items:flex-start!important;justify-content:flex-start!important
+          }
+          body:has(.v101-validator) .v101-validator{
+            padding:16px!important;border-radius:20px!important;box-shadow:0 14px 38px rgba(10,27,77,.09)!important
+          }
+          body:has(.v101-validator) .v101-validator:before{left:18px!important;right:18px!important;height:3px!important}
+          body:has(.v101-validator) .v101-validator-head{margin-bottom:14px!important;gap:10px!important}
+          body:has(.v101-validator) .v101-validator-head h3{font-size:22px!important}
+          body:has(.v101-validator) .v101-validator-head p{font-size:11px!important;line-height:1.4!important;margin-top:5px!important}
+          body:has(.v101-validator) .v101-validator-badge{display:none!important}
+          body:has(.v101-validator) .v101-validator-tools{grid-template-columns:1fr!important;gap:8px!important}
+          body:has(.v101-validator) .v101-validator-input{
+            height:54px!important;border-radius:14px!important;padding:0 14px!important;font-size:16px!important
+          }
+          body:has(.v101-validator) .v101-validator-go{
+            height:50px!important;border-radius:14px!important;font-size:13px!important;box-shadow:0 7px 18px rgba(36,74,165,.17)!important
+          }
+          body:has(.v101-validator) .v101-validator-note{margin-top:10px!important;font-size:10px!important}
+          body:has(.v101-validator) .v101-validator-list{
+            top:61px!important;max-height:min(310px,48vh)!important;border-radius:14px!important
+          }
+          body:has(.v101-validator) .v101-validator-item{min-height:58px!important;padding:9px 10px!important;gap:9px!important}
+          body:has(.v101-validator) .v101-validator-item b{font-size:13px!important}
+          body:has(.v101-validator) .v101-validator-item small{font-size:9px!important}
+
+          .v101-check-modal,.v117-check-modal{
+            inset:0!important;padding:0!important;align-items:stretch!important;
+            background:#F3F6FA!important;backdrop-filter:none!important;overflow:hidden!important
+          }
+          .v101-check-card,.v117-check-card{
+            width:100%!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;
+            margin:0!important;padding:12px 12px calc(74px + env(safe-area-inset-bottom))!important;
+            border:0!important;border-radius:0!important;background:#F7F9FC!important;
+            box-shadow:none!important;overflow-x:hidden!important;overflow-y:auto!important;
+            overscroll-behavior:contain!important;scrollbar-width:none!important
+          }
+          .v101-check-card::-webkit-scrollbar,.v117-check-card::-webkit-scrollbar{display:none!important}
+
+          .v117-check-head{
+            position:relative!important;display:block!important;padding:2px 54px 10px 0!important;
+            margin:0 0 8px!important;border-bottom:0!important
+          }
+          .v117-title-row{gap:8px!important;align-items:center!important;flex-wrap:wrap!important}
+          .v117-title-row h2{
+            font-size:34px!important;line-height:.98!important;letter-spacing:-.06em!important
+          }
+          .v117-overall{
+            min-height:29px!important;padding:0 9px!important;font-size:8.5px!important;letter-spacing:.035em!important
+          }
+          .v117-close{
+            position:absolute!important;right:0!important;top:0!important;width:44px!important;height:44px!important;
+            min-width:44px!important;min-height:44px!important;border-radius:13px!important;font-size:20px!important;
+            background:#FFFFFF!important;box-shadow:0 4px 14px rgba(10,27,77,.07)!important
+          }
+
+          /* No duplicated owner. Mobile identity stays concise and deterministic. */
+          .v117-meta{
+            display:grid!important;grid-template-columns:max-content max-content!important;
+            gap:6px!important;margin:8px 0 0!important;align-items:center!important
+          }
+          .v117-meta>span{
+            width:auto!important;min-height:29px!important;padding:5px 8px!important;border-radius:999px!important;
+            font-size:8.5px!important;white-space:nowrap!important
+          }
+          .v117-meta>span.v133-mobile-supervisor{
+            grid-column:1/-1!important;width:max-content!important;max-width:100%!important;
+            min-height:32px!important;padding:6px 9px!important
+          }
+          .v117-meta>span.v130-mobile-owner{display:none!important}
+
+          .v117-identity-line,.v117-identity-line.v125-clean{
+            display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+            gap:7px!important;margin:8px 0 10px!important;padding:0!important
+          }
+          .v117-identity-line>span{
+            min-height:40px!important;padding:8px 10px!important;border-radius:12px!important;
+            font-size:9px!important;line-height:1.2!important
+          }
+          .v117-identity-line>span:nth-child(2){display:none!important}
+          .v117-identity-line>span:last-child{grid-column:auto!important}
+          .v117-identity-line b{font-size:9px!important}
+
+          .v133-closed-notice{margin:0 0 9px!important}
+
+          /* Four systems become dense inspection rows instead of tall desktop cards. */
+          .v117-quick-grid,.v117-quick-grid.with-gps,.v117-quick-grid.no-gps{
+            display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin:0!important
+          }
+          .v117-status-card{
+            display:grid!important;
+            grid-template-columns:minmax(0,1fr)!important;
+            min-height:0!important;padding:0!important;border:1px solid #D9E3EF!important;border-top-width:3px!important;
+            border-radius:15px!important;background:#fff!important;box-shadow:0 5px 15px rgba(10,27,77,.045)!important;
+            overflow:hidden!important
+          }
+          .v117-status-card header{
+            min-height:68px!important;display:grid!important;grid-template-columns:36px minmax(0,1fr) 28px!important;
+            align-items:center!important;gap:10px!important;padding:9px 11px!important;border:0!important
+          }
+          .v117-card-icon{
+            width:36px!important;height:36px!important;flex-basis:36px!important;border-radius:11px!important;
+            font-size:15px!important
+          }
+          .v117-status-card header small{font-size:8px!important;letter-spacing:.095em!important}
+          .v117-status-card header strong{font-size:13px!important;line-height:1.15!important;margin-top:2px!important}
+          .v117-state-dot{
+            width:28px!important;height:28px!important;border-radius:9px!important;font-size:14px!important
+          }
+
+          /* Key value is pulled into the row; secondary detail stays available without creating giant cards. */
+          .v117-card-value{
+            position:absolute!important;left:57px!important;right:46px!important;bottom:9px!important;
+            margin:0!important;font-size:11px!important;line-height:1.1!important;letter-spacing:-.01em!important;
+            white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important
+          }
+          .v117-status-card{position:relative!important}
+          .v117-card-sub,.v117-card-details{display:none!important}
+
+          .v117-check-actions{
+            position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:100510!important;
+            display:block!important;margin:0!important;padding:10px 12px calc(10px + env(safe-area-inset-bottom))!important;
+            border-top:1px solid #D8E3F2!important;background:rgba(255,255,255,.96)!important;
+            box-shadow:0 -10px 26px rgba(10,27,77,.08)!important;backdrop-filter:blur(12px)!important
+          }
+          #v101AgainCheck{
+            width:100%!important;min-width:0!important;min-height:52px!important;border-radius:14px!important;
+            background:#244AA5!important;border-color:#244AA5!important;color:#fff!important;font-size:13px!important;
+            box-shadow:0 8px 18px rgba(36,74,165,.18)!important
+          }
+        }
+
+        /* Small phones: preserve all four checks without visual crowding. */
+        @media(max-width:390px){
+          .v101-check-card,.v117-check-card{padding-left:9px!important;padding-right:9px!important}
+          .v117-title-row h2{font-size:30px!important}
+          .v117-overall{font-size:7.8px!important}
+          .v117-meta{gap:5px!important}
+          .v117-meta>span{font-size:7.8px!important;padding:4px 7px!important}
+          .v117-identity-line>span{min-height:37px!important;padding:7px 8px!important}
+          .v117-status-card header{min-height:64px!important;padding:8px 9px!important;grid-template-columns:34px minmax(0,1fr) 26px!important}
+          .v117-card-icon{width:34px!important;height:34px!important}
+          .v117-status-card header strong{font-size:12px!important}
+          .v117-card-value{left:53px!important;right:42px!important;bottom:8px!important;font-size:10px!important}
+        }
+
+        /* Phone landscape: use two columns and keep the result above the fold. */
+        @media(max-height:540px) and (orientation:landscape){
+          .v101-check-card,.v117-check-card{padding:8px 10px 62px!important}
+          .v117-check-head{padding-bottom:5px!important;margin-bottom:4px!important}
+          .v117-title-row h2{font-size:27px!important}
+          .v117-meta{display:flex!important;gap:5px!important;margin-top:4px!important}
+          .v117-meta>span.v133-mobile-supervisor{grid-column:auto!important}
+          .v117-identity-line,.v117-identity-line.v125-clean{margin:5px 0 6px!important}
+          .v117-quick-grid,.v117-quick-grid.with-gps,.v117-quick-grid.no-gps{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+          .v117-status-card header{min-height:58px!important;padding:7px 9px!important}
+          .v117-card-value{bottom:7px!important}
+          .v117-check-actions{padding:6px 10px calc(6px + env(safe-area-inset-bottom))!important}
+          #v101AgainCheck{min-height:44px!important}
+        }
       `;
 
       function showDenied(){
