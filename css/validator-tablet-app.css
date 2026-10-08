@@ -280,3 +280,33 @@ html.rym-unit-validator-app:not(.uva-authenticated) body{
     radial-gradient(circle at 92% 85%,rgba(244,124,32,.12),transparent 27%),
     linear-gradient(150deg,#071A45 0%,#123E79 58%,#2C8AC7 100%)!important
 }
+
+/* Operational-priority summaries */
+html.rym-unit-validator-app .uva-priority-note{
+  margin:8px 40px 0 0!important;color:var(--uva-muted)!important;font-size:11px!important;line-height:1.35!important;font-weight:650!important
+}
+html.rym-unit-validator-app .uva-gps-live{
+  display:flex!important;gap:8px!important;flex-wrap:wrap!important;margin:9px 40px 0 0!important
+}
+html.rym-unit-validator-app .uva-gps-pill{
+  display:inline-flex!important;align-items:center!important;gap:6px!important;min-height:30px!important;padding:5px 9px!important;
+  border-radius:999px!important;background:#fff!important;border:1px solid #D8E3F2!important;
+  color:var(--uva-muted)!important;font-size:10px!important;font-style:normal!important
+}
+html.rym-unit-validator-app .uva-gps-pill i{width:9px!important;height:9px!important;border-radius:50%!important;background:#94A3B8!important}
+html.rym-unit-validator-app .uva-gps-pill.ok{border-color:#BDE6CA!important;background:#F1FBF5!important;color:#047857!important}
+html.rym-unit-validator-app .uva-gps-pill.ok i{background:#22A06B!important;box-shadow:0 0 0 4px rgba(34,160,107,.10)!important}
+html.rym-unit-validator-app .uva-gps-pill.bad{border-color:#F1C7C7!important;background:#FFF5F5!important;color:#B42318!important}
+html.rym-unit-validator-app .uva-gps-pill.bad i{background:#D83A3A!important;box-shadow:0 0 0 4px rgba(216,58,58,.09)!important}
+html.rym-unit-validator-app .uva-gps-pill.off{border-color:#DDE3EA!important;background:#F5F7FA!important;color:#64748B!important}
+html.rym-unit-validator-app .uva-detail-body{display:grid!important;gap:12px!important;padding-top:2px!important}
+html.rym-unit-validator-app .uva-detail-section{display:grid!important;gap:7px!important}
+html.rym-unit-validator-app .uva-detail-section+h4{margin-top:8px!important}
+html.rym-unit-validator-app .uva-detail-section h4{
+  margin:2px 0 3px!important;color:var(--domain)!important;font-size:10px!important;letter-spacing:.06em!important;text-transform:uppercase!important
+}
+html.rym-unit-validator-app .uva-detail-empty{padding:8px 0!important;color:var(--uva-muted)!important;font-size:11px!important}
+html.rym-unit-validator-app .uva-pan-priority .v117-card-value{font-size:27px!important}
+html.rym-unit-validator-app .uva-rev-priority .v117-card-value{font-size:18px!important}
+html.rym-unit-validator-app .uva-control-priority .v117-card-value{font-size:18px!important}
+html.rym-unit-validator-app .uva-meta-company{font-weight:650!important}
