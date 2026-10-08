@@ -109,9 +109,33 @@
       ctrl.estatus2,ctrl.status2,ficha?.logistica?.status2));
     return {state,internal,label:state==='PARADA'&&internal?state+' · '+internal:state};
   }
+  // Presentation only: preserve the source timestamp, format solely for humans.
+  function validatorDate(value){
+    const raw=text(value);
+    const m=raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/);
+    if(!m)return raw;
+    let day=m[3],month=m[2],year=m[1],hour=m[4],minute=m[5];
+    if(m[6]&&hour){
+      const date=new Date(raw);
+      if(!Number.isNaN(date.getTime())){
+        const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(date);
+        const get=k=>parts.find(p=>p.type===k)?.value;
+        day=get('day');month=get('month');year=get('year');hour=get('hour');minute=get('minute');
+      }
+    }
+    const dateText=day+'/'+month+'/'+year;
+    if(hour===undefined)return dateText;
+    const h=Number(hour);
+    return dateText+' · '+String(h%12||12)+':'+minute+' '+(h>=12?'p. m.':'a. m.');
+  }
+  function readableField(label,value){
+    const key=text(label).toLowerCase();
+    if(!/(fecha|consulta|actualizaci[oó]n|reporte|revisado|verificaci[oó]n|login|transmisi[oó]n)/i.test(key))return value;
+    return validatorDate(value);
+  }
   function detailHtml(label,value){
     if(value==null||text(value)===''||text(value)==='—')return '';
-    return '<div class="v117-card-detail"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>';
+    return '<div class="v117-card-detail"><span>'+esc(label)+'</span><b>'+esc(readableField(label,value))+'</b></div>';
   }
   function sectionHtml(title,rows){
     const body=rows.filter(Boolean).join('');
@@ -170,7 +194,8 @@
         const details=card.querySelector('.uva-details');
         card.insertBefore(noteEl,details||null);
       }
-      if(noteEl.textContent!==String(note))noteEl.textContent=String(note);
+      const readableNote=String(note).replace(/\b\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?\b/g,raw=>validatorDate(raw));
+      if(noteEl.textContent!==readableNote)noteEl.textContent=readableNote;
     }else noteEl?.remove();
   }
 
@@ -318,7 +343,7 @@
     const rawOfficial=officialRaw(oficial);
     const rev=(responses.rev?.rows||[]).find(r=>text(r.unidad).toUpperCase()===getIdentity(modal).unit.toUpperCase())||{};
     const operacion=ficha?.operacion||{};
-    const last=revisadoDateLabel(first(operacion.fecha_ultimo_revisado,oficial?.fecha_revisado,rawOfficial.fechaRevisado,map['ÚLTIMO REVISADO']));
+    const last=validatorDate(first(operacion.fecha_ultimo_revisado,oficial?.fecha_revisado,rawOfficial.fechaRevisado,map['ÚLTIMO REVISADO'])||'Sin registro');
     const original=mainCard(card);
     const raw=[map['ESTADO'],original.badge,original.value].filter(Boolean).join(' ');
     // The persisted Revisados operational evaluation is authoritative. A valid
