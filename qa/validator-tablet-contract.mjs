@@ -28,7 +28,7 @@ const context={self:{location:{origin:'https://preview.test'},addEventListener:(
 vm.runInNewContext(fs.readFileSync('validator-tablet-sw.js','utf8'),context);
 let pending;handlers.install({waitUntil:p=>pending=p});await pending;
 assert.ok(cached.every(url=>!url.includes('validator-host')&&!url.includes('auth')&&!url.includes('functions')));
-for(const url of ['/?app=validador-unidad','/?validator-host=1','/auth/v1/token','/functions/v1/ena-consulta-saldo','/functions/v1/gps-rym-validator','/functions/v1/revisados-final','/rest/v1/rpc/panapass_control_auto_v2']){
+for(const url of ['/?app=validador-unidad','/?validator-host=1','/auth/v1/token','/functions/v1/ena-consulta-saldo','/functions/v1/gps-rym-validator','/functions/v1/revisados-final','/rest/v1/rpc/panapass_control_auto_v2','/rest/v1/ena_cuentas','/rest/v1/revisados_vehiculo_oficial']){
   const before=cached.length;pending=null;handlers.fetch({request:{url:'https://preview.test'+url,method:'GET'},respondWith:p=>pending=p});await pending;assert.equal(cached.length,before,url+' cached operational data');
 }
 let responded=false;handlers.fetch({request:{url:'https://preview.test/auth/v1/token',method:'POST'},respondWith:()=>responded=true});assert.equal(responded,false);
