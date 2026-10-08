@@ -17,7 +17,7 @@
     if(!session)return;
     frame.classList.add('ready');loading.hidden=true;
     subtitle.textContent=session.user||'Portal RYM';
-    status.textContent=session.denied?'Sin acceso':!session.authenticated?'Inicia sesión':navigator.onLine?'Conectado':'Sin conexión';
+    status.textContent=session.pending?'Verificando acceso':session.denied?'Sin acceso':!session.authenticated?'Inicia sesión':navigator.onLine?'Conectado':'Sin conexión';
     const exit=d.getElementById('exit');
     if(exit)exit.hidden=!session.authenticated;
   }

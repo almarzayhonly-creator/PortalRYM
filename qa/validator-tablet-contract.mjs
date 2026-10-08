@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
+const BUILD='8';
 const main=execFileSync('git',['show','origin/main:index.html'],{encoding:'utf8',maxBuffer:5e6});
 assert.ok(fs.readFileSync('index.html','utf8').replaceAll('\r\n','\n')===main.replaceAll('\r\n','\n'),'Main source changed (excluding checkout line endings)');
 const manifest=JSON.parse(fs.readFileSync('validator-tablet.webmanifest','utf8'));
@@ -19,12 +20,18 @@ for(const url of ['/?app=validador-unidad','/?validator-host=1','/auth/v1/token'
 }
 let responded=false;handlers.fetch({request:{url:'https://preview.test/auth/v1/token',method:'POST'},respondWith:()=>responded=true});assert.equal(responded,false);
 handlers.fetch({request:{url:'https://supabase.test/rest/v1/units',method:'GET'},respondWith:()=>responded=true});assert.equal(responded,false);
-handlers.fetch({request:{url:'https://preview.test/css/validator-tablet-app.css?v=7',method:'GET'},respondWith:p=>pending=p});await pending;assert.ok(cached.includes('https://preview.test/css/validator-tablet-app.css?v=7'));
+handlers.fetch({request:{url:'https://preview.test/css/validator-tablet-app.css?v='+BUILD,method:'GET'},respondWith:p=>pending=p});await pending;assert.ok(cached.includes('https://preview.test/css/validator-tablet-app.css?v='+BUILD));
 const worker=(await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('worker.js','utf8')).toString('base64'))).default;
 const assets={fetch:async()=>new Response(main,{headers:{'content-type':'text/html'}})};
 const portal=await worker.fetch(new Request('https://preview.test/'),{ASSETS:assets});const portalHtml=await portal.text();
 assert.ok(!portalHtml.includes('<html class="rym-unit-validator-app"'));
 const host=await worker.fetch(new Request('https://preview.test/?validator-host=1'),{ASSETS:assets});const hostHtml=await host.text();assert.ok(hostHtml.includes('<html class="rym-unit-validator-app"'));
-assert.ok(hostHtml.includes('/modules/control-auto/validator-tablet-app.js?v=6'));
+assert.ok(hostHtml.includes('/modules/control-auto/validator-tablet-app.js?v='+BUILD));
+const count=(hay,needle)=>hay.split(needle).length-1;
+assert.equal(count(hostHtml,'validator-tablet-app.js?v='+BUILD),1,'adapter injected more than once');
+assert.equal(count(hostHtml,'validator-tablet-app.css?v='+BUILD),1,'validator CSS injected more than once');
+const loader=fs.readFileSync('modules/v171-loader.js','utf8');
+assert.ok(!loader.includes('validator-tablet-app.js'),'global loader must not load dedicated adapter');
+assert.ok(!loader.includes('validator-tablet-app.css'),'global loader must not load dedicated CSS');
 const launcher=fs.readFileSync('modules/core/unit-validator-launcher.js','utf8');assert.ok(launcher.includes("w.rymHasModule(PERM)"));
 console.log('PASS: main parity, worker route isolation, local PWA icons, manifest, static-only SW caching, launcher permission.');

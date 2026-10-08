@@ -8,10 +8,30 @@
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const text=v=>String(v??'').trim();
+  let accessCheckedFor='',accessProbe=null;
   function profile(){try{return state.profile}catch(_){return null}}
+  function userKey(){const p=profile();return String(p?.id||p?.email||p?.usuario||p?.nombre||'')}
   function allowed(){try{return !!profile()&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
-  function session(){const p=profile();return {authenticated:!!p,denied:!!p&&!allowed(),user:p?.nombre||p?.email||''}}
+  function accessMode(){
+    const p=profile();if(!p)return 'guest';
+    if(allowed())return 'allowed';
+    return accessCheckedFor===userKey()?'denied':'pending';
+  }
+  function session(){const p=profile(),mode=accessMode();return {authenticated:!!p,pending:mode==='pending',denied:mode==='denied',user:p?.nombre||p?.email||''}}
   function notify(){w.parent.postMessage({type:'rym-validator-state'},location.origin)}
+  async function verifyAccess(){
+    const key=userKey();if(!key||allowed()||accessCheckedFor===key||accessProbe)return;
+    accessProbe=(async()=>{
+      try{
+        const r=await reqCall('/functions/v1/portal-session-modules',{method:'POST',body:'{}'});
+        if(r?.data?.ok&&Array.isArray(r.data.modules)){
+          state.allModules=[...new Set(r.data.modules.map(String))];
+          if(r.data.profile)state.profile={...(state.profile||{}),...r.data.profile};
+        }
+      }catch(_){}
+      accessCheckedFor=key;
+    })().finally(()=>{accessProbe=null;refresh()});
+  }
   function rpcCall(name,args){try{return typeof rpc==='function'?rpc(name,args):Promise.reject(Error('RPC no disponible'))}catch(e){return Promise.reject(e)}}
   function reqCall(path,init){try{return typeof req==='function'?req(path,init):Promise.reject(Error('REQ no disponible'))}catch(e){return Promise.reject(e)}}
 
@@ -156,46 +176,35 @@
     setDetails(card,html);
   }
 
-  function gpsTone(g){
-    if(!g?.installed)return 'off';
-    return g?.ok?'ok':'bad';
-  }
-  function gpsLabel(g){
-    if(!g?.installed)return 'SIN GPS';
-    return g?.ok?'REPORTANDO':text(g?.label)||'SIN REPORTAR';
-  }
-  async function gpsVisual(modal,unit){
+  function gpsFromDom(modal){
     const card=modal.querySelector('#v117GpsCard');if(!card)return;
-    try{
-      const r=await reqCall('/functions/v1/gps-rym-validator',{method:'POST',body:JSON.stringify({q:unit})});
-      const row=(r?.data?.rows||[]).find(x=>text(x.unidad).toUpperCase()===unit.toUpperCase())||(r?.data?.rows||[])[0];
-      if(!r?.data?.ok||!row)throw Error(r?.data?.error||'Sin información GPS');
-      const g1=row.gps1||{},g2=row.gps2||{};
-      const good=[g1,g2].filter(g=>g?.installed&&g?.ok).length;
-      const installed=[g1,g2].filter(g=>g?.installed).length;
-      const badge=installed===0?'SIN GPS':good===2?'2 GPS OK':good+' DE '+installed+' GPS OK';
-      setPriority(card,{badge,value:badge,note:''});
-      card.classList.add('uva-gps-priority');
-      let live=card.querySelector('.uva-gps-live');
-      if(!live){live=d.createElement('div');live.className='uva-gps-live';card.querySelector('.v117-card-value')?.after(live)}
-      live.innerHTML=[
-        ['GPS1',g1],['GPS2',g2]
-      ].map(([name,g])=>'<span class="uva-gps-pill '+gpsTone(g)+'"><i></i><b>'+name+'</b><em>'+esc(gpsLabel(g))+'</em></span>').join('');
-      const html=sectionHtml('GPS',[
-        detailHtml('GPS1',gpsLabel(g1)),
-        detailHtml('Último reporte GPS1',g1?.last),
-        detailHtml('GPS2',gpsLabel(g2)),
-        detailHtml('Último reporte GPS2',g2?.last),
-        detailHtml('Nivel',row?.nivel),
-        detailHtml('Diagnóstico',row?.razon),
-        detailHtml('Estado operativo',row?.estado_operativo),
-        detailHtml('Última fuente',row?.ultima_fuente)
-      ]);
-      setDetails(card,html);
-    }catch(e){
-      setPriority(card,{badge:'GPS SIN CONFIRMAR',value:'No disponible',note:'No fue posible confirmar GPS1/GPS2'});
-      setDetails(card,sectionHtml('GPS',[detailHtml('Estado',e.message||'Sin información')]));
-    }
+    const map=detailMap(card);
+    const parse=(key)=>{
+      const raw=text(map[key]);
+      const installed=!/SIN GPS/i.test(raw)&&!!raw;
+      const ok=installed&&/REPORTANDO|OK/i.test(raw)&&!/SIN REPORT|NO REPORT/i.test(raw);
+      const last=(raw.match(/·\s*(.+)$/)||[])[1]||'';
+      return {raw,installed,ok,last};
+    };
+    const g1=parse('GPS1'),g2=parse('GPS2');
+    if(!g1.raw&&!g2.raw)return;
+    const good=[g1,g2].filter(g=>g.installed&&g.ok).length;
+    const installed=[g1,g2].filter(g=>g.installed).length;
+    const badge=installed===0?'SIN GPS':good===2?'2 GPS OK':good+' DE '+Math.max(installed,2)+' GPS OK';
+    setPriority(card,{badge,value:badge,note:''});
+    card.classList.add('uva-gps-priority');
+    let live=card.querySelector('.uva-gps-live');
+    if(!live){live=d.createElement('div');live.className='uva-gps-live';card.querySelector('.v117-card-value')?.after(live)}
+    const pill=(name,g)=>{
+      const tone=!g.installed?'off':g.ok?'ok':'bad';
+      const label=!g.installed?'SIN GPS':g.ok?'REPORTANDO':(g.raw.split('·')[0]||'SIN REPORTAR');
+      return '<span class="uva-gps-pill '+tone+'"><i></i><b>'+name+'</b><em>'+esc(label)+'</em></span>';
+    };
+    live.innerHTML=pill('GPS1',g1)+pill('GPS2',g2);
+    setDetails(card,sectionHtml('GPS',[
+      detailHtml('GPS1',g1.raw||'SIN GPS'),
+      detailHtml('GPS2',g2.raw||'SIN GPS')
+    ]));
   }
 
   function controlVisual(modal,ctrl,ficha){
@@ -244,27 +253,42 @@
   }
 
   async function enrichModal(modal){
-    if(!modal||!allowed())return;
+    if(!modal||accessMode()!=='allowed')return;
     const id=getIdentity(modal);if(!id.unit)return;
     const token=id.unit+'|'+id.plate;
+
+    // Always reformat what main already rendered. Main owns live ENA/GPS checks.
+    const ctrl=modal._uvaCtrl||{};
+    const ficha=modal._uvaFicha||null;
+    normalizeHeader(modal,{companyOwner:text(ctrl?.empresa_duena)||id.company});
+    panVisual(modal,ctrl);
+    revisadoVisual(modal,ficha,ctrl);
+    controlVisual(modal,ctrl,ficha);
+    gpsFromDom(modal);
+
+    // Supplemental master/eCarCheck data is fetched once per validated unit.
+    if(modal._uvaFetchToken===token)return;
+    modal._uvaFetchToken=token;
     const seq=(modal._uvaSeq||0)+1;modal._uvaSeq=seq;
     try{
       const rows=await rpcCall('panapass_control_auto_v2',{p_grupo:null,p_buscar:id.unit,p_limit:10}).catch(()=>[]);
-      const ctrl=(rows||[]).find(r=>text(r.unidad).toUpperCase()===id.unit.toUpperCase())||(rows||[])[0]||{};
+      const freshCtrl=(rows||[]).find(r=>text(r.unidad).toUpperCase()===id.unit.toUpperCase())||(rows||[])[0]||{};
       if(modal._uvaSeq!==seq)return;
-      const companyOwner=text(ctrl?.empresa_duena)||id.company;
-      normalizeHeader(modal,{companyOwner});
-      panVisual(modal,ctrl);
+      modal._uvaCtrl=freshCtrl;
 
-      let ficha=null;
+      let freshFicha=null;
       try{
         const r=await reqCall('/functions/v1/revisados-ficha',{method:'POST',body:JSON.stringify({placa:id.plate,unidad:id.unit})});
-        if(r?.data?.ok)ficha=r.data;
+        if(r?.data?.ok)freshFicha=r.data;
       }catch(_){}
       if(modal._uvaSeq!==seq)return;
-      revisadoVisual(modal,ficha,ctrl);
-      controlVisual(modal,ctrl,ficha);
-      gpsVisual(modal,id.unit);
+      modal._uvaFicha=freshFicha;
+
+      normalizeHeader(modal,{companyOwner:text(freshCtrl?.empresa_duena)||id.company});
+      panVisual(modal,freshCtrl);
+      revisadoVisual(modal,freshFicha,freshCtrl);
+      controlVisual(modal,freshCtrl,freshFicha);
+      gpsFromDom(modal);
       modal.dataset.uvaEnriched=token;
     }catch(e){
       console.warn('Unit validator presentation enrichment',e);
@@ -272,6 +296,7 @@
   }
 
   function logout(){
+    accessCheckedFor='';accessProbe=null;
     d.getElementById('v101CheckModal')?.remove();
     if(typeof clearSession==='function')clearSession();
     if(typeof loginView==='function')loginView();
@@ -280,10 +305,11 @@
   w.RYM_UNIT_VALIDATOR=Object.freeze({session,logout});
 
   function refresh(){
-    const p=profile(),ok=allowed();
+    const p=profile(),mode=accessMode(),ok=mode==='allowed';
     d.documentElement.classList.toggle('uva-authorized',ok);
     d.documentElement.classList.toggle('uva-authenticated',!!p);
-    if(p&&!ok){
+    if(mode==='pending'){verifyAccess();notify();return}
+    if(mode==='denied'){
       d.getElementById('v101CheckModal')?.remove();
       const root=d.getElementById('app');
       if(root&&!root.querySelector('.uva-denied'))root.innerHTML='<section class="uva-denied"><span aria-hidden="true">⌑</span><h1>Acceso restringido</h1><p>Tu usuario no tiene habilitado el permiso de App Validador de Unidad.</p></section>';

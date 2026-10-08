@@ -43,8 +43,13 @@ jobs:
           grep -Fq 'control_auto.validador_unidad_app' unit-validator.html
           grep -Fq 'control_auto.validador_unidad_app' modules/core/unit-validator-launcher.js
           grep -Fq 'v101ValidatorQ' modules/control-auto/validator-tablet-app.js
-          grep -Fq 'validator-tablet-app.js' modules/v171-loader.js
-          grep -Fq 'validator-tablet-app.css' modules/v171-loader.js
+          ! grep -Fq 'validator-tablet-app.js' modules/v171-loader.js
+          ! grep -Fq 'validator-tablet-app.css' modules/v171-loader.js
+          grep -Fq 'validator-tablet-app.css?v=8' unit-validator.html
+          grep -Fq 'unit-validator-shell.js?v=8' unit-validator.html
+          grep -Fq 'validator-tablet-app.js?v=8' worker.js
+          grep -Fq 'validator-tablet-app.css?v=8' worker.js
+          grep -Fq "rym-unit-validator-shell-v8" validator-tablet-sw.js
           grep -Fq '"start_url": "/?app=validador-unidad"' validator-tablet.webmanifest
 
       - name: Test dedicated validator against main functions
