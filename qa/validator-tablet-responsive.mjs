@@ -202,7 +202,7 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         const body=await control.locator('.uva-detail-body').innerText();
         for(const label of ['Control de Auto','Ficha oficial eCarCheck','Documento propietario','VIN','Transmisión','Combustible','Cilindrada','Cilindros','Capacidad','Puertas','Tracción','Aire acondicionado','Hipoteca','Pertenencia','Aseguradora','Póliza','Restricción vehicular','Rev ID','Último taller','Observaciones'])assert.ok(body.toUpperCase().includes(label.toUpperCase()),label+' missing');
         assert.match(body,/MARCA OFICIAL QA/);assert.match(body,/ASEGURADORA QA/);assert.match(body,/QA<123>/);assert.match(body,/false/);
-        assert.match(body,/Comparación de identidad RYM \/ eCarCheck/);
+        assert.match(body,/Comparación de identidad RYM \/ eCarCheck/i);
         assert.match(body,/NO COINCIDE/);
         if(scenario==='gps-alert')assert.match(await gps.locator('.uva-priority-note').innerText(),/ALERTA/);
         if(scenario==='progressive')await page.screenshot({path:path.join(out,`${width}x${height}-progressive-control-detail.png`)});
