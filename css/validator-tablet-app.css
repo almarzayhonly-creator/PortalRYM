@@ -310,3 +310,88 @@ html.rym-unit-validator-app .uva-pan-priority .v117-card-value{font-size:27px!im
 html.rym-unit-validator-app .uva-rev-priority .v117-card-value{font-size:18px!important}
 html.rym-unit-validator-app .uva-control-priority .v117-card-value{font-size:18px!important}
 html.rym-unit-validator-app .uva-meta-company{font-weight:650!important}
+
+/* 360–412px: keep the four operational priorities above the fold. */
+@media(max-width:650px){
+  html.rym-unit-validator-app .v101-check-card,
+  html.rym-unit-validator-app .v117-check-card{
+    padding-top:10px!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+    padding-bottom:68px!important
+  }
+  html.rym-unit-validator-app .v117-check-head{
+    margin-bottom:6px!important;
+    padding-bottom:4px!important
+  }
+  html.rym-unit-validator-app .v117-title-row h2{font-size:31px!important}
+  html.rym-unit-validator-app .v117-overall{min-height:27px!important;padding:0 8px!important;font-size:8.5px!important}
+  html.rym-unit-validator-app .v117-meta{margin-top:5px!important;gap:4px 8px!important}
+  html.rym-unit-validator-app .v117-meta>span{min-height:25px!important;padding:3px 7px!important;font-size:10px!important}
+  html.rym-unit-validator-app .v117-meta b{font-size:11px!important}
+  html.rym-unit-validator-app .v117-identity-line,
+  html.rym-unit-validator-app .v117-identity-line.v125-clean{margin:5px 0 7px!important}
+  html.rym-unit-validator-app .v117-quick-grid,
+  html.rym-unit-validator-app .v117-quick-grid.with-gps,
+  html.rym-unit-validator-app .v117-quick-grid.no-gps{gap:6px!important}
+  html.rym-unit-validator-app .v117-status-card{
+    min-height:82px!important;
+    padding:9px 10px 9px 13px!important;
+    border-radius:13px!important
+  }
+  html.rym-unit-validator-app .v117-status-card header{
+    min-height:40px!important;
+    padding:0!important;
+    grid-template-columns:31px minmax(0,1fr) 25px!important;
+    gap:8px!important
+  }
+  html.rym-unit-validator-app .v117-card-icon{width:31px!important;height:31px!important;flex-basis:31px!important;border-radius:9px!important}
+  html.rym-unit-validator-app .v117-status-card header small{font-size:9px!important}
+  html.rym-unit-validator-app .v117-status-card header strong{font-size:12px!important}
+  html.rym-unit-validator-app .v117-state-dot{width:25px!important;height:25px!important;font-size:12px!important}
+  html.rym-unit-validator-app .v117-card-value{
+    position:static!important;
+    margin:2px 34px 0 39px!important;
+    font-size:14px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important
+  }
+  html.rym-unit-validator-app .uva-pan-priority .v117-card-value{font-size:18px!important}
+  html.rym-unit-validator-app .uva-rev-priority .v117-card-value,
+  html.rym-unit-validator-app .uva-control-priority .v117-card-value{font-size:13px!important}
+  html.rym-unit-validator-app .uva-priority-note{
+    margin:1px 34px 0 39px!important;
+    font-size:9px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important
+  }
+  html.rym-unit-validator-app .uva-gps-live{
+    margin:2px 34px 0 39px!important;
+    gap:5px!important;
+    flex-wrap:nowrap!important
+  }
+  html.rym-unit-validator-app .uva-gps-pill{
+    min-height:23px!important;
+    padding:2px 6px!important;
+    font-size:8.5px!important;
+    white-space:nowrap!important
+  }
+  html.rym-unit-validator-app .uva-gps-pill i{width:7px!important;height:7px!important}
+  html.rym-unit-validator-app .uva-details summary{
+    right:9px!important;
+    bottom:9px!important;
+    width:26px!important;
+    height:26px!important;
+    min-height:26px!important;
+    border-radius:8px!important
+  }
+  html.rym-unit-validator-app .uva-details summary:after{font-size:20px!important}
+  html.rym-unit-validator-app .v117-check-actions{
+    padding:7px 10px calc(7px + env(safe-area-inset-bottom))!important
+  }
+  html.rym-unit-validator-app #v101AgainCheck{min-height:48px!important}
+}
