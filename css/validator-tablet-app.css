@@ -395,3 +395,13 @@ html.rym-unit-validator-app .uva-meta-company{font-weight:650!important}
   }
   html.rym-unit-validator-app #v101AgainCheck{min-height:48px!important}
 }
+
+/* QA legibility floor: operational text must remain readable on small phones. */
+@media(max-width:650px){
+  html.rym-unit-validator-app .v117-status-card header small,
+  html.rym-unit-validator-app .v117-meta>span,
+  html.rym-unit-validator-app .uva-priority-note,
+  html.rym-unit-validator-app .uva-gps-pill{
+    font-size:11px!important
+  }
+}
