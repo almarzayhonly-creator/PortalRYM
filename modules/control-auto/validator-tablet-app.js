@@ -522,7 +522,14 @@
   w.RYM_UNIT_VALIDATOR=Object.freeze({session,logout});
 
   function ensureValidatorSurface(){
-    if(d.getElementById('v101ValidatorQ'))return true;
+    const existing=d.getElementById('v101ValidatorQ');
+    if(existing){
+      const go=d.getElementById('v101ValidatorGo');
+      if((typeof existing.oninput!=='function'||typeof go?.onclick!=='function')&&typeof w.bindValidator99==='function'){
+        try{w.bindValidator99()}catch(e){console.warn('Unit validator rebind',e)}
+      }
+      return true;
+    }
     const root=d.getElementById('app');if(!root)return false;
     root.innerHTML=
       '<div class="v101-shell uva-dedicated-shell">'+
