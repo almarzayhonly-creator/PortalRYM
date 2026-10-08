@@ -599,3 +599,12 @@ html.rym-unit-validator-app #v117RevCard.uva-rev-expired .v117-card-value{color:
 html.rym-unit-validator-app #v117CtlCard .uva-identity-check{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow-wrap:anywhere!important;word-break:break-word!important}
 html.rym-unit-validator-app #v117CtlCard .uva-identity-check strong,
 html.rym-unit-validator-app #v117CtlCard .uva-identity-check div{min-width:0!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important}
+
+/* Source classification is visible even while details are closed. */
+html.rym-unit-validator-app .uva-gps-pill small{grid-column:1/-1;color:#64748b;font-size:11px;line-height:1.2;overflow-wrap:anywhere}
+html.rym-unit-validator-app .uva-verified-flag.critical{background:#fee2e2!important;color:#b42318!important;border-color:#fecaca!important}
+html.rym-unit-validator-app #v117RevCard.uva-rev-pending .v117-card-value{color:#a15c00!important}
+html.rym-unit-validator-app #v117CtlCard .uva-identity-check.match strong{color:#047857}
+html.rym-unit-validator-app #v117CtlCard .uva-identity-check.match strong:before{content:'✓ ';font-weight:700}
+html.rym-unit-validator-app #v117CtlCard .uva-identity-check.missing strong{color:#64748b}
+html.rym-unit-validator-app #v117CtlCard .uva-detail-section+ .uva-detail-section{border-top:1px solid #dce7e4;margin-top:16px;padding-top:12px}

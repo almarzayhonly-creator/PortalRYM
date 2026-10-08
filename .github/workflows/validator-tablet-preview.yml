@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
@@ -25,11 +27,13 @@ jobs:
       - name: Verify main parity and tablet app files
         run: |
           git fetch --depth=1 origin main
+          git fetch --depth=1 origin de63de94c83a87cd182e4ea1a58ef4d866d9e158
           git diff --exit-code origin/main -- index.html
           test "$(git rev-parse HEAD^0)" != ""
           node --check worker.js
           node --check modules/v171-loader.js
           node --check modules/control-auto/validator-tablet-app.js
+          node --check modules/control-auto/validator-presentation.js
           node --check modules/core/unit-validator-shell.js
           node --check modules/core/unit-validator-launcher.js
           node --check validator-tablet-sw.js
@@ -67,6 +71,8 @@ jobs:
             CHROME_PATH="$(node -e "const {chromium}=require('playwright');process.stdout.write(chromium.executablePath())")"
           fi
           PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-tablet-responsive.mjs
+          PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-tablet-cache-update.mjs
+          node qa/validator-presentation-contract.mjs
           node qa/validator-tablet-contract.mjs
 
       - name: Upload responsive evidence
@@ -124,3 +130,16 @@ jobs:
           done
           echo "Validator tablet alias did not propagate." >&2
           exit 1
+
+      - name: Verify served build and exact resource hashes
+        env:
+          VERSION_URL: ${{ steps.deploy.outputs.version_url }}
+          ALIAS_URL: ${{ steps.deploy.outputs.alias_url }}
+        run: node qa/validator-tablet-deployed.mjs "$VERSION_URL" "$ALIAS_URL"
+
+      - name: Upload served resource evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validator-served-resources
+          path: .sandbox/validator-qa/deployed-resources.json

@@ -102,11 +102,18 @@
     const mainReq=req;
     req=async function(path,init){
       const owner=userKey();
-      const out=await mainReq(path,init);
+      let out=await mainReq(path,init);
       if(!owner||owner!==userKey())return out;
       const url=String(path);let input={};
       try{input=JSON.parse(init?.body||'{}')}catch(_){}
-      if(url.includes('/functions/v1/gps-rym-validator'))responses.gps={key:text(input.q),data:out?.data};
+      if(url.includes('/functions/v1/gps-rym-validator')){
+        if(Array.isArray(out?.data?.rows))out={...out,data:{...out.data,rows:out.data.rows.map(row=>{
+          const evaluation=w.RYM_VALIDATOR_PRESENTATION.gps(row);
+          const level={NORMAL:'OK',ALERTA:'ALERTA','CRÍTICO':'CRITICO'}[evaluation.level];
+          return level?{...row,nivel_validator:row.nivel,nivel:level,razon:evaluation.reason}:row;
+        })}};
+        responses.gps={key:text(input.q),data:out?.data};
+      }
       if(url.includes('/functions/v1/ena-consulta-saldo'))responses.ena={key:text(input.panapass),data:out?.data};
       if(url.includes('/functions/v1/revisados-final'))responses.rev=out?.data;
       return out;
@@ -301,9 +308,9 @@
     const live=responses.ena?.key===text(ctrl?.panapass_numero||map['PANAPASS'])?responses.ena.data?.results?.[0]:null;
     const rawLive=live?.summary?.saldo_texto;
     const hasLive=(live?.result==='OK'||live?.result==='BUSY')&&rawLive!=null&&text(rawLive)!=='';
-    const parsedLive=hasLive?Number(text(rawLive).replace(/[^\\d.-]/g,'')):NaN;
+    const parsedLive=hasLive?w.RYM_VALIDATOR_PRESENTATION.balance(rawLive):NaN;
     const cardValue=text(original.value);
-    const hasCardValue=cardValue&&!/^(—|–|--|-|CONSULTANDO(?:\\.\\.\\.)?|NO DISPONIBLE|SIN INFORMACIÓN)$/i.test(cardValue);
+    const hasCardValue=cardValue&&!/^(—|–|--|-|CONSULTANDO(?:\.\.\.)?|NO DISPONIBLE|SIN INFORMACIÓN)$/i.test(cardValue);
     const stored=first(ctrl?.ena_saldo,ctrl?.saldo_ena,ctrl?.saldo);
     const balance=Number.isFinite(parsedLive)?'B/. '+parsedLive.toFixed(2):hasCardValue?cardValue:stored!=null&&Number.isFinite(Number(stored))?'B/. '+Number(stored).toFixed(2):'No disponible';
     const account=modal._uvaEna||{};
@@ -380,19 +387,17 @@
     const raw=[map['ESTADO'],original.badge,original.value].filter(Boolean).join(' ');
     // The persisted Revisados operational evaluation is authoritative. A valid
     // official revisado must never be downgraded by legacy card text.
-    const officialState=text(operacion.estado_revisado).toUpperCase();
-    const expired=/VENCID|PENDIENT|NO VIGENTE|EXPIR/i.test(raw);
-    const current=!expired&&/VIGENTE|AL D[IÍ]A|OK|VALIDO|VÁLIDO/i.test(raw);
-    const status=officialState==='VIGENTE'?'VIGENTE':officialState==='VENCIDO'?'VENCIDO':officialState==='PENDIENTE'?'PENDIENTE':current?'VIGENTE':/VENCID|EXPIR/i.test(raw)?'VENCIDO':'PENDIENTE';
-    const mes=text(first(ctrl?.mes_revisado,unidad?.mes_revisado,map['MES DE LA UNIDAD']));
-    const headline=status==='VIGENTE'?'VIGENTE':(status==='VENCIDO'||/VENCID/i.test(text(first(operacion.estado_revisado,rev.estado,map['ESTADO']))))?'VENCIDO'+(mes?' · '+mes.toUpperCase():''):'PENDIENTE'+(mes?' · '+mes.toUpperCase():'');
+    const status=w.RYM_VALIDATOR_PRESENTATION.revisado(rev,operacion,raw);
+    const mes=text(first(ctrl?.mes_revisado,unidad?.mes_revisado,rev.mes,map['MES DE LA UNIDAD']));
+    const headline=['VENCIDO','PENDIENTE'].includes(status)?status+(mes?' · '+mes.toUpperCase():''):status;
     setPriority(card,{badge:'REVISADO',value:headline,note:'Último revisado · '+last});
     card.classList.add('uva-rev-priority');
     card.classList.toggle('uva-rev-current',status==='VIGENTE');
-    card.classList.toggle('uva-rev-expired',status!=='VIGENTE');
+    card.classList.toggle('uva-rev-expired',status==='VENCIDO');
+    card.classList.toggle('uva-rev-pending',status==='PENDIENTE'||status==='SIN MES');
     let flag=card.querySelector('.uva-verified-flag');
     if(!flag){flag=d.createElement('span');flag.className='uva-verified-flag';card.querySelector('header')?.appendChild(flag)}
-    flag.className='uva-verified-flag '+(status==='VIGENTE'?'ok':'warn');
+    flag.className='uva-verified-flag '+(status==='VIGENTE'?'ok':status==='VENCIDO'?'critical':'warn');
     const flagHtml='<i aria-hidden="true">'+(status==='VIGENTE'?'✓':'!')+'</i><b>'+esc(status)+'</b>';
     if(flag.innerHTML!==flagHtml)flag.innerHTML=flagHtml;
     const html=sectionHtml('Revisado',[
@@ -425,24 +430,27 @@
       return {raw,known,installed,ok,last};
     };
     const row=responses.gps?.key.toUpperCase()===getIdentity(modal).unit.toUpperCase()?(responses.gps.data?.rows||[]).find(r=>text(r.unidad).toUpperCase()===getIdentity(modal).unit.toUpperCase())||responses.gps.data?.rows?.[0]:null;
-    const g1=parse('GPS1'),g2=parse('GPS2');
+    const deviceState=(source,key)=>source&&typeof source.installed==='boolean'?{raw:text(source.label),known:true,installed:source.installed,ok:source.installed&&source.ok===true,last:source.last}:parse(key);
+    const g1=deviceState(row?.gps1,'GPS1'),g2=deviceState(row?.gps2,'GPS2');
     const good=[g1,g2].filter(g=>g.installed&&g.ok).length;
     const installed=[g1,g2].filter(g=>g.installed).length;
     const summary=!g1.known&&!g2.known?'SIN INFORMACIÓN':installed===0?'SIN GPS':good===2?'2 DE 2 REPORTANDO':good+' DE '+Math.max(installed,2)+' REPORTANDO';
-    const level=text(row?.nivel||row?.nivel_criticidad||row?.criticidad).toUpperCase();
-    const tone=/CR[IÍ]TIC/.test(level)?'critical':/ALERTA|WARN|ADVERT/.test(level)?'alert':/OK|NORMAL|BIEN/.test(level)?'normal':'unknown';
-    const label=tone==='critical'?'CRÍTICO':tone==='alert'?'ALERTA':tone==='normal'?'NORMAL':'SIN CLASIFICAR';
+    const evaluation=w.RYM_VALIDATOR_PRESENTATION.gps(row),tone=evaluation.tone,label=evaluation.level;
     setPriority(card,{badge:'GPS',value:summary,note:'Criticidad GPS · '+label});
     card.classList.toggle('uva-gps-critical',tone==='critical');
     card.classList.toggle('uva-gps-alert',tone==='alert');
     card.classList.toggle('uva-gps-normal',tone==='normal');
     card.classList.add('uva-gps-priority');
+    let levelFlag=card.querySelector('.uva-gps-level');
+    if(!levelFlag){levelFlag=d.createElement('span');levelFlag.className='uva-verified-flag uva-gps-level';card.querySelector('header')?.appendChild(levelFlag)}
+    levelFlag.className='uva-verified-flag uva-gps-level '+(tone==='normal'?'ok':tone==='unknown'?'off':tone==='critical'?'critical':'warn');
+    if(levelFlag.textContent!==label)levelFlag.textContent=label;
     let live=card.querySelector('.uva-gps-live');
     if(!live){live=d.createElement('div');live.className='uva-gps-live';card.querySelector('.v117-card-value')?.after(live)}
     const pill=(name,g)=>{
       const tone=!g.installed?'off':g.ok?'ok':'bad';
       const label=!g.known?'SIN INFORMACIÓN':!g.installed?'SIN GPS':g.ok?'REPORTANDO':'NO REPORTA';
-      return '<span class="uva-gps-pill '+tone+'"><i></i><b>'+name.replace('GPS','GPS ')+'</b><em>'+esc(label)+'</em></span>';
+      return '<span class="uva-gps-pill '+tone+'"><i></i><b>'+name.replace('GPS','GPS ')+'</b><em>'+esc(label)+'</em><small>'+esc(g.last?validatorDate(g.last):'Sin transmisión')+'</small></span>';
     };
     const liveHtml=pill('GPS1',g1)+pill('GPS2',g2);
     if(live.innerHTML!==liveHtml)live.innerHTML=liveHtml;
@@ -456,7 +464,9 @@
     ]);
     setDetails(card,sectionHtml('Evaluación GPS',[
       detailHtml('Nivel oficial',first(row?.nivel,row?.nivel_criticidad,row?.criticidad,'Sin clasificar')),
-      detailHtml('Motivo',first(row?.razon,row?.diagnostico)),
+      detailHtml('Nivel recibido del endpoint Validator',row?.nivel_validator),
+      detailHtml('Clasificación GPS RYM',evaluation.level),
+      detailHtml('Motivo',evaluation.reason),
       detailHtml('Estado operativo',row?.estado_operativo)
     ])+device('GPS 1',g1,row?.gps1)+device('GPS 2',g2,row?.gps2));
   }
@@ -475,7 +485,7 @@
     if(flag.innerHTML!==flagHtml)flag.innerHTML=flagHtml;
     const u=ficha?.unidad||{},o=ficha?.oficial||{};
     const raw=officialRaw(o);
-    const control=sectionHtml('Control de Auto',[
+    const control=sectionHtml('CONTROL DE AUTO · RYM',[
       detailHtml('Estado de la unidad',state),
       detailHtml('Estatus interno',internal),
       detailHtml('Empresa',ctrl?.empresa_duena||u?.empresa_duena),
@@ -492,7 +502,7 @@
       detailHtml('Transmisión',ctrl?.transmision||u?.transmision),
       detailHtml('Estatus Netsuite',first(ctrl?.estatus_netsuite,u?.estatus_netsuite))
     ]);
-    const ecar=sectionHtml('Ficha oficial eCarCheck',[
+    const ecar=sectionHtml('FICHA OFICIAL · ECARCHECK',[
       detailHtml('Última verificación',o?.actualizado_at||ficha?.consulta_at),
       detailHtml('Resultado eCarCheck',ficha?.resultado||raw?.detalleRespuesta||raw?.detalle_respuesta),
       detailHtml('Placa consultada',raw?.nroPlaca||o?.placa),
@@ -528,10 +538,10 @@
       detailHtml('Rev ID',first(raw?.revId,raw?.idRevisados,o?.rev_id)),
       detailHtml('Último taller',first(raw?.ultTallerRevisado,o?.ultimo_taller)),
       detailHtml('Observaciones',first(raw?.observaciones,o?.observaciones))
-    ]);
+    ])||sectionHtml('FICHA OFICIAL · ECARCHECK',[detailHtml('Estado','Sin ficha oficial disponible')]);
     const compareFields=[
       ['Chasis',first(ctrl?.chasis,u?.chasis),first(raw?.nroChasis,o?.chasis)],
-      ['VIN',first(ctrl?.vin,u?.vin,ctrl?.chasis,u?.chasis),first(raw?.nroVin,o?.vin)],
+      ['VIN',first(ctrl?.vin,u?.vin),first(raw?.nroVin,o?.vin)],
       ['Motor',first(ctrl?.motor,u?.motor),first(raw?.nroMotor,o?.motor)],
       ['Placa',first(ctrl?.placa_unica,u?.placa_unica),first(raw?.nroPlaca,o?.placa)],
       ['Marca',first(ctrl?.marca,u?.marca),first(raw?.marcaVehiculo,raw?.marcavehiculo,o?.marca)],
@@ -539,10 +549,8 @@
       ['Año',first(ctrl?.anio,u?.anio),first(raw?.anioVehiculo,o?.anio)],
       ['Color',first(ctrl?.color,u?.color),first(raw?.colorVehiculo,o?.color)]
     ];
-    const normalize=v=>text(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
     const checks=compareFields.map(([label,internal,official])=>{
-      const left=normalize(internal),right=normalize(official);
-      const status=!left||!right?'missing':left===right?'match':'diff';
+      const status=w.RYM_VALIDATOR_PRESENTATION.compare(internal,official);
       const state=status==='match'?'COINCIDE':status==='diff'?'NO COINCIDE':'SIN DATOS PARA COMPARAR';
       return '<div class="uva-identity-check '+status+'" style="padding:9px 10px;margin:5px 0;border-radius:10px;border:1px solid '+(status==='diff'?'#f5ad59':'#dce7e4')+';background:'+(status==='diff'?'#fff0d9':'transparent')+'"><strong>'+esc(label)+' · '+state+'</strong><div>RYM: '+esc(internal||'Sin dato')+'</div><div>eCarCheck: '+esc(official||'Sin dato')+'</div></div>';
     }).join('');

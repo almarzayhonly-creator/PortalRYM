@@ -5,7 +5,28 @@
   const status=d.getElementById('status'),subtitle=d.getElementById('subtitle');
   const install=d.getElementById('install');
   let prompt=null;
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('/validator-tablet-sw.js',{scope:'/'}).catch(()=>{});
+  const build=d.querySelector('meta[name="rym-validator-build"]')?.content;
+  let checking=false,reloading=false;
+  async function checkBuild(){
+    if(checking||!navigator.onLine||d.visibilityState==='hidden')return;
+    checking=true;
+    try{
+      const response=await fetch('/?app=validador-unidad',{cache:'no-store'});
+      const next=response.headers.get('x-portal-build');
+      if(response.ok&&next&&build&&next!==build&&!reloading){
+        reloading=true;w.location.reload();
+      }
+    }catch(_){}finally{checking=false}
+  }
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/validator-tablet-sw.js',{scope:'/',updateViaCache:'none'})
+      .then(registration=>registration.update()).catch(()=>{});
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{void checkBuild()});
+  }
+  d.addEventListener('visibilitychange',()=>{void checkBuild()});
+  w.addEventListener('online',()=>{void checkBuild()});
+  w.setInterval(()=>{void checkBuild()},60000);
+  void checkBuild();
   w.addEventListener('beforeinstallprompt',e=>{e.preventDefault();prompt=e;install.hidden=false});
   install.addEventListener('click',async()=>{
     if(!prompt)return;

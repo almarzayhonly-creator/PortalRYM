@@ -7,6 +7,6 @@
     "directory": "./",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/"]
+    "run_worker_first": ["/", "/unit-validator", "/unit-validator.html", "/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-tablet-app.js"]
   }
 }
