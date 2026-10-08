@@ -14,7 +14,7 @@ const clean=consistency.slice(consistency.indexOf('  function cleanQuickQuery(){
 // Execute main's actual validator functions, with deterministic responses only in this test server.
 const seed={unidad:'QA200',placa_unica:'QA14826',placa_comercial:'QA-CUPO',estatus:'ACTIVO',panapass_numero:'1129235',panapass_display:'1129235 · QA',ena_saldo:.25,empresa_duena:'EMPRESA QA',empresa_operadora:'OPERADORA QA',supervisora:'SUPERVISORA QA',galera:'GALERA QA',mes_revisado:'OCTUBRE',color:'Titan Grey',marca:'Hyundai',modelo:'QA-MODELO',anio:2020,chasis:'QA-CHASIS',motor:'QA-MOTOR',transmision:'MANUAL',estatus_netsuite:'QA-NETSUITE',tag:'TAG-1',tags_ena:'TAG-1, TAG-2',cantidad_tags:2,tags_detalle:[{tag:'TAG-2',estado:'ACTIVO',estado_financiero:'AL DIA',tipo_tag:'QA-TIPO-TAG',matricula:'QA14826',tipo_vehiculo:'AUTO',corregimiento:'QA',consultado_at:'2026-10-07T12:00:00Z'}]};
 const official={placa:'QA14826',actualizado_at:'2026-10-07T12:00:00Z',ultima_respuesta:{detalleRespuesta:'QA GUARDADO',nroPlaca:'QA14826',cupo:'QA-OFICIAL',nombrePropietario:'PROPIETARIO QA',nroDocumentoPropietario:'DOC-QA',nroVin:'QA-VIN-LARGO-012345678901234567890123456789',nroChasis:'OFICIAL-CHASIS',nroMotor:'OFICIAL-MOTOR',marcavehiculo:'MARCA OFICIAL QA',modeloVehiculo:'MODELO OFICIAL QA',anioVehiculo:2021,colorVehiculo:'COLOR QA',tipoVehiculo:'TIPO QA',tipoPlaca:'PLACA QA',tipoUso:'USO QA',estadoVehiculo:'ESTADO QA',tipoTransmision:'AUTOMATICA',tipoCombustible:'GASOLINA',cilindradaVehiculo:1500,nroCilindros:4,capacidadVehiculo:5,tipoCapacidad:'PERSONAS',nroPuertas:4,traccionMotor:'DELANTERA',tieneAireAcondicionado:false,hipoteca:false,tipoPertenencia:'PROPIA',aseguradora:'ASEGURADORA QA',poliza:'QA<123>',restriccionVehiculos:'RESTRICCION QA',fechaRevisado:'2026-10-01',mesRevisado:'OCTUBRE',idRevisados:123,ultTallerRevisado:'TALLER QA',observaciones:'OBSERVACION QA'}};
-const cases=process.argv.includes('--progressive-only')?['progressive']:['ok','progressive','pan-negative','no-pan','rev-pending','rev-blocked','gps-alert','no-gps','stopped','custody','bodywork','closed','ena-error','not-found','no-permission'];
+const cases=process.argv.includes('--progressive-only')?['progressive']:process.argv.includes('--latency-only')?['fast-enter','parallel','master-fallback']:['ok','progressive','fast-enter','parallel','master-fallback','pan-negative','no-pan','rev-pending','rev-blocked','gps-alert','no-gps','stopped','custody','bodywork','closed','ena-error','not-found','no-permission'];
 const sizes=[[360,800],[390,844],[412,915],[768,1024],[800,1280],[1024,768],[1280,800],[1440,900]];
 let activeCase='ok';
 function fixture(){
@@ -26,12 +26,12 @@ function fixture(){
   function loginView(){document.body.className='';document.getElementById('app').innerHTML='<div class="login-card">Inicia sesión</div>'}
   window.v36PortalHome=async()=>{};
   function gpsDate116(v){return String(v)}
-  async function rpc(name,args){calls.push({name,args});if(testCase==='not-found')return [];const s={...testSeed};if(testCase==='progressive')s.mes_revisado='ENERO';if(testCase==='pan-negative')s.ena_saldo=-2;if(testCase==='no-pan')s.panapass_numero='';if(testCase==='stopped'){s.estatus='PARADO';s.status2='TALLER'}if(testCase==='closed')s.estatus='CERRADA';return [s]}
-  async function req(url,opt){calls.push({url,opt});
-  if(testCase==='progressive')await new Promise(resolve=>setTimeout(resolve,url.includes('gps-rym-validator')?650:url.includes('ena-consulta')?450:50));
+  async function rpc(name,args){calls.push({name,args});if(testCase==='fast-enter'||testCase==='parallel')await new Promise(resolve=>setTimeout(resolve,testCase==='fast-enter'?350:100));if(testCase==='not-found'||(testCase==='master-fallback'&&name==='panapass_control_auto_v2'&&args.p_limit===8))return [];const s={...testSeed};if(testCase==='progressive')s.mes_revisado='ENERO';if(testCase==='pan-negative')s.ena_saldo=-2;if(testCase==='no-pan')s.panapass_numero='';if(testCase==='stopped'){s.estatus='PARADO';s.status2='TALLER'}if(testCase==='closed')s.estatus='CERRADA';return [s]}
+  async function req(url,opt){const call={url,opt,start:performance.now()};calls.push(call);try{
+  if(testCase==='parallel')await new Promise(resolve=>setTimeout(resolve,120));if(testCase==='progressive')await new Promise(resolve=>setTimeout(resolve,url.includes('gps-rym-validator')?650:url.includes('ena-consulta')?450:50));
   if(url.includes('portal-session-modules'))return {data:{ok:true,modules:state.allModules}};
   if(url.includes('revisados-ficha'))return {data:{ok:true,unidad:testSeed,oficial:{placa:testSeed.placa_unica},logistica:{status2:testCase==='stopped'?'TALLER':testCase==='custody'?'CUSTODIA':testCase==='bodywork'?'CHAPISTERÍA':'ACTIVO'}}};
-  if(url.includes('/rest/v1/ena_cuentas'))return {data:[{panapass_display:'1129235 · QA',estado_acceso:'OK',tipo_credencial:'QA-CREDENCIAL',ena_empresa:'ENA EMPRESA QA',ena_ruc:'RUC-QA',ena_email:'qa@example.test',ultimo_login_ok:'2026-10-07T12:00:00Z',ultima_consulta:'2026-10-07T12:00:00Z',updated_at:'2026-10-07T12:00:00Z'}]};if(url.includes('/rest/v1/revisados_vehiculo_oficial'))return {data:[testOfficial]};if(url.includes('revisados-final'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,estado:testCase==='rev-pending'?'PENDIENTE':'VIGENTE',emitido:testCase!=='rev-pending',bloqueado:testCase==='rev-blocked',status2:testCase==='stopped'?'TALLER':testCase==='custody'?'CUSTODIA':testCase==='bodywork'?'CHAPISTERÍA':'ACTIVO',mes_revisado:'OCTUBRE',ultimo_revisado:'2026-10-01',fotos_disponibles:true,cantidad_fotos:2}]}};if(url.includes('ena-consulta')){if(testCase==='ena-error')throw Error('Sin respuesta ENA');return {data:{ok:true,results:[{result:'OK',summary:{saldo_texto:testCase==='pan-negative'?'-2.00':'0.25'}}]}}}if(url.includes('gps-rym-validator'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,nivel:testCase==='gps-alert'?'ALERTA':'OK',estado_operativo:'ACTIVO',razon:'DIAGNOSTICO QA',gps1:{installed:testCase!=='no-gps',ok:true,last:'2026-10-07',proveedor:'PROVEEDOR QA',imei:'IMEI QA',metadata:{satellites:8}},gps2:{installed:true,ok:testCase!=='gps-alert',last:'2026-10-07'},estado_operativo:'ACTIVO',razon:'Diagnóstico QA'}]}};throw Error('Unexpected request '+url)}
+  if(url.includes('/rest/v1/ena_cuentas'))return {data:[{panapass_display:'1129235 · QA',estado_acceso:'OK',tipo_credencial:'QA-CREDENCIAL',ena_empresa:'ENA EMPRESA QA',ena_ruc:'RUC-QA',ena_email:'qa@example.test',ultimo_login_ok:'2026-10-07T12:00:00Z',ultima_consulta:'2026-10-07T12:00:00Z',updated_at:'2026-10-07T12:00:00Z'}]};if(url.includes('/rest/v1/revisados_vehiculo_oficial'))return {data:[testOfficial]};if(url.includes('revisados-final'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,estado:testCase==='rev-pending'?'PENDIENTE':'VIGENTE',emitido:testCase!=='rev-pending',bloqueado:testCase==='rev-blocked',status2:testCase==='stopped'?'TALLER':testCase==='custody'?'CUSTODIA':testCase==='bodywork'?'CHAPISTERÍA':'ACTIVO',mes_revisado:'OCTUBRE',ultimo_revisado:'2026-10-01',fotos_disponibles:true,cantidad_fotos:2}]}};if(url.includes('ena-consulta')){if(testCase==='ena-error')throw Error('Sin respuesta ENA');return {data:{ok:true,results:[{result:'OK',summary:{saldo_texto:testCase==='pan-negative'?'-2.00':'0.25'}}]}}}if(url.includes('gps-rym-validator'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,nivel:testCase==='gps-alert'?'ALERTA':'OK',estado_operativo:'ACTIVO',razon:'DIAGNOSTICO QA',gps1:{installed:testCase!=='no-gps',ok:true,last:'2026-10-07',proveedor:'PROVEEDOR QA',imei:'IMEI QA',metadata:{satellites:8}},gps2:{installed:true,ok:testCase!=='gps-alert',last:'2026-10-07'},estado_operativo:'ACTIVO',razon:'Diagnóstico QA'}]}};throw Error('Unexpected request '+url)}finally{call.end=performance.now()}}
   ${validator}
   const E=E99,N=N99;
   ${clean}
@@ -101,7 +101,8 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         assert.match(await host.locator('#v101ValidatorList').innerText(),/Sin coincidencias/);
         await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}.png`)});
       }else{
-        if(count%3===0){await host.locator('[data-v101pick]').waitFor();await host.locator('[data-v101pick]').click()}
+        if(scenario==='fast-enter')await host.locator('#v101ValidatorQ').press('Enter');
+        else if(count%3===0){await host.locator('[data-v101pick]').waitFor();await host.locator('[data-v101pick]').click()}
         else if(count%3===1)await host.locator('#v101ValidatorQ').press('Enter');
         else await host.locator('#v101ValidatorGo').click();
         if(scenario==='progressive'){
@@ -160,7 +161,7 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         // The historical closed-unit notice and expanded secondary data may require scrolling.
         await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}.png`)});
         if(scenario!=='closed')assert.equal(data.scroll,false,`${width} ${scenario}: unnecessary scroll`);
-        const expect=scenario==='ok'||scenario==='progressive'||scenario==='rev-blocked'?'ACTIVA · TODO OK':scenario==='closed'?'CERRADA · HISTORICO':scenario==='stopped'?'PARADA · TALLER':scenario==='custody'?'PARADA · CUSTODIA':scenario==='bodywork'?'PARADA · CHAPISTERÍA':scenario==='gps-alert'||scenario==='ena-error'?'ACTIVA · REVISAR':'ACTIVA · ALERTA';
+        const expect=['ok','progressive','fast-enter','parallel','master-fallback','rev-blocked'].includes(scenario)?'ACTIVA · TODO OK':scenario==='closed'?'CERRADA · HISTORICO':scenario==='stopped'?'PARADA · TALLER':scenario==='custody'?'PARADA · CUSTODIA':scenario==='bodywork'?'PARADA · CHAPISTERÍA':scenario==='gps-alert'||scenario==='ena-error'?'ACTIVA · REVISAR':'ACTIVA · ALERTA';
         assert.equal(data.status,expect,scenario);
         if(!await host.locator('.uva-details').first().evaluate(x=>x.open))await host.locator('.uva-details').first().locator('summary').click();
         assert.equal(await host.locator('.v117-card-details').first().isVisible(),true);
@@ -212,7 +213,14 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         await control.focus();await control.press('Enter');assert.equal(await control.locator('details').evaluate(x=>x.open),true);
         await control.press('Space');assert.equal(await control.locator('details').evaluate(x=>x.open),false);
         const sourceCalls=await host.locator('#v101CheckModal').evaluate(()=>QA.calls);
-        assert.equal(sourceCalls.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===10).length,1);
+        assert.equal(sourceCalls.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===8).length,1,scenario+' Enter/autocomplete repeated the same master lookup '+JSON.stringify(sourceCalls.filter(x=>x.name)));
+        if(scenario==='parallel'){
+          const reads=sourceCalls.filter(x=>x.url?.includes('revisados-ficha')||x.url?.includes('/rest/v1/ena_cuentas')||x.url?.includes('/rest/v1/revisados_vehiculo_oficial'));
+          assert.equal(reads.length,3);
+          assert.ok(Math.max(...reads.map(x=>x.start))<Math.min(...reads.map(x=>x.end)),'Supplemental reads must overlap');
+          data.supplementalMs=Math.max(...reads.map(x=>x.end))-Math.min(...reads.map(x=>x.start));
+        }
+        assert.equal(sourceCalls.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===10).length,scenario==='master-fallback'?1:0);
         assert.equal(sourceCalls.filter(x=>x.url?.includes('/rest/v1/revisados_vehiculo_oficial')).length,1);
         assert.equal(sourceCalls.filter(x=>x.url?.includes('revisados-ficha')).length,1);
         assert.equal(sourceCalls.filter(x=>x.url?.includes('/rest/v1/ena_cuentas')).length,scenario==='no-pan'?0:1);
@@ -220,7 +228,13 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         assert.equal(sourceCalls.filter(x=>x.url?.includes('ena-consulta-saldo')).length,scenario==='no-pan'?0:1);
         await host.locator('#v101AgainCheck').click();assert.equal(await host.locator('#v101CheckModal').count(),0);
         assert.equal(await host.locator('#v101ValidatorQ').evaluate(x=>x===document.activeElement),true);
-        await host.locator('#v101ValidatorGo').click();await host.locator('#v101CloseCheck').waitFor();await host.locator('#v101CloseCheck').click();
+        await host.locator('#v101ValidatorGo').click();await host.locator('#v101CloseCheck').waitFor();
+        if(scenario==='fast-enter'){
+          await host.locator('#v101CheckModal[data-uva-enriched]').waitFor();
+          const again=await host.locator('#v101CheckModal').evaluate(()=>QA.calls);
+          assert.equal(again.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===10).length,1,'A new validation must refresh consumed master data');
+        }
+        await host.locator('#v101CloseCheck').click();
         assert.equal(await host.locator('#v101CheckModal').count(),0);
         if(scenario==='ok'){await page.locator('#exit').click();await host.locator('.login-card').waitFor()}
         report.push({size:`${width}x${height}`,scenario,...data});
@@ -250,7 +264,7 @@ assert.ok(cacheUrls.includes('/assets/rym-validator-192.png'));
 assert.ok(!cacheUrls.includes('/'));
 await login.screenshot({path:path.join(out,'real-main-login-390x844.png')});
 await smoke.close();
-if(count)fs.writeFileSync(path.join(out,process.argv.includes('--progressive-only')?'progressive-results.json':'results.json'),JSON.stringify({count,report,errors},null,2));
+if(count)fs.writeFileSync(path.join(out,process.argv.includes('--progressive-only')?'progressive-results.json':process.argv.includes('--latency-only')?'latency-results.json':'results.json'),JSON.stringify({count,report,errors},null,2));
 console.log('PASS: real main login and browser SW installation (static assets only).');
 console.log(`PASS: ${count} cases; original main functions, ${sizes.length} viewports.`);
 }finally{await browser.close();server.close()}

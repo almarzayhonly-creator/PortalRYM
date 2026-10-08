@@ -66,6 +66,38 @@
 
   // Observe main's existing authenticated requests; preserve results/errors and request count.
   const responses={};
+  let searchEpoch=0,masterSource=null;
+  const masterRequests=new Map();
+  const masterResults=new Map();
+  d.addEventListener('input',event=>{
+    if(event.target.id==='v101ValidatorQ'){searchEpoch++;masterSource=null;masterResults.clear()}
+  },true);
+  if(typeof rpc==='function'){
+    const mainRpc=rpc;
+    rpc=function(name,args={}){
+      if(!['panapass_control_auto_v2','panapass_unidades_detalle'].includes(name)||!text(args.p_buscar))return mainRpc(name,args);
+      const owner=userKey(),epoch=searchEpoch,key=owner+'|'+epoch+'|'+name+'|'+JSON.stringify(args);
+      // Enter and main's pending autocomplete timer belong to the same input epoch.
+      const hit=masterResults.get(key);
+      if(hit&&performance.now()-hit.at<1000)return Promise.resolve(hit.rows);
+      if(hit)masterResults.delete(key);
+      if(masterRequests.has(key))return masterRequests.get(key);
+      const pending=Promise.resolve().then(()=>mainRpc(name,args)).then(rows=>{
+        if(owner&&owner===userKey()&&epoch===searchEpoch&&Array.isArray(rows)){
+          if(args.p_limit===8)masterResults.set(key,{rows,at:performance.now()});
+          if(name==='panapass_control_auto_v2'&&rows.length)masterSource={owner,rows,usedBy:null};
+        }
+        return rows;
+      }).finally(()=>masterRequests.delete(key));
+      masterRequests.set(key,pending);
+      return pending;
+    };
+  }
+  function selectedMaster(id,modal){
+    if(!masterSource||masterSource.owner!==userKey()||(masterSource.usedBy&&masterSource.usedBy!==modal))return null;
+    return masterSource.rows.find(row=>text(row.unidad).toUpperCase()===id.unit.toUpperCase()&&
+      (!id.plate||text(row.placa_unica||row.placa||row.placa_comercial).toUpperCase()===id.plate.toUpperCase()))||null;
+  }
   if(typeof req==='function'){
     const mainReq=req;
     req=async function(path,init){
@@ -544,43 +576,39 @@
     const seq=(modal._uvaSeq||0)+1;modal._uvaSeq=seq;
     const current=()=>modal.isConnected&&modal._uvaSeq===seq&&accessMode()==='allowed';
     try{
-      const rows=await rpcCall('panapass_control_auto_v2',{p_grupo:null,p_buscar:id.unit,p_limit:10}).catch(()=>[]);
-      const freshCtrl=(rows||[]).find(r=>text(r.unidad).toUpperCase()===id.unit.toUpperCase())||(rows||[])[0]||{};
-      if(!current())return;
-      modal._uvaCtrl=freshCtrl;
-
-      // Existing SELECT RLS restricts this account metadata to full admins.
-      // Request only display fields, never credentials; denied rows stay absent.
-      if(freshCtrl.panapass_numero){
+      let freshFicha=null,official=null;
+      const publishFicha=()=>{
+        if(!current())return;
+        modal._uvaFicha=official?{...(freshFicha||{}),oficial:{...(freshFicha?.oficial||{}),...official},unidad:freshFicha?.unidad||modal._uvaCtrl}:freshFicha;
+        presentModal(modal);
+      };
+      const seed=selectedMaster(id,modal);
+      const control=Promise.resolve(seed||rpcCall('panapass_control_auto_v2',{p_grupo:null,p_buscar:id.unit,p_limit:10})
+        .then(rows=>(rows||[]).find(row=>text(row.unidad).toUpperCase()===id.unit.toUpperCase())||{}).catch(()=>({})))
+        .then(ctrl=>{
+          if(current()){
+            if(masterSource?.rows.includes(ctrl))masterSource.usedBy=modal;
+            modal._uvaCtrl=ctrl;presentModal(modal);
+          }
+          return ctrl;
+        });
+      // Only the account number depends on Control. Ficha and official data start now.
+      const account=control.then(async ctrl=>{
+        if(!current()||!ctrl.panapass_numero)return;
         try{
           const fields='panapass_display,estado_acceso,tipo_credencial,ena_empresa,ena_ruc,ena_email,ultimo_login_ok,ultima_consulta,ultimo_error,updated_at';
-          const r=await reqCall('/rest/v1/ena_cuentas?panapass_numero=eq.'+encodeURIComponent(freshCtrl.panapass_numero)+'&select='+fields+'&limit=1',{method:'GET'});
+          const r=await reqCall('/rest/v1/ena_cuentas?panapass_numero=eq.'+encodeURIComponent(ctrl.panapass_numero)+'&select='+fields+'&limit=1',{method:'GET'});
           if(!current())return;
           modal._uvaEna=Array.isArray(r?.data)?r.data[0]:null;
+          presentModal(modal);
         }catch(_){}
-      }
-
-      let freshFicha=null;
-      try{
-        const r=await reqCall('/functions/v1/revisados-ficha',{method:'POST',body:JSON.stringify({placa:id.plate,unidad:id.unit})});
-        if(r?.data?.ok)freshFicha=r.data;
-      }catch(_){}
-      // The dedicated card needs the real eCarCheck vehicle record, not only the
-      // compact fields returned by Control de Auto. Use the authenticated,
-      // read-only official vehicle table as a fallback/source of truth.
-      try{
-        const plate=encodeURIComponent(id.plate);
-        const r=await reqCall('/rest/v1/revisados_vehiculo_oficial?placa=eq.'+plate+'&select=*&order=actualizado_at.desc&limit=1',{method:'GET'});
-        const rows=Array.isArray(r?.data)?r.data:(Array.isArray(r)?r:[]);
-        const official=rows[0];
-        if(official){
-          freshFicha={...(freshFicha||{}),oficial:{...(freshFicha?.oficial||{}),...official},unidad:freshFicha?.unidad||freshCtrl};
-        }
-      }catch(_){}
+      });
+      const ficha=reqCall('/functions/v1/revisados-ficha',{method:'POST',body:JSON.stringify({placa:id.plate,unidad:id.unit})})
+        .then(r=>{freshFicha=r?.data?.ok?r.data:null;publishFicha()}).catch(()=>{});
+      const vehicle=reqCall('/rest/v1/revisados_vehiculo_oficial?placa=eq.'+encodeURIComponent(id.plate)+'&select=*&order=actualizado_at.desc&limit=1',{method:'GET'})
+        .then(r=>{official=(Array.isArray(r?.data)?r.data:Array.isArray(r)?r:[])[0]||null;publishFicha()}).catch(()=>{});
+      await Promise.all([control,account,ficha,vehicle]);
       if(!current())return;
-      modal._uvaFicha=freshFicha;
-
-      presentModal(modal);
       modal.dataset.uvaEnriched=token;
     }catch(e){
       console.warn('Unit validator presentation enrichment',e);
@@ -590,6 +618,7 @@
   }
 
   function logout(){
+    masterSource=null;masterRequests.clear();masterResults.clear();searchEpoch++;
     Object.keys(responses).forEach(k=>delete responses[k]);
     accessCheckedFor='';accessProbe=null;
     d.getElementById('v101CheckModal')?.remove();
@@ -649,6 +678,7 @@
       }
     }
     async function run(){
+      clearTimeout(searchTimer);
       const term=text(input.value);
       if(!term)return;
       const norm=s=>text(s).toUpperCase();
@@ -660,6 +690,7 @@
     }
     input.oninput=()=>{
       clearTimeout(searchTimer);
+      searchSeq++;searchRows=[];searchOwner='';
       const q=input.value;
       searchTimer=setTimeout(()=>{void search(q)},220);
     };
@@ -668,7 +699,8 @@
       if(e.key==='Enter'){e.preventDefault();void run()}
       else if(e.key==='Escape'&&list)list.style.display='none';
     };
-    button.onclick=()=>{void run()};
+    // Main's document click listener otherwise hides a synchronously resolved result.
+    button.onclick=event=>{event.stopPropagation();void run()};
     input.dataset.uvaSearchBound='1';
     button.dataset.uvaSearchBound='1';
   }

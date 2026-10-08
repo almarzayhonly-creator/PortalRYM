@@ -9,7 +9,7 @@ export default {
       const shellResponse = await env.ASSETS.fetch(shellRequest);
       const shellHeaders = new Headers(shellResponse.headers);
       shellHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
-      shellHeaders.set("x-portal-build", "unit-validator-shell-v16");
+      shellHeaders.set("x-portal-build", "unit-validator-shell-v17");
       shellHeaders.set("x-rym-app", "unit-validator");
       return new Response(shellResponse.body, {
         status: shellResponse.status,
@@ -52,7 +52,7 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=16"><script src="/modules/control-auto/validator-tablet-app.js?v=16" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=17"><script src="/modules/control-auto/validator-tablet-app.js?v=17" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
