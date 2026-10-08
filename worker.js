@@ -39,6 +39,12 @@ export default {
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
       if (url.pathname === "/" && url.searchParams.get("validator-host") === "1") {
         body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
+        // Publish only the canonical modal functions within the isolated validator host.
+        // Keep index.html byte-for-byte identical to main (CI parity contract).
+        const validatorBridgeAnchor = "  function card99(cls,icon,title,desc,buttonId,minis,badge='Disponible'){";
+        const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;\\n";
+        if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
+
         body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=16"><script src="/modules/control-auto/validator-tablet-app.js?v=16" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
