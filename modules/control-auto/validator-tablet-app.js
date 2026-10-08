@@ -65,7 +65,7 @@
     const details=ensureDetails(card);
     [...details.children].filter(x=>x.tagName!=='SUMMARY').forEach(x=>x.remove());
     const body=d.createElement('div');
-    body.className='uva-detail-body';
+    body.className='uva-detail-body v117-card-details';
     body.innerHTML=html||'<div class="uva-detail-empty">Sin información adicional.</div>';
     details.appendChild(body);
   }
