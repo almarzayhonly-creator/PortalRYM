@@ -19,12 +19,12 @@ for(const url of ['/?app=validador-unidad','/?validator-host=1','/auth/v1/token'
 }
 let responded=false;handlers.fetch({request:{url:'https://preview.test/auth/v1/token',method:'POST'},respondWith:()=>responded=true});assert.equal(responded,false);
 handlers.fetch({request:{url:'https://supabase.test/rest/v1/units',method:'GET'},respondWith:()=>responded=true});assert.equal(responded,false);
-handlers.fetch({request:{url:'https://preview.test/css/validator-tablet-app.css?v=3',method:'GET'},respondWith:p=>pending=p});await pending;assert.ok(cached.includes('https://preview.test/css/validator-tablet-app.css?v=3'));
+handlers.fetch({request:{url:'https://preview.test/css/validator-tablet-app.css?v=6',method:'GET'},respondWith:p=>pending=p});await pending;assert.ok(cached.includes('https://preview.test/css/validator-tablet-app.css?v=6'));
 const worker=(await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('worker.js','utf8')).toString('base64'))).default;
 const assets={fetch:async()=>new Response(main,{headers:{'content-type':'text/html'}})};
 const portal=await worker.fetch(new Request('https://preview.test/'),{ASSETS:assets});const portalHtml=await portal.text();
 assert.ok(!portalHtml.includes('<html class="rym-unit-validator-app"'));
 const host=await worker.fetch(new Request('https://preview.test/?validator-host=1'),{ASSETS:assets});const hostHtml=await host.text();assert.ok(hostHtml.includes('<html class="rym-unit-validator-app"'));
-assert.ok(hostHtml.includes('/modules/control-auto/validator-tablet-app.js?v=3'));
+assert.ok(hostHtml.includes('/modules/control-auto/validator-tablet-app.js?v=6'));
 const launcher=fs.readFileSync('modules/core/unit-validator-launcher.js','utf8');assert.ok(launcher.includes("w.rymHasModule(PERM)"));
 console.log('PASS: main parity, worker route isolation, local PWA icons, manifest, static-only SW caching, launcher permission.');
