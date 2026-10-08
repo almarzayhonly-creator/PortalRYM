@@ -298,12 +298,16 @@
     const unidad=ficha?.unidad||{};
     const rawOfficial=officialRaw(oficial);
     const rev=(responses.rev?.rows||[]).find(r=>text(r.unidad).toUpperCase()===getIdentity(modal).unit.toUpperCase())||{};
-    const last=first(oficial?.fecha_revisado,rawOfficial.fechaRevisado,map['ÚLTIMO REVISADO'])||'Sin registro';
+    const operacion=ficha?.operacion||{};
+    const last=first(operacion.fecha_ultimo_revisado,oficial?.fecha_revisado,rawOfficial.fechaRevisado,map['ÚLTIMO REVISADO'])||'Sin registro';
     const original=mainCard(card);
     const raw=[map['ESTADO'],original.badge,original.value].filter(Boolean).join(' ');
+    // The persisted Revisados operational evaluation is authoritative. A valid
+    // official revisado must never be downgraded by legacy card text.
+    const officialState=text(operacion.estado_revisado).toUpperCase();
     const expired=/VENCID|PENDIENT|NO VIGENTE|EXPIR/i.test(raw);
     const current=!expired&&/VIGENTE|AL D[IÍ]A|OK|VALIDO|VÁLIDO/i.test(raw);
-    const status=current?'VIGENTE':'PENDIENTE';
+    const status=officialState==='VIGENTE'?'VIGENTE':officialState==='PENDIENTE'||officialState==='VENCIDO'?'PENDIENTE':current?'VIGENTE':'PENDIENTE';
     setPriority(card,{badge:'REVISADO',value:status,note:'Último revisado · '+last});
     card.classList.add('uva-rev-priority');
     card.classList.toggle('uva-rev-current',status==='VIGENTE');
@@ -320,7 +324,7 @@
       detailHtml('Año revisado',first(oficial?.anio_revisado,rev.anio_revisado)),
       detailHtml('Rev ID',first(rawOfficial.revId,rawOfficial.idRevisados,oficial?.rev_id)),
       detailHtml('Taller / emisor',first(rawOfficial.ultTallerRevisado,oficial?.taller,oficial?.emisor,unidad?.taller_revisado)),
-      detailHtml('Situación del revisado',first(rev.estado,map['ESTADO'])),
+      detailHtml('Situación del revisado',first(operacion.estado_revisado,rev.estado,map['ESTADO'])),
       detailHtml('Tipo de placa',first(rawOfficial.tipoPlaca,oficial?.tipo_placa)),
       detailHtml('Tipo de uso',first(rawOfficial.tipoUso,oficial?.tipo_uso)),
       detailHtml('Estado oficial del vehículo',first(rawOfficial.estadoVehiculo,oficial?.estado_vehiculo)),
