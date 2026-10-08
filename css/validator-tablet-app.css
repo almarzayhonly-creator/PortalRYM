@@ -588,3 +588,9 @@ html.rym-unit-validator-app .uva-gps-pill.bad i{animation:uva-gps-pulse 2s ease-
   html.rym-unit-validator-app .v117-status-card{min-height:82px!important}
   html.rym-unit-validator-app .uva-priority-note{font-size:11px!important;line-height:1.35!important;white-space:normal!important}
 }
+
+/* Semantic status colours: an official current Revisado must never inherit legacy red. */
+html.rym-unit-validator-app #v117RevCard.uva-rev-current{border-color:#b7e4c7!important;background:linear-gradient(180deg,#ffffff,#f0fdf4)!important}
+html.rym-unit-validator-app #v117RevCard.uva-rev-current .v117-card-value,
+html.rym-unit-validator-app #v117RevCard.uva-rev-current header small{color:#047857!important}
+html.rym-unit-validator-app #v117RevCard.uva-rev-expired .v117-card-value{color:#b42318!important}
