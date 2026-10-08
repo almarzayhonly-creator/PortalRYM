@@ -594,3 +594,8 @@ html.rym-unit-validator-app #v117RevCard.uva-rev-current{border-color:#b7e4c7!im
 html.rym-unit-validator-app #v117RevCard.uva-rev-current .v117-card-value,
 html.rym-unit-validator-app #v117RevCard.uva-rev-current header small{color:#047857!important}
 html.rym-unit-validator-app #v117RevCard.uva-rev-expired .v117-card-value{color:#b42318!important}
+
+/* Identity comparison: wrap long VIN/chassis strings inside the tablet modal. */
+html.rym-unit-validator-app #v117CtlCard .uva-identity-check{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow-wrap:anywhere!important;word-break:break-word!important}
+html.rym-unit-validator-app #v117CtlCard .uva-identity-check strong,
+html.rym-unit-validator-app #v117CtlCard .uva-identity-check div{min-width:0!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important}
