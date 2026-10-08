@@ -193,3 +193,90 @@ html.rym-unit-validator-app .v117-status-card:hover{transform:translateY(-1px)!i
   html.rym-unit-validator-app .v101-validator-head{margin-bottom:20px!important}
   html.rym-unit-validator-app .v101-validator-go{background:linear-gradient(180deg,#2D5BB7,#244AA5)!important;box-shadow:0 8px 18px rgba(36,74,165,.14)!important}
 }
+
+/* Dedicated app must never expose home/dashboard chrome. */
+html.rym-unit-validator-app .v101-title,
+html.rym-unit-validator-app .v101-greeting,
+html.rym-unit-validator-app .v99-kpis,
+html.rym-unit-validator-app .v99-section-title,
+html.rym-unit-validator-app .v99-alerts,
+html.rym-unit-validator-app .v99-grid,
+html.rym-unit-validator-app .v100-priority,
+html.rym-unit-validator-app .dashboard-welcome{display:none!important}
+
+/* Result identity: overall status already communicates state; do not repeat it below. */
+html.rym-unit-validator-app .v117-identity-line>span:nth-child(2),
+html.rym-unit-validator-app .v117-identity-line>span:nth-child(3){display:none!important}
+html.rym-unit-validator-app .v117-identity-line>span:first-child{
+  display:flex!important;align-items:center!important;gap:6px!important;
+  min-height:40px!important;padding:9px 12px!important;border:1px solid #DCE6F1!important;
+  border-radius:12px!important;background:#fff!important;color:var(--uva-muted)!important
+}
+html.rym-unit-validator-app .v117-identity-line>span:first-child b{color:var(--uva-navy)!important}
+
+/* Entire domain card is the detail affordance; remove repetitive "Detalles +". */
+html.rym-unit-validator-app .v117-status-card{cursor:pointer!important}
+html.rym-unit-validator-app .uva-details{border:0!important;padding:0!important;margin:0!important}
+html.rym-unit-validator-app .uva-details summary{
+  position:absolute!important;right:14px!important;bottom:13px!important;
+  width:30px!important;height:30px!important;min-height:30px!important;
+  display:grid!important;place-items:center!important;margin:0!important;padding:0!important;
+  border:1px solid #D6E1EE!important;border-radius:9px!important;background:rgba(255,255,255,.82)!important;
+  color:var(--domain)!important;font-size:0!important;line-height:1!important
+}
+html.rym-unit-validator-app .uva-details summary:after{
+  content:'›'!important;margin:0!important;font-size:24px!important;font-weight:700!important;line-height:1!important;
+  transform:rotate(0deg)!important;transition:transform .18s ease!important
+}
+html.rym-unit-validator-app .uva-details[open] summary:after{content:'›'!important;transform:rotate(90deg)!important}
+html.rym-unit-validator-app .uva-details[open]{
+  grid-column:1/-1!important;margin-top:8px!important;padding-top:10px!important;border-top:1px solid #E7EDF5!important
+}
+
+/* Search hero: compact and clearly app-like. */
+html.rym-unit-validator-app .v101-validator-head h3{font-size:30px!important}
+html.rym-unit-validator-app .v101-validator-head p{max-width:540px!important}
+
+@media(max-width:650px){
+  html.rym-unit-validator-app .v101-content{padding:28px 14px 20px!important}
+  html.rym-unit-validator-app .v101-validator{
+    padding:20px!important;border-radius:20px!important;
+    background:linear-gradient(145deg,#FFFFFF 0%,#F7FAFF 72%,#FFF9F3 100%)!important
+  }
+  html.rym-unit-validator-app .v101-validator-head{margin-bottom:16px!important}
+  html.rym-unit-validator-app .v101-validator-head h3{font-size:25px!important}
+  html.rym-unit-validator-app .v101-validator-head p{font-size:13px!important;margin-top:6px!important}
+  html.rym-unit-validator-app .v101-validator-go{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;height:52px!important;font-size:14px!important
+  }
+
+  html.rym-unit-validator-app .v117-check-head{margin-bottom:10px!important}
+  html.rym-unit-validator-app .v117-meta{grid-template-columns:auto auto!important;gap:5px 12px!important}
+  html.rym-unit-validator-app .v117-meta>span{font-size:12px!important}
+  html.rym-unit-validator-app .v117-meta b{font-size:14px!important}
+  html.rym-unit-validator-app .v117-meta .v133-mobile-supervisor{grid-column:1/-1!important}
+  html.rym-unit-validator-app .v117-identity-line,html.rym-unit-validator-app .v117-identity-line.v125-clean{
+    display:block!important;margin:10px 0 12px!important
+  }
+  html.rym-unit-validator-app .v117-identity-line>span:first-child{
+    width:100%!important;min-height:42px!important;justify-content:flex-start!important
+  }
+  html.rym-unit-validator-app .v117-status-card{
+    min-height:112px!important;padding:14px 14px 14px 17px!important
+  }
+  html.rym-unit-validator-app .v117-card-value{
+    margin:4px 42px 0 46px!important;font-size:15px!important
+  }
+  html.rym-unit-validator-app .v117-status-card.gps .v117-card-value{font-size:12px!important;line-height:1.35!important}
+  html.rym-unit-validator-app .uva-details summary{right:12px!important;bottom:12px!important}
+  html.rym-unit-validator-app .uva-details[open]{margin-left:46px!important;margin-right:0!important}
+}
+
+/* Login should feel like the same product, with the PWA shell handling app identity. */
+html.rym-unit-validator-app:not(.uva-authenticated) body{
+  background:
+    radial-gradient(circle at 10% 12%,rgba(83,183,232,.16),transparent 28%),
+    radial-gradient(circle at 92% 85%,rgba(244,124,32,.12),transparent 27%),
+    linear-gradient(150deg,#071A45 0%,#123E79 58%,#2C8AC7 100%)!important
+}
