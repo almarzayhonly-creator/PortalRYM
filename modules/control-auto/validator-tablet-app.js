@@ -37,7 +37,7 @@
       if(observer&&d.body)observer.observe(d.body,observed);
     }
   }
-  let accessCheckedFor='',accessProbe=null;
+  let accessCheckedFor='',accessProbe=null,homeProbe=null,homeRenderedFor='';
   function profile(){try{return state.profile}catch(_){return null}}
   function userKey(){const p=profile();return String(p?.id||p?.email||p?.usuario||p?.nombre||'')}
   function allowed(){try{return !!profile()&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
@@ -59,7 +59,19 @@
         }
       }catch(_){}
       accessCheckedFor=key;
-    })().finally(()=>{accessProbe=null;refresh()});
+    })().finally(()=>{
+      accessProbe=null;
+      // The login endpoint can authenticate a role before it returns this validator
+      // permission. portal-session-modules repairs the permission set; once allowed,
+      // explicitly render Portal Home so the authenticated iframe cannot remain on
+      // the stale login form.
+      const current=userKey();
+      if(allowed()&&current&&homeRenderedFor!==current&&!d.getElementById('v101ValidatorQ')&&typeof base==='function'&&!homeProbe){
+        homeProbe=Promise.resolve(base()).then(()=>{homeRenderedFor=current}).catch(()=>{}).finally(()=>{homeProbe=null;refresh()});
+        return;
+      }
+      refresh();
+    });
   }
   function rpcCall(name,args){try{return typeof rpc==='function'?rpc(name,args):Promise.reject(Error('RPC no disponible'))}catch(e){return Promise.reject(e)}}
   function reqCall(path,init){try{return typeof req==='function'?req(path,init):Promise.reject(Error('REQ no disponible'))}catch(e){return Promise.reject(e)}}
@@ -513,7 +525,7 @@
 
   function logout(){
     Object.keys(responses).forEach(k=>delete responses[k]);
-    accessCheckedFor='';accessProbe=null;
+    accessCheckedFor='';accessProbe=null;homeProbe=null;homeRenderedFor='';
     d.getElementById('v101CheckModal')?.remove();
     if(typeof clearSession==='function')clearSession();
     if(typeof loginView==='function')loginView();

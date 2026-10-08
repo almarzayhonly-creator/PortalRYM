@@ -9,7 +9,7 @@ export default {
       const shellResponse = await env.ASSETS.fetch(shellRequest);
       const shellHeaders = new Headers(shellResponse.headers);
       shellHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
-      shellHeaders.set("x-portal-build", "unit-validator-shell-v14");
+      shellHeaders.set("x-portal-build", "unit-validator-shell-v15");
       shellHeaders.set("x-rym-app", "unit-validator");
       return new Response(shellResponse.body, {
         status: shellResponse.status,
@@ -39,7 +39,7 @@ export default {
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
       if (url.pathname === "/" && url.searchParams.get("validator-host") === "1") {
         body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=14"><script src="/modules/control-auto/validator-tablet-app.js?v=14" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=15"><script src="/modules/control-auto/validator-tablet-app.js?v=15" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0
