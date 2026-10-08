@@ -275,6 +275,7 @@
     flag.className='uva-verified-flag '+(state==='ACTIVA'?'ok':state==='PARADA'?'warn':'off');
     flag.innerHTML='<i aria-hidden="true">'+(state==='ACTIVA'?'✓':state==='PARADA'?'!':'?')+'</i><b>'+esc(state)+'</b>';
     const u=ficha?.unidad||{},o=ficha?.oficial||{};
+    const raw=o?.ultima_respuesta_exitosa||o?.ultima_respuesta||{};
     const control=sectionHtml('Control de Auto',[
       detailHtml('Estado de la unidad',state),
       detailHtml('Estatus interno',internal),
@@ -292,22 +293,42 @@
       detailHtml('Transmisión',ctrl?.transmision||u?.transmision),
       detailHtml('Estatus Netsuite',ctrl?.estatus_netsuite)
     ]);
-    const ecar=sectionHtml('eCarCheck',[
-      detailHtml('Última verificación',o?.actualizado_at),
-      detailHtml('Propietario oficial',o?.propietario),
-      detailHtml('Cupo oficial',o?.cupo),
-      detailHtml('Color oficial',o?.color),
-      detailHtml('VIN',o?.vin),
-      detailHtml('Chasis',o?.chasis),
-      detailHtml('Motor',o?.motor),
-      detailHtml('Marca',o?.marca),
-      detailHtml('Modelo',o?.modelo),
-      detailHtml('Año vehículo',o?.anio),
-      detailHtml('Fecha revisado',o?.fecha_revisado),
-      detailHtml('Tipo de uso',o?.tipo_uso),
-      detailHtml('Estado vehículo',o?.estado_vehiculo),
-      detailHtml('Restricciones',o?.restricciones||o?.restriccion),
-      detailHtml('Observaciones',o?.observacion||o?.observaciones)
+    const ecar=sectionHtml('Ficha oficial eCarCheck',[
+      detailHtml('Última verificación',o?.actualizado_at||ficha?.consulta_at),
+      detailHtml('Resultado eCarCheck',ficha?.resultado||raw?.detalleRespuesta||raw?.detalle_respuesta),
+      detailHtml('Placa consultada',raw?.nroPlaca||o?.placa),
+      detailHtml('Cupo oficial',raw?.cupo||o?.cupo),
+      detailHtml('Propietario oficial',raw?.nombrePropietario||o?.propietario),
+      detailHtml('Documento propietario',raw?.nroDocumentoPropietario||o?.documento_propietario),
+      detailHtml('VIN',raw?.nroVin||o?.vin),
+      detailHtml('Chasis',raw?.nroChasis||o?.chasis),
+      detailHtml('Motor',raw?.nroMotor||o?.motor),
+      detailHtml('Marca',raw?.marcaVehiculo||o?.marca),
+      detailHtml('Modelo',raw?.modeloVehiculo||o?.modelo),
+      detailHtml('Año vehículo',raw?.anioVehiculo||o?.anio),
+      detailHtml('Color oficial',raw?.colorVehiculo||o?.color),
+      detailHtml('Tipo de vehículo',raw?.tipoVehiculo),
+      detailHtml('Tipo de placa',raw?.tipoPlaca||o?.tipo_placa),
+      detailHtml('Tipo de uso',raw?.tipoUso||o?.tipo_uso),
+      detailHtml('Estado vehículo',raw?.estadoVehiculo||o?.estado_vehiculo),
+      detailHtml('Transmisión',raw?.tipoTransmision),
+      detailHtml('Combustible',raw?.tipoCombustible),
+      detailHtml('Cilindrada',raw?.cilindradaVehiculo),
+      detailHtml('Cilindros',raw?.nroCilindros),
+      detailHtml('Capacidad',raw?.capacidadVehiculo ? raw.capacidadVehiculo+' '+(raw?.tipoCapacidad||'') : ''),
+      detailHtml('Puertas',raw?.nroPuertas),
+      detailHtml('Tracción',raw?.traccionMotor),
+      detailHtml('Aire acondicionado',raw?.tieneAireAcondicionado),
+      detailHtml('Hipoteca',raw?.hipoteca),
+      detailHtml('Pertenencia',raw?.tipoPertenencia),
+      detailHtml('Aseguradora',raw?.nombreAseguradora),
+      detailHtml('Póliza',raw?.nroPolizaSeguro),
+      detailHtml('Restricción vehicular',raw?.restriccionVehiculos),
+      detailHtml('Último revisado',raw?.fechaRevisado||o?.fecha_revisado),
+      detailHtml('Mes revisado',raw?.mesRevisado||o?.mes_revisado),
+      detailHtml('Rev ID',raw?.revId||o?.rev_id),
+      detailHtml('Último taller',raw?.ultTallerRevisado),
+      detailHtml('Observaciones',raw?.observaciones)
     ]);
     setDetails(card,control+ecar);
   }
@@ -340,6 +361,18 @@
       try{
         const r=await reqCall('/functions/v1/revisados-ficha',{method:'POST',body:JSON.stringify({placa:id.plate,unidad:id.unit})});
         if(r?.data?.ok)freshFicha=r.data;
+      }catch(_){}
+      // The dedicated card needs the real eCarCheck vehicle record, not only the
+      // compact fields returned by Control de Auto. Use the authenticated,
+      // read-only official vehicle table as a fallback/source of truth.
+      try{
+        const plate=encodeURIComponent(id.plate);
+        const r=await reqCall('/rest/v1/revisados_vehiculo_oficial?placa=eq.'+plate+'&select=*&order=actualizado_at.desc&limit=1',{method:'GET'});
+        const rows=Array.isArray(r?.data)?r.data:(Array.isArray(r)?r:[]);
+        const official=rows[0];
+        if(official){
+          freshFicha={...(freshFicha||{}),oficial:{...(freshFicha?.oficial||{}),...official},unidad:freshFicha?.unidad||freshCtrl};
+        }
       }catch(_){}
       if(modal._uvaSeq!==seq)return;
       modal._uvaFicha=freshFicha;
