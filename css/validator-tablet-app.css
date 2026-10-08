@@ -405,3 +405,52 @@ html.rym-unit-validator-app .uva-meta-company{font-weight:650!important}
     font-size:11px!important
   }
 }
+
+
+/* Unit validator operational summary v9 */
+html.rym-unit-validator-app .uva-unit-preview{margin:0 0 18px!important;padding:18px 20px!important;border:1px solid #DCE7F3!important;border-radius:18px!important;background:linear-gradient(135deg,#FFFFFF 0%,#F6F9FF 72%,#FFF9F3 100%)!important;box-shadow:0 10px 28px rgba(10,27,77,.06)!important}
+html.rym-unit-validator-app .uva-unit-preview-main{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:14px!important}
+html.rym-unit-validator-app .uva-unit-preview-main>div{display:grid!important;gap:2px!important}
+html.rym-unit-validator-app .uva-unit-kicker{font-size:10px!important;font-weight:800!important;letter-spacing:.11em!important;color:var(--uva-muted)!important}
+html.rym-unit-validator-app .uva-unit-preview-main strong{font-size:30px!important;line-height:1!important;letter-spacing:-.04em!important;color:var(--uva-navy)!important}
+html.rym-unit-validator-app .uva-unit-preview-main em{font-size:12px!important;font-style:normal!important;color:var(--uva-muted)!important}
+html.rym-unit-validator-app .uva-unit-state{display:inline-flex!important;align-items:center!important;min-height:32px!important;padding:6px 11px!important;border-radius:999px!important;background:#EEF4FF!important;color:#244AA5!important;font-size:11px!important;font-weight:850!important}
+html.rym-unit-validator-app .uva-unit-preview-chips{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin-top:14px!important}
+html.rym-unit-validator-app .uva-unit-preview-chips>span{display:grid!important;gap:2px!important;padding:9px 11px!important;border:1px solid #E2EAF3!important;border-radius:12px!important;background:rgba(255,255,255,.84)!important}
+html.rym-unit-validator-app .uva-unit-preview-chips small{font-size:9px!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:var(--uva-muted)!important}
+html.rym-unit-validator-app .uva-unit-preview-chips b{font-size:12px!important;color:var(--uva-navy)!important;white-space:normal!important}
+html.rym-unit-validator-app .uva-unit-preview-chips .uva-unit-internal{border-color:#F0D6AA!important;background:#FFF9EF!important}
+html.rym-unit-validator-app .uva-verified-flag{margin-left:auto!important;display:inline-flex!important;align-items:center!important;gap:5px!important;min-height:26px!important;padding:4px 8px!important;border-radius:999px!important;font-size:9px!important;font-weight:850!important;letter-spacing:.03em!important}
+html.rym-unit-validator-app .uva-verified-flag i{display:grid!important;place-items:center!important;width:16px!important;height:16px!important;border-radius:50%!important;font-style:normal!important;font-size:10px!important}
+html.rym-unit-validator-app .uva-verified-flag.ok{background:#ECFDF3!important;color:#047857!important;border:1px solid #B7E4C7!important}
+html.rym-unit-validator-app .uva-verified-flag.ok i{background:#047857!important;color:#fff!important}
+html.rym-unit-validator-app .uva-verified-flag.warn{background:#FFF7E8!important;color:#9A5B00!important;border:1px solid #F0D6AA!important}
+html.rym-unit-validator-app .uva-verified-flag.warn i{background:#C77A00!important;color:#fff!important}
+html.rym-unit-validator-app .uva-verified-flag.bad{background:#FFF1F1!important;color:#B42318!important;border:1px solid #F1C7C7!important}
+html.rym-unit-validator-app .uva-verified-flag.bad i{background:#D83A3A!important;color:#fff!important}
+html.rym-unit-validator-app .uva-verified-flag.off{background:#F3F5F8!important;color:#64748B!important;border:1px solid #DDE3EA!important}
+html.rym-unit-validator-app #v117RevCard img,
+html.rym-unit-validator-app #v117RevCard [class*="photo"],
+html.rym-unit-validator-app #v117RevCard [class*="image"],
+html.rym-unit-validator-app #v117RevCard [class*="foto"]{display:none!important}
+html.rym-unit-validator-app .uva-pan-priority .v117-card-value{font-size:28px!important;letter-spacing:-.03em!important}
+html.rym-unit-validator-app .uva-rev-priority .v117-card-value,
+html.rym-unit-validator-app .uva-control-priority .v117-card-value{font-size:22px!important;font-weight:850!important;letter-spacing:-.02em!important}
+html.rym-unit-validator-app .uva-rev-current .v117-card-value,
+html.rym-unit-validator-app .uva-control-active .v117-card-value{color:var(--uva-green)!important}
+html.rym-unit-validator-app .uva-rev-expired .v117-card-value{color:var(--uva-red)!important}
+html.rym-unit-validator-app .uva-control-stopped .v117-card-value{color:#B56A00!important}
+html.rym-unit-validator-app .uva-gps-live{display:grid!important;grid-template-columns:1fr 1fr!important}
+html.rym-unit-validator-app .uva-gps-pill{justify-content:flex-start!important}
+html.rym-unit-validator-app .uva-gps-pill em{font-style:normal!important;font-weight:800!important}
+@media(max-width:650px){
+  html.rym-unit-validator-app .uva-unit-preview{margin-bottom:12px!important;padding:14px!important;border-radius:16px!important}
+  html.rym-unit-validator-app .uva-unit-preview-main strong{font-size:25px!important}
+  html.rym-unit-validator-app .uva-unit-preview-chips{grid-template-columns:1fr 1fr!important;gap:6px!important;margin-top:10px!important}
+  html.rym-unit-validator-app .uva-unit-preview-chips .uva-unit-internal{grid-column:1/-1!important}
+  html.rym-unit-validator-app .uva-verified-flag{padding:3px 6px!important;font-size:8px!important}
+  html.rym-unit-validator-app .uva-pan-priority .v117-card-value{font-size:21px!important}
+  html.rym-unit-validator-app .uva-rev-priority .v117-card-value,
+  html.rym-unit-validator-app .uva-control-priority .v117-card-value{font-size:18px!important}
+  html.rym-unit-validator-app .uva-gps-live{grid-template-columns:1fr 1fr!important;margin-right:38px!important}
+}
