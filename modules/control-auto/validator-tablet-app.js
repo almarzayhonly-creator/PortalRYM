@@ -9,6 +9,34 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const text=v=>String(v??'').trim();
   const first=(...values)=>values.find(v=>v!=null&&text(v)!==''&&text(v)!=='—');
+  let observer=null,renderDepth=0;
+  const observed={childList:true,characterData:true,subtree:true};
+  const internalSelector='.uva-unit-preview,.uva-details,.uva-priority-note,.uva-gps-live,.uva-verified-flag';
+  function mainMutations(records){
+    let changed=false;
+    for(const record of records){
+      const target=record.target.nodeType===1?record.target:record.target.parentElement;
+      if(target?.closest(internalSelector))continue;
+      changed=true;
+      const card=target?.closest('.v117-status-card'),snapshot=card?._uvaMain;
+      if(!snapshot)continue;
+      // Main usually replaces the article. Also support updates within an existing card.
+      if(target.closest('.v117-card-value'))snapshot.value=text(card.querySelector('.v117-card-value')?.textContent);
+      else if(target.closest('header'))snapshot.badge=text(card.querySelector('header strong')?.textContent);
+      else if(!card.querySelector('.uva-details'))delete card._uvaMain;
+    }
+    return changed;
+  }
+  function renderQuietly(render){
+    if(renderDepth)return render();
+    // Drain pending main changes before pausing; only synchronous adapter writes are excluded.
+    if(observer){mainMutations(observer.takeRecords());observer.disconnect()}
+    renderDepth++;
+    try{return render()}finally{
+      renderDepth--;
+      if(observer&&d.body)observer.observe(d.body,observed);
+    }
+  }
   let accessCheckedFor='',accessProbe=null;
   function profile(){try{return state.profile}catch(_){return null}}
   function userKey(){const p=profile();return String(p?.id||p?.email||p?.usuario||p?.nombre||'')}
@@ -412,28 +440,35 @@
     setDetails(card,control+ecar);
   }
 
+  function presentModal(modal){
+    // Main owns live ENA/GPS checks; replacements get a fresh mainCard snapshot.
+    return renderQuietly(()=>{
+      const ctrl=modal._uvaCtrl||{};
+      const ficha=modal._uvaFicha||null;
+      normalizeHeader(modal,{companyOwner:text(ctrl?.empresa_duena)||getIdentity(modal).company,ctrl,ficha});
+      panVisual(modal,ctrl);
+      revisadoVisual(modal,ficha,ctrl);
+      controlVisual(modal,ctrl,ficha);
+      gpsFromDom(modal);
+    });
+  }
+
   async function enrichModal(modal){
-    if(!modal||accessMode()!=='allowed')return;
+    if(!modal?.isConnected||accessMode()!=='allowed')return;
     const id=getIdentity(modal);if(!id.unit)return;
     const token=id.unit+'|'+id.plate;
-
-    // Always reformat what main already rendered. Main owns live ENA/GPS checks.
-    const ctrl=modal._uvaCtrl||{};
-    const ficha=modal._uvaFicha||null;
-    normalizeHeader(modal,{companyOwner:text(ctrl?.empresa_duena)||id.company,ctrl,ficha});
-    panVisual(modal,ctrl);
-    revisadoVisual(modal,ficha,ctrl);
-    controlVisual(modal,ctrl,ficha);
-    gpsFromDom(modal);
+    presentModal(modal);
 
     // Supplemental master/eCarCheck data is fetched once per validated unit.
-    if(modal._uvaFetchToken===token)return;
+    if(modal._uvaFetchToken===token||modal._uvaEnriching===token)return;
     modal._uvaFetchToken=token;
+    modal._uvaEnriching=token;
     const seq=(modal._uvaSeq||0)+1;modal._uvaSeq=seq;
+    const current=()=>modal.isConnected&&modal._uvaSeq===seq&&accessMode()==='allowed';
     try{
       const rows=await rpcCall('panapass_control_auto_v2',{p_grupo:null,p_buscar:id.unit,p_limit:10}).catch(()=>[]);
       const freshCtrl=(rows||[]).find(r=>text(r.unidad).toUpperCase()===id.unit.toUpperCase())||(rows||[])[0]||{};
-      if(modal._uvaSeq!==seq)return;
+      if(!current())return;
       modal._uvaCtrl=freshCtrl;
 
       // Existing SELECT RLS restricts this account metadata to full admins.
@@ -442,7 +477,7 @@
         try{
           const fields='panapass_display,estado_acceso,tipo_credencial,ena_empresa,ena_ruc,ena_email,ultimo_login_ok,ultima_consulta,ultimo_error,updated_at';
           const r=await reqCall('/rest/v1/ena_cuentas?panapass_numero=eq.'+encodeURIComponent(freshCtrl.panapass_numero)+'&select='+fields+'&limit=1',{method:'GET'});
-          if(modal._uvaSeq!==seq)return;
+          if(!current())return;
           modal._uvaEna=Array.isArray(r?.data)?r.data[0]:null;
         }catch(_){}
       }
@@ -464,17 +499,15 @@
           freshFicha={...(freshFicha||{}),oficial:{...(freshFicha?.oficial||{}),...official},unidad:freshFicha?.unidad||freshCtrl};
         }
       }catch(_){}
-      if(modal._uvaSeq!==seq)return;
+      if(!current())return;
       modal._uvaFicha=freshFicha;
 
-      normalizeHeader(modal,{companyOwner:text(freshCtrl?.empresa_duena)||id.company,ctrl:freshCtrl,ficha:freshFicha});
-      panVisual(modal,freshCtrl);
-      revisadoVisual(modal,freshFicha,freshCtrl);
-      controlVisual(modal,freshCtrl,freshFicha);
-      gpsFromDom(modal);
+      presentModal(modal);
       modal.dataset.uvaEnriched=token;
     }catch(e){
       console.warn('Unit validator presentation enrichment',e);
+    }finally{
+      if(modal._uvaEnriching===token)modal._uvaEnriching=null;
     }
   }
 
@@ -488,7 +521,8 @@
   }
   w.RYM_UNIT_VALIDATOR=Object.freeze({session,logout});
 
-  function refresh(){
+  function refresh(){return renderQuietly(refreshView)}
+  function refreshView(){
     const p=profile(),mode=accessMode(),ok=mode==='allowed';
     d.documentElement.classList.toggle('uva-authorized',ok);
     d.documentElement.classList.toggle('uva-authenticated',!!p);
@@ -516,11 +550,10 @@
       modal.setAttribute('aria-label','Resultado de validación de unidad');
       const close=modal.querySelector('#v101CloseCheck');if(close)close.setAttribute('aria-label','Cerrar resultado');
       const overall=modal.querySelector('#v117Overall');if(overall)overall.setAttribute('aria-live','polite');
-      normalizeHeader(modal,{ctrl:modal._uvaCtrl||{},ficha:modal._uvaFicha});
       const full=modal.querySelector('#v101OpenModule');if(full){full.hidden=true;full.disabled=true;full.onclick=null}
       modal.querySelectorAll('.v117-status-card').forEach(ensureDetails);
-      clearTimeout(modal._uvaTimer);
-      modal._uvaTimer=setTimeout(()=>enrichModal(modal),120);
+      // First presentation happens now, never behind a cancelable mutation debounce.
+      void enrichModal(modal);
     }
     notify();
   }
@@ -533,8 +566,8 @@
     };
     w.v36PortalHome=home;try{v36PortalHome=home}catch(_){}
   }
-  const observer=new MutationObserver(()=>{
-    observer.disconnect();refresh();observer.observe(d.body,{childList:true,subtree:true});
+  observer=new MutationObserver(records=>{
+    if(mainMutations(records))refresh();
   });
-  refresh();observer.observe(d.body,{childList:true,subtree:true});
+  refresh();
 })(window,document);
