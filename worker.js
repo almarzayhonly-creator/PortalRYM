@@ -39,6 +39,13 @@ export default {
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
       if (url.pathname === "/" && url.searchParams.get("validator-host") === "1") {
         body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
+        // The dedicated validator uses its own module permission for the GPS card.
+        // The GPS Edge Function independently verifies the user JWT and validator access.
+        const legacyGpsGate = "const adminGps=['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase());";
+        if (body.includes(legacyGpsGate)) {
+          body = body.replace(legacyGpsGate, "const adminGps=!!(typeof window.rymHasModule==='function'&&window.rymHasModule('control_auto.validador_unidad_app'))||['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase());");
+        }
+
         // Publish only the canonical modal functions within the isolated validator host.
         // Keep index.html byte-for-byte identical to main (CI parity contract).
         const validatorBridgeAnchor = "  function card99(cls,icon,title,desc,buttonId,minis,badge='Disponible'){";
