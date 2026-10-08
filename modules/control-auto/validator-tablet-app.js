@@ -239,7 +239,16 @@
   function panVisual(modal,ctrl){
     const card=modal.querySelector('#v117PanCard');if(!card)return;
     const original=mainCard(card),map=original.details;
-    const balance=original.value||text(first(ctrl?.ena_saldo,ctrl?.saldo_ena,ctrl?.saldo))||'No disponible';
+    // Treat the placeholder left by the canonical card as missing, not as a balance.
+    // ENA's authenticated response wins only when it contains a valid numeric amount.
+    const live=responses.ena?.key===text(ctrl?.panapass_numero||map['PANAPASS'])?responses.ena.data?.results?.[0]:null;
+    const rawLive=live?.summary?.saldo_texto;
+    const hasLive=(live?.result==='OK'||live?.result==='BUSY')&&rawLive!=null&&text(rawLive)!=='';
+    const parsedLive=hasLive?Number(text(rawLive).replace(/[^\\d.-]/g,'')):NaN;
+    const cardValue=text(original.value);
+    const hasCardValue=cardValue&&!/^(—|–|--|-|CONSULTANDO(?:\\.\\.\\.)?|NO DISPONIBLE|SIN INFORMACIÓN)$/i.test(cardValue);
+    const stored=first(ctrl?.ena_saldo,ctrl?.saldo_ena,ctrl?.saldo);
+    const balance=Number.isFinite(parsedLive)?'B/. '+parsedLive.toFixed(2):hasCardValue?cardValue:stored!=null&&Number.isFinite(Number(stored))?'B/. '+Number(stored).toFixed(2):'No disponible';
     const account=modal._uvaEna||{};
     const last=first(original.badge==='SIN RESPUESTA ENA'?null:/No aplica|Consultando/i.test(map['CONSULTA ENA']||'')?null:map['CONSULTA ENA'],account.ultima_consulta,ctrl?.ena_ultima_consulta,ctrl?.ultima_consulta_ena)||'Sin consulta registrada';
     const verified=card.classList.contains('ok');
@@ -291,6 +300,16 @@
     setDetails(card,html);
   }
 
+  function revisadoDateLabel(value){
+    const raw=text(value);
+    if(!raw)return 'Sin registro';
+    // Database timestamp without timezone: display stored Panama wall-clock time.
+    const m=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})(?:[T ](\\d{2}):(\\d{2}))?/);
+    if(!m)return raw;
+    if(!m[4])return m[3]+'/'+m[2]+'/'+m[1];
+    const h=Number(m[4]);
+    return m[3]+'/'+m[2]+'/'+m[1]+', '+String(h%12||12)+':'+m[5]+' '+(h>=12?'p. m.':'a. m.');
+  }
   function revisadoVisual(modal,ficha,ctrl){
     const card=modal.querySelector('#v117RevCard');if(!card)return;
     const map=detailMap(card);
@@ -299,7 +318,7 @@
     const rawOfficial=officialRaw(oficial);
     const rev=(responses.rev?.rows||[]).find(r=>text(r.unidad).toUpperCase()===getIdentity(modal).unit.toUpperCase())||{};
     const operacion=ficha?.operacion||{};
-    const last=first(operacion.fecha_ultimo_revisado,oficial?.fecha_revisado,rawOfficial.fechaRevisado,map['ÚLTIMO REVISADO'])||'Sin registro';
+    const last=revisadoDateLabel(first(operacion.fecha_ultimo_revisado,oficial?.fecha_revisado,rawOfficial.fechaRevisado,map['ÚLTIMO REVISADO']));
     const original=mainCard(card);
     const raw=[map['ESTADO'],original.badge,original.value].filter(Boolean).join(' ');
     // The persisted Revisados operational evaluation is authoritative. A valid
