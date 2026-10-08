@@ -58,12 +58,31 @@
       normalizeIdentity(modal);
       const full=modal.querySelector('#v101OpenModule');if(full){full.hidden=true;full.disabled=true;full.onclick=null}
       modal.querySelectorAll('.v117-status-card').forEach(card=>{
-        if(card.querySelector('.uva-details'))return;
-        const details=d.createElement('details'),summary=d.createElement('summary');
-        details.className='uva-details';summary.textContent='Detalles';details.appendChild(summary);
-        details.open=w.matchMedia('(min-width:651px)').matches;
-        card.querySelectorAll('.v117-card-sub,.v117-card-details').forEach(el=>details.appendChild(el));
-        card.appendChild(details);
+        let details=card.querySelector('.uva-details');
+        if(!details){
+          details=d.createElement('details');
+          const summary=d.createElement('summary');
+          details.className='uva-details';
+          summary.textContent='Ver detalle';
+          summary.setAttribute('aria-label','Ver detalle');
+          details.appendChild(summary);
+          details.open=w.matchMedia('(min-width:651px)').matches;
+          card.querySelectorAll('.v117-card-sub,.v117-card-details').forEach(el=>details.appendChild(el));
+          card.appendChild(details);
+        }
+        if(card.dataset.uvaClickable==='1')return;
+        card.dataset.uvaClickable='1';
+        card.tabIndex=0;
+        card.setAttribute('role','button');
+        card.setAttribute('aria-label','Abrir o cerrar detalle de '+(card.querySelector('header small')?.textContent?.trim()||'validación'));
+        const toggle=e=>{
+          if(e.target.closest('summary')||e.target.closest('a,button,input,select,textarea'))return;
+          details.open=!details.open;
+        };
+        card.addEventListener('click',toggle);
+        card.addEventListener('keydown',e=>{
+          if(e.key==='Enter'||e.key===' '){e.preventDefault();details.open=!details.open}
+        });
       });
     }
     notify();
