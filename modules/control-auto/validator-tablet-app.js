@@ -111,7 +111,7 @@
     const plate=meta.find(x=>/^Placa\b/i.test(text(x.textContent)));
     const galera=meta.find(x=>/^Galera\b/i.test(text(x.textContent)));
     const supervisor=meta.find(x=>/Supervisora/i.test(text(x.textContent)));
-    const owner=meta.find(x=>/Dueña/i.test(text(x.textContent)));
+    const owner=meta.find(x=>/Dueña|Empresa/i.test(text(x.textContent)));
     if(plate)plate.classList.add('uva-meta-plate');
     if(galera)galera.classList.add('uva-meta-galera');
     if(supervisor)supervisor.classList.add('uva-meta-supervisor');
@@ -124,6 +124,32 @@
     }
     const identity=modal.querySelector('.v117-identity-line');
     if(identity)identity.hidden=true;
+
+    const id=getIdentity(modal);
+    const ctrl=ctx.ctrl||{};
+    const internal=text(ctrl?.estatus2||ctrl?.status2);
+    const rawState=text(ctrl?.estatus);
+    const stateLabel=/^ACTIV[AO]$/i.test(rawState)?'ACTIVA':rawState||'ESTADO POR VALIDAR';
+    let preview=modal.querySelector('.uva-unit-preview');
+    if(!preview){
+      preview=d.createElement('section');
+      preview.className='uva-unit-preview';
+      const anchor=modal.querySelector('.v117-quick-grid')||identity;
+      if(anchor)anchor.parentNode.insertBefore(preview,anchor);
+    }
+    if(preview){
+      preview.innerHTML=
+        '<div class="uva-unit-preview-main">'+
+          '<div><span class="uva-unit-kicker">UNIDAD</span><strong>'+esc(id.unit||'—')+'</strong><em>'+esc(id.plate?'Placa '+id.plate:'Sin placa')+'</em></div>'+
+          '<span class="uva-unit-state">'+esc(stateLabel)+'</span>'+
+        '</div>'+
+        '<div class="uva-unit-preview-chips">'+
+          '<span><small>Supervisora</small><b>'+esc(id.supervisor||'Sin asignar')+'</b></span>'+
+          '<span><small>Galera</small><b>'+esc(id.galera||'Sin asignar')+'</b></span>'+
+          '<span><small>Empresa</small><b>'+esc(ctx.companyOwner||id.company||'Sin asignar')+'</b></span>'+
+          (internal?'<span class="uva-unit-internal"><small>Estatus interno</small><b>'+esc(internal)+'</b></span>':'')+
+        '</div>';
+    }
   }
 
   function getIdentity(modal){
@@ -139,22 +165,32 @@
   function panVisual(modal,ctrl){
     const card=modal.querySelector('#v117PanCard');if(!card)return;
     const map=detailMap(card);
-    const balance=text(card.querySelector('.v117-card-value')?.textContent)||'No disponible';
-    const last=map['CONSULTA ENA']||text(ctrl?.ena_ultima_consulta)||'Sin consulta registrada';
-    const badge=text(card.querySelector('header strong')?.textContent)||'PANAPASS';
-    setPriority(card,{badge,value:balance,note:'Última consulta · '+last});
+    const balance=text(card.querySelector('.v117-card-value')?.textContent)||text(ctrl?.saldo_ena)||text(ctrl?.saldo)||'No disponible';
+    const last=map['CONSULTA ENA']||text(ctrl?.ena_ultima_consulta)||text(ctrl?.ultima_consulta_ena)||'Sin consulta registrada';
+    const verified=card.classList.contains('ok')||/OK|VERIFIC/i.test(text(card.querySelector('header strong')?.textContent));
+    setPriority(card,{badge:'PANAPASS',value:balance,note:'Última consulta · '+last});
     card.classList.add('uva-pan-priority');
-    card.querySelector('.v117-state-dot')?.setAttribute('title',card.classList.contains('ok')?'Verificado':'Requiere revisión');
+    let flag=card.querySelector('.uva-verified-flag');
+    if(!flag){flag=d.createElement('span');flag.className='uva-verified-flag';card.querySelector('header')?.appendChild(flag)}
+    flag.className='uva-verified-flag '+(verified?'ok':'warn');
+    flag.innerHTML='<i aria-hidden="true">'+(verified?'✓':'!')+'</i><b>'+(verified?'VERIFICADO':'REVISAR')+'</b>';
     const tags=text(ctrl?.tags_ena)||text(ctrl?.tag);
-    const html=sectionHtml('ENA',[
-      detailHtml('Número Panapass',ctrl?.panapass_numero||map['PANAPASS']),
-      detailHtml('TAG principal',ctrl?.tag),
-      detailHtml('TAGs ENA',tags),
-      detailHtml('Cantidad TAG ENA',ctrl?.cantidad_tags),
-      detailHtml('Estado ENA',ctrl?.ena_estado_acceso),
-      detailHtml('Saldo',balance),
-      detailHtml('Última consulta ENA',last)
-    ]);
+    const html=
+      sectionHtml('Cuenta ENA',[
+        detailHtml('Número Panapass',ctrl?.panapass_numero||ctrl?.numero_panapass||map['PANAPASS']),
+        detailHtml('Cuenta ENA',ctrl?.cuenta_ena||ctrl?.numero_cuenta||ctrl?.panapass_numero),
+        detailHtml('TAG principal',ctrl?.tag),
+        detailHtml('TAGs ENA',tags),
+        detailHtml('Cantidad TAG ENA',ctrl?.cantidad_tags),
+        detailHtml('Estado ENA',ctrl?.ena_estado_acceso),
+        detailHtml('Saldo',balance),
+        detailHtml('Última consulta ENA',last)
+      ])+
+      sectionHtml('Referencia',[
+        detailHtml('Unidad',ctrl?.unidad),
+        detailHtml('Placa',ctrl?.placa_unica),
+        detailHtml('Empresa',ctrl?.empresa_duena)
+      ]);
     setDetails(card,html);
   }
 
@@ -164,14 +200,25 @@
     const oficial=ficha?.oficial||{};
     const unidad=ficha?.unidad||{};
     const last=oficial?.fecha_revisado||map['ÚLTIMO REVISADO']||'Sin registro';
-    const badge=text(card.querySelector('header strong')?.textContent)||map['ESTADO']||'REVISADO';
-    setPriority(card,{badge,value:last,note:'Último revisado'});
+    const raw=[map['ESTADO'],text(card.querySelector('header strong')?.textContent),text(card.querySelector('.v117-card-value')?.textContent)].filter(Boolean).join(' ');
+    const expired=/VENCID|PENDIENT|NO VIGENTE|EXPIR/i.test(raw);
+    const current=!expired&&/VIGENTE|AL D[IÍ]A|OK|VALIDO|VÁLIDO/i.test(raw);
+    const status=expired?'VENCIDO':current?'VIGENTE':(map['ESTADO']||'POR VALIDAR').toUpperCase();
+    setPriority(card,{badge:'REVISADO',value:status,note:'Último revisado · '+last});
     card.classList.add('uva-rev-priority');
+    card.classList.toggle('uva-rev-current',status==='VIGENTE');
+    card.classList.toggle('uva-rev-expired',status==='VENCIDO');
+    let flag=card.querySelector('.uva-verified-flag');
+    if(!flag){flag=d.createElement('span');flag.className='uva-verified-flag';card.querySelector('header')?.appendChild(flag)}
+    flag.className='uva-verified-flag '+(status==='VIGENTE'?'ok':status==='VENCIDO'?'bad':'warn');
+    flag.innerHTML='<i aria-hidden="true">'+(status==='VIGENTE'?'✓':status==='VENCIDO'?'×':'!')+'</i><b>'+esc(status)+'</b>';
     const html=sectionHtml('Revisado',[
-      detailHtml('Estado',map['ESTADO']||badge),
+      detailHtml('Estado',status),
       detailHtml('Último revisado',last),
       detailHtml('Mes',ctrl?.mes_revisado||unidad?.mes_revisado||map['MES DE LA UNIDAD']),
-      detailHtml('Fecha oficial eCarCheck',oficial?.fecha_revisado)
+      detailHtml('Fecha oficial eCarCheck',oficial?.fecha_revisado),
+      detailHtml('Taller / emisor',oficial?.taller||oficial?.emisor||unidad?.taller_revisado),
+      detailHtml('Observación',oficial?.observacion||unidad?.observacion_revisado)
     ]);
     setDetails(card,html);
   }
@@ -182,7 +229,7 @@
     const parse=(key)=>{
       const raw=text(map[key]);
       const installed=!/SIN GPS/i.test(raw)&&!!raw;
-      const ok=installed&&/REPORTANDO|OK/i.test(raw)&&!/SIN REPORT|NO REPORT/i.test(raw);
+      const ok=installed&&/REPORTANDO|\bOK\b|ACTIVO/i.test(raw)&&!/SIN REPORT|NO REPORT|OFFLINE/i.test(raw);
       const last=(raw.match(/·\s*(.+)$/)||[])[1]||'';
       return {raw,installed,ok,last};
     };
@@ -190,36 +237,46 @@
     if(!g1.raw&&!g2.raw)return;
     const good=[g1,g2].filter(g=>g.installed&&g.ok).length;
     const installed=[g1,g2].filter(g=>g.installed).length;
-    const badge=installed===0?'SIN GPS':good===2?'2 GPS OK':good+' DE '+Math.max(installed,2)+' GPS OK';
-    setPriority(card,{badge,value:badge,note:''});
+    const summary=installed===0?'SIN GPS':good===2?'2 DE 2 REPORTANDO':good+' DE '+Math.max(installed,2)+' REPORTANDO';
+    setPriority(card,{badge:'GPS',value:summary,note:'Estado de señal'});
     card.classList.add('uva-gps-priority');
     let live=card.querySelector('.uva-gps-live');
     if(!live){live=d.createElement('div');live.className='uva-gps-live';card.querySelector('.v117-card-value')?.after(live)}
     const pill=(name,g)=>{
       const tone=!g.installed?'off':g.ok?'ok':'bad';
-      const label=!g.installed?'SIN GPS':g.ok?'REPORTANDO':(g.raw.split('·')[0]||'SIN REPORTAR');
-      return '<span class="uva-gps-pill '+tone+'"><i></i><b>'+name+'</b><em>'+esc(label)+'</em></span>';
+      const label=!g.installed?'SIN GPS':g.ok?'REPORTA':'NO REPORTA';
+      return '<span class="uva-gps-pill '+tone+'"><i></i><b>'+name.replace('GPS','GPS ')+'</b><em>'+esc(label)+'</em></span>';
     };
     live.innerHTML=pill('GPS1',g1)+pill('GPS2',g2);
-    setDetails(card,sectionHtml('GPS',[
-      detailHtml('GPS1',g1.raw||'SIN GPS'),
-      detailHtml('GPS2',g2.raw||'SIN GPS')
+    setDetails(card,sectionHtml('Información GPS',[
+      detailHtml('GPS 1',g1.raw||'SIN GPS'),
+      detailHtml('Último reporte GPS 1',g1.last),
+      detailHtml('GPS 2',g2.raw||'SIN GPS'),
+      detailHtml('Último reporte GPS 2',g2.last)
     ]));
   }
 
   function controlVisual(modal,ctrl,ficha){
     const card=modal.querySelector('#v117CtlCard');if(!card)return;
     const map=detailMap(card);
-    const badge=text(card.querySelector('header strong')?.textContent)||map['ESTADO']||'CONTROL DE AUTO';
+    const rawState=text(ctrl?.estatus||map['ESTADO']||card.querySelector('header strong')?.textContent);
     const status2=text(ctrl?.estatus2||ctrl?.status2||ficha?.logistica?.status2);
-    const active=/^ACTIVA?$/i.test(badge)||/^ACTIVO$/i.test(text(ctrl?.estatus));
-    const sub=active?(status2&&status2.toUpperCase()!=='ACTIVO'&&status2.toUpperCase()!=='CONVENIO'?status2:'OPERATIVA'):(status2||text(card.querySelector('.v117-card-value')?.textContent)||'REVISAR');
-    setPriority(card,{badge,value:sub.toUpperCase(),note:active?'Unidad activa':'Estatus interno'});
+    const active=/^ACTIV[AO]$/i.test(rawState);
+    const stopped=/PARAD|INACTIV|BAJA|TALLER|CHAPISTER/i.test(rawState)||(!active&&!!status2&&!/ACTIV|OPERATIV|CONVENIO/i.test(status2));
+    const state=active?'ACTIVA':stopped?'PARADA':(rawState||'POR VALIDAR').toUpperCase();
+    const internal=status2||(active?'OPERATIVA':'REVISAR ESTATUS INTERNO');
+    setPriority(card,{badge:'CONTROL DE AUTO',value:state,note:'Estatus interno · '+internal});
     card.classList.add('uva-control-priority');
+    card.classList.toggle('uva-control-active',state==='ACTIVA');
+    card.classList.toggle('uva-control-stopped',state==='PARADA');
+    let flag=card.querySelector('.uva-verified-flag');
+    if(!flag){flag=d.createElement('span');flag.className='uva-verified-flag';card.querySelector('header')?.appendChild(flag)}
+    flag.className='uva-verified-flag '+(state==='ACTIVA'?'ok':state==='PARADA'?'warn':'off');
+    flag.innerHTML='<i aria-hidden="true">'+(state==='ACTIVA'?'✓':state==='PARADA'?'!':'?')+'</i><b>'+esc(state)+'</b>';
     const u=ficha?.unidad||{},o=ficha?.oficial||{};
     const control=sectionHtml('Control de Auto',[
-      detailHtml('Estado',ctrl?.estatus||map['ESTADO']||badge),
-      detailHtml('Estatus interno',status2),
+      detailHtml('Estado de la unidad',state),
+      detailHtml('Estatus interno',internal),
       detailHtml('Empresa',ctrl?.empresa_duena||u?.empresa_duena),
       detailHtml('Galera',ctrl?.galera||u?.galera),
       detailHtml('Supervisora',ctrl?.supervisora||u?.supervisora),
@@ -247,7 +304,9 @@
       detailHtml('Año vehículo',o?.anio),
       detailHtml('Fecha revisado',o?.fecha_revisado),
       detailHtml('Tipo de uso',o?.tipo_uso),
-      detailHtml('Estado vehículo',o?.estado_vehiculo)
+      detailHtml('Estado vehículo',o?.estado_vehiculo),
+      detailHtml('Restricciones',o?.restricciones||o?.restriccion),
+      detailHtml('Observaciones',o?.observacion||o?.observaciones)
     ]);
     setDetails(card,control+ecar);
   }
@@ -260,7 +319,7 @@
     // Always reformat what main already rendered. Main owns live ENA/GPS checks.
     const ctrl=modal._uvaCtrl||{};
     const ficha=modal._uvaFicha||null;
-    normalizeHeader(modal,{companyOwner:text(ctrl?.empresa_duena)||id.company});
+    normalizeHeader(modal,{companyOwner:text(ctrl?.empresa_duena)||id.company,ctrl});
     panVisual(modal,ctrl);
     revisadoVisual(modal,ficha,ctrl);
     controlVisual(modal,ctrl,ficha);
@@ -284,7 +343,7 @@
       if(modal._uvaSeq!==seq)return;
       modal._uvaFicha=freshFicha;
 
-      normalizeHeader(modal,{companyOwner:text(freshCtrl?.empresa_duena)||id.company});
+      normalizeHeader(modal,{companyOwner:text(freshCtrl?.empresa_duena)||id.company,ctrl:freshCtrl});
       panVisual(modal,freshCtrl);
       revisadoVisual(modal,freshFicha,freshCtrl);
       controlVisual(modal,freshCtrl,freshFicha);
