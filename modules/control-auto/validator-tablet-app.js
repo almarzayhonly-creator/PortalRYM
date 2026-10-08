@@ -521,15 +521,82 @@
   }
   w.RYM_UNIT_VALIDATOR=Object.freeze({session,logout});
 
+  // The dedicated search owns its input handlers. It does not depend on the
+  // main Portal's closed-over home search being published at bootstrap.
+  let searchSeq=0,searchTimer=0,searchRows=[],searchOwner='';
+  function bindDedicatedSearch(){
+    const input=d.getElementById('v101ValidatorQ'),button=d.getElementById('v101ValidatorGo');
+    if(!input||!button)return;
+    if(input.dataset.uvaSearchBound==='1'&&button.dataset.uvaSearchBound==='1')return;
+    const list=d.getElementById('v101ValidatorList');
+    const key=()=>userKey();
+    function showError(message){
+      if(!list)return;
+      list.style.display='block';
+      list.innerHTML='<div class="v101-check-empty">'+esc(message)+'</div>';
+    }
+    function renderRows(rows){
+      if(!list)return;
+      if(!rows.length){showError('Sin coincidencias.');return}
+      list.style.display='block';
+      list.innerHTML=rows.map((r,i)=>{
+        const unit=text(r.unidad||r.unit||'—'),plate=text(r.placa_unica||r.placa||r.placa_comercial||'—');
+        const company=text(r.empresa_duena||r.empresa_operadora||r.empresa||'—');
+        return '<button type="button" class="v101-validator-item" data-v101pick="'+i+'"><span><b>'+esc(unit)+'</b><small>'+esc(company)+' · '+esc(plate)+' · '+esc(r.panapass_numero||'Sin Panapass')+'</small></span><span class="v101-validator-state">'+esc(r.estatus||r.estado||'')+'</span></button>';
+      }).join('');
+      list.querySelectorAll('[data-v101pick]').forEach(el=>el.onclick=()=>openRow(rows[Number(el.dataset.v101pick)]));
+    }
+    function openRow(row){
+      if(!row)return;
+      if(typeof w.openValidator99!=='function'){showError('No está disponible el detalle. Recarga la aplicación.');return}
+      list.style.display='none';
+      w.openValidator99(row);
+    }
+    async function search(term){
+      const seq=++searchSeq,owner=key(),q=text(term);
+      if(q.length<2){searchRows=[];if(list){list.innerHTML='';list.style.display='none'}return []}
+      try{
+        let rows=await rpcCall('panapass_control_auto_v2',{p_grupo:null,p_buscar:q,p_limit:8});
+        if(!Array.isArray(rows)||!rows.length)rows=await rpcCall('panapass_unidades_detalle',{p_buscar:q,p_limit:8});
+        if(seq!==searchSeq||owner!==key()||input.value.trim()!==q)return [];
+        searchRows=Array.isArray(rows)?rows:[];
+        searchOwner=owner;
+        renderRows(searchRows);
+        return searchRows;
+      }catch(e){
+        if(seq===searchSeq&&owner===key()){
+          searchRows=[];showError('No se pudo consultar: '+text(e?.message||e));
+        }
+        return [];
+      }
+    }
+    async function run(){
+      const term=text(input.value);
+      if(!term)return;
+      const norm=s=>text(s).toUpperCase();
+      const valid=searchOwner===key()&&searchRows;
+      const exact=valid?searchRows.find(r=>[r.unidad,r.placa_unica,r.placa,r.placa_comercial,r.panapass_numero].some(v=>norm(v)===norm(term))):null;
+      if(exact){openRow(exact);return}
+      const rows=await search(term);
+      if(rows.length===1)openRow(rows[0]);
+    }
+    input.oninput=()=>{
+      clearTimeout(searchTimer);
+      const q=input.value;
+      searchTimer=setTimeout(()=>{void search(q)},220);
+    };
+    input.onfocus=()=>{if(searchOwner===key()&&searchRows.length)renderRows(searchRows)};
+    input.onkeydown=e=>{
+      if(e.key==='Enter'){e.preventDefault();void run()}
+      else if(e.key==='Escape'&&list)list.style.display='none';
+    };
+    button.onclick=()=>{void run()};
+    input.dataset.uvaSearchBound='1';
+    button.dataset.uvaSearchBound='1';
+  }
   function ensureValidatorSurface(){
     const existing=d.getElementById('v101ValidatorQ');
-    if(existing){
-      const go=d.getElementById('v101ValidatorGo');
-      if((typeof existing.oninput!=='function'||typeof go?.onclick!=='function')&&typeof w.bindValidator99==='function'){
-        try{w.bindValidator99()}catch(e){console.warn('Unit validator rebind',e)}
-      }
-      return true;
-    }
+    if(existing){bindDedicatedSearch();return true}
     const root=d.getElementById('app');if(!root)return false;
     root.innerHTML=
       '<div class="v101-shell uva-dedicated-shell">'+
@@ -548,10 +615,7 @@
           '</div>'+
         '</main>'+
       '</div>';
-    try{
-      if(typeof bindValidator99==='function')bindValidator99();
-      else if(typeof w.bindValidator99==='function')w.bindValidator99();
-    }catch(e){console.warn('Unit validator bind',e)}
+    bindDedicatedSearch();
     return !!d.getElementById('v101ValidatorQ');
   }
 
