@@ -454,3 +454,57 @@ html.rym-unit-validator-app .uva-gps-pill em{font-style:normal!important;font-we
   html.rym-unit-validator-app .uva-control-priority .v117-card-value{font-size:18px!important}
   html.rym-unit-validator-app .uva-gps-live{grid-template-columns:1fr 1fr!important;margin-right:38px!important}
 }
+
+
+/* v10 compact mobile result: preserve all requested data without forced scroll */
+html.rym-unit-validator-app .v117-status-card:has(.uva-verified-flag) .v117-state-dot{display:none!important}
+html.rym-unit-validator-app .v117-status-card header{position:relative!important}
+html.rym-unit-validator-app .v117-status-card .uva-verified-flag{
+  grid-column:3!important;grid-row:1/3!important;align-self:center!important;justify-self:end!important;margin-left:0!important
+}
+@media(max-width:650px){
+  html.rym-unit-validator-app [hidden]{display:none!important}
+  html.rym-unit-validator-app .v117-meta{display:none!important}
+  html.rym-unit-validator-app .v117-identity-line,
+  html.rym-unit-validator-app .v117-identity-line.v125-clean{display:none!important}
+  html.rym-unit-validator-app .uva-unit-preview{
+    margin:0 0 6px!important;padding:8px 10px!important;border-radius:13px!important;box-shadow:0 5px 14px rgba(10,27,77,.045)!important
+  }
+  html.rym-unit-validator-app .uva-unit-preview-main{align-items:center!important;gap:8px!important}
+  html.rym-unit-validator-app .uva-unit-preview-main>div{display:flex!important;align-items:baseline!important;gap:6px!important;min-width:0!important}
+  html.rym-unit-validator-app .uva-unit-kicker{display:none!important}
+  html.rym-unit-validator-app .uva-unit-preview-main strong{font-size:21px!important;line-height:1!important;white-space:nowrap!important}
+  html.rym-unit-validator-app .uva-unit-preview-main em{font-size:11px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  html.rym-unit-validator-app .uva-unit-state{min-height:24px!important;padding:3px 7px!important;font-size:9px!important;white-space:nowrap!important}
+  html.rym-unit-validator-app .uva-unit-preview-chips{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;margin-top:6px!important
+  }
+  html.rym-unit-validator-app .uva-unit-preview-chips>span{
+    min-width:0!important;padding:3px 5px!important;border-radius:8px!important;gap:0!important
+  }
+  html.rym-unit-validator-app .uva-unit-preview-chips small{font-size:8px!important;line-height:1!important}
+  html.rym-unit-validator-app .uva-unit-preview-chips b{
+    font-size:10px!important;line-height:1.1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important
+  }
+  html.rym-unit-validator-app .uva-unit-preview-chips .uva-unit-internal{
+    grid-column:1/-1!important;display:flex!important;align-items:center!important;gap:5px!important;padding:3px 5px!important
+  }
+  html.rym-unit-validator-app .v117-check-head{margin-bottom:3px!important;padding-bottom:2px!important}
+  html.rym-unit-validator-app .v117-title-row h2{font-size:28px!important}
+  html.rym-unit-validator-app .v117-status-card{
+    min-height:74px!important;padding:7px 9px 7px 11px!important
+  }
+  html.rym-unit-validator-app .v117-status-card header{
+    min-height:33px!important;grid-template-columns:28px minmax(0,1fr) auto!important;gap:7px!important
+  }
+  html.rym-unit-validator-app .v117-card-icon{width:28px!important;height:28px!important;flex-basis:28px!important}
+  html.rym-unit-validator-app .v117-status-card .uva-verified-flag{
+    min-height:22px!important;padding:2px 5px!important;font-size:8px!important;gap:3px!important
+  }
+  html.rym-unit-validator-app .v117-status-card .uva-verified-flag i{width:14px!important;height:14px!important;font-size:9px!important}
+  html.rym-unit-validator-app .v117-card-value{margin:0 31px 0 35px!important}
+  html.rym-unit-validator-app .uva-priority-note{margin:0 31px 0 35px!important}
+  html.rym-unit-validator-app .uva-gps-live{margin:1px 31px 0 35px!important}
+  html.rym-unit-validator-app .uva-gps-pill{min-height:21px!important;padding:1px 5px!important}
+  html.rym-unit-validator-app .uva-details summary{right:7px!important;bottom:7px!important;width:24px!important;height:24px!important;min-height:24px!important}
+}
