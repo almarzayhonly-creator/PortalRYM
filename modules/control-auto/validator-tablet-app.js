@@ -129,7 +129,8 @@
     const ctrl=ctx.ctrl||{};
     const internal=text(ctrl?.estatus2||ctrl?.status2);
     const rawState=text(ctrl?.estatus);
-    const stateLabel=/^ACTIV[AO]$/i.test(rawState)?'ACTIVA':rawState||'ESTADO POR VALIDAR';
+    const overall=text(modal.querySelector('#v117Overall')?.textContent);
+    const stateLabel=/^ACTIV[AO]$/i.test(rawState)?'ACTIVA':rawState||overall||'ESTADO POR VALIDAR';
     let preview=modal.querySelector('.uva-unit-preview');
     if(!preview){
       preview=d.createElement('section');
