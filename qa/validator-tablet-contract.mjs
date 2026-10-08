@@ -19,7 +19,7 @@ for(const url of ['/?app=validador-unidad','/?validator-host=1','/auth/v1/token'
 }
 let responded=false;handlers.fetch({request:{url:'https://preview.test/auth/v1/token',method:'POST'},respondWith:()=>responded=true});assert.equal(responded,false);
 handlers.fetch({request:{url:'https://supabase.test/rest/v1/units',method:'GET'},respondWith:()=>responded=true});assert.equal(responded,false);
-handlers.fetch({request:{url:'https://preview.test/css/validator-tablet-app.css?v=6',method:'GET'},respondWith:p=>pending=p});await pending;assert.ok(cached.includes('https://preview.test/css/validator-tablet-app.css?v=6'));
+handlers.fetch({request:{url:'https://preview.test/css/validator-tablet-app.css?v=7',method:'GET'},respondWith:p=>pending=p});await pending;assert.ok(cached.includes('https://preview.test/css/validator-tablet-app.css?v=7'));
 const worker=(await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('worker.js','utf8')).toString('base64'))).default;
 const assets={fetch:async()=>new Response(main,{headers:{'content-type':'text/html'}})};
 const portal=await worker.fetch(new Request('https://preview.test/'),{ASSETS:assets});const portalHtml=await portal.text();
