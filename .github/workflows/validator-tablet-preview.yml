@@ -88,14 +88,14 @@ jobs:
           VERSION_URL: ${{ steps.deploy.outputs.version_url }}
         run: |
           curl -fsSL -D /tmp/headers.txt "$VERSION_URL/?app=validador-unidad" -o /tmp/index.html
-          curl -fsSL "$VERSION_URL/modules/v171-loader.js" -o /tmp/loader.js
+          curl -fsSL "$VERSION_URL/modules/core/unit-validator-launcher.js" -o /tmp/launcher.js
           curl -fsSL "$VERSION_URL/modules/control-auto/validator-tablet-app.js" -o /tmp/app.js
           curl -fsSL "$VERSION_URL/css/validator-tablet-app.css" -o /tmp/app.css
           curl -fsSL "$VERSION_URL/validator-tablet.webmanifest" -o /tmp/manifest.json
           grep -Fq 'Validador de Unidad' /tmp/index.html
           grep -Fq 'control_auto.validador_unidad_app' /tmp/index.html
           grep -Fq 'x-rym-app: unit-validator' /tmp/headers.txt
-          grep -Fq 'validator-tablet-app.js' /tmp/loader.js
+          grep -Fq 'control_auto.validador_unidad_app' /tmp/launcher.js
           grep -Fq 'v101ValidatorQ' /tmp/app.js
           grep -Fq 'rym-unit-validator-app' /tmp/app.css
           grep -Fq 'app=validador-unidad' /tmp/manifest.json
