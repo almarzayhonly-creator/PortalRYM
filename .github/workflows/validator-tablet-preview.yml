@@ -45,11 +45,17 @@ jobs:
           grep -Fq 'v101ValidatorQ' modules/control-auto/validator-tablet-app.js
           ! grep -Fq 'validator-tablet-app.js' modules/v171-loader.js
           ! grep -Fq 'validator-tablet-app.css' modules/v171-loader.js
-          grep -Fq 'validator-tablet-app.css?v=10' unit-validator.html
-          grep -Fq 'unit-validator-shell.js?v=10' unit-validator.html
-          grep -Fq 'validator-tablet-app.js?v=10' worker.js
-          grep -Fq 'validator-tablet-app.css?v=10' worker.js
-          grep -Fq "rym-unit-validator-shell-v10" validator-tablet-sw.js
+          BUILD=$(sed -nE 's#.*validator-tablet-app\.css\?v=([0-9]+).*#\1#p' unit-validator.html | head -1)
+          test -n "$BUILD"
+          grep -Fq "validator-tablet-app.css?v=$BUILD" unit-validator.html
+          grep -Fq "unit-validator-shell.js?v=$BUILD" unit-validator.html
+          grep -Fq "validator-tablet-app.js?v=$BUILD" worker.js
+          grep -Fq "validator-tablet-app.css?v=$BUILD" worker.js
+          grep -Fq "unit-validator-shell-v$BUILD" worker.js
+          grep -Fq "rym-unit-validator-shell-v$BUILD" validator-tablet-sw.js
+          grep -Fq "validator-tablet-app.css?v=$BUILD" validator-tablet-sw.js
+          grep -Fq "validator-tablet-app.js?v=$BUILD" validator-tablet-sw.js
+          grep -Fq "unit-validator-shell.js?v=$BUILD" validator-tablet-sw.js
           grep -Fq '"start_url": "/?app=validador-unidad"' validator-tablet.webmanifest
 
       - name: Test dedicated validator against main functions
