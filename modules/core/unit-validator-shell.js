@@ -18,6 +18,8 @@
     frame.classList.add('ready');loading.hidden=true;
     subtitle.textContent=session.user||'Portal RYM';
     status.textContent=session.denied?'Sin acceso':!session.authenticated?'Inicia sesión':navigator.onLine?'Conectado':'Sin conexión';
+    const exit=d.getElementById('exit');
+    if(exit)exit.hidden=!session.authenticated;
   }
   w.addEventListener('message',e=>{
     if(e.origin===location.origin&&e.source===frame.contentWindow&&e.data?.type==='rym-validator-state')update();
