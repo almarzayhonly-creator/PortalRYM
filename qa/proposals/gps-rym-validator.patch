@@ -1,0 +1,16 @@
+--- a/index.ts
++++ b/index.ts
+@@ -20 +20,12 @@
+-async function json(url:string){const r=await fetch(url,{headers:{accept:'application/json'}});if(!r.ok)throw Error(`HTTP ${r.status}`);let x=await r.json();if(Array.isArray(x)&&x.length===1&&Array.isArray(x[0]))x=x[0];if(!Array.isArray(x))throw Error('JSON no es array');return x}
++async function json(url:string){
++  const broker=Deno.env.get('GPS_SHARED_FEED_URL')||'',secret=Deno.env.get('GPS_COORDINATOR_SECRET')||'';
++  let target=url;const headers:any={accept:'application/json'};
++  if(broker||secret){
++    if(!broker||!secret)throw Error('shared_feed_configuration_incomplete');
++    const origin=new URL(broker);
++    if(origin.protocol!=='https:'||origin.username||origin.password||origin.pathname!=='/'||origin.search||origin.hash)throw Error('shared_feed_origin_invalid');
++    const route=url==='https://logistictodo.com:5001/user97'?'/gps':url==='https://logistictodo.com:5000/user149'?'/status':null;
++    if(!route)throw Error('shared_feed_not_allowed');target=origin.origin+route;headers.authorization='Bearer '+secret;
++  }
++  const r=await fetch(target,{headers});if(!r.ok)throw Error(`HTTP ${r.status}`);let x=await r.json();if(Array.isArray(x)&&x.length===1&&Array.isArray(x[0]))x=x[0];if(!Array.isArray(x))throw Error('JSON no es array');return x;
++}

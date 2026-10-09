@@ -1,0 +1,8 @@
+{
+  "name": "rym-validator-gps-sandbox",
+  "main": "gps-feed-worker.mjs",
+  "compatibility_date": "2026-10-09",
+  "workers_dev": true,
+  "durable_objects": {"bindings": [{"name": "GPS_FEEDS", "class_name": "SharedGpsFeeds"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["SharedGpsFeeds"]}]
+}

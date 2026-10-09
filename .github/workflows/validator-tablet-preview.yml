@@ -75,13 +75,20 @@ jobs:
           PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-tablet-cache-update.mjs
           node qa/validator-presentation-contract.mjs
           node qa/validator-tablet-contract.mjs
+          node qa/validator-gps-proposal-contract.mjs
+          PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-tablet-concurrency.mjs
+
+      - name: Compile GPS proposal without deployment
+        run: npx --yes wrangler@4.149.0 deploy --dry-run --config qa/proposals/wrangler.gps.jsonc --outdir .sandbox/gps-proposal-build
 
       - name: Upload responsive evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: validator-responsive-evidence
-          path: .sandbox/validator-qa
+          path: |
+            .sandbox/validator-qa
+            .sandbox/validator-load
 
 
       - name: Deploy isolated Cloudflare preview
