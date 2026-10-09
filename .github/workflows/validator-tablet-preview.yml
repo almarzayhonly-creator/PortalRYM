@@ -34,6 +34,7 @@ jobs:
           node --check modules/v171-loader.js
           node --check modules/control-auto/validator-tablet-app.js
           node --check modules/control-auto/validator-presentation.js
+          node --check modules/control-auto/validator-details.js
           node --check modules/core/unit-validator-shell.js
           node --check modules/core/unit-validator-launcher.js
           node --check validator-tablet-sw.js

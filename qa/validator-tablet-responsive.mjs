@@ -14,8 +14,9 @@ const clean=consistency.slice(consistency.indexOf('  function cleanQuickQuery(){
 // Execute main's actual validator functions, with deterministic responses only in this test server.
 const seed={unidad:'QA200',placa_unica:'QA14826',placa_comercial:'QA-CUPO',estatus:'ACTIVO',panapass_numero:'1129235',panapass_display:'1129235 · QA',ena_saldo:.25,empresa_duena:'EMPRESA QA',empresa_operadora:'OPERADORA QA',supervisora:'SUPERVISORA QA',galera:'GALERA QA',mes_revisado:'OCTUBRE',color:'Titan Grey',marca:'Hyundai',modelo:'QA-MODELO',anio:2020,chasis:'QA-CHASIS',motor:'QA-MOTOR',transmision:'MANUAL',estatus_netsuite:'QA-NETSUITE',tag:'TAG-1',tags_ena:'TAG-1, TAG-2',cantidad_tags:2,tags_detalle:[{tag:'TAG-2',estado:'ACTIVO',estado_financiero:'AL DIA',tipo_tag:'QA-TIPO-TAG',matricula:'QA14826',tipo_vehiculo:'AUTO',corregimiento:'QA',consultado_at:'2026-10-07T12:00:00Z'}]};
 const official={placa:'QA14826',actualizado_at:'2026-10-07T12:00:00Z',ultima_respuesta:{detalleRespuesta:'QA GUARDADO',nroPlaca:'QA14826',cupo:'QA-OFICIAL',nombrePropietario:'PROPIETARIO QA',nroDocumentoPropietario:'DOC-QA',nroVin:'QA-VIN-LARGO-'+ '0123456789'.repeat(24),nroChasis:'OFICIAL-CHASIS',nroMotor:'OFICIAL-MOTOR',marcavehiculo:'MARCA OFICIAL QA',modeloVehiculo:'MODELO OFICIAL QA',anioVehiculo:2021,colorVehiculo:'COLOR QA',tipoVehiculo:'TIPO QA',tipoPlaca:'PLACA QA',tipoUso:'USO QA',estadoVehiculo:'ESTADO QA',tipoTransmision:'AUTOMATICA',tipoCombustible:'GASOLINA',cilindradaVehiculo:1500,nroCilindros:4,capacidadVehiculo:5,tipoCapacidad:'PERSONAS',nroPuertas:4,traccionMotor:'DELANTERA',tieneAireAcondicionado:false,hipoteca:false,tipoPertenencia:'PROPIA',aseguradora:'ASEGURADORA QA',poliza:'QA<123>',restriccionVehiculos:'RESTRICCION QA',fechaRevisado:'2026-10-01',mesRevisado:'OCTUBRE',idRevisados:123,ultTallerRevisado:'TALLER QA',observaciones:'OBSERVACION QA'}};
-const cases=process.argv.includes('--progressive-only')?['progressive']:process.argv.includes('--latency-only')?['fast-enter','parallel','master-fallback']:['rev-expired','gps-critical','gps-unknown','gps2-only','identity-match','official-missing','operativo','supervisora','ok','progressive','fast-enter','parallel','master-fallback','pan-negative','no-pan','rev-pending','rev-blocked','gps-alert','no-gps','stopped','custody','bodywork','closed','ena-error','not-found','no-permission'];
-const sizes=[[360,800],[390,844],[412,915],[768,1024],[800,1280],[1024,768],[1280,800],[1440,900]];
+const v2Cases=['ena-pending','pan-dedup','identity-all-match','vin-chassis-link','gps-distinct'];
+const cases=process.argv.includes('--v2-only')?v2Cases:process.argv.includes('--progressive-only')?['progressive']:process.argv.includes('--latency-only')?['fast-enter','parallel','master-fallback']:['rev-expired','gps-critical','gps-unknown','gps2-only','identity-match','official-missing','operativo','supervisora','ok','progressive','fast-enter','parallel','master-fallback','pan-negative','no-pan','rev-pending','rev-blocked','gps-alert','no-gps','stopped','custody','bodywork','closed','ena-error','not-found','no-permission',...v2Cases];
+const sizes=[[360,800],[390,844],[412,915],[768,1024],[800,1280],[1024,768],[1280,800],[1440,900],[1920,1080]];
 let activeCase='ok';
 function fixture(){
   return `<!doctype html><html lang="es"><head><meta name="viewport" content="width=device-width,initial-scale=1">${originalStyles}</head><body class="v99-home"><div id="app"><div class="v101-shell"><aside class="v101-side">Forbidden sidebar</aside><main class="v101-main"><header class="v101-top">Forbidden portal</header><div class="v101-content"><section class="v101-validator"><div class="v101-validator-head"><h3>Validador rápido de unidad</h3><p>Original helper</p></div><div class="v101-validator-tools"><div class="v101-validator-box"><input id="v101ValidatorQ" class="v101-validator-input"><div id="v101ValidatorList" class="v101-validator-list" style="display:none"></div></div><button id="v101ValidatorGo" class="v101-validator-go">Validar</button></div></section><section class="v99-grid">Forbidden dashboard</section></div></main></div></div><script>
@@ -26,12 +27,12 @@ function fixture(){
   function loginView(){document.body.className='';document.getElementById('app').innerHTML='<div class="login-card">Inicia sesión</div>'}
   window.v36PortalHome=async()=>{};
   function gpsDate116(v){return String(v)}
-  async function rpc(name,args){calls.push({name,args});if(testCase==='fast-enter'||testCase==='parallel')await new Promise(resolve=>setTimeout(resolve,testCase==='fast-enter'?350:100));if(testCase==='not-found'||(testCase==='master-fallback'&&name==='panapass_control_auto_v2'&&args.p_limit===8))return [];const s={...testSeed};if(testCase==='progressive')s.mes_revisado='ENERO';if(testCase==='rev-expired')s.mes_revisado='MARZO';if(testCase==='identity-match')s.chasis=' QA-CHASIS '; if(testCase==='pan-negative')s.ena_saldo=-2;if(testCase==='no-pan')s.panapass_numero='';if(testCase==='stopped'){s.estatus='PARADO';s.status2='TALLER'}if(testCase==='closed')s.estatus='CERRADA';return [s]}
+  async function rpc(name,args){calls.push({name,args});if(testCase==='fast-enter'||testCase==='parallel')await new Promise(resolve=>setTimeout(resolve,testCase==='fast-enter'?350:100));if(testCase==='not-found'||(testCase==='master-fallback'&&name==='panapass_control_auto_v2'&&args.p_limit===8))return [];const s={...testSeed};if(testCase==='pan-dedup'){s.panapass_display=s.panapass_numero;s.cuenta_ena=s.panapass_numero;s.tags_ena='TAG-1, TAG-1, TAG-2'}if(testCase==='vin-chassis-link')s.chasis='QA-VIN-LARGO-'+ '0123456789'.repeat(24);if(testCase==='progressive')s.mes_revisado='ENERO';if(testCase==='rev-expired')s.mes_revisado='MARZO';if(testCase==='identity-match')s.chasis=' QA-CHASIS '; if(testCase==='pan-negative')s.ena_saldo=-2;if(testCase==='no-pan')s.panapass_numero='';if(testCase==='stopped'){s.estatus='PARADO';s.status2='TALLER'}if(testCase==='closed')s.estatus='CERRADA';return [s]}
   async function req(url,opt){const call={url,opt,start:performance.now()};calls.push(call);try{
   if(testCase==='parallel')await new Promise(resolve=>setTimeout(resolve,120));if(testCase==='progressive')await new Promise(resolve=>setTimeout(resolve,url.includes('gps-rym-validator')?650:url.includes('ena-consulta')?450:50));
   if(url.includes('portal-session-modules'))return {data:{ok:true,modules:state.allModules}};
   if(url.includes('revisados-ficha'))return {data:{ok:true,unidad:testSeed,oficial:testCase==='official-missing'?null:{placa:testSeed.placa_unica},operacion:testCase==='rev-expired'?{estado_revisado:'VENCIDO',fecha_ultimo_revisado:'2025-03-07'}:null,logistica:{status2:testCase==='stopped'?'TALLER':testCase==='custody'?'CUSTODIA':testCase==='bodywork'?'CHAPISTERÍA':'ACTIVO'}}};
-  if(url.includes('/rest/v1/ena_cuentas'))return {data:[{panapass_display:'1129235 · QA',estado_acceso:'OK',tipo_credencial:'QA-CREDENCIAL',ena_empresa:'ENA EMPRESA QA',ena_ruc:'RUC-QA',ena_email:'qa@example.test',ultimo_login_ok:'2026-10-07T12:00:00Z',ultima_consulta:'2026-10-07T12:00:00Z',updated_at:'2026-10-07T12:00:00Z'}]};if(url.includes('/rest/v1/revisados_vehiculo_oficial'))return {data:testCase==='official-missing'?[]:[testCase==='identity-match'?{...testOfficial,ultima_respuesta:{...testOfficial.ultima_respuesta,nroChasis:'qa chasis'}}:testOfficial]};if(url.includes('revisados-final'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,estado:['rev-pending','rev-expired'].includes(testCase)?'PENDIENTE':'VIGENTE',meses_atraso:testCase==='rev-expired'?7:0,emitido:!['rev-pending','rev-expired'].includes(testCase),bloqueado:testCase==='rev-blocked',status2:testCase==='stopped'?'TALLER':testCase==='custody'?'CUSTODIA':testCase==='bodywork'?'CHAPISTERÍA':'ACTIVO',mes_revisado:'OCTUBRE',ultimo_revisado:'2026-10-01',fotos_disponibles:true,cantidad_fotos:2}]}};if(url.includes('ena-consulta')){if(testCase==='ena-error')throw Error('Sin respuesta ENA');return {data:{ok:true,results:[{result:'OK',summary:{saldo_texto:testCase==='pan-negative'?'-2.00':'0.25'}}]}}}if(url.includes('gps-rym-validator')&&testCase==='gps-unknown')return {data:{ok:true,rows:[]}};if(url.includes('gps-rym-validator'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,historico:testCase==='closed',nivel:testCase==='gps-critical'?'CRITICO':['gps-alert','gps2-only'].includes(testCase)?'ALERTA':'OK',estado_operativo:'ACTIVO',razon:'DIAGNOSTICO QA',gps1:{installed:!['no-gps','gps2-only'].includes(testCase),ok:testCase!=='gps-critical',last:'2026-10-07',proveedor:'PROVEEDOR QA',imei:'IMEI QA',metadata:{satellites:8}},gps2:{installed:true,ok:!['gps-alert','gps-critical'].includes(testCase),last:'2026-10-07'},estado_operativo:'ACTIVO',razon:'Diagnóstico QA'}]}};throw Error('Unexpected request '+url)}finally{call.end=performance.now()}}
+  if(url.includes('/rest/v1/ena_cuentas'))return {data:[{panapass_display:testCase==='pan-dedup'?'1129235':'1129235 · QA',estado_acceso:testCase==='ena-pending'?'PENDIENTE':'OK',tipo_credencial:'QA-CREDENCIAL',ena_empresa:'ENA EMPRESA QA',ena_ruc:'RUC-QA',ena_email:'qa@example.test',ultimo_login_ok:'2026-10-07T12:00:00Z',ultima_consulta:'2026-10-07T12:00:00Z',updated_at:'2026-10-07T12:00:00Z'}]};if(url.includes('/rest/v1/revisados_vehiculo_oficial'))return {data:testCase==='official-missing'?[]:[testCase==='identity-all-match'?{...testOfficial,ultima_respuesta:{...testOfficial.ultima_respuesta,nroChasis:'qa chasis',nroMotor:'qa motor',marcavehiculo:'HYUNDAI',modeloVehiculo:'qa modelo',anioVehiculo:2020,colorVehiculo:'titan grey'}}:testCase==='identity-match'?{...testOfficial,ultima_respuesta:{...testOfficial.ultima_respuesta,nroChasis:'qa chasis'}}:testOfficial]};if(url.includes('revisados-final'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,estado:['rev-pending','rev-expired'].includes(testCase)?'PENDIENTE':'VIGENTE',meses_atraso:testCase==='rev-expired'?7:0,emitido:!['rev-pending','rev-expired'].includes(testCase),bloqueado:testCase==='rev-blocked',status2:testCase==='stopped'?'TALLER':testCase==='custody'?'CUSTODIA':testCase==='bodywork'?'CHAPISTERÍA':'ACTIVO',mes_revisado:'OCTUBRE',ultimo_revisado:'2026-10-01',fotos_disponibles:true,cantidad_fotos:2}]}};if(url.includes('ena-consulta')){if(testCase==='ena-error')throw Error('Sin respuesta ENA');return {data:{ok:true,results:[{result:'OK',summary:{saldo_texto:testCase==='pan-negative'?'-2.00':'0.25'}}]}}}if(url.includes('gps-rym-validator')&&testCase==='gps-unknown')return {data:{ok:true,rows:[]}};if(url.includes('gps-rym-validator'))return {data:{ok:true,rows:[{unidad:testSeed.unidad,historico:testCase==='closed',nivel:['gps-critical','gps-distinct'].includes(testCase)?'CRITICO':['gps-alert','gps2-only'].includes(testCase)?'ALERTA':'OK',estado_operativo:'ACTIVO',razon:'DIAGNOSTICO QA',gps1:{installed:!['no-gps','gps2-only'].includes(testCase),ok:!['gps-critical','gps-distinct'].includes(testCase),razon:testCase==='gps-distinct'?'GPS 1 sin alimentación':null,last:'2026-10-07',proveedor:'PROVEEDOR QA',imei:'IMEI QA',metadata:{satellites:8}},gps2:{installed:true,ok:!['gps-alert','gps-critical','gps-distinct'].includes(testCase),razon:testCase==='gps-distinct'?'GPS 2 sin cobertura':null,last:'2026-10-07'},estado_operativo:'ACTIVO',razon:'Diagnóstico QA'}]}};throw Error('Unexpected request '+url)}finally{call.end=performance.now()}}
   ${validator}
   const E=E99,N=N99;
   ${clean}
@@ -73,7 +74,8 @@ const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'C:
 const out=path.join(root,'.sandbox/validator-qa');fs.mkdirSync(out,{recursive:true});
 let count=0;const report=[],errors=[];
 try{
-for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
+const testedSizes=process.argv.includes('--smoke')?[]:process.argv.includes('--one-viewport')?[[390,844]]:process.argv.includes('--evidence')?[[390,844],[768,1024],[1920,1080]]:sizes;
+for(const [width,height] of testedSizes){
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block'});
   await context.route('https://drive.google.com/**',r=>r.abort());
   for(const scenario of cases){
@@ -161,26 +163,32 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         // The historical closed-unit notice and expanded secondary data may require scrolling.
         await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}.png`)});
         if(scenario!=='closed')assert.equal(data.scroll,false,`${width} ${scenario}: unnecessary scroll`);
-        const expect=['ok','progressive','fast-enter','parallel','master-fallback','rev-blocked','identity-match','official-missing','operativo','supervisora','no-gps','gps2-only'].includes(scenario)?'ACTIVA · TODO OK':scenario==='closed'?'CERRADA · HISTORICO':scenario==='stopped'?'PARADA · TALLER':scenario==='custody'?'PARADA · CUSTODIA':scenario==='bodywork'?'PARADA · CHAPISTERÍA':['gps-alert','ena-error'].includes(scenario)?'ACTIVA · REVISAR':'ACTIVA · ALERTA';
+        const expect=['ok','progressive','fast-enter','parallel','master-fallback','rev-blocked','identity-match','official-missing','operativo','supervisora','no-gps','gps2-only','ena-pending','pan-dedup','identity-all-match','vin-chassis-link'].includes(scenario)?'ACTIVA · TODO OK':scenario==='closed'?'CERRADA · HISTORICO':scenario==='stopped'?'PARADA · TALLER':scenario==='custody'?'PARADA · CUSTODIA':scenario==='bodywork'?'PARADA · CHAPISTERÍA':['gps-alert','ena-error'].includes(scenario)?'ACTIVA · REVISAR':'ACTIVA · ALERTA';
         assert.equal(data.status,expect,scenario);
-        if(!await host.locator('.uva-details').first().evaluate(x=>x.open))await host.locator('.uva-details').first().locator('summary').click();
+        if(!await host.locator('.uva-details').first().evaluate(x=>x.open))await host.locator('.uva-details').first().locator(':scope > summary').click();
         assert.equal(await host.locator('.v117-card-details').first().isVisible(),true);
         assert.ok(await host.locator('.v117-card-detail b').first().innerText());
+        const pan=host.locator('#v117PanCard');
+        const compactPan=await pan.locator('.uva-detail-body').innerText();
+        assert.doesNotMatch(compactPan,/REFERENCIA|Última consulta|Cuenta ENA|Saldo actual/i,'Panapass repeats summary/header fields');
+        if(scenario==='pan-dedup'){assert.doesNotMatch(compactPan,/Panapass display/i);assert.equal((compactPan.match(/TAG-1/g)||[]).length,1);assert.equal((compactPan.match(/TAG-2/g)||[]).length,1)}
+        for(const summary of await pan.locator('.uva-detail-group > summary').all())await summary.click();
         const panBody=await host.locator('#v117PanCard .uva-detail-body').innerText();
-        assert.match(panBody,/Panapass display/i);assert.match(panBody,/TAG-2/);
+        if(scenario!=='pan-dedup')assert.match(panBody,/Panapass display/i);assert.match(panBody,/TAG-2/);
         assert.match(panBody,/QA-TIPO-TAG/);
         if(scenario!=='no-pan')assert.match(panBody,/ENA EMPRESA QA/);
-        if(scenario==='no-pan')assert.match(panBody,/Sin consulta registrada/i);
+        if(scenario==='no-pan')assert.match(await pan.innerText(),/Sin consulta registrada/i);
+        if(scenario==='ena-pending'){assert.match(panBody,/Acceso ENA interno · no valida el vehículo[\s\S]*PENDIENTE/i);assert.match(await pan.locator('.uva-verified-flag').innerText(),/VERIFICADO/)}
         if(scenario==='progressive'){
           assert.equal(await host.locator('#v117PanCard .v117-card-value').innerText(),'B/. 0.25');
           await page.screenshot({path:path.join(out,`${width}x${height}-progressive-pan-detail.png`)});
-          await host.locator('#v117PanCard summary').click();
+          await host.locator('#v117PanCard > .uva-details > summary').click();
           for(const id of ['v117RevCard','v117GpsCard']){
             const card=host.locator('#'+id);
-            await card.locator('summary').click();
+            await card.locator(':scope > .uva-details > summary').click();
             assert.equal(await card.locator('.uva-detail-body').isVisible(),true);
             await page.screenshot({path:path.join(out,`${width}x${height}-progressive-${id}-detail.png`)});
-            await card.locator('summary').click();
+            await card.locator(':scope > .uva-details > summary').click();
           }
         }
         assert.equal(await host.locator('#v117RevCard .v117-card-value').innerText(),scenario==='rev-expired'?'VENCIDO · MARZO':scenario==='rev-pending'?'PENDIENTE · OCTUBRE':'VIGENTE');
@@ -190,11 +198,11 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
         assert.equal(await host.locator('#v117RevCard img').count(),0);
         const gps=host.locator('#v117GpsCard');
         assert.equal(await gps.locator('.uva-gps-pill').count(),2);
-        assert.equal(await gps.locator('.uva-gps-pill').first().getAttribute('class'), 'uva-gps-pill '+(['no-gps','gps2-only','gps-unknown'].includes(scenario)?'off':scenario==='gps-critical'?'bad':'ok'));
-        assert.equal(await gps.locator('.uva-gps-pill').last().getAttribute('class'),'uva-gps-pill '+(scenario==='gps-unknown'?'off':['gps-alert','gps-critical'].includes(scenario)?'bad':'ok'));
+        assert.equal(await gps.locator('.uva-gps-pill').first().getAttribute('class'), 'uva-gps-pill '+(['no-gps','gps2-only','gps-unknown'].includes(scenario)?'off':['gps-critical','gps-distinct'].includes(scenario)?'bad':'ok'));
+        assert.equal(await gps.locator('.uva-gps-pill').last().getAttribute('class'),'uva-gps-pill '+(scenario==='gps-unknown'?'off':['gps-alert','gps-critical','gps-distinct'].includes(scenario)?'bad':'ok'));
         if(scenario==='gps-unknown')assert.match(await gps.locator('.uva-detail-body').textContent(),/Sin respuesta GPS disponible/);else assert.match(await gps.locator('.uva-detail-body').textContent(),/PROVEEDOR QA/);
         if(scenario!=='gps-unknown')assert.match(await gps.locator('.uva-detail-body').textContent(),/IMEI QA/);
-        const gpsLabel=scenario==='gps-unknown'||scenario==='closed'?'SIN INFORMACIÓN':scenario==='gps-critical'?'CRÍTICO':scenario==='gps-alert'?'ALERTA':'NORMAL';
+        const gpsLabel=scenario==='gps-unknown'||scenario==='closed'?'SIN INFORMACIÓN':['gps-critical','gps-distinct'].includes(scenario)?'CRÍTICO':scenario==='gps-alert'?'ALERTA':'NORMAL';
         assert.equal(await gps.locator('.uva-gps-level').innerText(),gpsLabel);assert.equal(await gps.locator('.uva-gps-level').isVisible(),true);
         assert.equal(await gps.locator('.uva-gps-pill small').count(),2);
         if(scenario==='ok'){
@@ -202,24 +210,48 @@ for(const [width,height] of process.argv.includes('--smoke')?[]:sizes){
           assert.equal(await gps.locator('.uva-gps-pill i').first().evaluate(x=>getComputedStyle(x).animationName),'none');
           await page.emulateMedia({reducedMotion:'no-preference'});
         }
+        const gpsDetails=await gps.locator('.uva-detail-body').textContent();
+        assert.equal((gpsDetails.match(/EVALUACIÓN GPS/gi)||[]).length,1);
+        assert.doesNotMatch(gpsDetails,/Nivel oficial|Nivel recibido|Clasificación GPS RYM|Instalado|Reporta|Última transmisión/);
+        if(scenario==='gps-distinct'){assert.match(gpsDetails,/GPS 1 sin alimentación/);assert.match(gpsDetails,/GPS 2 sin cobertura/)}
         const control=host.locator('#v117CtlCard');
-        await control.click();assert.equal(await control.locator('details').evaluate(x=>x.open),true);
+        await control.locator('header').click();assert.equal(await control.locator(':scope > details').evaluate(x=>x.open),true);
+        const compactControl=await control.locator('.uva-detail-body').innerText();
+        assert.doesNotMatch(compactControl,/GALERA QA|SUPERVISORA QA|EMPRESA QA|ACTIVA|PARADA/);
+        assert.equal(await control.locator('.uva-identity-check.match:visible').count(),0,'Matches must stay compact');
+        assert.equal(await control.locator('.uva-identity-check.missing:visible').count(),0,'Missing values must stay neutral and folded');
+        const counts=await control.locator('[data-uva-count]').allTextContents();assert.equal(counts.length,3);
+        if(scenario==='identity-all-match'){assert.deepEqual(counts,['7 coincidencias','0 diferencias','1 sin información']);assert.equal(await control.locator('.uva-identity-check.diff').count(),0)}
+        if(scenario==='vin-chassis-link')assert.match(compactControl,/El chasis RYM coincide con el VIN oficial/);
+        await control.locator('header').evaluate(x=>x.scrollIntoView({block:'start'}));
+        await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}-control-compact.png`)});
+        await control.locator('.uva-comparison').evaluate(x=>x.scrollIntoView({block:'start'}));
+        await page.screenshot({path:path.join(out,`${width}x${height}-${scenario}-comparison-compact.png`)});
+        const heights=await host.locator('.v117-status-card').evaluateAll(cards=>cards.map(card=>({id:card.id,height:card.getBoundingClientRect().height,open:card.querySelector(':scope > details').open})));
+        assert.ok(heights.filter(card=>!card.open).every(card=>card.height<350),'Closed cards stretched by an expanded neighbor');
+        for(const summary of await control.locator('.uva-detail-group > summary').all())await summary.click();
+        if(scenario==='progressive'){
+          await control.locator('.uva-group-body').first().click();assert.equal(await control.locator(':scope > details').evaluate(x=>x.open),true,'Detail click closes card');
+          await host.locator('#v101CheckModal').evaluate(modal=>{modal._uvaCtrl.estatus_netsuite='QA-NETSUITE actualizado';modal.querySelector('#v117CtlCard').appendChild(document.createElement('span'))});
+          await control.locator('[data-uva-group=rym-technical]').getByText('QA-NETSUITE actualizado',{exact:true}).waitFor();
+          assert.equal(await control.locator('.uva-detail-group:not([open])').count(),0,'Incremental main refresh loses opened groups');
+        }
         const body=await control.locator('.uva-detail-body').innerText();
         for(const label of (scenario==='official-missing'?['CONTROL DE AUTO · RYM','FICHA OFICIAL · ECARCHECK','Chasis','Motor','VIN']:['CONTROL DE AUTO · RYM','FICHA OFICIAL · ECARCHECK','Documento propietario','VIN','Transmisión','Combustible','Cilindrada','Cilindros','Capacidad','Puertas','Tracción','Aire acondicionado','Hipoteca','Pertenencia','Aseguradora','Póliza','Restricción vehicular','Rev ID','Último taller','Observaciones']))assert.ok(body.toUpperCase().includes(label.toUpperCase()),label+' missing');
-        if(scenario==='official-missing'){assert.equal(await control.locator('.uva-identity-check.diff').count(),0);assert.equal(await control.locator('.uva-identity-check.missing').count(),8)}else{assert.match(body,/MARCA OFICIAL QA/);assert.match(body,/ASEGURADORA QA/);assert.match(body,/QA<123>/);assert.match(body,/false/)}
+        if(scenario==='official-missing'){assert.equal(await control.locator('.uva-identity-check.diff').count(),0);assert.equal(await control.locator('.uva-identity-check.missing').count(),8)}else{assert.match(body,scenario==='identity-all-match'?/HYUNDAI/:/MARCA OFICIAL QA/);assert.match(body,/ASEGURADORA QA/);assert.match(body,/QA<123>/);assert.match(body,/false/)}
         const chassis=control.locator('.uva-identity-check').filter({hasText:/^Chasis/});
-        if(scenario==='identity-match')assert.match(await chassis.getAttribute('class'),/match/);else if(scenario!=='official-missing')assert.match(await chassis.getAttribute('class'),/diff/);
+        if(['identity-match','identity-all-match'].includes(scenario))assert.match(await chassis.getAttribute('class'),/match/);else if(scenario!=='official-missing')assert.match(await chassis.getAttribute('class'),/diff/);
         const vin=control.locator('.uva-identity-check').filter({hasText:/^VIN/});assert.match(await vin.getAttribute('class'),/missing/);
         if(scenario!=='official-missing')assert.ok((await vin.innerText()).length>200);
-        assert.match(body,/Comparación de identidad RYM \/ eCarCheck/i);
-        if(scenario==='official-missing')assert.match(body,/SIN DATOS PARA COMPARAR/);else assert.match(body,/NO COINCIDE/);
+        assert.match(body,/COMPARACIÓN RYM \/ ECARCHECK/i);
+        if(scenario==='official-missing')assert.match(body,/SIN DATOS PARA COMPARAR/);else if(scenario!=='identity-all-match')assert.match(body,/NO COINCIDE/);
         if(scenario==='gps-alert')assert.match(await gps.locator('.uva-priority-note').textContent(),/ALERTA/);
         if(scenario==='progressive')await page.screenshot({path:path.join(out,`${width}x${height}-progressive-control-detail.png`)});
         assert.equal(await control.locator('img').count(),0);
         assert.equal(await host.locator('#v101CheckModal').evaluate(x=>x.scrollWidth>innerWidth),false);
-        await control.click();assert.equal(await control.locator('details').evaluate(x=>x.open),false);
-        await control.focus();await control.press('Enter');assert.equal(await control.locator('details').evaluate(x=>x.open),true);
-        await control.press('Space');assert.equal(await control.locator('details').evaluate(x=>x.open),false);
+        await control.locator('header').click();assert.equal(await control.locator(':scope > details').evaluate(x=>x.open),false);
+        await control.focus();await control.press('Enter');assert.equal(await control.locator(':scope > details').evaluate(x=>x.open),true);
+        await control.press('Space');assert.equal(await control.locator(':scope > details').evaluate(x=>x.open),false);
         const sourceCalls=await host.locator('#v101CheckModal').evaluate(()=>QA.calls);
         assert.equal(sourceCalls.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===8).length,1,scenario+' Enter/autocomplete repeated the same master lookup '+JSON.stringify(sourceCalls.filter(x=>x.name)));
         if(scenario==='parallel'){
@@ -272,7 +304,7 @@ assert.ok(cacheUrls.includes('/assets/rym-validator-192.png'));
 assert.ok(!cacheUrls.includes('/'));
 await login.screenshot({path:path.join(out,'real-main-login-390x844.png')});
 await smoke.close();
-if(count)fs.writeFileSync(path.join(out,process.argv.includes('--progressive-only')?'progressive-results.json':process.argv.includes('--latency-only')?'latency-results.json':'results.json'),JSON.stringify({count,report,errors},null,2));
+if(count)fs.writeFileSync(path.join(out,process.argv.includes('--progressive-only')?'progressive-results.json':process.argv.includes('--latency-only')?'latency-results.json':process.argv.includes('--v2-only')?'v2-results.json':'results.json'),JSON.stringify({count,report,errors},null,2));
 console.log('PASS: real main login and browser SW installation (static assets only).');
-console.log(`PASS: ${count} cases; original main functions, ${sizes.length} viewports.`);
+console.log(`PASS: ${count} cases; original main functions, ${testedSizes.length} viewports.`);
 }finally{await browser.close();server.close()}

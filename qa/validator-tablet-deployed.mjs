@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 const build=fs.readFileSync('unit-validator.html','utf8').match(/rym-validator-build" content="([^"]+)"/)[1];
 const version=build.match(/v(\d+)$/)[1];
 const urls=process.argv.slice(2);assert.ok(urls.length,'Pass immutable and/or alias URLs');
-const files=['unit-validator.html','validator-tablet-sw.js','validator-tablet.webmanifest','css/validator-tablet-app.css','modules/core/unit-validator-shell.js','modules/control-auto/validator-presentation.js','modules/control-auto/validator-tablet-app.js'];
+const files=['unit-validator.html','validator-tablet-sw.js','validator-tablet.webmanifest','css/validator-tablet-app.css','modules/core/unit-validator-shell.js','modules/control-auto/validator-presentation.js','modules/control-auto/validator-details.js','modules/control-auto/validator-tablet-app.js'];
 const normalized=s=>s.replaceAll('\r\n','\n');
 const hash=s=>createHash('sha256').update(normalized(s)).digest('hex');
 const results=[];
@@ -30,7 +30,7 @@ for(const base of urls){
       const host=await fetch(base+'/?validator-host=1',{cache:'no-store',redirect:'manual'});
       assert.equal(host.status,200);assert.equal(host.headers.get('x-portal-build'),build);
       const html=await host.text();
-      for(const file of ['validator-presentation.js','validator-tablet-app.js','validator-tablet-app.css'])assert.ok(html.includes(file+'?v='+version));
+      for(const file of ['validator-presentation.js','validator-details.js','validator-tablet-app.js','validator-tablet-app.css'])assert.ok(html.includes(file+'?v='+version));
       assert.ok(html.includes("const tone=level==='CRITICO'?'bad'"),'Official GPS summary bridge missing');
       evidence={base,build,commit,resources,hostSha256:hash(html)};break;
     }catch(error){lastError=error;if(attempt<attempts-1)await new Promise(resolve=>setTimeout(resolve,5000));}

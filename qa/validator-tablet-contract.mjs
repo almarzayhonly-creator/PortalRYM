@@ -6,7 +6,7 @@ const shell=fs.readFileSync('unit-validator.html','utf8');
 const buildMatch=shell.match(/validator-tablet-app\.css\?v=(\d+)/);
 assert.ok(buildMatch,'Unit validator build version missing from shell');
 const BUILD=buildMatch[1];
-const changed=execFileSync('git',['diff','--name-only','HEAD^','--','unit-validator.html','worker.js','validator-tablet-sw.js','modules/core/unit-validator-shell.js','modules/control-auto/validator-tablet-app.js','modules/control-auto/validator-presentation.js','css/validator-tablet-app.css'],{encoding:'utf8'});
+const changed=execFileSync('git',['diff','--name-only','HEAD^','--','unit-validator.html','worker.js','validator-tablet-sw.js','modules/core/unit-validator-shell.js','modules/control-auto/validator-tablet-app.js','modules/control-auto/validator-presentation.js','modules/control-auto/validator-details.js','css/validator-tablet-app.css'],{encoding:'utf8'});
 if(changed.trim()){
   const previous=execFileSync('git',['show','HEAD^:unit-validator.html'],{encoding:'utf8'}).match(/validator-tablet-app\.css\?v=(\d+)/)[1];
   assert.ok(Number(BUILD)>Number(previous),'Presentation changes require a new build; never reuse cached version URLs');
@@ -26,8 +26,10 @@ assert.ok(swSource.includes('/modules/core/unit-validator-shell.js?v='+BUILD),'S
 assert.ok(shell.includes('unit-validator-shell-v'+BUILD),'Visible shell build metadata mismatch');
 assert.ok(workerSource.includes('/modules/control-auto/validator-presentation.js?v='+BUILD),'Presentation module build mismatch');
 assert.ok(swSource.includes('/modules/control-auto/validator-presentation.js?v='+BUILD),'Presentation cache build mismatch');
+assert.ok(workerSource.includes('/modules/control-auto/validator-details.js?v='+BUILD),'Detail renderer build mismatch');
+assert.ok(swSource.includes('/modules/control-auto/validator-details.js?v='+BUILD),'Detail renderer cache build mismatch');
 const config=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8').replace(/^\s*\/\/.*$/gm,''));
-for(const route of ['/unit-validator','/unit-validator.html','/validator-tablet-sw.js','/modules/core/unit-validator-shell.js','/modules/control-auto/validator-presentation.js','/modules/control-auto/validator-tablet-app.js','/css/validator-tablet-app.css'])assert.ok(config.assets.run_worker_first.includes(route),route+' bypasses Worker cache/build headers');
+for(const route of ['/unit-validator','/unit-validator.html','/validator-tablet-sw.js','/modules/core/unit-validator-shell.js','/modules/control-auto/validator-presentation.js','/modules/control-auto/validator-details.js','/modules/control-auto/validator-tablet-app.js','/css/validator-tablet-app.css'])assert.ok(config.assets.run_worker_first.includes(route),route+' bypasses Worker cache/build headers');
 const manifest=JSON.parse(fs.readFileSync('validator-tablet.webmanifest','utf8'));
 assert.equal(manifest.name,'Validador RYM');assert.equal(manifest.display,'standalone');assert.equal(manifest.start_url,'/?app=validador-unidad');
 for(const icon of manifest.icons){const png=fs.readFileSync('.'+icon.src);assert.equal(png.subarray(1,4).toString(),'PNG');const size=Number(icon.sizes.split('x')[0]);assert.equal(png.readUInt32BE(16),size);assert.equal(png.readUInt32BE(20),size)}

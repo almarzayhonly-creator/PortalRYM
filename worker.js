@@ -11,7 +11,7 @@ export default {
       const shellResponse = await env.ASSETS.fetch(shellRequest);
       const shellHeaders = new Headers(shellResponse.headers);
       shellHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
-      shellHeaders.set("x-portal-build", "unit-validator-shell-v18");
+      shellHeaders.set("x-portal-build", "unit-validator-shell-v19");
       shellHeaders.set("x-rym-app", "unit-validator");
       return new Response(shellResponse.body, {
         status: shellResponse.status,
@@ -23,10 +23,10 @@ export default {
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     const contentType = headers.get("content-type") || "";
-    const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-tablet-app.js"].includes(url.pathname);
+    const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-details.js", "/modules/control-auto/validator-tablet-app.js"].includes(url.pathname);
     if (validatorStatic) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
-      headers.set("x-portal-build", "unit-validator-shell-v18");
+      headers.set("x-portal-build", "unit-validator-shell-v19");
       if (url.pathname === "/validator-tablet-sw.js") headers.set("service-worker-allowed", "/");
     }
 
@@ -46,7 +46,7 @@ export default {
 
       let body = html.replace(staleInline, "").replace(staleExternal, "").replace(staleRanking, "").replace(staleNegLast, "");
       if (url.pathname === "/" && url.searchParams.get("validator-host") === "1") {
-        headers.set("x-portal-build", "unit-validator-shell-v18");
+        headers.set("x-portal-build", "unit-validator-shell-v19");
         body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
         // The dedicated validator uses its own module permission for the GPS card.
         // The GPS Edge Function independently verifies the user JWT and validator access.
@@ -64,7 +64,7 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=18"><script src="/modules/control-auto/validator-presentation.js?v=18" defer></script><script src="/modules/control-auto/validator-tablet-app.js?v=18" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=19"><script src="/modules/control-auto/validator-presentation.js?v=19" defer></script><script src="/modules/control-auto/validator-details.js?v=19" defer></script><script src="/modules/control-auto/validator-tablet-app.js?v=19" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       body = bodyEnd >= 0

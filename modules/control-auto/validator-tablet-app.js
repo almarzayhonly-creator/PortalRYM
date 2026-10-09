@@ -199,13 +199,15 @@
       card.setAttribute('role','button');
       card.setAttribute('aria-label','Abrir o cerrar detalle de '+(card.querySelector('header small')?.textContent?.trim()||'validación'));
       const toggle=e=>{
-        if(e.target.closest('summary,a,button,input,select,textarea'))return;
+        if(e.target.closest('.uva-detail-body,summary,a,button,input,select,textarea'))return;
         details.open=!details.open;
       };
       card.addEventListener('click',toggle);
       card.addEventListener('keydown',e=>{
         if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();details.open=!details.open}
       });
+      details.addEventListener('toggle',()=>card.setAttribute('aria-expanded',String(details.open)));
+      card.setAttribute('aria-expanded',String(details.open));
     }
     return details;
   }
@@ -213,12 +215,16 @@
     const details=ensureDetails(card);
     html=html||'<div class="uva-detail-empty">Sin información adicional.</div>';
     if(details._uvaHtml===html)return;
+    const opened=[...details.querySelectorAll('[data-uva-group][open]')].map(group=>group.dataset.uvaGroup);
+    const focused=d.activeElement?.closest('[data-uva-group]')?.dataset.uvaGroup;
     details._uvaHtml=html;
     [...details.children].filter(x=>x.tagName!=='SUMMARY').forEach(x=>x.remove());
     const body=d.createElement('div');
     body.className='uva-detail-body v117-card-details';
     body.innerHTML=html;
+    body.querySelectorAll('[data-uva-group]').forEach(group=>{if(opened.includes(group.dataset.uvaGroup))group.open=true});
     details.appendChild(body);
+    if(focused)[...body.querySelectorAll('[data-uva-group]')].find(group=>group.dataset.uvaGroup===focused)?.querySelector('summary')?.focus({preventScroll:true});
   }
   function setPriority(card,{badge,value,note}){
     if(!card)return;
@@ -323,44 +329,46 @@
     flag.className='uva-verified-flag '+(verified?'ok':'warn');
     const flagHtml='<i aria-hidden="true">'+(verified?'✓':'!')+'</i><b>'+(verified?'VERIFICADO':'REVISAR')+'</b>';
     if(flag.innerHTML!==flagHtml)flag.innerHTML=flagHtml;
-    const tags=Array.isArray(ctrl?.tags_ena)?ctrl.tags_ena.join(' · '):text(ctrl?.tags_ena)||text(ctrl?.tag)||'Sin TAG registrado';
+    const number=first(ctrl?.panapass_numero,ctrl?.numero_panapass,map['PANAPASS']);
+    const primary=text(ctrl?.tag);
+    const ids=[...new Set((Array.isArray(ctrl?.tags_ena)?ctrl.tags_ena:text(ctrl?.tags_ena).split(/[,;·]+/)).map(text).filter(Boolean))];
     const ena=responses.ena?.key===text(ctrl?.panapass_numero||map['PANAPASS'])?responses.ena.data?.results?.[0]:null;
     const summary=ena?.summary||{};
     let tagRows=ctrl?.tags_detalle||[];
     if(typeof tagRows==='string'){try{tagRows=JSON.parse(tagRows)}catch(_){tagRows=[]}}
-    const tagDetails=Array.isArray(tagRows)?tagRows.map((tag,index)=>sectionHtml('TAG ENA '+(index+1),[
-      detailHtml('TAG',first(tag.tag,tag.numero_tag)),detailHtml('Estado del TAG',first(tag.estado_tag,tag.estado)),
+    const tagDetails=Array.isArray(tagRows)?tagRows.map((tag,index)=>{
+      const id=text(first(tag.tag,tag.numero_tag));
+      return w.RYM_VALIDATOR_DETAILS.fold('pan-tag-'+index,id&&w.RYM_VALIDATOR_PRESENTATION.compare(id,primary)==='match'?'Información del TAG principal':'TAG ENA · '+(id||index+1),sectionHtml('Datos del TAG',[
+      detailHtml('Estado del TAG',first(tag.estado_tag,tag.estado)),
       detailHtml('Estado financiero',tag.estado_financiero),detailHtml('Tipo de TAG',first(tag.tipo_tag,tag.tipo)),
-      detailHtml('Matrícula',first(tag.matricula,tag.placa)),detailHtml('Saldo',tag.saldo),
+      detailHtml('Matrícula',w.RYM_VALIDATOR_PRESENTATION.compare(first(tag.matricula,tag.placa),ctrl?.placa_unica)==='match'?null:first(tag.matricula,tag.placa)),
+      detailHtml('Saldo del TAG',tag.saldo!=null&&w.RYM_VALIDATOR_PRESENTATION.balance(tag.saldo)!==w.RYM_VALIDATOR_PRESENTATION.balance(balance)?tag.saldo:null),
       detailHtml('Tipo de vehículo',tag.tipo_vehiculo),detailHtml('Corregimiento',tag.corregimiento),
-      detailHtml('Última consulta ENA',tag.consultado_at)
-    ])).join(''):'';
+      detailHtml('Consulta propia del TAG',tag.consultado_at&&![last,account.ultima_consulta,ctrl?.ena_ultima_consulta].some(value=>text(value)===text(tag.consultado_at))?tag.consultado_at:null)
+    ])||(id?'<p class="uva-detail-empty">Sin información adicional del TAG.</p>':''))}).join(''):'';
+    const remaining=ids.filter(id=>w.RYM_VALIDATOR_PRESENTATION.compare(id,primary)!=='match'&&!(Array.isArray(tagRows)?tagRows:[]).some(tag=>w.RYM_VALIDATOR_PRESENTATION.compare(id,first(tag.tag,tag.numero_tag))==='match'));
+    const display=first(account.panapass_display,ctrl?.panapass_display);
+    const enaAccount=first(ctrl?.cuenta_ena,ctrl?.numero_cuenta);
     const html=
-      sectionHtml('Cuenta ENA',[
-        detailHtml('Número Panapass',ctrl?.panapass_numero||ctrl?.numero_panapass||map['PANAPASS']),
-        detailHtml('Panapass display',first(account.panapass_display,ctrl?.panapass_display)),
-        detailHtml('Cuenta ENA',ctrl?.cuenta_ena||ctrl?.numero_cuenta||ctrl?.panapass_numero),
-        detailHtml('TAG principal',ctrl?.tag||'Sin TAG registrado'),
-        detailHtml('TAGs ENA',tags),
-        detailHtml('Cantidad TAG ENA',ctrl?.cantidad_tags),
-        detailHtml('Estado de acceso ENA',first(account.estado_acceso,ctrl?.ena_estado_acceso)),
-        detailHtml('Saldo',balance),
-        detailHtml('Última consulta ENA',last),
+      sectionHtml('PANAPASS Y TAGS',[
+        detailHtml('Número Panapass',number),
+        detailHtml('Panapass display',w.RYM_VALIDATOR_PRESENTATION.compare(display,number)==='match'?null:display),
+        detailHtml('TAG principal',primary||'Sin TAG registrado'),
+        detailHtml('Otros TAGs ENA',remaining.join(' · ')),
+        detailHtml('Cantidad de TAGs',Number(ctrl?.cantidad_tags)>1?ctrl.cantidad_tags:null),
+        detailHtml('Último resultado',first(ena?.result,ctrl?.ena_ultimo_resultado)),
+        detailHtml('Último error',first(ena?.error,account.ultimo_error,ctrl?.ena_ultimo_error))
+      ])+tagDetails+
+      w.RYM_VALIDATOR_DETAILS.fold('pan-administration','Información administrativa ENA',sectionHtml('ACCESO INTERNO DEL PORTAL',[
+        detailHtml('Cuenta ENA distinta',enaAccount&&w.RYM_VALIDATOR_PRESENTATION.compare(enaAccount,number)!=='match'?enaAccount:null),
+        detailHtml('Acceso ENA interno · no valida el vehículo',first(account.estado_acceso,ctrl?.ena_estado_acceso)),
         detailHtml('Último login correcto',first(account.ultimo_login_ok,ctrl?.ena_ultimo_login_ok,summary.ultimo_login_ok)),
         detailHtml('Empresa ENA',first(account.ena_empresa,ctrl?.ena_empresa,summary.empresa)),
         detailHtml('RUC ENA',first(account.ena_ruc,ctrl?.ena_ruc,summary.ruc)),
         detailHtml('Email ENA',first(account.ena_email,ctrl?.ena_email,summary.email)),
         detailHtml('Tipo de credencial',first(account.tipo_credencial,ctrl?.tipo_credencial,summary.tipo_credencial)),
-        detailHtml('Último resultado',first(ena?.result,ctrl?.ena_ultimo_resultado)),
-        detailHtml('Último error',first(ena?.error,account.ultimo_error,ctrl?.ena_ultimo_error,map['ESTADO'])),
         detailHtml('Fecha de actualización',first(account.updated_at,ctrl?.ena_actualizado_at,summary.actualizado_at))
-      ])+
-      tagDetails+
-      sectionHtml('Referencia',[
-        detailHtml('Unidad',ctrl?.unidad),
-        detailHtml('Placa',ctrl?.placa_unica),
-        detailHtml('Empresa',ctrl?.empresa_duena)
-      ]);
+      ]));
     setDetails(card,html);
   }
 
@@ -401,13 +409,10 @@
     const flagHtml='<i aria-hidden="true">'+(status==='VIGENTE'?'✓':'!')+'</i><b>'+esc(status)+'</b>';
     if(flag.innerHTML!==flagHtml)flag.innerHTML=flagHtml;
     const html=sectionHtml('Revisado',[
-      detailHtml('Estado',status),
-      detailHtml('Último revisado',last),
-      detailHtml('Mes',ctrl?.mes_revisado||unidad?.mes_revisado||map['MES DE LA UNIDAD']),
+      detailHtml('Mes asignado',mes),
       detailHtml('Año revisado',first(oficial?.anio_revisado,rev.anio_revisado)),
       detailHtml('Rev ID',first(rawOfficial.revId,rawOfficial.idRevisados,oficial?.rev_id)),
       detailHtml('Taller / emisor',first(rawOfficial.ultTallerRevisado,oficial?.taller,oficial?.emisor,unidad?.taller_revisado)),
-      detailHtml('Situación del revisado',first(operacion.estado_revisado,rev.estado,map['ESTADO'])),
       detailHtml('Tipo de placa',first(rawOfficial.tipoPlaca,oficial?.tipo_placa)),
       detailHtml('Tipo de uso',first(rawOfficial.tipoUso,oficial?.tipo_uso)),
       detailHtml('Estado oficial del vehículo',first(rawOfficial.estadoVehiculo,oficial?.estado_vehiculo)),
@@ -455,20 +460,18 @@
     const liveHtml=pill('GPS1',g1)+pill('GPS2',g2);
     if(live.innerHTML!==liveHtml)live.innerHTML=liveHtml;
     const device=(name,g,source={})=>sectionHtml(name,[
-      detailHtml('Estado',g.raw||'Sin información'),detailHtml('Instalado',source.installed!=null?source.installed?'Sí':'No':g.known?g.installed?'Sí':'No':null),
-      detailHtml('Reporta',source.ok!=null?source.ok?'Sí':'No':g.known?g.ok?'Sí':'No':null),detailHtml('Último reporte',first(source.last,g.last)),
-      detailHtml('Última señal',source.ultima_senal),detailHtml('Estado operativo',row?.estado_operativo),
-      detailHtml('Razón / diagnóstico',first(source.razon,row?.razon)),detailHtml('Proveedor',first(source.proveedor,source.fuente)),
+      detailHtml('Diagnóstico específico',source.razon&&text(source.razon)!==text(evaluation.reason)?source.razon:g.known&&g.installed&&!g.ok&&g.raw&&!/SIN REPORTAR|NO REPORTA/i.test(g.raw)?g.raw:null),
+      detailHtml('Última señal adicional',source.ultima_senal&&text(source.ultima_senal)!==text(g.last)?source.ultima_senal:null),
+      detailHtml('Proveedor',first(source.proveedor,source.fuente)),
       detailHtml('IMEI / ID',first(source.imei,source.id)),
       detailHtml('Metadata',source.metadata?JSON.stringify(source.metadata):null)
     ]);
+    const extra=device('GPS 1',g1,row?.gps1)+device('GPS 2',g2,row?.gps2);
     setDetails(card,sectionHtml('Evaluación GPS',[
-      detailHtml('Nivel oficial',first(row?.nivel,row?.nivel_criticidad,row?.criticidad,'Sin clasificar')),
-      detailHtml('Nivel recibido del endpoint Validator',row?.nivel_validator),
-      detailHtml('Clasificación GPS RYM',evaluation.level),
+      detailHtml('Clasificación final',evaluation.level),
       detailHtml('Motivo',evaluation.reason),
-      detailHtml('Estado operativo',row?.estado_operativo)
-    ])+device('GPS 1',g1,row?.gps1)+device('GPS 2',g2,row?.gps2));
+      detailHtml('Diagnóstico operativo',first(row?.diagnostico_operativo,row?.estado_operativo))
+    ])+(extra?w.RYM_VALIDATOR_DETAILS.fold('gps-additional','Información específica de los equipos',extra):''));
   }
 
   function controlVisual(modal,ctrl,ficha){
@@ -486,22 +489,17 @@
     const u=ficha?.unidad||{},o=ficha?.oficial||{};
     const raw=officialRaw(o);
     const control=sectionHtml('CONTROL DE AUTO · RYM',[
-      detailHtml('Estado de la unidad',state),
-      detailHtml('Estatus interno',internal),
-      detailHtml('Empresa',ctrl?.empresa_duena||u?.empresa_duena),
-      detailHtml('Galera',ctrl?.galera||u?.galera),
-      detailHtml('Supervisora',ctrl?.supervisora||u?.supervisora),
-      detailHtml('Placa',ctrl?.placa_unica||u?.placa_unica),
       detailHtml('Cupo / placa comercial',ctrl?.placa_comercial||u?.placa_comercial),
       detailHtml('Marca',ctrl?.marca||u?.marca),
       detailHtml('Modelo',ctrl?.modelo||u?.modelo),
       detailHtml('Color',ctrl?.color||u?.color),
-      detailHtml('Año',ctrl?.anio||u?.anio),
+      detailHtml('Año',ctrl?.anio||u?.anio)
+    ])+w.RYM_VALIDATOR_DETAILS.fold('rym-technical','Datos técnicos RYM',sectionHtml('Características internas',[
       detailHtml('Chasis',ctrl?.chasis||u?.chasis),
       detailHtml('Motor',ctrl?.motor||u?.motor),
       detailHtml('Transmisión',ctrl?.transmision||u?.transmision),
       detailHtml('Estatus Netsuite',first(ctrl?.estatus_netsuite,u?.estatus_netsuite))
-    ]);
+    ]));
     const ecar=sectionHtml('FICHA OFICIAL · ECARCHECK',[
       detailHtml('Última verificación',o?.actualizado_at||ficha?.consulta_at),
       detailHtml('Resultado eCarCheck',ficha?.resultado||raw?.detalleRespuesta||raw?.detalle_respuesta),
@@ -511,7 +509,8 @@
       detailHtml('Documento propietario',raw?.nroDocumentoPropietario||o?.documento_propietario),
       detailHtml('VIN',raw?.nroVin||o?.vin),
       detailHtml('Chasis',raw?.nroChasis||o?.chasis),
-      detailHtml('Motor',raw?.nroMotor||o?.motor),
+      detailHtml('Motor',raw?.nroMotor||o?.motor)
+    ])+w.RYM_VALIDATOR_DETAILS.fold('ecar-technical','Características oficiales',sectionHtml('Datos técnicos eCarCheck',[
       detailHtml('Marca',first(raw?.marcaVehiculo,raw?.marcavehiculo,o?.marca)),
       detailHtml('Modelo',raw?.modeloVehiculo||o?.modelo),
       detailHtml('Año vehículo',raw?.anioVehiculo||o?.anio),
@@ -528,17 +527,19 @@
       detailHtml('Puertas',first(raw?.nroPuertas,o?.puertas)),
       detailHtml('Tracción',first(raw?.traccionMotor,o?.traccion)),
       detailHtml('Aire acondicionado',first(raw?.tieneAireAcondicionado,o?.aire_acondicionado)),
+      detailHtml('Pertenencia',first(raw?.tipoPertenencia,o?.pertenencia))
+    ]))+w.RYM_VALIDATOR_DETAILS.fold('ecar-insurance','Seguro y restricciones',sectionHtml('Información legal',[
       detailHtml('Hipoteca',first(raw?.hipoteca,o?.hipoteca)),
-      detailHtml('Pertenencia',first(raw?.tipoPertenencia,o?.pertenencia)),
       detailHtml('Aseguradora',first(raw?.nombreAseguradora,raw?.aseguradora,o?.aseguradora)),
       detailHtml('Póliza',first(raw?.nroPolizaSeguro,raw?.poliza,o?.poliza)),
-      detailHtml('Restricción vehicular',first(raw?.restriccionVehiculos,o?.restriccion_vehicular)),
+      detailHtml('Restricción vehicular',first(raw?.restriccionVehiculos,o?.restriccion_vehicular))
+    ]))+w.RYM_VALIDATOR_DETAILS.fold('ecar-revisado-source','Fuente oficial del revisado',sectionHtml('Declaración eCarCheck',[
       detailHtml('Último revisado',raw?.fechaRevisado||o?.fecha_revisado),
       detailHtml('Mes revisado',raw?.mesRevisado||o?.mes_revisado),
       detailHtml('Rev ID',first(raw?.revId,raw?.idRevisados,o?.rev_id)),
       detailHtml('Último taller',first(raw?.ultTallerRevisado,o?.ultimo_taller)),
       detailHtml('Observaciones',first(raw?.observaciones,o?.observaciones))
-    ])||sectionHtml('FICHA OFICIAL · ECARCHECK',[detailHtml('Estado','Sin ficha oficial disponible')]);
+    ]))||sectionHtml('FICHA OFICIAL · ECARCHECK',[detailHtml('Estado','Sin ficha oficial disponible')]);
     const compareFields=[
       ['Chasis',first(ctrl?.chasis,u?.chasis),first(raw?.nroChasis,o?.chasis)],
       ['VIN',first(ctrl?.vin,u?.vin),first(raw?.nroVin,o?.vin)],
@@ -549,12 +550,7 @@
       ['Año',first(ctrl?.anio,u?.anio),first(raw?.anioVehiculo,o?.anio)],
       ['Color',first(ctrl?.color,u?.color),first(raw?.colorVehiculo,o?.color)]
     ];
-    const checks=compareFields.map(([label,internal,official])=>{
-      const status=w.RYM_VALIDATOR_PRESENTATION.compare(internal,official);
-      const state=status==='match'?'COINCIDE':status==='diff'?'NO COINCIDE':'SIN DATOS PARA COMPARAR';
-      return '<div class="uva-identity-check '+status+'" style="padding:9px 10px;margin:5px 0;border-radius:10px;border:1px solid '+(status==='diff'?'#f5ad59':'#dce7e4')+';background:'+(status==='diff'?'#fff0d9':'transparent')+'"><strong>'+esc(label)+' · '+state+'</strong><div>RYM: '+esc(internal||'Sin dato')+'</div><div>eCarCheck: '+esc(official||'Sin dato')+'</div></div>';
-    }).join('');
-    const comparison=sectionHtml('Comparación de identidad RYM / eCarCheck',[checks]);
+    const comparison=w.RYM_VALIDATOR_DETAILS.comparison(compareFields);
     setDetails(card,control+ecar+comparison);
   }
 
