@@ -174,6 +174,7 @@ for(const [width,height] of testedSizes){
         if(scenario==='pan-dedup'){assert.doesNotMatch(compactPan,/Panapass display/i);assert.equal((compactPan.match(/TAG-1/g)||[]).length,1);assert.equal((compactPan.match(/TAG-2/g)||[]).length,1)}
         for(const summary of await pan.locator('.uva-detail-group > summary').all())await summary.click();
         const panBody=await host.locator('#v117PanCard .uva-detail-body').innerText();
+        if(scenario==='pan-dedup')assert.match(panBody,/Consulta propia del TAG/i,'A TAG consultation distinct from the summary must remain accessible');
         if(scenario!=='pan-dedup')assert.match(panBody,/Panapass display/i);assert.match(panBody,/TAG-2/);
         assert.match(panBody,/QA-TIPO-TAG/);
         if(scenario!=='no-pan')assert.match(panBody,/ENA EMPRESA QA/);
@@ -215,6 +216,11 @@ for(const [width,height] of testedSizes){
         assert.doesNotMatch(gpsDetails,/Nivel oficial|Nivel recibido|Clasificación GPS RYM|Instalado|Reporta|Última transmisión/);
         if(scenario==='gps-distinct'){assert.match(gpsDetails,/GPS 1 sin alimentación/);assert.match(gpsDetails,/GPS 2 sin cobertura/)}
         const control=host.locator('#v117CtlCard');
+        await control.locator('header').scrollIntoViewIfNeeded();
+        assert.equal(await control.locator('header').evaluate(header=>{
+          const box=header.getBoundingClientRect(),hit=document.elementFromPoint(box.x+box.width/2,box.y+box.height/2);
+          return header===hit||header.contains(hit);
+        }),true,`${width} ${scenario}: fixed footer covers Control header`);
         await control.locator('header').click();assert.equal(await control.locator(':scope > details').evaluate(x=>x.open),true);
         const compactControl=await control.locator('.uva-detail-body').innerText();
         assert.doesNotMatch(compactControl,/GALERA QA|SUPERVISORA QA|EMPRESA QA|ACTIVA|PARADA/);

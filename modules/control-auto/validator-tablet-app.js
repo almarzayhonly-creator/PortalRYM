@@ -344,7 +344,7 @@
       detailHtml('Matrícula',w.RYM_VALIDATOR_PRESENTATION.compare(first(tag.matricula,tag.placa),ctrl?.placa_unica)==='match'?null:first(tag.matricula,tag.placa)),
       detailHtml('Saldo del TAG',tag.saldo!=null&&w.RYM_VALIDATOR_PRESENTATION.balance(tag.saldo)!==w.RYM_VALIDATOR_PRESENTATION.balance(balance)?tag.saldo:null),
       detailHtml('Tipo de vehículo',tag.tipo_vehiculo),detailHtml('Corregimiento',tag.corregimiento),
-      detailHtml('Consulta propia del TAG',tag.consultado_at&&![last,account.ultima_consulta,ctrl?.ena_ultima_consulta].some(value=>text(value)===text(tag.consultado_at))?tag.consultado_at:null)
+      detailHtml('Consulta propia del TAG',tag.consultado_at&&text(tag.consultado_at)!==text(last)?tag.consultado_at:null)
     ])||(id?'<p class="uva-detail-empty">Sin información adicional del TAG.</p>':''))}).join(''):'';
     const remaining=ids.filter(id=>w.RYM_VALIDATOR_PRESENTATION.compare(id,primary)!=='match'&&!(Array.isArray(tagRows)?tagRows:[]).some(tag=>w.RYM_VALIDATOR_PRESENTATION.compare(id,first(tag.tag,tag.numero_tag))==='match'));
     const display=first(account.panapass_display,ctrl?.panapass_display);

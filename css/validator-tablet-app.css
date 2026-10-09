@@ -610,6 +610,9 @@ html.rym-unit-validator-app #v117CtlCard .uva-identity-check.missing strong{colo
 html.rym-unit-validator-app #v117CtlCard .uva-detail-section+ .uva-detail-section{border-top:1px solid #dce7e4;margin-top:16px;padding-top:12px}
 
 /* V2: natural card heights and focused, accessible audit groups. */
+html.rym-unit-validator-app .v117-check-modal{scroll-padding-block:16px calc(88px + env(safe-area-inset-bottom))}
+html.rym-unit-validator-app .v117-status-card header,html.rym-unit-validator-app .uva-detail-group>summary{scroll-margin-block:16px 88px}
+@media(max-width:650px){html.rym-unit-validator-app .v117-check-card:has(.uva-details[open]){padding-bottom:calc(88px + env(safe-area-inset-bottom))!important}}
 html.rym-unit-validator-app .v117-quick-grid{align-items:start!important}
 html.rym-unit-validator-app .v117-status-card:has(>.uva-details[open]){grid-column:span 2!important}
 html.rym-unit-validator-app .uva-detail-group{margin:10px 0;border:1px solid #dce7e4;border-radius:10px;background:#fff;min-width:0}

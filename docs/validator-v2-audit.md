@@ -1,4 +1,4 @@
-# Validador General RYM V2 · build v19
+# Validador General RYM V2 · build v20
 
 Rama exclusiva: `sandbox/validator-tablet-app`. HEAD inicial remoto/local:
 `6dfc4398ceae2fdd81819bd37352eebd284d9740` (v18, workflow #89 SUCCESS).
@@ -37,7 +37,7 @@ No se modifican fuentes, permisos, RLS, consultas de backend, umbrales ni reglas
 
 `validator-details.js` contiene únicamente renderizado de grupos y comparaciones, con
 escape de valores y uso de la normalización existente. Worker inyecta el módulo antes
-del adapter solo en el host dedicado. Shell, Worker y SW usan v19; el recurso participa
+del adapter solo en el host dedicado. Shell, Worker y SW usan v20; el recurso participa
 en precache y `run_worker_first`, con cabeceras de build/no-store y hash servido verificado.
 
 Se conserva el enriquecimiento inmediato por unidad, token de fetch, lecturas paralelas,
@@ -63,3 +63,11 @@ Capturas, resultados JSON y hashes se guardan como artefactos del workflow de pr
 La validación autenticada utiliza funciones reales de main con respuestas controladas;
 la URL remota se verifica sin credenciales mediante login real, SW, recursos y hashes.
 No se afirma haber validado una unidad real autenticada en producción.
+
+## Corrección detectada por CI
+
+Actions #90 detectó en 412 px que el pie fijo interceptaba el clic sobre el encabezado
+de Control tras expandir Panapass. Se reserva espacio inferior y scroll-padding/scroll-margin
+para que la navegación automática mantenga los controles fuera del pie fijo. QA verifica
+el hit-test del encabezado antes del clic; no utiliza force ni elimina aserciones.
+El build se incrementa a v20 y la corrección se conserva en un commit adicional.
