@@ -77,6 +77,7 @@ jobs:
           node qa/validator-presentation-contract.mjs
           node qa/validator-tablet-contract.mjs
           node qa/validator-gps-proposal-contract.mjs
+          node qa/validator-gps-tls-contract.mjs
           node qa/validator-unit-backend.mjs
           PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-independent-boot.mjs
           PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH="$CHROME_PATH" node qa/validator-tablet-concurrency.mjs
