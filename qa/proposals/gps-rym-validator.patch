@@ -7,7 +7,7 @@
 +  let target=url;const headers:any={accept:'application/json'};
 +  if(broker||secret){
 +    if(!broker||!secret)throw Error('shared_feed_configuration_incomplete');
-+    const origin=new URL(broker);
++    const origin=new globalThis.URL(broker);
 +    if(origin.protocol!=='https:'||origin.username||origin.password||origin.pathname!=='/'||origin.search||origin.hash)throw Error('shared_feed_origin_invalid');
 +    const route=url==='https://logistictodo.com:5001/user97'?'/gps':url==='https://logistictodo.com:5000/user149'?'/status':null;
 +    if(!route)throw Error('shared_feed_not_allowed');target=origin.origin+route;headers.authorization='Bearer '+secret;

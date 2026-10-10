@@ -12,7 +12,8 @@ let calls=[],config={},payload=[{unit:'fixture'}];
 const context=vm.createContext({URL,Array,Error,Deno:{env:{get:key=>config[key]}},fetch:async(url,opt)=>{
   calls.push({url,opt});return new Response(JSON.stringify(payload));
 }});
-vm.runInContext(stripTypeScriptTypes(added.join('\n'))+';transport=json;',context);
+// The deployed Edge Function has a lexical URL string for the Supabase origin.
+vm.runInContext("const URL='https://supabase.fixture.invalid';"+stripTypeScriptTypes(added.join('\n'))+';transport=json;',context);
 const gps='https://logistictodo.com:5001/user97',status='https://logistictodo.com:5000/user149';
 await context.transport(gps);assert.equal(calls[0].url,gps);assert.equal(calls[0].opt.headers.authorization,undefined);
 const secret='controlled-fixture-secret-not-a-real-credential';
