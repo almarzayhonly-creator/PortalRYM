@@ -45,7 +45,7 @@ async function upstream(name,delay){if(!pools.has(name))pools.set(name,new Pool(
   metrics.outbound[name]=(metrics.outbound[name]||0)+1;await sleep(delay);return {sampled:true}
 })}
 function serviceOf(body){if(body.service==='rpc')return 'Busqueda';const url=body.url||'';
-  for(const [part,name] of [['ena-consulta','ENA'],['gps-rym-validator','GPS'],['revisados-final','Revisados'],['revisados-ficha','Ficha'],['revisados_vehiculo_oficial','Oficial'],['ena_cuentas','Cuenta']])if(url.includes(part))return name;
+  for(const [part,name] of [['ena-consulta','ENA'],['gps-rym-validator','GPS'],['revisados-validator','Revisados'],['revisados-ficha','Ficha'],['revisados_vehiculo_oficial','Oficial'],['ena_cuentas','Cuenta']])if(url.includes(part))return name;
   return 'Otros';
 }
 async function execute(client,body){
@@ -112,7 +112,7 @@ try{
       const result=await Promise.all([
         api(client,reqBody('/functions/v1/ena-consulta-saldo')),
         api(client,reqBody('/functions/v1/gps-rym-validator',{unidad:client.unit})),
-        api(client,reqBody('/functions/v1/revisados-final')),
+        api(client,reqBody('/functions/v1/revisados-validator')),
         api(client,reqBody('/functions/v1/revisados-ficha',{unidad:client.unit})),
         api(client,reqBody('/rest/v1/revisados_vehiculo_oficial')),
         api(client,reqBody('/rest/v1/ena_cuentas'))]);
@@ -139,7 +139,7 @@ try{
         assert.equal(await host.locator('.uva-unit-preview-main strong').innerText(),client.unit);assert.equal(await host.locator('.uva-gps-pill').count(),2);
         assert.equal(await host.locator('#v117PanCard .v117-card-value').innerText(),'B/. 0.25');
         const calls=await host.locator('#v101CheckModal').evaluate(()=>QA.calls);
-        for(const part of ['ena-consulta','gps-rym-validator','revisados-final','revisados-ficha','revisados_vehiculo_oficial','ena_cuentas'])assert.equal(calls.filter(call=>call.url?.includes(part)).length,1,part+' duplicate');
+        for(const part of ['ena-consulta','gps-rym-validator','revisados-validator','revisados-ficha','revisados_vehiculo_oficial','ena_cuentas'])assert.equal(calls.filter(call=>call.url?.includes(part)).length,1,part+' duplicate');
         assert.equal(calls.filter(call=>call.name==='panapass_control_auto_v2').length,1,'Master lookup duplicate');elapsed.push(performance.now()-start);
       }));
       assert.deepEqual(errors,[]);assert.equal(metrics.errors,0);for(const context of contexts)await context.close();

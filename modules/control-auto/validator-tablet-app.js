@@ -1,5 +1,5 @@
-/* Presentation adapter for main's Unit Validator.
-   Main remains the source of truth; this file only reorganizes existing data and reads existing Portal endpoints. */
+/* Dedicated adapter for main's canonical Unit Validator.
+   Preserve canonical checks; use the dedicated session and scoped Revisados endpoint in this host. */
 (function(w,d){
   'use strict';
   if(new URLSearchParams(location.search).get('validator-host')!=='1'||w.RYM_UNIT_VALIDATOR)return;
@@ -40,11 +40,12 @@
   let accessCheckedFor='',accessProbe=null;
   function profile(){try{return state.profile}catch(_){return null}}
   function userKey(){const p=profile();return String(p?.id||p?.email||p?.usuario||p?.nombre||'')}
-  function allowed(){try{return !!profile()&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
+  function allowed(){try{return !!profile()&&!profile().must_change_password&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
   function accessMode(){
     const p=profile();if(!p)return 'guest';
+    if(p.must_change_password)return 'password';
     if(allowed())return 'allowed';
-    return accessCheckedFor===userKey()?'denied':'pending';
+    return accessCheckedFor===userKey()||(w.RYM_VALIDATOR_ACCESS_OWNER&&w.RYM_VALIDATOR_ACCESS_OWNER===userKey())?'denied':'pending';
   }
   function session(){const p=profile(),mode=accessMode();return {authenticated:!!p,pending:mode==='pending',denied:mode==='denied',user:p?.nombre||p?.email||''}}
   function notify(){w.parent.postMessage({type:'rym-validator-state'},location.origin)}
@@ -115,7 +116,7 @@
         responses.gps={key:text(input.q),data:out?.data};
       }
       if(url.includes('/functions/v1/ena-consulta-saldo'))responses.ena={key:text(input.panapass),data:out?.data};
-      if(url.includes('/functions/v1/revisados-final'))responses.rev=out?.data;
+      if(url.includes('/functions/v1/revisados-final')||url.includes('/functions/v1/revisados-validator'))responses.rev=out?.data;
       return out;
     };
   }
@@ -622,6 +623,7 @@
   }
 
   function logout(){
+    w.RYM_VALIDATOR_ACCESS_OWNER='';
     masterSource=null;masterRequests.clear();masterResults.clear();searchEpoch++;
     Object.keys(responses).forEach(k=>delete responses[k]);
     accessCheckedFor='';accessProbe=null;
@@ -738,6 +740,7 @@
     const p=profile(),mode=accessMode(),ok=mode==='allowed';
     d.documentElement.classList.toggle('uva-authorized',ok);
     d.documentElement.classList.toggle('uva-authenticated',!!p);
+    if(mode==='password'){notify();return}
     if(mode==='pending'){verifyAccess();notify();return}
     if(mode==='denied'){
       d.getElementById('v101CheckModal')?.remove();

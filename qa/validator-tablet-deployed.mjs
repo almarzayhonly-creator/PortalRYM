@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 const build=fs.readFileSync('unit-validator.html','utf8').match(/rym-validator-build" content="([^"]+)"/)[1];
 const version=build.match(/v(\d+)$/)[1];
 const urls=process.argv.slice(2);assert.ok(urls.length,'Pass immutable and/or alias URLs');
-const files=['unit-validator.html','validator-tablet-sw.js','validator-tablet.webmanifest','css/validator-tablet-app.css','modules/core/unit-validator-shell.js','modules/control-auto/validator-presentation.js','modules/control-auto/validator-details.js','modules/control-auto/validator-tablet-app.js'];
+const files=['unit-validator.html','validator-tablet-sw.js','validator-tablet.webmanifest','css/validator-tablet-app.css','modules/core/unit-validator-shell.js','modules/core/validator-session.js','modules/control-auto/validator-presentation.js','modules/control-auto/validator-details.js','modules/control-auto/validator-tablet-app.js'];
 const normalized=s=>s.replaceAll('\r\n','\n');
 const hash=s=>createHash('sha256').update(normalized(s)).digest('hex');
 const results=[];
