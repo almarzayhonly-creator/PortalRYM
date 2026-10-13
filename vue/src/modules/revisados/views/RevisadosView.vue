@@ -1159,6 +1159,7 @@ onMounted(()=>load())
                     <span v-if="check.unidad">Unidad {{check.unidad}}</span>
                   </div>
                   <div class="rv-company-detail-model"><small>MODELO</small><b>{{boletaCheckModel(check)}}</b></div>
+                  <div v-if="check.ecarcheck_fuentes_coincidentes || boletaDetailLines(check).length>0 && Number(check.ena||0)>0 && Number(check.documento||0)>0" class="rv-company-source-note">ENA y documento pueden presentar los mismos conceptos. Los contadores oficiales se muestran por separado y no se suman.</div>
                   <div class="rv-company-detail-result">
                     <small>RESULTADO ECARCHECK</small>
                     <b>{{boletaCheckResult(check)}}</b>
@@ -1245,6 +1246,7 @@ onMounted(()=>load())
             <article><small>ENA</small><b>{{num(ficha.ecarcheck?.boletas?.infraccionesEna?.cantidad||0)}}</b></article>
             <article><small>Documento</small><b>{{num(ficha.ecarcheck?.boletas?.boletasPorDocumento?.cantidad||0)}}</b></article>
             <article class="wide"><small>Resumen</small><b>{{ficha.ecarcheck?.resumen||ficha.ecarcheck?.detalle||'Sin novedades'}}</b></article>
+            <article v-if="(ficha.ecarcheck?.desglose||[]).some((item:any)=>Array.isArray(item.fuentes)&&item.fuentes.length>1)" class="wide"><small>Conceptos compartidos</small><b>ENA y documento reportan conceptos coincidentes; no representan automáticamente boletas adicionales.</b></article>
           </div>
           <ul v-if="Array.isArray(ficha.ecarcheck?.desglose)&&ficha.ecarcheck.desglose.length" class="rv-ecarcheck-detail-list">
             <li v-for="(item,idx) in ficha.ecarcheck.desglose" :key="idx">
@@ -2442,4 +2444,5 @@ onMounted(()=>load())
 .rv-ecarcheck-detail-list li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 10px;border:1px solid #D9E4F0;border-radius:10px;background:#F8FBFF}
 .rv-ecarcheck-detail-list li b{color:#16335C;font-size:11px}.rv-ecarcheck-detail-list li span{font-weight:900;color:#B64235}.rv-ecarcheck-detail-list li small{color:#71829A;font-size:8px;font-weight:800}
 .rv-ecarcheck-detail-card{border-color:#F0C9A0;background:linear-gradient(135deg,#FFF9F1,#fff)}
+.rv-company-source-note{padding:8px 10px;border:1px solid #e4d3ad;border-radius:9px;background:#fffbef;color:#79592f;font-size:10px;line-height:1.4}
 </style>
