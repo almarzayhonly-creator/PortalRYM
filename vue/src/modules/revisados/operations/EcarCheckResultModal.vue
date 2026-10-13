@@ -41,8 +41,10 @@ function money(v:unknown){
 function compactItem(item:any){
   if(item==null) return ''
   if(typeof item!=='object') return first(item)
+  const qty=Number(item.cantidad||0)
+  const kind=first(item.tipo,item.clase,item.concepto,item.descripcion,item.detalle)
   const parts=[
-    first(item.tipo,item.clase,item.concepto,item.descripcion,item.detalle),
+    kind ? kind+(qty>1?` (${qty})`:'') : '',
     first(item.numero,item.nroBoleta,item.boleta,item.id),
     item.monto!=null ? money(item.monto) : '',
     first(item.fecha,item.fechaBoleta,item.estado)
@@ -50,7 +52,7 @@ function compactItem(item:any){
   return [...new Set(parts)].join(' · ')
 }
 function detailItems(source:any){
-  const candidates=[source?.items,source?.boletas,source?.infracciones,source?.resultados,source?.data,source?.detalle]
+  const candidates=[source?.desglose,source?.items,source?.boletas,source?.infracciones,source?.resultados,source?.data,source?.detalle]
   const list=candidates.find(Array.isArray)
   return Array.isArray(list) ? list.map(compactItem).filter(Boolean).slice(0,8) : []
 }
