@@ -491,18 +491,35 @@ async function hydrateBoletaModels(){
     boletaModelsBusy.value=false
   }
 }
+function boletaDetailLines(x:Record<string,any>){
+  const raw=Array.isArray(x.desglose)?x.desglose
+    :Array.isArray(x.ecarcheck_desglose)?x.ecarcheck_desglose
+    :Array.isArray(x?.result?.boletas?.boletasPorPlaca?.desglose)?x.result.boletas.boletasPorPlaca.desglose
+    :Array.isArray(x?.result?.boletas?.boletasPorDocumento?.desglose)?x.result.boletas.boletasPorDocumento.desglose
+    :Array.isArray(x?.result?.boletas?.infraccionesEna?.desglose)?x.result.boletas.infraccionesEna.desglose
+    :[]
+  return raw.map((item:any)=>{
+    const label=boletaTextValue(item?.tipo,item?.descripcion,item?.detalle,item?.nombre,item?.motivo)
+    const qty=Math.max(1,Number(item?.cantidad||1)||1)
+    return label?(qty>1?label+' ('+qty+')':label):''
+  }).filter(Boolean)
+}
 function boletaCheckResult(x:Record<string,any>){
   const nested=(x.ecarcheck&&typeof x.ecarcheck==='object'?x.ecarcheck:null)
     ||(x.resultado&&typeof x.resultado==='object'?x.resultado:null)
     ||(x.result&&typeof x.result==='object'?x.result:null)
     ||{}
+  const detailLines=boletaDetailLines(x)
+  if(detailLines.length)return detailLines.join(' · ')
   const detail=boletaTextValue(
+    x.ecarcheck_resumen,
     x.resultado_ecarcheck,
     typeof x.resultado==='string'?x.resultado:'',
     x.detalle_ecarcheck,
     x.detalle,
     x.mensaje,
     x.descripcion,
+    nested.ecarcheck_resumen,
     nested.resultado_ecarcheck,
     nested.resultado,
     nested.detalle,
@@ -1142,7 +1159,13 @@ onMounted(()=>load())
                     <span v-if="check.unidad">Unidad {{check.unidad}}</span>
                   </div>
                   <div class="rv-company-detail-model"><small>MODELO</small><b>{{boletaCheckModel(check)}}</b></div>
-                  <div class="rv-company-detail-result"><small>RESULTADO ECARCHECK</small><b>{{boletaCheckResult(check)}}</b></div>
+                  <div class="rv-company-detail-result">
+                    <small>RESULTADO ECARCHECK</small>
+                    <b>{{boletaCheckResult(check)}}</b>
+                    <ul v-if="boletaDetailLines(check).length>1" class="rv-company-detail-list">
+                      <li v-for="(item,detailIndex) in boletaDetailLines(check)" :key="detailIndex">{{item}}</li>
+                    </ul>
+                  </div>
                 </article>
               </div>
             </details>
@@ -1210,6 +1233,27 @@ onMounted(()=>load())
       <div v-else-if="fichaError" class="rv-state error"><b>No fue posible cargar la ficha.</b><span>{{fichaError}}</span></div>
 
       <template v-else-if="ficha">
+        <section v-if="ficha.ecarcheck" class="rv-ficha-card rv-ecarcheck-detail-card">
+          <div class="rv-section-title">
+            <span class="rv-section-icon warn"><RymIcon name="receipt_long" :size="17"/></span>
+            <div><small>ECARCHECK · ÚLTIMA CONSULTA</small><b>Boletas, infracciones y detalle devuelto</b></div>
+          </div>
+          <div class="rv-ficha-facts">
+            <article><small>Estado</small><b>{{ficha.ecarcheck?.estado||ficha.ecarcheck?.tipo_resultado||'—'}}</b></article>
+            <article><small>Última consulta</small><b>{{date(ficha.ecarcheck?.ultima_consulta_at||ficha.ecarcheck?.consultado_en)}}</b></article>
+            <article><small>Boleta placa</small><b>{{num(ficha.ecarcheck?.boletas?.boletasPorPlaca?.cantidad||0)}}</b></article>
+            <article><small>ENA</small><b>{{num(ficha.ecarcheck?.boletas?.infraccionesEna?.cantidad||0)}}</b></article>
+            <article><small>Documento</small><b>{{num(ficha.ecarcheck?.boletas?.boletasPorDocumento?.cantidad||0)}}</b></article>
+            <article class="wide"><small>Resumen</small><b>{{ficha.ecarcheck?.resumen||ficha.ecarcheck?.detalle||'Sin novedades'}}</b></article>
+          </div>
+          <ul v-if="Array.isArray(ficha.ecarcheck?.desglose)&&ficha.ecarcheck.desglose.length" class="rv-ecarcheck-detail-list">
+            <li v-for="(item,idx) in ficha.ecarcheck.desglose" :key="idx">
+              <b>{{item.tipo||'Detalle'}}</b>
+              <span v-if="Number(item.cantidad||0)>1">× {{Number(item.cantidad)}}</span>
+              <small v-if="Array.isArray(item.fuentes)&&item.fuentes.length">{{item.fuentes.join(' · ')}}</small>
+            </li>
+          </ul>
+        </section>
         <div v-if="Array.isArray(ficha.diferencias)&&ficha.diferencias.length" class="rv-diffs rv-diffs-v2">
           <div class="rv-section-title">
             <span class="rv-section-icon warn"><RymIcon name="warning" :size="16"/></span>
@@ -2391,4 +2435,11 @@ onMounted(()=>load())
   font-weight:700!important;
   letter-spacing:-.035em!important
 }
+
+.rv-company-detail-list,.rv-ecarcheck-detail-list{margin:8px 0 0;padding:8px 0 0 18px;border-top:1px solid #D8E2EE}
+.rv-company-detail-list li,.rv-ecarcheck-detail-list li{margin:3px 0;color:#405675;font-size:10px;line-height:1.45}
+.rv-ecarcheck-detail-list{list-style:none;padding-left:0;display:grid;gap:7px}
+.rv-ecarcheck-detail-list li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 10px;border:1px solid #D9E4F0;border-radius:10px;background:#F8FBFF}
+.rv-ecarcheck-detail-list li b{color:#16335C;font-size:11px}.rv-ecarcheck-detail-list li span{font-weight:900;color:#B64235}.rv-ecarcheck-detail-list li small{color:#71829A;font-size:8px;font-weight:800}
+.rv-ecarcheck-detail-card{border-color:#F0C9A0;background:linear-gradient(135deg,#FFF9F1,#fff)}
 </style>
