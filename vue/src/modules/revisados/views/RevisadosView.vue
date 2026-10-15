@@ -40,15 +40,15 @@ const boletaCompanyRows=computed<Array<Record<string,any>>>(()=>boletaCompanies.
   status:boletaCompanyStatus(g),
   restriction:boletaCompanyRestriction(g)
 })).sort((a:Record<string,any>,b:Record<string,any>)=>{
-  const rank=(v:string)=>v==='CON RESTRICCIÓN'?0:v==='ERROR'?1:v==='PENDIENTE'?2:3
+  const rank=(v:string)=>v==='CON RESTRICCIÓN'?0:v==='INCIDENCIA EN PLACA'?1:v==='ERROR'?2:v==='PENDIENTE'?3:4
   return rank(String(a.status))-rank(String(b.status))||String(a.empresa||'').localeCompare(String(b.empresa||''),'es')
 }))
 const filteredBoletaCompanies=computed(()=>boletaCompanyRows.value.filter(g=>boletaFilter.value==='TODAS'||g.status===boletaFilter.value))
-const boletaPositiveCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='CON RESTRICCIÓN').length)
+const boletaPositiveCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='CON RESTRICCIÓN'||g.status==='INCIDENCIA EN PLACA').length)
 const boletaCleanCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='SIN RESTRICCIÓN').length)
 const boletaErrorCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='ERROR').length)
 const boletaCheckedCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status!=='PENDIENTE').length)
-const BOLETA_CHECK_TARGET=BOLETA_COMPANY_TARGET*2
+const BOLETA_CHECK_TARGET=BOLETA_COMPANY_TARGET*3
 const boletaCompletedChecks=computed(()=>boletaCompanyRows.value.reduce((sum,g)=>sum+(Array.isArray(g.checks)?g.checks.length:0),0))
 const historyFilterCount=computed(()=>filters.value.galeras.length+filters.value.supervisoras.length+filters.value.estados.length+(filters.value.search.trim()?1:0))
 const cuposSummary=computed(()=>{
@@ -421,29 +421,20 @@ function boletaPlateCounts(g:Record<string,any>){
     total:checks.length}
 }
 function boletaCompanyStatus(g:Record<string,any>){
-  const c=boletaPlateCounts(g)
-  if(!c.total)return 'PENDIENTE'
-  if(c.incidencia>0)return 'CON RESTRICCIÓN'
-  if(c.sinValidar>0)return 'ERROR'
+  const checks=Array.isArray(g.checks)?g.checks:[]
+  if(!checks.length)return 'PENDIENTE'
+  if(checks.some((x:Record<string,any>)=>Number(x.documento||0)>0||Number(x.ena||0)>0))return 'CON RESTRICCIÓN'
+  if(checks.some((x:Record<string,any>)=>boletaPlateStatus(x)==='INCIDENCIA'))return 'INCIDENCIA EN PLACA'
+  if(checks.some((x:Record<string,any>)=>boletaPlateStatus(x)==='SIN VALIDAR'))return 'ERROR'
   return 'SIN RESTRICCIÓN'
 }
 function boletaCompanyRestriction(g:Record<string,any>){
-  const status=boletaCompanyStatus(g)
-  const counts=boletaPlateCounts(g)
-  if(counts.total)return [`${counts.incidencia}/${counts.total} con incidencia`,`${counts.limpias}/${counts.total} limpias`,...(counts.sinValidar?[`${counts.sinValidar} sin verificar`]:[])].join(' · ')
-  if(status==='SIN RESTRICCIÓN')return 'Sin restricción reportada'
-  if(status==='ERROR')return 'Consulta incompleta · no se pudo validar'
-  if(status==='PENDIENTE')return 'Pendiente de consulta'
-  const clas=String(g.clasificacion||'').trim().toUpperCase()
-  if(clas==='BOLETA EMPRESA')return 'Boleta de empresa detectada'
-  if(clas==='BOLETA UNIDAD')return 'Boleta de placa detectada'
-  if(clas==='INFRACCION ENA')return 'Infracción ENA detectada'
-  const checks=Array.isArray(g.checks)?g.checks:[]
-  const labels:string[]=[]
-  if(checks.some((x:Record<string,any>)=>Number(x.documento||0)>0))labels.push('Boleta por documento')
-  if(checks.some((x:Record<string,any>)=>Number(x.placa_boleta||0)>0))labels.push('Boleta por placa')
-  if(checks.some((x:Record<string,any>)=>Number(x.ena||0)>0))labels.push('Infracción ENA')
-  return labels.join(' · ')||'Restricción eCarCheck detectada'
+  const c=boletaPlateCounts(g)
+  if(!c.total)return 'Pendiente de consulta'
+  const corporate=(Array.isArray(g.checks)?g.checks:[]).some((x:Record<string,any>)=>Number(x.documento||0)>0||Number(x.ena||0)>0)
+  return [corporate?'Señal corporativa por documento/ENA':'Sin boleta corporativa detectada en la muestra',
+    `${c.incidencia}/${c.total} placas con incidencia`,`${c.limpias}/${c.total} limpias`,
+    ...(c.sinValidar?[`${c.sinValidar} sin verificar`]:[])].join(' · ')
 }
 function boletaCheckSummary(x:Record<string,any>){
   const labels:string[]=[]
@@ -547,7 +538,7 @@ function boletaCheckResult(x:Record<string,any>){
 }
 function boletaWhatsAppText(){
   const rows=boletaCompanyRows.value
-  const restricted=rows.filter(g=>g.status==='CON RESTRICCIÓN')
+  const restricted=rows.filter(g=>g.status==='CON RESTRICCIÓN'||g.status==='INCIDENCIA EN PLACA')
   const checked=boletaCheckedCompanies.value
   const lines=[
     '*Boletas eCarCheck*',
@@ -1156,7 +1147,7 @@ onMounted(()=>load())
               <summary>
                 <div class="rv-company-name">
                   <span class="rv-company-dot"></span>
-                  <div><b>{{g.empresa||'Empresa sin nombre'}}</b><small>{{(g.checks||[]).length}} de 2 placas recibidas</small></div>
+                  <div><b>{{g.empresa||'Empresa sin nombre'}}</b><small>{{(g.checks||[]).length}} de 3 placas recibidas</small></div>
                 </div>
                 <span class="rv-company-galera">{{g.galera||'Sin galera'}}</span>
                 <div class="rv-company-plates"><span v-for="(check,idx) in (g.checks||[])" :key="'plate-'+String(check.placa||idx)">{{check.placa||'—'}}</span></div>
