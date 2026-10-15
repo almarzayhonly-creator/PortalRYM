@@ -1097,7 +1097,7 @@ onMounted(()=>load())
           <div class="rv-boletas-command-copy">
             <span>CONSULTA ECARCHECK V2</span>
             <h2>Boletas</h2>
-            <p>Consulta 2 placas activas por empresa para detectar restricciones eCarCheck.</p>
+            <p>Consulta hasta 3 placas activas rotativas por empresa. Boletas por documento, ENA e incidencias de placas se distinguen.</p>
             <div class="rv-boletas-state">
               <i :data-active="boletaBusy"></i>
               <span>{{boletaState}}</span>
@@ -1180,13 +1180,20 @@ onMounted(()=>load())
                     <span v-if="check.unidad">Unidad {{check.unidad}}</span>
                   </div>
                   <div class="rv-company-detail-model"><small>MODELO</small><b>{{boletaCheckModel(check)}}</b></div>
-                  <div v-if="check.ecarcheck_fuentes_coincidentes || boletaDetailLines(check).length>0 && Number(check.ena||0)>0 && Number(check.documento||0)>0" class="rv-company-source-note">ENA y documento pueden presentar los mismos conceptos. Los contadores oficiales se muestran por separado y no se suman.</div>
                   <div class="rv-company-detail-result">
                     <small>RESULTADO ECARCHECK</small>
-                    <b>{{boletaCheckResult(check)}}</b>
-                    <ul v-if="boletaDetailLines(check).length>1" class="rv-company-detail-list">
+                    <div class="rv-plate-flags">
+                      <span v-if="Number(check.documento||0)>0" class="rv-plate-flag corporate">Documento {{check.documento}}</span>
+                      <span v-if="Number(check.ena||0)>0" class="rv-plate-flag ena">ENA {{check.ena}}</span>
+                      <span v-if="Number(check.placa_boleta||0)>0" class="rv-plate-flag plate">Boleta placa {{check.placa_boleta}}</span>
+                      <span v-if="boletaPlateStatus(check)==='LIMPIA'" class="rv-plate-flag clear">Sin incidencias</span>
+                      <span v-if="boletaPlateStatus(check)==='SIN VALIDAR'" class="rv-plate-flag unknown">Sin verificar</span>
+                    </div>
+                    <ul v-if="boletaDetailLines(check).length" class="rv-company-detail-list rv-plate-list">
                       <li v-for="(item,detailIndex) in boletaDetailLines(check)" :key="detailIndex">{{item}}</li>
                     </ul>
+                    <p v-else class="rv-plate-fallback">{{boletaCheckResult(check)}}</p>
+                    <small v-if="check.ecarcheck_fuentes_coincidentes" class="rv-plate-note">ENA y documento pueden referirse al mismo concepto; no se suman.</small>
                   </div>
                 </article>
               </div>
@@ -1196,7 +1203,7 @@ onMounted(()=>load())
           <div v-else class="rv-company-empty">
             <span><RymIcon name="business" :size="26"/></span>
             <b>Lista preparada para 16 empresas</b>
-            <p>La consulta validará dos placas activas por empresa y mostrará claramente placa, modelo y resultado eCarCheck.</p>
+            <p>La consulta verificará hasta tres placas activas por empresa y separará boletas corporativas, ENA y restricciones individuales.</p>
           </div>
         </section>
       </section>
@@ -2466,4 +2473,31 @@ onMounted(()=>load())
 .rv-ecarcheck-detail-list li b{color:#16335C;font-size:11px}.rv-ecarcheck-detail-list li span{font-weight:900;color:#B64235}.rv-ecarcheck-detail-list li small{color:#71829A;font-size:8px;font-weight:800}
 .rv-ecarcheck-detail-card{border-color:#F0C9A0;background:linear-gradient(135deg,#FFF9F1,#fff)}
 .rv-company-source-note{padding:8px 10px;border:1px solid #e4d3ad;border-radius:9px;background:#fffbef;color:#79592f;font-size:10px;line-height:1.4}
+
+/* Boletas: tres fichas legibles y categorias separadas. */
+.rv-boletas-v2 .rv-company-detail{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:16px}
+.rv-boletas-v2 .rv-company-detail article{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0;padding:17px;border-radius:15px;background:#F8FAFD}
+.rv-boletas-v2 .rv-company-detail article>div{display:block;width:100%;min-width:0}
+.rv-boletas-v2 .rv-company-detail-identity strong{display:block;margin:5px 0;font-size:18px}
+.rv-boletas-v2 .rv-company-detail-identity span{display:block;font-size:12px}
+.rv-boletas-v2 .rv-company-detail-model{padding-bottom:10px;border-bottom:1px solid #E0E8F1}
+.rv-boletas-v2 .rv-company-detail-model b{display:block;margin-top:5px;font-size:14px}
+.rv-boletas-v2 .rv-company-detail-result small{display:block;font-size:10px}
+.rv-boletas-v2 .rv-company-detail-result b,.rv-boletas-v2 .rv-plate-fallback{font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.rv-boletas-v2 .rv-plate-fallback{margin:9px 0;color:#36506C}
+.rv-boletas-v2 .rv-plate-flags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.rv-boletas-v2 .rv-plate-flag{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#EDF3FB;color:#254F82}
+.rv-boletas-v2 .rv-plate-flag.corporate{background:#FEE8E6;color:#AC302B}
+.rv-boletas-v2 .rv-plate-flag.ena{background:#FFF1D7;color:#895909}
+.rv-boletas-v2 .rv-plate-flag.plate{background:#FDECE2;color:#A34B1A}
+.rv-boletas-v2 .rv-plate-flag.clear{background:#E3F7EB;color:#176D43}
+.rv-boletas-v2 .rv-plate-flag.unknown{background:#ECEFF3;color:#536274}
+.rv-boletas-v2 .rv-plate-list{padding-left:19px;margin:10px 0 0;display:grid;gap:7px}
+.rv-boletas-v2 .rv-plate-list li{font-size:12px;line-height:1.5;overflow-wrap:anywhere;color:#334B67}
+.rv-boletas-v2 .rv-plate-note{margin-top:10px;color:#8A620B;font-size:11px;line-height:1.4}
+.rv-boletas-v2 .rv-company-row[data-status="INCIDENCIA EN PLACA"]{border-color:#E7D2A1;background:#FFFCF5}
+.rv-boletas-v2 .rv-company-row[data-status="INCIDENCIA EN PLACA"] .rv-company-dot{background:#D69C26;box-shadow:0 0 0 5px rgba(214,156,38,.12)}
+.rv-boletas-v2 .rv-company-row .rv-company-restriction{font-size:11px;line-height:1.55}
+@media(max-width:1100px){.rv-boletas-v2 .rv-company-detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.rv-boletas-v2 .rv-company-detail{grid-template-columns:1fr;padding:10px}.rv-boletas-v2 .rv-company-detail article{padding:13px}}
 </style>
