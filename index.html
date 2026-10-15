@@ -694,6 +694,7 @@ body.v66-revisados .v66-daily-gal{background:#fff0d1!important;color:#734600!imp
 </head>
 <body><div id="app"></div>
 <script src="/modules/core/pagos-read.js?v=1"></script>
+<script src="/modules/core/project-read.js?v=1"></script>
 <script>
 const URL='https://avczyvcpmicpuhdkmxzx.supabase.co';
 const KEY='sb_publishable_Xq9jQFfPrywG4kbmw1dOuQ_IyjsrlsQ';
@@ -3944,7 +3945,8 @@ body.v66-revisados button:focus-visible{outline:3px solid rgba(242,140,0,.28)!im
   const N=v=>String(v??'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
   const MONTHS=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const GO={VCOMP:0,VIPCO:1,VINDU:2,VCARS:3};
-  let data=null, incidents=[], incidentTypes=[], tab='dashboard', preset={}, loading=false, cacheUserKey='', dataLoadedAt=0, selectedMonthlyGalera='';
+  let data=null, incidents=[], incidentTypes=[], tab='dashboard', preset={}, loading=false, cacheUserKey='', dataLoadedAt=0, selectedMonthlyGalera='',loadPending=null,loadPendingKey='';
+  const revisadosKey=()=>String(state?.sessionVersion||0)+'|'+String(state?.profile?.id||'')+'|'+N(state?.profile?.rol||'');
   const appEl=()=>document.querySelector('#app');
   const roleNow=()=>N(data?.profile?.rol || (typeof state!=='undefined'?(state?.profile?.rol||state?.profile?.role):''));
   const fmt=v=>{if(!v)return '—';try{return new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch{return String(v)}};
@@ -3973,19 +3975,42 @@ body.v66-revisados button:focus-visible{outline:3px solid rgba(242,140,0,.28)!im
   }
   function mergeRows(){const m=openIncByUnit();for(const r of (data?.rows||[])){r.incidencias_abiertas=m.get(String(r.unidad_id))||[];r.alertas_auto=meaningfulAutoAlerts(r);r.bloqueado=(r.incidencias_abiertas.length+r.alertas_auto.length)>0;r.situacion=r.bloqueado?'BLOQUEADO':'LISTO'}}
   function toast(msg){let t=$('#v66Toast');if(!t){t=document.createElement('div');t.id='v66Toast';t.className='v66-toast';document.body.appendChild(t)}t.textContent=msg;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2600)}
-  async function call(path,init){return await req(path,init)}
-  async function load(force=false){const userKey=String((typeof state!=='undefined'&&state?.profile?.id)||'')+'|'+N((typeof state!=='undefined'&&state?.profile?.rol)||'');const fresh=data&&cacheUserKey===userKey&&(Date.now()-dataLoadedAt)<120000;if(fresh&&!force)return data;if(!force){const pf=window.__rymRevisadosPrefetch;if(pf&&pf.key===userKey){try{const pd=pf.data||(pf.promise?await pf.promise:null);if(pd?.ok){data=pd;cacheUserKey=userKey;dataLoadedAt=pf.at||Date.now();incidents=Array.isArray(data.incidents)?data.incidents:[];incidentTypes=Array.isArray(data.incident_types)?data.incident_types:[];mergeRows();return data}}catch(_){}}}const r=await call('/functions/v1/revisados-final',{method:'POST',body:'{}'});if(!r.data?.ok)throw Error(r.data?.error||'No se pudo cargar Revisados');data=r.data;cacheUserKey=userKey;dataLoadedAt=Date.now();incidents=Array.isArray(data.incidents)?data.incidents:[];incidentTypes=Array.isArray(data.incident_types)?data.incident_types:[];mergeRows();return data}
+  async function call(path,init){if(path==='/functions/v1/revisados-ficha')return window.rymProjectRead(signal=>req(path,{...init,signal}));return await req(path,init)}
+  async function load(force=false){
+    const userKey=revisadosKey();
+    if(data&&cacheUserKey===userKey&&Date.now()-dataLoadedAt<120000&&!force)return data;
+    if(loadPending&&loadPendingKey===userKey)return loadPending;
+    loadPendingKey=userKey;
+    const pending=(async()=>{
+      const pf=window.__rymRevisadosPrefetch;
+      let result=null,at=Date.now();
+      if(!force&&pf?.key===userKey&&Date.now()-pf.at<120000){result=pf.data||(pf.promise?await pf.promise:null);at=pf.at}
+      if(!result?.ok){result=(await call('/functions/v1/revisados-final',{method:'POST',body:'{}',rymForce:force})).data;at=Date.now()}
+      if(userKey!==revisadosKey())throw Error('La sesión cambió.');
+      if(!result?.ok)throw Error(result?.error||'No se pudo cargar Revisados');
+      data=result;cacheUserKey=userKey;dataLoadedAt=at;
+      incidents=Array.isArray(data.incidents)?data.incidents:[];incidentTypes=Array.isArray(data.incident_types)?data.incident_types:[];mergeRows();return data;
+    })();
+    loadPending=pending;
+    try{return await pending}finally{if(loadPending===pending){loadPending=null;loadPendingKey=''}}
+  }
   window.v66PrefetchRevisados=async function(){try{return await load(false)}catch(_){return null}};
   function perms(){const c=data?.profile?.can||{},daily=(typeof window.rymHasModule==='function'?window.rymHasModule('revisados.reporte_diario'):roleNow()==='ADMIN_TOTAL');return {dashboard:true,operations:!!c.operations,monthly:!!c.monthly,daily:!!daily,history:!!c.history,stats:!!c.stats,boletas:!!c.boletas,cupos:!!c.cupos}}
   function navItems(){const p=perms(),a=[['dashboard','⌂','Dashboard']];if(p.operations)a.push(['operations','⚑','Operaciones']);if(p.monthly)a.push(['monthly','▦','Avance mensual']);if(p.daily)a.push(['daily','✉','Reporte diario']);if(p.history)a.push(['history','≡','Historial']);if(p.stats)a.push(['stats','▥','Estadísticas']);if(p.boletas)a.push(['boletas','●','Boletas']);if(p.cupos)a.push(['cupos','$','Cupos']);return a}
-  function shell(){const p=data.profile||{};document.body.classList.remove('v60-revisados','v38-revisados-only','v37-control-only');document.body.classList.add('v66-revisados');const app=appEl();app.innerHTML=`<main class="v66-app"><aside class="v66-side"><div class="v66-brand"><div class="v66-brand-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="RYM"></div><div><h2>Revisados RYM</h2><p>Control legal vehicular</p></div></div><div class="v66-user"><strong>${E(p.nombre||'Usuario')}</strong><span class="v66-role">${E(p.rol||'')}</span><span>${E(p.scope_label||'')}</span></div><nav class="v66-nav" id="v66Nav">${navItems().map(x=>`<button data-v66-tab="${x[0]}" class="${tab===x[0]?'active':''}"><span class="ico">${x[1]}</span>${x[2]}</button>`).join('')}</nav><div class="v66-foot"><button id="v66Back">← Volver al Portal</button></div></aside><section class="v66-main"><div class="v66-inner"><header class="v66-top"><div class="v66-title"><h1 id="v66Title">Dashboard</h1><p id="v66Sub"></p></div><div class="v66-actions"><span class="v66-scope">${E(p.scope_label||'')}</span><button class="v66-refresh" id="v66Refresh">Actualizar vista</button></div></header><div id="v66Body"></div></div></section></main><div id="v66Modal" class="v66-modal"><div class="v66-modal-box"><div class="v66-modal-head"><div><h2 id="v66ModalTitle"></h2><p id="v66ModalSub"></p></div><button class="v66-modal-close" id="v66ModalClose">×</button></div><div id="v66ModalBody"></div></div></div>`;
-    $$('#v66Nav [data-v66-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.v66Tab;preset={};render()});
+  function shell(){const p=data?.profile||state?.profile||{};document.body.classList.remove('v60-revisados','v38-revisados-only','v37-control-only');document.body.classList.add('v66-revisados');const app=appEl();app.innerHTML=`<main class="v66-app"><aside class="v66-side"><div class="v66-brand"><div class="v66-brand-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="RYM"></div><div><h2>Revisados RYM</h2><p>Control legal vehicular</p></div></div><div class="v66-user"><strong>${E(p.nombre||'Usuario')}</strong><span class="v66-role">${E(p.rol||'')}</span><span>${E(p.scope_label||'')}</span></div><nav class="v66-nav" id="v66Nav">${navItems().map(x=>`<button data-v66-tab="${x[0]}" class="${tab===x[0]?'active':''}"><span class="ico">${x[1]}</span>${x[2]}</button>`).join('')}</nav><div class="v66-foot"><button id="v66Back">← Volver al Portal</button></div></aside><section class="v66-main"><div class="v66-inner"><header class="v66-top"><div class="v66-title"><h1 id="v66Title">Dashboard</h1><p id="v66Sub"></p></div><div class="v66-actions"><span class="v66-scope">${E(p.scope_label||'')}</span><button class="v66-refresh" id="v66Refresh">Actualizar vista</button></div></header><div id="v66Body"></div></div></section></main><div id="v66Modal" class="v66-modal"><div class="v66-modal-box"><div class="v66-modal-head"><div><h2 id="v66ModalTitle"></h2><p id="v66ModalSub"></p></div><button class="v66-modal-close" id="v66ModalClose">×</button></div><div id="v66ModalBody"></div></div></div>`;
+    $$('#v66Nav [data-v66-tab]').forEach(b=>b.onclick=()=>{if(!data)return;tab=b.dataset.v66Tab;preset={};render()});
     $('#v66Back').onclick=()=>{document.body.classList.remove('v66-revisados');if(typeof window.v36PortalHome==='function')window.v36PortalHome()};
     $('#v66Refresh').onclick=refresh;
     $('#v66ModalClose').onclick=closeModal;$('#v66Modal').onclick=e=>{if(e.target.id==='v66Modal')closeModal()};
   }
   function setHead(title,sub){$('#v66Title').textContent=title;$('#v66Sub').textContent=sub||'';$$('#v66Nav [data-v66-tab]').forEach(b=>b.classList.toggle('active',b.dataset.v66Tab===tab))}
-  async function refresh(){if(loading)return;loading=true;const b=$('#v66Refresh');if(b){b.disabled=true;b.textContent='Actualizando...'}try{await load(true);shell();render();toast('Vista actualizada')}catch(e){toast('Error: '+(e.message||e))}finally{loading=false}}
+  async function refresh(){
+    if(loading)return;loading=true;const root=$('.v66-app'),b=$('#v66Refresh');
+    if(b){b.disabled=true;b.textContent='Actualizando...'}
+    try{await load(true);if(!root?.isConnected)return;shell();render();toast('Vista actualizada')}
+    catch(e){data=null;dataLoadedAt=0;if(root?.isConnected){const body=$('#v66Body');body.innerHTML=`<div class="alert">${E(e.message||e)}. No se pudo actualizar la vista.</div>`}}
+    finally{loading=false;if(b?.isConnected){b.disabled=false;b.textContent='Actualizar vista'}}
+  }
   function priorityCounts(rows){const c={CRITICA:0,URGENTE:0,ALTA:0,ACTUAL:0};for(const r of rows)if(c[N(r.prioridad)]!==undefined)c[N(r.prioridad)]++;return c}
   function heroCopy(){const k=data.kpis||{},p=data.profile||{},r=roleNow(),pending=Number(k.pendientes||0),alerts=Number(k.con_alertas||0),pc=priorityCounts((data.rows||[]).filter(x=>!x.emitido));const personal=r==='SUPERVISORA'?'Tus unidades':r==='ADMIN_TOTAL'?'La operación':p.scope_label||'Tu alcance';if(pending===0)return {success:true,title:'Todo al día ✓',text:`${personal} tiene ${num(k.activas)} unidades con el ciclo vigente cubierto.${alerts?` Hay ${num(alerts)} alerta${alerts===1?'':'s'} de datos que conviene revisar.`:''}`,action:'history'};const urgent=pc.CRITICA+pc.URGENTE;return {success:false,title:`${num(pending)} unidades necesitan atención`,text:`${urgent?`${num(urgent)} están más atrasadas · `:''}${num(pc.ALTA)} corresponden al mes anterior · ${num(pc.ACTUAL)} al mes en curso. ${num(k.cubiertas)} unidades están al día.`,action:perms().operations?'operations':'history'}}
   function kpi(label,value,desc,kind,action){return `<div class="v66-kpi ${kind||''}" data-action="${action||''}"><span>${E(label)}</span><strong>${num(value)}</strong><small>${E(desc)}</small>${action?'<i class="chev">›</i>':''}</div>`}
@@ -4086,7 +4111,17 @@ body.v66-revisados button:focus-visible{outline:3px solid rgba(242,140,0,.28)!im
   const renderOperationsPresentation=operations;
   operations=function(){renderOperationsPresentation();addWhatsappSummary()}
   function render(){if(!data)return;const p=perms();if(tab==='operations'&&!p.operations)tab='dashboard';if(tab==='monthly'&&!p.monthly)tab='dashboard';if(tab==='daily'&&!p.daily)tab='dashboard';if(tab==='history'&&!p.history)tab='dashboard';if(tab==='stats'&&!p.stats)tab='dashboard';if(tab==='boletas'&&!p.boletas)tab='dashboard';if(tab==='cupos'&&!p.cupos)tab='dashboard';if(tab==='dashboard')dashboard();else if(tab==='operations')operations();else if(tab==='monthly')monthly();else if(tab==='daily')daily();else if(tab==='history')history();else if(tab==='stats')stats();else if(tab==='boletas')boletas();else if(tab==='cupos')cupos();else dashboard()}
-  window.v60OpenRevisados=async function(){const app=appEl();if(!app)return;tab='dashboard';preset={};document.body.classList.remove('v60-revisados');document.body.classList.add('v66-revisados');const userKey=String((typeof state!=='undefined'&&state?.profile?.id)||'')+'|'+N((typeof state!=='undefined'&&state?.profile?.rol)||'');if(data&&cacheUserKey===userKey&&(Date.now()-dataLoadedAt)<120000){shell();render();return}if(cacheUserKey!==userKey){data=null;incidents=[];incidentTypes=[];cacheUserKey=userKey;dataLoadedAt=0}app.innerHTML='<div style="padding:30px;font-family:Inter,system-ui">Cargando Revisados...</div>';try{await load(false);shell();render()}catch(e){document.body.classList.remove('v66-revisados');app.innerHTML=`<div class="wrap"><div class="alert">Revisados: ${E(e.message||e)}</div><button onclick="window.v36PortalHome&&window.v36PortalHome()">Volver</button></div>`}}
+  window.v60OpenRevisados=async function(){
+    const app=appEl();if(!app)return;tab='dashboard';preset={};
+    document.body.classList.remove('v60-revisados');document.body.classList.add('v66-revisados');
+    const userKey=revisadosKey(),fresh=data&&cacheUserKey===userKey&&Date.now()-dataLoadedAt<120000;
+    if(fresh){shell();render();return}
+    data=null;incidents=[];incidentTypes=[];dataLoadedAt=0;
+    shell();const root=$('.v66-app');$('#v66Body').innerHTML='<div class="v66-card" role="status">Cargando Revisados...</div>';
+    try{await load(false);if(!root.isConnected)return;shell();render()}
+    catch(e){if(root.isConnected)$('#v66Body').innerHTML=`<div class="alert">Revisados: ${E(e.message||e)}. Usa Actualizar vista para reintentar.</div>`}
+  };
+
 })();
 </script>
 <!-- V66 UX BRUTAL END -->
@@ -4190,7 +4225,7 @@ body.v70-admin{margin:0;background:#eef3f8!important;color:#17233d}.v70-admin-ap
     window.phase6OpenUnit=function(r){oldOpen(r);const m=document.querySelector('#ca6UnitModal');if(!m||m.querySelector('.v74-control-edit'))return;const canColor=role()==='ADMIN_TOTAL'||has('control_auto.editar_color'),canCupo=role()==='ADMIN_TOTAL'||has('control_auto.editar_cupo');if(!canColor&&!canCupo)return;const anchor=m.querySelector('.ca6-ena-card'),box=document.createElement('section');box.className='v74-control-edit';box.innerHTML=`<h3>Editar Control de Auto</h3><div class="muted">Cambios auditados. eCarcheck sigue siendo la fuente oficial del color y ATTT/cupos la fuente de asignación de cupo.</div><div class="v74-edit-grid">${canColor?`<div class="field"><label>Color</label><input id="v74EditColor" value="${esc(r.color||'')}" placeholder="Color"></div>`:''}${canCupo?`<div class="field"><label>Cupo</label><input id="v74EditCupo" value="${esc(r.placa_comercial||'')}" placeholder="Ej. 8T12345 o Sin cupo"></div>`:''}</div><div class="v74-edit-actions">${canColor?'<button class="soft-btn" id="v74SaveColor">Guardar color</button>':''}${canCupo?'<button class="soft-btn" id="v74SaveCupo">Guardar cupo</button>':''}</div><div class="v74-edit-msg" id="v74EditMsg"></div>`;anchor?.parentNode.insertBefore(box,anchor);const msg=box.querySelector('#v74EditMsg');async function save(action,val,btn){if(!val&&action==='COLOR')return;btn.disabled=true;btn.textContent='Guardando...';try{const {data}=await req('/functions/v1/control-auto-editar',{method:'POST',body:JSON.stringify({action,unidad:r.unidad,valor:val})});if(!data?.ok)throw Error(data?.error||'No se pudo guardar');msg.innerHTML=`<div class="success">${action==='COLOR'?'Color':'Cupo'} actualizado y auditado.</div>`;setTimeout(()=>{m.style.display='none';document.querySelector('#ca6Go')?.click()},400)}catch(e){msg.innerHTML=`<div class="alert">${esc(e.message||e)}</div>`;btn.disabled=false;btn.textContent=action==='COLOR'?'Guardar color':'Guardar cupo'}}const bc=box.querySelector('#v74SaveColor');if(bc)bc.onclick=()=>save('COLOR',String(box.querySelector('#v74EditColor').value||'').trim(),bc);const bp=box.querySelector('#v74SaveCupo');if(bp)bp.onclick=()=>save('CUPO',String(box.querySelector('#v74EditCupo').value||'').trim(),bp)};
     try{phase6OpenUnit=window.phase6OpenUnit}catch(_){ }
   }
-  window.rymPrefetchRevisados=function(){try{if(!(typeof rymHasModule==='function'&&rymHasModule('portal.revisados')))return;const key=String(state?.profile?.id||'')+'|'+String(state?.profile?.rol||'').trim().toUpperCase();if(!key||key==='|')return;const cur=window.__rymRevisadosPrefetch;if(cur&&cur.key===key&&(cur.promise||cur.data)&&Date.now()-(cur.at||Date.now())<120000)return;const holder={key,at:Date.now(),data:null,promise:null};holder.promise=req('/functions/v1/revisados-final',{method:'POST',body:'{}'}).then(r=>{if(r.data?.ok){holder.data=r.data;holder.at=Date.now();return r.data}throw Error(r.data?.error||'prefetch_failed')}).catch(()=>null).finally(()=>{holder.promise=null});window.__rymRevisadosPrefetch=holder}catch(_){}};
+  window.rymPrefetchRevisados=function(){try{if(!(typeof rymHasModule==='function'&&rymHasModule('portal.revisados')))return;const key=String(state?.sessionVersion||0)+'|'+String(state?.profile?.id||'')+'|'+String(state?.profile?.rol||'').trim().toUpperCase();if(!state?.profile?.id)return;const cur=window.__rymRevisadosPrefetch;if(cur&&cur.key===key&&(cur.promise||cur.data)&&Date.now()-(cur.at||Date.now())<120000)return;const holder={key,at:Date.now(),data:null,promise:null};holder.promise=req('/functions/v1/revisados-final',{method:'POST',body:'{}'}).then(r=>{if(r.data?.ok){holder.data=r.data;holder.at=Date.now();return r.data}throw Error(r.data?.error||'prefetch_failed')}).catch(()=>null).finally(()=>{holder.promise=null});window.__rymRevisadosPrefetch=holder}catch(_){}};
   const oldHome=window.v36PortalHome;if(typeof oldHome==='function'){window.v36PortalHome=function(){const r=oldHome.apply(this,arguments);setTimeout(()=>window.rymPrefetchRevisados?.(),250);return r};try{v36PortalHome=window.v36PortalHome}catch(_){}}
   document.addEventListener('DOMContentLoaded',()=>{document.querySelector('#v36PortalHomeBtn')?.remove()});
 })();
@@ -5208,7 +5243,7 @@ body.v66-revisados .v66-history-head,body.v66-revisados .v66-history-row{grid-te
   ].includes(String(p||''));
 
   req=async function(path,opt={}){
-    if(window.__RYM_HOME_PRIMARY_LOADING&&homeGate&&secondaryPath(path)){
+    if(document.body.classList.contains('v99-home')&&window.__RYM_HOME_PRIMARY_LOADING&&homeGate&&secondaryPath(path)){
       try{await Promise.race([homeGate,new Promise(r=>setTimeout(r,6000))])}catch(_){}
     }
     return reqBase(path,opt);
@@ -5823,7 +5858,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',fix,{once:true
   /* Revisados: el consumo diario real incluye todo APROBADO operativo del taller 986, también terceros. */
   if(typeof req==='function'&&!window.__v96ReqWrapped){
     const old=req;window.__v96ReqWrapped=true;
-    req=async function(path,opt={}){const z=await old(path,opt);if(path==='/functions/v1/revisados-final'&&z?.data?.ok&&isAdmin()){try{const d=await rpc('revisados_emitidos_hoy_v1');if(d)z.data.emitidos_hoy=d}catch(_){}}return z};
+    req=async function(path,opt={}){if(path!=='/functions/v1/revisados-final'||!isAdmin())return old(path,opt);const emitted=old('/rest/v1/rpc/revisados_emitidos_hoy_v1',{method:'POST',body:'{}',signal:opt.signal}).then(r=>r.data).catch(()=>null);const [z,d]=await Promise.all([old(path,opt),emitted]);if(z?.data?.ok&&d)z.data.emitidos_hoy=d;return z};
   }
 
   /* Control de Auto: ficha histórica local + situación oficial eCarCheck en dos bloques separados. */
@@ -6765,7 +6800,7 @@ body.v113-gps .v113-gps-top,.v113-gps-top{background:linear-gradient(105deg,#173
   const clearProjectClasses=()=>document.body.classList.remove('v117-panapass','v117-revisados','v117-control','v117-gps');
   const wrap=(name,cls)=>{
     const old=window[name];if(typeof old!=='function'||old.__v117)return;
-    const fn=async function(){clearProjectClasses();document.body.classList.add(cls);const r=await old.apply(this,arguments);clearProjectClasses();document.body.classList.add(cls);return r};fn.__v117=true;window[name]=fn;
+    const fn=async function(){clearProjectClasses();document.body.classList.add(cls);const r=await old.apply(this,arguments);if((cls==='v117-revisados'&&document.querySelector('.v66-app'))||(cls==='v117-panapass'&&document.querySelector('.shell')&&!document.body.classList.contains('v66-revisados'))||(!['v117-revisados','v117-panapass'].includes(cls))){clearProjectClasses();document.body.classList.add(cls)}return r};fn.__v117=true;window[name]=fn;
     try{if(name==='v70OpenPanapass')v70OpenPanapass=fn;if(name==='v60OpenRevisados')v60OpenRevisados=fn;if(name==='v70OpenControl')v70OpenControl=fn;if(name==='v113OpenGps')v113OpenGps=fn}catch(_){ }
   };
   wrap('v70OpenPanapass','v117-panapass');wrap('v60OpenRevisados','v117-revisados');wrap('v70OpenControl','v117-control');wrap('v113OpenGps','v117-gps');
@@ -8323,7 +8358,7 @@ body.v157-gps .v160-matrix td b{color:inherit!important;font-size:14px}
   const recent = new Map();
 
   function userKey(){
-    try{return String((window.state && state.profile && (state.profile.id || state.profile.usuario || state.profile.email)) || 'anon');}
+    try{return String(state?.sessionVersion||0)+'|'+String(state?.profile?.id||'anon')+'|'+String(state?.profile?.rol||'');}
     catch(_){return 'anon';}
   }
   function bodyKey(opt){
@@ -8358,10 +8393,10 @@ body.v157-gps .v160-matrix td b{color:inherit!important;font-size:14px}
       const now=Date.now();
       const ttl=isHome() ? (homeTtl[p]||0) : 0;
       const saved=recent.get(key);
-      if(ttl && saved && (now-saved.at)<ttl) return saved.value;
+      if(!opt.rymForce && ttl && saved && (now-saved.at)<ttl) return saved.value;
       if(inflight.has(key)) return inflight.get(key);
       const job=Promise.resolve()
-        .then(()=>reqBase(path,opt))
+        .then(()=>p==='/functions/v1/revisados-final'?window.rymProjectRead(signal=>reqBase(path,{...opt,signal})):reqBase(path,opt))
         .then(z=>{
           shareResult(p,z);
           if(isHome() && ttl && z && z.data && z.data.ok!==false){
