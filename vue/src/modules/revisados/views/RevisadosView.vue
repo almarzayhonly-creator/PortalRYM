@@ -575,7 +575,7 @@ function boletaWhatsAppText(){
   section('*INCIDENCIAS SIN BOLETA CORPORATIVA CONFIRMADA*',plates)
   section('*CONSULTAS INCOMPLETAS*',errors)
   lines.push('','Nota: colisión, fuga y boleta de placa no prueban deuda de empresa. ENA se reporta aparte.')
-  return lines.join('\\n')
+  return lines.join('\n')
 }
 async function copyBoletasWhatsApp(){
   const t=boletaWhatsAppText()
