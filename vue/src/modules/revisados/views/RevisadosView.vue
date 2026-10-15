@@ -44,7 +44,7 @@ const boletaCompanyRows=computed<Array<Record<string,any>>>(()=>boletaCompanies.
   return rank(String(a.status))-rank(String(b.status))||String(a.empresa||'').localeCompare(String(b.empresa||''),'es')
 }))
 const filteredBoletaCompanies=computed(()=>boletaCompanyRows.value.filter(g=>boletaFilter.value==='TODAS'||g.status===boletaFilter.value))
-const boletaPositiveCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='CON RESTRICCIÓN'||g.status==='INCIDENCIA EN PLACA').length)
+const boletaPositiveCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='CON RESTRICCIÓN').length)
 const boletaCleanCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='SIN RESTRICCIÓN').length)
 const boletaErrorCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status==='ERROR').length)
 const boletaCheckedCompanies=computed(()=>boletaCompanyRows.value.filter(g=>g.status!=='PENDIENTE').length)
@@ -423,17 +423,24 @@ function boletaPlateCounts(g:Record<string,any>){
 function boletaCompanyStatus(g:Record<string,any>){
   const checks=Array.isArray(g.checks)?g.checks:[]
   if(!checks.length)return 'PENDIENTE'
-  if(checks.some((x:Record<string,any>)=>Number(x.documento||0)>0||Number(x.ena||0)>0))return 'CON RESTRICCIÓN'
-  if(checks.some((x:Record<string,any>)=>boletaPlateStatus(x)==='INCIDENCIA'))return 'INCIDENCIA EN PLACA'
+  // Three independently verified sample plates reporting a DOCUMENT debt
+  // are required to flag the company red. Plate restrictions and ENA are separate.
+  const all3=checks.length===3&&checks.every((x:Record<string,any>)=>!x.error_code&&['OK','BLOQUEADO'].includes(String(x.estado||'').toUpperCase())&&Number(x.documento||0)>0)
+  if(all3)return 'CON RESTRICCIÓN'
   if(checks.some((x:Record<string,any>)=>boletaPlateStatus(x)==='SIN VALIDAR'))return 'ERROR'
+  if(checks.some((x:Record<string,any>)=>boletaPlateStatus(x)==='INCIDENCIA'))return 'INCIDENCIA EN PLACA'
   return 'SIN RESTRICCIÓN'
 }
 function boletaCompanyRestriction(g:Record<string,any>){
+  const checks=Array.isArray(g.checks)?g.checks:[]
   const c=boletaPlateCounts(g)
   if(!c.total)return 'Pendiente de consulta'
-  const corporate=(Array.isArray(g.checks)?g.checks:[]).some((x:Record<string,any>)=>Number(x.documento||0)>0||Number(x.ena||0)>0)
-  return [corporate?'Señal corporativa por documento/ENA':'Sin boleta corporativa detectada en la muestra',
-    `${c.incidencia}/${c.total} placas con incidencia`,`${c.limpias}/${c.total} limpias`,
+  const documents=checks.filter((x:Record<string,any>)=>Number(x.documento||0)>0).length
+  const ena=checks.filter((x:Record<string,any>)=>Number(x.ena||0)>0).length
+  const company=boletaCompanyStatus(g)==='CON RESTRICCIÓN'
+  return [company?'Boleta empresa confirmada (3/3 documento)':documents?`Documento: ${documents}/3 · sin confirmación corporativa`:'Sin boleta de empresa confirmada',
+    ...(ena?[`ENA: ${ena} placa(s) con señal`]:[]),
+    `${c.incidencia}/${c.total} con incidencia`,`${c.limpias}/${c.total} limpias`,
     ...(c.sinValidar?[`${c.sinValidar} sin verificar`]:[])].join(' · ')
 }
 function boletaCheckSummary(x:Record<string,any>){
@@ -538,29 +545,37 @@ function boletaCheckResult(x:Record<string,any>){
 }
 function boletaWhatsAppText(){
   const rows=boletaCompanyRows.value
-  const restricted=rows.filter(g=>g.status==='CON RESTRICCIÓN'||g.status==='INCIDENCIA EN PLACA')
-  const checked=boletaCheckedCompanies.value
-  const lines=[
-    '*Boletas eCarCheck*',
-    `Consulta de empresas: ${checked}/${BOLETA_COMPANY_TARGET}`,
-    '',
-    `✅ Sin restricción: ${boletaCleanCompanies.value}`,
-    `⚠️ Con restricción: ${boletaPositiveCompanies.value}`
-  ]
-  if(boletaErrorCompanies.value)lines.push(`❗ Con error de consulta: ${boletaErrorCompanies.value}`)
-  lines.push('')
-  if(restricted.length){
-    lines.push('*Empresas con restricción:*')
-    for(const g of restricted){
-      const plates=(Array.isArray(g.checks)?g.checks:[]).map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean)
-      lines.push(`• ${g.empresa||'Empresa'} — ${g.restriction}${plates.length?' · '+plates.join(', '):''}`)
+  const corporate=rows.filter(g=>g.status==='CON RESTRICCIÓN')
+  const plates=rows.filter(g=>g.status==='INCIDENCIA EN PLACA')
+  const errors=rows.filter(g=>g.status==='ERROR')
+  const clean=rows.filter(g=>g.status==='SIN RESTRICCIÓN')
+  const lines=['*AUDITORÍA ECARCHECK · BOLETAS*',
+    `Empresas consultadas: ${rows.filter(g=>g.status!=='PENDIENTE').length}/${BOLETA_COMPANY_TARGET}`,
+    `Placas recibidas: ${rows.reduce((n,g)=>n+(g.checks?.length||0),0)}/${BOLETA_CHECK_TARGET}`, '',
+    `🔴 Boleta corporativa confirmada (3/3): ${corporate.length}`,
+    `🟠 Solo incidencias / señales por placa: ${plates.length}`,
+    `🟢 Sin incidencias detectadas: ${clean.length}`,
+    `⚪ Consulta incompleta: ${errors.length}`]
+  const section=(name:string,arr:Record<string,any>[])=>{
+    if(!arr.length)return
+    lines.push('',name)
+    for(const g of arr){
+      const checks=Array.isArray(g.checks)?g.checks:[]
+      const list=checks.map((x:Record<string,any>)=>{
+        const mark=boletaPlateStatus(x)==='LIMPIA'?'✅':boletaPlateStatus(x)==='INCIDENCIA'?'⚠️':'❔'
+        return `${mark}${x.placa||'—'}`
+      }).join(' · ')
+      const ena=checks.filter((x:Record<string,any>)=>Number(x.ena||0)>0).length
+      const doc=checks.filter((x:Record<string,any>)=>Number(x.documento||0)>0).length
+      lines.push(`• ${g.empresa||'Empresa'} (${g.galera||'—'}): ${list}`)
+      if(doc||ena)lines.push(`  Documento: ${doc}/3 · ENA: ${ena}/3 (rubro separado)`)
     }
-  }else if(rows.length){
-    lines.push('✅ No se detectaron restricciones en las empresas consultadas.')
-  }else{
-    lines.push('Aún no se ha ejecutado la consulta.')
   }
-  return lines.join('\n')
+  section('*BOLETA CORPORATIVA CONFIRMADA*',corporate)
+  section('*INCIDENCIAS SIN BOLETA CORPORATIVA CONFIRMADA*',plates)
+  section('*CONSULTAS INCOMPLETAS*',errors)
+  lines.push('','Nota: colisión, fuga y boleta de placa no prueban deuda de empresa. ENA se reporta aparte.')
+  return lines.join('\\n')
 }
 async function copyBoletasWhatsApp(){
   const t=boletaWhatsAppText()
