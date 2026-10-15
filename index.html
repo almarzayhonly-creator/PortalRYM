@@ -7672,32 +7672,33 @@ body.v99-home .v99-module .v99-mini-kpis.v126-three{grid-template-columns:repeat
       document.body.classList.remove('capture-mode','v36-admin-total','v37-control-only','v38-revisados-only','v60-revisados','v63-revisados','v66-revisados','v70-control','v70-admin','v70-portal','v117-panapass','v117-revisados','v117-control','v117-gps','v113-gps');
       document.body.classList.add('v99-home','v117-home');
 
-      let c=window.__v117HomeSummary;
-      if(!c?.data)c=readPersisted();
-      if(c?.data){
-        mergeModules(c.data.modules);
-        if(c.data.profile)state.profile={...(state.profile||{}),...c.data.profile};
+      const c=window.__v117HomeSummary;
+      if(c?.data&&Date.now()-c.at<90000){
         renderHome139(c.data);
-        window.__v117HomeSummary={data:c.data,at:Date.now()};
       }else{
-        ensureLayer();
+        // Navigation follows this session's authenticated grants, not persisted summaries.
+        const mods=Array.isArray(state.allModules)&&state.allModules.length?state.allModules:(state.modules||[]),has=m=>mods.includes(m);
+        renderHome139({profile:state.profile,modules:mods,panapass:has('portal.panapass')||['dashboard','negativos_hoy','pagos_hoy','ranking'].some(has)?{}:null,revisados:has('portal.revisados')?{}:null,control:has('portal.control_auto')||has('control_auto.unidades')?{}:null,alerts:[]});
+        document.querySelectorAll('.v99-mini b,.v99-kpi strong').forEach(x=>x.textContent='—');
+        const updated=document.querySelector('.v101-updated b');if(updated)updated.textContent='Actualizando resumen...';
+        const alerts=document.querySelector('.v99-alerts');if(alerts)alerts.innerHTML='<div class="v99-empty">Consultando prioridades actuales...</div>';
       }
+      // The summary updates independently; a slow service must not cover project links.
+      (async()=>{
+        try{
+          const response=await req('/functions/v1/portal-home-resumen',{method:'POST',body:'{}'}),data=response?.data;
+          if(!data?.ok)throw Error(data?.error||'No se pudo cargar el Centro de Control');
+          mergeModules(data.modules);
+          if(data.profile)state.profile={...(state.profile||{}),...data.profile};
+          window.__v117HomeSummary={data,at:Date.now()};writePersisted(data);renderHome139(data);
+        }catch(e){
+          if(!document.body.classList.contains('v99-home'))return;
+          const box=document.querySelector('.v101-content');
+          if(box){box.querySelector('#v139SummaryStatus')?.remove();box.insertAdjacentHTML('afterbegin','<div class="alert" id="v139SummaryStatus">No se pudo actualizar el resumen actual. <button id="v139RetrySummary">Reintentar</button></div>');box.querySelector('#v139RetrySummary').onclick=()=>window.v36PortalHome()}
+          const updated=document.querySelector('.v101-updated b');if(updated)updated.textContent='Resumen sin actualizar';
+        }finally{document.querySelector('#v139HomeTransition')?.remove()}
+      })();
 
-      // Refresco en paralelo; no volver a pintar un home parcial.
-      try{
-        const response=await req('/functions/v1/portal-home-resumen',{method:'POST',body:'{}'});
-        const data=response?.data;
-        if(!data?.ok)throw Error(data?.error||'No se pudo cargar el Centro de Control');
-        mergeModules(data.modules);
-        if(data.profile)state.profile={...(state.profile||{}),...data.profile};
-        window.__v117HomeSummary={data,at:Date.now()};writePersisted(data);
-        renderHome139(data);
-      }catch(e){
-        console.warn('V139 home refresh',e);
-        if(!c?.data)return oldHome.apply(this,arguments);
-      }finally{
-        document.querySelector('#v139HomeTransition')?.remove();
-      }
     };
     stableHome.__v139=true;
     window.v36PortalHome=stableHome;try{v36PortalHome=stableHome}catch(_){}
@@ -8429,7 +8430,7 @@ body.v157-gps .v160-matrix td b{color:inherit!important;font-size:14px}
       if(!opt.rymForce && ttl && saved && (now-saved.at)<ttl) return saved.value;
       if(inflight.has(key)) return inflight.get(key);
       const job=Promise.resolve()
-        .then(()=>p==='/functions/v1/revisados-final'?window.rymProjectRead(signal=>reqBase(path,{...opt,signal})):reqBase(path,opt))
+        .then(()=>['/functions/v1/revisados-final','/functions/v1/portal-home-resumen'].includes(p)?window.rymProjectRead(signal=>reqBase(path,{...opt,signal})):reqBase(path,opt))
         .then(z=>{
           shareResult(p,z);
           if(isHome() && ttl && z && z.data && z.data.ok!==false){

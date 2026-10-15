@@ -92,6 +92,22 @@ async function setup(browser,old=false){
     assert.equal(await t.page.locator('[data-v66-tab="operations"]').count(),0);
     assert.equal(await t.page.locator('[data-v66-tab="history"]').count(),0);
     assert.deepEqual(t.errors,[]);await t.page.close();
+    const home=await setup(browser);
+    await home.page.route('**/functions/v1/auth-username',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true,access_token:'qa',profile,modules:['dashboard','portal.revisados','portal.panapass']})}));
+    await home.page.route('**/functions/v1/portal-home-resumen',async route=>{
+      await new Promise(r=>setTimeout(r,700));
+      await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,error:'QA resumen no disponible'})});
+    });
+    await home.page.locator('input[name="usuario"]').fill('qa');
+    await home.page.locator('input[name="password"]').fill('qa');
+    await home.page.locator('#loginBtn').click();
+    await home.page.waitForSelector('#v99Rev');
+    await home.page.waitForSelector('#v145LoginTransition',{state:'detached'});
+    assert.equal(await home.page.locator('#v99Rev').count(),1);
+    assert.equal(await home.page.locator('#v99Pan').count(),1);
+    assert.equal(await home.page.locator('#v139HomeTransition,#v145LoginTransition').count(),0);
+    await home.page.waitForSelector('#v139RetrySummary');
+    assert.deepEqual(home.errors,[]);await home.page.close();
     console.log(JSON.stringify({isolatedRequests:metrics,checks:'navigation, cache scope, refresh, operations, permissions, failure/retry, timeout/abort, console: OK'},null,2));
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
