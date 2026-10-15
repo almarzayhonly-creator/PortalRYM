@@ -432,16 +432,12 @@ function boletaCompanyStatus(g:Record<string,any>){
   return 'SIN RESTRICCIÓN'
 }
 function boletaCompanyRestriction(g:Record<string,any>){
-  const checks=Array.isArray(g.checks)?g.checks:[]
   const c=boletaPlateCounts(g)
-  if(!c.total)return 'Pendiente de consulta'
-  const documents=checks.filter((x:Record<string,any>)=>Number(x.documento||0)>0).length
-  const ena=checks.filter((x:Record<string,any>)=>Number(x.ena||0)>0).length
-  const company=boletaCompanyStatus(g)==='CON RESTRICCIÓN'
-  return [company?'Boleta empresa confirmada (3/3 documento)':documents?`Documento: ${documents}/3 · sin confirmación corporativa`:'Sin boleta de empresa confirmada',
-    ...(ena?[`ENA: ${ena} placa(s) con señal`]:[]),
-    `${c.incidencia}/${c.total} con incidencia`,`${c.limpias}/${c.total} limpias`,
-    ...(c.sinValidar?[`${c.sinValidar} sin verificar`]:[])].join(' · ')
+  if(!c.total)return 'Pendiente'
+  if(boletaCompanyStatus(g)==='CON RESTRICCIÓN')return 'Boleta de empresa confirmada'
+  if(boletaCompanyStatus(g)==='ERROR')return 'Consulta incompleta'
+  if(boletaCompanyStatus(g)==='INCIDENCIA EN PLACA')return `${c.incidencia} de ${c.total} placas con incidencia`
+  return 'Sin novedades en la muestra'
 }
 function boletaCheckSummary(x:Record<string,any>){
   const labels:string[]=[]
@@ -547,34 +543,30 @@ function boletaWhatsAppText(){
   const rows=boletaCompanyRows.value
   const corporate=rows.filter(g=>g.status==='CON RESTRICCIÓN')
   const plates=rows.filter(g=>g.status==='INCIDENCIA EN PLACA')
-  const errors=rows.filter(g=>g.status==='ERROR')
+  const incomplete=rows.filter(g=>g.status==='ERROR')
   const clean=rows.filter(g=>g.status==='SIN RESTRICCIÓN')
-  const lines=['*AUDITORÍA ECARCHECK · BOLETAS*',
-    `Empresas consultadas: ${rows.filter(g=>g.status!=='PENDIENTE').length}/${BOLETA_COMPANY_TARGET}`,
-    `Placas recibidas: ${rows.reduce((n,g)=>n+(g.checks?.length||0),0)}/${BOLETA_CHECK_TARGET}`, '',
-    `🔴 Boleta corporativa confirmada (3/3): ${corporate.length}`,
-    `🟠 Solo incidencias / señales por placa: ${plates.length}`,
-    `🟢 Sin incidencias detectadas: ${clean.length}`,
-    `⚪ Consulta incompleta: ${errors.length}`]
-  const section=(name:string,arr:Record<string,any>[])=>{
-    if(!arr.length)return
-    lines.push('',name)
-    for(const g of arr){
+  const lines=['*BOLETAS · ECARCHECK*',
+    `${rows.filter(g=>g.status!=='PENDIENTE').length}/${BOLETA_COMPANY_TARGET} empresas consultadas`, '',
+    `🔴 Boleta empresa: ${corporate.length}`,
+    `🟠 Incidencias de placas: ${plates.length}`,
+    `✅ Sin novedades: ${clean.length}`]
+  if(incomplete.length)lines.push(`⚪ Sin verificar: ${incomplete.length}`)
+  const add=(title:string,items:Record<string,any>[])=>{
+    if(!items.length)return
+    lines.push('',title)
+    for(const g of items){
       const checks=Array.isArray(g.checks)?g.checks:[]
-      const list=checks.map((x:Record<string,any>)=>{
-        const mark=boletaPlateStatus(x)==='LIMPIA'?'✅':boletaPlateStatus(x)==='INCIDENCIA'?'⚠️':'❔'
-        return `${mark}${x.placa||'—'}`
-      }).join(' · ')
-      const ena=checks.filter((x:Record<string,any>)=>Number(x.ena||0)>0).length
-      const doc=checks.filter((x:Record<string,any>)=>Number(x.documento||0)>0).length
-      lines.push(`• ${g.empresa||'Empresa'} (${g.galera||'—'}): ${list}`)
-      if(doc||ena)lines.push(`  Documento: ${doc}/3 · ENA: ${ena}/3 (rubro separado)`)
+      const affected=checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='INCIDENCIA').map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean)
+      const pending=checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='SIN VALIDAR').map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean)
+      const signals=checks.some((x:Record<string,any>)=>Number(x.ena||0)>0)
+      lines.push(`• ${g.empresa||'Empresa'} (${g.galera||'—'})${affected.length?' · '+affected.join(', '):''}`)
+      if(signals)lines.push('  ENA: incidencia reportada (rubro separado)')
+      if(pending.length)lines.push(`  Sin verificar: ${pending.join(', ')}`)
     }
   }
-  section('*BOLETA CORPORATIVA CONFIRMADA*',corporate)
-  section('*INCIDENCIAS SIN BOLETA CORPORATIVA CONFIRMADA*',plates)
-  section('*CONSULTAS INCOMPLETAS*',errors)
-  lines.push('','Nota: colisión, fuga y boleta de placa no prueban deuda de empresa. ENA se reporta aparte.')
+  add('*BOLETA DE EMPRESA*',corporate)
+  add('*INCIDENCIAS DE PLACAS*',plates)
+  add('*CONSULTAS INCOMPLETAS*',incomplete)
   return lines.join('\n')
 }
 async function copyBoletasWhatsApp(){
@@ -1131,11 +1123,11 @@ onMounted(()=>load())
           </article>
           <article data-tone="bad">
             <span class="rv-company-summary-icon red"><RymIcon name="warning" :size="20"/></span>
-            <div><small>CON RESTRICCIÓN</small><b>{{num(boletaPositiveCompanies)}}</b><em>requieren atención</em></div>
+            <div><small>BOLETA EMPRESA</small><b>{{num(boletaPositiveCompanies)}}</b><em>requieren atención</em></div>
           </article>
           <article data-tone="good">
             <span class="rv-company-summary-icon green"><RymIcon name="verified" :size="20"/></span>
-            <div><small>SIN RESTRICCIÓN</small><b>{{num(boletaCleanCompanies)}}</b><em>sin novedades</em></div>
+            <div><small>SIN NOVEDADES</small><b>{{num(boletaCleanCompanies)}}</b><em>sin novedades</em></div>
           </article>
         </section>
 
@@ -1144,17 +1136,17 @@ onMounted(()=>load())
             <div>
               <span>RESULTADO POR EMPRESA</span>
               <h3>{{boletaCompanies.length?'Empresas consultadas':'Aún no se ha ejecutado la consulta'}}</h3>
-              <p>{{boletaCompanies.length?'Primero aparecen las empresas con restricción. Cada fila muestra las placas, modelos y el resultado general; ábrela para ver el resultado de cada placa.':'Presiona “Consultar 16 empresas” para validar dos placas activas por empresa.'}}</p>
+              <p>{{boletaCompanies.length?'Primero las boletas de empresa. Las incidencias de placas y ENA se identifican por separado.':'Consulta hasta tres placas por empresa para comprobar boletas y otras incidencias.'}}</p>
             </div>
             <div v-if="boletaCompanies.length" class="rv-company-segments">
               <button :class="{active:boletaFilter==='TODAS'}" @click="boletaFilter='TODAS'">Todas {{boletaCompanies.length}}</button>
-              <button :class="{active:boletaFilter==='CON RESTRICCIÓN'}" @click="boletaFilter='CON RESTRICCIÓN'">Con restricción {{boletaPositiveCompanies}}</button>
+              <button :class="{active:boletaFilter==='CON RESTRICCIÓN'}" @click="boletaFilter='CON RESTRICCIÓN'">Boleta empresa {{boletaPositiveCompanies}}</button>
               <button :class="{active:boletaFilter==='SIN RESTRICCIÓN'}" @click="boletaFilter='SIN RESTRICCIÓN'">Sin restricción {{boletaCleanCompanies}}</button>
             </div>
           </header>
 
           <div v-if="boletaCompanies.length" class="rv-company-table-head" aria-hidden="true">
-            <span>Empresa</span><span>Galera</span><span>Placas consultadas</span><span>Modelos</span><span>Resultado eCarCheck</span><span>Estado</span><span></span>
+            <span>Empresa</span><span>Galera</span><span>Placas</span><span>Resultado</span><span>Estado</span><span></span>
           </div>
 
           <div v-if="boletaCompanies.length" class="rv-company-list">
@@ -1166,7 +1158,7 @@ onMounted(()=>load())
                 </div>
                 <span class="rv-company-galera">{{g.galera||'Sin galera'}}</span>
                 <div class="rv-company-plates"><span v-for="(check,idx) in (g.checks||[])" :key="'plate-'+String(check.placa||idx)">{{check.placa||'—'}}</span></div>
-                <div class="rv-company-models"><span v-for="(check,idx) in (g.checks||[])" :key="'model-'+String(check.placa||idx)">{{boletaCheckModel(check)}}</span></div>
+                
                 <span class="rv-company-restriction">{{g.restriction}}</span>
                 <span class="rv-company-status">{{g.status==='ERROR'?'CONSULTA INCOMPLETA':g.status}}</span>
                 <RymIcon class="rv-company-expand" name="expand_more" :size="20"/>
@@ -2500,4 +2492,13 @@ onMounted(()=>load())
 .rv-boletas-v2 .rv-company-row .rv-company-restriction{font-size:11px;line-height:1.55}
 @media(max-width:1100px){.rv-boletas-v2 .rv-company-detail{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.rv-boletas-v2 .rv-company-detail{grid-template-columns:1fr;padding:10px}.rv-boletas-v2 .rv-company-detail article{padding:13px}}
+
+/* Boletas: lectura sencilla del resultado por empresa. */
+.rv-boletas-v2 .rv-company-table-head,
+.rv-boletas-v2 .rv-company-row summary{grid-template-columns:minmax(190px,1.4fr) 85px minmax(160px,1fr) minmax(210px,1.15fr) auto 22px;gap:12px}
+.rv-boletas-v2 .rv-company-restriction{font-size:13px;font-weight:750;line-height:1.45}
+.rv-boletas-v2 .rv-company-name small{font-size:11px}
+.rv-boletas-v2 .rv-company-row[data-status="INCIDENCIA EN PLACA"] .rv-company-status{background:#FFF1D9;color:#865D12}
+@media(max-width:1050px){.rv-boletas-v2 .rv-company-table-head{display:none}.rv-boletas-v2 .rv-company-row summary{grid-template-columns:minmax(180px,1.2fr) minmax(150px,1fr) auto 22px}.rv-boletas-v2 .rv-company-galera,.rv-boletas-v2 .rv-company-plates{display:none}}
+@media(max-width:650px){.rv-boletas-v2 .rv-company-row summary{grid-template-columns:1fr auto 22px}.rv-boletas-v2 .rv-company-restriction{grid-column:1/-1}.rv-boletas-v2 .rv-company-detail{grid-template-columns:1fr}}
 </style>
