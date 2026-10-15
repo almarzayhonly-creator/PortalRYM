@@ -405,17 +405,32 @@ async function runSyncEcarcheck(){
   }
 }
 
-function boletaCompanyStatus(g:Record<string,any>){
+function boletaPlateStatus(x:Record<string,any>):'INCIDENCIA'|'LIMPIA'|'SIN VALIDAR'{
+  const estado=String(x.estado||'').toUpperCase()
+  if(x.error_code||['ERROR','SESION_REQUERIDA','CANCELADO'].includes(estado))return 'SIN VALIDAR'
+  if(Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0||x.bloqueo_title)return 'INCIDENCIA'
+  const result=String(boletaCheckResult(x)||'').trim().toUpperCase()
+  if(result&&!['OK','SIN RESTRICCIÓN REPORTADA','SIN RESTRICCION REPORTADA','SIN BOLETAS'].includes(result)&&!result.startsWith('SIN RESTRICCI'))return 'INCIDENCIA'
+  return estado==='OK'?'LIMPIA':'SIN VALIDAR'
+}
+function boletaPlateCounts(g:Record<string,any>){
   const checks=Array.isArray(g.checks)?g.checks:[]
-  if(!checks.length)return 'PENDIENTE'
-  const clas=String(g.clasificacion||'').trim().toUpperCase()
-  const hasRestriction=(clas&&clas!=='SIN BOLETAS')||checks.some((x:Record<string,any>)=>Number(x.ena||0)>0||Number(x.documento||0)>0||Number(x.placa_boleta||0)>0)
-  if(hasRestriction)return 'CON RESTRICCIÓN'
-  if(checks.some((x:Record<string,any>)=>Boolean(x.error_code)||['ERROR','SESION_REQUERIDA','CANCELADO'].includes(String(x.estado||'').toUpperCase())))return 'ERROR'
+  return {incidencia:checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='INCIDENCIA').length,
+    limpias:checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='LIMPIA').length,
+    sinValidar:checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='SIN VALIDAR').length,
+    total:checks.length}
+}
+function boletaCompanyStatus(g:Record<string,any>){
+  const c=boletaPlateCounts(g)
+  if(!c.total)return 'PENDIENTE'
+  if(c.incidencia>0)return 'CON RESTRICCIÓN'
+  if(c.sinValidar>0)return 'ERROR'
   return 'SIN RESTRICCIÓN'
 }
 function boletaCompanyRestriction(g:Record<string,any>){
   const status=boletaCompanyStatus(g)
+  const counts=boletaPlateCounts(g)
+  if(counts.total)return [`${counts.incidencia}/${counts.total} con incidencia`,`${counts.limpias}/${counts.total} limpias`,...(counts.sinValidar?[`${counts.sinValidar} sin verificar`]:[])].join(' · ')
   if(status==='SIN RESTRICCIÓN')return 'Sin restricción reportada'
   if(status==='ERROR')return 'Consulta incompleta · no se pudo validar'
   if(status==='PENDIENTE')return 'Pendiente de consulta'
@@ -1154,7 +1169,7 @@ onMounted(()=>load())
               <div class="rv-company-detail">
                 <article v-for="(check,idx) in (g.checks||[])" :key="String(check.placa||idx)">
                   <div class="rv-company-detail-identity">
-                    <small>PLACA {{Number(idx)+1}}</small>
+                    <small>PLACA {{Number(idx)+1}} · {{boletaPlateStatus(check)==='INCIDENCIA'?'CON INCIDENCIA':boletaPlateStatus(check)==='LIMPIA'?'LIMPIA':'SIN VERIFICAR'}}</small>
                     <strong>{{check.placa||'—'}}</strong>
                     <span v-if="check.unidad">Unidad {{check.unidad}}</span>
                   </div>
