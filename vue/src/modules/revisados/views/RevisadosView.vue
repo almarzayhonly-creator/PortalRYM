@@ -559,9 +559,11 @@ function boletaWhatsAppText(){
       const affected=checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='INCIDENCIA').map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean)
       const pending=checks.filter((x:Record<string,any>)=>boletaPlateStatus(x)==='SIN VALIDAR').map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean)
       const signals=checks.some((x:Record<string,any>)=>Number(x.ena||0)>0)
-      lines.push(`• ${g.empresa||'Empresa'} (${g.galera||'—'})${affected.length?' · '+affected.join(', '):''}`)
+      lines.push(`• *${g.empresa||'Empresa'}* (${g.galera||'—'})`)
+      lines.push(`  Placas: ${affected.length?affected.join(' · '):checks.map((x:Record<string,any>)=>String(x.placa||'')).filter(Boolean).join(' · ')||'Sin datos'}`)
       if(signals)lines.push('  ENA: incidencia reportada (rubro separado)')
-      if(pending.length)lines.push(`  Sin verificar: ${pending.join(', ')}`)
+      if(pending.length)lines.push(`  Sin verificar: ${pending.join(' · ')}`)
+      lines.push('')
     }
   }
   add('*BOLETA DE EMPRESA*',corporate)
