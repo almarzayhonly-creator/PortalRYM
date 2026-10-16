@@ -5431,6 +5431,19 @@ body.v66-revisados .v182-ficha-ecar-list small{color:#7e8998;font-size:7px;font-
 
 
 
+<style id="rym-v182-poliza-validator-visible-css">
+/* La póliza ocupa el segundo detalle: nunca ocultarla en móvil. */
+#v117CtlCard .v117-card-detail:nth-child(2){display:grid!important}
+#v117CtlCard .v117-card-detail{grid-template-columns:minmax(80px,0.85fr) minmax(0,1.15fr)!important;gap:8px!important}
+#v117CtlCard .v117-card-detail span{font-size:10px!important;line-height:1.35!important}
+#v117CtlCard .v117-card-detail b{font-size:11px!important;line-height:1.4!important;white-space:normal!important;overflow-wrap:anywhere!important;overflow:visible!important;text-overflow:clip!important}
+@media(max-width:520px){
+#v117CtlCard .v117-card-detail{grid-template-columns:minmax(0,1fr)!important;gap:2px!important}
+#v117CtlCard .v117-card-detail:nth-child(2){padding:8px!important;background:#eff6ff;border:1px solid #cee1f6;border-radius:9px}
+}
+</style>
+<!-- BUILD V182: políza NetSuite visible en validación responsive -->
+
 <style id="rym-profile-top-only">#rymLoveFab,#rymYhAlertBadge{display:none!important;visibility:hidden!important;pointer-events:none!important}</style>
 <script id="rym-aracelys-messages-inline">
 /* Portal RYM - Yhonly private profile + Aracelys welcome + ENA change alerts */
@@ -5823,19 +5836,6 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',fix,{once:true
 })(window,document);
 
 </script>
-
-<style id="rym-v182-poliza-validator-visible-css">
-/* La póliza ocupa el segundo detalle: nunca ocultarla en móvil. */
-#v117CtlCard .v117-card-detail:nth-child(2){display:grid!important}
-#v117CtlCard .v117-card-detail{grid-template-columns:minmax(80px,0.85fr) minmax(0,1.15fr)!important;gap:8px!important}
-#v117CtlCard .v117-card-detail span{font-size:10px!important;line-height:1.35!important}
-#v117CtlCard .v117-card-detail b{font-size:11px!important;line-height:1.4!important;white-space:normal!important;overflow-wrap:anywhere!important;overflow:visible!important;text-overflow:clip!important}
-@media(max-width:520px){
-#v117CtlCard .v117-card-detail{grid-template-columns:minmax(0,1fr)!important;gap:2px!important}
-#v117CtlCard .v117-card-detail:nth-child(2){padding:8px!important;background:#eff6ff;border:1px solid #cee1f6;border-radius:9px}
-}
-</style>
-<!-- BUILD V182: políza NetSuite visible en validación responsive -->
 </body>
 </html>
 <style id="rym-v95-transfer-manual-css">
