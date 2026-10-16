@@ -28,7 +28,7 @@ export default {
       const shellResponse = await env.ASSETS.fetch(shellRequest);
       const shellHeaders = new Headers(shellResponse.headers);
       shellHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
-      shellHeaders.set("x-portal-build", "unit-validator-shell-v23");
+      shellHeaders.set("x-portal-build", "unit-validator-shell-v24");
       shellHeaders.set("x-rym-app", "unit-validator");
       return new Response(shellResponse.body, {
         status: shellResponse.status,
@@ -43,7 +43,7 @@ export default {
     const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/core/validator-session.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-details.js", "/modules/control-auto/validator-tablet-app.js"].includes(url.pathname);
     if (validatorStatic) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
-      headers.set("x-portal-build", "unit-validator-shell-v23");
+      headers.set("x-portal-build", "unit-validator-shell-v24");
       if (url.pathname === "/validator-tablet-sw.js") headers.set("service-worker-allowed", "/");
     }
 
@@ -72,7 +72,7 @@ export default {
           body=body.replace('const revData=await loadRevisados99();','const revData=await loadRevisados99(ctrl.unidad);');
         }
         if(dedicated){
-          headers.set("x-portal-build", "unit-validator-shell-v23");
+          headers.set("x-portal-build", "unit-validator-shell-v24");
           body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
         }
         // The dedicated validator uses its own module permission for the GPS card.
@@ -91,7 +91,7 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=23"><script src="/modules/control-auto/validator-presentation.js?v=23" defer></script><script src="/modules/control-auto/validator-details.js?v=23" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=23" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=23" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=24"><script src="/modules/control-auto/validator-presentation.js?v=24" defer></script><script src="/modules/control-auto/validator-details.js?v=24" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=24" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=24" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       const extras=url.searchParams.get('validator-host')==='1'?'':owner+rankingOwner+negativosLastOwner+unitValidatorLauncher;

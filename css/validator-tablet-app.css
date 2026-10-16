@@ -7,7 +7,7 @@
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   color:var(--uva-text);background:var(--uva-bg);
 }
-:is(html.rym-unit-validator-app,html.rym-unit-validator-integrated) :is(.v101-validator,#v101CheckModal){font-family:Inter,"Segoe UI",Arial,sans-serif}
+:is(html.rym-unit-validator-app,html.rym-unit-validator-integrated) :is(.v101-validator,#v101CheckModal){font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:16px}
 .rym-validator-shell{margin:0;overflow:hidden}
 .rym-validator-shell *{box-sizing:border-box}
 .rym-validator-shell [hidden]{display:none}

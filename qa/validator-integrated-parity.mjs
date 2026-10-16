@@ -12,7 +12,7 @@ const server=http.createServer(async(req,res)=>{
   try{
     const response=await worker.fetch(new Request('http://127.0.0.1:4195'+req.url),{ASSETS:{fetch:async request=>{
       const u=new URL(request.url);
-      if(u.pathname==='/')return new Response(makeFixture(policy),{headers:{'content-type':'text/html; charset=utf-8'}});
+      if(u.pathname==='/')return new Response(u.searchParams.has('validator-host')?makeFixture(policy).replace('class="v99-home"',''):makeFixture(policy),{headers:{'content-type':'text/html; charset=utf-8'}});
       const file=u.pathname.slice(1),type=file.endsWith('.css')?'text/css':'text/javascript';
       return new Response(fs.readFileSync(file),{headers:{'content-type':type}});
     }}});
@@ -33,6 +33,7 @@ try{
       await page.setContent(makeFixture(policy).replace(/<script>[\s\S]*?<\/script>/g,''));
       const neighbors=await page.evaluate(()=>['.v101-side','.v99-grid'].map(q=>getComputedStyle(document.querySelector(q)).display));
       await page.goto('http://127.0.0.1:4195/'+(dedicated?'?validator-host=1':''));
+      const searchStyles=await page.locator('.v101-validator').evaluate(root=>[root,...root.querySelectorAll('*')].map(el=>{const s=getComputedStyle(el);return [el.tagName,el.className,s.display,s.color,s.backgroundColor,s.fontFamily,s.fontSize,s.fontWeight,s.borderRadius]}));
       await page.locator('#v101ValidatorQ').fill('P714');await page.locator('#v101ValidatorQ').press('Enter');
       await page.locator('#v101CheckModal[data-uva-enriched]').waitFor();
       await page.locator('#v117GpsCard:not(.pending)').waitFor();
@@ -48,6 +49,7 @@ try{
         styles:[...modal.querySelectorAll('*')].map(el=>{const s=getComputedStyle(el);return [el.tagName,el.className,s.display,s.color,s.backgroundColor,s.fontFamily,s.fontSize,s.fontWeight,s.gridTemplateColumns,s.borderRadius]}),
         calls:QA.calls.filter(x=>x.name||/gps-rym-validator|ena-consulta-saldo|revisados-ficha|revisados-validator/.test(x.url)).map(x=>x.name?{name:x.name,args:x.args}:{url:x.url}).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))
       }));
+      result.searchStyles=searchStyles;
       assert.equal(result.calls.filter(x=>x.name==='panapass_control_auto_v3'&&x.args.p_limit===10).length,1);
       if(!dedicated)assert.deepEqual(await page.evaluate(()=>['.v101-side','.v99-grid'].map(q=>getComputedStyle(document.querySelector(q)).display)),neighbors,'Portal neighbors changed');
       assert.deepEqual(errors,[]);
@@ -57,7 +59,7 @@ try{
       results.push(result);await context.close();
     }
     fs.writeFileSync('.sandbox/validator-qa/parity-debug.json',JSON.stringify(results));
-    for(const key of ['html','styles','calls']){
+    for(const key of ['html','styles','calls','searchStyles']){
       const a=JSON.stringify(results[0][key]),b=JSON.stringify(results[1][key]);
       if(a!==b){let i=0;while(a[i]===b[i])i++;throw Error(key+' differs at '+i+' dedicated='+a.slice(Math.max(0,i-80),i+160)+' integrated='+b.slice(Math.max(0,i-80),i+160))}
     }
