@@ -21,6 +21,18 @@ await new Promise(resolve=>server.listen(4192,'127.0.0.1',resolve));
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe'});
 try{
   const results=[];
+  // Reproduce the cached-child/deferred-parent race without extending any timeout.
+  {
+    const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage();
+    let release;const gate=new Promise(resolve=>release=resolve);
+    await context.route('https://**/*',route=>route.abort());
+    await page.route('**/modules/core/unit-validator-shell.js*',async route=>{await gate;await route.continue()});
+    await page.goto('http://127.0.0.1:4192/?app=validador-unidad',{waitUntil:'commit'});
+    await page.waitForFunction(()=>{const host=document.querySelector('#portal')?.contentWindow;return host?.RYM_UNIT_VALIDATOR&&host.document.readyState==='complete'});
+    release();await page.locator('#portal.ready').waitFor();
+    assert.equal(await page.locator('#loading').isVisible(),false);
+    await context.close();console.log('PASS cached child ready before deferred shell: immediate session synchronization.');
+  }
   for(const [name,role,extra,password,denied] of [
     ['Manuel Chavez','OPERATIVO',[],false,false],
     ['Yhonly Almarza','ADMIN_TOTAL',['portal.panapass','portal.revisados','gps.ver','admin.usuarios'],false,false],

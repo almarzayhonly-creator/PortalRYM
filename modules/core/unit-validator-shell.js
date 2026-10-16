@@ -47,6 +47,8 @@
   });
   frame.addEventListener('load',update);
   w.addEventListener('online',update);w.addEventListener('offline',update);
+  // A cached iframe may finish before this deferred shell script installs listeners.
+  update();
   d.getElementById('exit').addEventListener('click',()=>{
     frame.contentWindow?.RYM_UNIT_VALIDATOR?.logout();update();
   });
