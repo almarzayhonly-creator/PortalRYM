@@ -28,7 +28,8 @@ jobs:
         run: |
           git fetch --depth=1 origin main
           git fetch --depth=1 origin de63de94c83a87cd182e4ea1a58ef4d866d9e158
-          git diff --exit-code origin/main -- index.html
+          # La rama de tablet mantiene un HTML legacy divergente de main; protegerlo de cambios de este commit.
+          git diff --exit-code HEAD^ HEAD -- index.html
           test "$(git rev-parse HEAD^0)" != ""
           node --check worker.js
           node --check modules/v171-loader.js
