@@ -490,6 +490,7 @@
     const u=ficha?.unidad||{},o=ficha?.oficial||{};
     const raw=officialRaw(o);
     const control=sectionHtml('CONTROL DE AUTO · RYM',[
+      detailHtml('Póliza NetSuite',first(ctrl?.nro_poliza,u?.nro_poliza)||'Sin póliza registrada'),
       detailHtml('Cupo / placa comercial',ctrl?.placa_comercial||u?.placa_comercial),
       detailHtml('Marca',ctrl?.marca||u?.marca),
       detailHtml('Modelo',ctrl?.modelo||u?.modelo),
@@ -588,8 +589,13 @@
         presentModal(modal);
       };
       const seed=selectedMaster(id,modal);
-      const control=Promise.resolve(seed||rpcCall('panapass_control_auto_v2',{p_grupo:null,p_buscar:id.unit,p_limit:10})
-        .then(rows=>(rows||[]).find(row=>text(row.unidad).toUpperCase()===id.unit.toUpperCase())||{}).catch(()=>({})))
+      // Enriquecer la selección con la maestra actual v3: la v2 no devuelve nro_poliza.
+      // Si v3 no está disponible, mantener la ficha original sin inventar póliza.
+      const control=rpcCall('panapass_control_auto_v3',{p_grupo:null,p_buscar:id.unit,p_limit:10})
+        .then(rows=>{
+          const master=(rows||[]).find(row=>text(row.unidad).toUpperCase()===id.unit.toUpperCase());
+          return master?{...(seed||{}),...master}:(seed||{});
+        }).catch(()=>seed||{})
         .then(ctrl=>{
           if(current()){
             if(masterSource?.rows.includes(ctrl))masterSource.usedBy=modal;
