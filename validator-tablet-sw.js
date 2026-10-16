@@ -1,7 +1,7 @@
 /* Portal RYM · Unit Validator PWA
    Cache only the dedicated shell/static identity. Portal auth/API/data always stay network-fresh. */
-const CACHE='rym-unit-validator-shell-v21';
-const CORE=['/unit-validator.html','/validator-tablet.webmanifest','/assets/rym-validator-192.png','/assets/rym-validator-512.png','/css/validator-tablet-app.css?v=21','/modules/core/validator-session.js?v=21','/modules/core/unit-validator-shell.js?v=21','/modules/control-auto/validator-presentation.js?v=21','/modules/control-auto/validator-details.js?v=21','/modules/control-auto/validator-tablet-app.js?v=21'];
+const CACHE='rym-unit-validator-shell-v22';
+const CORE=['/unit-validator.html','/validator-tablet.webmanifest','/assets/rym-validator-192.png','/assets/rym-validator-512.png','/css/validator-tablet-app.css?v=22','/modules/core/validator-session.js?v=22','/modules/core/unit-validator-shell.js?v=22','/modules/control-auto/validator-presentation.js?v=22','/modules/control-auto/validator-details.js?v=22','/modules/control-auto/validator-tablet-app.js?v=22'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting()));

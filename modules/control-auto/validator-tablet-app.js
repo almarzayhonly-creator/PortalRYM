@@ -76,7 +76,7 @@
   if(typeof rpc==='function'){
     const mainRpc=rpc;
     rpc=function(name,args={}){
-      if(!['panapass_control_auto_v2','panapass_unidades_detalle'].includes(name)||!text(args.p_buscar))return mainRpc(name,args);
+      if(!['panapass_control_auto_v2','panapass_control_auto_v3','panapass_unidades_detalle'].includes(name)||!text(args.p_buscar))return mainRpc(name,args);
       const owner=userKey(),epoch=searchEpoch,key=owner+'|'+epoch+'|'+name+'|'+JSON.stringify(args);
       // Enter and main's pending autocomplete timer belong to the same input epoch.
       const hit=masterResults.get(key);
@@ -86,7 +86,7 @@
       const pending=Promise.resolve().then(()=>mainRpc(name,args)).then(rows=>{
         if(owner&&owner===userKey()&&epoch===searchEpoch&&Array.isArray(rows)){
           if(args.p_limit===8)masterResults.set(key,{rows,at:performance.now()});
-          if(name==='panapass_control_auto_v2'&&rows.length)masterSource={owner,rows,usedBy:null};
+          if(['panapass_control_auto_v2','panapass_control_auto_v3'].includes(name)&&rows.length)masterSource={owner,rows,usedBy:null,canonical:name==='panapass_control_auto_v3'};
         }
         return rows;
       }).finally(()=>masterRequests.delete(key));
@@ -490,7 +490,7 @@
     const u=ficha?.unidad||{},o=ficha?.oficial||{};
     const raw=officialRaw(o);
     const control=sectionHtml('CONTROL DE AUTO · RYM',[
-      detailHtml('Póliza NetSuite',first(ctrl?.nro_poliza,u?.nro_poliza)||'Sin póliza registrada'),
+      detailHtml('Póliza NetSuite',text(ctrl?.nro_poliza)||'Sin póliza registrada'),
       detailHtml('Cupo / placa comercial',ctrl?.placa_comercial||u?.placa_comercial),
       detailHtml('Marca',ctrl?.marca||u?.marca),
       detailHtml('Modelo',ctrl?.modelo||u?.modelo),
@@ -591,10 +591,10 @@
       const seed=selectedMaster(id,modal);
       // Enriquecer la selección con la maestra actual v3: la v2 no devuelve nro_poliza.
       // Si v3 no está disponible, mantener la ficha original sin inventar póliza.
-      const control=rpcCall('panapass_control_auto_v3',{p_grupo:null,p_buscar:id.unit,p_limit:10})
+      const control=(seed&&masterSource?.canonical?Promise.resolve([seed]):rpcCall('panapass_control_auto_v3',{p_grupo:null,p_buscar:id.unit,p_limit:10}))
         .then(rows=>{
           const master=(rows||[]).find(row=>text(row.unidad).toUpperCase()===id.unit.toUpperCase());
-          return master?{...(seed||{}),...master}:(seed||{});
+          return master||seed||{};
         }).catch(()=>seed||{})
         .then(ctrl=>{
           if(current()){
