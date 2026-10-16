@@ -25,6 +25,19 @@ jobs:
           node --check modules/core/panapass-ranking-criteria-final.js
           node --check modules/core/panapass-ranking-criteria-clickfix.js
           node --check modules/core/panapass-negativos-panama-date.js
+      - name: Verify shared Unit Validator before deployment
+        run: |
+          npm install --no-save --package-lock=false playwright@1.62.1
+          CHROME_PATH="$(command -v google-chrome || command -v chromium || true)"
+          if [ -z "$CHROME_PATH" ]; then
+            npx playwright install --with-deps chromium
+            CHROME_PATH="$(node -e "const {chromium}=require('playwright');process.stdout.write(chromium.executablePath())")"
+          fi
+          export PLAYWRIGHT_PATH="$PWD/node_modules/playwright" CHROME_PATH
+          node qa/validator-presentation-contract.mjs
+          node qa/validator-integrated-parity.mjs
+          node qa/validator-independent-boot.mjs
+          node qa/validator-portal-boot.mjs
       - name: Persist production controllers
         run: |
           python3 - <<'PY'
@@ -88,3 +101,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx --yes wrangler@latest deploy
+
+      - name: Verify deployed Unit Validator resource hashes
+        run: node qa/validator-tablet-deployed.mjs "https://portal-ena-rym.almarzayhonly.workers.dev"

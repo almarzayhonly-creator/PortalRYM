@@ -1,0 +1,8 @@
+{
+  "auditedAt": "2026-10-08",
+  "project": "avczyvcpmicpuhdkmxzx",
+  "adminVersion": 13,
+  "validatorVersion": 2,
+  "adminClassification": "      let level='OK',reason='2 GPS reportando';\n      if(inst===0){level='CRITICO';reason='Sin GPS instalado';}\n      else if(rep===0){level='CRITICO';reason='Ningun GPS reporta';}\n      else if(inst===2&&rep===1){level='ALERTA';reason='1 de 2 GPS reportando';}\n      else if(inst===1&&rep===1){level='OK';reason='1 GPS instalado y reportando';}\n      if(historical){level='HISTORICO';reason=inst?`Ultima informacion GPS - ${oper}`:`${oper} - sin historial GPS disponible`;}",
+  "validatorClassification": "      let level='OK',reason='2 GPS reportando';\n      if(inst===0){level='CRITICO';reason='Sin GPS instalado'}\n      else if(rep===0){level='CRITICO';reason='Ningún GPS reporta'}\n      else if(inst===2&&rep===1){level='ALERTA';reason='1 de 2 GPS reportando'}\n      else if(inst===1&&s1.installed&&s1.ok){level='OK';reason='GPS1 OK · sin GPS2'}\n      else if(inst===1&&rep===1){level='ALERTA';reason='Solo 1 GPS instalado y reportando'}"
+}
