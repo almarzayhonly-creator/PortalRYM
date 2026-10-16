@@ -2,9 +2,10 @@
    Preserve canonical checks; use the dedicated session and scoped Revisados endpoint in this host. */
 (function(w,d){
   'use strict';
-  if(new URLSearchParams(location.search).get('validator-host')!=='1'||w.RYM_UNIT_VALIDATOR)return;
+  const dedicated=new URLSearchParams(location.search).get('validator-host')==='1';
+  if((!dedicated&&!w.RYM_VALIDATOR_INTEGRATED)||w.RYM_UNIT_VALIDATOR)return;
   const PERMISSION='control_auto.validador_unidad_app';
-  d.documentElement.classList.add('rym-unit-validator-app');
+  d.documentElement.classList.add(dedicated?'rym-unit-validator-app':'rym-unit-validator-integrated');
 
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const text=v=>String(v??'').trim();
@@ -40,7 +41,7 @@
   let accessCheckedFor='',accessProbe=null;
   function profile(){try{return state.profile}catch(_){return null}}
   function userKey(){const p=profile();return String(p?.id||p?.email||p?.usuario||p?.nombre||'')}
-  function allowed(){try{return !!profile()&&!profile().must_change_password&&typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)}catch(_){return false}}
+  function allowed(){try{return !!profile()&&!profile().must_change_password&&(!dedicated||(typeof w.rymHasModule==='function'&&w.rymHasModule(PERMISSION)))}catch(_){return false}}
   function accessMode(){
     const p=profile();if(!p)return 'guest';
     if(p.must_change_password)return 'password';
@@ -48,7 +49,7 @@
     return accessCheckedFor===userKey()||(w.RYM_VALIDATOR_ACCESS_OWNER&&w.RYM_VALIDATOR_ACCESS_OWNER===userKey())?'denied':'pending';
   }
   function session(){const p=profile(),mode=accessMode();return {authenticated:!!p,pending:mode==='pending',denied:mode==='denied',user:p?.nombre||p?.email||''}}
-  function notify(){w.parent.postMessage({type:'rym-validator-state'},location.origin)}
+  function notify(){if(dedicated)w.parent.postMessage({type:'rym-validator-state'},location.origin)}
   async function verifyAccess(){
     const key=userKey();if(!key||allowed()||accessCheckedFor===key||accessProbe)return;
     accessProbe=(async()=>{
@@ -67,6 +68,7 @@
 
   // Observe main's existing authenticated requests; preserve results/errors and request count.
   const responses={};
+  let sessionOwner=userKey();
   let searchEpoch=0,masterSource=null;
   const masterRequests=new Map();
   const masterResults=new Map();
@@ -76,7 +78,7 @@
   if(typeof rpc==='function'){
     const mainRpc=rpc;
     rpc=function(name,args={}){
-      if(!['panapass_control_auto_v2','panapass_control_auto_v3','panapass_unidades_detalle'].includes(name)||!text(args.p_buscar))return mainRpc(name,args);
+      if(![8,10].includes(args.p_limit)||!['panapass_control_auto_v2','panapass_control_auto_v3','panapass_unidades_detalle'].includes(name)||!text(args.p_buscar))return mainRpc(name,args);
       const owner=userKey(),epoch=searchEpoch,key=owner+'|'+epoch+'|'+name+'|'+JSON.stringify(args);
       // Enter and main's pending autocomplete timer belong to the same input epoch.
       const hit=masterResults.get(key);
@@ -580,7 +582,8 @@
     modal._uvaFetchToken=token;
     modal._uvaEnriching=token;
     const seq=(modal._uvaSeq||0)+1;modal._uvaSeq=seq;
-    const current=()=>modal.isConnected&&modal._uvaSeq===seq&&accessMode()==='allowed';
+    const owner=userKey();
+    const current=()=>modal.isConnected&&modal._uvaSeq===seq&&owner===userKey()&&accessMode()==='allowed';
     try{
       let freshFicha=null,official=null;
       const publishFicha=()=>{
@@ -755,7 +758,7 @@
       notify();return;
     }
 
-    if(ok)ensureValidatorSurface();
+    if(ok){if(dedicated)ensureValidatorSurface();else if(d.getElementById('v101ValidatorQ'))bindDedicatedSearch()}
     const input=d.getElementById('v101ValidatorQ');
     if(ok&&input){
       input.setAttribute('inputmode','search');input.setAttribute('enterkeyhint','search');
@@ -781,7 +784,7 @@
   }
 
   const base=w.v36PortalHome;
-  if(typeof base==='function'){
+  if(dedicated&&typeof base==='function'){
     const home=async function(){
       if(profile()&&!allowed()){refresh();return}
       const result=await base.apply(this,arguments);refresh();return result;
