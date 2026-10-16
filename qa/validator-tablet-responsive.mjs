@@ -266,7 +266,7 @@ for(const [width,height] of testedSizes){
           assert.ok(Math.max(...reads.map(x=>x.start))<Math.min(...reads.map(x=>x.end)),'Supplemental reads must overlap');
           data.supplementalMs=Math.max(...reads.map(x=>x.end))-Math.min(...reads.map(x=>x.start));
         }
-        assert.equal(sourceCalls.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===10).length,scenario==='master-fallback'?1:0);
+        assert.equal(sourceCalls.filter(x=>x.name==='panapass_control_auto_v3'&&x.args.p_limit===10).length,1);
         assert.equal(sourceCalls.filter(x=>x.url?.includes('/rest/v1/revisados_vehiculo_oficial')).length,1);
         assert.equal(sourceCalls.filter(x=>x.url?.includes('revisados-ficha')).length,1);
         assert.equal(sourceCalls.filter(x=>x.url?.includes('/rest/v1/ena_cuentas')).length,scenario==='no-pan'?0:1);
@@ -278,7 +278,7 @@ for(const [width,height] of testedSizes){
         if(scenario==='fast-enter'){
           await host.locator('#v101CheckModal[data-uva-enriched]').waitFor();
           const again=await host.locator('#v101CheckModal').evaluate(()=>QA.calls);
-          assert.equal(again.filter(x=>x.name==='panapass_control_auto_v2'&&x.args.p_limit===10).length,1,'A new validation must refresh consumed master data');
+          assert.equal(again.filter(x=>x.name==='panapass_control_auto_v3'&&x.args.p_limit===10).length,1,'A new validation must refresh consumed master data');
         }
         await host.locator('#v101CloseCheck').click();
         assert.equal(await host.locator('#v101CheckModal').count(),0);
