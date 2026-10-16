@@ -278,7 +278,7 @@ for(const [width,height] of testedSizes){
         if(scenario==='fast-enter'){
           await host.locator('#v101CheckModal[data-uva-enriched]').waitFor();
           const again=await host.locator('#v101CheckModal').evaluate(()=>QA.calls);
-          assert.equal(again.filter(x=>x.name==='panapass_control_auto_v3'&&x.args.p_limit===10).length,1,'A new validation must refresh consumed master data');
+          assert.equal(again.filter(x=>x.name==='panapass_control_auto_v3'&&x.args.p_limit===10).length,2,'A new validation must refresh consumed master data exactly once per validation');
         }
         await host.locator('#v101CloseCheck').click();
         assert.equal(await host.locator('#v101CheckModal').count(),0);
