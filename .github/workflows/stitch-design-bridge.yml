@@ -1,0 +1,54 @@
+name: Stitch design bridge (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'List projects (safe) or generate one new screen'
+        required: true
+        type: choice
+        options:
+          - list
+          - generate
+        default: list
+      project_id:
+        description: 'Existing Stitch project ID (required for generate)'
+        required: false
+        type: string
+      prompt:
+        description: 'Design prompt (required for generate; no secrets or private data)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stitch-design-bridge
+  cancel-in-progress: false
+
+jobs:
+  stitch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+      STITCH_MODE: ${{ inputs.mode }}
+      STITCH_PROJECT_ID: ${{ inputs.project_id }}
+      STITCH_PROMPT: ${{ inputs.prompt }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Stitch SDK in temporary workspace
+        run: npm install --no-save --no-package-lock --ignore-scripts @google/stitch-sdk
+      - name: Verify Stitch or generate design
+        run: node scripts/stitch-bridge.mjs
+      - name: Upload design evidence (never deploy)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stitch-design-${{ github.run_id }}
+          path: stitch-output/
+          retention-days: 7
