@@ -60,11 +60,17 @@ async function run(role,width,height,baseline=false){
   if(!baseline){
     assert.match(await page.locator('.v101-content').evaluate(e=>getComputedStyle(e).fontFamily),/^"RYM Executive Inter"/);
     assert.equal(await page.evaluate(()=>document.fonts.check('400 14px "RYM Executive Inter"')&&document.fonts.check('700 20px "RYM Executive Inter"')),true);
-    assert.equal(await page.locator('.v99-module.pan').evaluate(e=>getComputedStyle(e).borderRadius),'12px');
+    assert.equal(await page.locator('.v99-module.pan').evaluate(e=>getComputedStyle(e).borderRadius),'24px');
+    if(width>=1100){
+      const rows=await page.locator('.v99-grid>.v99-module').evaluateAll(els=>els.map(e=>Math.round(e.getBoundingClientRect().top)));
+      assert.equal(new Set(rows).size,1,'Desktop modules must share one row');
+      assert.equal(await page.locator('.v99-modicon').first().isVisible(),true,'System icon missing');
+    }
     assert.ok((await page.locator('#v101ValidatorGo').boundingBox()).width>=140,'Validator button squeezed');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Home overflows '+width);
     const clipped=await page.locator('.v99-module h4,.v99-mini b,.v101-greeting h2,.v99-alert b').evaluateAll(els=>els.filter(e=>e.getClientRects().length&&e.scrollWidth>e.clientWidth+1).map(e=>e.textContent));
     assert.deepEqual(clipped,[],'Clipped home labels');
+    assert.deepEqual(await page.locator('.v99-mini b').evaluateAll(els=>els.filter(e=>e.getClientRects().length&&e.scrollHeight>parseFloat(getComputedStyle(e).lineHeight)+2).map(e=>e.textContent)),[],'Metrics split across lines');
     await page.screenshot({path:path.join(output,`home-${role}-${width}.png`),fullPage:true});
   }
   await page.locator('#v101ValidatorQ').fill('P714');await page.locator('#v101ValidatorQ').press('Enter');
@@ -79,10 +85,15 @@ async function run(role,width,height,baseline=false){
     assert.equal(await page.locator('.v117-check-card').evaluate(e=>e.scrollWidth<=e.clientWidth+1),true,'Modal overflow');
     await page.screenshot({path:path.join(output,`validator-${role}-${width}.png`)});
   }
-  await page.locator('#v101CloseCheck').click();assert.equal(await page.locator('#v101CheckModal').count(),0);
+  if(baseline)await page.locator('#v101CloseCheck').evaluate(e=>e.click());else await page.locator('#v101CloseCheck').click();assert.equal(await page.locator('#v101CheckModal').count(),0);
+  if(!baseline){
+    await page.locator('#v101ValidatorQ').fill('P71');await page.locator('.v101-validator-item').first().waitFor({state:'visible'});await page.locator('.v101-validator-item').first().click();await page.locator('#v101CheckModal[data-uva-enriched]').waitFor();
+    assert.equal(await page.locator('#v101CheckModal #v101ValidatorQ').count(),1,'Existing search input was not moved into the modal');assert.equal(await page.locator('#v101CheckModal .v101-modal-results #v101ValidatorList').count(),1,'Existing match list was not moved into the result column');await page.locator('#v101CheckModal #v101ValidatorQ').fill('P714');await page.locator('#v101CheckModal .v101-modal-results .v101-validator-item').first().waitFor({state:'visible'});assert.equal(await page.evaluate(()=>document.activeElement?.id==='v101ValidatorQ'),true,'Search focus was lost when opening the modal');await page.locator('#v101CheckModal .v101-modal-results .v101-validator-item').first().click();await page.locator('#v101CheckModal[data-uva-enriched]').waitFor();
+    await page.locator('#v101CloseCheck').click();assert.equal(await page.locator('#v101CheckModal').count(),0);
+  }
   await page.locator('#v101ValidatorGo').click();await page.locator('#v101CheckModal[data-uva-enriched]').waitFor();
-  await page.locator('#v101AgainCheck').click();assert.equal(await page.locator('#v101CheckModal').count(),0);
-  assert.equal(await page.locator('#v101ValidatorQ').isVisible(),true);
+  if(baseline)await page.locator('#v101AgainCheck').evaluate(e=>e.click());else await page.locator('#v101AgainCheck').click();assert.equal(await page.locator('#v101CheckModal').count(),0);
+  const returnedSearch=await page.evaluate(()=>{const e=document.querySelector('#v101ValidatorQ');return e?{parent:e.parentElement?.className,connected:e.isConnected,rect:e.getBoundingClientRect().toJSON(),html:e.parentElement?.outerHTML.slice(0,500)}:null});assert.ok(returnedSearch?.rect.width>0,'Validator search was not restored: '+JSON.stringify(returnedSearch));
   const validatorCalls=calls.filter(x=>/revisados-validator|gps-rym-validator|ena-consulta-saldo|revisados-ficha/.test(x.path));
   const navigation=[];
   if(width===1440){
@@ -111,9 +122,10 @@ async function run(role,width,height,baseline=false){
 try{
   for(const role of ['ADMIN_TOTAL','SUPERVISORA']){
     const before=await run(role,1440,900,true),after=await run(role,1440,900);
-    for(const key of ['access','values','validatorCalls','loginStyle','navigation'])assert.deepEqual(after[key],before[key],key+' changed');
+    for(const key of ['access','values','loginStyle','navigation'])assert.deepEqual(after[key],before[key],key+' changed');
+    assert.deepEqual([...new Set(after.validatorCalls.map(x=>JSON.stringify(x)))].sort(),[...new Set(before.validatorCalls.map(x=>JSON.stringify(x)))].sort(),'Validator request endpoint/body changed');
   }
-  for(const [width,height] of [[360,800],[390,844],[768,1024],[1024,768],[1280,800],[1920,1080]])await run('ADMIN_TOTAL',width,height);
+  for(const [width,height] of [[360,800],[390,844],[768,1024],[1024,768],[1136,872],[1280,800],[1304,1000],[1920,1080]])await run('ADMIN_TOTAL',width,height);
   fs.writeFileSync(path.join(output,'report.json'),JSON.stringify(report,null,2));
   console.log('PASS baseline parity: login presentation, role-based controls, result values and Validator request bodies. Artifacts: '+output);
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
