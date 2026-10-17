@@ -6185,33 +6185,37 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
   }
   function outsideValidatorSearch99(e){if(document.querySelector('#v101CheckModal')||e.target?.closest?.('.v101-validator-item,#v101ValidatorGo,#v101CloseCheck,#v101AgainCheck'))return;const wrap=document.querySelector('.v101-validator-box');if(!wrap?.contains(e.target))toggleList99(false)}
   function bindValidator99(){const q=document.querySelector('#v101ValidatorQ'),go=document.querySelector('#v101ValidatorGo');if(!q||!go)return;const run=()=>{const term=String(q.value||'').trim();if(!term)return;const exact=(v106ValidatorRows||[]).find(r=>[r.unidad,r.placa_unica,r.placa,r.placa_comercial,r.panapass_numero].map(x=>N99(x)).includes(N99(term)));if(exact)return openValidator99(exact);searchValidator99(term).then(()=>{if(v106ValidatorRows.length===1)openValidator99(v106ValidatorRows[0]);else toggleList99(true)})};q.oninput=()=>{clearTimeout(v106ValidatorTimer);v106ValidatorTimer=setTimeout(()=>searchValidator99(q.value),220)};q.onfocus=()=>{if((v106ValidatorRows||[]).length)toggleList99(true)};q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();run()}if(e.key==='Escape')toggleList99(false)};go.onclick=run;document.removeEventListener('click',outsideValidatorSearch99);document.addEventListener('click',outsideValidatorSearch99)}
+  window.__RYM_VUE_NEXT_HOME_MAIN={bindValidator:bindValidator99,refreshIndicators:refreshExecutiveCards99};
   function card99(cls,icon,title,desc,buttonId,minis,badge='Disponible'){
     return `<article class="v99-module ${cls}"><div class="v99-module-head"><div class="v99-modicon">${E99(icon)}</div><span class="v99-badge">${E99(badge)}</span></div><h4>${E99(title)}</h4><p>${E99(desc)}</p><div class="v99-mini-kpis">${minis.map(x=>`<div class="v99-mini"><span>${E99(x[0])}</span><b>${E99(x[1])}</b></div>`).join('')}</div><button id="${buttonId}">Entrar al módulo</button></article>`
   }
-  async function refreshExecutiveCards99(role){
+  async function refreshExecutiveCards99(role,scope={control:true,gps:true}){
+    const pilot=window.__RYM_VUE_NEXT_HOME;
+    const pilotActive=!!pilot?.isActive?.();
     const controlCard=document.querySelector('body.v99-home .v99-module.control');
-    if(controlCard){
+    if(scope.control&&(controlCard||(pilotActive&&pilot.hasControl?.()))){
       try{
         const {data}=await req('/functions/v1/control-auto-resumen-supervisoras',{method:'POST',body:'{}'});
         if(data?.ok){
-          const t=data.totals||{},minis=controlCard.querySelector('.v99-mini-kpis');
+          const t=data.totals||{},minis=controlCard?.querySelector('.v99-mini-kpis');
           if(minis){minis.classList.add('v126-three');minis.innerHTML=`<div class="v99-mini"><span>Unidades activas</span><b>${Number(t.activas||0)}</b></div><div class="v99-mini"><span>Unidades paradas</span><b>${Number(t.paradas||0)}</b></div><div class="v99-mini"><span>Abono adicional</span><b>${Number(t.abono_adicional||0)}</b></div>`}
-          const badge=controlCard.querySelector('.v103-state-copy small');
+          const badge=controlCard?.querySelector('.v103-state-copy small');
           if(badge)badge.textContent=`${Number(t.activas||0)} activas · ${Number(t.paradas||0)} paradas · ${Number(t.abono_adicional||0)} abono adicional`;
-        }
-      }catch(e){console.warn('Resumen operativo de Control de Auto',e)}
+          if(pilotActive)pilot.setControl?.(data);
+        }else throw Error('Resumen operativo no disponible');
+      }catch(e){if(pilotActive)pilot.errorControl?.(e);console.warn('Resumen operativo de Control de Auto',e)}
     }
-    if(N99(role)!=='ADMIN_TOTAL')return;
+    if(!scope.gps||N99(role)!=='ADMIN_TOTAL')return;
     let gpsCard=document.querySelector('body.v99-home .v99-module.gps');
-    if(!gpsCard){
+    if(!gpsCard&&!pilotActive){
       const grid=document.querySelector('body.v99-home .v99-grid');
       if(grid){gpsCard=document.createElement('article');gpsCard.id='v113GpsCard';gpsCard.className='v99-module gps';gpsCard.innerHTML='<div class="v99-module-head"><div class="v99-modicon">⌖</div><span class="v99-badge">ADMIN TOTAL</span></div><h4>GPS</h4><p>Monitoreo GPS1/GPS2, estado operativo, alertas y ubicación de la flota.</p><div class="v99-mini-kpis"><div class="v99-mini"><span>Críticas</span><b>—</b></div><div class="v99-mini"><span>Alertas</span><b>—</b></div><div class="v99-mini"><span>Sin GPS</span><b>—</b></div></div><button id="v113GpsEnter">Monitorear GPS</button>';grid.appendChild(gpsCard);gpsCard.querySelector('button').onclick=()=>window.v113OpenGps?.()}
     }
-    if(gpsCard){
+    if(gpsCard||pilotActive){
       try{
         const {data}=await req('/functions/v1/gps-rym-admin',{method:'POST',body:JSON.stringify({q:'',galera:'TODAS',estado:'TODOS',onlyProblems:false})});
-        if(data?.ok){const k=data.kpis||{},minis=gpsCard.querySelector('.v99-mini-kpis');if(minis){minis.classList.add('v126-three');minis.innerHTML=`<div class="v99-mini"><span>Críticas</span><b>${Number(k.criticos||0)}</b></div><div class="v99-mini"><span>Alertas</span><b>${Number(k.alertas||0)}</b></div><div class="v99-mini"><span>Sin GPS</span><b>${Number(k.sin_gps||0)}</b></div>`}}
-      }catch(e){console.warn('Resumen ejecutivo GPS',e)}
+        if(data?.ok){const k=data.kpis||{},minis=gpsCard?.querySelector('.v99-mini-kpis');if(minis){minis.classList.add('v126-three');minis.innerHTML=`<div class="v99-mini"><span>Críticas</span><b>${Number(k.criticos||0)}</b></div><div class="v99-mini"><span>Alertas</span><b>${Number(k.alertas||0)}</b></div><div class="v99-mini"><span>Sin GPS</span><b>${Number(k.sin_gps||0)}</b></div>`}if(pilotActive)pilot.setGps?.(data)}else throw Error('Resumen GPS no disponible');
+      }catch(e){if(pilotActive)pilot.errorGps?.(e);console.warn('Resumen ejecutivo GPS',e)}
     }
   }
   function greetingPanama99(){
@@ -7727,6 +7731,7 @@ body.v99-home .v99-module .v99-mini-kpis.v126-three{grid-template-columns:repeat
           if(data.profile)state.profile={...(state.profile||{}),...data.profile};
           window.__v117HomeSummary={data,at:Date.now()};writePersisted(data);renderHome139(data);
         }catch(e){
+          window.__RYM_VUE_NEXT_HOME?.error(e);
           if(!document.body.classList.contains('v99-home'))return;
           const box=document.querySelector('.v101-content');
           if(box){box.querySelector('#v139SummaryStatus')?.remove();box.insertAdjacentHTML('afterbegin','<div class="alert" id="v139SummaryStatus">No se pudo actualizar el resumen actual. <button id="v139RetrySummary">Reintentar</button></div>');box.querySelector('#v139RetrySummary').onclick=()=>window.v36PortalHome()}
@@ -7849,6 +7854,7 @@ body.v99-home .v99-module .v99-mini-kpis.v126-three{grid-template-columns:repeat
   if(originalHomeRenderer&&!originalHomeRenderer.__v145){
     const guarded=function(summary){
       if(projectActive)return;
+      if(window.__RYM_VUE_NEXT_HOME_ENABLED)return window.__RYM_VUE_NEXT_HOME?.render(summary);
       return originalHomeRenderer(summary);
     };
     guarded.__v145=true;
@@ -8346,17 +8352,19 @@ body.v99-home .v99-module.gps>button{color:#fff!important;background:linear-grad
     btn.textContent=pending?'Atender '+pending+' prioridades':'Abrir GPS';btn.onclick=()=>window.v113OpenGps?.();return true
   }
   async function portalGpsPriority(){
-    if(!document.body.classList.contains('v99-home'))return;
+    const vuePilot=!!window.__RYM_VUE_NEXT_HOME_ENABLED,pilot=window.__RYM_VUE_NEXT_HOME;
+    if(vuePilot?!pilot?.isActive?.():!document.body.classList.contains('v99-home'))return;
     const key=profileKey();
-    try{const raw=localStorage.getItem(storeKey());if(raw){const cached=JSON.parse(raw);if(cached&&Date.now()-Number(cached.at||0)<6*3600000)paint(cached)}}catch(_){}
+    try{const raw=localStorage.getItem(storeKey());if(raw){const cached=JSON.parse(raw);if(cached&&Date.now()-Number(cached.at||0)<6*3600000){if(vuePilot)pilot.setGps?.({ok:true,kpis:{criticos:cached.crit,alertas:cached.alert,pending:cached.pending}});else paint(cached)}}}catch(_){}
     try{
       const shared=window.__v164GpsPortalData;let data=shared&&shared.key===key?shared.data:null,c=window.__v163GpsPortalCache;if(!data&&c&&c.key===key&&Date.now()-c.at<30000)data=c.data;
       if(!data){const res=await req('/functions/v1/gps-rym-admin',{method:'POST',body:JSON.stringify({q:'',galera:'TODAS',estado:'TODOS',nivel:'TODOS',onlyProblems:false})});if(!res?.data?.ok)throw Error('GPS no disponible');data=res.data}
-      window.__v164GpsPortalData={key,data};window.__v163GpsPortalCache={key,at:Date.now(),data};const sum=summarize(data);paint(sum);try{localStorage.setItem(storeKey(),JSON.stringify(sum))}catch(_){}
-    }catch(_){/* conserva el último dato visible sin bloquear el Portal */}
+      window.__v164GpsPortalData={key,data};window.__v163GpsPortalCache={key,at:Date.now(),data};const sum=summarize(data);if(vuePilot)pilot.setGps?.({ok:true,kpis:{criticos:sum.crit,alertas:sum.alert,pending:sum.pending,sin_gps:data.kpis?.sin_gps}});else paint(sum);try{localStorage.setItem(storeKey(),JSON.stringify(sum))}catch(_){}
+    }catch(e){if(vuePilot)pilot.errorGps?.(e);/* conserva el último dato visible sin bloquear el Portal */}
   }
   const oldHome=window.v36PortalHome;
-  if(typeof oldHome==='function'&&!oldHome.__v164gps){const fn=async function(){const r=await oldHome.apply(this,arguments);portalGpsPriority();setTimeout(portalGpsPriority,120);return r};fn.__v164gps=true;window.v36PortalHome=fn;try{v36PortalHome=fn}catch(_){}}
+  window.__RYM_VUE_NEXT_GPS_PRIORITY=portalGpsPriority;
+  if(typeof oldHome==='function'&&!oldHome.__v164gps){const fn=async function(){const r=await oldHome.apply(this,arguments);if(!window.__RYM_VUE_NEXT_HOME_ENABLED){portalGpsPriority();setTimeout(portalGpsPriority,120)}return r};fn.__v164gps=true;window.v36PortalHome=fn;try{v36PortalHome=fn}catch(_){}}
   setTimeout(portalGpsPriority,60);
 })();
 </script>
@@ -8809,3 +8817,19 @@ body.v66-revisados .v180-status-list label{background:#fff!important;color:#243b
 body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
 </style>
 <link rel="stylesheet" href="/css/portal-executive.css?v=1"/>
+<script type="module">
+  if(new URLSearchParams(location.search).get('vueNext')==='1'){
+    window.__RYM_VUE_NEXT_HOME_ENABLED=true;
+    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js');
+    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css';document.head.appendChild(css);
+    let opened=false;
+    window.__RYM_VUE_NEXT_HOME={render:summary=>{opened=true;return pilot.renderHome(summary)},error:error=>pilot.failHome(error),isActive:pilot.isHomeActive,hasControl:pilot.hasControlSummary,setControl:pilot.setControlIndicators,errorControl:pilot.failControlIndicators,setGps:pilot.setGpsIndicators,errorGps:pilot.failGpsIndicators};
+    const baseRender=window.render;
+    if(typeof baseRender==='function')window.render=async function(...args){
+      if(!opened&&document.querySelector('#app .shell')&&typeof window.v36PortalHome==='function'){
+        opened=true;return window.v36PortalHome();
+      }
+      return baseRender.apply(this,args);
+    };
+  }
+</script>
