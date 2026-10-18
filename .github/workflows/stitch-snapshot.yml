@@ -1,0 +1,43 @@
+name: Stitch design snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stitch-snapshot
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tools/stitch/package-lock.json
+      - name: Verify Stitch configuration
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+        run: |
+          test -n "$STITCH_API_KEY" || { echo '::error::Add STITCH_API_KEY under repository Actions secrets.'; exit 1; }
+          test -n "$STITCH_PROJECT_ID" || { echo '::error::Add STITCH_PROJECT_ID under repository Actions variables.'; exit 1; }
+      - name: Install pinned Stitch SDK
+        working-directory: tools/stitch
+        run: npm ci --ignore-scripts
+      - name: Export the selected Stitch project
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+        run: node tools/stitch/sync.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portal-rym-stitch-snapshot-${{ github.run_number }}
+          path: .stitch/projects/rym-*/
+          if-no-files-found: error
+          retention-days: 7
