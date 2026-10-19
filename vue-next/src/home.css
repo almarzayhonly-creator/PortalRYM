@@ -63,8 +63,9 @@
 .rym-vue-home .ryn-validator-heading p{margin:3px 0 0;color:#6e8098;font-size:10px}
 .rym-vue-home .ryn-validator .v101-validator-tools{display:contents!important;margin:0}
 .rym-vue-home .ryn-validator .v101-validator-box{grid-column:2;min-width:0;width:100%}
-.rym-vue-home .ryn-validator input{height:43px;padding:0 14px;border:1px solid #d4e0ed;border-radius:12px;background:#fff;box-shadow:inset 0 1px 2px #18365308;color:#233d5b;font-size:12px}
-.rym-vue-home .ryn-validator input:focus{border-color:#4774ff;outline:3px solid #4774ff20}
+.rym-vue-home .ryn-validator input.v101-validator-input{height:43px;padding:0 14px;border:1px solid #9fb6d0!important;border-radius:12px;background:#eaf1fa!important;box-shadow:inset 0 2px 4px #18365312;color:#142f50!important;caret-color:#1269c7;font-size:12px;font-weight:700}
+.rym-vue-home .ryn-validator input.v101-validator-input::placeholder{color:#5b6f87!important;opacity:1}
+.rym-vue-home .ryn-validator input.v101-validator-input:focus{border-color:#236fd1!important;background:#f4f8fd!important;outline:3px solid #236fd126}
 .rym-vue-home .ryn-validator .v101-validator-go{grid-column:3;min-height:43px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:linear-gradient(110deg,#176dc2,#087f65);box-shadow:0 7px 13px #087f6530;color:#fff;font-size:11px}
 .rym-vue-home .ryn-load-state{margin:0 0 15px;padding:12px 15px;border:1px solid #d9e4ef;border-radius:12px;background:#fff;color:#61758e;font-size:11px}
 .rym-vue-home .ryn-load-state.error{border-color:#f1c9c5;background:#fff8f7;color:#a4453e}
@@ -103,7 +104,8 @@
 .rym-vue-home .ryn-module.gps:before{background:linear-gradient(90deg,#173b65,#197ba0,#18a579)}
 .rym-vue-home .ryn-module:hover{transform:translateY(-3px);box-shadow:0 15px 27px #153f6c19}
 .rym-vue-home .ryn-module header{min-height:50px;align-items:center}
-.rym-vue-home .ryn-module-icon{width:39px;height:39px;border-radius:13px;background:linear-gradient(145deg,#00a8dd,#1769d5)!important;font-size:20px;color:#fff!important;box-shadow:0 5px 11px #1689cc35}
+.rym-vue-home .ryn-module-icon{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:linear-gradient(145deg,#00a8dd,#1769d5)!important;font-size:20px;color:#fff!important;box-shadow:0 5px 11px #1689cc35}
+.rym-vue-home .ryn-module-icon svg{display:block;width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .rym-vue-home .ryn-module.revisados .ryn-module-icon{background:linear-gradient(145deg,#dff7ed,#a7dfc4)!important;color:#15945e!important;box-shadow:0 4px 10px #14965b20}
 .rym-vue-home .ryn-module.control .ryn-module-icon{background:linear-gradient(145deg,#fff0de,#ffd2aa)!important;color:#d86615!important;box-shadow:0 4px 10px #de7a1d20}
 .rym-vue-home .ryn-module.gps .ryn-module-icon{background:linear-gradient(145deg,#eef1ff,#d8e4ff)!important;color:#214d8c!important}

@@ -2,6 +2,7 @@
 import { computed, onUnmounted, watch } from 'vue'
 import '../home.css'
 import { canOpen } from '../dashboard'
+import ModuleIcon from '../components/ModuleIcon.vue'
 import type { DashboardState } from '../dashboard'
 import type { ModuleAction } from '../types'
 
@@ -43,37 +44,37 @@ const updated = computed(() => {
 })
 const formatMoney = (value: unknown) => `B/. ${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 type CardMetric = { label: string; value: string | number }
-type PortalCard = { key: string; title: string; icon: string; badge: string; description: string; metrics: CardMetric[]; action: keyof ModuleAction }
+type PortalCard = { key: string; title: string; badge: string; description: string; metrics: CardMetric[]; action: keyof ModuleAction }
 const cards = computed<PortalCard[]>(() => {
   const data = summary.value
   if (!data) {
     const badge = props.state.state === 'loading' ? 'Cargando' : 'Sin datos'
     const result: PortalCard[] = []
-    if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', icon: '▤', badge, description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [{ label: 'Negativos hoy', value: '…' }, { label: 'Pagos hoy', value: '…' }, { label: 'Pagado mes', value: '…' }], action: 'panapass' })
-    if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', icon: '☑', badge, description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [{ label: 'Pendientes', value: '…' }, { label: 'Emitidos hoy', value: '…' }], action: 'revisados' })
-    if (hasGrant('portal.control_auto', 'control_auto.unidades')) result.push({ key: 'control', title: 'CONTROL DE AUTO', icon: '♧', badge, description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [{ label: 'Unidades activas', value: '…' }, { label: 'Unidades paradas', value: '…' }, { label: 'Abono adicional', value: '…' }], action: 'control' })
-    if (allowedGps.value) result.push({ key: 'gps', title: 'GPS', icon: '⌖', badge, description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [{ label: 'Críticas', value: '…' }, { label: 'Alertas', value: '…' }, { label: 'Pendientes hoy', value: '…' }], action: 'gps' })
+    if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', badge, description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [{ label: 'Negativos hoy', value: '…' }, { label: 'Pagos hoy', value: '…' }, { label: 'Pagado mes', value: '…' }], action: 'panapass' })
+    if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', badge, description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [{ label: 'Pendientes', value: '…' }, { label: 'Emitidos hoy', value: '…' }], action: 'revisados' })
+    if (hasGrant('portal.control_auto', 'control_auto.unidades')) result.push({ key: 'control', title: 'CONTROL DE AUTO', badge, description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [{ label: 'Unidades activas', value: '…' }, { label: 'Unidades paradas', value: '…' }, { label: 'Abono adicional', value: '…' }], action: 'control' })
+    if (allowedGps.value) result.push({ key: 'gps', title: 'GPS', badge, description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [{ label: 'Críticas', value: '…' }, { label: 'Alertas', value: '…' }, { label: 'Pendientes hoy', value: '…' }], action: 'gps' })
     return result
   }
   const result: PortalCard[] = []
   const pan = data.panapass
   const rev = data.revisados
   const control = data.control
-  if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', icon: '▤', badge: pan?.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : pan ? 'Operativo' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
+  if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', badge: pan?.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : pan ? 'Operativo' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
     { label: 'Negativos hoy', value: pan?.negativos_hoy ?? '—' }, { label: 'Pagos hoy', value: pan?.pagos_hoy ?? '—' }, { label: 'Pagado mes', value: pan ? formatMoney(pan.monto_mes) : '—' },
   ], action: 'panapass' })
-  if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', icon: '☑', badge: rev ? Number(rev.pendientes || 0) ? `${rev.pendientes} pendientes` : 'Al día' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [
+  if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', badge: rev ? Number(rev.pendientes || 0) ? `${rev.pendientes} pendientes` : 'Al día' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [
     { label: 'Pendientes', value: rev?.pendientes ?? '—' }, { label: 'Emitidos hoy', value: rev ? `${rev.emitidos_hoy ?? 0}/${rev.limite_hoy ?? 0}` : '—' },
   ], action: 'revisados' })
   if (hasGrant('portal.control_auto', 'control_auto.unidades')) {
     const totals = props.state.controlIndicators?.totals
-    result.push({ key: 'control', title: 'CONTROL DE AUTO', icon: '♧', badge: control ? 'Revisar flota' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [
+    result.push({ key: 'control', title: 'CONTROL DE AUTO', badge: control ? 'Revisar flota' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [
       { label: 'Unidades activas', value: totals?.activas ?? control?.activas ?? '—' }, { label: 'Unidades paradas', value: totals?.paradas ?? control?.otros ?? '—' }, { label: 'Abono adicional', value: totals?.abono_adicional ?? '—' },
     ], action: 'control' })
   }
   if (allowedGps.value) {
     const gps = props.state.gpsIndicators?.kpis
-    result.push({ key: 'gps', title: 'GPS', icon: '⌖', badge: role.value === 'ADMIN_TOTAL' ? 'ADMIN TOTAL' : 'Monitoreo', description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [
+    result.push({ key: 'gps', title: 'GPS', badge: role.value === 'ADMIN_TOTAL' ? 'ADMIN TOTAL' : 'Monitoreo', description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [
       { label: 'Críticas', value: gps?.criticos ?? '—' }, { label: 'Alertas', value: gps?.alertas ?? '—' }, { label: 'Pendientes hoy', value: gps?.pending ?? '—' },
     ], action: 'gps' })
   }
@@ -122,13 +123,11 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <small class="ryn-nav-label">OPERACIÓN</small>
         <button v-for="card in cards.filter(item => item.key !== 'gps')" :key="card.key" @click="open(card.action)">
           <i :class="`icon-${card.key}`" aria-hidden="true">
-            <svg v-if="card.key === 'panapass'" viewBox="0 0 24 24"><rect x="6" y="5" width="13" height="16" rx="2"/><path d="M9 5.5V4a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v1.5M9 10h1.5M13 10h3M9 14h1.5M13 14h3M9 18h1.5M13 18h3"/></svg>
-            <svg v-else-if="card.key === 'control'" viewBox="0 0 24 24"><path d="m4 15 1.1-4.2a2 2 0 0 1 1.9-1.5h9.8a2 2 0 0 1 1.9 1.5L20 15v3H4v-3Z"/><path d="m7 9.3 1.4-3h7.2l1.4 3M4 13h16M7 18v1.5M17 18v1.5"/><circle cx="7.5" cy="15.5" r=".7"/><circle cx="16.5" cy="15.5" r=".7"/></svg>
-            <span v-else>{{ card.icon }}</span>
+            <ModuleIcon :name="card.key" />
           </i>
           {{ card.title === 'CONTROL DE AUTO' ? 'Auto' : card.title.charAt(0) + card.title.slice(1).toLowerCase() }}
         </button>
-        <button v-if="allowedGps" @click="open('gps')"><i class="icon-gps" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></i>GPS</button>
+        <button v-if="allowedGps" @click="open('gps')"><i class="icon-gps" aria-hidden="true"><ModuleIcon name="gps" /></i>GPS</button>
         <small v-if="allowedUsers" class="ryn-nav-label admin-label">ADMINISTRACIÓN</small>
         <button v-if="allowedUsers" @click="open('users')"><i class="icon-users" aria-hidden="true">♙</i>Usuarios</button>
       </nav>
@@ -163,7 +162,7 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <section class="ryn-section-title"><div><h2>Tu operación por sistema</h2><p>Cada módulo muestra únicamente sus indicadores y acciones.</p></div></section>
         <section v-if="cards.length" class="ryn-modules">
           <article v-for="card in cards" :key="card.key" class="ryn-module" :class="[card.key, { 'is-loading': state.state === 'loading' }]">
-            <header><span class="ryn-module-icon">{{ card.icon }}</span><span class="ryn-badge">{{ card.badge }}</span></header>
+            <header><span class="ryn-module-icon"><ModuleIcon :name="card.key" /></span><span class="ryn-badge">{{ card.badge }}</span></header>
             <h3>{{ card.title }}</h3><p>{{ card.description }}</p>
             <div class="ryn-module-metrics"><div v-for="metric in card.metrics" :key="metric.label"><span>{{ metric.label }}</span><b>{{ metric.value }}</b></div></div>
             <button class="ryn-open" @click="open(card.action)">{{ card.key === 'gps' ? 'Atender prioridades' : card.key === 'control' ? 'Ver flota' : card.key === 'revisados' ? 'Gestionar revisados' : 'Abrir Panapass' }} <span aria-hidden="true">→</span></button>
