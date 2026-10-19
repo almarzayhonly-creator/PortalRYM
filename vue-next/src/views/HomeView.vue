@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onUnmounted, watch } from 'vue'
 import '../home.css'
 import { canOpen } from '../dashboard'
 import type { DashboardState } from '../dashboard'
 import type { ModuleAction } from '../types'
 
 const props = defineProps<{ state: DashboardState; actions: ModuleAction; hasModule: (code: string) => boolean }>()
+let summaryTimer: number | undefined
+watch(() => props.state.state, value => {
+  window.clearTimeout(summaryTimer)
+  summaryTimer = undefined
+  if (value === 'loading') {
+    summaryTimer = window.setTimeout(() => {
+      if (props.state.state !== 'loading') return
+      props.state.state = 'error'
+      props.state.error = 'La consulta está tardando más de lo esperado. Puedes reintentar.'
+    }, 12000)
+  }
+}, { immediate: true })
+onUnmounted(() => window.clearTimeout(summaryTimer))
 const summary = computed(() => props.state.summary)
 const profile = computed(() => props.state.session.profile)
 const name = computed(() => String(profile.value.nombre || profile.value.email || 'Usuario').trim())
@@ -30,6 +43,16 @@ type CardMetric = { label: string; value: string | number }
 type PortalCard = { key: string; title: string; icon: string; badge: string; description: string; metrics: CardMetric[]; action: keyof ModuleAction }
 const cards = computed<PortalCard[]>(() => {
   const data = summary.value
+  if (!data && props.state.state === 'loading') {
+    const modules = props.state.session.modules
+    const has = (...codes: string[]) => codes.some(code => modules.includes(code) || props.hasModule(code))
+    const result: PortalCard[] = []
+    if (has('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', icon: '▤', badge: 'Cargando', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [{ label: 'Negativos hoy', value: '…' }, { label: 'Pagos hoy', value: '…' }, { label: 'Pagado mes', value: '…' }], action: 'panapass' })
+    if (has('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', icon: '☑', badge: 'Cargando', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [{ label: 'Pendientes', value: '…' }, { label: 'Emitidos hoy', value: '…' }], action: 'revisados' })
+    if (has('portal.control_auto', 'control_auto.unidades')) result.push({ key: 'control', title: 'CONTROL DE AUTO', icon: '♧', badge: 'Cargando', description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [{ label: 'Unidades activas', value: '…' }, { label: 'Unidades paradas', value: '…' }, { label: 'Abono adicional', value: '…' }], action: 'control' })
+    if (allowedGps.value) result.push({ key: 'gps', title: 'GPS', icon: '⌖', badge: 'Cargando', description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [{ label: 'Críticas', value: '…' }, { label: 'Alertas', value: '…' }, { label: 'Pendientes hoy', value: '…' }], action: 'gps' })
+    return result
+  }
   if (!data) return []
   const result: PortalCard[] = []
   const pan = data.panapass
@@ -100,14 +123,14 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <div v-if="state.state === 'loading'" class="ryn-load-state" role="status">Cargando el resumen de tu alcance…</div>
         <section class="ryn-section-title"><div><h2>Tu operación por sistema</h2><p>Cada módulo muestra únicamente sus indicadores y acciones.</p></div></section>
         <section v-if="cards.length" class="ryn-modules">
-          <article v-for="card in cards" :key="card.key" class="ryn-module" :class="card.key">
+          <article v-for="card in cards" :key="card.key" class="ryn-module" :class="[card.key, { 'is-loading': state.state === 'loading' }]">
             <header><span class="ryn-module-icon">{{ card.icon }}</span><span class="ryn-badge">{{ card.badge }}</span></header>
             <h3>{{ card.title }}</h3><p>{{ card.description }}</p>
             <div class="ryn-module-metrics"><div v-for="metric in card.metrics" :key="metric.label"><span>{{ metric.label }}</span><b>{{ metric.value }}</b></div></div>
             <button class="ryn-open" @click="open(card.action)">{{ card.key === 'gps' ? 'Atender prioridades' : card.key === 'control' ? 'Ver flota' : card.key === 'revisados' ? 'Gestionar revisados' : 'Abrir Panapass' }} <span aria-hidden="true">→</span></button>
           </article>
         </section>
-        <div v-else-if="state.state !== 'loading'" class="ryn-load-state">No tienes módulos habilitados para esta sesión.</div>
+        <div v-else-if="state.state !== 'loading' && state.state !== 'error'" class="ryn-load-state">No tienes módulos habilitados para esta sesión.</div>
       </section>
     </section>
   </main>
