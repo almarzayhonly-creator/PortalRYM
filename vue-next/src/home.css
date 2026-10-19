@@ -43,9 +43,10 @@
 .rym-vue-home .ryn-top-user b,.rym-vue-home .ryn-top-user small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rym-vue-home .ryn-top-user b{max-width:145px;color:#17395e;font-size:10px}
 .rym-vue-home .ryn-top-user small{margin-top:3px;color:#77879b;font-size:8px}
-.rym-vue-home .ryn-logout-icon{display:grid;place-items:center;width:35px;height:35px;flex:none;border:1px solid #d9e2ec;border-radius:11px;background:#fff;color:#315171;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
-.rym-vue-home .ryn-logout-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.rym-vue-home .ryn-logout-icon:hover{border-color:#f2bd5c;background:#fff8e9;color:#a76a00}
+.rym-vue-home .ryn-topbar .ryn-logout-icon{display:grid;place-items:center;width:35px;height:35px;flex:none;border:1px solid #17436c!important;border-radius:11px;background:#17436c!important;color:#fff!important;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.rym-vue-home .ryn-topbar .ryn-logout-icon svg{width:18px;height:18px;fill:none;stroke:#fff!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rym-vue-home .ryn-topbar .ryn-logout-icon:hover{border-color:#f2bd5c!important;background:#fff8e9!important;color:#a76a00!important}
+.rym-vue-home .ryn-topbar .ryn-logout-icon:hover svg{stroke:#a76a00!important}
 .rym-vue-home .ryn-topbar :focus-visible{outline:3px solid #37bdc7;outline-offset:3px}
 .rym-vue-home .ryn-main{max-width:none;padding:25px clamp(22px,3.5vw,60px) 42px}
 .rym-vue-home .ryn-page-heading{display:flex;align-items:center;justify-content:space-between;margin:0 0 28px}
