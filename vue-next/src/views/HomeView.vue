@@ -81,7 +81,15 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
       <div class="ryn-user"><div class="ryn-user-id"><span class="ryn-user-avatar">{{ initials }}</span><div><b>{{ name }}</b><span>{{ role }}{{ galera ? ` · ${galera}` : '' }}</span></div></div><small class="ryn-online"><i></i>En línea</small><button @click="open('logout')">Cerrar sesión <span aria-hidden="true">→</span></button></div>
     </aside>
     <section class="ryn-workspace">
-      <header class="ryn-topbar"><strong>Centro de Control RYM</strong><div class="ryn-top-actions"><span class="ryn-profile-pill">♥ Mi perfil</span><div class="ryn-updated">Última actualización<strong>{{ updated }}</strong></div><span class="ryn-top-icon" aria-hidden="true">♙</span><div class="ryn-top-user"><b>{{ name }}</b><small>{{ role }}</small></div><button class="ryn-logout-icon" aria-label="Cerrar sesión" @click="open('logout')">↪</button></div></header>
+      <header class="ryn-topbar">
+        <div class="ryn-top-brand"><img :src="'/assets/rym-logo.png'" alt=""><div><small>RYM · OPERACIONES</small><strong>Centro de Control</strong><span>Gestión inteligente de flota</span></div></div>
+        <div class="ryn-top-actions">
+          <div class="ryn-updated"><i aria-hidden="true"></i><span><small>ÚLTIMA ACTUALIZACIÓN</small><strong>{{ updated }}</strong></span></div>
+          <span class="ryn-profile-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>Mi perfil</span>
+          <div class="ryn-top-user"><span class="ryn-top-avatar">{{ initials }}</span><span class="ryn-top-user-copy"><b>{{ name }}</b><small>{{ role }}</small></span></div>
+          <button class="ryn-logout-icon" aria-label="Cerrar sesión" title="Cerrar sesión" @click="open('logout')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></button>
+        </div>
+      </header>
       <section class="ryn-main">
         <header class="ryn-page-heading"><div><h1>¡{{ greeting }}, {{ first }}! <span aria-hidden="true">👋</span></h1><p>Así va tu operación hoy{{ galera ? ` · ${galera}` : '' }}</p></div></header>
         <section v-if="canQuickValidator" class="ryn-validator" aria-label="Validador de unidad">
