@@ -480,3 +480,68 @@ body.v99-home .v99-module > button { min-height: 48px !important; display: flex;
 @media (prefers-reduced-motion: reduce) {
   body.v99-home .v101-nav.v105-nav-clean button { transition: none !important; }
 }
+
+/* RYM Fleet sidebar: iconografía funcional y estado activo con presencia. */
+@media (min-width: 1201px) {
+  body.v99-home .v101-side { position: sticky; isolation: isolate; }
+  body.v99-home .v101-side:before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, #00C7D4, #355FF5 58%, #FFD24A);
+  }
+  body.v99-home .v101-side-logo { border-bottom-color: #00C7D4 !important; }
+  body.v99-home .v101-side-logo b:after {
+    content: "CONTROL DE FLOTA";
+    display: block;
+    margin-top: 4px;
+    color: #7A879C;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .1em;
+  }
+  body.v99-home .v101-nav.v105-nav-clean button { font-weight: 700 !important; }
+  body.v99-home .v101-nav.v105-nav-clean button .v117-nav-icon {
+    display: grid;
+    place-items: center;
+    transition: color .16s ease, background-color .16s ease, transform .16s ease;
+  }
+  body.v99-home .v101-nav.v105-nav-clean button .v117-nav-icon svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavPan .v117-nav-icon { color: #355FF5 !important; background: #EAF0FF !important; }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavRev .v117-nav-icon { color: #009EAA !important; background: #E4F8F9 !important; }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavCtl .v117-nav-icon { color: #16885C !important; background: #EAF8F1 !important; }
+  body.v99-home .v101-nav.v105-nav-clean #v113NavGps .v117-nav-icon { color: #6B54D9 !important; background: #F0EDFF !important; }
+  body.v99-home .v101-nav.v105-nav-clean #v118NavUsers .v117-nav-icon { color: #A76B00 !important; background: #FFF5DD !important; }
+  body.v99-home .v101-nav.v105-nav-clean button.active,
+  body.v99-home .v101-nav.v105-nav-clean button.active:hover {
+    color: #fff !important;
+    background: linear-gradient(105deg, #355FF5, #7558F5) !important;
+    border: 1px solid #5E70F4 !important;
+    border-left: 3px solid #00C7D4 !important;
+    box-shadow: 0 8px 18px #355ff526 !important;
+  }
+  body.v99-home .v101-nav.v105-nav-clean button.active .v117-nav-icon,
+  body.v99-home .v101-nav.v105-nav-clean button.active:hover .v117-nav-icon {
+    color: #fff !important;
+    background: #ffffff2e !important;
+    transform: scale(1.04);
+  }
+  body.v99-home .v101-nav.v105-nav-clean button:hover:not(.active) .v117-nav-icon { transform: translateY(-1px); }
+  body.v99-home .v101-user-side { padding: 12px !important; }
+  body.v99-home .v101-user-initials { border: 0 !important; background: linear-gradient(145deg, #355FF5, #7558F5) !important; color: #fff !important; }
+  body.v99-home .v101-user-side small { font-weight: 700; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.v99-home .v101-nav.v105-nav-clean button .v117-nav-icon { transition: none !important; }
+  body.v99-home .v101-nav.v105-nav-clean button:hover .v117-nav-icon { transform: none !important; }
+}

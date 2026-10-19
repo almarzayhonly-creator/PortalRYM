@@ -6966,7 +6966,13 @@ body.v113-gps .v113-gps-top,.v113-gps-top{background:linear-gradient(105deg,#173
     if(!document.body.classList.contains('v99-home'))return;
     const nav=document.querySelector('.v101-nav');
     if(nav){
-      const defs=[['#v101NavPan','P','Panapass'],['#v101NavRev','R','Revisados'],['#v101NavCtl','▣','Auto'],['#v113NavGps','⌖','GPS'],['#v118NavUsers','U','Usuarios']];
+      const defs=[
+        ['#v101NavPan','<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="M4 9h16M7 15h4"/></svg>','Panapass'],
+        ['#v101NavRev','<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4.5" width="14" height="17" rx="2.5"/><path d="M9 4.5v-1h6v1M8.5 12l2.2 2.2 4.8-5"/></svg>','Revisados'],
+        ['#v101NavCtl','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 14 1.5-5h13l1.5 5v4h-2v-2H6v2H4zM7 9l1.3-3h7.4L17 9M7.5 12h.01M16.5 12h.01"/></svg>','Auto'],
+        ['#v113NavGps','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10.2c0 5-7 10.3-7 10.3S5 15.2 5 10.2a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.2"/></svg>','GPS'],
+        ['#v118NavUsers','<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.3-3 2.3-4.5 5.5-4.5s5.2 1.5 5.5 4.5M16 5.5a3 3 0 0 1 0 5.8M17 14.7c2.2.5 3.4 2 3.5 4.3"/></svg>','Usuarios'],
+      ];
       defs.forEach(([sel,ico,label])=>{const b=nav.querySelector(sel);if(b&&!b.dataset.v117){b.dataset.v117='1';b.title=label;b.innerHTML=`<span class="v117-nav-icon">${ico}</span><span>${label}</span>`}});
     }
     const priorityTitle=[...document.querySelectorAll('.v99-section-title')].find(x=>/Qué requiere|Prioridad de hoy/i.test(x.querySelector('h3')?.textContent||''));
