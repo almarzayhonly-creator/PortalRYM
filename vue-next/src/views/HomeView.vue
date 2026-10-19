@@ -79,7 +79,7 @@ const cards = computed<PortalCard[]>(() => {
   }
   return result
 })
-type Priority = { key: string; tone: 'critical' | 'warning' | 'good'; title: string; detail: string; action: keyof ModuleAction }
+type Priority = { key: string; tone: 'critical' | 'warning' | 'good'; value: string; title: string; detail: string; action: keyof ModuleAction; actionLabel: string }
 const priorities = computed<Priority[]>(() => {
   const data = summary.value
   if (!data) return []
@@ -87,17 +87,26 @@ const priorities = computed<Priority[]>(() => {
   const pan = data.panapass
   const rev = data.revisados
   const control = data.control
-  if (Number(rev?.criticos) > 0) result.push({ key: 'rev-critical', tone: 'critical', title: `${rev!.criticos} revisados críticos`, detail: `${rev!.pendientes || 0} pendientes dentro de tu alcance`, action: 'revisados' })
-  if (Number(pan?.bajas?.pendientes) > 0) result.push({ key: 'ena-pending', tone: Number(pan?.bajas?.alertas) > 0 ? 'critical' : 'warning', title: `${pan!.bajas!.pendientes} bajas ENA pendientes`, detail: `${pan!.bajas!.procesadas || 0} procesadas · ${pan!.bajas!.devoluciones || 0} devoluciones`, action: 'panapass' })
+  const makePriority = (key: string, tone: Priority['tone'], rawTitle: string, detail: string, action: keyof ModuleAction): Priority => {
+    const match = rawTitle.match(/^(\d[\d,.]*)\s+(.+)$/)
+    const actionLabel = action === 'revisados' ? 'Ir a Revisados' : action === 'panapass' ? 'Ir a Panapass' : action === 'control' ? 'Ver flota' : 'Abrir GPS'
+    return { key, tone, value: match?.[1] || '', title: match?.[2] || rawTitle, detail, action, actionLabel }
+  }
+  if (Number(rev?.criticos) > 0) result.push(makePriority('rev-critical', 'critical', `${rev!.criticos} revisados críticos`, `${rev!.pendientes || 0} pendientes dentro de tu alcance`, 'revisados'))
+  if (Number(pan?.bajas?.pendientes) > 0) result.push(makePriority('ena-pending', 'warning', `${pan!.bajas!.pendientes} bajas ENA pendientes`, `${pan!.bajas!.procesadas || 0} procesadas · ${pan!.bajas!.devoluciones || 0} devoluciones`, 'panapass'))
   for (const [index, alert] of (data.alerts || []).entries()) {
-    const title = alert.title || 'Atención requerida'
-    if (result.some(item => item.title.toLocaleLowerCase() === title.toLocaleLowerCase())) continue
+    const rawTitle = alert.title || 'Atención requerida'
+    const normalizedTitle = rawTitle.toLocaleLowerCase().replace(/^\d[\d,.]*\s+/, '').trim()
+    if (result.some(item => item.title.toLocaleLowerCase() === normalizedTitle)) continue
     const module = String(alert.module || '').toLowerCase()
     const action: keyof ModuleAction = module.includes('gps') ? 'gps' : module.includes('revis') ? 'revisados' : module.includes('control') || module.includes('auto') ? 'control' : 'panapass'
     const level = String(alert.level || '').toLowerCase()
-    result.push({ key: `system-alert-${index}`, tone: ['bad', 'critical', 'critico', 'crítica'].includes(level) ? 'critical' : 'warning', title, detail: alert.text || alert.module || 'Revisar alerta', action })
+    const text = `${rawTitle} ${alert.text || ''}`.toLocaleLowerCase()
+    const isMissingPanapass = text.includes('sin panapass') || text.includes('panapass asignado')
+    const tone = isMissingPanapass ? 'warning' : ['bad', 'critical', 'critico', 'crítica'].includes(level) ? 'critical' : 'warning'
+    result.push(makePriority(`system-alert-${index}`, tone, rawTitle, alert.text || alert.module || 'Revisar alerta', action))
   }
-  if (!result.length && control) result.push({ key: 'all-clear', tone: 'good', title: 'Operación sin prioridades críticas', detail: `${control.activas || 0} unidades activas dentro de tu alcance`, action: 'control' })
+  if (!result.length && control) result.push(makePriority('all-clear', 'good', 'Operación sin prioridades críticas', `${control.activas || 0} unidades activas dentro de tu alcance`, 'control'))
   return result.slice(0, 3)
 })
 function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.() }
@@ -147,7 +156,7 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
           <header class="ryn-priorities-heading"><div><span class="ryn-kicker">CENTRO DE ATENCIÓN</span><h2 id="ryn-priorities-title">Atención prioritaria</h2><p>Excepciones que requieren una acción en tu operación.</p></div><span class="ryn-priority-count">{{ priorities.every(item => item.tone === 'good') ? 'Todo en orden' : `${priorities.filter(item => item.tone !== 'good').length} ${priorities.filter(item => item.tone !== 'good').length === 1 ? 'alerta' : 'alertas'}` }}</span></header>
           <div class="ryn-priority-grid">
             <button v-for="item in priorities" :key="item.key" type="button" class="ryn-priority-card" :class="item.tone" @click="open(item.action)">
-              <span class="ryn-priority-mark" aria-hidden="true">{{ item.tone === 'critical' ? '!' : item.tone === 'good' ? '✓' : '↗' }}</span><span class="ryn-priority-copy"><span class="ryn-priority-level">{{ item.tone === 'critical' ? 'CRÍTICO' : item.tone === 'good' ? 'AL DÍA' : 'ATENCIÓN' }}</span><b>{{ item.title }}</b><small>{{ item.detail }}</small></span><span class="ryn-priority-arrow" aria-hidden="true">→</span>
+              <span v-if="item.value" class="ryn-priority-value">{{ item.value }}</span><span v-else class="ryn-priority-mark" aria-hidden="true">{{ item.tone === 'good' ? '✓' : '!' }}</span><span class="ryn-priority-copy"><span class="ryn-priority-level">{{ item.tone === 'critical' ? 'CRÍTICO' : item.tone === 'good' ? 'AL DÍA' : 'ATENCIÓN' }}</span><b>{{ item.title }}</b><small>{{ item.detail }}</small></span><span class="ryn-priority-action">{{ item.actionLabel }} <b aria-hidden="true">→</b></span>
             </button>
           </div>
         </section>
