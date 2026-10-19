@@ -394,6 +394,11 @@ body.v99-home .v99-module > button { min-height: 48px !important; display: flex;
     font-weight: 900;
     letter-spacing: .12em;
   }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavPan { order: 1; }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavRev { order: 2; }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavCtl { order: 3; }
+  body.v99-home .v101-nav.v105-nav-clean #v113NavGps { order: 4; }
+  body.v99-home .v101-nav.v105-nav-clean #v118NavUsers { order: 5; }
   body.v99-home .v101-nav.v105-nav-clean button {
     color: #43536D !important;
     background: transparent !important;
