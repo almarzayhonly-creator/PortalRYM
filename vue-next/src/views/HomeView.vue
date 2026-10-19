@@ -1,87 +1,100 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { canOpen, mainKpis, moduleCards } from '../dashboard'
+import '../home.css'
+import { canOpen } from '../dashboard'
 import type { DashboardState } from '../dashboard'
 import type { ModuleAction } from '../types'
 
 const props = defineProps<{ state: DashboardState; actions: ModuleAction; hasModule: (code: string) => boolean }>()
 const summary = computed(() => props.state.summary)
-const cards = computed(() => summary.value ? moduleCards(summary.value) : [])
-const kpis = computed(() => summary.value ? mainKpis(summary.value) : [])
-const first = computed(() => String(props.state.session.profile.nombre || props.state.session.profile.email || 'Usuario').trim().split(/\s+/)[0])
-const role = computed(() => String(props.state.session.profile.rol || '').toUpperCase())
-const canQuickValidator = computed(() => ['ADMIN_TOTAL', 'GERENTE_GALERA', 'ADMIN', 'SUPERVISORA'].includes(role.value))
-const galera = computed(() => String(props.state.session.profile.galera || ''))
-const rank = computed(() => summary.value?.panapass?.rank)
+const profile = computed(() => props.state.session.profile)
+const name = computed(() => String(profile.value.nombre || profile.value.email || 'Usuario').trim())
+const first = computed(() => name.value.split(/\s+/)[0] || 'Usuario')
+const initials = computed(() => name.value.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase())
+const role = computed(() => String(profile.value.rol || '').toUpperCase())
+const galera = computed(() => String(profile.value.galera || summary.value?.panapass?.rank?.galera || ''))
 const allowedGps = computed(() => canOpen(props.state.session, 'gps', props.hasModule))
 const allowedUsers = computed(() => canOpen(props.state.session, 'users', props.hasModule))
-const alerts = computed(() => (summary.value?.alerts || []).slice(0, 3))
+const canQuickValidator = computed(() => ['ADMIN_TOTAL', 'GERENTE_GALERA', 'ADMIN', 'SUPERVISORA'].includes(role.value))
+const greeting = (() => {
+  const hour = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Panama', hour: '2-digit', hourCycle: 'h23' }).format(new Date()))
+  return hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
+})()
 const updated = computed(() => {
   const value = summary.value?.generated_at
-  if (!value) return '—'
-  try { return new Intl.DateTimeFormat('es-PA', { timeZone: 'America/Panama', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) } catch { return value }
+  if (!value) return 'Actualizando resumen…'
+  try { return new Intl.DateTimeFormat('es-PA', { timeZone: 'America/Panama', dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) } catch { return value }
 })
-const greeting = (() => {
-  const h = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Panama', hour: '2-digit', hourCycle: 'h23' }).format(new Date()))
-  return h < 12 ? 'Buenos días' : h < 18 ? 'Buenas tardes' : 'Buenas noches'
-})()
-function open(key?: keyof ModuleAction) { if (key) props.actions[key]?.() }
+const formatMoney = (value: unknown) => `B/. ${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+type CardMetric = { label: string; value: string | number }
+type PortalCard = { key: string; title: string; icon: string; badge: string; description: string; metrics: CardMetric[]; action: keyof ModuleAction }
+const cards = computed<PortalCard[]>(() => {
+  const data = summary.value
+  if (!data) return []
+  const result: PortalCard[] = []
+  const pan = data.panapass
+  const rev = data.revisados
+  const control = data.control
+  if (pan) result.push({ key: 'panapass', title: 'PANAPASS', icon: '▤', badge: pan.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : 'Operativo', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
+    { label: 'Negativos hoy', value: pan.negativos_hoy ?? '—' }, { label: 'Pagos hoy', value: pan.pagos_hoy ?? '—' }, { label: 'Pagado mes', value: formatMoney(pan.monto_mes) },
+  ], action: 'panapass' })
+  if (rev) result.push({ key: 'revisados', title: 'REVISADOS', icon: '☑', badge: Number(rev.pendientes || 0) ? `${rev.pendientes} pendientes` : 'Al día', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [
+    { label: 'Pendientes', value: rev.pendientes ?? '—' }, { label: 'Emitidos hoy', value: `${rev.emitidos_hoy ?? 0}/${rev.limite_hoy ?? 0}` },
+  ], action: 'revisados' })
+  if (control) {
+    const totals = props.state.controlIndicators?.totals
+    result.push({ key: 'control', title: 'CONTROL DE AUTO', icon: '♧', badge: 'Revisar flota', description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [
+      { label: 'Unidades activas', value: totals?.activas ?? control.activas ?? '—' }, { label: 'Unidades paradas', value: totals?.paradas ?? control.otros ?? '—' }, { label: 'Abono adicional', value: totals?.abono_adicional ?? '—' },
+    ], action: 'control' })
+  }
+  if (allowedGps.value) {
+    const gps = props.state.gpsIndicators?.kpis
+    result.push({ key: 'gps', title: 'GPS', icon: '⌖', badge: role.value === 'ADMIN_TOTAL' ? 'ADMIN TOTAL' : 'Monitoreo', description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [
+      { label: 'Críticas', value: gps?.criticos ?? '—' }, { label: 'Alertas', value: gps?.alertas ?? '—' }, { label: 'Pendientes hoy', value: gps?.pending ?? '—' },
+    ], action: 'gps' })
+  }
+  return result
+})
+function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.() }
 </script>
 
 <template>
-  <main class="ryn-shell" data-testid="vue-next-home">
+  <main class="ryn-shell rym-vue-home" data-testid="vue-next-home">
     <aside class="ryn-sidebar">
-      <div class="ryn-brand"><span class="ryn-mark">R</span><div><b>Portal RYM</b><small>Centro de Control</small></div></div>
-      <nav aria-label="Módulos disponibles">
-        <button class="active" data-testid="nav-home">Inicio</button>
-        <button v-for="card in cards" :key="card.key" @click="open(card.action)">{{ card.title }}</button>
-        <button v-if="allowedGps" @click="open('gps')">GPS</button>
-        <button v-if="allowedUsers" @click="open('users')">Usuarios</button>
+      <div class="ryn-brand"><img :src="'/assets/rym-logo.png'" alt="R&M Repuestos & Multiservicios"><span>CONTROL DE FLOTA</span></div>
+      <nav aria-label="Navegación del portal">
+        <small class="ryn-nav-label">GENERAL</small>
+        <button class="active" data-testid="nav-home"><i aria-hidden="true">⌂</i>Inicio</button>
+        <small class="ryn-nav-label">OPERACIÓN</small>
+        <button v-for="card in cards.filter(item => item.key !== 'gps')" :key="card.key" @click="open(card.action)"><i :class="`icon-${card.key}`" aria-hidden="true">{{ card.icon }}</i>{{ card.title === 'CONTROL DE AUTO' ? 'Auto' : card.title.charAt(0) + card.title.slice(1).toLowerCase() }}</button>
+        <button v-if="allowedGps" @click="open('gps')"><i class="icon-gps" aria-hidden="true">⌖</i>GPS</button>
+        <small v-if="allowedUsers" class="ryn-nav-label admin-label">ADMINISTRACIÓN</small>
+        <button v-if="allowedUsers" @click="open('users')"><i class="icon-users" aria-hidden="true">♙</i>Usuarios</button>
       </nav>
-      <div class="ryn-user"><b>{{ state.session.profile.nombre || state.session.profile.email || 'Usuario' }}</b><span>{{ role }}</span><button @click="open('logout')">Cerrar sesión</button></div>
+      <div class="ryn-user"><div class="ryn-user-id"><span class="ryn-user-avatar">{{ initials }}</span><div><b>{{ name }}</b><span>{{ role }}{{ galera ? ` · ${galera}` : '' }}</span></div></div><small class="ryn-online"><i></i>En línea</small><button @click="open('logout')">Cerrar sesión <span aria-hidden="true">→</span></button></div>
     </aside>
-    <section class="ryn-main">
-      <header class="ryn-header"><div><span class="ryn-eyebrow">PORTAL RYM · INICIO</span><h1>Centro de Control</h1></div><div class="ryn-updated">Última actualización<strong>{{ updated }}</strong></div></header>
-      <section v-if="canQuickValidator" class="v101-validator ryn-validator" aria-label="Validador rápido de unidad">
-        <div class="v101-validator-head"><div><h3>Búsqueda rápida de unidad</h3><p>Busca por unidad, empresa, placa o Panapass y revisa el checklist de MAIN.</p></div><span class="v101-validator-badge">Checklist express</span></div>
-        <div class="v101-validator-tools"><div class="v101-validator-box"><input id="v101ValidatorQ" class="v101-validator-input" placeholder="Unidad, empresa, placa o Panapass" autocomplete="off"><div id="v101ValidatorList" class="v101-validator-list"></div></div><button id="v101ValidatorGo" class="v101-validator-go" type="button">Validar unidad</button></div>
-        <div class="v101-validator-note">Muestra empresa, Panapass, revisado y estado operativo según las fuentes actuales de MAIN.</div>
-      </section>
-      <div v-if="state.state === 'loading'" class="ryn-state" role="status">Cargando el resumen de tu alcance…</div>
-      <div v-else-if="state.state === 'error'" class="ryn-state error" role="alert"><b>No se pudo cargar el resumen.</b><span>{{ state.error }}</span><button @click="open('retry')">Reintentar</button></div>
-      <div v-else>
-        <div v-if="state.state === 'stale'" class="ryn-state stale" role="status">No se pudo actualizar. Se conserva la última información válida. {{ state.error }} <button @click="open('retry')">Reintentar</button></div>
-        <section class="ryn-welcome"><div><span class="ryn-eyebrow">{{ greeting }}</span><h2>{{ first }}, así va tu operación hoy</h2><p>Resumen y accesos dentro de los permisos de tu sesión{{ galera ? ` en ${galera}` : '' }}.</p></div><div v-if="rank" class="ryn-rank"><span>🏆</span><div><small>Posición en ranking</small><strong>#{{ rank.posicion_galera }} de {{ rank.total_galera }}</strong><small>Este mes</small></div></div><div class="ryn-avatar">{{ first.slice(0, 1).toUpperCase() }}</div></section>
-        <section v-if="kpis.length" class="ryn-kpis" aria-label="Indicadores principales">
-          <article v-for="metric in kpis" :key="metric.label" class="ryn-kpi" :class="metric.tone"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small>{{ metric.detail }}</small></article>
+    <section class="ryn-workspace">
+      <header class="ryn-topbar"><strong>Centro de Control RYM</strong><div class="ryn-top-actions"><span class="ryn-profile-pill">♥ Mi perfil</span><div class="ryn-updated">Última actualización<strong>{{ updated }}</strong></div><span class="ryn-top-icon" aria-hidden="true">♙</span><div class="ryn-top-user"><b>{{ name }}</b><small>{{ role }}</small></div><button class="ryn-logout-icon" aria-label="Cerrar sesión" @click="open('logout')">↪</button></div></header>
+      <section class="ryn-main">
+        <header class="ryn-page-heading"><div><h1>¡{{ greeting }}, {{ first }}! <span aria-hidden="true">👋</span></h1><p>Así va tu operación hoy{{ galera ? ` · ${galera}` : '' }}</p></div></header>
+        <section v-if="canQuickValidator" class="ryn-validator" aria-label="Validador de unidad">
+          <div class="ryn-validator-heading"><span class="ryn-validator-icon" aria-hidden="true">⌕</span><div><h2>Validador de Unidad</h2><p>Busca una unidad, placa o Panapass</p></div></div>
+          <div class="v101-validator-tools"><div class="v101-validator-box"><input id="v101ValidatorQ" class="v101-validator-input" placeholder="Buscar unidad, placa o Panapass" autocomplete="off"><div id="v101ValidatorList" class="v101-validator-list"></div></div><button id="v101ValidatorGo" class="v101-validator-go" type="button">Validar unidad</button></div>
         </section>
-        <section class="ryn-section-head"><div><span class="ryn-eyebrow">OPERACIÓN</span><h2>Módulos disponibles</h2></div><span class="ryn-data-state">Datos de MAIN</span></section>
+        <div v-if="state.state === 'error'" class="ryn-load-state error" role="alert"><b>No se pudo cargar el resumen.</b><span>{{ state.error }}</span><button @click="open('retry')">Reintentar</button></div>
+        <div v-else-if="state.state === 'stale'" class="ryn-load-state stale" role="status">No se pudo actualizar el resumen. Se conservan los últimos datos válidos. {{ state.error }} <button @click="open('retry')">Reintentar</button></div>
+        <div v-if="state.state === 'loading'" class="ryn-load-state" role="status">Cargando el resumen de tu alcance…</div>
+        <section class="ryn-section-title"><div><h2>Tu operación por sistema</h2><p>Cada módulo muestra únicamente sus indicadores y acciones.</p></div></section>
         <section v-if="cards.length" class="ryn-modules">
           <article v-for="card in cards" :key="card.key" class="ryn-module" :class="card.key">
-            <header><span class="ryn-module-icon">{{ card.title.slice(0, 1) }}</span><span class="ryn-badge">{{ card.badge }}</span></header>
+            <header><span class="ryn-module-icon">{{ card.icon }}</span><span class="ryn-badge">{{ card.badge }}</span></header>
             <h3>{{ card.title }}</h3><p>{{ card.description }}</p>
-            <div class="ryn-module-metrics"><div v-for="metric in card.metrics" :key="metric.label" :class="metric.tone"><span>{{ metric.label }}</span><b>{{ metric.value }}</b><small>{{ metric.detail }}</small></div></div>
-            <div v-if="card.key === 'control'" class="ryn-secondary-kpis" data-indicator="control" :data-state="state.controlState">
-              <small v-if="state.controlState === 'loading'" role="status">Cargando indicadores operativos…</small>
-              <p v-if="state.controlState === 'error'" role="alert">Control: {{ state.controlError }} <button @click="open('retryIndicators')">Reintentar</button></p>
-              <p v-if="state.controlState === 'stale'" role="status">No se pudo actualizar Control; se conservan los valores anteriores. {{ state.controlError }}</p>
-              <div v-if="state.controlIndicators" class="ryn-secondary-grid"><div><span>Unidades activas</span><b>{{ state.controlIndicators.totals?.activas ?? 0 }}</b></div><div><span>Unidades paradas</span><b>{{ state.controlIndicators.totals?.paradas ?? 0 }}</b></div><div><span>Abono adicional</span><b>{{ state.controlIndicators.totals?.abono_adicional ?? 0 }}</b></div></div>
-            </div>
-            <button class="ryn-open" @click="open(card.action)">Abrir {{ card.title }} <span aria-hidden="true">→</span></button>
+            <div class="ryn-module-metrics"><div v-for="metric in card.metrics" :key="metric.label"><span>{{ metric.label }}</span><b>{{ metric.value }}</b></div></div>
+            <button class="ryn-open" @click="open(card.action)">{{ card.key === 'gps' ? 'Atender prioridades' : card.key === 'control' ? 'Ver flota' : card.key === 'revisados' ? 'Gestionar revisados' : 'Abrir Panapass' }} <span aria-hidden="true">→</span></button>
           </article>
         </section>
-        <section v-if="role === 'ADMIN_TOTAL'" class="ryn-gps-kpis" data-indicator="gps" :data-state="state.gpsState" aria-label="Indicadores GPS">
-          <div><span class="ryn-eyebrow">GPS · RESUMEN EJECUTIVO</span><h3>Estado de la flota</h3></div>
-          <small v-if="state.gpsState === 'loading'" role="status">Cargando indicadores GPS…</small>
-          <p v-if="state.gpsState === 'error'" role="alert">GPS: {{ state.gpsError }} <button @click="open('retryIndicators')">Reintentar</button></p>
-          <p v-if="state.gpsState === 'stale'" role="status">No se pudo actualizar GPS; se conservan los valores anteriores. {{ state.gpsError }}</p>
-          <div v-if="state.gpsIndicators" class="ryn-secondary-grid"><div><span>Críticas</span><b>{{ state.gpsIndicators.kpis?.criticos ?? 0 }}</b></div><div><span>Alertas</span><b>{{ state.gpsIndicators.kpis?.alertas ?? 0 }}</b></div><div><span>Pendientes hoy</span><b>{{ state.gpsIndicators.kpis?.pending ?? 0 }}</b></div><div v-if="state.gpsIndicators.kpis?.sin_gps != null"><span>Sin GPS</span><b>{{ state.gpsIndicators.kpis.sin_gps }}</b></div></div>
-        </section>
-        <section v-else class="ryn-state">No hay módulos con resumen disponible para esta sesión.</section>
-        <section class="ryn-section-head"><div><span class="ryn-eyebrow">SEGUIMIENTO</span><h2>Prioridades de hoy</h2></div><span class="ryn-count">{{ alerts.length }} prioridades</span></section>
-        <section v-if="alerts.length" class="ryn-alerts"><article v-for="(alert, i) in alerts" :key="`${alert.title}-${i}`" :class="alert.level"><b>{{ alert.title }}</b><p>{{ alert.text }}</p></article></section>
-        <section v-else class="ryn-state empty">Sin prioridades reportadas dentro de tu alcance.</section>
-      </div>
+        <div v-else-if="state.state !== 'loading'" class="ryn-load-state">No tienes módulos habilitados para esta sesión.</div>
+      </section>
     </section>
   </main>
 </template>
