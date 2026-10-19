@@ -591,3 +591,11 @@ body.v99-home .v101-side-logo #v101SidebarToggle { display: none !important; }
   body.v99-home .v101-nav.v105-nav-clean button .v117-nav-icon { transition: none !important; }
   body.v99-home .v101-nav.v105-nav-clean button:hover .v117-nav-icon { transform: none !important; }
 }
+
+/* Evita que el color general de spans atenúe las iniciales del perfil. */
+body.v99-home .v101-user-side .v101-user-id > .v101-user-initials {
+  color: #fff !important;
+  background: linear-gradient(145deg, #2F50E8, #6544DA) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
