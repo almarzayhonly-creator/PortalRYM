@@ -700,11 +700,11 @@ body.v66-revisados .v66-daily-gal{background:#fff0d1!important;color:#734600!imp
 }
 .login.login-rym:before,.login.login-rym:after{content:"";position:absolute;inset:-18%;width:auto;height:auto;left:0;right:0;top:0;bottom:0;z-index:-1;pointer-events:none;border:0;border-radius:0;box-shadow:none;transform:none}
 .login.login-rym:before{
-  background:linear-gradient(112deg,transparent 8%,rgba(8,120,231,.16) 23%,transparent 39%,rgba(0,190,220,.2) 55%,transparent 70%,rgba(244,179,34,.2) 84%,transparent);
-  background-size:260% 210%;animation:rym-login-color-current 16s linear infinite alternate
+  background:radial-gradient(ellipse 34% 30% at 13% 24%,rgba(0,190,220,.34),rgba(0,190,220,.16) 48%,transparent 74%),radial-gradient(ellipse 31% 37% at 86% 77%,rgba(244,179,34,.32),rgba(244,179,34,.14) 50%,transparent 76%),linear-gradient(112deg,transparent 8%,rgba(8,120,231,.1) 25%,transparent 43%,rgba(0,190,220,.12) 59%,transparent 74%,rgba(244,179,34,.12) 88%,transparent);
+  background-size:125% 125%,125% 125%,260% 210%;animation:rym-login-color-current 16s ease-in-out infinite alternate
 }
 .login.login-rym:after{
-  background:radial-gradient(ellipse at 16% 22%,rgba(0,190,220,.24),transparent 37%),radial-gradient(ellipse at 83% 78%,rgba(244,179,34,.25),transparent 32%),radial-gradient(ellipse at 78% 18%,rgba(8,120,231,.13),transparent 30%);
+  background:radial-gradient(ellipse 29% 35% at 79% 20%,rgba(8,120,231,.2),transparent 73%),radial-gradient(ellipse 28% 23% at 20% 83%,rgba(0,173,157,.24),transparent 76%),radial-gradient(ellipse 22% 29% at 50% 50%,rgba(244,179,34,.1),transparent 78%);
   animation:rym-login-glow-drift 11s ease-in-out infinite alternate
 }
 .login-rym-layout{position:relative;z-index:1;width:min(100%,980px);display:grid;grid-template-columns:1.04fr .96fr;align-items:stretch;gap:0;overflow:hidden;border:1px solid rgba(255,255,255,.9);border-radius:30px;background:#fff;box-shadow:0 28px 80px rgba(25,72,119,.16),0 5px 20px rgba(8,120,231,.08)}
