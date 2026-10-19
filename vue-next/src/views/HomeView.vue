@@ -78,7 +78,7 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <small v-if="allowedUsers" class="ryn-nav-label admin-label">ADMINISTRACIÓN</small>
         <button v-if="allowedUsers" @click="open('users')"><i class="icon-users" aria-hidden="true">♙</i>Usuarios</button>
       </nav>
-      <div class="ryn-user"><div class="ryn-user-id"><span class="ryn-user-avatar">{{ initials }}</span><div><b>{{ name }}</b><span>{{ role }}{{ galera ? ` · ${galera}` : '' }}</span></div></div><small class="ryn-online"><i></i>En línea</small><button @click="open('logout')">Cerrar sesión <span aria-hidden="true">→</span></button></div>
+      <div class="ryn-user"><div class="ryn-user-id"><span class="ryn-user-avatar">{{ initials }}</span><div><b>{{ name }}</b><span>{{ role }}{{ galera ? ` · ${galera}` : '' }}</span></div></div><small class="ryn-online"><i></i>En línea</small><button type="button" @click="open('logout')">Cerrar sesión <span aria-hidden="true">→</span></button></div>
     </aside>
     <section class="ryn-workspace">
       <header class="ryn-topbar">
@@ -86,7 +86,7 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <div class="ryn-top-actions">
           <div class="ryn-updated"><span><small>Actualizado</small><strong>{{ updated }}</strong></span></div>
           <div class="ryn-top-user"><span class="ryn-top-avatar">{{ initials }}</span><span class="ryn-top-user-copy"><b>{{ name }}</b><small>{{ role }}</small></span></div>
-          <button class="ryn-logout-icon" aria-label="Cerrar sesión" title="Cerrar sesión" @click="open('logout')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></button>
+          <button type="button" class="ryn-logout-icon" aria-label="Cerrar sesión" title="Cerrar sesión" @click="open('logout')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></button>
         </div>
       </header>
       <section class="ryn-main">

@@ -4,6 +4,7 @@ import LoginView from './views/LoginView.vue'
 import { acceptHomeSummary, acceptIndicator, createDashboardState, failHomeSummary, failIndicator } from './dashboard'
 import type { DashboardState } from './dashboard'
 import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalProfile } from './types'
+import type { PanapassSnapshot } from './panapass'
 import './style.css'
 
 declare global {
@@ -19,6 +20,8 @@ declare global {
     loginView?: () => unknown
     login?: (event: SubmitEvent) => Promise<void>
     __RYM_VUE_NEXT_HOME_MAIN?: { bindValidator?: () => unknown; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
+    __RYM_VUE_NEXT_LOGIN?: { render: (error?: string) => void; dispose: () => void }
+    __RYM_VUE_NEXT_PANAPASS_MAIN?: { read?: (force?: boolean) => Promise<PanapassSnapshot> }
     __RYM_VUE_NEXT_GPS_PRIORITY?: () => unknown
   }
 }
@@ -72,12 +75,12 @@ function loadPanapassStyles(): Promise<void> {
 }
 function currentActions(): ModuleAction {
   return {
-    panapass: () => routeTo(window.v70OpenPanapass),
+    panapass: () => openPanapass(),
     revisados: () => routeTo(window.v60OpenRevisados),
     control: () => routeTo(window.v70OpenControl),
     gps: () => routeTo(window.v113OpenGps),
     users: () => routeTo(window.v70OpenUsers),
-    logout: () => routeTo(() => { window.clearSession?.(); window.loginView?.() }),
+    logout: () => routeTo(logoutToLogin),
     retry: () => window.v36PortalHome?.(),
     retryIndicators: () => {
       if (!state) return
@@ -90,7 +93,119 @@ function currentActions(): ModuleAction {
   }
 }
 
+function logoutToLogin(): void {
+  window.clearSession?.()
+  disposeHome()
+  renderLogin()
+}
+
+async function openPanapass(): Promise<void> {
+  const route = window.v70OpenPanapass
+  if (typeof route !== 'function') return
+  const authorized = !!window.rymHasModule?.('portal.panapass') || !!state?.session.modules.includes('portal.panapass')
+  if (!authorized) return
+  disposeHome()
+  await route()
+  const view = document.querySelector<HTMLElement>('#view')
+  const main = window.__RYM_VUE_NEXT_PANAPASS_MAIN
+  if (!view || !main?.read || document.body.classList.contains('v66-revisados')) return
+  groupPanapassNavigation()
+  renderPanapass(view)
+}
+
+function groupPanapassNavigation(): void {
+  const nav = document.querySelector<HTMLElement>('.side .nav')
+  if (!nav || nav.querySelector('[data-rym-pan-nav]')) return
+  const groups = [
+    { label: 'OPERACIÓN', modules: ['dashboard', 'negativos_hoy', 'pagos_hoy'] },
+    { label: 'GESTIÓN', modules: ['cargar_pagos', 'historial', 'recurrentes', 'bajas_panapass'] },
+    { label: 'ANÁLISIS', modules: ['ranking', 'reportes', 'recorrido', 'operaciones'] },
+  ]
+  const fragment = document.createDocumentFragment()
+  const ordered = new Set<HTMLElement>()
+  for (const group of groups) {
+    const buttons = group.modules.map(code => nav.querySelector<HTMLElement>(`[data-m="${code}"]`)).filter((button): button is HTMLElement => !!button)
+    if (!buttons.length) continue
+    const label = document.createElement('div')
+    label.className = 'rym-pan-nav-label'
+    label.dataset.rymPanNav = '1'
+    label.textContent = group.label
+    fragment.append(label)
+    for (const button of buttons) { ordered.add(button); fragment.append(button) }
+  }
+  for (const child of [...nav.children]) if (!ordered.has(child as HTMLElement)) fragment.append(child)
+  nav.replaceChildren(fragment)
+}
+
+export async function renderPanapass(view = document.querySelector<HTMLElement>('#view')): Promise<void> {
+  if (!view) return
+  disposePanapass()
+  document.body.classList.add('rym-panapass-vue')
+  const sequence = ++panapassSequence
+  view.innerHTML = '<div id="rym-vue-next-panapass"></div>'
+  const root = view.querySelector<HTMLElement>('#rym-vue-next-panapass')
+  if (!root) return
+  const read = window.__RYM_VUE_NEXT_PANAPASS_MAIN?.read
+  if (!read) return
+  const observer = new MutationObserver(() => {
+    if (!root.isConnected) disposePanapass()
+  })
+  panapassObserver = observer
+  observer.observe(view, { childList: true, subtree: true })
+  const componentState = reactive({ snapshot: null as PanapassSnapshot | null, loading: true, error: '', stale: false })
+  const load = async (force = false) => {
+    componentState.loading = true
+    componentState.error = ''
+    try {
+      const next = await read(force)
+      if (sequence !== panapassSequence || !root.isConnected || document.querySelector('#view') !== view) return
+      componentState.snapshot = next
+      componentState.stale = next.state === 'stale'
+      componentState.error = next.error || ''
+    } catch (error) {
+      if (sequence !== panapassSequence || !root.isConnected) return
+      componentState.error = error instanceof Error ? error.message : String(error)
+    } finally {
+      if (sequence === panapassSequence && root.isConnected) componentState.loading = false
+    }
+  }
+  let PanapassView: typeof import('./views/PanapassView.vue')['default']
+  try {
+    const [component] = await Promise.all([import('./views/PanapassView.vue'), loadPanapassStyles()])
+    PanapassView = component.default
+  } catch (error) {
+    if (sequence === panapassSequence && root.isConnected) {
+      const alert = document.createElement('section')
+      alert.className = 'pan-state pan-error'
+      alert.setAttribute('role', 'alert')
+      const message = document.createElement('span')
+      message.textContent = 'No se pudo cargar el dashboard Panapass. Comprueba tu conexión e inténtalo de nuevo.'
+      const retry = document.createElement('button')
+      retry.type = 'button'
+      retry.textContent = 'Reintentar'
+      retry.onclick = () => { void renderPanapass(view) }
+      alert.append(message, retry)
+      root.replaceChildren(alert)
+    }
+    return
+  }
+  if (sequence !== panapassSequence || !root.isConnected || document.querySelector('#view') !== view) return
+  panapassApp = createApp(PanapassView, { state: componentState, retry: () => { void load(true) } })
+  panapassApp.mount(root)
+  void load()
+}
+
+export function disposePanapass(): void {
+  panapassSequence++
+  document.body.classList.remove('rym-panapass-vue')
+  panapassObserver?.disconnect()
+  panapassObserver = null
+  panapassApp?.unmount()
+  panapassApp = null
+}
+
 export function renderHome(summary: HomeSummary): void {
+  disposeLogin()
   const root = document.querySelector<HTMLElement>('#app')
   if (!root) return
   if (state && !document.querySelector('#rym-vue-next-home')) disposeHome()
