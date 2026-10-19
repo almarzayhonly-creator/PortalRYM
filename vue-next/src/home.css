@@ -8,13 +8,14 @@
 .rym-vue-home .ryn-sidebar nav{display:grid;gap:5px}
 .rym-vue-home .ryn-sidebar nav .ryn-nav-label{padding:11px 10px 5px;color:#7a8ca5;font-size:9px;font-weight:900;letter-spacing:.13em}
 .rym-vue-home .ryn-sidebar nav button{display:flex;align-items:center;gap:11px;min-height:48px;padding:8px 10px;border:0;border-radius:12px;background:transparent;color:#48596e;text-align:left;font-size:12px;font-weight:700;transition:background .16s ease,color .16s ease,transform .16s ease}
+.rym-vue-home .ryn-sidebar nav button:not(.active){background:transparent!important;color:#48596e!important;box-shadow:none!important;font-size:12px!important}
 .rym-vue-home .ryn-sidebar nav button i{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:11px;background:#e8f1ff;color:#2363c4;font-size:18px;font-style:normal;font-weight:800}
 .rym-vue-home .ryn-sidebar nav button i.icon-revisados{background:#e7f7ee;color:#15945e}
 .rym-vue-home .ryn-sidebar nav button i.icon-control{background:#fff0e4;color:#dc6a13}
 .rym-vue-home .ryn-sidebar nav button i.icon-gps{background:#edf0ff;color:#574be5}
 .rym-vue-home .ryn-sidebar nav button i.icon-users{background:#fff5dc;color:#ad7300}
 .rym-vue-home .ryn-sidebar nav button:hover{background:#f0f5fc;color:#174f93;transform:translateX(2px)}
-.rym-vue-home .ryn-sidebar nav button.active{min-height:50px;background:linear-gradient(105deg,#146dbb,#1f58ad);box-shadow:inset 4px 0 #f4a226,0 7px 15px #1d64ae20;color:#fff}
+.rym-vue-home .ryn-sidebar nav button.active{min-height:50px;background:linear-gradient(105deg,#146dbb,#1f58ad)!important;box-shadow:inset 4px 0 #f4a226,0 7px 15px #1d64ae20;color:#fff!important;font-size:12px!important}
 .rym-vue-home .ryn-sidebar nav button.active i{background:#ffffff29;color:#fff}
 .rym-vue-home .ryn-sidebar nav .admin-label{margin-top:13px;padding-top:16px;border-top:1px solid #e0e7f0}
 .rym-vue-home .ryn-user{margin-top:auto;padding:12px 10px 11px;border:1px solid #dce6f1;border-radius:16px;background:#f8fafd}
@@ -24,7 +25,7 @@
 .rym-vue-home .ryn-user-id span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#74849b;font-size:9px}
 .rym-vue-home .ryn-online{display:flex;align-items:center;gap:5px;margin:8px 0;color:#17975f;font-size:9px}
 .rym-vue-home .ryn-online i{width:7px;height:7px;border-radius:50%;background:#23b878;box-shadow:0 0 0 3px #23b87820}
-.rym-vue-home .ryn-user button{display:flex;justify-content:center;align-items:center;gap:8px;margin:0;padding:9px 10px;border:1px solid #d5e1ee;border-radius:11px;background:#fff;color:#314b68;text-align:center;font-size:10px;font-weight:800}
+.rym-vue-home .ryn-user button{display:flex;justify-content:center;align-items:center;gap:8px;margin:0;padding:9px 10px;border:1px solid #d5e1ee;border-radius:11px;background:#fff!important;color:#314b68!important;text-align:center;font-size:10px!important;font-weight:800}
 .rym-vue-home .ryn-user button:hover{border-color:#f0a128;color:#174f93}
 .rym-vue-home .ryn-workspace{min-width:0;max-width:none;background:radial-gradient(ellipse at 5% 0%,#e9f5fb 0,transparent 36%),#f3f6fb}
 .rym-vue-home .ryn-topbar{height:65px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 25px;border-bottom:1px solid #e1e8f0;background:#fff}
@@ -67,23 +68,23 @@
 .rym-vue-home .ryn-module.gps:before{background:linear-gradient(90deg,#173b65,#197ba0,#18a579)}
 .rym-vue-home .ryn-module:hover{transform:translateY(-3px);box-shadow:0 15px 27px #153f6c19}
 .rym-vue-home .ryn-module header{min-height:50px;align-items:center}
-.rym-vue-home .ryn-module-icon{width:39px;height:39px;border-radius:13px;background:linear-gradient(145deg,#00a8dd,#1769d5);font-size:20px;color:#fff;box-shadow:0 5px 11px #1689cc35}
-.rym-vue-home .ryn-module.revisados .ryn-module-icon{background:linear-gradient(145deg,#dff7ed,#a7dfc4);color:#15945e;box-shadow:0 4px 10px #14965b20}
-.rym-vue-home .ryn-module.control .ryn-module-icon{background:linear-gradient(145deg,#fff0de,#ffd2aa);color:#d86615;box-shadow:0 4px 10px #de7a1d20}
-.rym-vue-home .ryn-module.gps .ryn-module-icon{background:linear-gradient(145deg,#eef1ff,#d8e4ff);color:#214d8c}
+.rym-vue-home .ryn-module-icon{width:39px;height:39px;border-radius:13px;background:linear-gradient(145deg,#00a8dd,#1769d5)!important;font-size:20px;color:#fff!important;box-shadow:0 5px 11px #1689cc35}
+.rym-vue-home .ryn-module.revisados .ryn-module-icon{background:linear-gradient(145deg,#dff7ed,#a7dfc4)!important;color:#15945e!important;box-shadow:0 4px 10px #14965b20}
+.rym-vue-home .ryn-module.control .ryn-module-icon{background:linear-gradient(145deg,#fff0de,#ffd2aa)!important;color:#d86615!important;box-shadow:0 4px 10px #de7a1d20}
+.rym-vue-home .ryn-module.gps .ryn-module-icon{background:linear-gradient(145deg,#eef1ff,#d8e4ff)!important;color:#214d8c!important}
 .rym-vue-home .ryn-badge{max-width:62%;padding:7px 9px;border:1px solid #ffcf73;border-radius:999px;background:#fff9eb;color:#9d6909;font-size:9px;line-height:1.25}
 .rym-vue-home .ryn-module h3{margin:18px 0 8px;color:#173651;font-size:17px;letter-spacing:-.025em}
 .rym-vue-home .ryn-module.panapass h3{color:#194f8e}.rym-vue-home .ryn-module.revisados h3{color:#16874e}.rym-vue-home .ryn-module.control h3{color:#c75b11}.rym-vue-home .ryn-module.gps h3{color:#1c3e69}
-.rym-vue-home .ryn-module>p{min-height:41px;margin:0;color:#718198;font-size:11px;line-height:1.55}
+.rym-vue-home .ryn-module>p{min-height:41px;margin:0;color:#657991!important;font-size:11px!important;line-height:1.55}
 .rym-vue-home .ryn-module-metrics{display:grid;grid-template-columns:1fr;gap:0;margin:17px 0 15px;padding:3px 12px;border:1px solid #dce7f2;border-radius:15px;background:#f7f9fc}
 .rym-vue-home .ryn-module.revisados .ryn-module-metrics{border-color:#dceee5;background:#f8fcfa}.rym-vue-home .ryn-module.control .ryn-module-metrics{border-color:#d6eee5;background:#f5fbf8}.rym-vue-home .ryn-module.gps .ryn-module-metrics{border-color:#d7e6f4;background:#f6f9fd}
 .rym-vue-home .ryn-module-metrics>div{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;min-height:46px;padding:8px 2px;border:0;border-bottom:1px solid #e1e9f1;border-radius:0;background:transparent}
 .rym-vue-home .ryn-module-metrics>div:last-child{border-bottom:0}
-.rym-vue-home .ryn-module-metrics span{min-height:0;color:#708198;font-size:9px;line-height:1.35}
-.rym-vue-home .ryn-module-metrics b{margin:0;color:#142f4e;font-size:17px;letter-spacing:-.025em;text-align:right;overflow-wrap:anywhere}
-.rym-vue-home .ryn-open{display:flex;justify-content:center;gap:9px;min-height:44px;margin-top:auto;border-radius:12px;background:linear-gradient(100deg,#126fbd,#1a3b60);box-shadow:0 5px 10px #13589524;font-size:11px}
+.rym-vue-home .ryn-module-metrics span{min-height:0;color:#667b94!important;font-size:10px!important;font-weight:600!important;line-height:1.35}
+.rym-vue-home .ryn-module-metrics b{margin:0;color:#142f4e!important;font-size:17px!important;letter-spacing:-.025em;text-align:right;overflow-wrap:anywhere}
+.rym-vue-home .ryn-open{display:flex;justify-content:center;gap:9px;min-height:44px;margin-top:auto;border-radius:12px;background:linear-gradient(100deg,#126fbd,#1a3b60);box-shadow:0 5px 10px #13589524;color:#fff!important;font-size:12px!important;font-weight:800!important}
 .rym-vue-home .ryn-module.revisados .ryn-open{background:linear-gradient(100deg,#138954,#16894e)}
-.rym-vue-home .ryn-module.control .ryn-open{background:linear-gradient(100deg,#e36812,#f07d18);color:#142b40}
+.rym-vue-home .ryn-module.control .ryn-open{background:linear-gradient(100deg,#e36812,#f07d18)!important;color:#fff!important}
 .rym-vue-home .ryn-module.gps .ryn-open{background:linear-gradient(100deg,#176abd,#173b60)}
 .rym-vue-home .ryn-open:hover{filter:brightness(1.06);transform:translateY(-1px)}
 @keyframes rym-wave{0%,65%,100%{transform:rotate(0)}72%{transform:rotate(18deg)}80%{transform:rotate(-8deg)}88%{transform:rotate(14deg)}}
