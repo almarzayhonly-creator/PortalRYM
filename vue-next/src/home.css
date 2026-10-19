@@ -1,6 +1,6 @@
 /* Vue dashboard parity: the live Portal RYM home with the same compact control-room layout. */
 .rym-vue-home{grid-template-columns:238px minmax(0,1fr);min-height:100vh;background:#f2f5fa;color:#102a45}
-.rym-vue-home .ryn-sidebar{position:sticky;z-index:5;top:0;height:100vh;padding:24px 14px 15px;background:linear-gradient(165deg,#102d50 0%,#173f68 54%,#0e2a4b 100%);color:#f4f8ff;border-right:1px solid #15385d;box-shadow:8px 0 28px #102a5012}
+.ryn-shell.rym-vue-home .ryn-sidebar{position:sticky;z-index:5;top:0;height:100vh;padding:24px 14px 15px;background:linear-gradient(165deg,#102d50 0%,#173f68 54%,#0e2a4b 100%)!important;color:#f4f8ff;border-right:1px solid #15385d;box-shadow:8px 0 28px #102a5012}
 .rym-vue-home .ryn-brand{position:relative;display:flex;flex-wrap:wrap;gap:0 13px;align-content:flex-start;align-items:center;padding:0 7px 22px;margin-bottom:15px;border-bottom:1px solid #ffffff24}
 .rym-vue-home .ryn-brand:before{content:"";position:absolute;top:-24px;left:-14px;right:-14px;height:4px;background:linear-gradient(90deg,#1473c4,#00c8d0 52%,#f5b52d)}
 .rym-vue-home .ryn-brand img{width:43px;height:43px;object-fit:contain;border-radius:12px;background:#fff;box-shadow:0 5px 14px #173a6414}
@@ -15,7 +15,7 @@
 .rym-vue-home .ryn-sidebar nav button i.icon-gps{background:#edf0ff;color:#574be5}
 .rym-vue-home .ryn-sidebar nav button i.icon-users{background:#fff5dc;color:#ad7300}
 .rym-vue-home .ryn-sidebar nav button:not(.active):hover{background:#ffffff12!important;border-color:#ffffff14;color:#fff!important;transform:translateX(2px)}
-.rym-vue-home .ryn-sidebar nav button.active{min-height:50px;background:linear-gradient(105deg,#fff,#eaf3ff)!important;box-shadow:inset 4px 0 #f28a25,0 9px 20px #061b3538;color:#173b62!important;font-size:12px!important}
+.ryn-shell.rym-vue-home .ryn-sidebar nav button.active{min-height:50px;background:linear-gradient(105deg,#fff,#eaf3ff)!important;box-shadow:inset 4px 0 #f28a25,0 9px 20px #061b3538;color:#173b62!important;font-size:12px!important}
 .rym-vue-home .ryn-sidebar nav button.active i{background:#dcecff;color:#1767ad}
 .rym-vue-home .ryn-sidebar nav .admin-label{margin-top:13px;padding-top:16px;border-top:1px solid #ffffff24}
 .rym-vue-home .ryn-user{margin-top:auto;padding:12px 10px 11px;border:1px solid #ffffff2b;border-radius:16px;background:#ffffff0c;box-shadow:inset 0 1px #ffffff08}
