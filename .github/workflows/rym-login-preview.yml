@@ -1,11 +1,8 @@
-name: RYM login sandbox preview
+name: RYM portal sandbox preview
 
 on:
   push:
     branches: [sandbox/portal-vue-next]
-    paths:
-      - 'index.html'
-      - '.github/workflows/rym-login-preview.yml'
 
 permissions:
   contents: read
