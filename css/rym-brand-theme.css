@@ -215,3 +215,30 @@ body.v99-home .v99-module:hover { transform: translateY(-4px); box-shadow: 0 18p
 .login-rym-head { background: linear-gradient(135deg,#355FF5 0%,#7558F5 52%,#00BFD0 100%) !important; }
 .login-card.login-rym-card #loginBtn { background: linear-gradient(100deg,#355FF5,#7558F5 54%,#00BFD0) !important; box-shadow: 0 12px 28px #355ff536 !important; }
 @media (prefers-reduced-motion: reduce) { body.v99-home .v99-module { transition: none; } body.v99-home .v99-module:hover { transform: none; } }
+
+/* Dashboard: keep the compact sidebar readable and give each fleet module a clear accent. */
+body.v99-home .v101-main { background: radial-gradient(ellipse at 12% 8%,#00C7D40c,transparent 34%),radial-gradient(ellipse at 93% 48%,#7558F50c,transparent 36%),#F4F7FC !important; }
+body.v99-home .v101-nav.v105-nav-clean button { color: #40516f !important; background: transparent !important; border-color: transparent !important; opacity: 1 !important; }
+body.v99-home .v101-nav.v105-nav-clean button .v117-nav-icon { background: #E9EEFF !important; color: #355FF5 !important; }
+body.v99-home .v101-nav.v105-nav-clean button.active,
+body.v99-home .v101-nav.v105-nav-clean button.active:hover { color: #fff !important; background: linear-gradient(105deg,#355FF5,#7558F5) !important; border-color: #5f70ff !important; box-shadow: inset 3px 0 #00C7D4,0 10px 22px #355ff52b !important; }
+body.v99-home .v101-nav.v105-nav-clean button.active .v117-nav-icon { color: #fff !important; background: #ffffff2e !important; }
+body.v99-home .v101-nav.v105-nav-clean button:hover:not(.active) { color: #253B83 !important; background: linear-gradient(100deg,#EEF1FF,#E8F9FC) !important; border-color: #D5DEFF !important; }
+body.v99-home .v101-nav.v105-nav-clean button:hover:not(.active) .v117-nav-icon { color: #7558F5 !important; background: #fff !important; }
+body.v99-home .v101-user-side { border-color: #DCE4F2 !important; box-shadow: 0 10px 26px #253b830d; }
+body.v99-home .v101-user-side button { background: linear-gradient(105deg,#355FF5,#7558F5) !important; box-shadow: 0 7px 18px #355ff526; }
+body.v99-home .v99-module.pan { background: linear-gradient(155deg,#fff 58%,#F1F4FF) !important; }
+body.v99-home .v99-module.rev { background: linear-gradient(155deg,#fff 58%,#EDFBFC) !important; }
+body.v99-home .v99-module.control { background: linear-gradient(155deg,#fff 58%,#F0FBF6) !important; }
+body.v99-home .v99-module.gps { background: linear-gradient(155deg,#fff 58%,#F2F0FF) !important; }
+body.v99-home .v99-module.pan:before { background: linear-gradient(90deg,#355FF5,#7558F5,#00C7D4) !important; }
+body.v99-home .v99-module.rev:before { background: linear-gradient(90deg,#00C7D4,#5BDDE4,#7558F5) !important; }
+body.v99-home .v99-module.control:before { background: linear-gradient(90deg,#27B879,#7ADBB0,#FFD24A) !important; }
+body.v99-home .v99-module.gps:before { background: linear-gradient(90deg,#7558F5,#355FF5,#00C7D4) !important; }
+body.v99-home .v99-module.rev h4 { color: #0093A5 !important; }
+body.v99-home .v99-module.control h4 { color: #17885d !important; }
+body.v99-home .v99-module.gps h4 { color: #5c45cc !important; }
+body.v99-home .v99-module.rev > button { background: linear-gradient(100deg,#00AFC2,#00C7D4) !important; }
+body.v99-home .v99-module.control > button { background: linear-gradient(100deg,#169A68,#27B879) !important; }
+body.v99-home .v99-module.gps > button { background: linear-gradient(100deg,#7558F5,#355FF5) !important; }
+@media (prefers-reduced-motion: reduce) { body.v99-home .v99-module, body.v99-home .v101-nav button { transition: none !important; } }
