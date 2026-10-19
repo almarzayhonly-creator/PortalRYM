@@ -704,3 +704,40 @@ body.v66-revisados .v66-kpi.danger:before { background: var(--rym-orange) !impor
 .ryn-shell .ryn-module-icon, .ryn-shell .ryn-module.revisados .ryn-module-icon { background: var(--rym-green) !important; color: #fff !important; }
 .ryn-shell .ryn-module.control .ryn-module-icon, .ryn-shell .ryn-module.control .ryn-open { background: var(--rym-orange) !important; color: #17191D !important; }
 .ryn-shell .ryn-module.revisados .ryn-open { background: var(--rym-green) !important; }
+
+/* Login: rutas técnicas en movimiento sobre un fondo claro y tranquilo. */
+.login.login-rym {
+  background: linear-gradient(125deg, #F0F6FC 0%, #FBFCFD 48%, #FFF7EB 100%) !important;
+  background-size: 100% 100% !important;
+  animation: none !important;
+}
+.login.login-rym:before {
+  display: block !important;
+  background-image: linear-gradient(to right, #17324D08 1px, transparent 1px), linear-gradient(to bottom, #17324D08 1px, transparent 1px) !important;
+  background-size: 54px 54px !important;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 36%, transparent 88%);
+  opacity: .55;
+}
+.login.login-rym:after {
+  background: radial-gradient(ellipse 34% 36% at 14% 22%, #1769C218, transparent 76%), radial-gradient(ellipse 30% 32% at 88% 76%, #16834A17, transparent 76%), radial-gradient(ellipse 24% 26% at 77% 18%, #F47B2015, transparent 78%) !important;
+  animation: rym-login-glow-drift 18s ease-in-out infinite alternate !important;
+}
+.login-rym-route-art {
+  position: absolute;
+  z-index: 0;
+  inset: -1.5%;
+  width: 103%;
+  height: 103%;
+  object-fit: cover;
+  pointer-events: none;
+  opacity: .72;
+  mix-blend-mode: multiply;
+  animation: rym-login-route-drift 26s ease-in-out infinite alternate !important;
+}
+@keyframes rym-login-route-drift {
+  0% { transform: translate3d(-.25%, .12%, 0) scale(1); }
+  100% { transform: translate3d(.35%, -.18%, 0) scale(1.012); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login.login-rym:after, .login-rym-route-art { animation: none !important; }
+}
