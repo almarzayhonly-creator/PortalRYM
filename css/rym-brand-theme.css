@@ -61,12 +61,53 @@ th { background: linear-gradient(100deg, var(--rym-blue-deep), var(--rym-blue));
 .welcome-card { background: linear-gradient(120deg, var(--rym-blue-deep), var(--rym-blue-light)); }
 
 /* Home dashboard */
+body.v99-home {
+  --v101-bg: var(--rym-canvas);
+  --v101-line: var(--rym-line);
+  --v101-ink: var(--rym-ink);
+  --v101-navy: var(--rym-blue-deep);
+  --v101-blue: var(--rym-blue);
+  --v101-orange: var(--rym-orange);
+  --v101-green: var(--rym-green);
+  --v117-ena-navy: var(--rym-blue-deep);
+  --v117-ena-blue: var(--rym-blue);
+  --v117-ena-sky: var(--rym-blue-light);
+  --v117-ena-orange: var(--rym-orange);
+  --v117-ena-gold: var(--rym-orange);
+  --v117-ecar-blue: var(--rym-blue-light);
+  --v117-ecar-blue2: #56a8c3;
+  --v117-control: var(--rym-green-deep);
+  --v117-control2: var(--rym-green);
+  --v117-gps-blue: var(--rym-blue);
+  --v117-gps-blue2: var(--rym-blue-deep);
+}
 body.v99-home .v101-side { background: linear-gradient(180deg, var(--rym-gray) 0%, var(--rym-gray-deep) 100%) !important; }
-body.v99-home .v101-nav button:hover,
-body.v99-home .v101-nav button.active:hover {
+body.v99-home .v101-nav button.active,
+body.v99-home .v101-nav button.active:hover,
+body.v99-home .v101-nav button:hover {
   background: linear-gradient(100deg, var(--rym-red), #f26b35) !important;
   color: #fff !important;
+  border-color: #ffffff40 !important;
+  box-shadow: 0 7px 18px #a5261f35 !important;
 }
+body.v99-home .v101-top { border-color: var(--rym-line) !important; }
+body.v99-home .v101-greeting h2 { color: var(--rym-blue-deep) !important; }
+body.v99-home .v101-validator {
+  border-color: #e7c9bb !important;
+  background: linear-gradient(135deg, #fff 0%, #fffaf7 65%, #fff3e4 100%) !important;
+  box-shadow: 0 14px 34px #7e3b2012 !important;
+}
+body.v99-home .v101-validator:before { background: linear-gradient(90deg, var(--rym-red), var(--rym-orange), var(--rym-blue-light)) !important; }
+body.v99-home .v101-validator-head h3 { color: var(--rym-gray-deep) !important; }
+body.v99-home .v101-validator-badge {
+  background: linear-gradient(100deg, var(--rym-red), #f26b35) !important;
+  box-shadow: 0 8px 18px #ed3b2f2e !important;
+}
+body.v99-home .v101-validator-input:focus { border-color: var(--rym-blue-light) !important; box-shadow: 0 0 0 4px #087da620 !important; }
+body.v99-home .v101-validator-go { background: linear-gradient(100deg, var(--rym-red), #f26b35 58%, var(--rym-orange)) !important; box-shadow: 0 10px 20px #ed3b2f2b !important; }
+body.v99-home .v117-top-logout { background: #fff1ed !important; color: var(--rym-red) !important; border-color: #f4c6b8 !important; }
+body.v99-home .rym-love-header { background: #fff6ed !important; color: var(--rym-red) !important; border-color: #f1c8ae !important; }
+body.v99-home .rym-love-header.has-alerts:after { background: var(--rym-red) !important; }
 body.v99-home .v99-module.pan:before { background: linear-gradient(90deg, var(--rym-blue-deep), var(--rym-blue), var(--rym-orange)) !important; }
 body.v99-home .v99-module.pan h4 { color: var(--rym-blue-deep) !important; }
 body.v99-home .v99-module.pan > button { background: linear-gradient(90deg, var(--rym-blue-deep), var(--rym-blue)) !important; }
