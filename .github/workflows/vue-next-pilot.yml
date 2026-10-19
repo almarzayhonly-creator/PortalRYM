@@ -45,7 +45,7 @@ jobs:
           test -s dist/portal-rym-vue-next.js
           test -s dist/portal-rym-vue-next.css
           test -s dist/panapass.css
-          find dist -maxdepth 1 -type f -name 'PanapassView-*.js' | grep -q .
+          test -s dist/portal-rym-vue-next-PanapassView.js
       - name: Install isolated browser QA
         run: |
           npm install --no-save --package-lock=false playwright@1.62.1

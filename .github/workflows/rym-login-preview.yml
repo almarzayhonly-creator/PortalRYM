@@ -45,11 +45,13 @@ jobs:
           curl -fsSL --max-time 30 "$url/?preview=${GITHUB_SHA}" -o /tmp/rym-login-preview.html
           curl -fsSL --max-time 30 "$url/assets/rym-logo.png" -o /tmp/rym-logo-preview.png
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.js" -o /tmp/rym-vue-next-preview.js
+          curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next-bridge.js" -o /tmp/rym-vue-next-bridge-preview.js
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.css" -o /tmp/rym-vue-next-preview.css
           test -s /tmp/rym-logo-preview.png
           test -s /tmp/rym-vue-next-preview.js
+          test -s /tmp/rym-vue-next-bridge-preview.js
           test -s /tmp/rym-vue-next-preview.css
-          grep -Fq 'rym-vue-next-login' /tmp/rym-vue-next-preview.js
+          grep -Fq 'rym-vue-next-login' /tmp/rym-vue-next-bridge-preview.js
           grep -Fq 'Tu flota' /tmp/rym-login-preview.html
           grep -Fq 'vueNext=1' /tmp/rym-login-preview.html
           {
