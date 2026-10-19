@@ -1,0 +1,148 @@
+/* RYM brand system: Ternium-inspired palette, shared by legacy and Vue screens. */
+:root {
+  --rym-red: #ed3b2f;
+  --rym-gray: #666a6e;
+  --rym-gray-deep: #454a4e;
+  --rym-orange: #ffa52f;
+  --rym-white: #fff;
+  --rym-blue-light: #087da6;
+  --rym-blue: #005eb8;
+  --rym-blue-deep: #003b66;
+  --rym-green: #00a950;
+  --rym-green-deep: #205d3b;
+  --rym-canvas: #f3f4f5;
+  --rym-line: #d8dadd;
+  --rym-ink: #34393d;
+  --rym-muted: #687076;
+
+  --navy: var(--rym-blue-deep);
+  --blue: var(--rym-blue);
+  --sky: var(--rym-blue-light);
+  --orange: var(--rym-orange);
+  --soft: var(--rym-canvas);
+  --border: var(--rym-line);
+  --text: var(--rym-ink);
+  --muted: var(--rym-muted);
+  --green: var(--rym-green-deep);
+  --red: var(--rym-red);
+  --rym-panapass: var(--rym-blue);
+  --rym-revisados: var(--rym-blue-light);
+  --rym-control: var(--rym-green);
+  --rym-gps: var(--rym-green-deep);
+  --rym-bg: var(--rym-canvas);
+  --rym-text: var(--rym-ink);
+  --rym-muted: #687076;
+}
+
+body { background: var(--rym-canvas); color: var(--rym-ink); }
+input, select, textarea { border-color: var(--rym-line); color: var(--rym-ink); }
+input:focus, select:focus, textarea:focus { border-color: var(--rym-blue-light); box-shadow: 0 0 0 3px #087da61c; }
+
+/* Main portal and navigation */
+.shell, .v101-shell, .v157-shell, .v66-app { background-color: var(--rym-canvas); color: var(--rym-ink); }
+.side, .v101-side, .v157-side, .ryn-sidebar {
+  background: linear-gradient(165deg, var(--rym-gray) 0%, var(--rym-gray-deep) 100%) !important;
+  color: var(--rym-white) !important;
+}
+.nav button.active, .v101-nav button.active, .v157-nav button.active {
+  background: linear-gradient(100deg, var(--rym-red), #f26b35) !important;
+  color: var(--rym-white) !important;
+  border-color: #ffffff40 !important;
+  box-shadow: 0 7px 18px #a5261f35 !important;
+}
+.side .brand, .v101-side-logo, .v157-brand, .ryn-mark { color: var(--rym-white); }
+.top h1, .v101-title h1, .v157-top h1 { color: var(--rym-blue-deep); }
+.panel, .card, .kpi, .v99-module, .v101-validator, .v157-card {
+  border-color: var(--rym-line);
+}
+.panel-title { background: #f3f4f5; color: var(--rym-gray-deep); }
+th { background: linear-gradient(100deg, var(--rym-blue-deep), var(--rym-blue)); }
+.pill, .entity-chip, .date-badge { background: #e8f3f8; color: var(--rym-blue-deep); }
+.welcome-card { background: linear-gradient(120deg, var(--rym-blue-deep), var(--rym-blue-light)); }
+
+/* Home dashboard */
+body.v99-home .v101-side { background: linear-gradient(180deg, var(--rym-gray) 0%, var(--rym-gray-deep) 100%) !important; }
+body.v99-home .v101-nav button:hover,
+body.v99-home .v101-nav button.active:hover {
+  background: linear-gradient(100deg, var(--rym-red), #f26b35) !important;
+  color: #fff !important;
+}
+body.v99-home .v99-module.pan:before { background: linear-gradient(90deg, var(--rym-blue-deep), var(--rym-blue), var(--rym-orange)) !important; }
+body.v99-home .v99-module.pan h4 { color: var(--rym-blue-deep) !important; }
+body.v99-home .v99-module.pan > button { background: linear-gradient(90deg, var(--rym-blue-deep), var(--rym-blue)) !important; }
+body.v99-home .v99-module.rev:before { background: linear-gradient(90deg, #7fb5d0, var(--rym-blue-light), #d7e9ef) !important; }
+body.v99-home .v99-module.rev h4, body.v99-home .v99-module.rev .v99-modicon { color: var(--rym-blue-light) !important; }
+body.v99-home .v99-module.rev .v99-modicon { background: #e5f2f6 !important; }
+body.v99-home .v99-module.rev > button { background: linear-gradient(90deg, var(--rym-blue-light), #3298b7) !important; }
+body.v99-home .v99-module.control:before { background: linear-gradient(90deg, var(--rym-green-deep), var(--rym-green), #a8dfbd) !important; }
+body.v99-home .v99-module.control h4, body.v99-home .v99-module.control .v99-modicon { color: var(--rym-green-deep) !important; }
+body.v99-home .v99-module.control .v99-modicon { background: #e5f4eb !important; }
+body.v99-home .v99-module.control > button { background: linear-gradient(90deg, var(--rym-green-deep), var(--rym-green)) !important; }
+body.v99-home .v99-module.gps:before { background: linear-gradient(90deg, var(--rym-blue-deep), var(--rym-blue), #88bdd6) !important; }
+body.v99-home .v99-module.gps h4, body.v99-home .v99-module.gps .v99-modicon { color: var(--rym-blue-deep) !important; }
+body.v99-home .v99-module.gps .v99-modicon { background: #e8f1f7 !important; }
+body.v99-home .v99-module.gps > button { background: linear-gradient(90deg, var(--rym-blue-deep), var(--rym-blue)) !important; border-bottom-color: var(--rym-orange) !important; }
+
+/* Revisados keeps blue as its module color; warning and success meanings stay clear. */
+body.v66-revisados .v66-app { background: linear-gradient(135deg, #f3f4f5, #fff 62%, #fff6ed) !important; color: var(--rym-ink) !important; }
+body.v66-revisados .v66-side { background: linear-gradient(180deg, var(--rym-blue-deep), var(--rym-blue-light)) !important; border-color: var(--rym-blue-deep) !important; }
+body.v66-revisados .v66-brand h2, body.v66-revisados .v66-hero h2 { color: var(--rym-blue-deep) !important; }
+body.v66-revisados .v66-nav button.active { background: #ffffff24 !important; color: #fff !important; box-shadow: inset 4px 0 var(--rym-orange) !important; }
+body.v66-revisados .v66-hero { background: linear-gradient(120deg, #e7f2f7, #f7fbfd 70%, #fff3e3) !important; border-color: #c7dce5 !important; }
+body.v66-revisados .v66-hero-btn, body.v66-revisados .v66-refresh,
+body.v66-revisados #v66DailySend { background: linear-gradient(100deg, var(--rym-blue), var(--rym-blue-light)) !important; border-color: var(--rym-blue) !important; }
+body.v66-revisados .v66-kpi:before { background: var(--rym-blue) !important; }
+body.v66-revisados .v66-kpi.success:before { background: var(--rym-green) !important; }
+body.v66-revisados .v66-kpi.warn:before { background: var(--rym-orange) !important; }
+body.v66-revisados .v66-kpi.danger:before { background: var(--rym-red) !important; }
+
+/* Panapass and Control Vue views */
+body:has(.pan-dashboard) { --rym-panapass: var(--rym-blue); }
+.pan-dashboard { background: linear-gradient(140deg, #f3f4f5, #fff 68%, #fff7ef) !important; color: var(--rym-ink) !important; }
+.pan-head h1, .pan-panel-head h2, .pan-gallery h3 { color: var(--rym-blue-deep) !important; }
+.pan-readonly { background: #e8f3f8 !important; color: var(--rym-blue-deep) !important; border-color: #b8d3df !important; }
+.pan-card.blue { background: linear-gradient(135deg, var(--rym-blue-deep), var(--rym-blue)) !important; }
+.pan-card.green { background: linear-gradient(135deg, var(--rym-green-deep), var(--rym-green)) !important; }
+.pan-card.orange { background: linear-gradient(135deg, #e86a24, var(--rym-orange)) !important; }
+.pan-card.violet { background: linear-gradient(135deg, var(--rym-blue-light), #53a5c1) !important; }
+.pan-primary button, .pan-refresh { background: linear-gradient(100deg, var(--rym-red), #f26b35) !important; }
+.ryn-shell, body:has(.ryn-shell) { background: var(--rym-canvas) !important; color: var(--rym-ink) !important; }
+.ryn-shell .ryn-sidebar { background: linear-gradient(165deg, var(--rym-gray), var(--rym-gray-deep)) !important; }
+.ryn-shell .ryn-sidebar nav button.active { box-shadow: inset 3px 0 var(--rym-orange) !important; }
+.ryn-shell .ryn-mark { background: var(--rym-red) !important; }
+.ryn-shell .ryn-avatar { background: #e8f3f8 !important; color: var(--rym-blue-deep) !important; }
+.ryn-shell .ryn-kpi strong, .ryn-shell .ryn-module h3, .ryn-shell .ryn-header h1 { color: var(--rym-blue-deep) !important; }
+.ryn-shell .ryn-module-icon { background: var(--rym-blue) !important; }
+.ryn-shell .ryn-module.revisados .ryn-module-icon { background: var(--rym-blue-light) !important; }
+.ryn-shell .ryn-module.control .ryn-module-icon { background: var(--rym-green-deep) !important; }
+.ryn-shell .ryn-open { background: var(--rym-blue-deep) !important; }
+.ryn-shell .ryn-module.revisados .ryn-open { background: var(--rym-blue-light) !important; }
+.ryn-shell .ryn-module.control .ryn-open { background: var(--rym-green-deep) !important; }
+
+/* Login retains its motion and layout, with the approved RYM palette. */
+.login.login-rym {
+  --rym-login-blue: var(--rym-blue);
+  --rym-login-cyan: var(--rym-blue-light);
+  --rym-login-teal: var(--rym-green);
+  --rym-login-gold: var(--rym-orange);
+  background: linear-gradient(125deg, #fff2e9 0%, #f7f8f8 35%, #fff 55%, #ffe4c5 78%, #e9f3f5 100%) !important;
+}
+.login.login-rym:after {
+  background: radial-gradient(ellipse 29% 35% at 79% 20%, #005eb81f, transparent 73%), radial-gradient(ellipse 28% 23% at 20% 83%, #00a95022, transparent 76%), radial-gradient(ellipse 22% 29% at 50% 50%, #ffa52f20, transparent 78%) !important;
+}
+.login-rym-head { background: linear-gradient(138deg, var(--rym-red) 0%, #f15b31 49%, var(--rym-orange) 100%) !important; }
+.login-rym-head:before { background: linear-gradient(135deg, #fff 0%, #ffe1ce 48%, #ffd889 100%) !important; }
+.login-rym-head:after { background: linear-gradient(135deg, #fff6ed, #fff 48%, #ffd477) !important; }
+.login-rym-head h1 span { color: #fff0b9 !important; }
+.login-rym-form-head small { color: var(--rym-blue-light) !important; }
+.login-rym-form-head h2 { color: var(--rym-blue-deep) !important; }
+.login-rym-field input:focus { border-color: var(--rym-blue-light) !important; box-shadow: 0 0 0 4px #087da622 !important; }
+.login-card.login-rym-card #loginBtn { background: linear-gradient(100deg, var(--rym-red), #f26b35 55%, var(--rym-orange)) !important; box-shadow: 0 9px 22px #ed3b2f35 !important; }
+.login-rym-flow .flow-blue { stroke: var(--rym-blue); }
+.login-rym-flow .flow-cyan { stroke: var(--rym-green); }
+.login-rym-flow .flow-gold { stroke: var(--rym-orange); }
+
+@media (prefers-reduced-motion: reduce) {
+  .login.login-rym, .login.login-rym:after, .login-rym-head,
+  .login-rym-head:before, .login-rym-head:after { animation: none !important; }
+}
