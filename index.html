@@ -690,6 +690,90 @@ body.v66-revisados .v66-daily-gal{background:#fff0d1!important;color:#734600!imp
 .ca77-audit-kpis{grid-template-columns:repeat(8,minmax(120px,1fr))!important}.ca77-primary{border-color:#b9dbc8!important;background:#fbfffc}.ca77-table-wrap{overflow:auto}.ca77-table{min-width:1500px}.ca77-table th:nth-child(6),.ca77-table td:nth-child(6){background:#f0faf4}.ca77-table th:nth-child(7),.ca77-table td:nth-child(7){background:#f8fafc}.v77-rec-empty-note{display:grid;gap:6px;padding:18px;border:1px solid #d5dfeb;border-radius:14px;background:#fbfdff;color:#17365e;text-align:left}.v77-rec-empty-note b{font-size:13px}.v77-rec-empty-note span{font-size:11px;color:#49627e}.v77-rec-empty-note small{font-size:10px;color:#75849a;line-height:1.45}
 @media(max-width:1300px){.ca77-audit-kpis{grid-template-columns:repeat(4,minmax(130px,1fr))!important}}@media(max-width:760px){.ca77-audit-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
+<style id="rym-login-stitch-design">
+.login.login-rym{
+  --rym-login-blue:#0878e7;--rym-login-cyan:#00c4e8;--rym-login-teal:#08ad9d;--rym-login-gold:#f4b322;
+  position:relative;isolation:isolate;overflow:hidden;min-height:100vh;min-height:100svh;
+  display:grid;place-items:center;padding:36px 22px;
+  background:linear-gradient(118deg,#edf7ff 0%,#fff 40%,#fff7e6 72%,#eafaff 100%)!important;
+  background-size:260% 260%!important;animation:rym-login-gradient-flow 22s ease-in-out infinite alternate;
+}
+.login.login-rym:before,.login.login-rym:after{content:"";position:absolute;inset:-18%;width:auto;height:auto;left:0;right:0;top:0;bottom:0;z-index:-1;pointer-events:none;border:0;border-radius:0;box-shadow:none;transform:none}
+.login.login-rym:before{
+  background:linear-gradient(112deg,transparent 13%,rgba(8,120,231,.035) 29%,transparent 42%,rgba(0,190,220,.07) 57%,transparent 72%,rgba(244,179,34,.08) 86%,transparent);
+  background-size:230% 190%;animation:rym-login-color-current 19s linear infinite alternate
+}
+.login.login-rym:after{
+  background:radial-gradient(ellipse at 16% 22%,rgba(0,190,220,.09),transparent 35%),radial-gradient(ellipse at 83% 78%,rgba(244,179,34,.11),transparent 30%);
+  animation:rym-login-glow-drift 13s ease-in-out infinite alternate
+}
+.login-rym-layout{position:relative;z-index:1;width:min(100%,980px);display:grid;grid-template-columns:1.04fr .96fr;align-items:stretch;gap:0;overflow:hidden;border:1px solid rgba(255,255,255,.9);border-radius:30px;background:#fff;box-shadow:0 28px 80px rgba(25,72,119,.16),0 5px 20px rgba(8,120,231,.08)}
+.login-rym-head{position:relative;isolation:isolate;overflow:hidden;width:100%;min-height:480px;padding:46px 40px 38px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;color:#fff;background:linear-gradient(138deg,#0878e7 0%,#00b9db 44%,#08ad9d 74%,#f4b322 125%);background-size:220% 220%;animation:rym-login-gradient-flow 17s ease-in-out infinite alternate}
+.login-rym-head:before,.login-rym-head:after{content:"";position:absolute;z-index:0;pointer-events:none;opacity:.33;filter:blur(.2px)}
+.login-rym-head:before{width:390px;height:300px;right:-155px;top:-112px;border-radius:58% 42% 64% 36% / 42% 62% 38% 58%;background:linear-gradient(135deg,#fff 0%,#9df3ed 46%,#ffc64a 100%);transform:rotate(-22deg);animation:rym-login-blob-one 12s ease-in-out infinite alternate}
+.login-rym-head:after{width:320px;height:250px;left:-158px;bottom:-118px;border-radius:37% 63% 42% 58% / 56% 37% 63% 44%;background:linear-gradient(135deg,#f5fffc,#fff 48%,#ffd46a);transform:rotate(18deg);animation:rym-login-blob-two 15s ease-in-out infinite alternate}
+.login-rym-head>*{position:relative;z-index:1}
+.login-rym-logo{align-self:center;display:flex;align-items:center;justify-content:center;width:118px;height:80px;margin:0 0 25px;padding:6px 12px;border-radius:18px;background:#fff;box-shadow:0 12px 32px rgba(5,53,119,.18);overflow:hidden}
+.login-rym-logo img{display:block;width:100%;height:100%;object-fit:contain;background:#fff}
+.login-rym-kicker{margin:0 0 8px;color:#fff;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 1px 8px rgba(5,52,112,.22)}
+.login-rym-head h1{margin:0;color:#fff!important;font-size:clamp(34px,4vw,49px);line-height:1.02;letter-spacing:-.045em;text-shadow:0 3px 16px rgba(5,52,112,.2)}
+.login-rym-head h1 span{color:#fff3bb}
+.login-rym-subtitle{max-width:390px;margin:12px 0 20px;color:#f7fdff;font-size:14px;line-height:1.5;text-shadow:0 1px 8px rgba(5,52,112,.16)}
+.login-rym-modules{display:flex;justify-content:flex-start;gap:8px;flex-wrap:wrap}
+.login-rym-module{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid rgba(255,255,255,.82);border-radius:999px;background:rgba(255,255,255,.96);color:#075da9;font-size:12px;font-weight:850;box-shadow:0 6px 18px rgba(4,61,125,.15);animation:rym-login-module-drift 2.8s ease-in-out infinite!important;will-change:transform;transition:box-shadow .2s}
+.login-rym-module:after{content:"";position:absolute;z-index:0;top:-20%;bottom:-20%;left:-45%;width:32%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);transform:skewX(-18deg);animation:rym-login-module-shine 3.4s ease-in-out infinite;pointer-events:none}
+.login-rym-module:hover{box-shadow:0 10px 22px rgba(4,61,125,.22)}
+.login-rym-module:nth-child(2){animation-delay:.35s}.login-rym-module:nth-child(3){animation-delay:.7s}.login-rym-module:nth-child(4){animation-delay:1.05s}
+.login-rym-module:nth-child(2):after{animation-delay:.45s}.login-rym-module:nth-child(3):after{animation-delay:.9s}.login-rym-module:nth-child(4):after{animation-delay:1.35s}
+.login-rym-module:nth-child(2){color:#087f76}.login-rym-module:nth-child(3){color:#0875bd}.login-rym-module:nth-child(4){color:#9a6200}
+.login-rym-module i{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(255,255,255,.68);animation:rym-login-module-pulse 1.8s ease-in-out infinite;will-change:transform,box-shadow}
+.login-card.login-rym-card{
+  position:relative;width:100%;min-height:480px;padding:48px clamp(26px,4vw,50px) 32px;display:flex;flex-direction:column;justify-content:center;
+  border:0!important;border-radius:0!important;background:#fff!important;background-image:none!important;color:#17365e;box-shadow:none!important
+}
+.login-card.login-rym-card:before{display:none}
+.login-rym-form-head{text-align:center;margin:0 0 16px}
+.login-rym-form-head small{display:block;margin-bottom:4px;color:#0878bd;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.login-rym-form-head h2{margin:0;color:#13376d;font-size:23px;letter-spacing:-.025em}
+.login-rym-form-head p{margin:5px 0 0;color:#66768e;font-size:13px;line-height:1.4}
+.login-rym-card .login-rym-form{display:grid;gap:12px;margin:0}
+.login-rym-field{display:grid;gap:6px;color:#304763;font-size:11px;font-weight:850}
+.login-rym-field input{width:100%;height:45px;margin:0;padding:0 13px;border:1px solid #d7e3f1;border-radius:11px;background:#f9fcff;color:#14355e;font-size:14px;transition:border-color .16s,box-shadow .16s,background .16s}
+.login-rym-field input::placeholder{color:#8292a8;font-weight:500}
+.login-rym-field input:focus{outline:none;border-color:#08aee0;background:#fff;box-shadow:0 0 0 4px rgba(0,190,226,.14)}
+.login-card.login-rym-card #loginBtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:48px;margin:3px 0 0;border-radius:12px;background:linear-gradient(100deg,#0878e7 0%,#00b9d5 48%,#eea91e 100%)!important;background-size:200% 100%;color:#fff;font-size:14px;font-weight:900;box-shadow:0 9px 22px rgba(7,134,190,.25);transition:background-position .3s,transform .16s,box-shadow .16s}
+.login-card.login-rym-card #loginBtn:hover:not(:disabled){background-position:100% 50%;transform:translateY(-1px);box-shadow:0 13px 25px rgba(7,134,190,.3)}
+.login-card.login-rym-card #loginBtn:disabled{opacity:.76;cursor:wait}
+.login-rym-footer{margin:12px 0 0;color:#8090a6;text-align:center;font-size:10px}
+.login-rym-flow{grid-column:1/-1;display:block;width:min(92%,920px);height:72px;margin:0 auto;overflow:visible;filter:drop-shadow(0 4px 8px rgba(7,93,163,.12))}
+.login-rym-flow path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.login-rym-flow .flow-blue{stroke:#056bc6;stroke-width:3.2}.login-rym-flow .flow-cyan{stroke:#00e0ef;stroke-width:3}.login-rym-flow .flow-gold{stroke:#f8b515;stroke-width:3.2}
+.login-rym-flow .flow-fine{stroke:rgba(33,88,138,.34);stroke-width:1.4}.login-rym-flow .flow-dash{stroke-dasharray:8 13;animation:rym-login-dash 9s linear infinite}
+.login-rym-flow .flow-dash.reverse{animation-direction:reverse;animation-duration:12s}
+.login-rym-flow .flow-node{stroke:#fff;stroke-width:2;filter:drop-shadow(0 0 5px currentColor)}
+@keyframes rym-login-gradient-flow{0%{background-position:0% 45%}50%{background-position:68% 55%}100%{background-position:100% 45%}}
+@keyframes rym-login-color-current{0%{background-position:0% 50%;transform:translateX(-3%)}100%{background-position:100% 50%;transform:translateX(3%)}}
+@keyframes rym-login-glow-drift{0%{transform:translate(-1.5%,1%)}100%{transform:translate(1.5%,-1%)}}
+@keyframes rym-login-blob-one{0%{border-radius:58% 42% 64% 36% / 42% 62% 38% 58%;transform:translate(0,0) rotate(-22deg)}100%{border-radius:42% 58% 36% 64% / 58% 38% 62% 42%;transform:translate(-18px,24px) rotate(-7deg)}}
+@keyframes rym-login-blob-two{0%{border-radius:37% 63% 42% 58% / 56% 37% 63% 44%;transform:translate(0,0) rotate(18deg)}100%{border-radius:61% 39% 57% 43% / 39% 58% 42% 61%;transform:translate(24px,-17px) rotate(4deg)}}
+@keyframes rym-login-module-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes rym-login-module-shine{0%,58%{left:-45%;opacity:0}68%{opacity:.9}100%{left:125%;opacity:0}}
+@keyframes rym-login-module-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 3px rgba(255,255,255,.65)}50%{transform:scale(1.3);box-shadow:0 0 0 6px rgba(255,255,255,.2)}}
+@keyframes rym-login-dash{to{stroke-dashoffset:-168}}
+@media(max-width:760px){
+ .login.login-rym{padding:18px 13px;overflow:auto}
+ .login-rym-layout{grid-template-columns:1fr;width:min(100%,560px);border-radius:24px}
+ .login-rym-head{min-height:0;padding:28px 25px 26px;align-items:center;text-align:center}
+ .login-rym-logo{width:94px;height:65px;margin-bottom:15px;border-radius:15px}
+ .login-rym-kicker{font-size:9px;letter-spacing:.12em}.login-rym-head h1{font-size:clamp(29px,8vw,39px)}
+ .login-rym-subtitle{max-width:440px;margin:8px 0 14px;font-size:13px}.login-rym-modules{justify-content:center;gap:7px}.login-rym-module{padding:7px 10px;font-size:11px}
+ .login-card.login-rym-card{min-height:0;padding:28px 25px 24px}.login-rym-form-head{margin-bottom:13px}.login-rym-flow{height:58px}
+}
+@media(prefers-reduced-motion:reduce){
+ .login.login-rym,.login.login-rym:before,.login.login-rym:after,.login-rym-head,.login-rym-head:before,.login-rym-head:after,.login-rym-flow .flow-dash{animation:none!important}
+ .login-card.login-rym-card #loginBtn{transition:none!important}
+}
+</style>
 <!-- BUILD V80: base V78 + validador eCarCheck protegido + traspasos + Revisado Taxi -->
 </head>
 <body><div id="app"></div>
@@ -771,7 +855,7 @@ function monthRanges(desde,hasta){
   return out;
 }
 
-function loginView(msg=''){app.innerHTML=`<main class="login"><section class="login-card"><div class="login-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM" onerror="this.style.display='none'"></div><div class="brand">Portal RYM</div><h1>Portal RYM</h1><p class="muted login-help">Ingresa con tu usuario y contraseña.</p>${msg?`<div class="alert">${esc(msg)}</div>`:''}<form id="f"><input name="usuario" autocomplete="username" placeholder="Usuario" required><input name="password" type="password" autocomplete="current-password" placeholder="Contraseña" required><button id="loginBtn">Entrar</button></form></section></main>`;document.querySelector('#f').onsubmit=login}
+function loginView(msg=''){app.innerHTML=`<main class="login login-rym"><div class="login-rym-layout"><header class="login-rym-head"><div class="login-rym-logo"><img src="assets/rym-logo.png" alt="R&M Repuestos & Multiservicios"></div><p class="login-rym-kicker">Portal RYM · Gestión de flota</p><h1>Tu flota,<br><span>en movimiento</span></h1><p class="login-rym-subtitle">Plataforma unificada para la administración y monitoreo operativo de vehículos.</p><div class="login-rym-modules" aria-label="Módulos de gestión"><span class="login-rym-module"><i></i>Panapass</span><span class="login-rym-module"><i></i>Revisados</span><span class="login-rym-module"><i></i>GPS</span><span class="login-rym-module"><i></i>Control de flota</span></div></header><section class="login-card login-rym-card"><div class="login-rym-form-head"><small>Acceso de operación</small><h2>Iniciar sesión</h2><p>Ingresa tus credenciales autorizadas para continuar.</p></div>${msg?`<div class="alert">${esc(msg)}</div>`:''}<form id="f" class="login-rym-form"><label class="login-rym-field">Usuario<input name="usuario" autocomplete="username" placeholder="Usuario asignado" required></label><label class="login-rym-field">Contraseña<input name="password" type="password" autocomplete="current-password" placeholder="Contraseña" required></label><button id="loginBtn" type="submit"><span>Entrar al sistema</span><span aria-hidden="true">→</span></button></form><p class="login-rym-footer">© 2026 RYM · Gestión de flota</p></section><svg class="login-rym-flow" viewBox="0 0 920 78" role="presentation" aria-hidden="true"><path class="flow-fine" d="M18 51 C104 51 91 20 170 20 S270 58 338 43 S445 15 510 28 S623 63 698 47 S820 24 902 33"/><path class="flow-blue flow-dash" d="M10 61 C104 58 115 35 194 36 S286 60 358 49 S457 26 530 39 S650 65 722 51 S823 38 910 44"/><path class="flow-cyan flow-dash reverse" d="M22 39 C95 40 127 56 203 54 S300 32 375 34 S465 55 540 51 S645 29 710 32 S830 53 900 56"/><path class="flow-gold flow-dash" d="M70 70 C146 66 168 47 238 47 S334 69 405 62 S490 42 564 45 S680 70 748 64 S840 52 890 60"/><circle class="flow-node" cx="194" cy="36" r="4" fill="#056bc6"/><circle class="flow-node" cx="375" cy="34" r="4" fill="#00cfe7"/><circle class="flow-node" cx="564" cy="45" r="4" fill="#f4b322"/><circle class="flow-node" cx="722" cy="51" r="4" fill="#056bc6"/></svg></div></main>`;document.querySelector('#f').onsubmit=login}
 async function login(e){e.preventDefault();const f=new FormData(e.currentTarget),b=document.querySelector('#loginBtn');b.disabled=true;b.textContent='Ingresando...';try{const {data}=await req('/functions/v1/auth-username',{method:'POST',body:JSON.stringify({usuario:f.get('usuario'),password:f.get('password')})});if(!data?.ok||!data.access_token)throw Error(data?.error||'No se pudo iniciar sesión.');const nextToken=data.access_token,nextRefresh=String(data.refresh_token||''),nextExpires=Number(data.expires_at||0)||0;clearSession();state.token=nextToken;state.refreshToken=nextRefresh;state.expiresAt=nextExpires;if(data.profile&&data.modules){state.profile=data.profile;state.modules=data.modules;if(data.profile.must_change_password){passwordChangeView();return}state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');shell();render().catch(x=>{const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(x.message||x)}</div>`});return}await loadApp()}catch(x){clearSession();loginView(x.message)}}
 function passwordChangeView(){app.innerHTML=`<main class="login"><section class="password-panel"><div class="login-logo"><img src="https://drive.google.com/thumbnail?id=1f65vwdwsAraUrK2h7cb5l_eVOQKuHsL8&sz=w1000" alt="Portal RYM"></div><div class="brand" style="text-align:center">Portal RYM</div><h1>Cambia tu contraseña</h1><p class="muted">Por seguridad debes crear una contraseña personal antes de continuar.</p><form id="pc"><input name="p1" type="password" autocomplete="new-password" placeholder="Nueva contraseña" minlength="8" required><input name="p2" type="password" autocomplete="new-password" placeholder="Confirmar contraseña" minlength="8" required><button>Guardar contraseña</button></form><div id="pcMsg"></div></section></main>`;document.querySelector('#pc').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),m=document.querySelector('#pcMsg'),p1=String(f.get('p1')||''),p2=String(f.get('p2')||'');if(p1!==p2){m.innerHTML='<div class="alert">Las contraseñas no coinciden.</div>';return}m.innerHTML='<div class="card">Guardando...</div>';try{const {data}=await req('/functions/v1/change-password',{method:'POST',body:JSON.stringify({password:p1})});if(!data?.ok)throw Error(data?.error||'No se pudo cambiar la contraseña.');m.innerHTML='<div class="success">Contraseña actualizada.</div>';setTimeout(loadApp,350)}catch(x){m.innerHTML=`<div class="alert">${esc(x.message)}</div>`}}}
 async function loadApp(){try{const me=(await req('/auth/v1/user')).data;const p=(await rest('perfiles_usuario','select=id,nombre,email,usuario,rol,activo,supervisora_id,must_change_password&id=eq.'+me.id))[0];if(!p?.activo)throw Error('Tu usuario no está habilitado.');state.profile=p;if(p.must_change_password){passwordChangeView();return}const [mods,ovs,metaRes]=await Promise.all([rest('rol_modulo_permisos','select=modulo_codigo,puede_ver&rol=eq.'+encodeURIComponent(String(p.rol).toUpperCase())+'&puede_ver=eq.true'),rest('usuario_permisos','select=modulo_codigo,puede_ver&user_id=eq.'+me.id),rpc('panapass_meta').catch(()=>[])]);const map=new Map((mods||[]).map(x=>[x.modulo_codigo,true]));for(const o of ovs||[]){if(o.puede_ver===true)map.set(o.modulo_codigo,true);if(o.puede_ver===false)map.delete(o.modulo_codigo)}state.modules=[...map.keys()];state.active=state.modules.includes('dashboard')?'dashboard':(state.modules[0]||'dashboard');state.meta=metaRes?.[0]||null;shell();try{await render()}catch(x){const v=document.querySelector('#view');if(v)v.innerHTML=`<div class="alert">${esc(x.message||x)}</div>`}}catch(x){clearSession();loginView(x.message)}}
@@ -2546,7 +2630,7 @@ negativos=async function(v){
 };
 
 const _phase6Dashboard=dashboard;
-dashboard=async function(v){await _phase6Dashboard(v);try{const s=(await rpc('panapass_control_auto_resumen'))?.[0]||{},total=Number(s.activas||0)+Number(s.otros||0);const card=document.createElement('div');card.className='card ca6-dashboard-card';card.innerHTML=`<div><b>Control de Auto</b><div class="muted">Vista principal: unidades activas. Cerradas y canibalizadas permanecen como control histórico.</div></div><div class="ca6-dashboard-stats"><span>${total} unidades</span><span>${Number(s.activas||0)} activas</span><span>${Number(s.cerradas||0)} cerradas</span><span>${Number(s.canibalizadas||0)} canibalizadas</span><button id="ca6DashOpen">Abrir Control de Auto</button></div>`;v.prepend(card);card.querySelector('#ca6DashOpen').onclick=v11UnitList}catch(e){console.warn('Control Auto dashboard',e)}};
+dashboard=async function(v){await _phase6Dashboard(v);if(window.__RYM_VUE_NEXT_HOME_ENABLED)return;try{const s=(await rpc('panapass_control_auto_resumen'))?.[0]||{},total=Number(s.activas||0)+Number(s.otros||0);const card=document.createElement('div');card.className='card ca6-dashboard-card';card.innerHTML=`<div><b>Control de Auto</b><div class="muted">Vista principal: unidades activas. Cerradas y canibalizadas permanecen como control histórico.</div></div><div class="ca6-dashboard-stats"><span>${total} unidades</span><span>${Number(s.activas||0)} activas</span><span>${Number(s.cerradas||0)} cerradas</span><span>${Number(s.canibalizadas||0)} canibalizadas</span><button id="ca6DashOpen">Abrir Control de Auto</button></div>`;v.prepend(card);card.querySelector('#ca6DashOpen').onclick=v11UnitList}catch(e){console.warn('Control Auto dashboard',e)}};
 </script>
 <style id="phase10-ena-saldo-modal-ui">
 .ena10-overlay{position:fixed;inset:0;z-index:10050;background:rgba(4,20,55,.58);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px;animation:ena10Fade .16s ease-out}
@@ -4256,7 +4340,7 @@ body.v70-control .nav button[data-v75-control],body.v70-control .nav button[data
   /* Conserva los módulos globales y agrega Recorrido al shell Panapass. */
   phase2NormalizeModules=function(){
     const current=Array.isArray(state.modules)?state.modules:[];
-    if(current.some(x=>GLOBAL75.test(String(x)))||current.includes('recorrido')||!Array.isArray(state.allModules)||!state.allModules.length){
+    if(current.some(x=>GLOBAL75.test(String(x)))||!Array.isArray(state.allModules)||!state.allModules.length){
       if(current.length)state.allModules=[...new Set(current)];
     }
     state.modules=pan75();
