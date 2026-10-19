@@ -481,6 +481,52 @@ body.v99-home .v99-module > button { min-height: 48px !important; display: flex;
   body.v99-home .v101-nav.v105-nav-clean button { transition: none !important; }
 }
 
+/* Sidebar de escritorio expandible; conserva la navegación por iconos en modo compacto. */
+body.v99-home .v101-side-logo #v101SidebarToggle { display: none !important; }
+@media (min-width: 1201px) {
+  body.v99-home .v101-shell { transition: grid-template-columns .2s ease; }
+  body.v99-home #v101SidebarToggle {
+    display: grid !important;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid #E3E9F2;
+    border-radius: 9px;
+    background: #fff;
+    color: #355FF5;
+    cursor: pointer;
+  }
+  body.v99-home #v101SidebarToggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; }
+  body.v99-home #v101SidebarToggle:focus-visible { outline: 3px solid #00C7D4; outline-offset: 2px; }
+  body.v99-home.v101-sidebar-collapsed .v101-shell { grid-template-columns: 78px minmax(0, 1fr) !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-side { padding-left: 9px !important; padding-right: 9px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-side-logo { justify-content: center; min-height: 58px; margin: 0 0 20px !important; padding: 0 0 14px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-side-logo img { flex-basis: 42px; width: 42px !important; height: 42px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-side-logo b { display: none !important; }
+  body.v99-home.v101-sidebar-collapsed #v101SidebarToggle { position: absolute; top: 5px; right: -5px; width: 23px; height: 23px; border-radius: 50%; box-shadow: 0 2px 8px #253b8318; }
+  body.v99-home.v101-sidebar-collapsed #v101SidebarToggle svg { transform: rotate(180deg); }
+  body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean:before,
+  body.v99-home.v101-sidebar-collapsed #v118NavUsers:before { display: none !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean { gap: 8px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean button { justify-content: center !important; gap: 0 !important; width: 50px; min-height: 48px !important; margin-inline: auto; padding: 6px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean button > span:last-child { display: none !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean button .v117-nav-icon { flex-basis: 34px; width: 34px; height: 34px; }
+  body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean #v118NavUsers { margin-top: 24px !important; border-radius: 12px !important; padding-top: 6px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-user-side { display: flex !important; flex-direction: column; align-items: center; gap: 8px; padding: 9px 5px !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-user-id > div { display: none !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-user-side small { margin: 0 !important; font-size: 0 !important; }
+  body.v99-home.v101-sidebar-collapsed .v101-user-side small:before { content: ""; display: block; width: 8px; height: 8px; border-radius: 50%; background: #20B77A; }
+  body.v99-home.v101-sidebar-collapsed #v99Logout { width: 38px; min-height: 38px; margin: 0 !important; padding: 0 !important; overflow: hidden; font-size: 0 !important; }
+  body.v99-home.v101-sidebar-collapsed #v99Logout:after { content: "↪"; font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.v99-home .v101-shell,
+  body.v99-home #v101SidebarToggle svg { transition: none !important; }
+}
+
 /* RYM Fleet sidebar: iconografía funcional y estado activo con presencia. */
 @media (min-width: 1201px) {
   body.v99-home .v101-side { position: sticky; isolation: isolate; }
