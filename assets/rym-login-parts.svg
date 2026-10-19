@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="rubber" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#214c72"/><stop offset=".55" stop-color="#466c88"/><stop offset="1" stop-color="#102f50"/></linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".48" stop-color="#dceefa"/><stop offset="1" stop-color="#fff"/></linearGradient>
+    <linearGradient id="amber-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff6d8"/><stop offset=".52" stop-color="#f4b322"/><stop offset="1" stop-color="#ffe9a0"/></linearGradient>
+    <filter id="soft-glow" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <style>
+    .route{fill:none;stroke-linecap:round;stroke-dasharray:9 15;animation:route-flow 13s linear infinite}
+    .route-blue{stroke:#0878e7;stroke-width:3;opacity:.46}.route-cyan{stroke:#00b9d5;stroke-width:2.5;opacity:.58;animation-duration:17s;animation-direction:reverse}.route-gold{stroke:#eea91e;stroke-width:2.5;opacity:.54;animation-duration:20s}
+    .part{transform-box:fill-box;transform-origin:center;animation:part-float 13s ease-in-out infinite alternate}
+    .headlamp{animation:lamp-glow 5s ease-in-out infinite alternate}.key{animation-delay:-5s;animation-duration:16s}.wrench{animation-delay:-8s;animation-duration:17s}
+    .blue-line{stroke:#0878e7}.cyan-line{stroke:#00aeca}.gold-line{stroke:#d99612}
+    @keyframes route-flow{to{stroke-dashoffset:-192}}
+    @keyframes part-float{from{transform:translateY(7px)}to{transform:translateY(-9px)}}
+    @keyframes lamp-glow{from{opacity:.68}to{opacity:1}}
+    @media(prefers-reduced-motion:reduce){.route,.part,.headlamp{animation:none!important}}
+  </style>
+  <path class="route route-blue" d="M-28 474C58 430 114 448 198 423S314 374 396 399"/>
+  <path class="route route-cyan" d="M-24 498C79 451 136 484 221 458S324 414 414 437"/>
+  <path class="route route-gold" d="M1190 526C1282 487 1332 505 1401 481S1510 437 1631 464"/>
+  <path class="route route-cyan" d="M1182 550C1278 516 1341 539 1412 515S1522 478 1631 498"/>
+
+  <!-- Llanta técnica -->
+  <g class="part tire" transform="translate(164 315)" filter="url(#soft-glow)">
+    <circle r="111" fill="url(#rubber)" fill-opacity=".12" stroke="#214c72" stroke-width="19"/>
+    <circle r="111" stroke="#0878e7" stroke-opacity=".72" stroke-width="19" stroke-dasharray="5 11"/>
+    <circle r="88" stroke="#00aeca" stroke-opacity=".76" stroke-width="3"/>
+    <circle r="67" fill="url(#metal)" fill-opacity=".78" stroke="#214c72" stroke-width="5"/>
+    <circle r="49" stroke="#0878e7" stroke-opacity=".68" stroke-width="3"/>
+    <path d="M0-48v-18M34-34l13-13M48 0h18M34 34l13 13M0 48v18M-34 34l-13 13M-48 0h-18M-34-34l-13-13" stroke="#214c72" stroke-width="5" stroke-linecap="round"/>
+    <circle r="17" fill="url(#amber-metal)" stroke="#d99612" stroke-width="3"/>
+    <circle cx="0" cy="-31" r="4" fill="#00aeca"/><circle cx="31" cy="0" r="4" fill="#00aeca"/><circle cx="0" cy="31" r="4" fill="#00aeca"/><circle cx="-31" cy="0" r="4" fill="#00aeca"/>
+  </g>
+
+  <!-- Faro LED -->
+  <g class="part headlamp" transform="translate(1328 190)" filter="url(#soft-glow)">
+    <path d="M8 55C44 17 116 7 192 29Q218 55 192 81C116 103 44 93 8 55Z" fill="url(#metal)" fill-opacity=".84" stroke="#0878e7" stroke-width="4"/>
+    <path d="M24 55C66 35 125 30 183 42M24 57C69 72 129 77 183 67" stroke="#00aeca" stroke-width="3" stroke-linecap="round"/>
+    <path d="M65 38Q53 55 65 73M91 33Q78 55 91 77M118 31Q104 55 118 79" stroke="#f4b322" stroke-width="4" stroke-linecap="round"/>
+    <path d="M192 29Q218 55 192 81" stroke="#d99612" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Llave de taller -->
+  <g class="part wrench" transform="translate(75 728) rotate(-28 116 45)" filter="url(#soft-glow)">
+    <path d="M32 24C43 4 68-4 91 5L69 29 91 50 116 27C124 53 110 79 85 86 76 88 68 87 60 84L24 119C15 128 1 114 10 105L46 69C38 56 36 39 32 24Z" fill="url(#metal)" stroke="#0878e7" stroke-width="5" stroke-linejoin="round"/>
+    <path d="m26 107 37-37M49 82l12 12" stroke="#00aeca" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="17" cy="112" r="5" fill="#f4b322"/>
+  </g>
+
+  <!-- Control remoto y llave -->
+  <g class="part key" transform="translate(1418 714)" filter="url(#soft-glow)">
+    <path d="M45 7C69 7 86 25 86 49c0 18-11 33-27 39v39H42v18H27v-18H12V88C-4 81-14 66-14 49-14 25 4 7 28 7Z" transform="translate(38 0)" fill="url(#amber-metal)" fill-opacity=".8" stroke="#d99612" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="66" cy="48" r="11" fill="#fff" stroke="#0878e7" stroke-width="3"/>
+    <path d="M61 47v-3a5 5 0 0 1 10 0v3m-12 0h14v10H59Z" stroke="#0878e7" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="66" cy="75" r="5" fill="#00aeca"/><circle cx="66" cy="96" r="5" fill="#f4b322"/>
+    <path d="M110 54h43l12 11-10 10-8-7-8 8-8-7-8 8h-13" stroke="#214c72" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="154" cy="65" r="6" fill="#fff" stroke="#0878e7" stroke-width="3"/>
+  </g>
+</svg>
