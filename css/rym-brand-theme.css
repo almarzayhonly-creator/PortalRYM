@@ -387,12 +387,25 @@ body.v99-home .v99-module > button { min-height: 48px !important; display: flex;
     box-shadow: 5px 0 22px #253b8308 !important;
   }
   body.v99-home .v101-nav.v105-nav-clean:before {
-    content: "OPERACIÓN";
+    content: "GENERAL";
     margin: 0 10px 8px;
     color: #74839A;
     font-size: 9px;
     font-weight: 900;
     letter-spacing: .12em;
+  }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavHome { order: 0; }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavPan { order: 1; position: relative; margin-top: 26px !important; }
+  body.v99-home .v101-nav.v105-nav-clean #v101NavPan:before {
+    content: "OPERACIÓN";
+    position: absolute;
+    top: -22px;
+    left: 10px;
+    color: #74839A;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    pointer-events: none;
   }
   body.v99-home .v101-nav.v105-nav-clean #v101NavPan { order: 1; }
   body.v99-home .v101-nav.v105-nav-clean #v101NavRev { order: 2; }
@@ -509,6 +522,7 @@ body.v99-home .v101-side-logo #v101SidebarToggle { display: none !important; }
   body.v99-home.v101-sidebar-collapsed #v101SidebarToggle { position: absolute; top: 5px; right: -5px; width: 23px; height: 23px; border-radius: 50%; box-shadow: 0 2px 8px #253b8318; }
   body.v99-home.v101-sidebar-collapsed #v101SidebarToggle svg { transform: rotate(180deg); }
   body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean:before,
+  body.v99-home.v101-sidebar-collapsed #v101NavPan:before,
   body.v99-home.v101-sidebar-collapsed #v118NavUsers:before { display: none !important; }
   body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean { gap: 8px !important; }
   body.v99-home.v101-sidebar-collapsed .v101-nav.v105-nav-clean button { justify-content: center !important; gap: 0 !important; width: 50px; min-height: 48px !important; margin-inline: auto; padding: 6px !important; }
