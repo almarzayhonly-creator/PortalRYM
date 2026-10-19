@@ -92,8 +92,7 @@ function currentActions(): ModuleAction {
 
 function logoutToLogin(): void {
   window.clearSession?.()
-  disposeHome()
-  renderLogin()
+  window.location.reload()
 }
 
 export function renderHome(summary: HomeSummary): void {
