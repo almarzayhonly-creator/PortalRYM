@@ -29,33 +29,24 @@
 .rym-vue-home .ryn-user button{display:flex;justify-content:center;align-items:center;gap:8px;margin:0;padding:9px 10px;border:1px solid #ffffff30;border-radius:11px;background:#ffffff!important;color:#173b62!important;text-align:center;font-size:10px!important;font-weight:800}
 .rym-vue-home .ryn-user button:hover{border-color:#f0a128;background:#fff8e9!important;color:#174f93!important}
 .rym-vue-home .ryn-workspace{min-width:0;max-width:none;background:radial-gradient(ellipse at 5% 0%,#e9f5fb 0,transparent 36%),#f3f6fb}
-.rym-vue-home .ryn-topbar{position:relative;z-index:2;height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 28px;overflow:hidden;border-bottom:1px solid #102b49;background:linear-gradient(105deg,#0d2746 0%,#123c68 62%,#155583 100%);box-shadow:0 8px 24px #0b2a4918}
-.rym-vue-home .ryn-topbar:before{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#08c4cf,#3d83ff 43%,#f3a12d 78%,#ffd65a);content:""}
-.rym-vue-home .ryn-top-brand{display:flex;align-items:center;gap:12px;min-width:0}
-.rym-vue-home .ryn-top-brand>img{width:42px;height:42px;flex:none;object-fit:contain;border:1px solid #ffffff30;border-radius:13px;background:#fff;box-shadow:0 5px 16px #071a3038}
-.rym-vue-home .ryn-top-brand>div{min-width:0}
-.rym-vue-home .ryn-top-brand small,.rym-vue-home .ryn-top-brand strong,.rym-vue-home .ryn-top-brand span{display:block}
-.rym-vue-home .ryn-top-brand small{margin-bottom:3px;color:#79dbe1;font-size:8px;font-weight:900;letter-spacing:.16em}
-.rym-vue-home .ryn-top-brand strong{color:#fff;font-size:15px;letter-spacing:-.02em}
-.rym-vue-home .ryn-top-brand span{margin-top:3px;color:#b2c9e0;font-size:9px}
-.rym-vue-home .ryn-top-actions{display:flex;align-items:center;gap:17px;min-width:0}
-.rym-vue-home .ryn-updated{display:flex;align-items:center;gap:9px;color:#b2c9e0;font-size:8px;white-space:nowrap}
-.rym-vue-home .ryn-updated>i{width:8px;height:8px;flex:none;border-radius:50%;background:#38d08e;box-shadow:0 0 0 4px #38d08e20,0 0 12px #38d08e88}
+.rym-vue-home .ryn-topbar{position:relative;z-index:2;height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 28px;overflow:hidden;border-bottom:1px solid #e1e8f0;background:#fff;box-shadow:0 3px 12px #17395d08}
+.rym-vue-home .ryn-topbar:before{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#1473c4,#09bfc5 55%,#f3a12d);content:""}
+.rym-vue-home .ryn-topbar>strong{color:#173b62;font-size:14px;font-weight:800;letter-spacing:-.015em}
+.rym-vue-home .ryn-top-actions{display:flex;align-items:center;gap:22px;min-width:0}
+.rym-vue-home .ryn-updated{color:#75869b;font-size:9px;white-space:nowrap}
 .rym-vue-home .ryn-updated>span>small,.rym-vue-home .ryn-updated strong{display:block}
-.rym-vue-home .ryn-updated>span>small{margin-bottom:4px;color:#8faecc;font-size:7px;font-weight:900;letter-spacing:.1em}
-.rym-vue-home .ryn-updated strong{color:#fff;font-size:10px;font-weight:700}
-.rym-vue-home .ryn-profile-pill{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #ffffff2b;border-radius:999px;background:#ffffff10;color:#e9f4ff;font-size:10px;font-weight:800;white-space:nowrap}
-.rym-vue-home .ryn-profile-pill svg{width:15px;height:15px;fill:none;stroke:#ffd05a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.rym-vue-home .ryn-top-user{display:flex;align-items:center;gap:9px;min-width:0}
-.rym-vue-home .ryn-top-avatar{display:grid;place-items:center;width:36px;height:36px;flex:none;border:1px solid #ffd47766;border-radius:12px;background:linear-gradient(145deg,#ffd15d,#f28a24);color:#183453;font-size:10px;font-weight:900;box-shadow:0 5px 13px #061b3530}
+.rym-vue-home .ryn-updated>span>small{margin-bottom:3px;color:#8292a6;font-size:8px;font-weight:700}
+.rym-vue-home .ryn-updated strong{color:#294566;font-size:10px;font-weight:700}
+.rym-vue-home .ryn-top-user{display:flex;align-items:center;gap:9px;min-width:0;padding-left:18px;border-left:1px solid #e3e9f0}
+.rym-vue-home .ryn-top-avatar{display:grid;place-items:center;width:34px;height:34px;flex:none;border:1px solid #e7ad4c;border-radius:11px;background:#fff5de;color:#9a6500;font-size:10px;font-weight:900}
 .rym-vue-home .ryn-top-user-copy{min-width:0}
 .rym-vue-home .ryn-top-user b,.rym-vue-home .ryn-top-user small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rym-vue-home .ryn-top-user b{max-width:150px;color:#fff;font-size:10px}
-.rym-vue-home .ryn-top-user small{margin-top:4px;color:#a8bfd8;font-size:8px;letter-spacing:.04em}
-.rym-vue-home .ryn-logout-icon{display:grid;place-items:center;width:38px;height:38px;flex:none;border:1px solid #ffc850;border-radius:13px;background:linear-gradient(145deg,#ffd15d,#f29a25);color:#163658;cursor:pointer;box-shadow:0 6px 15px #061b3538;transition:transform .16s ease,box-shadow .16s ease}
-.rym-vue-home .ryn-logout-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.rym-vue-home .ryn-logout-icon:hover{transform:translateY(-2px);box-shadow:0 9px 20px #061b3548}
-.rym-vue-home .ryn-topbar :focus-visible{outline:3px solid #83e0e4;outline-offset:3px}
+.rym-vue-home .ryn-top-user b{max-width:145px;color:#17395e;font-size:10px}
+.rym-vue-home .ryn-top-user small{margin-top:3px;color:#77879b;font-size:8px}
+.rym-vue-home .ryn-logout-icon{display:grid;place-items:center;width:35px;height:35px;flex:none;border:1px solid #d9e2ec;border-radius:11px;background:#fff;color:#315171;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.rym-vue-home .ryn-logout-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rym-vue-home .ryn-logout-icon:hover{border-color:#f2bd5c;background:#fff8e9;color:#a76a00}
+.rym-vue-home .ryn-topbar :focus-visible{outline:3px solid #37bdc7;outline-offset:3px}
 .rym-vue-home .ryn-main{max-width:none;padding:25px clamp(22px,3.5vw,60px) 42px}
 .rym-vue-home .ryn-page-heading{display:flex;align-items:center;justify-content:space-between;margin:0 0 28px}
 .rym-vue-home .ryn-page-heading h1{margin:0;color:#123962;font-size:clamp(27px,2.7vw,37px);letter-spacing:-.045em;font-weight:850}
@@ -111,6 +102,6 @@
 @media(max-width:1450px){.rym-vue-home .ryn-modules{grid-template-columns:repeat(2,minmax(0,1fr))}.rym-vue-home .ryn-module{min-height:380px}}
 @media(max-width:900px){.rym-vue-home{grid-template-columns:200px minmax(0,1fr)}.rym-vue-home .ryn-topbar{padding:0 17px}.rym-vue-home .ryn-profile-pill{display:none}.rym-vue-home .ryn-main{padding:22px 18px 35px}}
 @media(max-width:650px){.rym-vue-home{display:block}.rym-vue-home .ryn-sidebar{position:static;width:100%;height:auto;padding:10px 12px 9px;border-right:0;border-bottom:1px solid #dce4ee}.rym-vue-home .ryn-brand{flex-wrap:nowrap;padding:0 5px 8px;margin:0 0 5px}.rym-vue-home .ryn-brand:before{display:none}.rym-vue-home .ryn-brand img{width:34px;height:34px}.rym-vue-home .ryn-brand span{font-size:8px}.rym-vue-home .ryn-sidebar nav{display:flex;gap:4px;overflow-x:auto}.rym-vue-home .ryn-sidebar nav .ryn-nav-label{display:none}.rym-vue-home .ryn-sidebar nav button{flex:none;min-height:39px;padding:4px 8px;white-space:nowrap;font-size:10px}.rym-vue-home .ryn-sidebar nav button i{width:27px;height:27px;border-radius:9px;font-size:15px}.rym-vue-home .ryn-sidebar nav button i svg{width:16px;height:16px}.rym-vue-home .ryn-sidebar nav button.active{min-height:39px}.rym-vue-home .ryn-sidebar nav button:nth-last-child(2){margin-left:auto}.rym-vue-home .ryn-user{display:none}.rym-vue-home .ryn-topbar{height:52px;padding:0 13px}.rym-vue-home .ryn-topbar>strong{font-size:12px}.rym-vue-home .ryn-top-actions{gap:8px}.rym-vue-home .ryn-updated{font-size:8px}.rym-vue-home .ryn-updated strong{font-size:9px}.rym-vue-home .ryn-top-icon{display:none}.rym-vue-home .ryn-top-user b{max-width:95px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}.rym-vue-home .ryn-top-user small{font-size:8px}.rym-vue-home .ryn-logout-icon{width:31px;height:31px}.rym-vue-home .ryn-main{padding:18px 13px 28px}.rym-vue-home .ryn-page-heading{margin-bottom:17px}.rym-vue-home .ryn-page-heading h1{font-size:24px}.rym-vue-home .ryn-page-heading p{font-size:11px}.rym-vue-home .ryn-validator{margin-bottom:20px;padding:15px;border-radius:18px}.rym-vue-home .ryn-validator-heading{margin-bottom:12px}.rym-vue-home .ryn-validator-heading h2{font-size:17px}.rym-vue-home .ryn-validator-heading p{font-size:11px}.rym-vue-home .ryn-validator .v101-validator-tools{grid-template-columns:1fr}.rym-vue-home .ryn-validator .v101-validator-go{min-height:42px}.rym-vue-home .ryn-section-title h2{font-size:15px}.rym-vue-home .ryn-modules{grid-template-columns:1fr;gap:12px}.rym-vue-home .ryn-module{min-height:0;padding:16px}.rym-vue-home .ryn-module>p{min-height:0}.rym-vue-home .ryn-module-metrics{margin:13px 0}.rym-vue-home .ryn-module-metrics>div{min-height:39px}}
-@media(max-width:650px){.rym-vue-home .ryn-topbar{height:auto;min-height:62px;padding:8px 13px;overflow:visible}.rym-vue-home .ryn-top-brand{gap:8px}.rym-vue-home .ryn-top-brand>img{width:34px;height:34px;border-radius:10px}.rym-vue-home .ryn-top-brand small{font-size:7px}.rym-vue-home .ryn-top-brand strong{font-size:11px}.rym-vue-home .ryn-top-brand span{display:none}.rym-vue-home .ryn-top-actions{gap:8px}.rym-vue-home .ryn-updated{font-size:7px}.rym-vue-home .ryn-updated>i{width:7px;height:7px}.rym-vue-home .ryn-updated>span>small{font-size:6px}.rym-vue-home .ryn-updated strong{font-size:8px}.rym-vue-home .ryn-top-avatar{width:30px;height:30px;border-radius:10px;font-size:9px}.rym-vue-home .ryn-top-user b{max-width:82px;font-size:9px}.rym-vue-home .ryn-top-user small{font-size:7px}.rym-vue-home .ryn-logout-icon{width:31px;height:31px;border-radius:11px}.rym-vue-home .ryn-logout-icon svg{width:16px;height:16px}}
+@media(max-width:650px){.rym-vue-home .ryn-topbar{height:auto;min-height:58px;padding:8px 13px;overflow:visible}.rym-vue-home .ryn-topbar>strong{font-size:12px}.rym-vue-home .ryn-top-actions{gap:11px}.rym-vue-home .ryn-updated{font-size:7px}.rym-vue-home .ryn-updated>span>small{font-size:7px}.rym-vue-home .ryn-updated strong{font-size:8px}.rym-vue-home .ryn-top-user{gap:7px;padding-left:10px}.rym-vue-home .ryn-top-avatar{width:30px;height:30px;border-radius:10px;font-size:9px}.rym-vue-home .ryn-top-user b{max-width:82px;font-size:9px}.rym-vue-home .ryn-top-user small{font-size:7px}.rym-vue-home .ryn-logout-icon{width:31px;height:31px;border-radius:10px}.rym-vue-home .ryn-logout-icon svg{width:16px;height:16px}}
 @media(max-width:430px){.rym-vue-home .ryn-updated{display:none}.rym-vue-home .ryn-topbar{gap:6px;padding-inline:10px}.rym-vue-home .ryn-top-actions{gap:7px}.rym-vue-home .ryn-top-user b{max-width:76px}}
 @media(prefers-reduced-motion:reduce){.rym-vue-home .ryn-page-heading h1 span{animation:none}.rym-vue-home .ryn-sidebar nav button,.rym-vue-home .ryn-module,.rym-vue-home .ryn-open{transition:none}}

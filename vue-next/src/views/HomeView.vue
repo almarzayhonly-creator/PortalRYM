@@ -82,10 +82,9 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
     </aside>
     <section class="ryn-workspace">
       <header class="ryn-topbar">
-        <div class="ryn-top-brand"><img :src="'/assets/rym-logo.png'" alt=""><div><small>RYM · OPERACIONES</small><strong>Centro de Control</strong><span>Gestión inteligente de flota</span></div></div>
+        <strong>Centro de Control RYM</strong>
         <div class="ryn-top-actions">
-          <div class="ryn-updated"><i aria-hidden="true"></i><span><small>ÚLTIMA ACTUALIZACIÓN</small><strong>{{ updated }}</strong></span></div>
-          <span class="ryn-profile-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>Mi perfil</span>
+          <div class="ryn-updated"><span><small>Actualizado</small><strong>{{ updated }}</strong></span></div>
           <div class="ryn-top-user"><span class="ryn-top-avatar">{{ initials }}</span><span class="ryn-top-user-copy"><b>{{ name }}</b><small>{{ role }}</small></span></div>
           <button class="ryn-logout-icon" aria-label="Cerrar sesión" title="Cerrar sesión" @click="open('logout')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></button>
         </div>
