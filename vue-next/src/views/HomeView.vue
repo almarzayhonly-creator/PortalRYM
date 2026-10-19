@@ -66,8 +66,15 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <small class="ryn-nav-label">GENERAL</small>
         <button class="active" data-testid="nav-home"><i aria-hidden="true">⌂</i>Inicio</button>
         <small class="ryn-nav-label">OPERACIÓN</small>
-        <button v-for="card in cards.filter(item => item.key !== 'gps')" :key="card.key" @click="open(card.action)"><i :class="`icon-${card.key}`" aria-hidden="true">{{ card.icon }}</i>{{ card.title === 'CONTROL DE AUTO' ? 'Auto' : card.title.charAt(0) + card.title.slice(1).toLowerCase() }}</button>
-        <button v-if="allowedGps" @click="open('gps')"><i class="icon-gps" aria-hidden="true">⌖</i>GPS</button>
+        <button v-for="card in cards.filter(item => item.key !== 'gps')" :key="card.key" @click="open(card.action)">
+          <i :class="`icon-${card.key}`" aria-hidden="true">
+            <svg v-if="card.key === 'panapass'" viewBox="0 0 24 24"><rect x="6" y="5" width="13" height="16" rx="2"/><path d="M9 5.5V4a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v1.5M9 10h1.5M13 10h3M9 14h1.5M13 14h3M9 18h1.5M13 18h3"/></svg>
+            <svg v-else-if="card.key === 'control'" viewBox="0 0 24 24"><path d="m4 15 1.1-4.2a2 2 0 0 1 1.9-1.5h9.8a2 2 0 0 1 1.9 1.5L20 15v3H4v-3Z"/><path d="m7 9.3 1.4-3h7.2l1.4 3M4 13h16M7 18v1.5M17 18v1.5"/><circle cx="7.5" cy="15.5" r=".7"/><circle cx="16.5" cy="15.5" r=".7"/></svg>
+            <span v-else>{{ card.icon }}</span>
+          </i>
+          {{ card.title === 'CONTROL DE AUTO' ? 'Auto' : card.title.charAt(0) + card.title.slice(1).toLowerCase() }}
+        </button>
+        <button v-if="allowedGps" @click="open('gps')"><i class="icon-gps" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></i>GPS</button>
         <small v-if="allowedUsers" class="ryn-nav-label admin-label">ADMINISTRACIÓN</small>
         <button v-if="allowedUsers" @click="open('users')"><i class="icon-users" aria-hidden="true">♙</i>Usuarios</button>
       </nav>
