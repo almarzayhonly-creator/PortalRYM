@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <filter id="soft-glow" x="-30%" y="-40%" width="160%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <style>
+    .route{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:10 15;animation:route-flow 12s linear infinite}
+    .route-blue{stroke:#0878e7;stroke-width:3;opacity:.48}
+    .route-cyan{stroke:#00b9d5;stroke-width:2.5;opacity:.55;animation-duration:16s;animation-direction:reverse}
+    .route-gold{stroke:#eea91e;stroke-width:2.5;opacity:.58;animation-duration:19s}
+    .vehicle{animation:car-glide 14s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+    .vehicle-gold{animation-delay:-6s;animation-duration:17s}
+    .body-blue{fill:#e9faff;fill-opacity:.52;stroke:#0878e7;stroke-width:4;stroke-linejoin:round}
+    .body-gold{fill:#fff8e5;fill-opacity:.58;stroke:#d99712;stroke-width:4;stroke-linejoin:round}
+    .glass{fill:#00b9d5;fill-opacity:.14;stroke:#00aeca;stroke-width:2.6;stroke-linejoin:round}
+    .trim{fill:none;stroke:#174d83;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+    .wheel{fill:#fff;stroke:#0878e7;stroke-width:4}.wheel-core{fill:none;stroke:#00b9d5;stroke-width:2.4}
+    .wheel-gold{fill:#fff;stroke:#d99712;stroke-width:4}.wheel-core-gold{fill:none;stroke:#00b9d5;stroke-width:2.4}
+    .lamp{fill:#f4b322;stroke:#d99712;stroke-width:1.5}
+    @keyframes route-flow{to{stroke-dashoffset:-200}}
+    @keyframes car-glide{0%{transform:translate(0,0)}100%{transform:translate(20px,-9px)}}
+    @media(prefers-reduced-motion:reduce){.route,.vehicle{animation:none!important}}
+  </style>
+  <path class="route route-blue" d="M-25 452C92 402 171 435 252 410S365 360 462 392"/>
+  <path class="route route-cyan" d="M-20 474C84 432 145 464 224 442S354 389 444 416"/>
+  <path class="route route-gold" d="M1138 588C1225 551 1289 570 1364 543S1501 487 1628 520"/>
+  <path class="route route-cyan" d="M1148 615C1234 578 1307 604 1389 574S1512 529 1624 557"/>
+  <g transform="translate(40 300)">
+    <g class="vehicle" filter="url(#soft-glow)">
+      <path class="body-blue" d="M18 83 25 61Q27 54 37 51L66 46 94 23Q101 18 113 18H166Q182 19 194 34L211 51 239 58Q250 61 254 71L258 84 252 94H224C222 78 211 69 198 69S174 78 172 94H100C98 78 87 69 74 69S50 78 48 94H23Z"/>
+      <path class="glass" d="m76 45 24-20q5-4 13-4h21v24Zm67-24h22q12 1 21 13l9 11h-52Z"/>
+      <path class="trim" d="M143 22v70m-69-43h167m-48 0v42m-91-42v12m-24 22h13m176 0h12"/>
+      <path class="lamp" d="m28 64 30-11-4 10-26 8Z"/>
+      <circle class="wheel" cx="74" cy="91" r="15"/><circle class="wheel-core" cx="74" cy="91" r="6"/>
+      <circle class="wheel" cx="198" cy="91" r="15"/><circle class="wheel-core" cx="198" cy="91" r="6"/>
+    </g>
+  </g>
+  <g transform="translate(1290 590)">
+    <g class="vehicle vehicle-gold" filter="url(#soft-glow)">
+      <path class="body-gold" d="M18 83 25 61Q27 54 37 51L66 46 94 23Q101 18 113 18H166Q182 19 194 34L211 51 239 58Q250 61 254 71L258 84 252 94H224C222 78 211 69 198 69S174 78 172 94H100C98 78 87 69 74 69S50 78 48 94H23Z"/>
+      <path class="glass" d="m76 45 24-20q5-4 13-4h21v24Zm67-24h22q12 1 21 13l9 11h-52Z"/>
+      <path class="trim" d="M143 22v70m-69-43h167m-48 0v42m-91-42v12m-24 22h13m176 0h12"/>
+      <path class="lamp" d="m229 64 24 7 2 6-28-5Z"/>
+      <circle class="wheel-gold" cx="74" cy="91" r="15"/><circle class="wheel-core-gold" cx="74" cy="91" r="6"/>
+      <circle class="wheel-gold" cx="198" cy="91" r="15"/><circle class="wheel-core-gold" cx="198" cy="91" r="6"/>
+    </g>
+  </g>
+</svg>
