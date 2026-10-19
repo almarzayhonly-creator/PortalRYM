@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none" aria-hidden="true">
   <defs>
-    <linearGradient id="track-blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4277d1" stop-opacity=".12"/><stop offset=".52" stop-color="#4277d1"/><stop offset="1" stop-color="#4277d1" stop-opacity=".08"/></linearGradient>
-    <linearGradient id="track-teal" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#42a875" stop-opacity=".08"/><stop offset=".5" stop-color="#42a875"/><stop offset="1" stop-color="#42a875" stop-opacity=".08"/></linearGradient>
-    <linearGradient id="track-gold" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f5c842" stop-opacity="0"/><stop offset=".5" stop-color="#f5c842"/><stop offset="1" stop-color="#f5c842" stop-opacity="0"/></linearGradient>
-    <pattern id="microgrid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" stroke="#0f5965" stroke-opacity=".065" stroke-width="1"/></pattern>
+    <linearGradient id="track-blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#355FF5" stop-opacity=".12"/><stop offset=".52" stop-color="#355FF5"/><stop offset="1" stop-color="#355FF5" stop-opacity=".08"/></linearGradient>
+    <linearGradient id="track-teal" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#00C7D4" stop-opacity=".08"/><stop offset=".5" stop-color="#00C7D4"/><stop offset="1" stop-color="#00C7D4" stop-opacity=".08"/></linearGradient>
+    <linearGradient id="track-gold" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#FFD24A" stop-opacity="0"/><stop offset=".5" stop-color="#FFD24A"/><stop offset="1" stop-color="#FFD24A" stop-opacity="0"/></linearGradient>
+    <pattern id="microgrid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" stroke="#253B83" stroke-opacity=".065" stroke-width="1"/></pattern>
     <filter id="node-glow" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <style>
     .grid{opacity:.55}
-    .contour{fill:none;stroke:#4277d1;stroke-width:1.5;stroke-opacity:.13}
-    .orbit{fill:none;stroke:#4277d1;stroke-opacity:.26;stroke-width:2}
-    .orbit-teal{stroke:#27c6b7;stroke-opacity:.3}
+    .contour{fill:none;stroke:#355FF5;stroke-width:1.5;stroke-opacity:.13}
+    .orbit{fill:none;stroke:#355FF5;stroke-opacity:.26;stroke-width:2}
+    .orbit-teal{stroke:#00C7D4;stroke-opacity:.3}
     .route{fill:none;stroke-linecap:round;stroke-dasharray:5 16;animation:flow 24s linear infinite}
     .route-blue{stroke:url(#track-blue);stroke-width:3}.route-teal{stroke:url(#track-teal);stroke-width:2.5;animation-duration:31s;animation-direction:reverse}.route-gold{stroke:url(#track-gold);stroke-width:2;animation-duration:36s}
     .accent{stroke-dasharray:38 240;animation:scan 12s ease-in-out infinite}
@@ -55,9 +55,9 @@
 
   <!-- Small telemetry markers, not literal vehicle-part illustrations -->
   <g filter="url(#node-glow)">
-    <circle class="node" cx="350" cy="419" r="5" fill="#fff" stroke="#4277d1" stroke-width="3"/>
-    <circle class="node" cx="695" cy="361" r="4.5" fill="#fff" stroke="#27c6b7" stroke-width="3"/>
-    <circle class="node" cx="1021" cy="456" r="5" fill="#fff" stroke="#f5c842" stroke-width="3"/>
-    <circle class="node" cx="1374" cy="380" r="4.5" fill="#fff" stroke="#0f5965" stroke-width="3"/>
+    <circle class="node" cx="350" cy="419" r="5" fill="#fff" stroke="#355FF5" stroke-width="3"/>
+    <circle class="node" cx="695" cy="361" r="4.5" fill="#fff" stroke="#00C7D4" stroke-width="3"/>
+    <circle class="node" cx="1021" cy="456" r="5" fill="#fff" stroke="#FFD24A" stroke-width="3"/>
+    <circle class="node" cx="1374" cy="380" r="4.5" fill="#fff" stroke="#253B83" stroke-width="3"/>
   </g>
 </svg>
