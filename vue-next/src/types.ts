@@ -25,7 +25,7 @@ export interface HomeSummary {
   } | null
   revisados?: { pendientes?: number; criticos?: number; emitidos_hoy?: number; limite_hoy?: number } | null
   control?: { activas?: number; otros?: number; cerradas?: number } | null
-  alerts?: Array<{ level?: string; title?: string; text?: string }>
+  alerts?: Array<{ level?: string; title?: string; text?: string; module?: string }>
 }
 
 export interface ExecutiveIndicators {

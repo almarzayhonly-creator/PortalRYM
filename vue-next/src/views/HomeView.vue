@@ -78,6 +78,27 @@ const cards = computed<PortalCard[]>(() => {
   }
   return result
 })
+type Priority = { key: string; tone: 'critical' | 'warning' | 'good'; title: string; detail: string; action: keyof ModuleAction }
+const priorities = computed<Priority[]>(() => {
+  const data = summary.value
+  if (!data) return []
+  const result: Priority[] = []
+  const pan = data.panapass
+  const rev = data.revisados
+  const control = data.control
+  if (Number(pan?.negativos_hoy) > 0) result.push({ key: 'pan-negatives', tone: 'warning', title: `${pan!.negativos_hoy} negativos Panapass`, detail: `${pan!.pagos_hoy || 0} pagos registrados hoy`, action: 'panapass' })
+  if (Number(rev?.criticos) > 0) result.push({ key: 'rev-critical', tone: 'critical', title: `${rev!.criticos} revisados críticos`, detail: `${rev!.pendientes || 0} pendientes dentro de tu alcance`, action: 'revisados' })
+  else if (Number(rev?.pendientes) > 0) result.push({ key: 'rev-pending', tone: 'warning', title: `${rev!.pendientes} revisados pendientes`, detail: `${rev!.emitidos_hoy || 0}/${rev!.limite_hoy || 33} emitidos hoy`, action: 'revisados' })
+  if (Number(pan?.bajas?.pendientes) > 0) result.push({ key: 'ena-pending', tone: Number(pan?.bajas?.alertas) > 0 ? 'critical' : 'warning', title: `${pan!.bajas!.pendientes} bajas ENA pendientes`, detail: `${pan!.bajas!.procesadas || 0} procesadas · ${pan!.bajas!.devoluciones || 0} devoluciones`, action: 'panapass' })
+  if (data.alerts?.length && !result.some(item => item.tone === 'critical')) {
+    const alert = data.alerts[0]
+    const module = String(alert.module || '').toLowerCase()
+    const action: keyof ModuleAction = module.includes('gps') ? 'gps' : module.includes('revis') ? 'revisados' : module.includes('control') || module.includes('auto') ? 'control' : 'panapass'
+    result.unshift({ key: 'system-alert', tone: alert.level === 'bad' ? 'critical' : 'warning', title: alert.title || 'Atención requerida', detail: alert.text || alert.module || 'Revisar alerta', action })
+  }
+  if (!result.length && control) result.push({ key: 'all-clear', tone: 'good', title: 'Operación sin prioridades críticas', detail: `${control.activas || 0} unidades activas dentro de tu alcance`, action: 'control' })
+  return result.slice(0, 3)
+})
 function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.() }
 </script>
 
@@ -121,6 +142,14 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <div v-if="state.state === 'error'" class="ryn-load-state error" role="alert"><b>No se pudo cargar el resumen.</b><span>{{ state.error }}</span><button @click="open('retry')">Reintentar</button></div>
         <div v-else-if="state.state === 'stale'" class="ryn-load-state stale" role="status">No se pudo actualizar el resumen. Se conservan los últimos datos válidos. {{ state.error }} <button @click="open('retry')">Reintentar</button></div>
         <div v-if="state.state === 'loading'" class="ryn-load-state" role="status">Cargando el resumen de tu alcance…</div>
+        <section v-if="priorities.length" class="ryn-priorities" aria-labelledby="ryn-priorities-title">
+          <header class="ryn-priorities-heading"><div><span class="ryn-kicker">RESUMEN INTELIGENTE</span><h2 id="ryn-priorities-title">Prioridad de hoy</h2><p>Lo que necesita atención primero en tu operación.</p></div><span class="ryn-priority-count">{{ priorities.every(item => item.tone === 'good') ? 'Todo en orden' : `${priorities.filter(item => item.tone !== 'good').length} ${priorities.filter(item => item.tone !== 'good').length === 1 ? 'alerta' : 'alertas'}` }}</span></header>
+          <div class="ryn-priority-grid">
+            <button v-for="item in priorities" :key="item.key" type="button" class="ryn-priority-card" :class="item.tone" @click="open(item.action)">
+              <span class="ryn-priority-mark" aria-hidden="true">{{ item.tone === 'critical' ? '!' : item.tone === 'good' ? '✓' : '•' }}</span><span class="ryn-priority-copy"><b>{{ item.title }}</b><small>{{ item.detail }}</small></span><span class="ryn-priority-arrow" aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </section>
         <section class="ryn-section-title"><div><h2>Tu operación por sistema</h2><p>Cada módulo muestra únicamente sus indicadores y acciones.</p></div></section>
         <section v-if="cards.length" class="ryn-modules">
           <article v-for="card in cards" :key="card.key" class="ryn-module" :class="[card.key, { 'is-loading': state.state === 'loading' }]">
