@@ -3,10 +3,11 @@ import { computed, onUnmounted, watch } from 'vue'
 import '../home.css'
 import { canOpen } from '../dashboard'
 import ModuleIcon from '../components/ModuleIcon.vue'
+import UnitValidator from '../components/UnitValidator.vue'
 import type { DashboardState } from '../dashboard'
 import type { ModuleAction } from '../types'
 
-const props = defineProps<{ state: DashboardState; actions: ModuleAction; hasModule: (code: string) => boolean }>()
+const props = defineProps<{ state: DashboardState; actions: ModuleAction; hasModule: (code: string) => boolean; validatorApi?: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown> } }>()
 let summaryTimer: number | undefined
 watch(() => props.state.state, value => {
   window.clearTimeout(summaryTimer)
@@ -144,10 +145,7 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
       </header>
       <section class="ryn-main">
         <header class="ryn-page-heading"><div><h1>¡{{ greeting }}, {{ first }}! <span aria-hidden="true">👋</span></h1><p>Así va tu operación hoy{{ galera ? ` · ${galera}` : '' }}</p></div></header>
-        <section v-if="canQuickValidator" class="ryn-validator" aria-label="Validador de unidad">
-          <div class="ryn-validator-heading"><span class="ryn-validator-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2M8.5 10.8h4.6M10.8 8.5v4.6"/></svg></span><div><span class="ryn-validator-kicker">BÚSQUEDA RÁPIDA</span><h2>Validador de unidad</h2><p>Unidad, placa o Panapass</p></div></div>
-          <div class="v101-validator-tools"><div class="v101-validator-box"><input id="v101ValidatorQ" class="v101-validator-input" placeholder="Escribe un número de unidad, placa o Panapass" autocomplete="off"><div id="v101ValidatorList" class="v101-validator-list"></div></div><button id="v101ValidatorGo" class="v101-validator-go" type="button">Buscar unidad <span aria-hidden="true">→</span></button></div>
-        </section>
+        <UnitValidator v-if="canQuickValidator" :api="validatorApi" :on-control="() => open('control')" />
         <div v-if="state.state === 'error'" class="ryn-load-state error" role="alert"><b>No se pudo cargar el resumen.</b><span>{{ state.error }}</span><button @click="open('retry')">Reintentar</button></div>
         <div v-else-if="state.state === 'stale'" class="ryn-load-state stale" role="status">No se pudo actualizar el resumen. Se conservan los últimos datos válidos. {{ state.error }} <button @click="open('retry')">Reintentar</button></div>
         <div v-if="state.state === 'loading'" class="ryn-load-state" role="status">Cargando el resumen de tu alcance…</div>

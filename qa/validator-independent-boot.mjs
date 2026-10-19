@@ -64,16 +64,22 @@ try{
     assert.deepEqual(calls,[],'Guest bootstrap sent API calls');
     await host.locator('[name=usuario]').fill('fixture');await host.locator('[name=password]').fill('fixture-password');
     await host.locator('#loginBtn').click();
-    await host.locator(password?'#pc':denied?'.uva-denied':'#v101ValidatorQ').waitFor();
+    await host.locator(password?'#pc':denied?'.vua-denied':'#vua-query').waitFor();
     await page.waitForTimeout(1700);
     assert.deepEqual(calls,['/functions/v1/auth-username','/functions/v1/portal-session-modules'],name+' loaded Portal data');
     assert.deepEqual(errors,[],name+' page errors');
-    if(password)assert.equal(await host.locator('#v101ValidatorQ').count(),0,'Mandatory password change bypassed');
+    if(password)assert.equal(await host.locator('#vua-query').count(),0,'Mandatory password change bypassed');
     if(!password&&!denied){
-      await host.locator('#v101ValidatorQ').fill('QA100');await host.locator('#v101ValidatorQ').press('Enter');
-      await host.locator('#v101CheckModal[data-uva-enriched]').waitFor();
-      await host.locator('#v117GpsCard:not(.pending)').waitFor();
-      assert.equal(await host.locator('.v117-status-card').count(),4);assert.equal(await host.locator('.uva-gps-pill').count(),2);
+      await host.locator('#vua-query').fill('QA100');await host.locator('#vua-query').press('Enter');
+      await host.locator('.vua-card').nth(3).waitFor();
+      assert.equal(await host.locator('.vua-card').count(),4);
+      assert.match(await host.locator('.vua-card.gps').innerText(),/GPS 1|GPS1/);
+      assert.equal(await host.locator('.vua-app').evaluate(el=>el.scrollWidth>el.clientWidth),false,'Vue validator must fit a mobile viewport');
+      await host.locator('.vua-app').screenshot({path:path.join(process.cwd(),'.sandbox/validator-qa/vue-validator-390.png')});
+      await host.locator('.vua-footer button').click();
+      assert.equal(await host.locator('#vua-query').inputValue(),'','Otra unidad clears the search and returns focus to search');
+      await page.locator('#exit').click();await host.locator('#f').waitFor();
+      assert.equal(await host.locator('#rym-unit-validator-vue').count(),0,'Logout unmounts Vue and returns to login');
       assert.equal(calls.filter(url=>url.endsWith('revisados-validator')).length,1);
       assert.ok(!calls.some(url=>/portal-home-resumen|revisados-final|gps-rym-admin/.test(url)));
       assert.deepEqual(errors,[]);

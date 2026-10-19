@@ -1,9 +1,11 @@
 import { createApp, nextTick, reactive } from 'vue'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
+import ValidatorAppView from './views/ValidatorAppView.vue'
 import { acceptHomeSummary, acceptIndicator, createDashboardState, failHomeSummary, failIndicator } from './dashboard'
 import type { DashboardState } from './dashboard'
 import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalProfile } from './types'
+import type { PanapassSnapshot } from './panapass'
 import './style.css'
 
 declare global {
@@ -18,7 +20,11 @@ declare global {
     clearSession?: () => unknown
     loginView?: () => unknown
     login?: (event: SubmitEvent) => Promise<void>
-    __RYM_VUE_NEXT_HOME_MAIN?: { bindValidator?: () => unknown; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
+    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<unknown>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
+    __RYM_VUE_NEXT_LOGIN?: { render: (error?: string) => void; dispose: () => void }
+    __RYM_VUE_NEXT_PANAPASS_MAIN?: { read?: (force?: boolean) => Promise<PanapassSnapshot> }
+    searchValidator99?: (query: string, render?: boolean) => Promise<Record<string, unknown>[]>
+    loadValidatorDetail99?: (unit: Record<string, unknown>) => Promise<unknown>
     __RYM_VUE_NEXT_GPS_PRIORITY?: () => unknown
   }
 }
@@ -34,6 +40,8 @@ let panapassApp: ReturnType<typeof createApp> | null = null
 let panapassObserver: MutationObserver | null = null
 let panapassSequence = 0
 let panapassStylesPromise: Promise<void> | null = null
+let validatorApp: ReturnType<typeof createApp> | null = null
+let validatorProps: { api: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown> }; access: 'allowed' | 'denied' } | null = null
 
 function profileOf(summary: HomeSummary): PortalProfile { return summary.profile || {} }
 function routeTo(action?: () => unknown): unknown { return action?.() }
@@ -72,7 +80,7 @@ function loadPanapassStyles(): Promise<void> {
 }
 function currentActions(): ModuleAction {
   return {
-    panapass: () => routeTo(window.v70OpenPanapass),
+    panapass: () => openPanapass(),
     revisados: () => routeTo(window.v60OpenRevisados),
     control: () => routeTo(window.v70OpenControl),
     gps: () => routeTo(window.v113OpenGps),
@@ -92,10 +100,117 @@ function currentActions(): ModuleAction {
 
 function logoutToLogin(): void {
   window.clearSession?.()
-  window.location.reload()
+  disposeHome()
+  renderLogin()
+}
+
+async function openPanapass(): Promise<void> {
+  const route = window.v70OpenPanapass
+  if (typeof route !== 'function') return
+  const authorized = !!window.rymHasModule?.('portal.panapass') || !!state?.session.modules.includes('portal.panapass')
+  if (!authorized) return
+  disposeHome()
+  await route()
+  const view = document.querySelector<HTMLElement>('#view')
+  const main = window.__RYM_VUE_NEXT_PANAPASS_MAIN
+  if (!view || !main?.read || document.body.classList.contains('v66-revisados')) return
+  groupPanapassNavigation()
+  renderPanapass(view)
+}
+
+function groupPanapassNavigation(): void {
+  const nav = document.querySelector<HTMLElement>('.side .nav')
+  if (!nav || nav.querySelector('[data-rym-pan-nav]')) return
+  const groups = [
+    { label: 'OPERACIÓN', modules: ['dashboard', 'negativos_hoy', 'pagos_hoy'] },
+    { label: 'GESTIÓN', modules: ['cargar_pagos', 'historial', 'recurrentes', 'bajas_panapass'] },
+    { label: 'ANÁLISIS', modules: ['ranking', 'reportes', 'recorrido', 'operaciones'] },
+  ]
+  const fragment = document.createDocumentFragment()
+  const ordered = new Set<HTMLElement>()
+  for (const group of groups) {
+    const buttons = group.modules.map(code => nav.querySelector<HTMLElement>(`[data-m="${code}"]`)).filter((button): button is HTMLElement => !!button)
+    if (!buttons.length) continue
+    const label = document.createElement('div')
+    label.className = 'rym-pan-nav-label'
+    label.dataset.rymPanNav = '1'
+    label.textContent = group.label
+    fragment.append(label)
+    for (const button of buttons) { ordered.add(button); fragment.append(button) }
+  }
+  for (const child of [...nav.children]) if (!ordered.has(child as HTMLElement)) fragment.append(child)
+  nav.replaceChildren(fragment)
+}
+
+export async function renderPanapass(view = document.querySelector<HTMLElement>('#view')): Promise<void> {
+  if (!view) return
+  disposePanapass()
+  document.body.classList.add('rym-panapass-vue')
+  const sequence = ++panapassSequence
+  view.innerHTML = '<div id="rym-vue-next-panapass"></div>'
+  const root = view.querySelector<HTMLElement>('#rym-vue-next-panapass')
+  if (!root) return
+  const read = window.__RYM_VUE_NEXT_PANAPASS_MAIN?.read
+  if (!read) return
+  const observer = new MutationObserver(() => {
+    if (!root.isConnected) disposePanapass()
+  })
+  panapassObserver = observer
+  observer.observe(view, { childList: true, subtree: true })
+  const componentState = reactive({ snapshot: null as PanapassSnapshot | null, loading: true, error: '', stale: false })
+  const load = async (force = false) => {
+    componentState.loading = true
+    componentState.error = ''
+    try {
+      const next = await read(force)
+      if (sequence !== panapassSequence || !root.isConnected || document.querySelector('#view') !== view) return
+      componentState.snapshot = next
+      componentState.stale = next.state === 'stale'
+      componentState.error = next.error || ''
+    } catch (error) {
+      if (sequence !== panapassSequence || !root.isConnected) return
+      componentState.error = error instanceof Error ? error.message : String(error)
+    } finally {
+      if (sequence === panapassSequence && root.isConnected) componentState.loading = false
+    }
+  }
+  let PanapassView: typeof import('./views/PanapassView.vue')['default']
+  try {
+    const [component] = await Promise.all([import('./views/PanapassView.vue'), loadPanapassStyles()])
+    PanapassView = component.default
+  } catch (error) {
+    if (sequence === panapassSequence && root.isConnected) {
+      const alert = document.createElement('section')
+      alert.className = 'pan-state pan-error'
+      alert.setAttribute('role', 'alert')
+      const message = document.createElement('span')
+      message.textContent = 'No se pudo cargar el dashboard Panapass. Comprueba tu conexión e inténtalo de nuevo.'
+      const retry = document.createElement('button')
+      retry.type = 'button'
+      retry.textContent = 'Reintentar'
+      retry.onclick = () => { void renderPanapass(view) }
+      alert.append(message, retry)
+      root.replaceChildren(alert)
+    }
+    return
+  }
+  if (sequence !== panapassSequence || !root.isConnected || document.querySelector('#view') !== view) return
+  panapassApp = createApp(PanapassView, { state: componentState, retry: () => { void load(true) } })
+  panapassApp.mount(root)
+  void load()
+}
+
+export function disposePanapass(): void {
+  panapassSequence++
+  document.body.classList.remove('rym-panapass-vue')
+  panapassObserver?.disconnect()
+  panapassObserver = null
+  panapassApp?.unmount()
+  panapassApp = null
 }
 
 export function renderHome(summary: HomeSummary): void {
+  disposeLogin()
   const root = document.querySelector<HTMLElement>('#app')
   if (!root) return
   if (state && !document.querySelector('#rym-vue-next-home')) disposeHome()
@@ -103,7 +218,7 @@ export function renderHome(summary: HomeSummary): void {
     state = reactive(createDashboardState({ profile: profileOf(summary), modules: summary.modules || [] })) as DashboardState
     methods = currentActions()
     root.innerHTML = '<div id="rym-vue-next-home"></div>'
-    app = createApp(HomeView, { state, actions: methods, hasModule: (code: string) => window.rymHasModule?.(code) ?? state?.session.modules.includes(code) ?? false })
+    app = createApp(HomeView, { state, actions: methods, hasModule: (code: string) => window.rymHasModule?.(code) ?? state?.session.modules.includes(code) ?? false, validatorApi: { search: (query: string) => window.__RYM_VUE_NEXT_HOME_MAIN?.searchValidator?.(query) ?? Promise.resolve([]), load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? Promise.reject(Error('El validador no está disponible.')) } })
     app.mount('#rym-vue-next-home')
     controlIndicatorsRequested = false
     gpsIndicatorsRequested = false
@@ -112,7 +227,6 @@ export function renderHome(summary: HomeSummary): void {
   Object.assign(state, acceptHomeSummary(state, summary))
   void nextTick(() => {
     if (!state || !document.querySelector('[data-testid="vue-next-home"]')) return
-    window.__RYM_VUE_NEXT_HOME_MAIN?.bindValidator?.()
     const role = String(state.session.profile.rol || '').toUpperCase()
     const control = !!state.summary?.control && !controlIndicatorsRequested
     const gps = role === 'ADMIN_TOTAL' && !gpsIndicatorsRequested
@@ -122,6 +236,34 @@ export function renderHome(summary: HomeSummary): void {
     void window.__RYM_VUE_NEXT_HOME_MAIN?.refreshIndicators?.(role, { control, gps: false })
     if (gps) void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
   })
+}
+
+export function mountValidatorApp(root: HTMLElement, access: 'allowed' | 'denied' = 'allowed'): void {
+  if (validatorApp && root.querySelector('[data-testid="vue-unit-validator"]')) {
+    setValidatorAccess(access)
+    return
+  }
+  validatorApp?.unmount()
+  root.replaceChildren()
+  validatorProps = reactive({
+    access,
+    api: {
+      search: (query: string) => window.searchValidator99?.(query, false) ?? Promise.resolve([]),
+      load: (unit: Record<string, unknown>) => window.loadValidatorDetail99?.(unit) ?? Promise.reject(Error('El validador no está disponible.')),
+    },
+  })
+  validatorApp = createApp(ValidatorAppView, validatorProps)
+  validatorApp.mount(root)
+}
+
+export function setValidatorAccess(access: 'allowed' | 'denied'): void {
+  if (validatorProps) validatorProps.access = access
+}
+
+export function disposeValidatorApp(): void {
+  validatorApp?.unmount()
+  validatorApp = null
+  validatorProps = null
 }
 
 export function failHome(error: unknown): void {

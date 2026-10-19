@@ -10,7 +10,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const text=v=>String(v??'').trim();
   const first=(...values)=>values.find(v=>v!=null&&text(v)!==''&&text(v)!=='—');
-  let observer=null,renderDepth=0;
+  let observer=null,renderDepth=0,vueValidatorPromise=null,vueValidatorModule=null,vueValidatorRoot=null;
   const observed={childList:true,characterData:true,subtree:true};
   const internalSelector='.uva-unit-preview,.uva-details,.uva-priority-note,.uva-gps-live,.uva-verified-flag';
   function mainMutations(records){
@@ -636,6 +636,7 @@
     masterSource=null;masterRequests.clear();masterResults.clear();searchEpoch++;
     Object.keys(responses).forEach(k=>delete responses[k]);
     accessCheckedFor='';accessProbe=null;
+    try{vueValidatorModule?.disposeValidatorApp();vueValidatorRoot=null}catch(_){}
     d.getElementById('v101CheckModal')?.remove();
     if(typeof clearSession==='function')clearSession();
     if(typeof loginView==='function')loginView();
@@ -719,29 +720,29 @@
     input.dataset.uvaSearchBound='1';
     button.dataset.uvaSearchBound='1';
   }
-  function ensureValidatorSurface(){
-    const existing=d.getElementById('v101ValidatorQ');
-    if(existing){bindDedicatedSearch();return true}
+  async function ensureValidatorSurface(access='allowed'){
     const root=d.getElementById('app');if(!root)return false;
-    root.innerHTML=
-      '<div class="v101-shell uva-dedicated-shell">'+
-        '<main class="v101-main">'+
-          '<div class="v101-content">'+
-            '<section class="v101-validator">'+
-              '<div class="v101-validator-head"><h3>Validador de Unidad</h3><p>Busca una unidad, placa o Panapass</p></div>'+
-              '<div class="v101-validator-tools">'+
-                '<div class="v101-validator-box">'+
-                  '<input id="v101ValidatorQ" class="v101-validator-input" autocomplete="off">'+
-                  '<div id="v101ValidatorList" class="v101-validator-list" style="display:none"></div>'+
-                '</div>'+
-                '<button id="v101ValidatorGo" class="v101-validator-go" type="button">Validar</button>'+
-              '</div>'+
-            '</section>'+
-          '</div>'+
-        '</main>'+
-      '</div>';
-    bindDedicatedSearch();
-    return !!d.getElementById('v101ValidatorQ');
+    let mount=root.querySelector('#rym-unit-validator-vue');
+    if(!mount){root.innerHTML='<div id="rym-unit-validator-vue" aria-busy="true"></div>';mount=root.firstElementChild}
+    if(!mount)return false;
+    if(!d.querySelector('link[data-rym-validator-vue-css]')){
+      const link=d.createElement('link');link.rel='stylesheet';link.href='/vue-next/dist/portal-rym-vue-next.css?v=validator-vue-1';link.dataset.rymValidatorVueCss='1';d.head.append(link);
+    }
+    try{
+      if(!vueValidatorModule){
+        vueValidatorPromise=vueValidatorPromise||import('/vue-next/dist/portal-rym-vue-next.js?v=validator-vue-1');
+        vueValidatorModule=await vueValidatorPromise;
+      }
+      if(!mount.isConnected)return false;
+      if(vueValidatorRoot!==mount){vueValidatorModule.mountValidatorApp(mount,access);vueValidatorRoot=mount}
+      else vueValidatorModule.setValidatorAccess(access);
+      mount.removeAttribute('aria-busy');
+      return true;
+    }catch(error){
+      console.error('Vue unit validator failed to load',error);
+      if(mount.isConnected)mount.innerHTML='<div class="uva-denied"><span aria-hidden="true">!</span><h1>No se pudo cargar el validador</h1><p>Comprueba tu conexión e inténtalo de nuevo.</p><button type="button" onclick="location.reload()">Reintentar</button></div>';
+      return false;
+    }
   }
 
   function refresh(){return renderQuietly(refreshView)}
@@ -754,11 +755,12 @@
     if(mode==='denied'){
       d.getElementById('v101CheckModal')?.remove();
       const root=d.getElementById('app');
-      if(root&&!root.querySelector('.uva-denied'))root.innerHTML='<section class="uva-denied"><span aria-hidden="true">⌑</span><h1>Acceso restringido</h1><p>Tu usuario no tiene habilitado el permiso de App Validador de Unidad.</p></section>';
+      if(dedicated)void ensureValidatorSurface('denied');
+      else if(root&&!root.querySelector('.uva-denied'))root.innerHTML='<section class="uva-denied"><span aria-hidden="true">⌑</span><h1>Acceso restringido</h1><p>Tu usuario no tiene habilitado el permiso de App Validador de Unidad.</p></section>';
       notify();return;
     }
 
-    if(ok){if(dedicated)ensureValidatorSurface();else if(d.getElementById('v101ValidatorQ'))bindDedicatedSearch()}
+    if(ok){if(dedicated)void ensureValidatorSurface('allowed');else if(d.getElementById('v101ValidatorQ'))bindDedicatedSearch()}
     const input=d.getElementById('v101ValidatorQ');
     if(ok&&input){
       input.setAttribute('inputmode','search');input.setAttribute('enterkeyhint','search');

@@ -8,12 +8,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    cssCodeSplit: false,
+    cssCodeSplit: true,
     lib: {
       entry: 'src/bridge.ts',
       formats: ['es'],
       fileName: () => 'portal-rym-vue-next.js',
     },
-    rollupOptions: { output: { assetFileNames: 'portal-rym-vue-next[extname]' } },
+    rollupOptions: { output: { assetFileNames: 'portal-rym-vue-next[extname]', chunkFileNames: 'portal-rym-vue-next-[name].js' } },
   },
 })
