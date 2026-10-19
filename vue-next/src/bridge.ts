@@ -1,5 +1,6 @@
 import { createApp, nextTick, reactive } from 'vue'
 import HomeView from './views/HomeView.vue'
+import LoginView from './views/LoginView.vue'
 import { acceptHomeSummary, acceptIndicator, createDashboardState, failHomeSummary, failIndicator } from './dashboard'
 import type { DashboardState } from './dashboard'
 import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalProfile } from './types'
@@ -16,19 +17,59 @@ declare global {
     v36PortalHome?: () => unknown
     clearSession?: () => unknown
     loginView?: () => unknown
+    login?: (event: SubmitEvent) => Promise<void>
     __RYM_VUE_NEXT_HOME_MAIN?: { bindValidator?: () => unknown; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
     __RYM_VUE_NEXT_GPS_PRIORITY?: () => unknown
   }
 }
 
 let app: ReturnType<typeof createApp> | null = null
+let loginApp: ReturnType<typeof createApp> | null = null
+let loginProps: { error: string; onSubmit: (event: SubmitEvent) => Promise<void> | void } | null = null
 let state: DashboardState | null = null
 let methods: ModuleAction = {}
 let controlIndicatorsRequested = false
 let gpsIndicatorsRequested = false
+let panapassApp: ReturnType<typeof createApp> | null = null
+let panapassObserver: MutationObserver | null = null
+let panapassSequence = 0
+let panapassStylesPromise: Promise<void> | null = null
 
 function profileOf(summary: HomeSummary): PortalProfile { return summary.profile || {} }
 function routeTo(action?: () => unknown): unknown { return action?.() }
+export function renderLogin(error = ''): void {
+  const root = document.querySelector<HTMLElement>('#app')
+  if (!root) return
+  if (!loginApp) {
+    root.innerHTML = '<div id="rym-vue-next-login"></div>'
+    loginProps = reactive({ error, onSubmit: (event: SubmitEvent) => window.login?.(event) })
+    loginApp = createApp(LoginView, loginProps)
+    loginApp.mount('#rym-vue-next-login')
+  } else if (loginProps) loginProps.error = error
+}
+export function disposeLogin(): void {
+  loginApp?.unmount()
+  loginApp = null
+  loginProps = null
+}
+function loadPanapassStyles(): Promise<void> {
+  if (!panapassStylesPromise) {
+    panapassStylesPromise = new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = `${import.meta.env.BASE_URL}panapass.css`
+      link.dataset.rymPanapassStyles = '1'
+      link.onload = () => resolve()
+      link.onerror = () => {
+        link.remove()
+        panapassStylesPromise = null
+        reject(new Error('No se pudieron cargar los estilos de Panapass.'))
+      }
+      document.head.append(link)
+    })
+  }
+  return panapassStylesPromise
+}
 function currentActions(): ModuleAction {
   return {
     panapass: () => routeTo(window.v70OpenPanapass),
