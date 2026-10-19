@@ -59,15 +59,15 @@ const cards = computed<PortalCard[]>(() => {
   const pan = data.panapass
   const rev = data.revisados
   const control = data.control
-  if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', icon: '▤', badge: pan?.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : pan ? 'Operativo' : 'Actualizando', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
+  if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', icon: '▤', badge: pan?.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : pan ? 'Operativo' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
     { label: 'Negativos hoy', value: pan?.negativos_hoy ?? '—' }, { label: 'Pagos hoy', value: pan?.pagos_hoy ?? '—' }, { label: 'Pagado mes', value: pan ? formatMoney(pan.monto_mes) : '—' },
   ], action: 'panapass' })
-  if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', icon: '☑', badge: rev ? Number(rev.pendientes || 0) ? `${rev.pendientes} pendientes` : 'Al día' : 'Actualizando', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [
+  if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', icon: '☑', badge: rev ? Number(rev.pendientes || 0) ? `${rev.pendientes} pendientes` : 'Al día' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [
     { label: 'Pendientes', value: rev?.pendientes ?? '—' }, { label: 'Emitidos hoy', value: rev ? `${rev.emitidos_hoy ?? 0}/${rev.limite_hoy ?? 0}` : '—' },
   ], action: 'revisados' })
   if (hasGrant('portal.control_auto', 'control_auto.unidades')) {
     const totals = props.state.controlIndicators?.totals
-    result.push({ key: 'control', title: 'CONTROL DE AUTO', icon: '♧', badge: control ? 'Revisar flota' : 'Actualizando', description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [
+    result.push({ key: 'control', title: 'CONTROL DE AUTO', icon: '♧', badge: control ? 'Revisar flota' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [
       { label: 'Unidades activas', value: totals?.activas ?? control?.activas ?? '—' }, { label: 'Unidades paradas', value: totals?.paradas ?? control?.otros ?? '—' }, { label: 'Abono adicional', value: totals?.abono_adicional ?? '—' },
     ], action: 'control' })
   }
@@ -87,15 +87,15 @@ const priorities = computed<Priority[]>(() => {
   const pan = data.panapass
   const rev = data.revisados
   const control = data.control
-  if (Number(pan?.negativos_hoy) > 0) result.push({ key: 'pan-negatives', tone: 'warning', title: `${pan!.negativos_hoy} negativos Panapass`, detail: `${pan!.pagos_hoy || 0} pagos registrados hoy`, action: 'panapass' })
   if (Number(rev?.criticos) > 0) result.push({ key: 'rev-critical', tone: 'critical', title: `${rev!.criticos} revisados críticos`, detail: `${rev!.pendientes || 0} pendientes dentro de tu alcance`, action: 'revisados' })
-  else if (Number(rev?.pendientes) > 0) result.push({ key: 'rev-pending', tone: 'warning', title: `${rev!.pendientes} revisados pendientes`, detail: `${rev!.emitidos_hoy || 0}/${rev!.limite_hoy || 33} emitidos hoy`, action: 'revisados' })
   if (Number(pan?.bajas?.pendientes) > 0) result.push({ key: 'ena-pending', tone: Number(pan?.bajas?.alertas) > 0 ? 'critical' : 'warning', title: `${pan!.bajas!.pendientes} bajas ENA pendientes`, detail: `${pan!.bajas!.procesadas || 0} procesadas · ${pan!.bajas!.devoluciones || 0} devoluciones`, action: 'panapass' })
-  if (data.alerts?.length && !result.some(item => item.tone === 'critical')) {
-    const alert = data.alerts[0]
+  for (const [index, alert] of (data.alerts || []).entries()) {
+    const title = alert.title || 'Atención requerida'
+    if (result.some(item => item.title.toLocaleLowerCase() === title.toLocaleLowerCase())) continue
     const module = String(alert.module || '').toLowerCase()
     const action: keyof ModuleAction = module.includes('gps') ? 'gps' : module.includes('revis') ? 'revisados' : module.includes('control') || module.includes('auto') ? 'control' : 'panapass'
-    result.unshift({ key: 'system-alert', tone: alert.level === 'bad' ? 'critical' : 'warning', title: alert.title || 'Atención requerida', detail: alert.text || alert.module || 'Revisar alerta', action })
+    const level = String(alert.level || '').toLowerCase()
+    result.push({ key: `system-alert-${index}`, tone: ['bad', 'critical', 'critico', 'crítica'].includes(level) ? 'critical' : 'warning', title, detail: alert.text || alert.module || 'Revisar alerta', action })
   }
   if (!result.length && control) result.push({ key: 'all-clear', tone: 'good', title: 'Operación sin prioridades críticas', detail: `${control.activas || 0} unidades activas dentro de tu alcance`, action: 'control' })
   return result.slice(0, 3)
@@ -144,7 +144,7 @@ function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.
         <div v-else-if="state.state === 'stale'" class="ryn-load-state stale" role="status">No se pudo actualizar el resumen. Se conservan los últimos datos válidos. {{ state.error }} <button @click="open('retry')">Reintentar</button></div>
         <div v-if="state.state === 'loading'" class="ryn-load-state" role="status">Cargando el resumen de tu alcance…</div>
         <section v-if="priorities.length" class="ryn-priorities" aria-labelledby="ryn-priorities-title">
-          <header class="ryn-priorities-heading"><div><span class="ryn-kicker">RESUMEN INTELIGENTE</span><h2 id="ryn-priorities-title">Prioridad de hoy</h2><p>Lo que necesita atención primero en tu operación.</p></div><span class="ryn-priority-count">{{ priorities.every(item => item.tone === 'good') ? 'Todo en orden' : `${priorities.filter(item => item.tone !== 'good').length} ${priorities.filter(item => item.tone !== 'good').length === 1 ? 'alerta' : 'alertas'}` }}</span></header>
+          <header class="ryn-priorities-heading"><div><span class="ryn-kicker">CENTRO DE ATENCIÓN</span><h2 id="ryn-priorities-title">Atención prioritaria</h2><p>Excepciones que requieren una acción en tu operación.</p></div><span class="ryn-priority-count">{{ priorities.every(item => item.tone === 'good') ? 'Todo en orden' : `${priorities.filter(item => item.tone !== 'good').length} ${priorities.filter(item => item.tone !== 'good').length === 1 ? 'pendiente' : 'pendientes'}` }}</span></header>
           <div class="ryn-priority-grid">
             <button v-for="item in priorities" :key="item.key" type="button" class="ryn-priority-card" :class="item.tone" @click="open(item.action)">
               <span class="ryn-priority-mark" aria-hidden="true">{{ item.tone === 'critical' ? '!' : item.tone === 'good' ? '✓' : '•' }}</span><span class="ryn-priority-copy"><b>{{ item.title }}</b><small>{{ item.detail }}</small></span><span class="ryn-priority-arrow" aria-hidden="true">↗</span>
