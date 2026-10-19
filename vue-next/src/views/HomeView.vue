@@ -51,7 +51,7 @@ const cards = computed<PortalCard[]>(() => {
   if (!data) {
     const badge = props.state.state === 'loading' ? 'Cargando' : 'Sin datos'
     const result: PortalCard[] = []
-    if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', badge, description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [{ label: 'Negativos hoy', value: '…' }, { label: 'Pagos hoy', value: '…' }, { label: 'Pagado mes', value: '…' }], action: 'panapass' })
+    if (hasGrant('portal.panapass', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', badge, description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [{ label: 'Negativos hoy', value: '…' }, { label: 'Pagos hoy', value: '…' }, { label: 'Pagado mes', value: '…' }], action: 'panapass' })
     if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', badge, description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [{ label: 'Pendientes', value: '…' }, { label: 'Emitidos hoy', value: '…' }], action: 'revisados' })
     if (hasGrant('portal.control_auto', 'control_auto.unidades')) result.push({ key: 'control', title: 'CONTROL DE AUTO', badge, description: 'Maestra de flota, eCarCheck, cupos, auditoría y trazabilidad.', metrics: [{ label: 'Unidades activas', value: '…' }, { label: 'Unidades paradas', value: '…' }, { label: 'Abono adicional', value: '…' }], action: 'control' })
     if (allowedGps.value) result.push({ key: 'gps', title: 'GPS', badge, description: 'GPS1/GPS2, prioridades, ranking y ubicación según tu perfil.', metrics: [{ label: 'Críticas', value: '…' }, { label: 'Alertas', value: '…' }, { label: 'Pendientes hoy', value: '…' }], action: 'gps' })
@@ -61,7 +61,7 @@ const cards = computed<PortalCard[]>(() => {
   const pan = data.panapass
   const rev = data.revisados
   const control = data.control
-  if (hasGrant('portal.panapass', 'dashboard', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', badge: pan?.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : pan ? 'Operativo' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
+  if (hasGrant('portal.panapass', 'negativos_hoy', 'pagos_hoy', 'ranking')) result.push({ key: 'panapass', title: 'PANAPASS', badge: pan?.rank ? `#${pan.rank.posicion_galera} · ${pan.rank.galera}` : pan ? 'Operativo' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Cobros, negativos, pagos, historial y operación ENA.', metrics: [
     { label: 'Negativos hoy', value: pan?.negativos_hoy ?? '—' }, { label: 'Pagos hoy', value: pan?.pagos_hoy ?? '—' }, { label: 'Pagado mes', value: pan ? formatMoney(pan.monto_mes) : '—' },
   ], action: 'panapass' })
   if (hasGrant('portal.revisados')) result.push({ key: 'revisados', title: 'REVISADOS', badge: rev ? Number(rev.pendientes || 0) ? `${rev.pendientes} pendientes` : 'Al día' : props.state.state === 'loading' ? 'Cargando' : 'Sin datos', description: 'Vencimientos, operación ATTT, historial y avance del mes.', metrics: [
