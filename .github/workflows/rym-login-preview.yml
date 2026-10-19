@@ -54,7 +54,7 @@ jobs:
           test -s /tmp/rym-vue-next-preview.css
           grep -Fq 'rym-vue-next-login' /tmp/rym-vue-next-bridge.js
           grep -Fq 'Tu flota' /tmp/rym-login-preview.html
-          grep -Fq 'rym-login-module-shine' /tmp/rym-login-preview.html
+          grep -Fq 'vueNext=1' /tmp/rym-login-preview.html
           {
             echo '## RYM login sandbox preview'
             echo "URL: $url/?vueNext=1"
