@@ -37,32 +37,6 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           npx --yes wrangler@latest versions upload --preview-alias rym-login-preview
-      - name: Verify login preview
-        shell: bash
-        run: |
-          set -euo pipefail
-          url='https://rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev'
-          curl -fsSL --max-time 30 "$url/?preview=${GITHUB_SHA}" -o /tmp/rym-login-preview.html
-          curl -fsSL --max-time 30 "$url/assets/rym-logo.png" -o /tmp/rym-logo-preview.png
-          curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.js" -o /tmp/rym-vue-next-preview.js
-          curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next-bridge.js" -o /tmp/rym-vue-next-bridge-preview.js
-          curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.css" -o /tmp/rym-vue-next-preview.css
-          curl -fsSL --max-time 30 "$url/css/validator-tablet-app.css?preview=${GITHUB_SHA}" -o /tmp/rym-validator-html-preview.css
-          test -s /tmp/rym-logo-preview.png
-          test -s /tmp/rym-vue-next-preview.js
-          test -s /tmp/rym-vue-next-bridge-preview.js
-          test -s /tmp/rym-vue-next-preview.css
-          test -s /tmp/rym-validator-html-preview.css
-          grep -Fq 'rym-vue-next-login' /tmp/rym-vue-next-bridge-preview.js
-          grep -Fq 'rym-unit-validator-integrated #v101CheckModal' /tmp/rym-validator-html-preview.css
-          grep -Fq 'Tu flota' /tmp/rym-login-preview.html
-          grep -Fq 'vueNext=1' /tmp/rym-login-preview.html
-          {
-            echo '## RYM login sandbox preview'
-            echo "URL: $url/?vueNext=1"
-            echo "Commit: ${GITHUB_SHA}"
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Publish dedicated validator preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -93,4 +67,37 @@ jobs:
             sleep 5
           done
           echo 'Dedicated validator preview did not serve the new Vue resources.' >&2
+          exit 1
+
+      - name: Verify login preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev'
+          for attempt in $(seq 1 12); do
+            if curl -fsSL --max-time 20 "$url/?preview=${GITHUB_SHA}" -o /tmp/rym-login-preview.html \
+              && curl -fsSL --max-time 20 "$url/assets/rym-logo.png" -o /tmp/rym-logo-preview.png \
+              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.js" -o /tmp/rym-vue-next-preview.js \
+              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next-bridge.js" -o /tmp/rym-vue-next-bridge-preview.js \
+              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.css" -o /tmp/rym-vue-next-preview.css \
+              && curl -fsSL --max-time 20 "$url/css/validator-tablet-app.css?preview=${GITHUB_SHA}" -o /tmp/rym-validator-html-preview.css \
+              && test -s /tmp/rym-logo-preview.png \
+              && test -s /tmp/rym-vue-next-preview.js \
+              && test -s /tmp/rym-vue-next-bridge-preview.js \
+              && test -s /tmp/rym-vue-next-preview.css \
+              && test -s /tmp/rym-validator-html-preview.css \
+              && grep -Fq 'rym-vue-next-login' /tmp/rym-vue-next-bridge-preview.js \
+              && grep -Fq 'rym-unit-validator-integrated #v101CheckModal' /tmp/rym-validator-html-preview.css \
+              && grep -Fq 'Tu flota' /tmp/rym-login-preview.html \
+              && grep -Fq 'vueNext=1' /tmp/rym-login-preview.html; then
+              {
+                echo '## RYM login sandbox preview'
+                echo "URL: $url/?vueNext=1"
+                echo "Commit: ${GITHUB_SHA}"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Login sandbox assets did not become available after retries.' >&2
           exit 1
