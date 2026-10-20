@@ -24,11 +24,17 @@ try {
   browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe'});
   const page=await browser.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const base='http://127.0.0.1:4198/vue-next/dist/validator-qa-local.html';
+  await page.setViewportSize({width:1440,height:900});
   await page.goto(base);
   const input=page.locator('#v101ValidatorQ');
   await input.fill('QA100');await input.press('Enter');await page.locator('.uv-dialog').waitFor();
   await page.waitForFunction(()=>document.querySelector('.uv-check-card.revisados')?.innerText.includes('VIGENTE'));
   assert.equal(await page.locator('.uv-check-card').count(),4);
+  assert.equal(await page.locator('.uv-identity-main h3').innerText(),'QA100');
+  assert.equal(await page.locator('.uv-check-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length),4);
+  assert.deepEqual(await page.locator('.uv-check-card').evaluateAll(cards=>cards.map(card=>['panapass','revisados','gps','control'].find(key=>card.classList.contains(key)))),['panapass','revisados','gps','control']);
+  assert.equal(await page.locator('.uv-identity').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+  fs.mkdirSync('.sandbox/validator-qa',{recursive:true});await page.screenshot({path:'.sandbox/validator-qa/vue-quick-1440.png',fullPage:true});
   const review=page.locator('.uv-check-card.revisados');assert.equal(await review.locator('.uv-extra-field').filter({hasText:'Fotos'}).count(),1);
   const gps=page.locator('.uv-check-card.gps');assert.match(await gps.innerText(),/2 DE 2 REPORTANDO/);await gps.locator('.uv-extra-section').filter({hasText:'información del equipo'}).first().locator('summary').click();assert.match(await gps.innerText(),/IMEI-1/);assert.match(await gps.innerText(),/Metadata/);
   await page.locator('.uv-close').click();await page.locator('.uv-dialog').waitFor({state:'hidden'});
