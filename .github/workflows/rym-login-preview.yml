@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          url='https://validator-tablet-app-portal-ena-rym.workers.dev'
+          url='https://validator-tablet-app-portal-ena-rym.almarzayhonly.workers.dev'
           curl -fsSL --max-time 30 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-yesterday.html
           curl -fsSL --max-time 30 "$url/css/validator-tablet-app.css?preview=${GITHUB_SHA}" -o /tmp/validator-yesterday.css
           test -s /tmp/validator-yesterday.css
