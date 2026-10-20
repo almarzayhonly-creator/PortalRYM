@@ -92,7 +92,7 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=30"><script src="/modules/control-auto/validator-presentation.js?v=30" defer></script><script src="/modules/control-auto/validator-details.js?v=30" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=30" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=30" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=31"><script src="/modules/control-auto/validator-presentation.js?v=31" defer></script><script src="/modules/control-auto/validator-details.js?v=31" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=31" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=31" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       const extras=url.searchParams.get('validator-host')==='1'?'':owner+rankingOwner+negativosLastOwner+unitValidatorLauncher;

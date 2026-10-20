@@ -83,12 +83,14 @@ jobs:
           set -euo pipefail
           url='https://validator-tablet-app-portal-ena-rym.almarzayhonly.workers.dev'
           for attempt in $(seq 1 12); do
-            if curl -fsSL --max-time 20 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-shell.html \
+            if curl -fsSL -D /tmp/validator-shell.headers --max-time 20 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-shell.html \
               && curl -fsSL --max-time 20 "$url/modules/control-auto/validator-tablet-app.js?preview=${GITHUB_SHA}" -o /tmp/validator-app.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next-bridge.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue-bridge.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.css?preview=${GITHUB_SHA}" -o /tmp/validator-vue.css; then
               if grep -Fq 'unit-validator-shell-v31' /tmp/validator-shell.html \
+                && grep -Fiq 'x-portal-build: unit-validator-shell-v31' /tmp/validator-shell.headers \
+                && grep -Fq '/css/validator-tablet-app.css?v=31' /tmp/validator-shell.html \
                 && grep -Fq 'mountValidatorApp' /tmp/validator-app.js \
                 && grep -Fq 'setValidatorAccess' /tmp/validator-vue.js \
                 && grep -Fq 'revisados-ficha' /tmp/validator-vue-bridge.js \
