@@ -151,5 +151,14 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 .vua-card:focus-within{border-color:#a8c9f2;box-shadow:0 0 0 3px #367be514,0 12px 26px #17395d10}
 @media(hover:hover){.vua-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px #17395d12}}
 @media(prefers-reduced-motion:reduce){.vua-card,.vua-search-action,.vua-result{transition:none}}
+.vua-content{container:unit-content / inline-size}
+.vua-card-heading .vua-kicker{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vua-card-facts b{overflow-wrap:normal;word-break:normal}
+.vua-card.revisados{border-top:3px solid #168e58}
+.vua-card.revisados .vua-module-icon{background:#e2f5eb;color:#078752}
+.vua-card.revisados .vua-card-value{color:#078752}
+.vua-card.revisados .vua-card-status.ok{background:#e9f8f0;color:#078752}
+@container unit-content (max-width:1120px){.vua-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.vua-card{min-height:0}}
+@container unit-content (max-width:600px){.vua-card-grid{grid-template-columns:1fr}}
 </style>
 
