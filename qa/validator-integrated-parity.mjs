@@ -50,12 +50,23 @@ try{
       assert.match(await control.innerText(),/PÓLIZA NETSUITE/i);
       assert.equal(await page.locator('#v101CheckModal').evaluate(x=>x.scrollWidth>innerWidth),false);
       await page.waitForFunction(()=>[...document.querySelectorAll('.v117-status-card')].every(c=>c.getAttribute('aria-expanded')===String(c.querySelector(':scope > details').open)));
+      const detailLayout=await page.locator('#v101CheckModal').evaluate(modal=>({
+        titleSize:getComputedStyle(modal.querySelector('.v117-title-row h2')).fontSize,
+        identityDisplay:getComputedStyle(modal.querySelector('.v117-meta')).display,
+        identityColumns:getComputedStyle(modal.querySelector('.v117-meta')).gridTemplateColumns.split(' ').length,
+        cards:getComputedStyle(modal.querySelector('.v117-quick-grid')).display,
+        cardRadius:getComputedStyle(modal.querySelector('.v117-status-card')).borderRadius
+      }));
+      assert.equal(detailLayout.identityDisplay,'grid');assert.equal(detailLayout.cards,'grid');
+      assert.ok(detailLayout.identityColumns>=2&&detailLayout.identityColumns<=4);
+      assert.ok(parseFloat(detailLayout.cardRadius)>=14);
       const result=await page.locator('#v101CheckModal').evaluate(modal=>({
         html:modal.innerHTML,
         styles:[...modal.querySelectorAll('*')].map(el=>{const s=getComputedStyle(el);return [el.tagName,el.className,s.display,s.color,s.backgroundColor,s.fontFamily,s.fontSize,s.fontWeight,s.gridTemplateColumns,s.borderRadius]}),
         calls:QA.calls.filter(x=>x.name||/gps-rym-validator|ena-consulta-saldo|revisados-ficha|revisados-validator/.test(x.url)).map(x=>x.name?{name:x.name,args:x.args}:{url:x.url}).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))
       }));
       result.searchStyles=searchStyles;
+      result.detailLayout=detailLayout;
       assert.equal(result.calls.filter(x=>x.name==='panapass_control_auto_v3'&&x.args.p_limit===10).length,1);
       if(!dedicated)assert.deepEqual(await page.evaluate(()=>['.v101-side','.v99-grid'].map(q=>getComputedStyle(document.querySelector(q)).display)),neighbors,'Portal neighbors changed');
       assert.deepEqual(errors,[]);
@@ -69,3 +80,4 @@ try{
   }
   fs.writeFileSync('.sandbox/validator-qa/parity.json',JSON.stringify(report,null,2));
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
+
