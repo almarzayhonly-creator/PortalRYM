@@ -14,7 +14,7 @@ const row={unidad:'QA100',placa_unica:'QA-PLATE',estatus:'ACTIVO'};
 const mode=new URLSearchParams(location.search).get('mode');
 window.calls=[];
 const card=(key)=>({key,title:key,tone:'ok',badge:'VERIFICADO',value:'VIGENTE',details:[],note:''});
-const api={search:async(q)=>{window.calls.push(q);await new Promise(r=>setTimeout(r,q==='slow'?500:30));if(q==='error')throw Error('Servicio no disponible');return [q==='slow'?{...row,unidad:'OLD'}:row]},load:async()=>({unit:'QA100',plate:'QA-PLATE',owner:'QA',operator:'QA',supervisor:'QA',galera:'QA',active:true,status:'ACTIVO',overall:'ACTIVA',controlRecord:{chasis:'CH-100',mes_revisado:'OCTUBRE'},revisadoRecord:{cantidad_fotos:2,ultimo_revisado:'2026-10-01'},cards:['panapass','revisados','gps','control'].map(card)}),enrich:async(d)=>{await new Promise(r=>setTimeout(r,100));d.cards[1].value='ACTUALIZADO';return d},ficha:async()=>({oficial:{chasis:'CH-200'}})};
+const api={search:async(q)=>{window.calls.push(q);await new Promise(r=>setTimeout(r,q==='slow'?500:30));if(q==='error')throw Error('Servicio no disponible');return [q==='slow'?{...row,unidad:'OLD'}:row]},load:async()=>({unit:'QA100',plate:'QA-PLATE',owner:'QA',operator:'QA',supervisor:'QA',galera:'QA',active:true,status:'ACTIVO',overall:'ACTIVA',controlRecord:{chasis:'CH-100',mes_revisado:'OCTUBRE'},revisadoRecord:{estado:'VIGENTE',cantidad_fotos:2,ultimo_revisado:'2026-10-01'},gpsRecord:{nivel:'NORMAL',razon:'Normal',gps1:{installed:true,ok:true,label:'Reportando',last:'2026-10-20T10:00:00Z',imei:'IMEI-1',metadata:{device:'one'}},gps2:{installed:true,ok:true,label:'Reportando',last:'2026-10-20T10:00:00Z'}},cards:['panapass','revisados','gps','control'].map(card)}),enrich:async(d)=>{await new Promise(r=>setTimeout(r,100));d.revisadoRecord.estado='VIGENTE';return d},ficha:async()=>({oficial:{chasis:'CH-200'}})};
 createApp(mode==='standalone'?Standalone:Quick,{api,access:'allowed'}).mount('#app');
 </script></body></html>`);
 const server = await createServer({root:path.resolve('vue-next'),configFile:path.resolve('vue-next/vite.config.ts'),server:{host:'127.0.0.1',port:4198,strictPort:true}});
@@ -27,9 +27,10 @@ try {
   await page.goto(base);
   const input=page.locator('#v101ValidatorQ');
   await input.fill('QA100');await input.press('Enter');await page.locator('.uv-dialog').waitFor();
-  await page.waitForFunction(()=>document.querySelector('.uv-check-card.revisados')?.innerText.includes('ACTUALIZADO'));
+  await page.waitForFunction(()=>document.querySelector('.uv-check-card.revisados')?.innerText.includes('VIGENTE'));
   assert.equal(await page.locator('.uv-check-card').count(),4);
   const review=page.locator('.uv-check-card.revisados');assert.equal(await review.locator('.uv-extra-field').filter({hasText:'Fotos'}).count(),1);
+  const gps=page.locator('.uv-check-card.gps');assert.match(await gps.innerText(),/2 DE 2 REPORTANDO/);await gps.locator('.uv-extra-section').filter({hasText:'información del equipo'}).first().locator('summary').click();assert.match(await gps.innerText(),/IMEI-1/);assert.match(await gps.innerText(),/Metadata/);
   await page.locator('.uv-close').click();await page.locator('.uv-dialog').waitFor({state:'hidden'});
   await input.fill('error');await input.press('Enter');await page.getByRole('alert').waitFor();assert.match(await page.getByRole('alert').innerText(),/Servicio no disponible/);
   await input.fill('slow');await page.waitForFunction(()=>window.calls.includes('slow'));await input.fill('QA100');await input.press('Enter');await page.locator('.uv-dialog').waitFor();await page.waitForTimeout(600);assert.equal(await page.locator('.uv-identity h3').innerText(),'QA100');
@@ -44,3 +45,4 @@ try {
   }
   assert.deepEqual(errors,[]);console.log('PASS quick Enter, search error, stale search, four systems, unique photo field, shared details, comparison and responsive 390/768/1440.');
 } finally {await browser?.close();await server.close();fs.unlinkSync(harness)}
+
