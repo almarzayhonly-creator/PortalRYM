@@ -48,25 +48,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          url='https://validator-tablet-app-portal-ena-rym.almarzayhonly.workers.dev'
+          url='https://validator-tablet-app-portal-ena-rym.workers.dev'
           for attempt in $(seq 1 12); do
-            if curl -fsSL --max-time 20 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-shell.html \
-              && curl -fsSL --max-time 20 "$url/modules/control-auto/validator-tablet-app.js?preview=${GITHUB_SHA}" -o /tmp/validator-app.js \
-              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue.js \
-              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next-bridge.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue-bridge.js \
-              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.css?preview=${GITHUB_SHA}" -o /tmp/validator-vue.css; then
-              if grep -Fq 'unit-validator-shell-v29' /tmp/validator-shell.html \
-                && grep -Fq 'mountValidatorApp' /tmp/validator-app.js \
-                && grep -Fq 'setValidatorAccess' /tmp/validator-vue.js \
-                && grep -Fq 'revisados-ficha' /tmp/validator-vue-bridge.js \
-                && grep -Fq '.vua-detail-toggle' /tmp/validator-vue.css; then
-                echo 'Dedicated validator preview verified: $url/unit-validator'
+            if curl -fsSL -D /tmp/validator-shell.headers --max-time 20 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-shell.html \
+              && curl -fsSL --max-time 20 "$url/?validator-host=1&preview=${GITHUB_SHA}" -o /tmp/validator-host.html \
+              && curl -fsSL --max-time 20 "$url/modules/control-auto/validator-tablet-app-legacy.js?preview=${GITHUB_SHA}" -o /tmp/validator-legacy.js \
+              && curl -fsSL --max-time 20 "$url/css/validator-tablet-app-legacy.css?preview=${GITHUB_SHA}" -o /tmp/validator-legacy.css; then
+              if grep -Fq 'unit-validator-shell-v32' /tmp/validator-shell.html \
+                && grep -Fiq 'x-portal-build: unit-validator-shell-v32' /tmp/validator-shell.headers \
+                && grep -Fq 'Validador de Unidad' /tmp/validator-host.html \
+                && grep -Fq '/modules/control-auto/validator-tablet-app-legacy.js?v=32' /tmp/validator-host.html \
+                && grep -Fq '/css/validator-tablet-app-legacy.css?v=32' /tmp/validator-host.html \
+                && grep -Fq 'function ensureValidatorSurface' /tmp/validator-legacy.js \
+                && grep -Fq '.v101-validator' /tmp/validator-legacy.css; then
+                echo 'Dedicated legacy HTML validator preview verified: $url/unit-validator'
                 exit 0
               fi
             fi
             sleep 5
           done
-          echo 'Dedicated validator preview did not serve the new Vue resources.' >&2
+          echo 'Dedicated legacy HTML validator resources did not become available.' >&2
           exit 1
 
       - name: Verify login preview
