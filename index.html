@@ -8962,6 +8962,18 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
   if(new URLSearchParams(location.search).get('vueNext')==='1'){
     const useVueHome=new URLSearchParams(location.search).get('vueHome')!=='0';
     window.__RYM_VUE_NEXT_HOME_ENABLED=useVueHome;
+    const vueFunctionAllowlist=new Set(['admin-users','admin-unidad-status','control-auto-auditoria','control-auto-auditoria-v112','control-auto-auditoria-validar','control-auto-cupos-attt-email','control-auto-ecarcheck-v2-manual','control-auto-editar','control-auto-resumen-supervisoras','control-auto-unidades-operativas','gps-ranking-galera','gps-rym-admin','gps-rym-validator','revisados-boletas-sync','revisados-boletas-v2','revisados-ecarcheck-consulta-admin','revisados-ecarcheck-v2-manual','revisados-ecarcheck-v2-sync','revisados-ficha','revisados-final','revisados-incidencias','revisados-reporte-diario-email','revisados-terceros']);
+    if(location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev'){
+      window.__RYM_VUE_NEXT_API=Object.freeze({
+        context:()=>({profile:state.profile?{...state.profile}:null,modules:[...state.modules]}),
+        hasModule:code=>typeof code==='string'&&state.modules.includes(code),
+        call:async(name,body={})=>{
+          if(!vueFunctionAllowlist.has(name))throw new Error('Servicio no habilitado para Vue.');
+          const result=await req('/functions/v1/'+name,{method:'POST',body:JSON.stringify(body)});
+          return result.data;
+        }
+      });
+    }
     const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=dashboard-vue-17');
     const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=dashboard-vue-17';document.head.appendChild(css);
     let opened=false;

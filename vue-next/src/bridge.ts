@@ -10,6 +10,11 @@ import './style.css'
 
 declare global {
   interface Window {
+    __RYM_VUE_NEXT_API?: {
+      context: () => { profile: PortalProfile | null; modules: string[] }
+      hasModule: (code: string) => boolean
+      call: <T = Record<string, unknown>>(name: string, body?: Record<string, unknown>) => Promise<T>
+    }
     rymHasModule?: (code: string) => boolean
     v70OpenPanapass?: () => unknown
     v60OpenRevisados?: () => unknown
