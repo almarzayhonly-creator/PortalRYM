@@ -61,6 +61,9 @@ try{
     });
     await page.goto('http://127.0.0.1:4192/?app=validador-unidad');
     const host=page.frameLocator('#portal');await host.locator('#f').waitFor();
+    const loginText=await host.locator('body').innerText();
+    assert.match(loginText,/Validador de Unidad/,'Dedicated app did not render its own login');
+    assert.doesNotMatch(loginText,/Tu flota|en movimiento|ENTORNO DE ACCESO/,'Dedicated app reused the Portal login');
     assert.deepEqual(calls,[],'Guest bootstrap sent API calls');
     await host.locator('[name=usuario]').fill('fixture');await host.locator('[name=password]').fill('fixture-password');
     await host.locator('#loginBtn').click();
@@ -95,3 +98,4 @@ try{
   fs.writeFileSync('.sandbox/validator-qa/independent-boot.json',JSON.stringify({kind:'Actual dedicated host and mocked authentication; no account impersonation',results},null,2));
   console.log('PASS independent validator: basic/full same two auth calls; no home/fleet/module requests; mandatory password and denied access preserved.');
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
+

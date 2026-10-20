@@ -7,13 +7,18 @@ function isolatedValidatorHost(html){
     if(a==null||a<0||b<a)throw Error('Validator source anchor missing: '+start);
     return source.slice(a,b);
   };
+  const standaloneLogin=`function loginView(msg=''){
+    window.__RYM_VUE_NEXT_LOGIN?.dispose();
+    app.innerHTML='<main class="uva-auth-page"><section class="uva-auth-card" aria-labelledby="uva-auth-title"><div class="uva-auth-brand"><img src="/assets/rym-validator-512.png" alt="RYM"><span>Validador RYM</span></div><p class="uva-auth-kicker">ACCESO DE OPERACIÓN</p><h1 id="uva-auth-title">Validador de Unidad</h1><p class="uva-auth-copy">Inicia sesión para consultar la información operativa de una unidad.</p>'+ (msg?'<div class="uva-auth-error" role="alert">'+esc(msg)+'</div>':'') +'<form id="f" class="uva-auth-form"><label>Usuario<input name="usuario" autocomplete="username" placeholder="Usuario asignado" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" placeholder="Contraseña" required></label><button id="loginBtn" type="submit">Ingresar al validador <span aria-hidden="true">→</span></button></form><p class="uva-auth-foot">Portal RYM · Validador independiente</p></section></main>';
+    document.querySelector('#f').onsubmit=login;
+  }`;
   const runtime='var login,loadApp;window.RYM_VALIDATOR_HOST=true;\n'+between(auth,'const URL=','async function cobraLive(')+
-    between(auth,'const RYM_SANDBOX_HOST=','function loginView(')+
-    between(auth,'function loginView(','async function login(')+
+    between(auth,'const RYM_SANDBOX_HOST=','function loginView(')+standaloneLogin+
+    between(auth,'async function login(','function passwordChangeView(')+
     between(auth,'function passwordChangeView(','async function loadApp(');
   const modal=between(core,'  const E99=','  function card99(').replace('refreshIndicators:refreshExecutiveCards99','refreshIndicators:()=>{}');
   const styles=[...html.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/gi)].map(m=>m[0]).join('\n');
-  return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Validador de Unidad</title>'+styles+'</head><body><div id="app"></div><script>'+runtime+'\n'+modal+'\nwindow.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\n</script></body></html>';
+  return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Validador de Unidad</title>'+styles+'<style>\n.uva-auth-page{min-height:100vh;box-sizing:border-box;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 15% 0%,#e5f4ff 0,transparent 42%),linear-gradient(145deg,#f4f7fb,#edf3fa)}.uva-auth-card{box-sizing:border-box;width:min(460px,100%);padding:36px;border:1px solid #d8e3f2;border-radius:22px;background:#fff;box-shadow:0 20px 60px #0a1b4d16;color:#10224e;font-family:Inter,system-ui,"Segoe UI",sans-serif}.uva-auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:30px;color:#0a1b4d;font-size:17px;font-weight:750}.uva-auth-brand img{width:48px;height:48px;object-fit:contain}.uva-auth-kicker{margin:0 0 8px;color:#244aa5;font-size:11px;font-weight:800;letter-spacing:.12em}.uva-auth-card h1{margin:0;font-size:28px;line-height:1.15;letter-spacing:-.04em}.uva-auth-copy{margin:10px 0 24px;color:#62708c;font-size:14px;line-height:1.55}.uva-auth-form{display:grid;gap:17px}.uva-auth-form label{display:grid;gap:7px;font-size:13px;font-weight:700}.uva-auth-form input{box-sizing:border-box;width:100%;height:52px;padding:0 14px;border:1px solid #d8e3f2;border-radius:11px;background:#fbfcfe;color:#10224e;font:500 15px inherit}.uva-auth-form input:focus{outline:3px solid #244aa522;border-color:#244aa5}.uva-auth-form button{height:54px;margin-top:4px;border:0;border-radius:11px;background:#244aa5;color:#fff;font:700 15px inherit;cursor:pointer}.uva-auth-form button span{margin-left:8px}.uva-auth-error{margin:0 0 16px;padding:11px 13px;border-radius:10px;background:#fff1f0;color:#b42318;font-size:13px}.uva-auth-foot{margin:23px 0 0;text-align:center;color:#73819a;font-size:11px}@media(max-width:520px){.uva-auth-page{padding:16px}.uva-auth-card{padding:27px 22px;border-radius:18px}}</style></head><body><div id="app"></div><script>'+runtime+'\n'+modal+'\nwindow.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\n</script></body></html>';
 }
 
 export default {
@@ -29,7 +34,7 @@ export default {
       const shellResponse = await env.ASSETS.fetch(shellRequest);
       const shellHeaders = new Headers(shellResponse.headers);
       shellHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
-      shellHeaders.set("x-portal-build", "unit-validator-shell-v29");
+      shellHeaders.set("x-portal-build", "unit-validator-shell-v32");
       shellHeaders.set("x-rym-app", "unit-validator");
       return new Response(shellResponse.body, {
         status: shellResponse.status,
@@ -44,7 +49,7 @@ export default {
     const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/core/validator-session.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-details.js", "/modules/control-auto/validator-tablet-app.js"].includes(url.pathname);
     if (validatorStatic) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
-      headers.set("x-portal-build", "unit-validator-shell-v29");
+      headers.set("x-portal-build", "unit-validator-shell-v32");
       if (url.pathname === "/validator-tablet-sw.js") headers.set("service-worker-allowed", "/");
     }
 
@@ -73,7 +78,7 @@ export default {
           body=body.replace('const revData=await loadRevisados99();','const revData=await loadRevisados99(ctrl.unidad);');
         }
         if(dedicated){
-          headers.set("x-portal-build", "unit-validator-shell-v29");
+          headers.set("x-portal-build", "unit-validator-shell-v32");
           body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
         }
         // The dedicated validator uses its own module permission for the GPS card.
@@ -92,7 +97,7 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=29"><script src="/modules/control-auto/validator-presentation.js?v=29" defer></script><script src="/modules/control-auto/validator-details.js?v=29" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=29" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=29" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=32"><script src="/modules/control-auto/validator-presentation.js?v=32" defer></script><script src="/modules/control-auto/validator-details.js?v=32" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=32" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=32" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       const extras=url.searchParams.get('validator-host')==='1'?'':owner+rankingOwner+negativosLastOwner+unitValidatorLauncher;
@@ -114,3 +119,4 @@ export default {
     });
   },
 };
+
