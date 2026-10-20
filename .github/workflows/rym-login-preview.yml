@@ -48,6 +48,11 @@ jobs:
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next-bridge.js" -o /tmp/rym-vue-next-bridge-preview.js
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.css" -o /tmp/rym-vue-next-preview.css
           curl -fsSL --max-time 30 "$url/css/validator-tablet-app.css?preview=${GITHUB_SHA}" -o /tmp/rym-validator-html-preview.css
+          for attempt in $(seq 1 6); do
+            if grep -Fq 'min-height:214px!important;padding:18px!important;border-radius:16px!important' /tmp/rym-validator-html-preview.css; then break; fi
+            sleep 5
+            curl -fsSL --max-time 30 "$url/css/validator-tablet-app.css?preview=${GITHUB_SHA}" -o /tmp/rym-validator-html-preview.css
+          done
           test -s /tmp/rym-logo-preview.png
           test -s /tmp/rym-vue-next-preview.js
           test -s /tmp/rym-vue-next-bridge-preview.js
