@@ -46,7 +46,7 @@ let panapassObserver: MutationObserver | null = null
 let panapassSequence = 0
 let panapassStylesPromise: Promise<void> | null = null
 let validatorApp: ReturnType<typeof createApp> | null = null
-let validatorProps: { api: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown> }; access: 'allowed' | 'denied' } | null = null
+let validatorProps: { api: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown>; gps?: (unit: Record<string, unknown>) => Promise<Record<string, unknown>> }; access: 'allowed' | 'denied' } | null = null
 let workspaceApp: ReturnType<typeof createApp> | null = null
 
 function profileOf(summary: HomeSummary): PortalProfile { return summary.profile || {} }
@@ -248,7 +248,7 @@ export function renderHome(summary: HomeSummary): void {
     state = reactive(createDashboardState({ profile: profileOf(summary), modules: summary.modules || [] })) as DashboardState
     methods = currentActions()
     root.innerHTML = '<div id="rym-vue-next-home"></div>'
-    app = createApp(HomeView, { state, actions: methods, hasModule: (code: string) => window.rymHasModule?.(code) ?? state?.session.modules.includes(code) ?? false, validatorApi: { search: (query: string) => window.__RYM_VUE_NEXT_HOME_MAIN?.searchValidator?.(query) ?? Promise.resolve([]), load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? Promise.reject(Error('El validador no está disponible.')) } })
+    app = createApp(HomeView, { state, actions: methods, hasModule: (code: string) => window.rymHasModule?.(code) ?? state?.session.modules.includes(code) ?? false, validatorApi: { search: (query: string) => window.__RYM_VUE_NEXT_HOME_MAIN?.searchValidator?.(query) ?? Promise.resolve([]), load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? Promise.reject(Error('El validador no está disponible.')), gps: async (unit: Record<string, unknown>) => { const api = window.__RYM_VUE_NEXT_API; if (!api?.hasModule('portal.gps')) throw Error('No se pudo validar el GPS con el servicio alterno.'); return api.call('gps-rym-admin', { q: String(unit.unidad ?? unit.unit ?? ''), galera: 'TODAS', estado: 'TODOS', nivel: 'TODOS', onlyProblems: false }) } } })
     app.mount('#rym-vue-next-home')
     controlIndicatorsRequested = false
     gpsIndicatorsRequested = false

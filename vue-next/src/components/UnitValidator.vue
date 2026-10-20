@@ -5,7 +5,7 @@ import ModuleIcon from './ModuleIcon.vue'
 type Unit = Record<string, unknown>
 type DetailCard = { key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string }
 type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[] }
-type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown> }
+type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown>; gps?: (unit: Unit) => Promise<Record<string, unknown>> }
 const props = defineProps<{ api?: Api; onControl?: () => unknown }>()
 const query = ref('')
 const rows = ref<Unit[]>([])
@@ -34,7 +34,40 @@ async function select(row: Unit) {
   panelOpen.value = false; rows.value = []; searched.value = false; modalOpen.value = true
   detail.value = null; detailError.value = ''; detailLoading.value = true
   const current = ++detailSequence
-  try { if (!props.api) throw Error('El validador no está disponible.'); detail.value = await props.api.load(row) as UnitDetail }
+  try {
+    if (!props.api) throw Error('El validador no está disponible.')
+    const result = await props.api.load(row) as UnitDetail
+    const gps = result.cards.find(card => card.key === 'gps')
+    const stateDetail = gps?.details.find(item => item.label === 'Estado')?.value || ''
+    if (gps && /HTTP\s+5\d\d/i.test(stateDetail) && props.api.gps) {
+      try {
+        const response = await props.api.gps(row)
+        if (!response.ok) throw Error(String(response.error || 'El servicio alterno no respondió.'))
+        const rows = Array.isArray(response.rows) ? response.rows as Unit[] : []
+        const query = unit(row).trim().toLocaleUpperCase()
+        const match = rows.find(item => unit(item).trim().toLocaleUpperCase() === query) || rows[0]
+        if (!match) throw Error('El servicio alterno no encontró esa unidad.')
+        const gps1 = (match.gps1 && typeof match.gps1 === 'object' ? match.gps1 : {}) as Unit
+        const gps2 = (match.gps2 && typeof match.gps2 === 'object' ? match.gps2 : {}) as Unit
+        const label = (value: Unit) => !value.installed ? 'Sin GPS instalado' : value.ok ? 'Reportando' : String(value.label || 'Sin reportar')
+        const last = (value: Unit) => value.last ? new Date(String(value.last)).toLocaleString('es-PA', { timeZone: 'America/Panama', dateStyle: 'short', timeStyle: 'short' }) : 'Sin transmisión reciente'
+        const level = String(match.nivel || '').toLocaleUpperCase()
+        Object.assign(gps, {
+          tone: level === 'CRITICO' ? 'bad' : level === 'ALERTA' ? 'warn' : 'ok',
+          badge: level === 'CRITICO' ? 'GPS CRÍTICO' : level === 'ALERTA' ? 'REVISAR GPS' : '2 GPS OK',
+          value: `${label(gps1)} · ${label(gps2)}`,
+          details: [{ label: 'GPS 1', value: `${label(gps1)} · ${last(gps1)}` }, { label: 'GPS 2', value: `${label(gps2)} · ${last(gps2)}` }],
+          note: `${String(match.estado_operativo || '—')} · ${String(match.razon || 'Sin diagnóstico')}`,
+        })
+        const tones = result.cards.map(card => card.tone)
+        result.overall = !result.active ? 'PARADA · REVISAR' : tones.includes('bad') ? 'ACTIVA · ALERTA' : tones.some(tone => tone === 'warn' || tone === 'pending') ? 'ACTIVA · REVISAR' : 'ACTIVA · TODO OK'
+      } catch {
+        Object.assign(gps, { tone: 'warn', badge: 'NO VALIDADO', value: 'No se pudo validar', details: [{ label: 'Unidad', value: result.unit }, { label: 'Estado', value: 'GPS no respondió' }], note: 'No significa que la unidad esté sin GPS instalado.' })
+        result.overall = result.active ? 'ACTIVA · REVISAR' : result.overall
+      }
+    }
+    if (current === detailSequence) detail.value = result
+  }
   catch (error) { if (current === detailSequence) detailError.value = error instanceof Error ? error.message : String(error) }
   finally { if (current === detailSequence) detailLoading.value = false }
 }
