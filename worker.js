@@ -46,7 +46,7 @@ export default {
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     const contentType = headers.get("content-type") || "";
-    const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/core/validator-session.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-details.js", "/modules/control-auto/validator-tablet-app.js"].includes(url.pathname);
+    const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/css/validator-tablet-app-legacy.css", "/modules/core/unit-validator-shell.js", "/modules/core/validator-session.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-details.js", "/modules/control-auto/validator-tablet-app.js", "/modules/control-auto/validator-tablet-app-legacy.js"].includes(url.pathname);
     if (validatorStatic) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
       headers.set("x-portal-build", "unit-validator-shell-v32");
@@ -85,7 +85,7 @@ export default {
         // The GPS Edge Function independently verifies the user JWT and validator access.
         const legacyGpsGate = "const adminGps=['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase());";
         if (body.includes(legacyGpsGate)) {
-          body = body.replace(legacyGpsGate, "const adminGps=!!(typeof window.rymHasModule==='function'&&window.rymHasModule('control_auto.validador_unidad_app'))||['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase());");
+          body = body.split(legacyGpsGate).join("const adminGps=!!(typeof window.rymHasModule==='function'&&window.rymHasModule('control_auto.validador_unidad_app'))||['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase());");
         }
         // The official module permits one installed/reporting GPS. Its evaluated
         // level, normalized by the adapter, drives the host summary as well.
@@ -97,7 +97,10 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=32"><script src="/modules/control-auto/validator-presentation.js?v=32" defer></script><script src="/modules/control-auto/validator-details.js?v=32" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=32" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=32" defer></script></head>');
+        const validatorUi=dedicated
+          ? '<link rel="stylesheet" href="/css/validator-tablet-app-legacy.css?v=32"><script src="/modules/control-auto/validator-presentation.js?v=32" defer></script><script src="/modules/control-auto/validator-details.js?v=32" defer></script><script src="/modules/core/validator-session.js?v=32" defer></script><script src="/modules/control-auto/validator-tablet-app-legacy.js?v=32" defer></script>'
+          : '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=32"><script src="/modules/control-auto/validator-presentation.js?v=32" defer></script><script src="/modules/control-auto/validator-details.js?v=32" defer></script><script>window.RYM_VALIDATOR_INTEGRATED=true;</script><script src="/modules/control-auto/validator-tablet-app.js?v=32" defer></script>';
+        body = body.replace(/<\/head>/i, validatorUi + '</head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       const extras=url.searchParams.get('validator-host')==='1'?'':owner+rankingOwner+negativosLastOwner+unitValidatorLauncher;
