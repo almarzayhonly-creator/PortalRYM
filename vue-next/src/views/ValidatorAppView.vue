@@ -4,7 +4,7 @@ import ModuleIcon from '../components/ModuleIcon.vue'
 
 type Unit = Record<string, unknown>
 type Detail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: Array<{ key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string }> }
-type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<Detail> }
+type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<Detail>; enrich?: (detail: Detail) => Promise<Detail> }
 const props = defineProps<{ api: Api; access: 'allowed' | 'denied' }>()
 const query = ref('')
 const rows = ref<Unit[]>([])
@@ -45,7 +45,13 @@ async function runSearch() {
 async function choose(row: Unit) {
   const version = ++detailVersion
   selected.value = row; detail.value = null; busy.value = true; error.value = ''; open.value = false
-  try { detail.value = await props.api.load(row) }
+  try {
+    const result = await props.api.load(row)
+    if (version !== detailVersion) return
+    detail.value = result
+    busy.value = false
+    if (props.api.enrich) void props.api.enrich(result).then(updated => { if (version === detailVersion) detail.value = updated }).catch(() => {})
+  }
   catch (reason) { if (version === detailVersion) error.value = reason instanceof Error ? reason.message : String(reason) }
   finally { if (version === detailVersion) busy.value = false }
 }
@@ -71,18 +77,18 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 </script>
 
 <template>
-  <main class="vua-app" data-testid="vue-unit-validator" :class="{ 'is-denied': access === 'denied' }">
+  <main class="vua-app" data-testid="vue-unit-validator" :class="{ 'is-denied': access === 'denied', 'has-selection': !!selected }">
     <section v-if="access === 'denied'" class="vua-denied" role="alert">
       <span class="vua-denied-mark">!</span><span class="vua-kicker">ACCESO DE OPERACIÓN</span>
       <h1>Acceso restringido</h1><p>Tu usuario no tiene habilitado el permiso de Validador de Unidad.</p>
     </section>
     <template v-else>
-      <header class="vua-heading">
+      <header v-if="!selected" class="vua-heading">
         <div><span class="vua-kicker">CONSULTA INTEGRAL DE FLOTA</span><h1>{{ selected ? 'Ficha de unidad' : 'Validador de unidad' }}</h1><p>{{ selected ? 'Estado operativo y servicios conectados en un solo lugar.' : 'Encuentra una unidad por número, placa o Panapass.' }}</p></div>
         <span class="vua-live"><i></i>Datos en línea</span>
       </header>
 
-      <section class="vua-search" aria-label="Buscar unidad">
+      <section v-if="!selected" class="vua-search" aria-label="Buscar unidad">
         <div class="vua-search-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2"/></svg></div>
         <div class="vua-search-body">
           <label for="vua-query">Búsqueda rápida</label>
@@ -104,13 +110,13 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
       <section v-if="busy" class="vua-loading"><span class="vua-spinner"></span><div><strong>Validando unidad</strong><p>Consultando Control de Auto, Panapass, Revisados y GPS.</p></div></section>
       <section v-else-if="selected && detail" class="vua-content">
         <section class="vua-identity">
-          <div class="vua-identity-top"><div class="vua-unit-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h16v12H4zM8 7.5V5h8v2.5M8 12h8M8 15.5h5"/></svg></div><div class="vua-unit-title"><span class="vua-kicker">{{ detail.closed ? 'REGISTRO HISTÓRICO' : 'UNIDAD' }}</span><h2>{{ detail.unit }}</h2><p>Placa <b>{{ detail.plate }}</b></p></div><span class="vua-overall" :class="overallTone"><i></i>{{ detail.overall }}</span></div>
-          <div class="vua-identity-facts"><div><span>EMPRESA</span><strong>{{ detail.operator }}</strong></div><div><span>DUEÑA</span><strong>{{ detail.owner }}</strong></div><div><span>SUPERVISORA</span><strong>{{ detail.supervisor }}</strong></div><div><span>GALERA</span><strong>{{ detail.galera }}</strong></div></div>
+          <div class="vua-identity-top"><div class="vua-unit-title"><h2>{{ detail.unit }}</h2><p>Placa {{ detail.plate }}</p></div><span class="vua-overall" :class="overallTone"><i></i>{{ detail.status }}</span><button class="vua-unit-close" type="button" aria-label="Cerrar ficha" @click="reset">×</button></div>
+          <div class="vua-identity-facts"><div><span>SUPERVISORA</span><strong>{{ detail.supervisor }}</strong></div><div><span>GALERA</span><strong>{{ detail.galera }}</strong></div><div><span>EMPRESA</span><strong>{{ detail.operator }}</strong></div><div><span>ESTATUS INTERNO</span><strong>{{ detail.status.includes('·') ? detail.status.split('·').slice(1).join('·').trim() : detail.active ? 'ACTIVO' : detail.status }}</strong></div></div>
         </section>
         <div class="vua-section-head"><div><span class="vua-kicker">ESTADO POR SISTEMA</span><h2>Resumen operativo</h2></div><span>{{ detail.cards.length }} sistemas consultados</span></div>
         <section class="vua-card-grid" aria-label="Estado por sistema">
           <article v-for="card in detail.cards" :key="card.key" class="vua-card" :class="[card.key, card.tone]">
-            <header><span class="vua-module-icon"><ModuleIcon :name="card.key" /></span><div class="vua-card-heading"><span class="vua-kicker">{{ card.title }}</span><b>{{ card.badge }}</b></div><span class="vua-card-status" :class="card.tone"><i>{{ card.tone === 'ok' ? '✓' : card.tone === 'warn' || card.tone === 'bad' ? '!' : '…' }}</i></span></header>
+            <header><span class="vua-module-icon"><ModuleIcon :name="card.key" /></span><div class="vua-card-heading"><span class="vua-kicker">{{ card.title }}</span></div><span class="vua-card-status" :class="card.tone"><i>{{ card.tone === 'ok' ? '✓' : card.tone === 'warn' || card.tone === 'bad' ? '!' : '…' }}</i>{{ card.badge }}</span></header>
             <strong class="vua-card-value">{{ card.value }}</strong><div class="vua-card-facts"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p>
           </article>
         </section>
@@ -160,5 +166,39 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 .vua-card.revisados .vua-card-status.ok{background:#e9f8f0;color:#078752}
 @container unit-content (max-width:1120px){.vua-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.vua-card{min-height:0}}
 @container unit-content (max-width:600px){.vua-card-grid{grid-template-columns:1fr}}
+.vua-app.has-selection{min-height:calc(100dvh - 82px);padding:26px 28px 96px;background:#f3f6fa}
+.vua-app.has-selection .vua-heading,.vua-app.has-selection .vua-search,.vua-app.has-selection .vua-section-head{display:none}
+.vua-app.has-selection .vua-content{max-width:none}
+.vua-app.has-selection .vua-identity{padding:22px 25px 19px;border:0;border-radius:21px;background:#fff;box-shadow:none}
+.vua-app.has-selection .vua-identity-top{gap:12px}
+.vua-app.has-selection .vua-unit-title h2{font-size:46px;line-height:1.05;color:#102e56}
+.vua-app.has-selection .vua-unit-title p{font-size:15px}
+.vua-app.has-selection .vua-overall{margin-left:auto;padding:10px 13px;border:0;border-radius:10px;background:#fff1dc;color:#995700;font-size:12px;font-weight:850}
+.vua-app.has-selection .vua-overall.ok{background:#e7f6ef;color:#087955}
+.vua-app.has-selection .vua-overall.bad{background:#fff0ef;color:#bf3d36}
+.vua-unit-close{width:54px;height:54px;display:grid;place-items:center;border:1px solid #d9e4f0;border-radius:15px;background:#fff;color:#607994;font:inherit;font-size:30px;line-height:1;cursor:pointer}
+.vua-unit-close:hover{border-color:#aec5df;background:#f8fbff;color:#244a71}
+.vua-app.has-selection .vua-identity-facts{gap:12px;margin-top:18px}
+.vua-app.has-selection .vua-identity-facts>div{padding:0;border:0;border-radius:0;background:transparent}
+.vua-app.has-selection .vua-identity-facts span{font-size:11px;letter-spacing:.08em}
+.vua-app.has-selection .vua-identity-facts strong{margin-top:6px;color:#132f53;font-size:15px}
+.vua-app.has-selection .vua-card-grid{gap:15px;margin-top:20px}
+.vua-app.has-selection .vua-card{min-height:262px;padding:22px 21px;border-radius:21px;box-shadow:0 9px 25px #14395d0b}
+.vua-app.has-selection .vua-card header{gap:10px}
+.vua-app.has-selection .vua-module-icon{width:54px;height:54px;border-radius:16px}
+.vua-app.has-selection .vua-card-heading .vua-kicker{font-size:13px;color:#164e9b;font-weight:900;letter-spacing:.08em}
+.vua-app.has-selection .vua-card-status{width:auto;height:auto;min-height:32px;display:flex;gap:6px;margin-left:auto;padding:6px 10px;border:1px solid #a9e4c4;border-radius:99px;background:#eefbf4;font-size:12px;white-space:nowrap}
+.vua-app.has-selection .vua-card-status i{width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:#07895f;color:#fff;font-size:12px;font-style:normal}
+.vua-app.has-selection .vua-card-status.warn,.vua-app.has-selection .vua-card-status.pending{border-color:#f3d49b;background:#fff8e9;color:#9c640a}
+.vua-app.has-selection .vua-card-status.bad{border-color:#ffc6c3;background:#fff4f3;color:#ba342e}
+.vua-app.has-selection .vua-card-value{min-height:42px;margin:29px 0 12px;font-size:35px}
+.vua-app.has-selection .vua-card-facts>div{padding:10px 0}
+.vua-app.has-selection .vua-card-facts span,.vua-app.has-selection .vua-card-facts b{font-size:13px}
+.vua-app.has-selection .vua-card>p{min-height:0;margin-top:13px;font-size:12px}
+.vua-app.has-selection .vua-footer{position:fixed;right:0;bottom:0;left:0;max-width:none;justify-content:flex-end;margin:0;padding:16px 32px;border:0;border-top:1px solid #dce5ef;border-radius:0;background:#fff}
+.vua-app.has-selection .vua-footer>span{display:none}
+.vua-app.has-selection .vua-footer button{min-width:275px;min-height:62px;justify-content:center;border:0;border-radius:15px;background:#294fae;color:#fff;font-size:16px}
+@media(max-width:1050px){.vua-app.has-selection{padding:22px 20px 92px}.vua-app.has-selection .vua-card{min-height:225px;padding:18px}}
+@media(max-width:680px){.vua-app.has-selection{padding:16px 13px 88px}.vua-app.has-selection .vua-identity{padding:16px;border-radius:17px}.vua-app.has-selection .vua-unit-title h2{font-size:34px}.vua-app.has-selection .vua-unit-title p{font-size:12px}.vua-unit-close{width:40px;height:40px;font-size:23px}.vua-app.has-selection .vua-identity-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}.vua-app.has-selection .vua-identity-facts span{font-size:9px}.vua-app.has-selection .vua-identity-facts strong{font-size:12px}.vua-app.has-selection .vua-card-grid{grid-template-columns:1fr;gap:9px;margin-top:14px}.vua-app.has-selection .vua-card{min-height:0;padding:15px}.vua-app.has-selection .vua-module-icon{width:42px;height:42px}.vua-app.has-selection .vua-card-heading .vua-kicker{font-size:10px}.vua-app.has-selection .vua-card-value{min-height:0;margin:15px 0 8px;font-size:25px}.vua-app.has-selection .vua-card-facts>div{padding:7px 0}.vua-app.has-selection .vua-card-facts span,.vua-app.has-selection .vua-card-facts b{font-size:10px}.vua-app.has-selection .vua-footer{padding:11px 13px}.vua-app.has-selection .vua-footer button{width:100%;min-width:0;min-height:48px;font-size:13px}}
 </style>
 

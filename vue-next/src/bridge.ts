@@ -25,11 +25,11 @@ declare global {
     clearSession?: () => unknown
     loginView?: () => unknown
     login?: (event: SubmitEvent) => Promise<void>
-    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<unknown>; enrichValidator?: (detail: Record<string, any>) => Promise<Record<string, any>>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
+    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<any>; enrichValidator?: (detail: Record<string, any>) => Promise<any>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
     __RYM_VUE_NEXT_LOGIN?: { render: (error?: string) => void; dispose: () => void }
     __RYM_VUE_NEXT_PANAPASS_MAIN?: { read?: (force?: boolean) => Promise<PanapassSnapshot> }
     searchValidator99?: (query: string, render?: boolean) => Promise<Record<string, unknown>[]>
-    loadValidatorDetail99?: (unit: Record<string, unknown>) => Promise<unknown>
+    loadValidatorDetail99?: (unit: Record<string, unknown>, options?: { deferChecks?: boolean }) => Promise<any>
     __RYM_VUE_NEXT_GPS_PRIORITY?: () => unknown
   }
 }
@@ -279,7 +279,8 @@ export function mountValidatorApp(root: HTMLElement, access: 'allowed' | 'denied
     access,
     api: {
       search: (query: string) => window.searchValidator99?.(query, false) ?? Promise.resolve([]),
-      load: (unit: Record<string, unknown>) => window.loadValidatorDetail99?.(unit) ?? Promise.reject(Error('El validador no está disponible.')),
+      load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? window.loadValidatorDetail99?.(unit, { deferChecks: true }) ?? Promise.reject(Error('El validador no está disponible.')),
+      enrich: (detail: any) => window.__RYM_VUE_NEXT_HOME_MAIN?.enrichValidator?.(detail) ?? Promise.resolve(detail),
     },
   })
   validatorApp = createApp(ValidatorAppView, validatorProps)
