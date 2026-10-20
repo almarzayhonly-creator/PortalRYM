@@ -10,6 +10,11 @@ import './style.css'
 
 declare global {
   interface Window {
+    __RYM_VUE_NEXT_API?: {
+      context: () => { profile: PortalProfile | null; modules: string[] }
+      hasModule: (code: string) => boolean
+      call: <T = Record<string, unknown>>(name: string, body?: Record<string, unknown>) => Promise<T>
+    }
     rymHasModule?: (code: string) => boolean
     v70OpenPanapass?: () => unknown
     v60OpenRevisados?: () => unknown
@@ -20,11 +25,11 @@ declare global {
     clearSession?: () => unknown
     loginView?: () => unknown
     login?: (event: SubmitEvent) => Promise<void>
-    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<unknown>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
+    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<any>; enrichValidator?: (detail: Record<string, any>) => Promise<any>; fichaValidator?: (unit: Record<string, unknown>) => Promise<Record<string, unknown>>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
     __RYM_VUE_NEXT_LOGIN?: { render: (error?: string) => void; dispose: () => void }
     __RYM_VUE_NEXT_PANAPASS_MAIN?: { read?: (force?: boolean) => Promise<PanapassSnapshot> }
     searchValidator99?: (query: string, render?: boolean) => Promise<Record<string, unknown>[]>
-    loadValidatorDetail99?: (unit: Record<string, unknown>) => Promise<unknown>
+    loadValidatorDetail99?: (unit: Record<string, unknown>, options?: { deferChecks?: boolean }) => Promise<any>
     __RYM_VUE_NEXT_GPS_PRIORITY?: () => unknown
   }
 }
@@ -41,7 +46,8 @@ let panapassObserver: MutationObserver | null = null
 let panapassSequence = 0
 let panapassStylesPromise: Promise<void> | null = null
 let validatorApp: ReturnType<typeof createApp> | null = null
-let validatorProps: { api: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown> }; access: 'allowed' | 'denied' } | null = null
+let validatorProps: { api: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown>; gps?: (unit: Record<string, unknown>) => Promise<Record<string, unknown>> }; access: 'allowed' | 'denied' } | null = null
+let workspaceApp: ReturnType<typeof createApp> | null = null
 
 function profileOf(summary: HomeSummary): PortalProfile { return summary.profile || {} }
 function routeTo(action?: () => unknown): unknown { return action?.() }
@@ -81,10 +87,10 @@ function loadPanapassStyles(): Promise<void> {
 function currentActions(): ModuleAction {
   return {
     panapass: () => openPanapass(),
-    revisados: () => routeTo(window.v60OpenRevisados),
-    control: () => routeTo(window.v70OpenControl),
-    gps: () => routeTo(window.v113OpenGps),
-    users: () => routeTo(window.v70OpenUsers),
+    revisados: () => openOperationalModule('revisados'),
+    control: () => openOperationalModule('control'),
+    gps: () => openOperationalModule('gps'),
+    users: () => openOperationalModule('users'),
     logout: () => routeTo(logoutToLogin),
     retry: () => window.v36PortalHome?.(),
     retryIndicators: () => {
@@ -95,6 +101,30 @@ function currentActions(): ModuleAction {
       void window.__RYM_VUE_NEXT_HOME_MAIN?.refreshIndicators?.(role, { control: !!state.summary?.control, gps: false })
       if (role === 'ADMIN_TOTAL') void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
     },
+  }
+}
+
+async function openOperationalModule(module: 'revisados' | 'control' | 'gps' | 'users'): Promise<void> {
+  const root = document.querySelector<HTMLElement>('#app')
+  if (!root || !window.__RYM_VUE_NEXT_API) return
+  disposeHome()
+  disposePanapass()
+  disposeValidatorApp()
+  workspaceApp?.unmount()
+  root.innerHTML = '<div id="rym-vue-next-operational"></div>'
+  const mount = root.querySelector<HTMLElement>('#rym-vue-next-operational')
+  if (!mount) return
+  try {
+    const { default: OperationalModuleView } = await import('./views/OperationalModuleView.vue')
+    const legacyActions = { revisados: window.v60OpenRevisados, control: window.v70OpenControl, gps: window.v113OpenGps, users: window.v70OpenUsers }
+    workspaceApp = createApp(OperationalModuleView, {
+      module,
+      onBack: () => { workspaceApp?.unmount(); workspaceApp = null; window.v36PortalHome?.() },
+      onOpenLegacy: () => { workspaceApp?.unmount(); workspaceApp = null; routeTo(legacyActions[module]) },
+    })
+    workspaceApp.mount(mount)
+  } catch (error) {
+    mount.textContent = error instanceof Error ? error.message : 'No se pudo abrir el módulo Vue.'
   }
 }
 
@@ -218,7 +248,7 @@ export function renderHome(summary: HomeSummary): void {
     state = reactive(createDashboardState({ profile: profileOf(summary), modules: summary.modules || [] })) as DashboardState
     methods = currentActions()
     root.innerHTML = '<div id="rym-vue-next-home"></div>'
-    app = createApp(HomeView, { state, actions: methods, hasModule: (code: string) => window.rymHasModule?.(code) ?? state?.session.modules.includes(code) ?? false, validatorApi: { search: (query: string) => window.__RYM_VUE_NEXT_HOME_MAIN?.searchValidator?.(query) ?? Promise.resolve([]), load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? Promise.reject(Error('El validador no está disponible.')) } })
+    app = createApp(HomeView, { state, actions: methods, hasModule: (code: string) => window.rymHasModule?.(code) ?? state?.session.modules.includes(code) ?? false, validatorApi: { search: (query: string) => window.__RYM_VUE_NEXT_HOME_MAIN?.searchValidator?.(query) ?? Promise.resolve([]), load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? Promise.reject(Error('El validador no está disponible.')), enrich: (detail: Record<string, any>) => window.__RYM_VUE_NEXT_HOME_MAIN?.enrichValidator?.(detail) ?? Promise.resolve(detail), ficha: async (unit: Record<string, unknown>) => { const api = window.__RYM_VUE_NEXT_API; if (!api) throw Error('El servicio de ficha no está disponible.'); return api.call('revisados-ficha', { placa: String(unit.placa_unica ?? unit.placa ?? unit.placa_comercial ?? ''), unidad: String(unit.unidad ?? unit.unit ?? '') }) }, gps: async (unit: Record<string, unknown>) => { const api = window.__RYM_VUE_NEXT_API; if (!api?.hasModule('portal.gps')) throw Error('No se pudo validar el GPS con el servicio alterno.'); return api.call('gps-rym-admin', { q: String(unit.unidad ?? unit.unit ?? '') , galera: 'TODAS', estado: 'TODOS', nivel: 'TODOS', onlyProblems: false }) } } })
     app.mount('#rym-vue-next-home')
     controlIndicatorsRequested = false
     gpsIndicatorsRequested = false
@@ -249,7 +279,9 @@ export function mountValidatorApp(root: HTMLElement, access: 'allowed' | 'denied
     access,
     api: {
       search: (query: string) => window.searchValidator99?.(query, false) ?? Promise.resolve([]),
-      load: (unit: Record<string, unknown>) => window.loadValidatorDetail99?.(unit) ?? Promise.reject(Error('El validador no está disponible.')),
+      load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? window.loadValidatorDetail99?.(unit, { deferChecks: true }) ?? Promise.reject(Error('El validador no está disponible.')),
+      enrich: (detail: any) => window.__RYM_VUE_NEXT_HOME_MAIN?.enrichValidator?.(detail) ?? Promise.resolve(detail),
+      ficha: async (unit: Record<string, unknown>) => { if (window.__RYM_VUE_NEXT_HOME_MAIN?.fichaValidator) return window.__RYM_VUE_NEXT_HOME_MAIN.fichaValidator(unit); const api = window.__RYM_VUE_NEXT_API; if (!api) throw Error('Ficha no disponible.'); return api.call('revisados-ficha', { placa: String(unit.placa_unica ?? unit.placa ?? unit.placa_comercial ?? ''), unidad: String(unit.unidad ?? unit.unit ?? '') }) },
     },
   })
   validatorApp = createApp(ValidatorAppView, validatorProps)

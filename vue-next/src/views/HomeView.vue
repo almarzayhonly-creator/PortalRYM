@@ -7,7 +7,7 @@ import UnitValidator from '../components/UnitValidator.vue'
 import type { DashboardState } from '../dashboard'
 import type { ModuleAction } from '../types'
 
-const props = defineProps<{ state: DashboardState; actions: ModuleAction; hasModule: (code: string) => boolean; validatorApi?: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown> } }>()
+const props = defineProps<{ state: DashboardState; actions: ModuleAction; hasModule: (code: string) => boolean; validatorApi?: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown>; enrich?: (detail: Record<string, any>) => Promise<Record<string, any>>; ficha?: (unit: Record<string, unknown>) => Promise<Record<string, unknown>>; gps?: (unit: Record<string, unknown>) => Promise<Record<string, unknown>> } }>()
 let summaryTimer: number | undefined
 watch(() => props.state.state, value => {
   window.clearTimeout(summaryTimer)
