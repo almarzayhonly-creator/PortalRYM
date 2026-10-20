@@ -143,12 +143,16 @@ function panSections(detail: UnitDetail): DetailSection[] {
 function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): DetailSection[] {
   const c = objectValue(detail.controlRecord), r = objectValue(detail.revisadoRecord), f = objectValue(fichaResponse)
   const official = objectValue(f.oficial), raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta)), op = objectValue(f.operacion)
+  const photoCount = Number(r.cantidad_fotos ?? r.total_fotos ?? r.fotos_count ?? 0)
+  const hasPhotos = r.fotos_disponibles === true || ['1', 'SI', 'TRUE', 'YES'].includes(String(r.fotos_disponibles ?? '').trim().toUpperCase()) || photoCount > 0
+  const noPhotos = r.fotos_disponibles === false || ['0', 'NO', 'FALSE'].includes(String(r.fotos_disponibles ?? '').trim().toUpperCase())
+  const photos = hasPhotos ? (photoCount ? `${photoCount} foto${photoCount === 1 ? '' : 's'}` : 'Fotos disponibles') : noPhotos ? 'Sin fotos' : null
   const section = fields('Revisado', [
     ['Mes asignado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes)], ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
     ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)], ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
     ['Tipo de placa', pickValue(raw.tipoPlaca, official.tipo_placa)], ['Tipo de uso', pickValue(raw.tipoUso, official.tipo_uso)],
     ['Estado oficial del vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)], ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
-    ['Bloqueado', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'], ['Observación', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
+    ['Bloqueado', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'], ['Fotos', photos], ['Observación', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
     ['Último revisado', pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado)], ['Fotos', r.cantidad_fotos],
   ])
   return section ? [section] : []
@@ -444,4 +448,29 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 .uv-extra-section :is(summary,button):focus-visible{outline:2px solid #3987e8;outline-offset:2px;border-radius:5px}
 @media(max-width:760px){.uv-dialog-scroll{display:flex;flex-direction:column;gap:12px}.uv-identity{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:15px}.uv-identity-main{flex-direction:row;align-items:center;gap:11px}.uv-identity-icon{width:40px;height:40px}.uv-identity-main h3{font-size:25px}.uv-identity-grid{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.uv-identity-grid>div{padding:8px}.uv-overall{grid-column:2;grid-row:1;align-self:start;justify-self:end}.uv-section-label{align-items:center;flex-direction:row;margin:0}.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.uv-check-card{min-height:165px;padding:12px}.uv-check-card>header{grid-template-columns:30px minmax(0,1fr);gap:7px}.uv-check-icon{width:30px;height:30px}.uv-check-badge{grid-column:2;justify-self:start}.uv-check-value{margin:9px 0 5px;font-size:17px}.uv-check-details>div{gap:8px}.uv-check-details b{max-width:62%;font-size:9px}}
 @media(max-width:480px){.uv-dialog{padding:12px;border-radius:20px}.uv-check-grid{grid-template-columns:1fr}.uv-check-card{min-height:0}.uv-identity-grid{grid-template-columns:1fr 1fr}.uv-dialog-actions{flex-direction:column-reverse}.uv-action{width:100%;flex:auto}}
+/* Service dossier: compact identity header, readable cards, and accordions that never clip. */
+.uv-dialog{width:min(1280px,100%);max-height:min(900px,calc(100dvh - 32px));padding:20px;gap:12px}
+.uv-dialog-scroll{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;align-content:start;gap:12px;overflow:auto;overscroll-behavior:contain}
+.uv-identity{grid-column:1;grid-row:auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px 18px;padding:16px 19px;border-radius:18px}
+.uv-identity-main{grid-column:1;grid-row:1;align-items:center;flex-direction:row;gap:13px}
+.uv-identity-icon{width:44px;height:44px;flex:none;border-radius:14px}
+.uv-identity-main>div{display:grid;gap:2px}
+.uv-identity-main h3{margin:0;font-size:30px}
+.uv-identity-main p{margin-top:3px}
+.uv-overall{grid-column:2;grid-row:1;justify-self:end;align-self:center;margin:0}
+.uv-identity-grid{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.uv-identity-grid>div{min-height:42px;padding:8px 10px}
+.uv-section-label{grid-column:1;grid-row:auto;margin:0 2px;align-self:center}
+.uv-check-grid{grid-column:1;grid-row:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;align-content:start;gap:11px;margin:0}
+.uv-check-card{min-height:0;align-self:start;padding:15px 16px 13px;overflow:visible}
+.uv-check-card:hover{transform:none}
+.uv-extra-section{overflow:visible}
+.uv-extra-section[open]{padding-bottom:3px}
+.uv-extra-fields{max-height:none;overflow:visible}
+.uv-extra-field{grid-template-columns:minmax(110px,.8fr) minmax(0,1.2fr);padding:7px 0}
+.uv-extra-field>span{font-size:9px}
+.uv-extra-field>b{font-size:10px}
+.uv-dialog-actions{padding-top:10px}
+@media(max-width:760px){.uv-dialog{padding:15px}.uv-dialog-scroll{display:grid;grid-template-columns:1fr;gap:10px}.uv-identity{grid-template-columns:minmax(0,1fr) auto;padding:13px}.uv-identity-main{grid-column:1;grid-row:1;flex-direction:row;align-items:center}.uv-identity-main h3{font-size:24px}.uv-overall{grid-column:2;grid-row:1;justify-self:end;margin:0}.uv-identity-grid{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr))}.uv-section-label{margin:0 2px}.uv-check-grid{grid-template-columns:1fr;gap:9px}.uv-check-card{min-height:0}.uv-check-card>header{grid-template-columns:34px minmax(0,1fr) auto}.uv-check-icon{width:34px;height:34px}.uv-check-badge{grid-column:auto;justify-self:end}.uv-check-value{font-size:19px}}
+@media(max-width:480px){.uv-dialog{padding:12px}.uv-identity{grid-template-columns:1fr auto;padding:11px}.uv-identity-main{grid-column:1;grid-row:1;flex-direction:row}.uv-identity-main h3{font-size:21px}.uv-overall{grid-column:2;grid-row:1}.uv-identity-grid{grid-template-columns:1fr 1fr}.uv-check-card{padding:12px}.uv-extra-field{grid-template-columns:minmax(90px,.8fr) minmax(0,1.2fr)}}
 </style>
