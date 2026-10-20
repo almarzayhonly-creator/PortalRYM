@@ -76,11 +76,6 @@ try{
       assert.match(await host.locator('.vua-card.gps').innerText(),/GPS 1|GPS1/);
       assert.equal(await host.locator('.vua-app').evaluate(el=>el.scrollWidth>el.clientWidth),false,'Vue validator must fit a mobile viewport');
       await host.locator('.vua-app').screenshot({path:path.join(process.cwd(),'.sandbox/validator-qa/vue-validator-390.png')});
-      await host.locator('.vua-card.revisados .vua-detail-toggle').click();
-      await page.waitForFunction(()=>document.querySelector('#portal')?.contentWindow?.document.querySelector('.vua-card.revisados .vua-detail-panel'));
-      await host.locator('.vua-card.revisados .vua-detail-panel').waitFor();
-      await page.waitForTimeout(100);
-      assert.equal(calls.filter(url=>url.endsWith('revisados-ficha')).length,1,'Expanded detail loads the authenticated complementary record once');
       await host.locator('.vua-footer button').click();
       assert.equal(await host.locator('#vua-query').inputValue(),'','Otra unidad clears the search and returns focus to search');
       await page.locator('#exit').click();await host.locator('#f').waitFor();

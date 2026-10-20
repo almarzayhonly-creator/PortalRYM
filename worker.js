@@ -12,7 +12,7 @@ function isolatedValidatorHost(html){
     between(auth,'function loginView(','async function login(')+
     between(auth,'function passwordChangeView(','async function loadApp(');
   const modal=between(core,'  const E99=','  function card99(').replace('refreshIndicators:refreshExecutiveCards99','refreshIndicators:()=>{}');
-  const styles=[...html.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/gi)].map(m=>m[0]).join('\n') + '\n<style id="rym-login-env-host-css">.rym-login-environments{margin:0 0 15px}.rym-login-env-caption{display:block;margin:0 0 7px 2px;color:#69788d;font-size:9px;font-weight:900;letter-spacing:.14em}.rym-login-env-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rym-login-env-option{position:relative;display:flex;align-items:center;gap:9px;min-width:0;min-height:54px;padding:8px 10px;border:1px solid #dce3ea;border-radius:13px;background:linear-gradient(145deg,#fff,#f8fafc);color:#17324d;text-decoration:none;box-shadow:0 3px 9px #17324d08;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}.rym-login-env-option:hover{transform:translateY(-1px);border-color:#f47b20;box-shadow:0 7px 15px #17324d12}.rym-login-env-option:focus-visible{outline:3px solid #ffc928;outline-offset:2px}.rym-login-env-option.active{border-color:#1769c2;background:linear-gradient(135deg,#edf5ff,#fff);box-shadow:inset 0 0 0 1px #1769c2,0 5px 14px #1769c21c}.rym-login-env-option.active:after{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:#16834a;content:"";box-shadow:0 0 0 3px #16834a1c}.rym-login-env-symbol{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:9px;color:#17191d;background:linear-gradient(145deg,#ffc928,#f47b20);font-size:12px;font-weight:950}.rym-login-env-symbol.sandbox{color:#fff;background:linear-gradient(145deg,#16834a,#2a83c8)}.rym-login-env-copy{display:grid;gap:2px;min-width:0}.rym-login-env-copy b{color:#17324d;font-size:12px;line-height:1.1}.rym-login-env-copy small{color:#596574;font-size:10px;line-height:1.2}.rym-login-env-status{margin-left:auto;padding:3px 5px;border-radius:999px;background:#eaf6ef;color:#16834a;font-size:8px;font-weight:950;letter-spacing:.05em;white-space:nowrap}@media(max-width:650px){.rym-login-env-option{gap:7px;min-height:52px;padding:7px}.rym-login-env-status{display:none}}@media(prefers-reduced-motion:reduce){.rym-login-env-option{transition:none}.rym-login-env-option:hover{transform:none}}</style>';
+  const styles=[...html.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/gi)].map(m=>m[0]).join('\n');
   return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Validador de Unidad</title>'+styles+'</head><body><div id="app"></div><script>'+runtime+'\n'+modal+'\nwindow.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\n</script></body></html>';
 }
 
@@ -29,7 +29,7 @@ export default {
       const shellResponse = await env.ASSETS.fetch(shellRequest);
       const shellHeaders = new Headers(shellResponse.headers);
       shellHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
-      shellHeaders.set("x-portal-build", "unit-validator-shell-v29");
+      shellHeaders.set("x-portal-build", "unit-validator-shell-v26");
       shellHeaders.set("x-rym-app", "unit-validator");
       return new Response(shellResponse.body, {
         status: shellResponse.status,
@@ -44,7 +44,7 @@ export default {
     const validatorStatic = ["/validator-tablet-sw.js", "/validator-tablet.webmanifest", "/css/validator-tablet-app.css", "/modules/core/unit-validator-shell.js", "/modules/core/validator-session.js", "/modules/control-auto/validator-presentation.js", "/modules/control-auto/validator-details.js", "/modules/control-auto/validator-tablet-app.js"].includes(url.pathname);
     if (validatorStatic) {
       headers.set("cache-control", "no-store, no-cache, must-revalidate");
-      headers.set("x-portal-build", "unit-validator-shell-v29");
+      headers.set("x-portal-build", "unit-validator-shell-v26");
       if (url.pathname === "/validator-tablet-sw.js") headers.set("service-worker-allowed", "/");
     }
 
@@ -73,7 +73,7 @@ export default {
           body=body.replace('const revData=await loadRevisados99();','const revData=await loadRevisados99(ctrl.unidad);');
         }
         if(dedicated){
-          headers.set("x-portal-build", "unit-validator-shell-v29");
+          headers.set("x-portal-build", "unit-validator-shell-v26");
           body = body.replace(/<html\b/i, '<html class="rym-unit-validator-app"');
         }
         // The dedicated validator uses its own module permission for the GPS card.
@@ -92,7 +92,7 @@ export default {
         const validatorBridge = "  window.openValidator99=openValidator99;window.bindValidator99=bindValidator99;window.searchValidator99=searchValidator99;window.loadValidatorDetail99=loadValidatorDetail99;\\n";
         if (body.includes(validatorBridgeAnchor)) body = body.replace(validatorBridgeAnchor, validatorBridge.replace('\\n','\n') + validatorBridgeAnchor);
 
-        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=29"><script src="/modules/control-auto/validator-presentation.js?v=29" defer></script><script src="/modules/control-auto/validator-details.js?v=29" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=29" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=29" defer></script></head>');
+        body = body.replace(/<\/head>/i, '<link rel="stylesheet" href="/css/validator-tablet-app.css?v=26"><script src="/modules/control-auto/validator-presentation.js?v=26" defer></script><script src="/modules/control-auto/validator-details.js?v=26" defer></script>' + (dedicated?'<script src="/modules/core/validator-session.js?v=26" defer></script>':'<script>window.RYM_VALIDATOR_INTEGRATED=true;</script>') + '<script src="/modules/control-auto/validator-tablet-app.js?v=26" defer></script></head>');
       }
       const bodyEnd = body.toLowerCase().lastIndexOf("</body>");
       const extras=url.searchParams.get('validator-host')==='1'?'':owner+rankingOwner+negativosLastOwner+unitValidatorLauncher;

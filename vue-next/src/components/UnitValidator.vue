@@ -2,13 +2,15 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import ModuleIcon from './ModuleIcon.vue'
 
-import { applyValidatorSections, type Unit, type UnitDetail, type Api } from '../validatorDetails'
+type Unit = Record<string, unknown>
+type DetailCard = { key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string }
+type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[] }
+type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown> }
 const props = defineProps<{ api?: Api; onControl?: () => unknown }>()
 const query = ref('')
 const rows = ref<Unit[]>([])
 const loading = ref(false)
 const searched = ref(false)
-const searchError = ref('')
 const activeIndex = ref(-1)
 const input = ref<HTMLInputElement>()
 const wrap = ref<HTMLDivElement>()
@@ -32,52 +34,7 @@ async function select(row: Unit) {
   panelOpen.value = false; rows.value = []; searched.value = false; modalOpen.value = true
   detail.value = null; detailError.value = ''; detailLoading.value = true
   const current = ++detailSequence
-  try {
-    if (!props.api) throw Error('El validador no está disponible.')
-    const result = await props.api.load(row) as UnitDetail
-    if (current !== detailSequence) return
-    detail.value = result
-    detailLoading.value = false
-    let fichaData: Unit | null = null
-    const applyExtras = (ficha: Unit | null = fichaData) => {
-      if (current !== detailSequence || !detail.value) return
-      applyValidatorSections(detail.value, ficha)
-    }
-    applyExtras(null)
-    const enrichment = props.api.enrich ? props.api.enrich(result).then(updated => { if (current === detailSequence) { detail.value = updated; applyExtras() } }).catch(() => {}) : Promise.resolve()
-    const fichaPromise = props.api.ficha ? props.api.ficha(row).then(ficha => { fichaData = ficha; applyExtras() }).catch(() => {}) : Promise.resolve()
-    void Promise.all([enrichment, fichaPromise])
-    const gps = result.cards.find(card => card.key === 'gps')
-    const stateDetail = gps?.details.find(item => item.label === 'Estado')?.value || ''
-    if (gps && /HTTP\s+5\d\d/i.test(stateDetail) && props.api.gps) {
-      try {
-        const response = await props.api.gps(row)
-        if (!response.ok) throw Error(String(response.error || 'El servicio alterno no respondió.'))
-        const rows = Array.isArray(response.rows) ? response.rows as Unit[] : []
-        const query = unit(row).trim().toLocaleUpperCase()
-        const match = rows.find(item => unit(item).trim().toLocaleUpperCase() === query) || rows[0]
-        if (!match) throw Error('El servicio alterno no encontró esa unidad.')
-        const gps1 = (match.gps1 && typeof match.gps1 === 'object' ? match.gps1 : {}) as Unit
-        const gps2 = (match.gps2 && typeof match.gps2 === 'object' ? match.gps2 : {}) as Unit
-        const label = (value: Unit) => !value.installed ? 'Sin GPS instalado' : value.ok ? 'Reportando' : String(value.label || 'Sin reportar')
-        const last = (value: Unit) => value.last ? new Date(String(value.last)).toLocaleString('es-PA', { timeZone: 'America/Panama', dateStyle: 'short', timeStyle: 'short' }) : 'Sin transmisión reciente'
-        const level = String(match.nivel || '').toLocaleUpperCase()
-        Object.assign(gps, {
-          tone: level === 'CRITICO' ? 'bad' : level === 'ALERTA' ? 'warn' : 'ok',
-          badge: level === 'CRITICO' ? 'GPS CRÍTICO' : level === 'ALERTA' ? 'REVISAR GPS' : '2 GPS OK',
-          value: `${label(gps1)} · ${label(gps2)}`,
-          details: [{ label: 'GPS 1', value: `${label(gps1)} · ${last(gps1)}` }, { label: 'GPS 2', value: `${label(gps2)} · ${last(gps2)}` }],
-          note: `${String(match.estado_operativo || '—')} · ${String(match.razon || 'Sin diagnóstico')}`,
-        })
-        const tones = result.cards.map(card => card.tone)
-        result.overall = !result.active ? 'PARADA · REVISAR' : tones.includes('bad') ? 'ACTIVA · ALERTA' : tones.some(tone => tone === 'warn' || tone === 'pending') ? 'ACTIVA · REVISAR' : 'ACTIVA · TODO OK'
-      } catch {
-        Object.assign(gps, { tone: 'warn', badge: 'NO VALIDADO', value: 'No se pudo validar', details: [{ label: 'Unidad', value: result.unit }, { label: 'Estado', value: 'GPS no respondió' }], note: 'No significa que la unidad esté sin GPS instalado.' })
-        result.overall = result.active ? 'ACTIVA · REVISAR' : result.overall
-      }
-    }
-    if (current === detailSequence) detail.value = result
-  }
+  try { if (!props.api) throw Error('El validador no está disponible.'); detail.value = await props.api.load(row) as UnitDetail }
   catch (error) { if (current === detailSequence) detailError.value = error instanceof Error ? error.message : String(error) }
   finally { if (current === detailSequence) detailLoading.value = false }
 }
@@ -85,23 +42,18 @@ function closeDetail() { modalOpen.value = false; detailSequence++; detailLoadin
 async function searchNow() {
   window.clearTimeout(timer)
   const term = query.value.trim()
-  if (term.length < 2 || !props.api) return
-  const current = ++sequence
-  if (rows.value.length === 1) { void select(rows.value[0]!); return }
-  panelOpen.value = true; loading.value = true; searched.value = false; searchError.value = ''
-  try {
-    const result = await props.api.search(term)
-    if (current !== sequence) return
-    rows.value = result; searched.value = true; activeIndex.value = result.length === 1 ? 0 : -1
-    if (result.length === 1) void select(result[0]!)
-  } catch (error) {
-    if (current === sequence) { rows.value = []; searched.value = true; searchError.value = error instanceof Error ? error.message : String(error) }
-  } finally { if (current === sequence) loading.value = false }
+  if (!term || !props.api) return
+  if (rows.value.length === 1) { select(rows.value[0]!); return }
+  panelOpen.value = true
+  loading.value = true
+  searched.value = false
+  try { rows.value = await props.api.search(term); searched.value = true; activeIndex.value = rows.value.length === 1 ? 0 : -1 }
+  finally { loading.value = false }
 }
 function onKeydown(event: KeyboardEvent) {
   if (event.key === 'ArrowDown' && rows.value.length) { event.preventDefault(); activeIndex.value = (activeIndex.value + 1) % rows.value.length }
   else if (event.key === 'ArrowUp' && rows.value.length) { event.preventDefault(); activeIndex.value = activeIndex.value <= 0 ? rows.value.length - 1 : activeIndex.value - 1 }
-  else if (event.key === 'Enter') { if (activeIndex.value >= 0 && rows.value[activeIndex.value]) { event.preventDefault(); select(rows.value[activeIndex.value]!) } else { event.preventDefault(); void searchNow() } }
+  else if (event.key === 'Enter') { if (activeIndex.value >= 0 && rows.value[activeIndex.value]) { event.preventDefault(); select(rows.value[activeIndex.value]!) } else if (rows.value.length === 1) { event.preventDefault(); select(rows.value[0]!) } }
   else if (event.key === 'Escape') { if (modalOpen.value) closeDetail(); else panelOpen.value = false; activeIndex.value = -1 }
 }
 function outsideClick(event: PointerEvent) { if (wrap.value && !wrap.value.contains(event.target as Node)) panelOpen.value = false }
@@ -110,13 +62,12 @@ watch(query, value => {
   window.clearTimeout(timer)
   const term = value.trim()
   const current = ++sequence
-  rows.value = []; searched.value = false; activeIndex.value = -1; searchError.value = ''
+  rows.value = []; searched.value = false; activeIndex.value = -1
   if (term.length < 2 || !props.api) { loading.value = false; return }
   panelOpen.value = true
   loading.value = true
   timer = window.setTimeout(async () => {
     try { const result = await props.api!.search(term); if (current === sequence) { rows.value = result; searched.value = true } }
-    catch (error) { if (current === sequence) { searched.value = true; searchError.value = error instanceof Error ? error.message : String(error) } }
     finally { if (current === sequence) loading.value = false }
   }, 240)
 })
@@ -130,10 +81,9 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
     <div class="ryn-validator-heading"><span class="ryn-validator-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2M8.5 10.8h4.6M10.8 8.5v4.6"/></svg></span><div><span class="ryn-validator-kicker">BÚSQUEDA RÁPIDA</span><h2>Validador de unidad</h2><p>Unidad, placa o Panapass</p></div></div>
     <div ref="wrap" class="uv-search-wrap">
       <label class="uv-search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2"/></svg><input id="v101ValidatorQ" ref="input" v-model="query" type="search" placeholder="Escribe unidad, placa o número Panapass" autocomplete="off" aria-label="Buscar unidad, placa o Panapass" aria-controls="v101ValidatorList" :aria-expanded="visible" @focus="panelOpen = true" @keydown="onKeydown"><kbd v-if="query">ESC</kbd></label>
-      <button id="v101ValidatorGo" class="uv-search-button" type="button" :disabled="query.trim().length < 2 || loading" @click="searchNow">Buscar unidad <span aria-hidden="true">→</span></button>
+      <button id="v101ValidatorGo" class="uv-search-button" type="button" :disabled="!query.trim()" @click="searchNow">Buscar unidad <span aria-hidden="true">→</span></button>
       <div v-if="visible" id="v101ValidatorList" class="uv-results" role="listbox" aria-label="Unidades encontradas">
         <div v-if="loading" class="uv-state"><span class="uv-spinner"></span>Buscando en la flota…</div>
-        <div v-else-if="searchError" class="uv-state" role="alert">{{ searchError }}</div>
         <div v-else-if="!rows.length" class="uv-state">Sin coincidencias para “{{ query.trim() }}”. Revisa el dato e intenta otra vez.</div>
         <button v-for="(item, index) in rows" v-else :key="`${unit(item)}-${plate(item)}`" type="button" class="uv-result v101-validator-item" :class="{ active: index === activeIndex }" role="option" :aria-selected="index === activeIndex" @click="select(item)" @mouseenter="activeIndex = index">
           <span class="uv-unit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5h16v12H4zM8 7.5V5h8v2.5M8 12h8M8 15.5h5"/></svg></span>
@@ -157,7 +107,7 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
               </section>
               <div class="uv-section-label"><div><span>VALIDACIÓN DE SERVICIOS</span><small>Estado actual de cada módulo conectado</small></div><b class="uv-system-count">04 <span>SISTEMAS</span></b></div>
               <section class="uv-check-grid" aria-label="Validaciones por sistema">
-                <article v-for="card in detail.cards" :key="card.key" class="uv-check-card" :class="[card.key, card.tone]"><header><span class="uv-check-icon"><ModuleIcon :name="card.key" /></span><strong>{{ card.title }}</strong><span class="uv-check-badge"><i aria-hidden="true">{{ card.tone === 'ok' ? '✓' : card.tone === 'pending' ? '·' : '!' }}</i>{{ card.badge }}</span></header><b class="uv-check-value">{{ card.value }}</b><div class="uv-check-details"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p><details v-for="section in card.sections" :key="section.title" class="uv-extra-section"><summary>{{ section.title }}<span>{{ section.fields.length }} campos <i aria-hidden="true">⌄</i></span></summary><div class="uv-extra-fields"><div v-for="field in section.fields" :key="field.label" class="uv-extra-field" :class="[field.comparison, { 'has-reference': field.reference !== undefined }]"><span>{{ field.label }}</span><template v-if="field.reference !== undefined"><b><small>RYM</small>{{ field.value }}</b><b><small>eCarCheck</small>{{ field.reference }}</b><em v-if="field.comparison">{{ field.comparison === 'match' ? 'Coincide' : field.comparison === 'diff' ? 'Diferencia' : 'Sin comparar' }}</em></template><b v-else>{{ field.value }}</b></div></div></details></article>
+                <article v-for="card in detail.cards" :key="card.key" class="uv-check-card" :class="[card.key, card.tone]"><header><span class="uv-check-icon"><ModuleIcon :name="card.key" /></span><strong>{{ card.title }}</strong><span class="uv-check-badge"><i aria-hidden="true">{{ card.tone === 'ok' ? '✓' : card.tone === 'pending' ? '·' : '!' }}</i>{{ card.badge }}</span></header><b class="uv-check-value">{{ card.value }}</b><div class="uv-check-details"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p></article>
               </section>
             </div>
             <footer class="uv-dialog-actions"><button type="button" class="uv-action secondary" @click="closeDetail">Otra unidad <span aria-hidden="true">↗</span></button><button type="button" class="uv-action primary" @click="closeDetail(); onControl?.()">Abrir Control de Auto <span aria-hidden="true">→</span></button></footer>
@@ -255,88 +205,5 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 @media(max-width:700px){.uv-overlay{align-items:stretch;padding:7px}.uv-dialog{width:100%;max-height:calc(100dvh - 14px);gap:10px;padding:14px;border-radius:19px}.uv-dialog-head{padding-bottom:10px}.uv-dialog-head h2{font-size:16px}.uv-close{width:36px;height:36px}.uv-identity{grid-template-columns:1fr;gap:12px;padding:13px}.uv-identity-main h3{font-size:21px}.uv-overall{justify-self:start;margin-left:61px;margin-top:-8px}.uv-identity-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.uv-identity-grid>div{padding:8px}.uv-check-grid{grid-template-columns:1fr;gap:8px;margin-top:9px}.uv-check-card{padding:12px}.uv-check-value{margin:8px 0 6px;font-size:15px}.uv-check-card>p{margin-top:7px}.uv-dialog-actions{gap:7px;padding-top:9px}.uv-action{min-height:38px;flex:1;padding:0 9px;font-size:10px}}
 @media(max-width:700px){.uv-dialog{gap:9px;padding:13px}.uv-dialog-head h2{font-size:17px}.uv-dialog-head p{font-size:11px}.uv-identity{grid-template-columns:1fr auto;gap:9px;padding:11px}.uv-identity-main{gap:9px}.uv-identity-icon{width:38px;height:38px}.uv-identity-main h3{font-size:20px}.uv-identity-main p{flex-wrap:wrap;gap:6px;font-size:10px}.uv-overall{justify-self:end;margin:0;padding:6px 8px;font-size:9px}.uv-identity-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.uv-identity-grid>div{padding:7px 8px}.uv-identity-grid b{font-size:10px}.uv-section-label{align-items:flex-start;flex-direction:column;gap:3px;margin-top:12px}.uv-section-label small{font-size:9px}.uv-check-grid{grid-template-columns:1fr;gap:7px;margin-top:7px}.uv-check-card{padding:11px 12px}.uv-check-value{font-size:15px}.uv-check-details>div{padding:5px 0}.uv-dialog-actions{padding-top:8px}.uv-action{min-height:38px}}
 @media(max-width:390px){.uv-dialog-actions{flex-direction:column-reverse}.uv-action{width:100%;flex:auto}.uv-identity{grid-template-columns:1fr}.uv-overall{justify-self:start;margin-left:47px}}
-/* Polish the real dashboard detail modal while preserving its existing Vue flow. */
-.uv-dialog{border-color:#cbdced;box-shadow:0 38px 110px #071b3770}
-.uv-overall.ok{border-color:#4ad39b!important;background:#0c7a5b!important;color:#eafff6!important}
-.uv-overall.warn{border-color:#ffc45c!important;background:#8a4b08!important;color:#fff5df!important}
-.uv-overall.bad{border-color:#ff8f8f!important;background:#982f37!important;color:#fff0f0!important}
-.uv-check-card.pending .uv-check-badge{border-color:#f4cd81;background:#fff7e6;color:#8b5700}
-.uv-dialog :is(.uv-close,.uv-action):focus-visible{outline:3px solid #3987e8;outline-offset:3px}
-.uv-check-card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.uv-check-card:hover{border-color:#c7d9ea;box-shadow:0 12px 26px #112f4d14}
 @media(prefers-reduced-motion:reduce){.uv-modal-enter-active,.uv-modal-leave-active,.uv-modal-enter-active .uv-dialog,.uv-modal-leave-active .uv-dialog{transition:none}}
-/* Vue unit dossier: identity rail + focused service grid. */
-.uv-dialog{width:min(1160px,100%);max-height:min(820px,calc(100dvh - 32px));gap:14px;padding:20px;border-radius:26px;background:linear-gradient(145deg,#fff 0%,#f5f9fd 100%)}
-.uv-dialog-head{padding-bottom:12px}
-.uv-dialog-scroll{display:grid;grid-template-columns:minmax(230px,.72fr) minmax(0,1.8fr);grid-template-rows:auto minmax(0,1fr);gap:14px;overflow:auto}
-.uv-identity{grid-column:1;grid-row:1 / span 2;min-height:100%;align-content:start;grid-template-columns:1fr;gap:16px;padding:22px;border:0;border-radius:22px;background:radial-gradient(circle at 100% 0%,#2a6c8180 0 18%,transparent 18.2%),linear-gradient(155deg,#102f53 0%,#17466a 58%,#116b5a 100%);box-shadow:0 14px 32px #123b5c24;overflow:hidden}
-.uv-identity:before{inset:auto -45px -50px auto;width:180px;height:180px;border:1px solid #ffffff1c;border-radius:50%;box-shadow:0 0 0 18px #ffffff08,0 0 0 38px #ffffff06;pointer-events:none}
-.uv-identity-main{align-items:flex-start;flex-direction:column;gap:14px}
-.uv-identity-icon{width:50px;height:50px;border-radius:16px;background:linear-gradient(145deg,#ffbd4b,#f47a12);box-shadow:0 8px 18px #071e3645;color:#143c60}
-.uv-identity-main>div{min-width:0}
-.uv-identity-main h3{margin-top:5px;font-size:37px;letter-spacing:-.055em}
-.uv-identity-main p{gap:8px;color:#d3e2ee;font-size:11px}
-.uv-plate{border:1px solid #ffffff34;background:#ffffff12;color:#d8e8f5}
-.uv-plate b{color:#fff}
-.uv-identity-grid{grid-template-columns:1fr;gap:8px}
-.uv-identity-grid>div{min-height:0;padding:10px 11px;border-color:#ffffff26;border-radius:12px;background:#ffffff12}
-.uv-identity-grid span{font-size:8px}
-.uv-identity-grid b{font-size:11px}
-.uv-overall{justify-self:start;grid-row:2;margin:0;padding:8px 11px;border-radius:999px!important}
-.uv-section-label{grid-column:2;grid-row:1;margin:0 2px;align-self:end}
-.uv-check-grid{grid-column:2;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));align-content:stretch;gap:12px;margin:0}
-.uv-check-card{min-height:190px;padding:17px 17px 14px;border-radius:19px;box-shadow:0 8px 22px #112f4d0b}
-.uv-check-card>header{grid-template-columns:38px minmax(0,1fr) auto;gap:10px}
-.uv-check-icon{width:38px;height:38px;border-radius:13px}
-.uv-check-card>header>strong{font-size:10px;letter-spacing:.07em}
-.uv-check-badge{padding:6px 9px;border-radius:999px;font-size:8px}
-.uv-check-value{margin:12px 0 7px;font-size:21px;letter-spacing:-.035em}
-.uv-check-details>div{padding:7px 0}
-.uv-check-details span{font-size:9px}
-.uv-check-details b{max-width:66%;font-size:10px}
-.uv-check-card>p{margin-top:8px;font-size:9px;line-height:1.45}
-.uv-dialog-actions{padding-top:12px}
-.uv-extra-section{margin-top:8px;border-top:1px solid #e4ebf2;color:#264764}
-.uv-extra-section>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 1px 3px;cursor:pointer;list-style:none;font-size:9px;font-weight:800}
-.uv-extra-section>summary::-webkit-details-marker{display:none}
-.uv-extra-section>summary>span{display:flex;align-items:center;gap:7px;color:#8293a6;font-size:8px;font-weight:650;white-space:nowrap}
-.uv-extra-section>summary i{color:#176bc1;font-size:14px;font-style:normal;transition:transform .16s ease}
-.uv-extra-section[open]>summary i{transform:rotate(180deg)}
-.uv-extra-fields{display:grid;gap:0;padding:4px 0 2px}
-.uv-extra-field{display:grid;grid-template-columns:minmax(90px,.75fr) minmax(0,1.25fr);gap:8px;padding:6px 0;border-top:1px solid #e9eef4;align-items:start}
-.uv-extra-field>span{color:#7d8fa2;font-size:8px;line-height:1.4}
-.uv-extra-field>b{min-width:0;color:#274865;font-size:9px;line-height:1.4;overflow-wrap:anywhere}
-.uv-extra-field>b>small{display:block;margin-bottom:2px;color:#8b9bad;font-size:7px;letter-spacing:.07em}
-.uv-extra-field.has-reference{grid-template-columns:1fr 1fr}
-.uv-extra-field.has-reference>span,.uv-extra-field.has-reference>em{grid-column:1/-1}
-.uv-extra-field>em{justify-self:start;padding:2px 6px;border-radius:999px;background:#eef3f7;color:#687d91;font-size:7px;font-style:normal;font-weight:750}
-.uv-extra-field.match>em{background:#e8f7ef;color:#16805a}.uv-extra-field.diff>em{background:#fff0e9;color:#bc4e25}.uv-extra-field.missing>em{background:#f0f3f6;color:#758397}
-.uv-extra-section :is(summary,button):focus-visible{outline:2px solid #3987e8;outline-offset:2px;border-radius:5px}
-@media(max-width:760px){.uv-dialog-scroll{display:flex;flex-direction:column;gap:12px}.uv-identity{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:15px}.uv-identity-main{flex-direction:row;align-items:center;gap:11px}.uv-identity-icon{width:40px;height:40px}.uv-identity-main h3{font-size:25px}.uv-identity-grid{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.uv-identity-grid>div{padding:8px}.uv-overall{grid-column:2;grid-row:1;align-self:start;justify-self:end}.uv-section-label{align-items:center;flex-direction:row;margin:0}.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.uv-check-card{min-height:165px;padding:12px}.uv-check-card>header{grid-template-columns:30px minmax(0,1fr);gap:7px}.uv-check-icon{width:30px;height:30px}.uv-check-badge{grid-column:2;justify-self:start}.uv-check-value{margin:9px 0 5px;font-size:17px}.uv-check-details>div{gap:8px}.uv-check-details b{max-width:62%;font-size:9px}}
-@media(max-width:480px){.uv-dialog{padding:12px;border-radius:20px}.uv-check-grid{grid-template-columns:1fr}.uv-check-card{min-height:0}.uv-identity-grid{grid-template-columns:1fr 1fr}.uv-dialog-actions{flex-direction:column-reverse}.uv-action{width:100%;flex:auto}}
-/* Service dossier: compact identity header, readable cards, and accordions that never clip. */
-.uv-dialog{width:min(1280px,100%);max-height:min(900px,calc(100dvh - 32px));padding:20px;gap:12px}
-.uv-dialog-scroll{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;align-content:start;gap:12px;overflow:auto;overscroll-behavior:contain}
-.uv-identity{grid-column:1;grid-row:auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px 18px;padding:16px 19px;border-radius:18px}
-.uv-identity-main{grid-column:1;grid-row:1;align-items:center;flex-direction:row;gap:13px}
-.uv-identity-icon{width:44px;height:44px;flex:none;border-radius:14px}
-.uv-identity-main>div{display:grid;gap:2px}
-.uv-identity-main h3{margin:0;font-size:30px}
-.uv-identity-main p{margin-top:3px}
-.uv-overall{grid-column:2;grid-row:1;justify-self:end;align-self:center;margin:0}
-.uv-identity-grid{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.uv-identity-grid>div{min-height:42px;padding:8px 10px}
-.uv-section-label{grid-column:1;grid-row:auto;margin:0 2px;align-self:center}
-.uv-check-grid{grid-column:1;grid-row:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;align-content:start;gap:11px;margin:0}
-.uv-check-card{min-height:0;align-self:start;padding:15px 16px 13px;overflow:visible}
-.uv-check-card:hover{transform:none}
-.uv-extra-section{overflow:visible}
-.uv-extra-section[open]{padding-bottom:3px}
-.uv-extra-fields{max-height:none;overflow:visible}
-.uv-extra-field{grid-template-columns:minmax(110px,.8fr) minmax(0,1.2fr);padding:7px 0}
-.uv-extra-field>span{font-size:9px}
-.uv-extra-field>b{font-size:10px}
-.uv-dialog-actions{padding-top:10px}
-@media(max-width:760px){.uv-dialog{padding:15px}.uv-dialog-scroll{display:grid;grid-template-columns:1fr;gap:10px}.uv-identity{grid-template-columns:minmax(0,1fr) auto;padding:13px}.uv-identity-main{grid-column:1;grid-row:1;flex-direction:row;align-items:center}.uv-identity-main h3{font-size:24px}.uv-overall{grid-column:2;grid-row:1;justify-self:end;margin:0}.uv-identity-grid{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr))}.uv-section-label{margin:0 2px}.uv-check-grid{grid-template-columns:1fr;gap:9px}.uv-check-card{min-height:0}.uv-check-card>header{grid-template-columns:34px minmax(0,1fr) auto}.uv-check-icon{width:34px;height:34px}.uv-check-badge{grid-column:auto;justify-self:end}.uv-check-value{font-size:19px}}
-@media(max-width:480px){.uv-dialog{padding:12px}.uv-identity{grid-template-columns:1fr auto;padding:11px}.uv-identity-main{grid-column:1;grid-row:1;flex-direction:row}.uv-identity-main h3{font-size:21px}.uv-overall{grid-column:2;grid-row:1}.uv-identity-grid{grid-template-columns:1fr 1fr}.uv-check-card{padding:12px}.uv-extra-field{grid-template-columns:minmax(90px,.8fr) minmax(0,1.2fr)}}
 </style>
