@@ -47,11 +47,14 @@ jobs:
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.js" -o /tmp/rym-vue-next-preview.js
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next-bridge.js" -o /tmp/rym-vue-next-bridge-preview.js
           curl -fsSL --max-time 30 "$url/vue-next/dist/portal-rym-vue-next.css" -o /tmp/rym-vue-next-preview.css
+          curl -fsSL --max-time 30 "$url/css/validator-tablet-app.css?preview=${GITHUB_SHA}" -o /tmp/rym-validator-html-preview.css
           test -s /tmp/rym-logo-preview.png
           test -s /tmp/rym-vue-next-preview.js
           test -s /tmp/rym-vue-next-bridge-preview.js
           test -s /tmp/rym-vue-next-preview.css
+          test -s /tmp/rym-validator-html-preview.css
           grep -Fq 'rym-vue-next-login' /tmp/rym-vue-next-bridge-preview.js
+          grep -Fq 'rym-unit-validator-integrated #v101CheckModal' /tmp/rym-validator-html-preview.css
           grep -Fq 'Tu flota' /tmp/rym-login-preview.html
           grep -Fq 'vueNext=1' /tmp/rym-login-preview.html
           {
@@ -78,7 +81,7 @@ jobs:
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next-bridge.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue-bridge.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.css?preview=${GITHUB_SHA}" -o /tmp/validator-vue.css; then
-              if grep -Fq 'unit-validator-shell-v27' /tmp/validator-shell.html \
+              if grep -Fq 'unit-validator-shell-v28' /tmp/validator-shell.html \
                 && grep -Fq 'mountValidatorApp' /tmp/validator-app.js \
                 && grep -Fq 'setValidatorAccess' /tmp/validator-vue.js \
                 && grep -Fq 'revisados-ficha' /tmp/validator-vue-bridge.js \
