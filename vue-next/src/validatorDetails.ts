@@ -118,16 +118,12 @@ function panSections(detail: UnitDetail): DetailSection[] {
 function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): DetailSection[] {
   const c = objectValue(detail.controlRecord), r = objectValue(detail.revisadoRecord), f = objectValue(fichaResponse)
   const official = objectValue(f.oficial), raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta)), op = objectValue(f.operacion)
-  const photoCount = Number(r.cantidad_fotos ?? r.total_fotos ?? r.fotos_count ?? 0)
-  const hasPhotos = r.fotos_disponibles === true || ['1', 'SI', 'TRUE', 'YES'].includes(String(r.fotos_disponibles ?? '').trim().toUpperCase()) || photoCount > 0
-  const noPhotos = r.fotos_disponibles === false || ['0', 'NO', 'FALSE'].includes(String(r.fotos_disponibles ?? '').trim().toUpperCase())
-  const photos = hasPhotos ? (photoCount ? `${photoCount} foto${photoCount === 1 ? '' : 's'}` : 'Fotos disponibles') : noPhotos ? 'Sin fotos' : null
   const section = fields('Revisado', [
     ['Mes asignado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes_revisado, r.mes)], ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
     ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)], ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
     ['Tipo de placa', pickValue(raw.tipoPlaca, official.tipo_placa)], ['Tipo de uso', pickValue(raw.tipoUso, official.tipo_uso)],
     ['Estado oficial del vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)], ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
-    ['Bloqueado', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'], ['Fotos', photos], ['Observación', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
+    ['Bloqueado', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'], ['Observación', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
     ['Último revisado', pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha)],
   ])
   return section ? [section] : []
@@ -162,13 +158,11 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
     else if (/VIGENTE|AL DIA|OK|VALIDO/.test(upperValue(legacy))) status = 'VIGENTE'
     const month = displayValue(pickValue(detail.controlRecord?.mes_revisado, objectValue(ficha?.unidad).mes_revisado, rev.mes_revisado, rev.mes))
     const last = displayValue(pickValue(operation.fecha_ultimo_revisado, objectValue(ficha?.oficial).fecha_revisado, rev.ultimo_revisado, rev.fecha, 'Sin registro'))
-    const count = Number(rev.cantidad_fotos ?? rev.total_fotos ?? rev.fotos_count ?? 0)
-    const photos = count > 0 ? `${count} foto${count === 1 ? '' : 's'}` : rev.fotos_disponibles === true ? 'Fotos disponibles' : rev.fotos_disponibles === false ? 'Sin fotos' : 'Sin información'
     Object.assign(review, {
       tone: status === 'VIGENTE' ? (rev.bloqueado ? 'warn' : 'ok') : status === 'VENCIDO' ? 'bad' : 'warn',
       badge: status,
       value: ['VENCIDO', 'PENDIENTE'].includes(status) && month ? `${status} · ${month.toUpperCase()}` : status,
-      details: [{ label: 'Último revisado', value: last }, { label: 'Fotos', value: photos }, { label: 'Estado', value: status }],
+      details: [{ label: 'Último revisado', value: last }],
       note: `Último revisado · ${last}`,
     })
   }
