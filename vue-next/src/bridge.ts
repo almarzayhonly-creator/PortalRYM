@@ -47,6 +47,7 @@ let panapassSequence = 0
 let panapassStylesPromise: Promise<void> | null = null
 let validatorApp: ReturnType<typeof createApp> | null = null
 let validatorProps: { api: { search: (query: string) => Promise<Record<string, unknown>[]>; load: (unit: Record<string, unknown>) => Promise<unknown> }; access: 'allowed' | 'denied' } | null = null
+let workspaceApp: ReturnType<typeof createApp> | null = null
 
 function profileOf(summary: HomeSummary): PortalProfile { return summary.profile || {} }
 function routeTo(action?: () => unknown): unknown { return action?.() }
@@ -86,10 +87,10 @@ function loadPanapassStyles(): Promise<void> {
 function currentActions(): ModuleAction {
   return {
     panapass: () => openPanapass(),
-    revisados: () => routeTo(window.v60OpenRevisados),
-    control: () => routeTo(window.v70OpenControl),
-    gps: () => routeTo(window.v113OpenGps),
-    users: () => routeTo(window.v70OpenUsers),
+    revisados: () => openOperationalModule('revisados'),
+    control: () => openOperationalModule('control'),
+    gps: () => openOperationalModule('gps'),
+    users: () => openOperationalModule('users'),
     logout: () => routeTo(logoutToLogin),
     retry: () => window.v36PortalHome?.(),
     retryIndicators: () => {
@@ -100,6 +101,30 @@ function currentActions(): ModuleAction {
       void window.__RYM_VUE_NEXT_HOME_MAIN?.refreshIndicators?.(role, { control: !!state.summary?.control, gps: false })
       if (role === 'ADMIN_TOTAL') void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
     },
+  }
+}
+
+async function openOperationalModule(module: 'revisados' | 'control' | 'gps' | 'users'): Promise<void> {
+  const root = document.querySelector<HTMLElement>('#app')
+  if (!root || !window.__RYM_VUE_NEXT_API) return
+  disposeHome()
+  disposePanapass()
+  disposeValidatorApp()
+  workspaceApp?.unmount()
+  root.innerHTML = '<div id="rym-vue-next-operational"></div>'
+  const mount = root.querySelector<HTMLElement>('#rym-vue-next-operational')
+  if (!mount) return
+  try {
+    const { default: OperationalModuleView } = await import('./views/OperationalModuleView.vue')
+    const legacyActions = { revisados: window.v60OpenRevisados, control: window.v70OpenControl, gps: window.v113OpenGps, users: window.v70OpenUsers }
+    workspaceApp = createApp(OperationalModuleView, {
+      module,
+      onBack: () => { workspaceApp?.unmount(); workspaceApp = null; window.v36PortalHome?.() },
+      onOpenLegacy: () => { workspaceApp?.unmount(); workspaceApp = null; routeTo(legacyActions[module]) },
+    })
+    workspaceApp.mount(mount)
+  } catch (error) {
+    mount.textContent = error instanceof Error ? error.message : 'No se pudo abrir el módulo Vue.'
   }
 }
 
