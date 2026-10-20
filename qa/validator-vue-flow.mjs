@@ -35,7 +35,7 @@ try {
   assert.deepEqual(await page.locator('.uv-check-card').evaluateAll(cards=>cards.map(card=>['panapass','revisados','gps','control'].find(key=>card.classList.contains(key)))),['panapass','revisados','gps','control']);
   assert.equal(await page.locator('.uv-identity').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
   fs.mkdirSync('.sandbox/validator-qa',{recursive:true});await page.screenshot({path:'.sandbox/validator-qa/vue-quick-1440.png',fullPage:true});
-  const review=page.locator('.uv-check-card.revisados');assert.equal(await review.locator('.uv-extra-field').filter({hasText:'Fotos'}).count(),1);
+  const review=page.locator('.uv-check-card.revisados');assert.doesNotMatch(await review.innerText(),/Fotos/i,'Obsolete photo data appeared in Revisado');assert.equal(await review.locator('.uv-extra-field').filter({hasText:'Fotos'}).count(),0);
   const gps=page.locator('.uv-check-card.gps');assert.match(await gps.innerText(),/2 DE 2 REPORTANDO/);await gps.locator('.uv-extra-section').filter({hasText:'información del equipo'}).first().locator('summary').click();assert.match(await gps.innerText(),/IMEI-1/);assert.match(await gps.innerText(),/Metadata/);
   await page.locator('.uv-close').click();await page.locator('.uv-dialog').waitFor({state:'hidden'});
   await input.fill('error');await input.press('Enter');await page.getByRole('alert').waitFor();assert.match(await page.getByRole('alert').innerText(),/Servicio no disponible/);
@@ -49,6 +49,6 @@ try {
     fs.mkdirSync('.sandbox/validator-qa',{recursive:true});await page.screenshot({path:'.sandbox/validator-qa/improved-'+width+'.png',fullPage:true});
     await page.locator('.vua-footer button').click();assert.equal(await page.locator('#vua-query').inputValue(),'');
   }
-  assert.deepEqual(errors,[]);console.log('PASS quick Enter, search error, stale search, four systems, unique photo field, shared details, comparison and responsive 390/768/1440.');
+  assert.deepEqual(errors,[]);console.log('PASS quick Enter, search error, stale search, four systems, obsolete photo fields omitted, shared details, comparison and responsive 390/768/1440.');
 } finally {await browser?.close();await server.close();fs.unlinkSync(harness)}
 
