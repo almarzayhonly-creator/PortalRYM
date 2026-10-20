@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          url='https://validator-tablet-app-portal-ena-rym.workers.dev'
+          url='https://validator-tablet-app-portal-ena-rym.almarzayhonly.workers.dev'
           for attempt in $(seq 1 12); do
             if curl -fsSL -D /tmp/validator-shell.headers --max-time 20 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-shell.html \
               && curl -fsSL --max-time 20 "$url/?validator-host=1&preview=${GITHUB_SHA}" -o /tmp/validator-host.html \
