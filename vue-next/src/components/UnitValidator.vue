@@ -415,4 +415,26 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 @media(max-width:1240px){.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.uv-card-select{min-height:200px}}
 @media(max-width:700px){.uv-card-select{min-height:0;padding:13px}.uv-active-detail{padding:14px}.uv-active-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.uv-recent{flex-wrap:wrap}}
 @media(max-width:480px){.uv-check-grid{grid-template-columns:1fr}.uv-card-select{min-height:0}.uv-active-detail>header{align-items:flex-start;flex-direction:column}}
+/* Keep the embedded Vue modal independent from the portal's legacy theme rules. */
+.uv-dialog-scroll{display:flex!important;flex-direction:column!important;gap:12px!important}
+.uv-identity{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;flex:none!important;min-height:0!important}
+.uv-identity-main{grid-column:1!important;grid-row:1!important}
+.uv-identity-grid{grid-column:1/-1!important;grid-row:2!important;position:static!important}
+.uv-section-label{flex:none!important;margin:0 2px!important}
+.uv-check-grid{display:grid!important;flex:none!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin:0!important}
+.uv-check-card{min-width:0!important;min-height:240px!important;padding:0!important;overflow:hidden!important;color:#163a60!important}
+.uv-check-card.panapass{background:#f5f9ff!important}
+.uv-check-card.revisados{background:#f3fbf7!important}
+.uv-check-card.gps{background:#f2fafb!important}
+.uv-check-card.control{background:#fff8f0!important}
+.uv-check-card.selected{border:2px solid #2d6fc3!important;box-shadow:0 8px 22px #173e671c!important}
+.uv-card-select{width:100%!important;min-height:inherit!important;height:100%!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;padding:17px 16px 14px!important;border:0!important;background:transparent!important;color:#163a60!important;text-align:left!important}
+.uv-card-select:hover{background:transparent!important;color:#163a60!important;transform:none!important}
+.uv-card-select>header>strong{color:#34506d!important}
+.uv-card-select .uv-check-value{margin:13px 0 5px!important}
+.uv-card-select .uv-check-details span{color:#71849a!important}
+.uv-card-select .uv-check-details b{color:#284865!important}
+.uv-card-select>p{color:#71849a!important}
+@media(max-width:1240px){.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.uv-check-card{min-height:200px!important}.uv-card-select{min-height:200px!important}}
+@media(max-width:700px){.uv-identity{grid-template-columns:minmax(0,1fr) auto!important;padding:13px!important}.uv-identity-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.uv-check-grid{grid-template-columns:1fr!important;gap:9px!important}.uv-check-card,.uv-card-select{min-height:0!important}.uv-card-select{padding:13px!important}}
 </style>

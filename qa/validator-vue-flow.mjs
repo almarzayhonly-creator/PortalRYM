@@ -34,6 +34,9 @@ try {
   assert.equal(await page.locator('.uv-check-grid').evaluate(el=>getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length),4);
   assert.deepEqual(await page.locator('.uv-check-card').evaluateAll(cards=>cards.map(card=>['panapass','revisados','gps','control'].find(key=>card.classList.contains(key)))),['panapass','revisados','gps','control']);
   assert.equal(await page.locator('.uv-identity').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+  assert.equal(await page.locator('.uv-check-card.panapass').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(245, 249, 255)');
+  assert.equal(await page.locator('.uv-card-select').first().evaluate(el=>getComputedStyle(el).color),'rgb(22, 58, 96)');
+  assert.equal(await page.locator('.uv-identity').evaluate(el=>el.getBoundingClientRect().bottom<=document.querySelector('.uv-section-label').getBoundingClientRect().top),true,'Identity header overlaps service section');
   fs.mkdirSync('.sandbox/validator-qa',{recursive:true});await page.screenshot({path:'.sandbox/validator-qa/vue-quick-1440.png',fullPage:true});
   const review=page.locator('.uv-check-card.revisados');assert.doesNotMatch(await review.innerText(),/Fotos/i,'Obsolete photo data appeared in Revisado');await review.locator('.uv-card-select').click();const reviewDetail=page.locator('.uv-active-detail.revisados');assert.equal(await reviewDetail.locator('.uv-extra-field').filter({hasText:'Fotos'}).count(),0);
   const gps=page.locator('.uv-check-card.gps');assert.match(await gps.innerText(),/2 DE 2 REPORTANDO/);await gps.locator('.uv-card-select').click();const gpsDetail=page.locator('.uv-active-detail.gps');await gpsDetail.locator('.uv-extra-section').filter({hasText:'información del equipo'}).first().locator('summary').click();assert.match(await gpsDetail.innerText(),/IMEI-1/);assert.match(await gpsDetail.innerText(),/Metadata/);
