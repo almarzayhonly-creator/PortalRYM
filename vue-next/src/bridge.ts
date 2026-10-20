@@ -25,7 +25,7 @@ declare global {
     clearSession?: () => unknown
     loginView?: () => unknown
     login?: (event: SubmitEvent) => Promise<void>
-    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<any>; enrichValidator?: (detail: Record<string, any>) => Promise<any>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
+    __RYM_VUE_NEXT_HOME_MAIN?: { searchValidator?: (query: string) => Promise<Record<string, unknown>[]>; loadValidator?: (unit: Record<string, unknown>) => Promise<any>; enrichValidator?: (detail: Record<string, any>) => Promise<any>; fichaValidator?: (unit: Record<string, unknown>) => Promise<Record<string, unknown>>; refreshIndicators?: (role: string, scope: { control: boolean; gps: boolean }) => unknown }
     __RYM_VUE_NEXT_LOGIN?: { render: (error?: string) => void; dispose: () => void }
     __RYM_VUE_NEXT_PANAPASS_MAIN?: { read?: (force?: boolean) => Promise<PanapassSnapshot> }
     searchValidator99?: (query: string, render?: boolean) => Promise<Record<string, unknown>[]>
@@ -281,6 +281,7 @@ export function mountValidatorApp(root: HTMLElement, access: 'allowed' | 'denied
       search: (query: string) => window.searchValidator99?.(query, false) ?? Promise.resolve([]),
       load: (unit: Record<string, unknown>) => window.__RYM_VUE_NEXT_HOME_MAIN?.loadValidator?.(unit) ?? window.loadValidatorDetail99?.(unit, { deferChecks: true }) ?? Promise.reject(Error('El validador no está disponible.')),
       enrich: (detail: any) => window.__RYM_VUE_NEXT_HOME_MAIN?.enrichValidator?.(detail) ?? Promise.resolve(detail),
+      ficha: async (unit: Record<string, unknown>) => { if (window.__RYM_VUE_NEXT_HOME_MAIN?.fichaValidator) return window.__RYM_VUE_NEXT_HOME_MAIN.fichaValidator(unit); const api = window.__RYM_VUE_NEXT_API; if (!api) throw Error('Ficha no disponible.'); return api.call('revisados-ficha', { placa: String(unit.placa_unica ?? unit.placa ?? unit.placa_comercial ?? ''), unidad: String(unit.unidad ?? unit.unit ?? '') }) },
     },
   })
   validatorApp = createApp(ValidatorAppView, validatorProps)

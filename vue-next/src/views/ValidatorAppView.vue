@@ -2,9 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ModuleIcon from '../components/ModuleIcon.vue'
 
-type Unit = Record<string, unknown>
-type Detail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: Array<{ key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string }> }
-type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<Detail>; enrich?: (detail: Detail) => Promise<Detail> }
+import { applyValidatorSections, type Unit, type UnitDetail as Detail } from '../validatorDetails'
+type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<Detail>; enrich?: (detail: Detail) => Promise<Detail>; ficha?: (unit: Unit) => Promise<Unit> }
 const props = defineProps<{ api: Api; access: 'allowed' | 'denied' }>()
 const query = ref('')
 const rows = ref<Unit[]>([])
@@ -15,13 +14,18 @@ const searching = ref(false)
 const searched = ref(false)
 const open = ref(false)
 const error = ref('')
+const enriching = ref(false)
+const expanded = ref<string | null>(null)
+const fichaError = ref('')
+let fichaData: Unit | null = null
+let fichaRequested = false
 const input = ref<HTMLInputElement>()
 const unitLabel = (row: Unit) => String(row.unidad ?? row.unit ?? 'Unidad')
 const plateLabel = (row: Unit) => String(row.placa_unica ?? row.placa ?? row.placa_comercial ?? '—')
 const ownerLabel = (row: Unit) => String(row.empresa_duena ?? row.empresa_operadora ?? row.empresa ?? 'Empresa no registrada')
 const statusLabel = (row: Unit) => String(row.estatus ?? row.estado ?? 'Sin estado')
 const statusTone = (value: string) => /activo|activa|operativo/i.test(value) ? 'ok' : 'warn'
-const overallTone = computed(() => !detail.value?.active ? 'bad' : detail.value.cards.some(card => card.tone === 'bad') ? 'warn' : 'ok')
+const overallTone = computed(() => !detail.value?.active ? 'bad' : detail.value.cards.some(card => card.tone !== 'ok') ? 'warn' : 'ok')
 let timer = 0
 let searchVersion = 0
 let detailVersion = 0
@@ -44,18 +48,41 @@ async function runSearch() {
 }
 async function choose(row: Unit) {
   const version = ++detailVersion
+  expanded.value = null; fichaData = null; fichaRequested = false; fichaError.value = ''; enriching.value = false
   selected.value = row; detail.value = null; busy.value = true; error.value = ''; open.value = false
   try {
     const result = await props.api.load(row)
     if (version !== detailVersion) return
+    applyValidatorSections(result)
     detail.value = result
     busy.value = false
-    if (props.api.enrich) void props.api.enrich(result).then(updated => { if (version === detailVersion) detail.value = updated }).catch(() => {})
+    if (props.api.enrich) {
+      enriching.value = true
+      void props.api.enrich(result).then(updated => {
+        if (version !== detailVersion) return
+        applyValidatorSections(updated, fichaData); detail.value = updated
+      }).catch(() => { if (version === detailVersion) fichaError.value = 'No se pudieron actualizar todos los servicios.' })
+        .finally(() => { if (version === detailVersion) enriching.value = false })
+    }
   }
   catch (reason) { if (version === detailVersion) error.value = reason instanceof Error ? reason.message : String(reason) }
   finally { if (version === detailVersion) busy.value = false }
 }
+async function toggleCard(key: string) {
+  expanded.value = expanded.value === key ? null : key
+  if (!expanded.value || fichaRequested || !props.api.ficha || !selected.value) return
+  fichaRequested = true
+  const version = detailVersion
+  try {
+    const ficha = await props.api.ficha(selected.value)
+    if (version !== detailVersion || !detail.value) return
+    fichaData = ficha; fichaError.value = ''; applyValidatorSections(detail.value, ficha)
+  } catch {
+    if (version === detailVersion) { fichaRequested = false; fichaError.value = 'Ficha complementaria no disponible. Puedes volver a abrir el detalle para reintentar.' }
+  }
+}
 function reset() {
+  expanded.value = null; enriching.value = false; fichaError.value = ''; searching.value = false
   ++searchVersion; ++detailVersion; selected.value = null; detail.value = null; busy.value = false; error.value = ''; query.value = ''; rows.value = []; searched.value = false; open.value = false
   window.setTimeout(() => input.value?.focus({ preventScroll: true }), 30)
 }
@@ -118,12 +145,18 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
           <article v-for="card in detail.cards" :key="card.key" class="vua-card" :class="[card.key, card.tone]">
             <header><span class="vua-module-icon"><ModuleIcon :name="card.key" /></span><div class="vua-card-heading"><span class="vua-kicker">{{ card.title }}</span></div><span class="vua-card-status" :class="card.tone"><i>{{ card.tone === 'ok' ? '✓' : card.tone === 'warn' || card.tone === 'bad' ? '!' : '…' }}</i>{{ card.badge }}</span></header>
             <strong class="vua-card-value">{{ card.value }}</strong><div class="vua-card-facts"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p>
+            <button type="button" class="vua-detail-toggle" :aria-expanded="expanded === card.key" :aria-controls="`vua-details-${card.key}`" @click="toggleCard(card.key)">{{ expanded === card.key ? 'Cerrar detalles' : 'Ver detalles' }} <span aria-hidden="true">{{ expanded === card.key ? '−' : '+' }}</span></button>
+            <div v-if="expanded === card.key" :id="`vua-details-${card.key}`" class="vua-detail-panel">
+              <section v-for="section in card.sections" :key="section.title"><h3>{{ section.title }}</h3><dl><div v-for="field in section.fields" :key="field.label" :class="field.comparison"><dt>{{ field.label }}</dt><dd>{{ field.value }}</dd><dd v-if="field.reference !== undefined"><small>eCarCheck</small> {{ field.reference }} <em>{{ field.comparison === 'match' ? 'Coincide' : field.comparison === 'diff' ? 'Diferencia' : 'Sin comparar' }}</em></dd></div></dl></section>
+              <p v-if="!card.sections?.length">No hay información complementaria disponible.</p>
+              <p v-if="fichaError" role="status">{{ fichaError }}</p>
+            </div>
           </article>
         </section>
       </section>
       <section v-else-if="!selected" class="vua-empty"><div class="vua-empty-art"><span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15h18l-1.7-5a2 2 0 0 0-1.9-1.4H6.6A2 2 0 0 0 4.7 10L3 15Zm0 0v4h2v-2h14v2h2v-4M7 15h.01M17 15h.01M8 8.5l1.2-3h5.6l1.2 3"/></svg></div><span class="vua-kicker">VISTA DE FLOTA</span><h2>Todo sobre una unidad, de un vistazo.</h2><p>Busca una unidad para consultar su información y validar sus sistemas operativos.</p><div class="vua-empty-points"><span><i>✓</i> Control de Auto</span><span><i>✓</i> Panapass y Revisados</span><span><i>✓</i> GPS disponible</span></div></section>
       <section v-if="error && selected && !busy" class="vua-error" role="alert"><strong>No se pudo completar la consulta</strong><span>{{ error }}</span><button type="button" @click="reset">Intentar otra unidad</button></section>
-      <footer v-if="selected" class="vua-footer"><span><i></i>Consulta finalizada · {{ detail?.cards.length ?? 0 }} servicios</span><button type="button" @click="reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5M5.6 16a8 8 0 1 0-.6-6"/></svg>Otra unidad</button></footer>
+      <footer v-if="selected" class="vua-footer"><span><i></i>{{ busy ? 'Consultando unidad…' : enriching ? 'Actualizando servicios…' : 'Consulta disponible' }} · {{ detail?.cards.length ?? 0 }} servicios</span><button type="button" @click="reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5M5.6 16a8 8 0 1 0-.6-6"/></svg>Otra unidad</button></footer>
     </template>
   </main>
 </template>
@@ -196,9 +229,11 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 .vua-app.has-selection .vua-card-facts span,.vua-app.has-selection .vua-card-facts b{font-size:13px}
 .vua-app.has-selection .vua-card>p{min-height:0;margin-top:13px;font-size:12px}
 .vua-app.has-selection .vua-footer{position:fixed;right:0;bottom:0;left:0;max-width:none;justify-content:flex-end;margin:0;padding:16px 32px;border:0;border-top:1px solid #dce5ef;border-radius:0;background:#fff}
-.vua-app.has-selection .vua-footer>span{display:none}
+.vua-app.has-selection .vua-footer>span{display:flex;margin-right:auto}
 .vua-app.has-selection .vua-footer button{min-width:275px;min-height:62px;justify-content:center;border:0;border-radius:15px;background:#294fae;color:#fff;font-size:16px}
 @media(max-width:1050px){.vua-app.has-selection{padding:22px 20px 92px}.vua-app.has-selection .vua-card{min-height:225px;padding:18px}}
 @media(max-width:680px){.vua-app.has-selection{padding:16px 13px 88px}.vua-app.has-selection .vua-identity{padding:16px;border-radius:17px}.vua-app.has-selection .vua-unit-title h2{font-size:34px}.vua-app.has-selection .vua-unit-title p{font-size:12px}.vua-unit-close{width:40px;height:40px;font-size:23px}.vua-app.has-selection .vua-identity-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}.vua-app.has-selection .vua-identity-facts span{font-size:9px}.vua-app.has-selection .vua-identity-facts strong{font-size:12px}.vua-app.has-selection .vua-card-grid{grid-template-columns:1fr;gap:9px;margin-top:14px}.vua-app.has-selection .vua-card{min-height:0;padding:15px}.vua-app.has-selection .vua-module-icon{width:42px;height:42px}.vua-app.has-selection .vua-card-heading .vua-kicker{font-size:10px}.vua-app.has-selection .vua-card-value{min-height:0;margin:15px 0 8px;font-size:25px}.vua-app.has-selection .vua-card-facts>div{padding:7px 0}.vua-app.has-selection .vua-card-facts span,.vua-app.has-selection .vua-card-facts b{font-size:10px}.vua-app.has-selection .vua-footer{padding:11px 13px}.vua-app.has-selection .vua-footer button{width:100%;min-width:0;min-height:48px;font-size:13px}}
+.vua-detail-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:auto;padding:12px 0 0;border:0;border-top:1px solid var(--line);background:transparent;color:#2356a1;font:inherit;font-size:12px;font-weight:750;cursor:pointer}.vua-detail-toggle:focus-visible{outline:2px solid #286de1;outline-offset:4px}.vua-detail-panel{min-width:0;margin-top:14px}.vua-detail-panel h3{margin:16px 0 8px;font-size:12px}.vua-detail-panel dl{margin:0}.vua-detail-panel dl>div{padding:9px 0;border-top:1px solid var(--line)}.vua-detail-panel dt{font-size:11px;color:var(--muted)}.vua-detail-panel dd{margin:5px 0 0;font-size:12px;overflow-wrap:anywhere}.vua-detail-panel em{display:block;font-size:10px;font-style:normal;color:#728399}.vua-detail-panel .diff em{color:#ac5800}.vua-detail-panel .match em{color:#087955}.vua-card-grid{align-items:start}
+@media(max-width:680px){.vua-app.has-selection{padding-bottom:120px}.vua-app.has-selection .vua-footer{flex-direction:column;gap:7px}.vua-app.has-selection .vua-footer>span{padding-top:0;font-size:10px}}
 </style>
 
