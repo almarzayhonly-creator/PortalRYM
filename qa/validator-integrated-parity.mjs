@@ -36,7 +36,11 @@ try{
       const neighbors=await page.evaluate(()=>['.v101-side','.v99-grid'].map(q=>getComputedStyle(document.querySelector(q)).display));
       await page.goto('http://127.0.0.1:4195/'+(dedicated?'?validator-host=1':''));
       const searchStyles=await page.locator('.v101-validator').evaluate(root=>[root,...root.querySelectorAll('*')].map(el=>{const s=getComputedStyle(el);return [el.tagName,el.className,s.display,s.color,s.backgroundColor,s.fontFamily,s.fontSize,s.fontWeight,s.borderRadius]}));
-      await page.locator('#v101ValidatorQ').fill('P714');await page.locator('#v101ValidatorQ').press('Enter');
+      await page.locator('#v101ValidatorQ').fill('P714');await page.evaluate(()=>window.searchValidator99('P714'));
+      const quickRow=page.locator('#v101ValidatorList .v117-result-row').first();await quickRow.waitFor();
+      const quickRowStyles=await quickRow.evaluate(el=>{const copy=el.querySelector('.v117-result-copy'),metadata=copy?.querySelector('small');return {display:getComputedStyle(el).display,columns:getComputedStyle(el).gridTemplateColumns,copy:copy&&getComputedStyle(copy).display,metadata:metadata&&getComputedStyle(metadata).display}});
+      assert.equal(quickRowStyles.display,'grid');assert.equal(quickRowStyles.copy,'block');assert.equal(quickRowStyles.metadata,'grid');
+      await page.locator('#v101ValidatorQ').press('Enter');
       await page.locator('#v101CheckModal[data-uva-enriched]').waitFor();
       await page.locator('#v117GpsCard:not(.pending)').waitFor();
       await page.locator('#v117PanCard:not(.pending)').waitFor();
