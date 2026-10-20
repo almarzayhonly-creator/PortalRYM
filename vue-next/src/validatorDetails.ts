@@ -9,6 +9,7 @@ const hasValue = (value: unknown) => value !== undefined && value !== null && St
 const displayValue = (value: unknown) => !hasValue(value) ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value).trim()
 const pickValue = (...values: unknown[]) => values.find(hasValue)
 function objectValue(value: unknown): Unit { return value && typeof value === 'object' && !Array.isArray(value) ? value as Unit : {} }
+const upperValue = (value: unknown) => displayValue(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()
 function rawObject(value: unknown): Unit {
   if (typeof value === 'string') { try { return objectValue(JSON.parse(value)) } catch { return {} } }
   return objectValue(value)
@@ -93,6 +94,7 @@ function panSections(detail: UnitDetail): DetailSection[] {
   const ids = Array.isArray(c.tags_ena) ? c.tags_ena.join(' · ') : c.tags_ena
   const sections = [fields('Panapass y TAGs', [
     ['Número Panapass', pickValue(c.panapass_numero, c.numero_panapass)], ['Panapass display', pickValue(account.panapass_display, c.panapass_display)],
+    ['Cuenta ENA distinta', pickValue(c.cuenta_ena, c.numero_cuenta)],
     ['TAG principal', pickValue(c.tag, 'Sin TAG registrado')], ['Otros TAGs ENA', ids], ['Cantidad de TAGs', c.cantidad_tags],
     ['Último resultado', c.ena_ultimo_resultado], ['Último error', pickValue(c.ena_ultimo_error, account.ultimo_error)],
   ])]
@@ -134,9 +136,70 @@ function gpsSections(detail: UnitDetail): DetailSection[] {
   const r = objectValue(detail.gpsRecord), g1 = objectValue(r.gps1), g2 = objectValue(r.gps2)
   const evaluation = fields('Evaluación GPS', [['Clasificación final', r.nivel], ['Motivo', r.razon], ['Diagnóstico operativo', pickValue(r.diagnostico_operativo, r.estado_operativo)]])
   const equipment = fields('GPS 1 y GPS 2', [['GPS 1', [g1.label, g1.last].filter(hasValue).join(' · ')], ['GPS 2', [g2.label, g2.last].filter(hasValue).join(' · ')], ['Proveedor GPS 1', pickValue(g1.proveedor, g1.fuente)], ['Proveedor GPS 2', pickValue(g2.proveedor, g2.fuente)]])
-  return [evaluation, equipment].filter((item): item is DetailSection => !!item)
+  const device = (title: string, source: Unit): DetailSection | null => fields(title, [
+    ['Diagnóstico específico', source.razon], ['Última señal adicional', source.ultima_senal],
+    ['Proveedor', pickValue(source.proveedor, source.fuente)], ['IMEI / ID', pickValue(source.imei, source.id)],
+    ['Metadata', source.metadata && typeof source.metadata === 'object' ? JSON.stringify(source.metadata) : source.metadata],
+  ])
+  return [evaluation, equipment, device('GPS 1 · información del equipo', g1), device('GPS 2 · información del equipo', g2)].filter((item): item is DetailSection => !!item)
+}
+
+// Keep the Vue cards aligned with the independent validator's read-only status
+// presentation. The source records remain authoritative; this only formats them.
+function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): void {
+  const rev = objectValue(detail.revisadoRecord), operation = objectValue(objectValue(ficha).operacion)
+  const review = detail.cards.find(card => card.key === 'revisados')
+  if (review && (Object.keys(rev).length || Object.keys(operation).length)) {
+    const source = upperValue(pickValue(rev.estado, operation.estado_revisado))
+    const legacy = [source, review.badge, review.value, ...review.details.map(item => item.value)].join(' ')
+    let status = 'PENDIENTE'
+    if (upperValue(operation.estado_revisado) === 'VENCIDO' || ['VENCIDO', 'EXPIRADO'].includes(source)) status = 'VENCIDO'
+    else if (source === 'PENDIENTE') status = Number(rev.meses_atraso) > 0 ? 'VENCIDO' : 'PENDIENTE'
+    else if (source === 'VIGENTE') status = 'VIGENTE'
+    else if (source === 'SIN_MES') status = 'SIN MES'
+    else if (/VENCID|EXPIR/.test(upperValue(legacy))) status = 'VENCIDO'
+    else if (/PENDIENT|NO VIGENTE/.test(upperValue(legacy))) status = 'PENDIENTE'
+    else if (/VIGENTE|AL DIA|OK|VALIDO/.test(upperValue(legacy))) status = 'VIGENTE'
+    const month = displayValue(pickValue(detail.controlRecord?.mes_revisado, objectValue(ficha?.unidad).mes_revisado, rev.mes_revisado, rev.mes))
+    const last = displayValue(pickValue(operation.fecha_ultimo_revisado, objectValue(ficha?.oficial).fecha_revisado, rev.ultimo_revisado, rev.fecha, 'Sin registro'))
+    const count = Number(rev.cantidad_fotos ?? rev.total_fotos ?? rev.fotos_count ?? 0)
+    const photos = count > 0 ? `${count} foto${count === 1 ? '' : 's'}` : rev.fotos_disponibles === true ? 'Fotos disponibles' : rev.fotos_disponibles === false ? 'Sin fotos' : 'Sin información'
+    Object.assign(review, {
+      tone: status === 'VIGENTE' ? (rev.bloqueado ? 'warn' : 'ok') : status === 'VENCIDO' ? 'bad' : 'warn',
+      badge: status,
+      value: ['VENCIDO', 'PENDIENTE'].includes(status) && month ? `${status} · ${month.toUpperCase()}` : status,
+      details: [{ label: 'Último revisado', value: last }, { label: 'Fotos', value: photos }, { label: 'Estado', value: status }],
+      note: `Último revisado · ${last}`,
+    })
+  }
+
+  const gps = detail.cards.find(card => card.key === 'gps'), row = objectValue(detail.gpsRecord)
+  if (gps && Object.keys(row).length) {
+    const devices = [objectValue(row.gps1), objectValue(row.gps2)]
+    const complete = devices.every(item => typeof item.installed === 'boolean' && typeof item.ok === 'boolean')
+    let level = upperValue(row.nivel), reason = displayValue(row.razon || row.diagnostico)
+    const historic = ['CERRADO', 'CERRADA', 'CANIBALIZADO', 'CANIBALIZADA'].includes(upperValue(row.estatus_control))
+    if (level === 'HISTORICO' || row.historico || historic) { level = 'SIN INFORMACIÓN'; reason ||= 'Información GPS histórica' }
+    else if (complete) {
+      const installed = devices.filter(item => item.installed).length, reporting = devices.filter(item => item.installed && item.ok).length
+      level = !installed || !reporting ? 'CRITICO' : installed === 2 && reporting === 1 ? 'ALERTA' : 'OK'
+      if (installed === 1 && reporting === 1) reason = '1 GPS instalado y reportando'
+    }
+    const tone = level === 'OK' ? 'ok' : level === 'ALERTA' ? 'warn' : level === 'CRITICO' ? 'bad' : 'pending'
+    const label = (item: Unit) => item.installed === false ? 'Sin GPS' : item.installed === true ? item.ok === true ? 'Reportando' : displayValue(item.label || 'Sin reportar') : 'Sin información'
+    const reporting = devices.filter(item => item.installed === true && item.ok === true).length
+    const installed = devices.filter(item => item.installed === true).length
+    const known = devices.some(item => typeof item.installed === 'boolean' || hasValue(item.label))
+    const summary = !known ? 'SIN INFORMACIÓN' : installed === 0 ? 'SIN GPS' : `${reporting} DE ${Math.max(installed, 2)} REPORTANDO`
+    Object.assign(gps, {
+      tone, badge: level, value: summary,
+      details: devices.map((item, index) => ({ label: `GPS ${index + 1}`, value: `${label(item)}${item.last ? ` · ${displayValue(item.last)}` : ''}` })),
+      note: `Criticidad GPS · ${level}${reason ? ` · ${reason}` : ''}`,
+    })
+  }
 }
 export function applyValidatorSections(detail: UnitDetail, ficha: Unit | null = null): void {
+  applyOperationalPresentation(detail, ficha)
   for (const card of detail.cards) {
     if (card.key === 'control') card.sections = controlSections(detail, ficha)
     if (card.key === 'panapass') card.sections = panSections(detail)
@@ -144,3 +207,4 @@ export function applyValidatorSections(detail: UnitDetail, ficha: Unit | null = 
     if (card.key === 'gps') card.sections = gpsSections(detail)
   }
 }
+
