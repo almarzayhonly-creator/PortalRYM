@@ -6,8 +6,8 @@ type Unit = Record<string, unknown>
 type DetailField = { label: string; value: string; reference?: string; comparison?: 'match' | 'diff' | 'missing' }
 type DetailSection = { title: string; fields: DetailField[] }
 type DetailCard = { key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string; sections?: DetailSection[] }
-type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[]; controlRecord?: Unit; revisadoRecord?: Unit }
-type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown>; ficha?: (unit: Unit) => Promise<Unit>; gps?: (unit: Unit) => Promise<Record<string, unknown>> }
+type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[]; controlRecord?: Unit; revisadoRecord?: Unit; enaAccount?: Unit; gpsRecord?: Unit }
+type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown>; enrich?: (detail: any) => Promise<any>; ficha?: (unit: Unit) => Promise<Unit>; gps?: (unit: Unit) => Promise<Record<string, unknown>> }
 const props = defineProps<{ api?: Api; onControl?: () => unknown }>()
 const query = ref('')
 const rows = ref<Unit[]>([])
@@ -108,17 +108,82 @@ function controlSections(detail: UnitDetail, fichaResponse: Unit | null): Detail
   if (officialValues.some(([, left, right]) => hasValue(left) || hasValue(right))) sections.push(comparisons)
   return sections
 }
+function fields(title: string, rows: Array<[string, unknown]>): DetailSection | null {
+  const values = rows.filter(([, item]) => hasValue(item)).map(([label, item]) => ({ label, value: displayValue(item) }))
+  return values.length ? { title, fields: values } : null
+}
+function panSections(detail: UnitDetail): DetailSection[] {
+  const c = objectValue(detail.controlRecord), account = objectValue(detail.enaAccount)
+  const tagsRaw = c.tags_detalle
+  let tags: Unit[] = Array.isArray(tagsRaw) ? tagsRaw as Unit[] : []
+  if (!tags.length && typeof tagsRaw === 'string') { try { const parsed: unknown = JSON.parse(tagsRaw); tags = Array.isArray(parsed) ? parsed as Unit[] : [] } catch { tags = [] } }
+  const ids = Array.isArray(c.tags_ena) ? c.tags_ena.join(' · ') : c.tags_ena
+  const sections = [fields('Panapass y TAGs', [
+    ['Número Panapass', pickValue(c.panapass_numero, c.numero_panapass)], ['Panapass display', pickValue(account.panapass_display, c.panapass_display)],
+    ['TAG principal', pickValue(c.tag, 'Sin TAG registrado')], ['Otros TAGs ENA', ids], ['Cantidad de TAGs', c.cantidad_tags],
+    ['Último resultado', c.ena_ultimo_resultado], ['Último error', pickValue(c.ena_ultimo_error, account.ultimo_error)],
+  ])]
+  for (const [i, tag] of tags.entries()) {
+    const section = fields(`TAG ${displayValue(pickValue(tag.tag, tag.numero_tag, i + 1))}`, [
+      ['Estado del TAG', pickValue(tag.estado_tag, tag.estado)], ['Estado financiero', tag.estado_financiero], ['Tipo de TAG', pickValue(tag.tipo_tag, tag.tipo)],
+      ['Matrícula', pickValue(tag.matricula, tag.placa)], ['Saldo del TAG', tag.saldo], ['Tipo de vehículo', tag.tipo_vehiculo],
+      ['Corregimiento', tag.corregimiento], ['Consulta del TAG', tag.consultado_at],
+    ])
+    if (section) sections.push(section)
+  }
+  const admin = fields('Información administrativa ENA', [
+    ['Acceso ENA interno · no valida el vehículo', pickValue(account.estado_acceso, c.ena_estado_acceso)],
+    ['Último login correcto', pickValue(account.ultimo_login_ok, c.ena_ultimo_login_ok)], ['Empresa ENA', pickValue(account.ena_empresa, c.ena_empresa)],
+    ['RUC ENA', pickValue(account.ena_ruc, c.ena_ruc)], ['Email ENA', pickValue(account.ena_email, c.ena_email)],
+    ['Tipo de credencial', pickValue(account.tipo_credencial, c.tipo_credencial)], ['Fecha de actualización', pickValue(account.updated_at, c.ena_actualizado_at)],
+  ])
+  if (admin) sections.push(admin)
+  return sections.filter((item): item is DetailSection => !!item)
+}
+function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): DetailSection[] {
+  const c = objectValue(detail.controlRecord), r = objectValue(detail.revisadoRecord), f = objectValue(fichaResponse)
+  const official = objectValue(f.oficial), raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta)), op = objectValue(f.operacion)
+  const section = fields('Revisado', [
+    ['Mes asignado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes)], ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
+    ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)], ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
+    ['Tipo de placa', pickValue(raw.tipoPlaca, official.tipo_placa)], ['Tipo de uso', pickValue(raw.tipoUso, official.tipo_uso)],
+    ['Estado oficial del vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)], ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
+    ['Bloqueado', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'], ['Observación', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
+    ['Último revisado', pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado)], ['Fotos', r.cantidad_fotos],
+  ])
+  return section ? [section] : []
+}
+function gpsSections(detail: UnitDetail): DetailSection[] {
+  const r = objectValue(detail.gpsRecord), g1 = objectValue(r.gps1), g2 = objectValue(r.gps2)
+  const evaluation = fields('Evaluación GPS', [['Clasificación final', r.nivel], ['Motivo', r.razon], ['Diagnóstico operativo', pickValue(r.diagnostico_operativo, r.estado_operativo)]])
+  const equipment = fields('GPS 1 y GPS 2', [['GPS 1', [g1.label, g1.last].filter(hasValue).join(' · ')], ['GPS 2', [g2.label, g2.last].filter(hasValue).join(' · ')], ['Proveedor GPS 1', pickValue(g1.proveedor, g1.fuente)], ['Proveedor GPS 2', pickValue(g2.proveedor, g2.fuente)]])
+  return [evaluation, equipment].filter((item): item is DetailSection => !!item)
+}
 async function select(row: Unit) {
   panelOpen.value = false; rows.value = []; searched.value = false; modalOpen.value = true
   detail.value = null; detailError.value = ''; detailLoading.value = true
   const current = ++detailSequence
   try {
     if (!props.api) throw Error('El validador no está disponible.')
-    const loadPromise = props.api.load(row) as Promise<UnitDetail>
-    const fichaPromise = props.api.ficha ? props.api.ficha(row).catch(() => null) : Promise.resolve(null)
-    const [result, ficha] = await Promise.all([loadPromise, fichaPromise])
-    const controlCard = result.cards.find(card => card.key === 'control')
-    if (controlCard) controlCard.sections = controlSections(result, ficha)
+    const result = await props.api.load(row) as UnitDetail
+    if (current !== detailSequence) return
+    detail.value = result
+    detailLoading.value = false
+    let fichaData: Unit | null = null
+    const applyExtras = (ficha: Unit | null = fichaData) => {
+      if (current !== detailSequence || !detail.value) return
+      const currentDetail = detail.value
+      const card = (key: string) => currentDetail.cards.find(item => item.key === key)
+      const controlCard = card('control'), panCard = card('panapass'), revCard = card('revisados'), gpsCard = card('gps')
+      if (controlCard) controlCard.sections = controlSections(currentDetail, ficha)
+      if (panCard) panCard.sections = panSections(currentDetail)
+      if (revCard) revCard.sections = revisadoSections(currentDetail, ficha)
+      if (gpsCard) gpsCard.sections = gpsSections(currentDetail)
+    }
+    applyExtras(null)
+    const enrichment = props.api.enrich ? props.api.enrich(result).then(updated => { if (current === detailSequence) { detail.value = updated; applyExtras() } }).catch(() => {}) : Promise.resolve()
+    const fichaPromise = props.api.ficha ? props.api.ficha(row).then(ficha => { fichaData = ficha; applyExtras() }).catch(() => {}) : Promise.resolve()
+    void Promise.all([enrichment, fichaPromise])
     const gps = result.cards.find(card => card.key === 'gps')
     const stateDetail = gps?.details.find(item => item.label === 'Estado')?.value || ''
     if (gps && /HTTP\s+5\d\d/i.test(stateDetail) && props.api.gps) {
