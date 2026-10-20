@@ -17,6 +17,9 @@ const detail = ref<UnitDetail | null>(null)
 const detailLoading = ref(false)
 const detailError = ref('')
 const modalOpen = ref(false)
+const activeCardKey = ref('panapass')
+const recentUnits = ref<Unit[]>([])
+const activeCard = computed(() => detail.value?.cards.find(card => card.key === activeCardKey.value) ?? detail.value?.cards[0] ?? null)
 let timer: number | undefined
 let sequence = 0
 let detailSequence = 0
@@ -30,6 +33,8 @@ const panapass = (row: Unit) => value(row, 'panapass_numero', 'panapass')
 const status = (row: Unit) => value(row, 'estatus', 'estado')
 async function select(row: Unit) {
   panelOpen.value = false; rows.value = []; searched.value = false; modalOpen.value = true
+  activeCardKey.value = 'panapass'
+  recentUnits.value = [row, ...recentUnits.value.filter(item => unit(item) !== unit(row))].slice(0, 4)
   detail.value = null; detailError.value = ''; detailLoading.value = true
   const current = ++detailSequence
   try {
@@ -142,6 +147,7 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
         </button>
       </div>
     </div>
+    <nav v-if="recentUnits.length" class="uv-recent" aria-label="Unidades recientes"><span>Recientes:</span><button v-for="item in recentUnits" :key="unit(item)" type="button" @click="select(item)">{{ unit(item) }}</button></nav>
   </section>
   <Teleport to="body">
     <Transition name="uv-modal">
@@ -157,7 +163,22 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
               </section>
               <div class="uv-section-label"><div><span>VALIDACIÓN DE SERVICIOS</span><small>Estado actual de cada módulo conectado</small></div><b class="uv-system-count">04 <span>SISTEMAS</span></b></div>
               <section class="uv-check-grid" aria-label="Validaciones por sistema">
-                <article v-for="card in detail.cards" :key="card.key" class="uv-check-card" :class="[card.key, card.tone]"><header><span class="uv-check-icon"><ModuleIcon :name="card.key" /></span><strong>{{ card.title }}</strong><span class="uv-check-badge"><i aria-hidden="true">{{ card.tone === 'ok' ? '✓' : card.tone === 'pending' ? '·' : '!' }}</i>{{ card.badge }}</span></header><b class="uv-check-value">{{ card.value }}</b><div class="uv-check-details"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p><details v-for="section in card.sections" :key="section.title" class="uv-extra-section"><summary>{{ section.title }}<span>{{ section.fields.length }} campos <i aria-hidden="true">⌄</i></span></summary><div class="uv-extra-fields"><div v-for="field in section.fields" :key="field.label" class="uv-extra-field" :class="[field.comparison, { 'has-reference': field.reference !== undefined }]"><span>{{ field.label }}</span><template v-if="field.reference !== undefined"><b><small>RYM</small>{{ field.value }}</b><b><small>eCarCheck</small>{{ field.reference }}</b><em v-if="field.comparison">{{ field.comparison === 'match' ? 'Coincide' : field.comparison === 'diff' ? 'Diferencia' : 'Sin comparar' }}</em></template><b v-else>{{ field.value }}</b></div></div></details></article>
+                <article v-for="card in detail.cards" :key="card.key" class="uv-check-card" :class="[card.key, card.tone, { selected: activeCard?.key === card.key }]">
+                  <button class="uv-card-select" type="button" :aria-expanded="activeCard?.key === card.key" @click="activeCardKey = card.key">
+                    <header><span class="uv-check-icon"><ModuleIcon :name="card.key" /></span><strong>{{ card.title }}</strong><span class="uv-check-badge"><i aria-hidden="true">{{ card.tone === 'ok' ? '✓' : card.tone === 'pending' ? '·' : '!' }}</i>{{ card.badge }}</span></header>
+                    <b class="uv-check-value">{{ card.value }}</b>
+                    <div class="uv-check-details"><div v-for="item in card.details.slice(0, 2)" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div>
+                    <p>{{ card.note }}</p>
+                    <span class="uv-card-more">{{ activeCard?.key === card.key ? 'Detalle abierto' : 'Ver detalle' }} <i aria-hidden="true">→</i></span>
+                  </button>
+                </article>
+              </section>
+              <section v-if="activeCard" class="uv-active-detail" :class="activeCard.key" aria-live="polite">
+                <header><div><span>DETALLE DE {{ activeCard.title.toLocaleUpperCase() }}</span><h3>{{ activeCard.value }}</h3></div><span class="uv-check-badge" :class="activeCard.tone">{{ activeCard.badge }}</span></header>
+                <p v-if="activeCard.note">{{ activeCard.note }}</p>
+                <div v-if="activeCard.details.length" class="uv-active-facts"><div v-for="item in activeCard.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div>
+                <details v-for="section in activeCard.sections" :key="section.title" class="uv-extra-section"><summary>{{ section.title }}<span>{{ section.fields.length }} campos <i aria-hidden="true">⌄</i></span></summary><div class="uv-extra-fields"><div v-for="field in section.fields" :key="field.label" class="uv-extra-field" :class="[field.comparison, { 'has-reference': field.reference !== undefined }]"><span>{{ field.label }}</span><template v-if="field.reference !== undefined"><b><small>RYM</small>{{ field.value }}</b><b><small>eCarCheck</small>{{ field.reference }}</b><em v-if="field.comparison">{{ field.comparison === 'match' ? 'Coincide' : field.comparison === 'diff' ? 'Diferencia' : 'Sin comparar' }}</em></template><b v-else>{{ field.value }}</b></div></div></details>
+                <div v-if="!activeCard.sections?.length" class="uv-no-extra">No hay más datos disponibles para este sistema.</div>
               </section>
             </div>
             <footer class="uv-dialog-actions"><button type="button" class="uv-action secondary" @click="closeDetail">Otra unidad <span aria-hidden="true">↗</span></button><button type="button" class="uv-action primary" @click="closeDetail(); onControl?.()">Abrir Control de Auto <span aria-hidden="true">→</span></button></footer>
@@ -364,4 +385,34 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 .uv-dialog-actions{padding-top:11px}
 @media(max-width:1240px){.uv-dialog{width:min(1100px,calc(100vw - 28px))}.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.uv-check-card{min-height:200px}}
 @media(max-width:700px){.uv-dialog{width:100%;max-height:calc(100dvh - 14px);padding:14px}.uv-identity{grid-template-columns:minmax(0,1fr) auto;padding:13px}.uv-identity-main{grid-column:1;grid-row:1;align-items:flex-start;flex-direction:column}.uv-identity-main h3{font-size:27px}.uv-overall{grid-column:2;grid-row:1;justify-self:end}.uv-identity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.uv-check-grid{grid-template-columns:1fr;gap:9px}.uv-check-card{min-height:0;padding:13px}.uv-check-value{font-size:19px}}
+.uv-recent{display:flex;align-items:center;gap:8px;margin:10px 0 0;color:#6f8298;font-size:11px}
+.uv-recent button{min-height:27px;padding:3px 10px;border:1px solid #d7e2ef;border-radius:999px;background:#fff;color:#24466a;font:inherit;font-weight:700;cursor:pointer}
+.uv-recent button:hover{border-color:#aac5e5;background:#f6faff}
+.uv-dialog{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.uv-check-card{align-self:stretch;min-height:240px;padding:0;border-width:1px;transition:border-color .16s,box-shadow .16s}
+.uv-check-card.selected{border:2px solid #183f79;box-shadow:0 8px 20px #102f4d16}
+.uv-card-select{width:100%;height:100%;min-height:inherit;display:flex;flex-direction:column;align-items:stretch;padding:17px 16px 14px;border:0;border-radius:inherit;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.uv-card-select:focus-visible{outline:3px solid #3d83dc;outline-offset:2px}
+.uv-card-select>header{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:8px}
+.uv-card-select>header>strong{min-width:0;color:#34506d;font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+.uv-card-select .uv-check-value{margin:13px 0 5px}
+.uv-card-select .uv-check-details{margin-top:2px}
+.uv-card-select>p{margin:8px 0 0}
+.uv-card-more{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:10px;color:#58718d;font-size:9px;font-weight:750}
+.uv-card-more i{color:#176bc1;font-size:14px;font-style:normal}
+.uv-active-detail{padding:18px 20px;border:1px solid #dbe6f1;border-radius:17px;background:#fff;box-shadow:0 7px 20px #112f4d0a}
+.uv-active-detail>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:11px;border-bottom:1px solid #e3ebf3}
+.uv-active-detail>header>div>span{color:#748aa2;font-size:9px;font-weight:850;letter-spacing:.1em}
+.uv-active-detail h3{margin:4px 0 0;color:#173c65;font-size:20px}
+.uv-active-detail>p{margin:11px 0;color:#6f8298;font-size:11px}
+.uv-active-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.uv-active-facts>div{min-width:0;display:grid;gap:5px;padding:9px 10px;border:1px solid #e3ebf3;border-radius:9px;background:#f8fbfe}
+.uv-active-facts span{color:#7d90a5;font-size:9px}
+.uv-active-facts b{overflow-wrap:anywhere;color:#264868;font-size:10px}
+.uv-active-detail .uv-extra-section{margin-top:0}
+.uv-active-detail .uv-extra-section>summary{padding:11px 1px 5px;font-size:10px}
+.uv-no-extra{padding:12px 0;color:#7c8fa5;font-size:11px}
+@media(max-width:1240px){.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.uv-card-select{min-height:200px}}
+@media(max-width:700px){.uv-card-select{min-height:0;padding:13px}.uv-active-detail{padding:14px}.uv-active-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.uv-recent{flex-wrap:wrap}}
+@media(max-width:480px){.uv-check-grid{grid-template-columns:1fr}.uv-card-select{min-height:0}.uv-active-detail>header{align-items:flex-start;flex-direction:column}}
 </style>
