@@ -248,4 +248,37 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 .uv-check-card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
 .uv-check-card:hover{border-color:#c7d9ea;box-shadow:0 12px 26px #112f4d14}
 @media(prefers-reduced-motion:reduce){.uv-modal-enter-active,.uv-modal-leave-active,.uv-modal-enter-active .uv-dialog,.uv-modal-leave-active .uv-dialog{transition:none}}
+/* Vue unit dossier: identity rail + focused service grid. */
+.uv-dialog{width:min(1160px,100%);max-height:min(820px,calc(100dvh - 32px));gap:14px;padding:20px;border-radius:26px;background:linear-gradient(145deg,#fff 0%,#f5f9fd 100%)}
+.uv-dialog-head{padding-bottom:12px}
+.uv-dialog-scroll{display:grid;grid-template-columns:minmax(230px,.72fr) minmax(0,1.8fr);grid-template-rows:auto minmax(0,1fr);gap:14px;overflow:auto}
+.uv-identity{grid-column:1;grid-row:1 / span 2;min-height:100%;align-content:start;grid-template-columns:1fr;gap:16px;padding:22px;border:0;border-radius:22px;background:radial-gradient(circle at 100% 0%,#2a6c8180 0 18%,transparent 18.2%),linear-gradient(155deg,#102f53 0%,#17466a 58%,#116b5a 100%);box-shadow:0 14px 32px #123b5c24;overflow:hidden}
+.uv-identity:before{inset:auto -45px -50px auto;width:180px;height:180px;border:1px solid #ffffff1c;border-radius:50%;box-shadow:0 0 0 18px #ffffff08,0 0 0 38px #ffffff06;pointer-events:none}
+.uv-identity-main{align-items:flex-start;flex-direction:column;gap:14px}
+.uv-identity-icon{width:50px;height:50px;border-radius:16px;background:linear-gradient(145deg,#ffbd4b,#f47a12);box-shadow:0 8px 18px #071e3645;color:#143c60}
+.uv-identity-main>div{min-width:0}
+.uv-identity-main h3{margin-top:5px;font-size:37px;letter-spacing:-.055em}
+.uv-identity-main p{gap:8px;color:#d3e2ee;font-size:11px}
+.uv-plate{border:1px solid #ffffff34;background:#ffffff12;color:#d8e8f5}
+.uv-plate b{color:#fff}
+.uv-identity-grid{grid-template-columns:1fr;gap:8px}
+.uv-identity-grid>div{min-height:0;padding:10px 11px;border-color:#ffffff26;border-radius:12px;background:#ffffff12}
+.uv-identity-grid span{font-size:8px}
+.uv-identity-grid b{font-size:11px}
+.uv-overall{justify-self:start;grid-row:2;margin:0;padding:8px 11px;border-radius:999px!important}
+.uv-section-label{grid-column:2;grid-row:1;margin:0 2px;align-self:end}
+.uv-check-grid{grid-column:2;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));align-content:stretch;gap:12px;margin:0}
+.uv-check-card{min-height:190px;padding:17px 17px 14px;border-radius:19px;box-shadow:0 8px 22px #112f4d0b}
+.uv-check-card>header{grid-template-columns:38px minmax(0,1fr) auto;gap:10px}
+.uv-check-icon{width:38px;height:38px;border-radius:13px}
+.uv-check-card>header>strong{font-size:10px;letter-spacing:.07em}
+.uv-check-badge{padding:6px 9px;border-radius:999px;font-size:8px}
+.uv-check-value{margin:12px 0 7px;font-size:21px;letter-spacing:-.035em}
+.uv-check-details>div{padding:7px 0}
+.uv-check-details span{font-size:9px}
+.uv-check-details b{max-width:66%;font-size:10px}
+.uv-check-card>p{margin-top:8px;font-size:9px;line-height:1.45}
+.uv-dialog-actions{padding-top:12px}
+@media(max-width:760px){.uv-dialog-scroll{display:flex;flex-direction:column;gap:12px}.uv-identity{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:15px}.uv-identity-main{flex-direction:row;align-items:center;gap:11px}.uv-identity-icon{width:40px;height:40px}.uv-identity-main h3{font-size:25px}.uv-identity-grid{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.uv-identity-grid>div{padding:8px}.uv-overall{grid-column:2;grid-row:1;align-self:start;justify-self:end}.uv-section-label{align-items:center;flex-direction:row;margin:0}.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.uv-check-card{min-height:165px;padding:12px}.uv-check-card>header{grid-template-columns:30px minmax(0,1fr);gap:7px}.uv-check-icon{width:30px;height:30px}.uv-check-badge{grid-column:2;justify-self:start}.uv-check-value{margin:9px 0 5px;font-size:17px}.uv-check-details>div{gap:8px}.uv-check-details b{max-width:62%;font-size:9px}}
+@media(max-width:480px){.uv-dialog{padding:12px;border-radius:20px}.uv-check-grid{grid-template-columns:1fr}.uv-check-card{min-height:0}.uv-identity-grid{grid-template-columns:1fr 1fr}.uv-dialog-actions{flex-direction:column-reverse}.uv-action{width:100%;flex:auto}}
 </style>
