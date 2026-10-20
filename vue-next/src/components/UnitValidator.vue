@@ -3,9 +3,11 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import ModuleIcon from './ModuleIcon.vue'
 
 type Unit = Record<string, unknown>
-type DetailCard = { key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string }
-type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[] }
-type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown>; gps?: (unit: Unit) => Promise<Record<string, unknown>> }
+type DetailField = { label: string; value: string; reference?: string; comparison?: 'match' | 'diff' | 'missing' }
+type DetailSection = { title: string; fields: DetailField[] }
+type DetailCard = { key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string; sections?: DetailSection[] }
+type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[]; controlRecord?: Unit; revisadoRecord?: Unit }
+type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown>; ficha?: (unit: Unit) => Promise<Unit>; gps?: (unit: Unit) => Promise<Record<string, unknown>> }
 const props = defineProps<{ api?: Api; onControl?: () => unknown }>()
 const query = ref('')
 const rows = ref<Unit[]>([])
@@ -30,13 +32,93 @@ const plate = (row: Unit) => value(row, 'placa_unica', 'placa', 'placa_comercial
 const company = (row: Unit) => value(row, 'empresa_duena', 'empresa_operadora', 'empresa', 'empresa_nombre', 'razon_social', 'duena', 'propietario')
 const panapass = (row: Unit) => value(row, 'panapass_numero', 'panapass')
 const status = (row: Unit) => value(row, 'estatus', 'estado')
+const hasValue = (value: unknown) => value !== undefined && value !== null && String(value).trim() !== '' && String(value).trim() !== '—'
+const displayValue = (value: unknown) => !hasValue(value) ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value).trim()
+const pickValue = (...values: unknown[]) => values.find(hasValue)
+function objectValue(value: unknown): Unit { return value && typeof value === 'object' && !Array.isArray(value) ? value as Unit : {} }
+function rawObject(value: unknown): Unit {
+  if (typeof value === 'string') { try { return objectValue(JSON.parse(value)) } catch { return {} } }
+  return objectValue(value)
+}
+function controlSections(detail: UnitDetail, fichaResponse: Unit | null): DetailSection[] {
+  const control = objectValue(detail.controlRecord)
+  const ficha = objectValue(fichaResponse)
+  const unitRecord = objectValue(ficha.unidad)
+  const official = objectValue(ficha.oficial)
+  const raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta))
+  const addSection = (title: string, rows: Array<[string, unknown]>): DetailSection | null => {
+    const fields = rows.filter(([, field]) => hasValue(field)).map(([label, field]) => ({ label, value: displayValue(field) }))
+    return fields.length ? { title, fields } : null
+  }
+  const sections: DetailSection[] = []
+  const controlSection = addSection('Control de Auto · RYM', [
+    ['Póliza NetSuite', control.nro_poliza], ['Cupo / placa comercial', pickValue(control.placa_comercial, unitRecord.placa_comercial)],
+    ['Marca', pickValue(control.marca, unitRecord.marca)], ['Modelo', pickValue(control.modelo, unitRecord.modelo)],
+    ['Color', pickValue(control.color, unitRecord.color)], ['Año', pickValue(control.anio, unitRecord.anio)],
+  ])
+  if (controlSection) sections.push(controlSection)
+  const technicalRym = addSection('Datos técnicos RYM', [
+    ['Chasis', pickValue(control.chasis, unitRecord.chasis)], ['Motor', pickValue(control.motor, unitRecord.motor)],
+    ['Transmisión', pickValue(control.transmision, unitRecord.transmision)], ['Estatus NetSuite', pickValue(control.estatus_netsuite, unitRecord.estatus_netsuite)],
+  ])
+  if (technicalRym) sections.push(technicalRym)
+  const officialSection = addSection('Ficha oficial · eCarCheck', [
+    ['Última verificación', pickValue(official.actualizado_at, ficha.consulta_at)], ['Resultado eCarCheck', pickValue(ficha.resultado, raw.detalleRespuesta, raw.detalle_respuesta)],
+    ['Placa consultada', pickValue(raw.nroPlaca, official.placa)], ['Cupo oficial', pickValue(raw.cupo, official.cupo)],
+    ['Propietario oficial', pickValue(raw.nombrePropietario, official.propietario)], ['Documento propietario', pickValue(raw.nroDocumentoPropietario, official.documento_propietario)],
+    ['VIN', pickValue(raw.nroVin, official.vin)], ['Chasis', pickValue(raw.nroChasis, official.chasis)], ['Motor', pickValue(raw.nroMotor, official.motor)],
+  ])
+  if (officialSection) sections.push(officialSection)
+  const officialTechnical = addSection('Características oficiales', [
+    ['Marca', pickValue(raw.marcaVehiculo, raw.marcavehiculo, official.marca)], ['Modelo', pickValue(raw.modeloVehiculo, official.modelo)],
+    ['Año vehículo', pickValue(raw.anioVehiculo, official.anio)], ['Color oficial', pickValue(raw.colorVehiculo, official.color)],
+    ['Tipo de vehículo', pickValue(raw.tipoVehiculo, official.tipo_vehiculo)], ['Tipo de placa', pickValue(raw.tipoPlaca, official.tipo_placa)],
+    ['Tipo de uso', pickValue(raw.tipoUso, official.tipo_uso)], ['Estado vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)],
+    ['Transmisión', pickValue(raw.tipoTransmision, official.transmision)], ['Combustible', pickValue(raw.tipoCombustible, official.combustible)],
+    ['Cilindrada', pickValue(raw.cilindradaVehiculo, official.cilindrada)], ['Cilindros', pickValue(raw.nroCilindros, official.cilindros)],
+    ['Capacidad', raw.capacidadVehiculo != null ? `${displayValue(raw.capacidadVehiculo)} ${displayValue(raw.tipoCapacidad)}`.trim() : official.capacidad],
+    ['Puertas', pickValue(raw.nroPuertas, official.puertas)], ['Tracción', pickValue(raw.traccionMotor, official.traccion)],
+    ['Aire acondicionado', pickValue(raw.tieneAireAcondicionado, official.aire_acondicionado)], ['Pertenencia', pickValue(raw.tipoPertenencia, official.pertenencia)],
+  ])
+  if (officialTechnical) sections.push(officialTechnical)
+  const legal = addSection('Seguro y restricciones', [
+    ['Hipoteca', pickValue(raw.hipoteca, official.hipoteca)], ['Aseguradora', pickValue(raw.nombreAseguradora, raw.aseguradora, official.aseguradora)],
+    ['Póliza', pickValue(raw.nroPolizaSeguro, raw.poliza, official.poliza)], ['Restricción vehicular', pickValue(raw.restriccionVehiculos, official.restriccion_vehicular)],
+  ])
+  if (legal) sections.push(legal)
+  const officialReview = addSection('Fuente oficial del revisado', [
+    ['Último revisado', pickValue(raw.fechaRevisado, official.fecha_revisado)], ['Mes revisado', pickValue(raw.mesRevisado, official.mes_revisado)],
+    ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id)], ['Último taller', pickValue(raw.ultTallerRevisado, official.ultimo_taller)],
+    ['Observaciones', pickValue(raw.observaciones, official.observaciones)],
+  ])
+  if (officialReview) sections.push(officialReview)
+  const officialValues: Array<[string, unknown, unknown]> = [
+    ['Chasis', pickValue(control.chasis, unitRecord.chasis), pickValue(raw.nroChasis, official.chasis)],
+    ['VIN', pickValue(control.vin, unitRecord.vin), pickValue(raw.nroVin, official.vin)], ['Motor', pickValue(control.motor, unitRecord.motor), pickValue(raw.nroMotor, official.motor)],
+    ['Placa', pickValue(control.placa_unica, unitRecord.placa_unica), pickValue(raw.nroPlaca, official.placa)],
+    ['Marca', pickValue(control.marca, unitRecord.marca), pickValue(raw.marcaVehiculo, raw.marcavehiculo, official.marca)],
+    ['Modelo', pickValue(control.modelo, unitRecord.modelo), pickValue(raw.modeloVehiculo, official.modelo)], ['Año', pickValue(control.anio, unitRecord.anio), pickValue(raw.anioVehiculo, official.anio)],
+    ['Color', pickValue(control.color, unitRecord.color), pickValue(raw.colorVehiculo, official.color)],
+  ]
+  const normalize = (item: unknown) => displayValue(item).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[\s-]+/g, '')
+  const comparisons: DetailSection = { title: 'Comparación RYM / eCarCheck', fields: officialValues.map(([label, left, right]) => {
+    const comparison = !hasValue(left) || !hasValue(right) ? 'missing' : normalize(left) === normalize(right) ? 'match' : 'diff'
+    return { label, value: hasValue(left) ? displayValue(left) : 'Sin dato', reference: hasValue(right) ? displayValue(right) : 'Sin dato', comparison }
+  }) }
+  if (officialValues.some(([, left, right]) => hasValue(left) || hasValue(right))) sections.push(comparisons)
+  return sections
+}
 async function select(row: Unit) {
   panelOpen.value = false; rows.value = []; searched.value = false; modalOpen.value = true
   detail.value = null; detailError.value = ''; detailLoading.value = true
   const current = ++detailSequence
   try {
     if (!props.api) throw Error('El validador no está disponible.')
-    const result = await props.api.load(row) as UnitDetail
+    const loadPromise = props.api.load(row) as Promise<UnitDetail>
+    const fichaPromise = props.api.ficha ? props.api.ficha(row).catch(() => null) : Promise.resolve(null)
+    const [result, ficha] = await Promise.all([loadPromise, fichaPromise])
+    const controlCard = result.cards.find(card => card.key === 'control')
+    if (controlCard) controlCard.sections = controlSections(result, ficha)
     const gps = result.cards.find(card => card.key === 'gps')
     const stateDetail = gps?.details.find(item => item.label === 'Estado')?.value || ''
     if (gps && /HTTP\s+5\d\d/i.test(stateDetail) && props.api.gps) {
@@ -140,7 +222,7 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
               </section>
               <div class="uv-section-label"><div><span>VALIDACIÓN DE SERVICIOS</span><small>Estado actual de cada módulo conectado</small></div><b class="uv-system-count">04 <span>SISTEMAS</span></b></div>
               <section class="uv-check-grid" aria-label="Validaciones por sistema">
-                <article v-for="card in detail.cards" :key="card.key" class="uv-check-card" :class="[card.key, card.tone]"><header><span class="uv-check-icon"><ModuleIcon :name="card.key" /></span><strong>{{ card.title }}</strong><span class="uv-check-badge"><i aria-hidden="true">{{ card.tone === 'ok' ? '✓' : card.tone === 'pending' ? '·' : '!' }}</i>{{ card.badge }}</span></header><b class="uv-check-value">{{ card.value }}</b><div class="uv-check-details"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p></article>
+                <article v-for="card in detail.cards" :key="card.key" class="uv-check-card" :class="[card.key, card.tone]"><header><span class="uv-check-icon"><ModuleIcon :name="card.key" /></span><strong>{{ card.title }}</strong><span class="uv-check-badge"><i aria-hidden="true">{{ card.tone === 'ok' ? '✓' : card.tone === 'pending' ? '·' : '!' }}</i>{{ card.badge }}</span></header><b class="uv-check-value">{{ card.value }}</b><div class="uv-check-details"><div v-for="item in card.details" :key="item.label"><span>{{ item.label }}</span><b>{{ item.value }}</b></div></div><p>{{ card.note }}</p><details v-for="section in card.sections" :key="section.title" class="uv-extra-section"><summary>{{ section.title }}<span>{{ section.fields.length }} campos <i aria-hidden="true">⌄</i></span></summary><div class="uv-extra-fields"><div v-for="field in section.fields" :key="field.label" class="uv-extra-field" :class="[field.comparison, { 'has-reference': field.reference !== undefined }]"><span>{{ field.label }}</span><template v-if="field.reference !== undefined"><b><small>RYM</small>{{ field.value }}</b><b><small>eCarCheck</small>{{ field.reference }}</b><em v-if="field.comparison">{{ field.comparison === 'match' ? 'Coincide' : field.comparison === 'diff' ? 'Diferencia' : 'Sin comparar' }}</em></template><b v-else>{{ field.value }}</b></div></div></details></article>
               </section>
             </div>
             <footer class="uv-dialog-actions"><button type="button" class="uv-action secondary" @click="closeDetail">Otra unidad <span aria-hidden="true">↗</span></button><button type="button" class="uv-action primary" @click="closeDetail(); onControl?.()">Abrir Control de Auto <span aria-hidden="true">→</span></button></footer>
@@ -279,6 +361,22 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 .uv-check-details b{max-width:66%;font-size:10px}
 .uv-check-card>p{margin-top:8px;font-size:9px;line-height:1.45}
 .uv-dialog-actions{padding-top:12px}
+.uv-extra-section{margin-top:8px;border-top:1px solid #e4ebf2;color:#264764}
+.uv-extra-section>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 1px 3px;cursor:pointer;list-style:none;font-size:9px;font-weight:800}
+.uv-extra-section>summary::-webkit-details-marker{display:none}
+.uv-extra-section>summary>span{display:flex;align-items:center;gap:7px;color:#8293a6;font-size:8px;font-weight:650;white-space:nowrap}
+.uv-extra-section>summary i{color:#176bc1;font-size:14px;font-style:normal;transition:transform .16s ease}
+.uv-extra-section[open]>summary i{transform:rotate(180deg)}
+.uv-extra-fields{display:grid;gap:0;padding:4px 0 2px}
+.uv-extra-field{display:grid;grid-template-columns:minmax(90px,.75fr) minmax(0,1.25fr);gap:8px;padding:6px 0;border-top:1px solid #e9eef4;align-items:start}
+.uv-extra-field>span{color:#7d8fa2;font-size:8px;line-height:1.4}
+.uv-extra-field>b{min-width:0;color:#274865;font-size:9px;line-height:1.4;overflow-wrap:anywhere}
+.uv-extra-field>b>small{display:block;margin-bottom:2px;color:#8b9bad;font-size:7px;letter-spacing:.07em}
+.uv-extra-field.has-reference{grid-template-columns:1fr 1fr}
+.uv-extra-field.has-reference>span,.uv-extra-field.has-reference>em{grid-column:1/-1}
+.uv-extra-field>em{justify-self:start;padding:2px 6px;border-radius:999px;background:#eef3f7;color:#687d91;font-size:7px;font-style:normal;font-weight:750}
+.uv-extra-field.match>em{background:#e8f7ef;color:#16805a}.uv-extra-field.diff>em{background:#fff0e9;color:#bc4e25}.uv-extra-field.missing>em{background:#f0f3f6;color:#758397}
+.uv-extra-section :is(summary,button):focus-visible{outline:2px solid #3987e8;outline-offset:2px;border-radius:5px}
 @media(max-width:760px){.uv-dialog-scroll{display:flex;flex-direction:column;gap:12px}.uv-identity{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:15px}.uv-identity-main{flex-direction:row;align-items:center;gap:11px}.uv-identity-icon{width:40px;height:40px}.uv-identity-main h3{font-size:25px}.uv-identity-grid{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.uv-identity-grid>div{padding:8px}.uv-overall{grid-column:2;grid-row:1;align-self:start;justify-self:end}.uv-section-label{align-items:center;flex-direction:row;margin:0}.uv-check-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.uv-check-card{min-height:165px;padding:12px}.uv-check-card>header{grid-template-columns:30px minmax(0,1fr);gap:7px}.uv-check-icon{width:30px;height:30px}.uv-check-badge{grid-column:2;justify-self:start}.uv-check-value{margin:9px 0 5px;font-size:17px}.uv-check-details>div{gap:8px}.uv-check-details b{max-width:62%;font-size:9px}}
 @media(max-width:480px){.uv-dialog{padding:12px;border-radius:20px}.uv-check-grid{grid-template-columns:1fr}.uv-check-card{min-height:0}.uv-identity-grid{grid-template-columns:1fr 1fr}.uv-dialog-actions{flex-direction:column-reverse}.uv-action{width:100%;flex:auto}}
 </style>
