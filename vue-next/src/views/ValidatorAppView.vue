@@ -200,9 +200,12 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 @container unit-content (max-width:1120px){.vua-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.vua-card{min-height:0}}
 @container unit-content (max-width:600px){.vua-card-grid{grid-template-columns:1fr}}
 .vua-app.has-selection{min-height:calc(100dvh - 82px);padding:26px 28px 96px;background:#f3f6fa}
-.vua-app.has-selection .vua-heading,.vua-app.has-selection .vua-search,.vua-app.has-selection .vua-section-head{display:none}
-.vua-app.has-selection .vua-content{max-width:none}
-.vua-app.has-selection .vua-identity{padding:22px 25px 19px;border:0;border-radius:21px;background:#fff;box-shadow:none}
+.vua-app.has-selection .vua-heading,.vua-app.has-selection .vua-search{display:none}
+.vua-app.has-selection .vua-content{max-width:1440px;margin:0 auto}
+.vua-app.has-selection .vua-section-head{display:flex;align-items:end;max-width:1440px;margin:22px auto 0;padding:0 2px}
+.vua-app.has-selection .vua-section-head h2{margin:4px 0 0;color:#132f53;font-size:20px;letter-spacing:-.03em}
+.vua-app.has-selection .vua-section-head>span{color:#718198;font-size:11px}
+.vua-app.has-selection .vua-identity{padding:22px 25px 19px;border:1px solid #dce6f1;border-left:4px solid #2c65c8;border-radius:20px;background:linear-gradient(110deg,#fff 0%,#fff 68%,#f4f8ff 100%);box-shadow:0 12px 30px #14395d0b}
 .vua-app.has-selection .vua-identity-top{gap:12px}
 .vua-app.has-selection .vua-unit-title h2{font-size:46px;line-height:1.05;color:#102e56}
 .vua-app.has-selection .vua-unit-title p{font-size:15px}
@@ -216,7 +219,7 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 .vua-app.has-selection .vua-identity-facts span{font-size:11px;letter-spacing:.08em}
 .vua-app.has-selection .vua-identity-facts strong{margin-top:6px;color:#132f53;font-size:15px}
 .vua-app.has-selection .vua-card-grid{gap:15px;margin-top:20px}
-.vua-app.has-selection .vua-card{min-height:262px;padding:22px 21px;border-radius:21px;box-shadow:0 9px 25px #14395d0b}
+.vua-app.has-selection .vua-card{min-height:250px;padding:21px;border-radius:18px;box-shadow:0 8px 24px #14395d0a}
 .vua-app.has-selection .vua-card header{gap:10px}
 .vua-app.has-selection .vua-module-icon{width:54px;height:54px;border-radius:16px}
 .vua-app.has-selection .vua-card-heading .vua-kicker{font-size:13px;color:#164e9b;font-weight:900;letter-spacing:.08em}
@@ -224,16 +227,20 @@ onBeforeUnmount(() => { window.clearTimeout(timer); ++searchVersion; ++detailVer
 .vua-app.has-selection .vua-card-status i{width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:#07895f;color:#fff;font-size:12px;font-style:normal}
 .vua-app.has-selection .vua-card-status.warn,.vua-app.has-selection .vua-card-status.pending{border-color:#f3d49b;background:#fff8e9;color:#9c640a}
 .vua-app.has-selection .vua-card-status.bad{border-color:#ffc6c3;background:#fff4f3;color:#ba342e}
-.vua-app.has-selection .vua-card-value{min-height:42px;margin:29px 0 12px;font-size:35px}
+.vua-app.has-selection .vua-card-value{min-height:42px;margin:22px 0 10px;font-size:32px}
 .vua-app.has-selection .vua-card-facts>div{padding:10px 0}
 .vua-app.has-selection .vua-card-facts span,.vua-app.has-selection .vua-card-facts b{font-size:13px}
 .vua-app.has-selection .vua-card>p{min-height:0;margin-top:13px;font-size:12px}
-.vua-app.has-selection .vua-footer{position:fixed;right:0;bottom:0;left:0;max-width:none;justify-content:flex-end;margin:0;padding:16px 32px;border:0;border-top:1px solid #dce5ef;border-radius:0;background:#fff}
+.vua-app.has-selection .vua-footer{position:sticky;right:auto;bottom:0;left:auto;max-width:none;justify-content:flex-end;margin:24px -28px -96px;padding:10px 28px;border:0;border-top:1px solid #dce5ef;border-radius:0;background:#ffffffed;box-shadow:0 -5px 18px #17395d08;backdrop-filter:blur(12px)}
 .vua-app.has-selection .vua-footer>span{display:flex;margin-right:auto}
 .vua-app.has-selection .vua-footer button{min-width:275px;min-height:62px;justify-content:center;border:0;border-radius:15px;background:#294fae;color:#fff;font-size:16px}
 @media(max-width:1050px){.vua-app.has-selection{padding:22px 20px 92px}.vua-app.has-selection .vua-card{min-height:225px;padding:18px}}
 @media(max-width:680px){.vua-app.has-selection{padding:16px 13px 88px}.vua-app.has-selection .vua-identity{padding:16px;border-radius:17px}.vua-app.has-selection .vua-unit-title h2{font-size:34px}.vua-app.has-selection .vua-unit-title p{font-size:12px}.vua-unit-close{width:40px;height:40px;font-size:23px}.vua-app.has-selection .vua-identity-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}.vua-app.has-selection .vua-identity-facts span{font-size:9px}.vua-app.has-selection .vua-identity-facts strong{font-size:12px}.vua-app.has-selection .vua-card-grid{grid-template-columns:1fr;gap:9px;margin-top:14px}.vua-app.has-selection .vua-card{min-height:0;padding:15px}.vua-app.has-selection .vua-module-icon{width:42px;height:42px}.vua-app.has-selection .vua-card-heading .vua-kicker{font-size:10px}.vua-app.has-selection .vua-card-value{min-height:0;margin:15px 0 8px;font-size:25px}.vua-app.has-selection .vua-card-facts>div{padding:7px 0}.vua-app.has-selection .vua-card-facts span,.vua-app.has-selection .vua-card-facts b{font-size:10px}.vua-app.has-selection .vua-footer{padding:11px 13px}.vua-app.has-selection .vua-footer button{width:100%;min-width:0;min-height:48px;font-size:13px}}
-.vua-detail-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:auto;padding:12px 0 0;border:0;border-top:1px solid var(--line);background:transparent;color:#2356a1;font:inherit;font-size:12px;font-weight:750;cursor:pointer}.vua-detail-toggle:focus-visible{outline:2px solid #286de1;outline-offset:4px}.vua-detail-panel{min-width:0;margin-top:14px}.vua-detail-panel h3{margin:16px 0 8px;font-size:12px}.vua-detail-panel dl{margin:0}.vua-detail-panel dl>div{padding:9px 0;border-top:1px solid var(--line)}.vua-detail-panel dt{font-size:11px;color:var(--muted)}.vua-detail-panel dd{margin:5px 0 0;font-size:12px;overflow-wrap:anywhere}.vua-detail-panel em{display:block;font-size:10px;font-style:normal;color:#728399}.vua-detail-panel .diff em{color:#ac5800}.vua-detail-panel .match em{color:#087955}.vua-card-grid{align-items:start}
-@media(max-width:680px){.vua-app.has-selection{padding-bottom:120px}.vua-app.has-selection .vua-footer{flex-direction:column;gap:7px}.vua-app.has-selection .vua-footer>span{padding-top:0;font-size:10px}}
+.vua-app.has-selection .vua-card .vua-detail-toggle{display:flex!important;justify-content:space-between;align-items:center;width:100%;min-height:42px!important;margin-top:auto;padding:10px 0 0!important;border:0!important;border-top:1px solid #e4eaf2!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;color:#2456a5!important;font:inherit!important;font-size:12px!important;font-weight:750!important;text-align:left!important;cursor:pointer}
+.vua-app.has-selection .vua-card .vua-detail-toggle:hover{background:#f6f9fe!important;color:#173f82!important}
+.vua-app.has-selection .vua-card .vua-detail-toggle span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #dce7f5;border-radius:8px;background:#f5f8fd;color:#315f9f}
+.vua-detail-toggle:focus-visible{outline:2px solid #286de1;outline-offset:3px}.vua-detail-panel{min-width:0;margin-top:14px;padding-top:2px}.vua-detail-panel section{padding:0 0 12px}.vua-detail-panel h3{margin:14px 0 8px;font-size:12px;color:#19395e}.vua-detail-panel dl{margin:0}.vua-detail-panel dl>div{padding:9px 0;border-top:1px solid #e7edf4}.vua-detail-panel dt{font-size:11px;color:#74849a}.vua-detail-panel dd{margin:5px 0 0;font-size:12px;overflow-wrap:anywhere}.vua-detail-panel em{display:block;font-size:10px;font-style:normal;color:#728399}.vua-detail-panel .diff em{color:#ac5800}.vua-detail-panel .match em{color:#087955}.vua-card-grid{align-items:start}
+@media(max-width:1050px){.vua-app.has-selection{padding-bottom:84px}.vua-app.has-selection .vua-footer{margin:20px -20px -84px;padding:10px 20px}}
+@media(max-width:680px){.vua-app.has-selection{padding-bottom:78px}.vua-app.has-selection .vua-footer{margin:18px -13px -78px;flex-direction:row;gap:8px}.vua-app.has-selection .vua-footer>span{padding-top:0;font-size:9px}.vua-app.has-selection .vua-footer button{width:auto;min-width:150px;min-height:44px;font-size:12px}}
 </style>
 

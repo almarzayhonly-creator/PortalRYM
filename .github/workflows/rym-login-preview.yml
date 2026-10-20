@@ -78,7 +78,7 @@ jobs:
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next-bridge.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue-bridge.js \
               && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.css?preview=${GITHUB_SHA}" -o /tmp/validator-vue.css; then
-              if grep -Fq 'unit-validator-shell-v26' /tmp/validator-shell.html \
+              if grep -Fq 'unit-validator-shell-v27' /tmp/validator-shell.html \
                 && grep -Fq 'mountValidatorApp' /tmp/validator-app.js \
                 && grep -Fq 'setValidatorAccess' /tmp/validator-vue.js \
                 && grep -Fq 'revisados-ficha' /tmp/validator-vue-bridge.js \

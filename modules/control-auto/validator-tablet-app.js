@@ -726,11 +726,11 @@
     if(!mount){root.innerHTML='<div id="rym-unit-validator-vue" aria-busy="true"></div>';mount=root.firstElementChild}
     if(!mount)return false;
     if(!d.querySelector('link[data-rym-validator-vue-css]')){
-      const link=d.createElement('link');link.rel='stylesheet';link.href='/vue-next/dist/portal-rym-vue-next.css?v=validator-vue-2';link.dataset.rymValidatorVueCss='1';d.head.append(link);
+      const link=d.createElement('link');link.rel='stylesheet';link.href='/vue-next/dist/portal-rym-vue-next.css?v=validator-vue-3';link.dataset.rymValidatorVueCss='1';d.head.append(link);
     }
     try{
       if(!vueValidatorModule){
-        vueValidatorPromise=vueValidatorPromise||import('/vue-next/dist/portal-rym-vue-next.js?v=validator-vue-2');
+        vueValidatorPromise=vueValidatorPromise||import('/vue-next/dist/portal-rym-vue-next.js?v=validator-vue-3');
         vueValidatorModule=await vueValidatorPromise;
       }
       if(!mount.isConnected)return false;
