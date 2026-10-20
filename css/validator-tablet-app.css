@@ -687,3 +687,27 @@ html.rym-unit-validator-integrated #v101CheckModal .v117-check-actions{padding-t
   html.rym-unit-validator-integrated #v101CheckModal .v117-card-sub{min-height:0!important}
   html.rym-unit-validator-integrated #v101CheckModal .v117-check-actions{position:sticky!important;bottom:-14px!important;margin:0 -14px -14px!important;padding:10px 14px 14px!important;background:#fff!important;border-top:1px solid #e4ebf3!important}
 }
+
+/* Integrated HTML search results: compact rows with aligned unit metadata. */
+html.rym-unit-validator-integrated .v101-validator-list{max-width:560px!important;padding:7px!important;border-radius:14px!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-row{
+  display:grid!important;grid-template-columns:36px minmax(0,1fr) auto!important;align-items:center!important;
+  min-height:72px!important;gap:10px!important;margin:0 0 6px!important;padding:10px 12px!important;
+  border:1px solid #e1e8f1!important;border-radius:12px!important;background:#fff!important;
+  box-shadow:none!important;letter-spacing:normal!important;text-transform:none!important
+}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-row:hover{background:#f7faff!important;border-color:#bfd3eb!important;transform:none!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-icon{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;border-radius:10px!important;background:#edf4ff!important;color:#315f9d!important;font-size:14px!important;font-weight:800!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy{display:block!important;min-width:0!important;letter-spacing:normal!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy>b{display:block!important;margin:0!important;font-size:14px!important;line-height:1.2!important;letter-spacing:normal!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy>small{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin-top:7px!important;font-size:11px!important;line-height:1.25!important;letter-spacing:normal!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy>small>span{display:grid!important;min-width:0!important;gap:2px!important;font-size:11px!important;line-height:1.25!important;letter-spacing:normal!important;overflow-wrap:anywhere!important}
+html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy>small>span>i{display:block!important;font-size:9px!important;line-height:1.1!important;font-style:normal!important;font-weight:800!important;color:#73839a!important;letter-spacing:.04em!important}
+html.rym-unit-validator-integrated .v101-validator-list .v101-validator-state{padding:5px 8px!important;font-size:10px!important;letter-spacing:normal!important}
+@media(max-width:560px){
+  html.rym-unit-validator-integrated .v101-validator-list{max-width:calc(100vw - 32px)!important;max-height:50dvh!important}
+  html.rym-unit-validator-integrated .v101-validator-list .v117-result-row{grid-template-columns:30px minmax(0,1fr) auto!important;gap:7px!important;padding:9px!important}
+  html.rym-unit-validator-integrated .v101-validator-list .v117-result-icon{width:30px!important;height:30px!important}
+  html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy>small{gap:5px!important;font-size:10px!important}
+  html.rym-unit-validator-integrated .v101-validator-list .v117-result-copy>small>span{font-size:10px!important}
+}
