@@ -59,3 +59,35 @@ jobs:
             echo "URL: $url/?vueNext=1"
             echo "Commit: ${GITHUB_SHA}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish dedicated validator preview
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest versions upload --preview-alias validator-tablet-app
+      - name: Verify dedicated validator preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://validator-tablet-app-portal-ena-rym.almarzayhonly.workers.dev'
+          for attempt in $(seq 1 12); do
+            if curl -fsSL --max-time 20 "$url/unit-validator?preview=${GITHUB_SHA}" -o /tmp/validator-shell.html \
+              && curl -fsSL --max-time 20 "$url/modules/control-auto/validator-tablet-app.js?preview=${GITHUB_SHA}" -o /tmp/validator-app.js \
+              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue.js \
+              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next-bridge.js?preview=${GITHUB_SHA}" -o /tmp/validator-vue-bridge.js \
+              && curl -fsSL --max-time 20 "$url/vue-next/dist/portal-rym-vue-next.css?preview=${GITHUB_SHA}" -o /tmp/validator-vue.css; then
+              if grep -Fq 'unit-validator-shell-v26' /tmp/validator-shell.html \
+                && grep -Fq 'mountValidatorApp' /tmp/validator-app.js \
+                && grep -Fq 'setValidatorAccess' /tmp/validator-vue.js \
+                && grep -Fq 'revisados-ficha' /tmp/validator-vue-bridge.js \
+                && grep -Fq '.vua-detail-toggle' /tmp/validator-vue.css; then
+                echo 'Dedicated validator preview verified: $url/unit-validator'
+                exit 0
+              fi
+            fi
+            sleep 5
+          done
+          echo 'Dedicated validator preview did not serve the new Vue resources.' >&2
+          exit 1
