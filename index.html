@@ -8988,23 +8988,60 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
         }
       });
     }
-    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=dashboard-vue-18');
-    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=dashboard-vue-18';document.head.appendChild(css);
+    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=dashboard-vue-19');
+    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=dashboard-vue-19';document.head.appendChild(css);
     let opened=false;
     window.__RYM_VUE_NEXT_HOME={render:summary=>{opened=true;return pilot.renderHome(summary)},error:error=>pilot.failHome(error),isActive:pilot.isHomeActive,hasControl:pilot.hasControlSummary,setControl:pilot.setControlIndicators,errorControl:pilot.failControlIndicators,setGps:pilot.setGpsIndicators,errorGps:pilot.failGpsIndicators};
     window.__RYM_VUE_NEXT_LOGIN={render:error=>pilot.renderLogin(error||""),dispose:pilot.disposeLogin};if(window.__RYM_VUE_NEXT_API)window.__RYM_VUE_NEXT_VIEWS={mount:pilot.mountView};
     if(document.querySelector("#app .login"))pilot.renderLogin();
+
+    // Universal Vue 3 View Hijack for all Panapass views:
+    const VUE_VIEWS=['ranking','historial','operaciones','pagos_hoy','negativos_hoy','cargar_pagos','recurrentes','reportes','usuarios'];
+    const tryVueMount=async(viewName,container)=>{
+      if(!viewName||!container)return false;
+      const mounter=window.__RYM_VUE_NEXT_VIEWS?.mount;
+      if(typeof mounter==='function'){
+        try{return await mounter(viewName,container)}catch(err){console.error('Vue mount failed for',viewName,err)}
+      }
+      return false;
+    };
+
+    // 1. Wrap global render()
     const baseRender=window.render;
-    if(typeof baseRender==='function')window.render=async function(...args){
+    window.render=async function(...args){
       if(!opened&&document.querySelector('#app .shell')&&typeof window.v36PortalHome==='function'){
         opened=true;return window.v36PortalHome();
       }
       const v=document.querySelector('#view');
-      if(v&&window.__RYM_VUE_NEXT_VIEWS?.mount&&state?.active){
-        const mounted=await window.__RYM_VUE_NEXT_VIEWS.mount(state.active,v);
-        if(mounted)return;
+      if(v&&state?.active&&VUE_VIEWS.includes(state.active)){
+        if(await tryVueMount(state.active,v))return;
       }
-      return baseRender.apply(this,args);
+      if(typeof baseRender==='function')return baseRender.apply(this,args);
     };
+
+    // 2. Wrap legacy individual view functions directly
+    const wrapViewFn=(fnName,viewKey)=>{
+      const original=window[fnName];
+      if(typeof original==='function'&&!original.__vueWrapped){
+        const wrapped=async function(v){
+          const target=v||document.querySelector('#view');
+          if(await tryVueMount(viewKey,target))return;
+          return original.apply(this,arguments);
+        };
+        wrapped.__vueWrapped=true;
+        window[fnName]=wrapped;
+      }
+    };
+    wrapViewFn('historial','historial');
+    wrapViewFn('ranking','ranking');
+    wrapViewFn('renderRanking','ranking');
+    wrapViewFn('operaciones','operaciones');
+    wrapViewFn('pagosConsultaHoy','pagos_hoy');
+    wrapViewFn('pagosTrabajo','cargar_pagos');
+    wrapViewFn('negativos','negativos_hoy');
+    wrapViewFn('finalRecurrentes','recurrentes');
+    wrapViewFn('recurrentes','recurrentes');
+    wrapViewFn('reportes','reportes');
+    wrapViewFn('usuarios','usuarios');
   }
 </script>
