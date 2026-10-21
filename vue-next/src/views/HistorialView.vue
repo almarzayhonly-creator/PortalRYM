@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import KpiStatCard from '../components/KpiStatCard.vue'
 import { callPortalRpc, callPortalFunction, portalViewContext } from '../portalApi'
 
 export interface HistorialRow {
@@ -33,6 +34,12 @@ const filterOperador = ref('')
 const filterDesde = ref('2025-01-02')
 const filterHasta = ref(new Date().toISOString().slice(0, 10))
 const isAdmin = ref(false)
+const paidPct = computed(() => {
+  const total = Number(resumen.value.total_a_pagar || 0)
+  const pend = Number(resumen.value.total_pendiente || 0)
+  return total > 0 ? Math.round(((total - pend) / total) * 100) : 0
+})
+const pendingPct = computed(() => 100 - paidPct.value)
 
 function formatMoney(amount?: number | string): string {
   const num = typeof amount === 'number' ? amount : parseFloat(String(amount || '0'))
@@ -99,146 +106,113 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="rym-tw space-y-6" data-testid="vue-historial">
-    <!-- Header Hero Card -->
-    <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950 p-6 shadow-xl">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 text-xs font-semibold tracking-wider uppercase mb-2">
-            📊 Auditoría Histórica
+  <div class="rym-tw w-full min-w-0 space-y-5" data-testid="vue-historial">
+    <!-- Hero: claro, con acento naranja/azul -->
+    <section class="relative overflow-hidden rounded-2xl border border-rym-gray-200 bg-white p-5 shadow-sm animate-rym-fade-up">
+      <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-rym-blue-500 via-rym-orange-500 to-rym-yellow-400" aria-hidden="true"></span>
+      <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div class="min-w-0">
+          <span class="mb-2 inline-flex items-center gap-1.5 rounded-full bg-rym-orange-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-rym-orange-600">
+            <span class="h-1.5 w-1.5 rounded-full bg-rym-orange-500 animate-rym-glow"></span> Auditoría histórica
           </span>
-          <h2 class="text-2xl font-bold tracking-tight text-white">Historial y Pendiente a Cobra</h2>
-          <p class="text-slate-300 text-xs mt-1 max-w-xl">
+          <h2 class="text-2xl font-black tracking-tight text-rym-black-800">Historial y Pendiente a Cobra</h2>
+          <p class="mt-1 max-w-xl text-xs font-medium text-rym-gray-500">
             Consulta consolidada de cobros y pagos por unidad o conductor con sincronización directa a Cobra.
           </p>
         </div>
-
-        <div v-if="isAdmin" class="flex flex-col items-end gap-1">
+        <div v-if="isAdmin" class="flex flex-col items-start gap-1 md:items-end">
           <button
             type="button"
             @click="handleValidateCobra"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+            class="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rym-orange-500 to-rym-orange-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-rym-orange-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
           >
             ⚡ Validar Cobra Hoy
           </button>
-          <span v-if="cobraStatus" class="text-[10px] text-cyan-400">{{ cobraStatus }}</span>
+          <span v-if="cobraStatus" class="text-[10px] font-bold text-rym-green-600">{{ cobraStatus }}</span>
         </div>
       </div>
 
-      <!-- Filtros Toolbar -->
-      <div class="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- Filtros -->
+      <div class="mt-5 grid grid-cols-1 gap-3 border-t border-rym-gray-100 pt-4 sm:grid-cols-2 lg:grid-cols-5">
         <div>
-          <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Unidad</label>
-          <input
-            v-model="filterUnidad"
-            placeholder="Ej: 1045"
-            class="w-full h-10 rounded-xl border border-slate-700 bg-slate-800/90 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-500"
-          />
+          <label class="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-rym-gray-500">Unidad</label>
+          <input v-model="filterUnidad" placeholder="Ej: 1045" class="h-10 w-full rounded-xl border border-rym-gray-200 bg-rym-gray-50 px-3 text-xs font-semibold text-rym-black-800 outline-none transition focus:border-rym-blue-500 focus:bg-white focus:ring-2 focus:ring-rym-blue-500/20" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Operador / N_OP</label>
-          <input
-            v-model="filterOperador"
-            placeholder="Conductor o N_OP"
-            class="w-full h-10 rounded-xl border border-slate-700 bg-slate-800/90 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-500"
-          />
+          <label class="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-rym-gray-500">Operador / N_OP</label>
+          <input v-model="filterOperador" placeholder="Conductor o N_OP" class="h-10 w-full rounded-xl border border-rym-gray-200 bg-rym-gray-50 px-3 text-xs font-semibold text-rym-black-800 outline-none transition focus:border-rym-blue-500 focus:bg-white focus:ring-2 focus:ring-rym-blue-500/20" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Desde</label>
-          <input
-            type="date"
-            v-model="filterDesde"
-            class="w-full h-10 rounded-xl border border-slate-700 bg-slate-800/90 px-3 text-xs text-white outline-none focus:border-cyan-500"
-          />
+          <label class="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-rym-gray-500">Desde</label>
+          <input type="date" v-model="filterDesde" class="h-10 w-full rounded-xl border border-rym-gray-200 bg-rym-gray-50 px-3 text-xs font-semibold text-rym-black-800 outline-none transition focus:border-rym-blue-500 focus:bg-white focus:ring-2 focus:ring-rym-blue-500/20" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Hasta</label>
-          <input
-            type="date"
-            v-model="filterHasta"
-            class="w-full h-10 rounded-xl border border-slate-700 bg-slate-800/90 px-3 text-xs text-white outline-none focus:border-cyan-500"
-          />
+          <label class="mb-1 block text-[10px] font-extrabold uppercase tracking-wider text-rym-gray-500">Hasta</label>
+          <input type="date" v-model="filterHasta" class="h-10 w-full rounded-xl border border-rym-gray-200 bg-rym-gray-50 px-3 text-xs font-semibold text-rym-black-800 outline-none transition focus:border-rym-blue-500 focus:bg-white focus:ring-2 focus:ring-rym-blue-500/20" />
         </div>
         <div class="flex items-end">
           <button
             type="button"
             @click="search"
             :disabled="loading"
-            class="w-full h-10 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+            class="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-rym-blue-600 to-rym-blue-500 text-xs font-extrabold text-white shadow-lg shadow-rym-blue-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60"
           >
-            <span>{{ loading ? 'Buscando...' : 'Consultar' }}</span>
+            <span>{{ loading ? 'Buscando…' : 'Consultar' }}</span>
           </button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Error Alert -->
-    <div v-if="errorMsg" role="alert" class="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-300">
+    <div v-if="errorMsg" role="alert" class="rounded-xl border border-rym-orange-100 bg-rym-orange-50 p-4 text-sm font-semibold text-rym-orange-700">
       {{ errorMsg }}
     </div>
 
-    <!-- Resumen KPIs -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total Registros</span>
-        <b class="text-xl font-bold text-white block mt-1">{{ resumen.registros ?? 0 }}</b>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Unidades</span>
-        <b class="text-xl font-bold text-cyan-400 block mt-1">{{ resumen.unidades ?? 0 }}</b>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total a Pagar</span>
-        <b class="text-xl font-bold text-emerald-400 block mt-1">{{ formatMoney(resumen.total_a_pagar) }}</b>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
-        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Pendiente Cobra</span>
-        <b class="text-xl font-bold text-rose-400 block mt-1">{{ formatMoney(resumen.total_pendiente) }}</b>
-      </div>
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <KpiStatCard label="Total registros" :amount="Number(resumen.registros ?? 0)" icon="🧾" tone="blue" hint="en el período" :delay="0" />
+      <KpiStatCard label="Unidades" :amount="Number(resumen.unidades ?? 0)" icon="🚌" tone="black" hint="con movimiento" :delay="60" />
+      <KpiStatCard label="Total a pagar" :amount="Number(resumen.total_a_pagar ?? 0)" prefix="$" :decimals="2" icon="💰" tone="green" hint="monto del período" :progress="paidPct" :delay="120" />
+      <KpiStatCard label="Pendiente Cobra" :amount="Number(resumen.total_pendiente ?? 0)" prefix="$" :decimals="2" icon="⏳" tone="orange" :pulse="Number(resumen.total_pendiente ?? 0) > 0" hint="por conciliar" :progress="pendingPct" :delay="180" />
     </div>
 
-    <!-- Tabla de Resultados -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+    <!-- Tabla -->
+    <section class="overflow-hidden rounded-2xl border border-rym-gray-200 bg-white shadow-sm animate-rym-fade-up" style="animation-delay:220ms">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
-          <thead class="bg-slate-800/60 font-semibold uppercase tracking-wider text-slate-400">
+          <thead class="bg-rym-blue-900 text-[10px] font-extrabold uppercase tracking-wider text-white">
             <tr>
-              <th class="py-3 px-4">Fecha</th>
-              <th class="py-3 px-4">Unidad</th>
-              <th class="py-3 px-4">Panapass</th>
-              <th class="py-3 px-4 text-right">A Pagar</th>
-              <th class="py-3 px-4">Boleta</th>
-              <th class="py-3 px-4">Operador</th>
-              <th class="py-3 px-4">Cobrador</th>
-              <th class="py-3 px-4 text-center">Estado Cobra</th>
+              <th class="px-4 py-3">Fecha</th>
+              <th class="px-4 py-3">Unidad</th>
+              <th class="px-4 py-3">Panapass</th>
+              <th class="px-4 py-3 text-right">A pagar</th>
+              <th class="px-4 py-3">Boleta</th>
+              <th class="px-4 py-3">Operador</th>
+              <th class="px-4 py-3">Cobrador</th>
+              <th class="px-4 py-3 text-center">Estado Cobra</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60 text-slate-300">
+          <tbody class="divide-y divide-rym-gray-100 text-rym-gray-700">
             <tr v-if="rows.length === 0 && !loading">
-              <td colspan="8" class="py-8 text-center text-slate-500">
-                No hay registros con los filtros seleccionados.
-              </td>
+              <td colspan="8" class="py-10 text-center font-semibold text-rym-gray-400">No hay registros con los filtros seleccionados.</td>
             </tr>
-            <tr v-for="(row, idx) in rows" :key="idx" class="hover:bg-slate-800/30 transition-colors">
-              <td class="py-3 px-4 text-slate-400 whitespace-nowrap">{{ row.fecha || '—' }}</td>
-              <td class="py-3 px-4 font-bold text-white">{{ row.unidad || '—' }}</td>
-              <td class="py-3 px-4 text-slate-300 font-mono">{{ row.panapass_numero || '—' }}</td>
-              <td class="py-3 px-4 text-right font-semibold text-emerald-400">{{ formatMoney(row.a_pagar) }}</td>
-              <td class="py-3 px-4 text-slate-400 font-mono">{{ row.boleta || '—' }}</td>
-              <td class="py-3 px-4 text-slate-200 truncate max-w-xs">{{ row.operador || '—' }}</td>
-              <td class="py-3 px-4 text-slate-300 truncate max-w-xs">{{ row.cobrador || '—' }}</td>
-              <td class="py-3 px-4 text-center">
+            <tr v-for="(row, idx) in rows" :key="idx" class="transition-colors hover:bg-rym-blue-50/60">
+              <td class="whitespace-nowrap px-4 py-3 text-rym-gray-500">{{ row.fecha || '—' }}</td>
+              <td class="px-4 py-3 font-black text-rym-black-800">{{ row.unidad || '—' }}</td>
+              <td class="px-4 py-3 font-mono text-rym-gray-700">{{ row.panapass_numero || '—' }}</td>
+              <td class="px-4 py-3 text-right font-extrabold tabular-nums text-rym-green-700">{{ formatMoney(row.a_pagar) }}</td>
+              <td class="px-4 py-3 font-mono text-rym-gray-500">{{ row.boleta || '—' }}</td>
+              <td class="max-w-xs truncate px-4 py-3 font-semibold text-rym-black-700">{{ row.operador || '—' }}</td>
+              <td class="max-w-xs truncate px-4 py-3 text-rym-gray-700">{{ row.cobrador || '—' }}</td>
+              <td class="px-4 py-3 text-center">
                 <span
-                  class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold"
-                  :class="row.estado_cobra === 'PAGADO' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
-                >
-                  {{ row.estado_cobra || 'PENDIENTE' }}
-                </span>
+                  class="rounded-full px-2.5 py-1 text-[10px] font-extrabold"
+                  :class="row.estado_cobra === 'PAGADO' ? 'bg-rym-green-50 text-rym-green-700 ring-1 ring-rym-green-400/40' : 'bg-rym-orange-50 text-rym-orange-700 ring-1 ring-rym-orange-400/40'"
+                >{{ row.estado_cobra || 'PENDIENTE' }}</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   </div>
 </template>

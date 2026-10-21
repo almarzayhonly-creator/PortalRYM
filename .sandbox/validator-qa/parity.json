@@ -1,0 +1,32 @@
+[
+  {
+    "width": 390,
+    "policy": "04-55-1458575-3",
+    "integratedValidatorPreserved": true
+  },
+  {
+    "width": 390,
+    "policy": "missing",
+    "integratedValidatorPreserved": true
+  },
+  {
+    "width": 768,
+    "policy": "04-55-1458575-3",
+    "integratedValidatorPreserved": true
+  },
+  {
+    "width": 768,
+    "policy": "missing",
+    "integratedValidatorPreserved": true
+  },
+  {
+    "width": 1440,
+    "policy": "04-55-1458575-3",
+    "integratedValidatorPreserved": true
+  },
+  {
+    "width": 1440,
+    "policy": "missing",
+    "integratedValidatorPreserved": true
+  }
+]

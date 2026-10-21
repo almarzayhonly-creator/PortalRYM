@@ -1,0 +1,57 @@
+{
+  "kind": "Actual dedicated host and mocked authentication; no account impersonation",
+  "results": [
+    {
+      "profile": "Manuel Chavez",
+      "role": "OPERATIVO",
+      "requests": [
+        "/functions/v1/auth-username",
+        "/functions/v1/portal-session-modules",
+        "/rest/v1/rpc/panapass_control_auto_v2",
+        "/rest/v1/rpc/panapass_control_auto_v3",
+        "/functions/v1/revisados-validator",
+        "/functions/v1/ena-consulta-saldo",
+        "/functions/v1/gps-rym-validator",
+        "/functions/v1/revisados-ficha",
+        "/rest/v1/revisados_vehiculo_oficial",
+        "/rest/v1/ena_cuentas"
+      ],
+      "verified": true
+    },
+    {
+      "profile": "Yhonly Almarza",
+      "role": "ADMIN_TOTAL",
+      "requests": [
+        "/functions/v1/auth-username",
+        "/functions/v1/portal-session-modules",
+        "/rest/v1/rpc/panapass_control_auto_v2",
+        "/rest/v1/rpc/panapass_control_auto_v3",
+        "/functions/v1/revisados-validator",
+        "/functions/v1/ena-consulta-saldo",
+        "/functions/v1/gps-rym-validator",
+        "/functions/v1/revisados-ficha",
+        "/rest/v1/revisados_vehiculo_oficial",
+        "/rest/v1/ena_cuentas"
+      ],
+      "verified": true
+    },
+    {
+      "profile": "Cambio obligatorio",
+      "role": "ADMIN_TOTAL",
+      "requests": [
+        "/functions/v1/auth-username",
+        "/functions/v1/portal-session-modules"
+      ],
+      "verified": true
+    },
+    {
+      "profile": "Sin permiso",
+      "role": "OPERATIVO",
+      "requests": [
+        "/functions/v1/auth-username",
+        "/functions/v1/portal-session-modules"
+      ],
+      "verified": true
+    }
+  ]
+}
