@@ -1,4 +1,5 @@
 import { createApp, nextTick, reactive } from 'vue'
+import type { Component } from 'vue'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import ValidatorAppView from './views/ValidatorAppView.vue'
@@ -8,6 +9,7 @@ import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalProfile } fr
 import type { PanapassSnapshot } from './panapass'
 import { navigateToLegacyView } from './navigation'
 import './style.css'
+import './tailwind.css'
 
 declare global {
   interface Window {
@@ -112,7 +114,7 @@ function currentActions(): ModuleAction {
         workspaceApp?.unmount()
         workspaceApp = null
       }
-    }),
+    }, state?.session.profile),
   }
 }
 
@@ -322,3 +324,39 @@ export function failControlIndicators(error: unknown): void { if (isHomeActive()
 export function failGpsIndicators(error: unknown): void { if (isHomeActive() && state) Object.assign(state, failIndicator(state, 'gps', error)) }
 
 export function disposeHome(): void { app?.unmount(); app = null; state = null; controlIndicatorsRequested = false; gpsIndicatorsRequested = false }
+
+let viewApp: ReturnType<typeof createApp> | null = null
+const nativeViews: Record<string, () => Promise<{ default: Component }>> = {
+  ranking: () => import('./views/RankingView.vue'),
+  historial: () => import('./views/HistorialView.vue'),
+  operaciones: () => import('./views/OperacionesView.vue'),
+  pagos_hoy: () => import('./views/PagosView.vue'),
+  negativos_hoy: () => import('./views/NegativosView.vue'),
+  cargar_pagos: () => import('./views/CargarPagosView.vue'),
+  recurrentes: () => import('./views/RecurrentesView.vue'),
+  reportes: () => import('./views/ReportesView.vue'),
+  usuarios: () => import('./views/UsuariosView.vue'),
+}
+
+export function disposeView(): void {
+  viewApp?.unmount()
+  viewApp = null
+}
+
+/** Monta una vista Vue nativa en #view. Devuelve false si el módulo sigue en legacy o si falla el montaje. */
+export async function mountView(moduleId: string, root: HTMLElement): Promise<boolean> {
+  disposeView()
+  const loader = nativeViews[moduleId]
+  if (!loader) return false
+  try {
+    const { default: View } = await loader()
+    root.innerHTML = ''
+    const host = document.createElement('div')
+    root.appendChild(host)
+    viewApp = createApp(View)
+    viewApp.mount(host)
+    return true
+  } catch {
+    return false
+  }
+}

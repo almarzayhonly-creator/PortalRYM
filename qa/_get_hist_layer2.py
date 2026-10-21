@@ -1,0 +1,5 @@
+c = open('index.html', 'r', encoding='utf-8', errors='ignore').read()
+idx = c.find('hclear" class="soft-btn">Limpiar filtros')
+start = c.rfind('function', 0, idx)
+print('Layer 2 Function start at byte:', start)
+print(c[start:start+2200])

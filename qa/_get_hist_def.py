@@ -1,0 +1,5 @@
+c = open('index.html', 'r', encoding='utf-8', errors='ignore').read()
+idx = c.find('d="hu" placeholder="Unidad"')
+start = c.rfind('function', 0, idx)
+print('Function start at byte:', start)
+print(c[start:start+1800])

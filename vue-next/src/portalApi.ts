@@ -7,6 +7,8 @@ type PortalApi = {
   context: () => PortalApiContext
   hasModule: (code: string) => boolean
   call: <T = Record<string, unknown>>(name: string, body?: Record<string, unknown>) => Promise<T>
+  rpc: <T = unknown>(name: string, body?: Record<string, unknown>) => Promise<T>
+  viewContext: () => { today: string | null; isAdmin: boolean }
 }
 
 function hostApi(): PortalApi {
@@ -18,3 +20,5 @@ function hostApi(): PortalApi {
 export const portalContext = (): PortalApiContext => hostApi().context()
 export const hasPortalModule = (code: string): boolean => hostApi().hasModule(code)
 export const callPortalFunction = <T = Record<string, unknown>>(name: string, body: Record<string, unknown> = {}): Promise<T> => hostApi().call<T>(name, body)
+export const callPortalRpc = <T = unknown>(name: string, body: Record<string, unknown> = {}): Promise<T> => hostApi().rpc<T>(name, body)
+export const portalViewContext = (): { today: string | null; isAdmin: boolean } => hostApi().viewContext()
