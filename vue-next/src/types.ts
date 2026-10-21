@@ -43,4 +43,5 @@ export interface ModuleAction {
   logout?: () => unknown
   retry?: () => unknown
   retryIndicators?: () => unknown
+  navigateLegacy?: (moduleId: string) => unknown
 }

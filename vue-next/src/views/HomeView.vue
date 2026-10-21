@@ -4,6 +4,8 @@ import '../home.css'
 import { canOpen } from '../dashboard'
 import ModuleIcon from '../components/ModuleIcon.vue'
 import UnitValidator from '../components/UnitValidator.vue'
+import AppSidebar from '../components/layout/AppSidebar.vue'
+import AppTopBar from '../components/layout/AppTopBar.vue'
 import type { DashboardState } from '../dashboard'
 import type { ModuleAction } from '../types'
 
@@ -111,38 +113,52 @@ const priorities = computed<Priority[]>(() => {
   if (!result.length && control) result.push(makePriority('all-clear', 'good', 'Operación sin prioridades críticas', `${control.activas || 0} unidades activas dentro de tu alcance`, 'control'))
   return result.slice(0, 3)
 })
-function open(action?: keyof ModuleAction) { if (action) props.actions[action]?.() }
+function open(action?: keyof ModuleAction, arg?: any) {
+  if (!action) return
+  const fn = props.actions[action]
+  if (typeof fn === 'function') {
+    if (arg !== undefined) (fn as any)(arg)
+    else (fn as any)()
+  }
+}
+
+function onSidebarNavigate(moduleId: string) {
+  if (moduleId === 'home') return
+  if (moduleId === 'users' || moduleId === 'usuarios') {
+    open('users')
+    return
+  }
+  if (moduleId === 'revisados' || moduleId === 'control' || moduleId === 'gps') {
+    open(moduleId)
+    return
+  }
+  if (props.actions[moduleId as keyof ModuleAction]) {
+    open(moduleId as keyof ModuleAction)
+    return
+  }
+  if (typeof props.actions.navigateLegacy === 'function') {
+    props.actions.navigateLegacy(moduleId)
+  }
+}
 </script>
 
 <template>
   <main class="ryn-shell rym-vue-home" data-testid="vue-next-home">
-    <aside class="ryn-sidebar">
-      <div class="ryn-brand"><img :src="'/assets/rym-logo.png'" alt="R&M Repuestos & Multiservicios"><span>CONTROL DE FLOTA</span></div>
-      <nav aria-label="Navegación del portal">
-        <small class="ryn-nav-label">GENERAL</small>
-        <button class="active" data-testid="nav-home"><i aria-hidden="true">⌂</i>Inicio</button>
-        <small class="ryn-nav-label">OPERACIÓN</small>
-        <button v-for="card in cards.filter(item => item.key !== 'gps')" :key="card.key" @click="open(card.action)">
-          <i :class="`icon-${card.key}`" aria-hidden="true">
-            <ModuleIcon :name="card.key" />
-          </i>
-          {{ card.title === 'CONTROL DE AUTO' ? 'Auto' : card.title.charAt(0) + card.title.slice(1).toLowerCase() }}
-        </button>
-        <button v-if="allowedGps" @click="open('gps')"><i class="icon-gps" aria-hidden="true"><ModuleIcon name="gps" /></i>GPS</button>
-        <small v-if="allowedUsers" class="ryn-nav-label admin-label">ADMINISTRACIÓN</small>
-        <button v-if="allowedUsers" @click="open('users')"><i class="icon-users" aria-hidden="true">♙</i>Usuarios</button>
-      </nav>
-      <div class="ryn-user"><div class="ryn-user-id"><span class="ryn-user-avatar">{{ initials }}</span><div><b>{{ name }}</b><span>{{ role }}{{ galera ? ` · ${galera}` : '' }}</span></div></div><small class="ryn-online"><i></i>En línea</small><button type="button" @click="open('logout')">Cerrar sesión <span aria-hidden="true">→</span></button></div>
-    </aside>
+    <AppSidebar
+      :profile="profile"
+      :modules="state.session.modules"
+      active-module="home"
+      :has-module="hasModule"
+      @navigate="onSidebarNavigate"
+      @logout="open('logout')"
+    />
     <section class="ryn-workspace">
-      <header class="ryn-topbar">
-        <strong>Centro de Control RYM</strong>
-        <div class="ryn-top-actions">
-          <div class="ryn-updated"><span><small>Actualizado</small><strong>{{ updated }}</strong></span></div>
-          <div class="ryn-top-user"><span class="ryn-top-avatar">{{ initials }}</span><span class="ryn-top-user-copy"><b>{{ name }}</b><small>{{ role }}</small></span></div>
-          <button type="button" class="ryn-logout-icon" aria-label="Cerrar sesión" title="Cerrar sesión" @click="open('logout')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></button>
-        </div>
-      </header>
+      <AppTopBar
+        :profile="profile"
+        title="Centro de Control RYM"
+        :updated-at="summary?.generated_at"
+        @logout="open('logout')"
+      />
       <section class="ryn-main">
         <header class="ryn-page-heading"><div><h1>¡{{ greeting }}, {{ first }}! <span aria-hidden="true">👋</span></h1><p>Así va tu operación hoy{{ galera ? ` · ${galera}` : '' }}</p></div></header>
         <UnitValidator v-if="canQuickValidator" :api="validatorApi" :on-control="() => open('control')" />
