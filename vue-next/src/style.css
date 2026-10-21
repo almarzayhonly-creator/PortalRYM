@@ -64,3 +64,52 @@
 @media(max-width:900px){.ryn-modules{grid-template-columns:1fr}.ryn-main{padding:23px 20px}.ryn-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.ryn-main{padding:18px 14px 30px}.ryn-header h1{font-size:26px}.ryn-updated{font-size:10px}.ryn-welcome{padding:19px;flex-wrap:wrap}.ryn-welcome h2{font-size:22px}.ryn-validator{padding:17px}.ryn-validator h3{font-size:18px}.ryn-validator .v101-validator-tools{grid-template-columns:1fr}.ryn-validator .v101-validator-go{height:48px}.ryn-kpis{gap:9px}.ryn-kpi{padding:13px;min-height:112px}.ryn-kpi strong{font-size:27px}.ryn-kpi span{font-size:10px}.ryn-module{padding:18px;min-height:0}.ryn-module h3{font-size:21px}.ryn-module-metrics span{font-size:10px}.ryn-module-metrics b{font-size:22px}.ryn-module-metrics small{font-size:9px}.ryn-secondary-grid span{font-size:9px}.ryn-gps-kpis{padding:17px}}
 @media(prefers-reduced-motion:reduce){.ryn-module{transition:none}.ryn-module:hover{transform:none}}
+
+
+/* Modern Sidebar categories and layout polish */
+.ryn-nav-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #7ba3cf;
+  padding: 14px 12px 4px;
+  text-transform: uppercase;
+}
+.ryn-nav-label.admin-label {
+  color: #c499f5;
+}
+.ryn-sidebar nav button {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px !important;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #dbe7f5;
+  transition: all 0.15s ease;
+}
+.ryn-sidebar nav button i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-style: normal;
+  opacity: 0.85;
+}
+.ryn-sidebar nav button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  transform: translateX(3px);
+}
+.ryn-sidebar nav button.active {
+  background: #ffffff !important;
+  color: #0b284e !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+}
+.ryn-sidebar nav button.active i {
+  opacity: 1;
+}
