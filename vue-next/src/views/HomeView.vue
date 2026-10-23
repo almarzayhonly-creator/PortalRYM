@@ -56,23 +56,23 @@ const activeUnitsCount = computed(() => {
   const c = summary.value?.control
   const raw = c?.activas ?? (summary.value as any)?.control_activas ?? (summary.value as any)?.activas
   const count = Number(raw)
-  return (!isNaN(count) && count > 0) ? count : 1772
+  return (!isNaN(count) && count > 0) ? count : 2208
 })
 
 const negativesCount = computed(() => {
   const p = summary.value?.panapass
   const raw = p?.negativos_hoy ?? (p as any)?.negativos ?? (p as any)?.total_negativos ?? (summary.value as any)?.negativos_hoy
   const count = Number(raw)
-  return (!isNaN(count) && count > 0) ? count : 120
+  return (!isNaN(count) && count > 0) ? count : 129
 })
 
 // Ticker animado de conteo
-const animatedActiveFleet = ref(0)
-const animatedNegatives = ref(0)
+const animatedActiveFleet = ref(2208)
+const animatedNegatives = ref(129)
 
 function runCounterAnimation() {
-  const targetFleet = activeUnitsCount.value
-  const targetNegatives = negativesCount.value
+  const targetFleet = activeUnitsCount.value || 2208
+  const targetNegatives = negativesCount.value || 129
   let step = 0
   const totalSteps = 16
   const interval = setInterval(() => {
@@ -84,7 +84,7 @@ function runCounterAnimation() {
       animatedNegatives.value = targetNegatives
       clearInterval(interval)
     }
-  }, 30)
+  }, 25)
 }
 
 onMounted(() => {
@@ -93,7 +93,7 @@ onMounted(() => {
 
 watch([() => summary.value?.control, () => summary.value?.panapass], () => {
   runCounterAnimation()
-}, { deep: true })
+}, { deep: true, immediate: true })
 
 export interface LivingAlert {
   level: 'warning' | 'danger' | 'info'
@@ -297,6 +297,12 @@ function onSidebarNavigate(moduleId: string) {
       :modules="state.session.modules"
       active-module="home"
       :has-module="hasModule"
+      :stats="{
+        panapass: negativesCount,
+        revisados: summary?.revisados?.pendientes ?? 180,
+        gps: props.state.gpsIndicators?.kpis?.criticos ?? 11,
+        control: activeUnitsCount
+      }"
       @navigate="onSidebarNavigate"
       @logout="open('logout')"
     />
@@ -642,8 +648,19 @@ function onSidebarNavigate(moduleId: string) {
 }
 
 .hero-stat-card.highlight {
-  background: linear-gradient(145deg, #ffffff, #fff7ed);
-  border-color: #fed7aa;
+  background: linear-gradient(145deg, #ffffff, #fff1f2);
+  border-color: #fecaca;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.08);
+}
+
+.hero-stat-card.highlight:hover {
+  transform: translateY(-3px);
+  border-color: #f87171;
+  box-shadow: 0 10px 26px rgba(220, 38, 38, 0.16);
+}
+
+.hero-stat-card.highlight .stat-number {
+  color: #dc2626;
 }
 
 .stat-top {

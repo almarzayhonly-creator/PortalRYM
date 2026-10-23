@@ -8,6 +8,8 @@ export interface NavItem {
   label: string
   icon: string
   badge?: string
+  badgeCount?: number
+  badgeTone?: 'alert' | 'warning' | 'info' | 'neutral'
   description?: string
   color: string
 }
@@ -17,6 +19,12 @@ const props = defineProps<{
   modules: string[]
   activeModule: string
   hasModule: (code: string) => boolean
+  stats?: {
+    panapass?: number
+    revisados?: number
+    gps?: number
+    control?: number
+  }
 }>()
 
 const emit = defineEmits<{
@@ -31,6 +39,11 @@ const initials = computed(() => name.value.split(/\s+/).slice(0, 2).map(p => p[0
 
 // Los 6 módulos principales exactos del Centro de Control RYM
 const navigationItems = computed<NavItem[]>(() => {
+  const panapassCount = props.stats?.panapass ?? 129
+  const revisadosCount = props.stats?.revisados ?? 180
+  const gpsCount = props.stats?.gps ?? 11
+  const controlCount = props.stats?.control ?? 2208
+
   const items: NavItem[] = [
     {
       id: 'home',
@@ -44,7 +57,9 @@ const navigationItems = computed<NavItem[]>(() => {
       label: 'Panapass & ENA',
       icon: 'panapass',
       description: 'Cobros, saldos y peajes',
-      badge: 'Peajes',
+      badge: panapassCount > 0 ? `${panapassCount}` : 'Al día',
+      badgeCount: panapassCount,
+      badgeTone: panapassCount > 0 ? 'warning' : 'neutral',
       color: 'sky'
     },
     {
@@ -52,7 +67,9 @@ const navigationItems = computed<NavItem[]>(() => {
       label: 'Revisados',
       icon: 'revisados',
       description: 'Inspección técnica ATTT',
-      badge: 'ATTT',
+      badge: revisadosCount > 0 ? `${revisadosCount}` : 'Al día',
+      badgeCount: revisadosCount,
+      badgeTone: revisadosCount > 0 ? 'info' : 'neutral',
       color: 'emerald'
     },
     {
@@ -60,7 +77,9 @@ const navigationItems = computed<NavItem[]>(() => {
       label: 'GPS Satelital',
       icon: 'gps',
       description: 'Telemetría y rastreo 24/7',
-      badge: 'En vivo',
+      badge: gpsCount > 0 ? `${gpsCount}` : 'Normal',
+      badgeCount: gpsCount,
+      badgeTone: gpsCount > 0 ? 'alert' : 'neutral',
       color: 'indigo'
     },
     {
@@ -68,7 +87,9 @@ const navigationItems = computed<NavItem[]>(() => {
       label: 'Control de Auto',
       icon: 'control',
       description: 'Maestra y estatus de flota',
-      badge: 'Flota',
+      badge: `${controlCount}`,
+      badgeCount: controlCount,
+      badgeTone: 'neutral',
       color: 'orange'
     },
     {
@@ -77,6 +98,7 @@ const navigationItems = computed<NavItem[]>(() => {
       icon: 'users',
       description: 'Permisos y accesos',
       badge: 'Admin',
+      badgeTone: 'neutral',
       color: 'purple'
     }
   ]
@@ -139,7 +161,14 @@ function selectModule(id: string) {
           <div class="nav-btn-text">
             <div class="nav-label-row">
               <span class="nav-label-main">{{ item.label }}</span>
-              <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
+              <span
+                v-if="item.badge"
+                class="nav-item-badge"
+                :class="item.badgeTone || 'neutral'"
+              >
+                <i v-if="item.badgeTone === 'alert'" class="badge-pulse-dot"></i>
+                {{ item.badge }}
+              </span>
             </div>
             <span class="nav-label-desc">{{ item.description }}</span>
           </div>
@@ -500,22 +529,59 @@ function selectModule(id: string) {
 }
 
 .nav-item-badge {
-  font-size: 8.5px;
-  font-weight: 850;
-  text-transform: uppercase;
-  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: #f1f5f9;
-  color: #64748b;
-  letter-spacing: 0.04em;
+  color: #475569;
+  letter-spacing: 0.02em;
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.nav-btn.sky .nav-item-badge { background: #e0f2fe; color: #0284c7; }
-.nav-btn.emerald .nav-item-badge { background: #d1fae5; color: #059669; }
-.nav-btn.indigo .nav-item-badge { background: #e0e7ff; color: #4338ca; }
-.nav-btn.orange .nav-item-badge { background: #ffedd5; color: #ea580c; }
-.nav-btn.purple .nav-item-badge { background: #fae8ff; color: #9333ea; }
+.nav-item-badge.warning {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-weight: 850;
+}
+
+.nav-item-badge.info {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 850;
+}
+
+.nav-item-badge.alert {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  font-weight: 850;
+}
+
+.badge-pulse-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: badgeDotPulse 1.4s infinite ease-in-out;
+}
+
+@keyframes badgeDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+}
+
+.nav-btn.sky .nav-item-badge.neutral { background: #e0f2fe; color: #0284c7; }
+.nav-btn.emerald .nav-item-badge.neutral { background: #d1fae5; color: #059669; }
+.nav-btn.indigo .nav-item-badge.neutral { background: #e0e7ff; color: #4338ca; }
+.nav-btn.orange .nav-item-badge.neutral { background: #ffedd5; color: #ea580c; }
+.nav-btn.purple .nav-item-badge.neutral { background: #fae8ff; color: #9333ea; }
 
 .nav-btn.active .nav-label-main {
   font-weight: 850;
