@@ -132,9 +132,28 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 
 <template>
   <section class="ryn-validator" aria-label="Validador de unidad">
-    <div class="ryn-validator-heading"><span class="ryn-validator-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2M8.5 10.8h4.6M10.8 8.5v4.6"/></svg></span><div><span class="ryn-validator-kicker">BÚSQUEDA RÁPIDA</span><h2>Validador de unidad</h2><p>Unidad, placa o Panapass</p></div></div>
+    <div class="ryn-validator-heading">
+      <span class="ryn-validator-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; max-width: 20px; max-height: 20px; display: block;">
+          <circle cx="10.8" cy="10.8" r="6.3" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="m16 16 4.2 4.2M8.5 10.8h4.6M10.8 8.5v4.6" />
+        </svg>
+      </span>
+      <div>
+        <span class="ryn-validator-kicker">BÚSQUEDA RÁPIDA</span>
+        <h2>Validador de unidad</h2>
+        <p>Unidad, placa o Panapass</p>
+      </div>
+    </div>
     <div ref="wrap" class="uv-search-wrap">
-      <label class="uv-search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.2 4.2"/></svg><input id="v101ValidatorQ" ref="input" v-model="query" type="search" placeholder="Escribe unidad, placa o número Panapass" autocomplete="off" aria-label="Buscar unidad, placa o Panapass" aria-controls="v101ValidatorList" :aria-expanded="visible" @focus="panelOpen = true" @keydown="onKeydown"><kbd v-if="query">ESC</kbd></label>
+      <label class="uv-search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 19px; height: 19px; max-width: 19px; max-height: 19px; flex: none; display: block;">
+          <circle cx="10.8" cy="10.8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.8" />
+          <path d="m16 16 4.2 4.2" />
+        </svg>
+        <input id="v101ValidatorQ" ref="input" v-model="query" type="search" placeholder="Escribe unidad, placa o número Panapass" autocomplete="off" aria-label="Buscar unidad, placa o Panapass" aria-controls="v101ValidatorList" :aria-expanded="visible" @focus="panelOpen = true" @keydown="onKeydown">
+        <kbd v-if="query">ESC</kbd>
+      </label>
       <button id="v101ValidatorGo" class="uv-search-button" type="button" :disabled="query.trim().length < 2 || loading" @click="searchNow">Buscar unidad <span aria-hidden="true">→</span></button>
       <div v-if="visible" id="v101ValidatorList" class="uv-results" role="listbox" aria-label="Unidades encontradas">
         <div v-if="loading" class="uv-state"><span class="uv-spinner"></span>Buscando en la flota…</div>
@@ -190,6 +209,63 @@ onUnmounted(() => { window.clearTimeout(timer); sequence++; detailSequence++; do
 </template>
 
 <style>
+.ryn-validator {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.ryn-validator-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 8px !important;
+}
+.ryn-validator-icon {
+  display: grid !important;
+  place-items: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex: 0 0 40px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28) !important;
+}
+.ryn-validator-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  display: block !important;
+  fill: none !important;
+  stroke: #ffffff !important;
+  stroke-width: 2 !important;
+}
+.ryn-validator-icon svg circle {
+  fill: none !important;
+  stroke: #ffffff !important;
+}
+.ryn-validator-kicker {
+  display: block !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #2563eb !important;
+  letter-spacing: 0.1em !important;
+}
+.ryn-validator-heading h2 {
+  margin: 2px 0 0 !important;
+  color: #0f172a !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+.ryn-validator-heading p {
+  margin: 2px 0 0 !important;
+  color: #64748b !important;
+  font-size: 11px !important;
+}
 .uv-search-wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;margin-top:20px}
 .uv-search-field{height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border:1px solid #c8d8eb;border-radius:14px;background:#fff;box-shadow:0 3px 12px #18395d0a;transition:border-color .18s,box-shadow .18s}
 .uv-search-field:focus-within{border-color:#2877ef;box-shadow:0 0 0 4px #2877ef20}

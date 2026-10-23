@@ -75,7 +75,7 @@ async function load() {
     const payload: Record<string, any> = {
       p_fecha: filterDate.value || null,
       p_galera: filterGalera.value === 'TODAS' ? null : filterGalera.value,
-      p_supervisora: null
+      p_supervisora_id: null
     }
     const data = await callPortalRpc<NegativoRow[]>('panapass_negativos_fecha_v2', payload)
     rows.value = data || []

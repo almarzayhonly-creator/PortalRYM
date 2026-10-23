@@ -9,6 +9,7 @@ import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalProfile } fr
 import type { PanapassSnapshot } from './panapass'
 import { navigateToLegacyView } from './navigation'
 import './style.css'
+import './home.css'
 import './tailwind.css'
 
 declare global {

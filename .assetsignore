@@ -1,9 +1,4 @@
-wrangler.jsonc
-worker.js
-.assetsignore
-.git/
-.github/
-
-.sandbox/
-qa/
-node_modules/
+vue-next/node_modules  
+node_modules  
+.git  
+qa 

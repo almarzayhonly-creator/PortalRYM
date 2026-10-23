@@ -23,9 +23,9 @@ function negativesDateInput(){
 }
 function fix(){
   try{
-    const input=negativesDateInput();if(!input)return;
     const pan=todayPanama(),utc=utcToday();
     if(pan===utc)return;
+    const input=negativesDateInput();if(!input)return;
     if(input.value!==utc&&input.value!==pan)return;
     if(input.value===pan)return;
     input.value=pan;

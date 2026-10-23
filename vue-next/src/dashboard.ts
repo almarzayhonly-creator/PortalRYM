@@ -20,8 +20,9 @@ export function failIndicator(current: DashboardState, key: 'control' | 'gps', e
 }
 
 export function acceptHomeSummary(current: DashboardState, next: HomeSummary): DashboardState {
-  if (next?.ok) return { ...current,
-    summary: next,
+  const hasData = next?.ok || next?.panapass || next?.revisados || next?.control;
+  if (hasData) return { ...current,
+    summary: { ok: true, ...next },
     session: { profile: next.profile || current.session.profile, modules: next.modules || current.session.modules },
     state: 'ready', error: '',
   }

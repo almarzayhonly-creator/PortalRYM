@@ -31,7 +31,7 @@ const resumen = ref<HistorialResumen>({ registros: 0, unidades: 0, total_a_pagar
 
 const filterUnidad = ref('')
 const filterOperador = ref('')
-const filterDesde = ref('2025-01-02')
+const filterDesde = ref(new Date().toISOString().slice(0, 8) + '01')
 const filterHasta = ref(new Date().toISOString().slice(0, 10))
 const isAdmin = ref(false)
 const paidPct = computed(() => {
@@ -100,7 +100,7 @@ async function handleValidateCobra() {
 onMounted(async () => {
   const view = portalViewContext()
   isAdmin.value = view.isAdmin
-  if (view.today) filterHasta.value = view.today
+  if (view.today) { filterHasta.value = view.today; filterDesde.value = view.today.slice(0, 8) + '01' }
   await search()
 })
 </script>
