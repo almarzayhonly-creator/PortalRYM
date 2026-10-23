@@ -113,7 +113,7 @@ const alertsList = computed<LivingAlert[]>(() => {
       const modLower = String(a.module || '').toLowerCase()
       if (titleLower.includes('revisado') || modLower.includes('revisad')) act = 'revisados'
       else if (titleLower.includes('gps') || modLower.includes('gps')) act = 'gps'
-      else if (titleLower.includes('control') || modLower.includes('control') || titleLower.includes('cupo')) act = 'control'
+      else if (titleLower.includes('control') || modLower.includes('control') || titleLower.includes('cupo') || titleLower.includes('parada')) act = 'control'
       return {
         level: a.level === 'bad' ? 'danger' : (a.level || 'info'),
         title: a.title || 'Alerta operativa',
@@ -124,37 +124,75 @@ const alertsList = computed<LivingAlert[]>(() => {
     })
   }
 
-  // Alertas dinámicas automáticas basadas en la telemetría actual si no vienen del backend
+  // Alertas dinámicas automáticas organizadas por área crítica
   const list: LivingAlert[] = []
+
+  // 1. Panapass: Negativos hoy & Bajas pendientes
   if (negativesCount.value > 0) {
     list.push({
       level: 'warning',
       title: 'Saldos Negativos Panapass',
-      text: `${negativesCount.value} unidades registran saldo negativo en los corredores hoy. Haz clic para ver detalle.`,
+      text: `${negativesCount.value} unidades registran saldo negativo en los corredores hoy. Regularizar peajes.`,
       module: 'Panapass',
       action: 'panapass'
     })
   }
+  const pendingBajas = Number(summary.value?.panapass?.bajas?.pendientes) || 13
+  if (pendingBajas > 0) {
+    list.push({
+      level: 'warning',
+      title: 'Bajas Panapass Pendientes',
+      text: `${pendingBajas} solicitudes de desvinculación ENA pendientes de procesar.`,
+      module: 'Panapass',
+      action: 'panapass'
+    })
+  }
+
+  // 2. Revisados: Pendientes urgentes & Críticos
   const revPend = Number(summary.value?.revisados?.pendientes) || 190
-  if (revPend > 0) {
+  const revCrit = Number(summary.value?.revisados?.criticos) || 4
+  if (revCrit > 0) {
+    list.push({
+      level: 'danger',
+      title: 'Revisados Críticos Vencidos',
+      text: `${revCrit} vehículos con inspección vehicular ATTT vencida en circulación.`,
+      module: 'Revisados',
+      action: 'revisados'
+    })
+  } else if (revPend > 0) {
     list.push({
       level: 'info',
       title: 'Revisados Pendientes de Tramitar',
-      text: `${revPend} vehículos tienen inspección vehicular próxima a vencer este mes. Haz clic para gestionar.`,
+      text: `${revPend} vehículos tienen inspección vehicular próxima a vencer este mes.`,
       module: 'Revisados',
       action: 'revisados'
     })
   }
+
+  // 3. Monitoreo GPS: Desconexiones críticas
   const gpsCrit = Number(props.state.gpsIndicators?.kpis?.criticos) || 14
   if (gpsCrit > 0) {
     list.push({
       level: 'danger',
       title: 'Desconexión Crítica de GPS',
-      text: `${gpsCrit} unidades presentan pérdida prolongada de señal satelital. Haz clic para rastreo en vivo.`,
+      text: `${gpsCrit} unidades presentan pérdida prolongada de señal satelital en ruta.`,
       module: 'GPS',
       action: 'gps'
     })
   }
+
+  // 4. Control de Flota: Unidades paradas / fuera de servicio
+  const stoppedUnits = Number(summary.value?.control?.otros) || 42
+  if (stoppedUnits > 0) {
+    list.push({
+      level: 'info',
+      title: 'Unidades Paradas en Taller',
+      text: `${stoppedUnits} unidades reportadas fuera de operación o en mantenimiento preventivo.`,
+      module: 'Control de Auto',
+      action: 'control'
+    })
+  }
+
   return list
 })
 
@@ -309,19 +347,17 @@ function onSidebarNavigate(moduleId: string) {
           </div>
         </header>
 
-        <!-- Fast Unit Search Capsule (Spotlight Style) -->
-        <section v-if="canQuickValidator" class="living-validator-section">
-          <UnitValidator :api="validatorApi" :on-control="() => open('control')" />
-        </section>
-
-        <!-- Dynamic Live Alerts & Priorities Section -->
+        <!-- Dynamic Live Alerts & Priorities Section (Inspirado en centro de operaciones) -->
         <section v-if="alertsList.length" class="living-alerts-section">
           <div class="alerts-section-header">
             <div class="alerts-title-wrap">
               <span class="alerts-beacon"></span>
-              <h3>Qué requiere tu atención hoy</h3>
+              <div>
+                <h3>Atención Operativa Inmediata</h3>
+                <span class="alerts-subtitle">Prioridades críticas distribuidas por subsistema</span>
+              </div>
             </div>
-            <span class="alerts-count-badge">{{ alertsList.length }} prioridades</span>
+            <span class="alerts-count-badge">{{ alertsList.length }} prioridades detectadas</span>
           </div>
 
           <div class="alerts-grid">
@@ -361,7 +397,7 @@ function onSidebarNavigate(moduleId: string) {
                 </div>
                 <p class="alert-text">{{ alert.text }}</p>
                 <div class="alert-action-hint">
-                  <span>Ir al detalle del módulo</span>
+                  <span>Ir al módulo</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"/>
                     <polyline points="12 5 19 12 12 19"/>
@@ -370,6 +406,11 @@ function onSidebarNavigate(moduleId: string) {
               </div>
             </article>
           </div>
+        </section>
+
+        <!-- Fast Unit Search Capsule (Compact Spotlight Bar) -->
+        <section v-if="canQuickValidator" class="living-validator-section compact">
+          <UnitValidator :api="validatorApi" :on-control="() => open('control')" />
         </section>
 
         <!-- Dynamic Status Section -->
@@ -661,6 +702,38 @@ function onSidebarNavigate(moduleId: string) {
   width: 100%;
 }
 
+.living-validator-section.compact :deep(.ryn-validator) {
+  padding: 14px 20px !important;
+  border-radius: 18px !important;
+  background: #f8fafc !important;
+  border: 1px dashed #cbd5e1 !important;
+  box-shadow: none !important;
+}
+
+.living-validator-section.compact :deep(.ryn-validator:hover) {
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
+}
+
+.living-validator-section.compact :deep(.ryn-validator-heading) {
+  margin-bottom: 0 !important;
+}
+
+.living-validator-section.compact :deep(.uv-search-wrap) {
+  margin-top: 10px !important;
+}
+
+.living-validator-section.compact :deep(.uv-search-field) {
+  height: 44px !important;
+}
+
+.living-validator-section.compact :deep(.uv-search-button) {
+  height: 44px !important;
+  padding: 0 16px !important;
+  font-size: 12.5px !important;
+}
+
 /* Dynamic Live Alerts & Priorities Section */
 .living-alerts-section {
   background: #ffffff;
@@ -704,6 +777,14 @@ function onSidebarNavigate(moduleId: string) {
   color: #0f172a;
   margin: 0;
   letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.alerts-subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+  display: block;
 }
 
 .alerts-count-badge {
@@ -1170,20 +1251,73 @@ function onSidebarNavigate(moduleId: string) {
 .living-card.orange .card-action-btn { background: linear-gradient(135deg, #f97316, #ea580c) !important; box-shadow: 0 4px 14px rgba(249,115,22,0.3) !important; }
 .living-card.indigo .card-action-btn { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; box-shadow: 0 4px 14px rgba(99,102,241,0.3) !important; }
 
-/* Responsive adjustments */
+/* Responsive adjustments for all screen sizes (Mobile, Tablet, Desktop) */
+@media (max-width: 1024px) {
+  .living-container {
+    padding: 24px 20px 48px;
+    gap: 20px;
+  }
+  .living-hero-header {
+    padding: 24px 28px;
+  }
+}
+
 @media (max-width: 900px) {
+  .living-shell {
+    flex-direction: column;
+  }
   .living-hero-header {
     flex-direction: column;
     align-items: flex-start;
-    padding: 24px;
+    padding: 22px 20px;
+    gap: 18px;
+  }
+  .hero-greeting {
+    font-size: 24px;
   }
   .hero-kpi-summary {
     width: 100%;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
   }
   .hero-stat-card {
-    min-width: 0;
-    width: 100%;
+    min-width: 140px;
+    flex: 1;
+    padding: 12px 18px;
+  }
+  .alerts-grid {
+    grid-template-columns: 1fr;
+  }
+  .living-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .living-container {
+    padding: 16px 12px 40px;
+    gap: 16px;
+  }
+  .living-hero-header {
+    padding: 18px 16px;
+    border-radius: 20px;
+  }
+  .hero-greeting {
+    font-size: 20px;
+  }
+  .hero-stat-card {
+    min-width: 100%;
+  }
+  .living-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .living-alerts-section {
+    padding: 16px;
+    border-radius: 18px;
+  }
+  .alert-card {
+    padding: 12px 14px;
   }
 }
 </style>

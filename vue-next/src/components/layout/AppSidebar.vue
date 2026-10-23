@@ -41,9 +41,10 @@ const navigationItems = computed<NavItem[]>(() => {
     },
     {
       id: 'panapass',
-      label: 'Panapass',
+      label: 'Panapass & ENA',
       icon: 'panapass',
-      description: 'Saldos, cobros y pagos',
+      description: 'Cobros, saldos y peajes',
+      badge: 'Peajes',
       color: 'sky'
     },
     {
@@ -51,13 +52,15 @@ const navigationItems = computed<NavItem[]>(() => {
       label: 'Revisados',
       icon: 'revisados',
       description: 'Inspección técnica ATTT',
+      badge: 'ATTT',
       color: 'emerald'
     },
     {
       id: 'gps',
-      label: 'GPS',
+      label: 'GPS Satelital',
       icon: 'gps',
-      description: 'Telemetría satelital',
+      description: 'Telemetría y rastreo 24/7',
+      badge: 'En vivo',
       color: 'indigo'
     },
     {
@@ -65,13 +68,15 @@ const navigationItems = computed<NavItem[]>(() => {
       label: 'Control de Auto',
       icon: 'control',
       description: 'Maestra y estatus de flota',
+      badge: 'Flota',
       color: 'orange'
     },
     {
       id: 'users',
-      label: 'Usuarios',
+      label: 'Usuarios & Roles',
       icon: 'users',
       description: 'Permisos y accesos',
+      badge: 'Admin',
       color: 'purple'
     }
   ]
@@ -132,7 +137,10 @@ function selectModule(id: string) {
           </div>
 
           <div class="nav-btn-text">
-            <span class="nav-label-main">{{ item.label }}</span>
+            <div class="nav-label-row">
+              <span class="nav-label-main">{{ item.label }}</span>
+              <span v-if="item.badge" class="nav-item-badge">{{ item.badge }}</span>
+            </div>
             <span class="nav-label-desc">{{ item.description }}</span>
           </div>
 
@@ -477,12 +485,37 @@ function selectModule(id: string) {
   flex: 1;
 }
 
+.nav-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
 .nav-label-main {
   font-size: 13.5px;
   font-weight: 750;
   color: inherit;
   line-height: 1.25;
 }
+
+.nav-item-badge {
+  font-size: 8.5px;
+  font-weight: 850;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.nav-btn.sky .nav-item-badge { background: #e0f2fe; color: #0284c7; }
+.nav-btn.emerald .nav-item-badge { background: #d1fae5; color: #059669; }
+.nav-btn.indigo .nav-item-badge { background: #e0e7ff; color: #4338ca; }
+.nav-btn.orange .nav-item-badge { background: #ffedd5; color: #ea580c; }
+.nav-btn.purple .nav-item-badge { background: #fae8ff; color: #9333ea; }
 
 .nav-btn.active .nav-label-main {
   font-weight: 850;

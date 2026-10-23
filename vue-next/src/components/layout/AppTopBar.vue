@@ -54,15 +54,6 @@ const formattedUpdated = computed(() => {
         </span>
       </div>
 
-      <!-- User Card Capsule -->
-      <div class="topbar-user-badge">
-        <span class="topbar-avatar">{{ initials }}</span>
-        <div class="topbar-meta">
-          <strong>{{ name }}</strong>
-          <span>{{ role }}</span>
-        </div>
-      </div>
-
       <!-- Quick Logout -->
       <button
         type="button"
