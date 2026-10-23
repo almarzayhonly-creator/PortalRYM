@@ -318,9 +318,9 @@ function onSidebarNavigate(moduleId: string) {
       />
 
       <div class="living-container">
-        <!-- Fila 1: Hero Welcome Panoramic Header with Integrated Spotlight Omnibox -->
-        <header class="living-hero-header panoramic">
-          <div class="hero-left-col">
+        <!-- Hero Welcome Header with Ambient Mesh & Ticker -->
+        <header class="living-hero-header">
+          <div class="hero-text-block">
             <div class="hero-chip-row">
               <span class="hero-chip">CENTRO DE CONTROL CENTRAL</span>
               <span class="telemetry-live-pill">
@@ -332,48 +332,45 @@ function onSidebarNavigate(moduleId: string) {
             <p class="hero-subtitle">Monitoreo continuo de flota, estados de Panapass y auditorías en tiempo real.</p>
           </div>
 
-          <!-- Spotlight Search Bar Integrada Directamente en Cabecera -->
-          <div v-if="canQuickValidator" class="hero-center-spotlight">
-            <UnitValidator :api="validatorApi" :on-control="() => open('control')" />
-          </div>
-
-          <!-- KPIs Clave Compactos -->
-          <div class="hero-kpi-summary panoramic-kpi">
-            <div class="hero-stat-card compact">
+          <div class="hero-kpi-summary">
+            <div class="hero-stat-card">
               <div class="stat-top">
                 <span class="stat-label">Unidades activas</span>
                 <span class="stat-status-badge ok">Operativo</span>
               </div>
               <span class="stat-number">{{ (animatedActiveFleet || activeUnitsCount).toLocaleString() }}</span>
-              <span class="stat-sub">Flota registrada</span>
+              <span class="stat-sub">Flota total registrada</span>
             </div>
 
-            <div class="hero-stat-card highlight compact">
+            <div class="hero-stat-card highlight">
               <div class="stat-top">
                 <span class="stat-label">Negativos Panapass</span>
                 <span class="stat-status-badge alert">Atención</span>
               </div>
               <span class="stat-number">{{ (animatedNegatives || negativesCount).toLocaleString() }}</span>
-              <span class="stat-sub">Pendientes</span>
+              <span class="stat-sub">Pendientes de regularizar</span>
             </div>
           </div>
         </header>
 
-        <!-- Fila 2: Ticker / Strip de Alertas Críticas (Compacto y en una sola fila interactiva) -->
-        <section v-if="alertsList.length" class="living-alerts-strip-section">
-          <div class="alerts-strip-header">
+        <!-- Dynamic Live Alerts & Priorities Section (Inspirado en centro de operaciones) -->
+        <section v-if="alertsList.length" class="living-alerts-section">
+          <div class="alerts-section-header">
             <div class="alerts-title-wrap">
               <span class="alerts-beacon"></span>
-              <h3>Atención Operativa Inmediata</h3>
+              <div>
+                <h3>Atención Operativa Inmediata</h3>
+                <span class="alerts-subtitle">Prioridades críticas distribuidas por subsistema</span>
+              </div>
             </div>
             <span class="alerts-count-badge">{{ alertsList.length }} prioridades detectadas</span>
           </div>
 
-          <div class="alerts-scroll-strip">
+          <div class="alerts-grid">
             <article
               v-for="(alert, index) in alertsList"
               :key="index"
-              class="alert-pill-card interactive"
+              class="alert-card interactive"
               :class="alert.level || 'info'"
               tabindex="0"
               role="button"
@@ -382,32 +379,54 @@ function onSidebarNavigate(moduleId: string) {
               @keydown.enter="open(alert.action)"
               @keydown.space.prevent="open(alert.action)"
             >
-              <div class="alert-pill-badge" :class="alert.level || 'info'">
-                <span class="pulse-dot-mini"></span>
-                <span>{{ alert.module || 'Operación' }}</span>
-              </div>
-              <div class="alert-pill-body">
-                <strong class="alert-pill-title">{{ alert.title }}</strong>
-                <p class="alert-pill-text">{{ alert.text }}</p>
-              </div>
-              <div class="alert-pill-action">
-                <span>Ir</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
+              <div class="alert-icon-pod">
+                <svg v-if="alert.level === 'danger'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
+                <svg v-else-if="alert.level === 'warning'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </div>
+              <div class="alert-content">
+                <div class="alert-top-row">
+                  <span class="alert-module-pill">{{ alert.module || 'Operación' }}</span>
+                  <strong class="alert-title">{{ alert.title }}</strong>
+                </div>
+                <p class="alert-text">{{ alert.text }}</p>
+                <div class="alert-action-hint">
+                  <span>Ir al módulo</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </div>
               </div>
             </article>
           </div>
         </section>
 
-        <!-- Fila 3: Módulos y Operación Central (4 Sistemas Integrados) -->
-        <div class="living-section-divider compact">
+        <!-- Fast Unit Search Capsule (Compact Spotlight Bar) -->
+        <section v-if="canQuickValidator" class="living-validator-section compact">
+          <UnitValidator :api="validatorApi" :on-control="() => open('control')" />
+        </section>
+
+        <!-- Dynamic Status Section -->
+        <div class="living-section-divider">
           <div class="section-title-wrap">
             <div class="title-with-pill">
               <h2>Módulos y Operación Central</h2>
               <span class="modules-count-pill">4 Sistemas Integrados</span>
             </div>
+            <p>Accede directamente al panel operativo de cada subsistema de flota.</p>
           </div>
           <div class="system-status-indicator">
             <span class="radar-dot"></span>
@@ -659,254 +678,309 @@ function onSidebarNavigate(moduleId: string) {
   letter-spacing: 0.05em;
 }
 
-/* Fila 1: Hero Panoramic Header with Integrated Spotlight */
-.living-hero-header.panoramic {
-  display: grid;
-  grid-template-columns: minmax(280px, 1.1fr) minmax(260px, 1.4fr) auto;
-  align-items: center;
-  gap: 20px;
-  padding: 18px 24px;
+.stat-status-badge {
+  font-size: 9px;
+  font-weight: 850;
+  padding: 2px 7px;
+  border-radius: 999px;
 }
 
-.hero-left-col {
-  display: flex;
-  flex-direction: column;
+.stat-status-badge.ok {
+  background: #ecfdf5;
+  color: #047857;
 }
 
-.hero-greeting {
-  font-size: 22px;
-  margin: 0 0 4px;
+.stat-status-badge.alert {
+  background: #fef2f2;
+  color: #dc2626;
 }
 
-.hero-subtitle {
-  font-size: 12.5px;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.35;
+.stat-number {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
 }
 
-.hero-center-spotlight {
+.hero-stat-card.highlight .stat-number {
+  color: #ea580c;
+}
+
+.stat-sub {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+/* Validator Wrap */
+.living-validator-section {
   width: 100%;
 }
 
-.hero-center-spotlight :deep(.ryn-validator) {
-  padding: 8px 16px !important;
-  border-radius: 14px !important;
+.living-validator-section.compact :deep(.ryn-validator) {
+  padding: 14px 20px !important;
+  border-radius: 18px !important;
   background: #f8fafc !important;
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  border: 1px dashed #cbd5e1 !important;
+  box-shadow: none !important;
 }
 
-.hero-center-spotlight :deep(.ryn-validator:hover) {
+.living-validator-section.compact :deep(.ryn-validator:hover) {
   background: #ffffff !important;
-  border-color: #3b82f6 !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.12) !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
 }
 
-.hero-center-spotlight :deep(.ryn-validator-heading) {
-  display: none !important;
+.living-validator-section.compact :deep(.ryn-validator-heading) {
+  margin-bottom: 0 !important;
 }
 
-.hero-center-spotlight :deep(.uv-search-wrap) {
-  margin-top: 0 !important;
+.living-validator-section.compact :deep(.uv-search-wrap) {
+  margin-top: 10px !important;
 }
 
-.hero-center-spotlight :deep(.uv-search-field) {
-  height: 40px !important;
-  font-size: 13px !important;
+.living-validator-section.compact :deep(.uv-search-field) {
+  height: 44px !important;
 }
 
-.hero-center-spotlight :deep(.uv-search-button) {
-  height: 40px !important;
-  padding: 0 14px !important;
-  font-size: 12px !important;
+.living-validator-section.compact :deep(.uv-search-button) {
+  height: 44px !important;
+  padding: 0 16px !important;
+  font-size: 12.5px !important;
 }
 
-.hero-kpi-summary.panoramic-kpi {
-  display: flex;
-  gap: 12px;
-}
-
-.hero-stat-card.compact {
-  padding: 10px 16px;
-  min-width: 130px;
-  border-radius: 14px;
-}
-
-.hero-stat-card.compact .stat-number {
-  font-size: 22px;
-}
-
-.hero-stat-card.compact .stat-sub {
-  font-size: 9.5px;
-}
-
-/* Fila 2: Ticker / Strip de Alertas Críticas Horizontal */
-.living-alerts-strip-section {
+/* Dynamic Live Alerts & Priorities Section */
+.living-alerts-section {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 14px 18px;
-  box-shadow: 0 6px 18px -4px rgba(15, 23, 42, 0.03);
+  border-radius: 24px;
+  padding: 22px 26px;
+  box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.04);
 }
 
-.alerts-strip-header {
+.alerts-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 
-.alerts-strip-header h3 {
-  font-size: 14px;
-  font-weight: 800;
+.alerts-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alerts-beacon {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  animation: beaconPulse 1.8s infinite;
+}
+
+@keyframes beaconPulse {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.alerts-title-wrap h3 {
+  font-size: 17px;
+  font-weight: 850;
   color: #0f172a;
   margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.alerts-scroll-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.alert-pill-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: none;
-}
-
-.alert-pill-card:hover {
-  transform: translateY(-2px);
-  background: #ffffff;
-  border-color: #94a3b8;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-}
-
-.alert-pill-card.danger {
-  background: #fff5f5;
-  border-color: #fed7d7;
-}
-
-.alert-pill-card.danger:hover {
-  border-color: #feb2b2;
-  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.12);
-}
-
-.alert-pill-card.warning {
-  background: #fffaf0;
-  border-color: #feebc8;
-}
-
-.alert-pill-card.warning:hover {
-  border-color: #fbd38d;
-  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.12);
-}
-
-.alert-pill-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 9.5px;
-  font-weight: 850;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.alert-pill-badge.danger {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.alert-pill-badge.warning {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.alert-pill-badge.info {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.pulse-dot-mini {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  animation: pulseDot 1.4s infinite ease-in-out;
-}
-
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(0.7); }
-}
-
-.alert-pill-body {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-
-.alert-pill-title {
-  font-size: 11.5px;
-  font-weight: 750;
-  color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: -0.015em;
   line-height: 1.2;
 }
 
-.alert-pill-text {
-  font-size: 10px;
+.alerts-subtitle {
+  font-size: 11.5px;
   color: #64748b;
-  margin: 1px 0 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-weight: 500;
+  display: block;
 }
 
-.alert-pill-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 10.5px;
+.alerts-count-badge {
+  font-size: 11px;
   font-weight: 800;
-  color: #2563eb;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.alerts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.alert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1.5px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.alert-card.interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+.alert-card.interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.1);
+}
+
+.alert-card.interactive:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.alert-card.warning {
+  background: #fffbf5;
+  border-color: #fed7aa;
+}
+.alert-card.warning.interactive:hover {
+  border-color: #f97316;
+}
+
+.alert-card.danger {
+  background: #fff8f8;
+  border-color: #fecaca;
+}
+.alert-card.danger.interactive:hover {
+  border-color: #ef4444;
+}
+
+.alert-card.info {
+  background: #f8fbff;
+  border-color: #bfdbfe;
+}
+.alert-card.info.interactive:hover {
+  border-color: #3b82f6;
+}
+
+.alert-icon-pod {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
 }
 
-.alert-pill-action svg {
-  width: 12px;
-  height: 12px;
-  transition: transform 0.18s ease;
+.alert-card.warning .alert-icon-pod {
+  background: #fef3c7;
+  color: #d97706;
 }
 
-.alert-pill-card:hover .alert-pill-action svg {
+.alert-card.danger .alert-icon-pod {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.alert-card.info .alert-icon-pod {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.alert-icon-pod svg {
+  width: 20px;
+  height: 20px;
+}
+
+.alert-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.alert-module-pill {
+  font-size: 9.5px;
+  font-weight: 850;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.alert-card.warning .alert-module-pill {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.alert-card.danger .alert-module-pill {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.alert-card.info .alert-module-pill {
+  background: #bfdbfe;
+  color: #1e40af;
+}
+
+.alert-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.alert-text {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.alert-action-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 750;
+  color: #2563eb;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.alert-card.warning .alert-action-hint {
+  color: #d97706;
+}
+
+.alert-card.danger .alert-action-hint {
+  color: #dc2626;
+}
+
+.alert-card.info .alert-action-hint {
+  color: #2563eb;
+}
+
+.alert-card.interactive:hover .alert-action-hint {
+  opacity: 1;
   transform: translateX(3px);
 }
 
-.living-section-divider.compact {
-  margin: 4px 0 0;
+.alert-action-hint svg {
+  width: 13px;
+  height: 13px;
 }
 
-/* Container Spacing for Panoramic Zero Scroll */
-.living-container {
-  gap: 16px;
-  padding: 18px 26px 40px;
-}
+/* Section Divider */
 .living-section-divider {
   display: flex;
   align-items: center;
