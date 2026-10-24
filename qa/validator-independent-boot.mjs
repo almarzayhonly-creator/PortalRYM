@@ -33,6 +33,20 @@ try{
     assert.equal(await page.locator('#loading').isVisible(),false);
     await context.close();console.log('PASS cached child ready before deferred shell: immediate session synchronization.');
   }
+  // A failed inner bootstrap must not leave the installed app spinning forever.
+  {
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844}});
+    const page=await context.newPage();
+    await page.route('**/modules/control-auto/validator-tablet-app.js*',route=>route.abort());
+    await page.goto('http://127.0.0.1:4192/?app=validador-unidad');
+    await page.locator('.uva-loading[data-state="error"]').waitFor({timeout:16000});
+    assert.match(await page.locator('#loading').innerText(),/no pudo terminar de abrirse/i);
+    assert.equal(await page.locator('.uva-recovery-actions a').getAttribute('href'),'/?validator-host=1');
+    await page.locator('.uva-recovery-actions button').click();
+    await page.locator('.uva-loading[data-state="error"]').waitFor({timeout:16000});
+    await context.close();
+    console.log('PASS stalled inner frame: visible recovery, retry and direct entry without bypassing auth.');
+  }
   for(const [name,role,extra,password,denied] of [
     ['Manuel Chavez','OPERATIVO',[],false,false],
     ['Yhonly Almarza','ADMIN_TOTAL',['portal.panapass','portal.revisados','gps.ver','admin.usuarios'],false,false],

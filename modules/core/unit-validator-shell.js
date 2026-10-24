@@ -7,6 +7,40 @@
   let prompt=null;
   const build=d.querySelector('meta[name="rym-validator-build"]')?.content;
   let checking=false,reloading=false;
+  let ready=false,bootTimer=0;
+  const BOOT_WAIT_MS=12000;
+  function restart(){
+    ready=false;
+    frame.classList.remove('ready');
+    loading.hidden=false;
+    loading.dataset.state='loading';
+    loading.textContent='Cargando Portal RYM…';
+    frame.src='/?validator-host=1&boot='+Date.now();
+    armBootWatchdog();
+  }
+  function showBootError(){
+    if(ready)return;
+    loading.hidden=false;
+    loading.dataset.state='error';
+    loading.textContent=navigator.onLine
+      ?'El validador no pudo terminar de abrirse.'
+      :'No hay conexión para abrir el validador.';
+    const actions=d.createElement('div');
+    actions.className='uva-recovery-actions';
+    const retry=d.createElement('button');
+    retry.type='button';retry.textContent='Reintentar';
+    retry.addEventListener('click',restart);
+    const direct=d.createElement('a');
+    direct.href='/?validator-host=1';
+    direct.textContent='Abrir sin la pantalla de inicio';
+    actions.append(retry,direct);
+    loading.append(actions);
+    status.textContent='Error al cargar';
+  }
+  function armBootWatchdog(){
+    w.clearTimeout(bootTimer);
+    bootTimer=w.setTimeout(showBootError,BOOT_WAIT_MS);
+  }
   async function checkBuild(){
     if(checking||!navigator.onLine||d.visibilityState==='hidden')return;
     checking=true;
@@ -34,9 +68,11 @@
     prompt=null;install.hidden=true;
   });
   function update(){
-    const session=frame.contentWindow?.RYM_UNIT_VALIDATOR?.session();
+    let session=null;
+    try{session=frame.contentWindow?.RYM_UNIT_VALIDATOR?.session()}catch(_){}
     if(!session)return;
-    frame.classList.add('ready');loading.hidden=true;
+    ready=true;w.clearTimeout(bootTimer);
+    frame.classList.add('ready');loading.hidden=true;loading.removeAttribute('data-state');
     subtitle.textContent=session.user||'Portal RYM';
     status.textContent=session.pending?'Verificando acceso':session.denied?'Sin acceso':!session.authenticated?'Inicia sesión':navigator.onLine?'Conectado':'Sin conexión';
     const exit=d.getElementById('exit');
@@ -49,6 +85,7 @@
   w.addEventListener('online',update);w.addEventListener('offline',update);
   // A cached iframe may finish before this deferred shell script installs listeners.
   update();
+  if(!ready)armBootWatchdog();
   d.getElementById('exit').addEventListener('click',()=>{
     frame.contentWindow?.RYM_UNIT_VALIDATOR?.logout();update();
   });
