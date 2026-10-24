@@ -80,6 +80,6 @@
     pages.forEach((page,i)=>{const p=3+i*2,c=p+1,stream=`BT /F1 5.8 Tf 20 570 Td 9 TL ${page.map((line,j)=>`${j?'T* ':''}(${pdfEscape(line)}) Tj`).join(' ')} ET`;objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 ${3+pages.length*2} 0 R >> >> /Contents ${c} 0 R >>`);objs.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);});
     objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'); let out='%PDF-1.4\n', offsets=[0]; objs.forEach((o,i)=>{offsets.push(out.length);out+=`${i+1} 0 obj\n${o}\nendobj\n`;}); const xref=out.length;out+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n${offsets.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')}trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;return new Blob([out],{type:'application/pdf'});
   }
-  function download(blob, name) { const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000); }
+  function download(blob, name) { const a=document.createElement('a'),url=global.URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>global.URL.revokeObjectURL(url),30000); }
   global.RYMRestrictionExport = { GALERAS, COLUMNS, rowsFromPanel, makeXlsx, makePdf, download };
 })(window);
