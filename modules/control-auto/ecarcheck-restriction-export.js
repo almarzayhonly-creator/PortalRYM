@@ -12,7 +12,7 @@
   };
   function rowsFromPanel(panel, selected = 'TODAS') {
     const alerts = Array.isArray(panel?.alertas) ? panel.alertas : [];
-    return alerts.filter(a => text(a.tipo).toUpperCase() === 'RESTRICCION_ECARCHECK')
+    return alerts.filter(a => ['RESTRICCION_ECARCHECK', 'SIN_FICHA'].includes(text(a.tipo).toUpperCase()))
       .map(a => {
         const d = a.detalle && typeof a.detalle === 'object' ? a.detalle : {}, v2 = a.boletas || a.resultado?.boletas || d.boletas || d.resultado?.boletas || d.ecarcheck?.boletas || d;
         const groups = [

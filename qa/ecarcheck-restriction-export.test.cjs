@@ -23,6 +23,7 @@ function entries(buffer) {
 test('filters restrictions to each gallery and all galleries', () => {
   for (const gal of api.GALERAS) assert.deepEqual(api.rowsFromPanel(panel, gal).map(r=>r.galera), [gal]);
   assert.deepEqual(api.rowsFromPanel(panel, 'TODAS').map(r=>r.galera), Array.from(api.GALERAS));
+  assert.equal(api.rowsFromPanel({alertas:[{...fixture('VCARS'),tipo:'SIN_FICHA'}]},'VCARS').length,1);
   assert.equal(api.rowsFromPanel({alertas:[{...fixture('VCARS'),tipo:'PENDIENTE_CONSULTA'}]},'TODAS').length,0);
 });
 
@@ -57,6 +58,7 @@ test('validator toolbar is independent of the exception section and inline scrip
   assert.doesNotMatch(draw,/if\(!ex\)return/);
   const enhance=html.slice(html.indexOf('async function enhanceGaleraManual(force=false){'),html.indexOf('const obs=new MutationObserver',html.indexOf('async function enhanceGaleraManual(force=false){')));
   assert.ok(enhance.indexOf('drawRestrictionExport111(root)')<enhance.indexOf('await loadManualPanel()'),'toolbar mounts before panel data is requested');
+  assert.match(html,/e\.target\?\.id!=='v111ExportGal'[\s\S]*?row\.hidden=gal!=='TODAS'&&rowGal!==gal/);
   const inline=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].filter(m=>!/(?:src=|type=["'](?:application\/ld\+json|importmap))/i.test(m[1]));
   for(const script of inline) if(script[2].trim()) { try { new vm.Script(script[2]); } catch (e) { assert.fail(`inline script ${script[1]} syntax: ${e.message}`); } }
   assert.doesNotMatch(html,/replace\(\/\^\[=\+\\-@\\t\\r\]\/,["']async function enhanceGaleraManual/);
