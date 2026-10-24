@@ -4,6 +4,7 @@
   const COLUMNS = ['Galera', 'Empresa dueña', 'Supervisora', 'Unidad', 'Placa', 'Tipo de restricción / boleta', 'Motivo detallado eCarCheck V2', 'Fecha y hora de la última consulta'];
   const text = value => value == null ? '' : String(value).trim();
   const first = (...values) => values.map(text).find(Boolean) || '';
+  const restrictionType = value => ({ RESTRICCION_ECARCHECK:'Restricción eCarCheck', SIN_FICHA:'Sin ficha eCarCheck' })[text(value).toUpperCase()] || text(value);
   const detailText = value => {
     if (typeof value === 'string') return value.trim();
     if (Array.isArray(value)) return value.map(detailText).filter(Boolean).join('; ');
@@ -35,7 +36,7 @@
         return {
           galera: galera.toUpperCase(), empresa: first(a.empresa_duena, a.empresa, d.empresa_duena, d.empresa, d.empresaDuena),
           supervisora: first(a.supervisora, d.supervisora), unidad: first(a.unidad, d.unidad),
-          placa: first(a.placa, d.placa), tipo: groups.map(([n, x]) => x?.cantidad > 0 ? n : '').filter(Boolean).join(' · ') || first(d.tipo, a.tipo),
+          placa: first(a.placa, d.placa), tipo: groups.map(([n, x]) => x?.cantidad > 0 ? n : '').filter(Boolean).join(' · ') || restrictionType(first(d.tipo, a.tipo)),
           motivo: reasons.join('\n') || first(d.motivo, d.mensaje, a.mensaje, a.motivo), fecha,
           raw: a
         };
@@ -65,11 +66,12 @@
   }
   function pdfEscape(s) { const cp = new Map([['·',0xb7],['–',0x96],['—',0x97],['á',0xe1],['é',0xe9],['í',0xed],['ó',0xf3],['ú',0xfa],['Á',0xc1],['É',0xc9],['Í',0xcd],['Ó',0xd3],['Ú',0xda],['ñ',0xf1],['Ñ',0xd1],['ü',0xfc],['Ü',0xdc],['¿',0xbf],['¡',0xa1]]); return [...String(s)].map(ch => { const n=ch.codePointAt(0),b=n<128?n:cp.get(ch); return b==null?'?':b===40||b===41||b===92?'\\'+String.fromCharCode(b):b<32||b>126?'\\'+b.toString(8).padStart(3,'0'):String.fromCharCode(b); }).join(''); }
   function wrap(s, width=148) { const words=String(s).split(/\s+/),out=[];let line='';for(let word of words){while(word.length>width){if(line){out.push(line);line=''}out.push(word.slice(0,width));word=word.slice(width)}if((line+' '+word).trim().length>width&&line){out.push(line);line=word}else line=(line+' '+word).trim()}if(line)out.push(line);return out; }
+  function pdfDate(value) { const date=new Date(value);if(!value||!Number.isFinite(date.getTime()))return text(value)||'—';const day=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).format(date),time=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Panama',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(date);return `${day} ${time}`; }
   function makePdf(rows, metadata) {
     const headers=['Galera','Empresa dueña','Supervisora','Unidad','Placa','Tipo de restricción','Motivo detallado eCarCheck V2','Última consulta'];
-    const widths=[48,93,72,44,57,76,306,90],x0=28,tableWidth=widths.reduce((a,b)=>a+b,0),bodyTop=449,bottom=48,lineH=8.4,padX=5,padY=5,font=6.4;
-    const chars=width=>Math.max(8,Math.floor((width-padX*2)/(font*.49))),wrapCell=(value,width)=>wrap(value||'—',chars(width));
-    const segments=[];for(const row of rows){const values=[row.galera,row.empresa,row.supervisora,row.unidad,row.placa,row.tipo,row.motivo,row.fecha],cells=values.map((value,i)=>wrapCell(value,widths[i])),total=Math.max(...cells.map(cell=>cell.length)),maxLines=Math.floor((bodyTop-25-bottom-padY*2)/lineH);for(let offset=0;offset<total;offset+=maxLines)segments.push({cells,offset,count:Math.min(maxLines,total-offset),stripe:segments.length%2===0});}
+    const widths=[48,93,72,44,57,92,280,100],x0=28,tableWidth=widths.reduce((a,b)=>a+b,0),bodyTop=449,bottom=48,lineH=8.4,padX=5,padY=5,font=6.4;
+    const chars=width=>Math.max(8,Math.floor((width-padX*2)/(font*.58))),wrapCell=(value,width)=>wrap(value||'—',chars(width));
+    const segments=[];for(const row of rows){const values=[row.galera,row.empresa,row.supervisora,row.unidad,row.placa,row.tipo,row.motivo,pdfDate(row.fecha)],cells=values.map((value,i)=>wrapCell(value,widths[i])),total=Math.max(...cells.map(cell=>cell.length)),maxLines=Math.floor((bodyTop-25-bottom-padY*2)/lineH);for(let offset=0;offset<total;offset+=maxLines)segments.push({cells,offset,count:Math.min(maxLines,total-offset),stripe:segments.length%2===0});}
     if(!segments.length)segments.push({empty:true,cells:[],offset:0,count:1,stripe:false});
     const pages=[];let page=[];let used=0;for(const segment of segments){const height=segment.count*lineH+padY*2;if(page.length&&used+height>bodyTop-25-bottom){pages.push(page);page=[];used=0}page.push(segment);used+=height}if(page.length)pages.push(page);
     const num=v=>Number(v).toFixed(3),rect=(ops,x,y,w,h,color)=>ops.push(`${color} rg ${num(x)} ${num(y)} ${num(w)} ${num(h)} re f`),line=(ops,x1,y1,x2,y2,color='0.83 0.87 0.92',width=.45)=>ops.push(`${color} RG ${width} w ${num(x1)} ${num(y1)} m ${num(x2)} ${num(y2)} l S`);

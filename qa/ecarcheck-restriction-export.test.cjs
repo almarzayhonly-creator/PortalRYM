@@ -44,12 +44,16 @@ test('exports a valid multi-page PDF with all report details', async () => {
     const rows=api.rowsFromPanel(panel,gal),blob=api.makePdf(rows,{galera:gal,periodo:panel.periodo.label,fecha:'2026-10-24'}),pdf=Buffer.from(await blob.arrayBuffer()).toString('latin1');
     assert.match(pdf,/^%PDF-1\.4/);assert.match(pdf,/%%EOF/);assert.match(pdf,new RegExp(gal==='TODAS'?'Empresa VCARS':`Empresa ${gal}`));
     assert.match(pdf,/Helvetica-Bold/);assert.match(pdf,/F2 6\.4 Tf/);assert.match(pdf,/Motivo detallado eCarCheck V2/);assert.doesNotMatch(pdf,/\| VCARS \|/);
+    assert.match(pdf,/2026-10-24 10:30:00/);assert.doesNotMatch(pdf,/2026-10-24T10:30:00-05:00/);
     if(gal!=='TODAS')for(const other of api.GALERAS.filter(x=>x!==gal))assert.ok(!pdf.includes('Empresa '+other));
   }
   const many=Array.from({length:70},(_,i)=>({...api.rowsFromPanel(panel,'VCARS')[0],unidad:'UNIT-'+i,motivo:'Restricción de prueba detallada '+i}));
   const blob=api.makePdf(many,{galera:'VCARS',periodo:'Quincena 2',fecha:'2026-10-24'}), pdf=Buffer.from(await blob.arrayBuffer()).toString('latin1');
   assert.match(pdf,/^%PDF-1\.4/); assert.match(pdf,/%%EOF/); assert.match(pdf,/\/Count [2-9]/);
   assert.match(pdf,/Portal RYM/); assert.match(pdf,/UNIT-69/); assert.match(pdf,/detallada 69/);
+  const raw=api.rowsFromPanel({alertas:[{tipo:'RESTRICCION_ECARCHECK',galera:'VCARS',unidad:'U-RAW',placa:'RAW-001',detalle:{consultadoEn:'2026-10-24T10:30:00-05:00',motivo:'Restricción detallada.'}}]},'VCARS');
+  const clean=Buffer.from(await api.makePdf(raw,{galera:'VCARS',periodo:'Quincena 2',fecha:'2026-10-24'}).arrayBuffer()).toString('latin1');
+  assert.match(clean,/Restricci\\363n eCarCheck/);assert.doesNotMatch(clean,/RESTRICCION_ECARCHECK/);
 });
 
 test('validator toolbar is independent of the exception section and inline scripts parse', () => {
