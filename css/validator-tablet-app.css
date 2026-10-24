@@ -640,3 +640,10 @@ html.rym-unit-validator-app:not(.uva-authenticated) body{
 :is(html.rym-unit-validator-app,html.rym-unit-validator-integrated) .uva-detail-section h4{grid-column:1/-1}
 @media(min-width:768px){:is(html.rym-unit-validator-app,html.rym-unit-validator-integrated) .uva-detail-section:not(.uva-comparison){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}}
 @media(max-width:650px){:is(html.rym-unit-validator-app,html.rym-unit-validator-integrated) .v117-status-card:has(>.uva-details[open]){grid-column:1!important}}
+
+/* Dedicated PWA results already offer "Otra unidad". Keep the duplicated
+   modal search and autocomplete results out of the viewport, so the four
+   operational cards and fixed action fit on small phones. Search returns
+   to its original focused input when the result closes. */
+html.rym-unit-validator-app #v101CheckModal .v101-modal-search,
+html.rym-unit-validator-app #v101CheckModal .v101-modal-results{display:none!important}
