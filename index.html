@@ -1418,70 +1418,7 @@ body.v60-revisados{background:#fff7ed!important}
 
 
 
-<style id="rym-v182-ecar-export">
-.v182-export{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border:1px solid #d8e3f0;border-radius:14px;background:#fff}
-.v182-export label{font-size:12px;font-weight:800;color:#24476e}
-.v182-export select,.v182-export button{border:1px solid #c7d8ea;border-radius:9px;padding:9px 13px;font:700 12px "Segoe UI",Arial,sans-serif;min-height:37px}
-.v182-export select{background:#fff;color:#173b69;min-width:160px}
-.v182-export button{cursor:pointer;background:#eaf2ff;color:#124681}
-.v182-export button.primary{background:#1d56ad;color:#fff}
-.v182-export button:disabled{opacity:.5;cursor:wait}
-.v182-export .v182-info{font-size:11px;color:#63748a;flex:1;min-width:210px}
-@media(max-width:680px){.v182-export{align-items:stretch;flex-direction:column}.v182-export select,.v182-export button{width:100%}}
-</style>
-<script id="rym-v182-ecar-export">
-(function(){
-'use strict';
-const esc182=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const gs=['VCARS','VCOMP','VIPCO','VINDU'];
-const fmt=x=>x?new Date(x).toLocaleString('es-PA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'Sin fecha';
-let busy=false;
-async function data182(gal){
-  const result=await req('/functions/v1/control-auto-ecarcheck-v2-manual',{method:'POST',body:JSON.stringify({action:'PANEL'})});
-  const d=result?.data;
-  if(!d?.ok)throw Error(d?.error||'No se pudo cargar el reporte.');
-  const all=(d.alertas||[]).filter(a=>a.tipo==='RESTRICCION_ECARCHECK');
-  return {rows:all.filter(a=>gal==='TODAS'||a.galera===gal).map(a=>({
-    galera:a.galera||'',empresa:a.detalle?.empresa||'',supervisora:a.detalle?.supervisora||'',
-    unidad:a.unidad||a.detalle?.unidad||'',placa:a.placa||'',motivo:a.mensaje||'',fecha:fmt(a.detalle?.consultado_at||a.requested_at)
-  })),period:d.periodo?.label||'quincena actual'};
-}
-function filename(g,ext){return 'RYM_eCarCheck_restricciones_'+g+'_'+new Date().toISOString().slice(0,10)+'.'+ext}
-function csvCell(x){return '"'+String(x??'').replace(/"/g,'""').replace(/^[=+\-@\t\r]/,'\u2019$&')+'"'}
-function exportExcel(g,rows){
- const heads=['Galera','Empresa dueña','Supervisora','Unidad','Placa','Motivo / detalle eCarCheck','Última consulta'];
- const content='\ufeff'+[heads,...rows.map(r=>[r.galera,r.empresa,r.supervisora,r.unidad,r.placa,r.motivo,r.fecha])].map(line=>line.map(csvCell).join(';')).join('\r\n');
- const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
- const link=document.createElement('a');link.href=url;link.download=filename(g,'csv');document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-}
-function exportPdf(g,period,rows){
- const w=window.open('','_blank');
- if(!w)throw Error('El navegador bloqueó la ventana. Permite ventanas emergentes para guardar el PDF.');
- const body=rows.map(r=>'<tr>'+[r.galera,r.empresa,r.supervisora,r.unidad,r.placa,r.motivo,r.fecha].map(t=>'<td>'+esc182(t)+'</td>').join('')+'</tr>').join('');
- w.document.open();w.document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><title>'+esc182(filename(g,'pdf'))+'</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:Arial,sans-serif;color:#15345c;font-size:10px}h1{font-size:18px;margin:0 0 8px}p{color:#566a80}table{border-collapse:collapse;width:100%;table-layout:fixed}th{background:#e8f0fb;text-align:left}th,td{padding:7px;border:1px solid #ccd9e7;vertical-align:top;overflow-wrap:anywhere}th:nth-child(6),td:nth-child(6){width:31%}thead{display:table-header-group}tr{break-inside:avoid}.actions{margin-bottom:15px}@media print{.actions{display:none}}</style></head><body><div class="actions"><button onclick="window.print()">Guardar como PDF / Imprimir</button></div><h1>Portal RYM · Restricciones eCarCheck</h1><p>Galera: '+esc182(g)+' · Cobertura: '+esc182(period)+' · Registros: '+rows.length+' · Generado: '+esc182(fmt(new Date().toISOString()))+'</p><table><thead><tr>'+['Galera','Empresa dueña','Supervisora','Unidad','Placa','Motivo / detalle eCarCheck','Última consulta'].map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></body></html>');w.document.close();w.focus();
-}
-async function go182(format){
- if(busy)return;
- const toolbar=document.querySelector('#v182Export'),gal=toolbar?.querySelector('#v182Gal')?.value||'TODAS',info=toolbar?.querySelector('.v182-info');
- if(!toolbar)return;
- busy=true;toolbar.querySelectorAll('button').forEach(b=>b.disabled=true);info.textContent='Preparando reporte desde eCarCheck V2…';
- try{const d=await data182(gal);if(!d.rows.length){info.textContent='No hay restricciones registradas para esta galera.';return}
- if(format==='excel')exportExcel(gal,d.rows);else exportPdf(gal,d.period,d.rows);
- info.textContent=d.rows.length+' restricciones incluidas · última información almacenada, sin consultar al proveedor.';
- }catch(e){info.textContent='Error: '+(e.message||e)}finally{busy=false;toolbar.querySelectorAll('button').forEach(b=>b.disabled=false)}
-}
-function mount182(){
- const root=document.querySelector('.v80-validator'),section=root?.querySelector('.v86-ex');
- if(!root||!section||root.querySelector('#v182Export'))return;
- const toolbar=document.createElement('div');toolbar.id='v182Export';toolbar.className='v182-export';
- toolbar.innerHTML='<label for="v182Gal">Reporte de restricciones · Galera</label><select id="v182Gal"><option value="TODAS">Todas las galeras</option>'+gs.map(g=>'<option value="'+g+'">'+g+'</option>').join('')+'</select><button id="v182PDF" class="primary" type="button">Exportar PDF</button><button id="v182Excel" type="button">Exportar Excel</button><span class="v182-info" aria-live="polite">Se exportan solo las restricciones registradas en la quincena.</span>';
- section.parentNode.insertBefore(toolbar,section);toolbar.querySelector('#v182PDF').onclick=()=>go182('pdf');toolbar.querySelector('#v182Excel').onclick=()=>go182('excel');
-}
-window.v182MountExport=mount182;
-new MutationObserver(mount182).observe(document.documentElement,{subtree:true,childList:true});
-mount182();
-})();
-</script>
+
 
 </body></html>`);w.document.close();return w
 }
@@ -6662,7 +6599,6 @@ async function enhanceGaleraManual(force=false){
   const p=await loadManualPanel();if(banner&&!manualRun)banner.textContent=statusText111(p);
   const map=new Map((p?.galeras||[]).map(g=>[String(g.galera),g])),coolOK=p?.cooldown?.ok!==false;
   const scopeTotal=[...map.values()].reduce((n,g)=>n+Number(g?.activas||0),0),activeCard=[...document.querySelectorAll('#ca6Summary .kpi')].find(x=>String(x.querySelector('span')?.textContent||'').trim().toUpperCase()==='ACTIVAS'),fleetActive=Number(String(activeCard?.querySelector('strong,b')?.textContent||'0').replace(/[^0-9]/g,''))||0,outside=Math.max(0,fleetActive-scopeTotal);let scopeNote=root.querySelector('#v111ScopeNote');if(!scopeNote){scopeNote=document.createElement('div');scopeNote.id='v111ScopeNote';scopeNote.className='v111-scope-note';banner?.insertAdjacentElement('afterend',scopeNote)}if(scopeNote)scopeNote.innerHTML=`<b>Alcance eCarCheck: ${scopeTotal.toLocaleString('en-US')} activas en VCARS/VCOMP/VIPCO/VINDU.</b>${outside?` ${outside} activas adicionales están fuera de estas cuatro galeras y no entran en los ciclos.`:''}`;
-  window.v182MountExport?.();
   const ex=root.querySelector('.v86-ex');if(ex){const alerts=Array.isArray(p?.alertas)?p.alertas:[],summary=p?.resumen_pendientes||{},restricted=Number(summary.restricciones??alerts.filter(x=>x.tipo==='RESTRICCION_ECARCHECK'||x.tipo==='SIN_FICHA').length),toConsult=Number(summary.pendientes_consulta??alerts.filter(x=>x.tipo==='PENDIENTE_CONSULTA').length),retry=Number(summary.reintentos??alerts.filter(x=>x.tipo==='REINTENTO').length),omitted=Number(summary.omitidas_empresa??alerts.filter(x=>x.tipo==='OMITIDA_EMPRESA_BOLETA').length);ex.innerHTML=`<div class="v86-ex-head"><div><h3>Pendientes de cobertura de la quincena</h3><p>Las consultas faltantes no son auditorías abiertas. Los bloqueos de eCarCheck se muestran por separado, sin modificar las restricciones oficiales.</p><p><strong>${toConsult} por consultar · ${restricted} con restricción · ${retry} reintentos · ${omitted} omitidas por empresa</strong></p></div><b>${alerts.length} pendientes de cobertura</b></div>${alerts.length?`<div class="v86-ex-list">${alerts.map(x=>`<div class="v86-ex-row"><div><b>${safe111(x.galera||'')}</b>${x.unidad?` · ${safe111(x.unidad)}`:''}${x.placa?` · ${safe111(x.placa)}`:''}</div><span class="v86-ex-kind ${['PENDIENTE_CONSULTA','REINTENTO','OMITIDA_EMPRESA_BOLETA'].includes(String(x.tipo||''))?'warn':'bad'}">${safe111(({RESTRICCION_ECARCHECK:'RESTRICCIÓN ACTIVA',SIN_FICHA:'RESTRICCIÓN ACTIVA',PENDIENTE_CONSULTA:'PENDIENTE DE CONSULTA',REINTENTO:'REINTENTO TÉCNICO',OMITIDA_EMPRESA_BOLETA:'EMPRESA OMITIDA'})[String(x.tipo||'')]||String(x.tipo||'PENDIENTE').replaceAll('_',' '))}</span><small>${safe111(x.mensaje||'Requiere revisión')}</small></div>`).join('')}</div>`:'<div class="v86-ex-empty">Cobertura completa para las unidades elegibles.</div>'}`}
   root.querySelectorAll('.v80-gal').forEach(card=>{const gal=String(card.querySelector('h3')?.textContent||'').trim().toUpperCase(),g=map.get(gal),head=card.querySelector('.v86-gal-head span'),today=card.querySelector('.v80-today'),old=card.querySelector('.v80-run-btn'),count=card.querySelector('.v80-count'),summary=card.querySelector('.v80-count + small'),meta=card.querySelector('.v80-gal-meta');if(head)head.textContent='Manual';if(today)today.textContent='Solo se ejecuta cuando presionas el botón.';const total=Number(g?.activas??0),ok=Number(g?.ok??0),pend=Number(g?.pendientes??Math.max(0,total-ok)),eligible=Number(g?.por_consultar??0),restricted=Number(g?.sin_ficha??0),omitted=Number(g?.omitidas_empresa??0),errors=Number(g?.errores??0),periodLabel=String(g?.periodo_label||p?.periodo?.label||'quincena actual');if(count)count.textContent=`${ok} / ${total}`;if(summary)summary.textContent=`OK ${periodLabel} · ${pend} pendientes de cobertura · ${eligible} consultables`;if(meta)meta.innerHTML=`<span>${Number(g?.con_cambios||0)} cambios</span><span>${restricted} restric. · ${omitted} omitidas · ${errors} error</span>`;if(!old)return;const b=old.cloneNode(true);old.replaceWith(b);b.textContent=eligible?`Procesar ciclo · próximas ${Math.min(100,eligible)}`:pend?'Sin unidades consultables':'Quincena cubierta';b.disabled=!coolOK||eligible<=0||!!manualRun;b.onclick=()=>runGal111(gal,b)});
   root.querySelectorAll('.v80-manual p').forEach(x=>{x.textContent=x.textContent.replace(/jornadas automáticas/gi,'ciclos manuales por galera').replace(/automáticas/gi,'manuales')});
