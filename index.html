@@ -8820,3 +8820,68 @@ body.v66-revisados .v180-status-list label{background:#fff!important;color:#243b
 body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
 </style>
 <link rel="stylesheet" href="/css/portal-executive.css?v=1"/>
+
+
+<style id="rym-v182-ecar-export">
+.v182-export{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border:1px solid #d8e3f0;border-radius:14px;background:#fff}
+.v182-export label{font-size:12px;font-weight:800;color:#24476e}
+.v182-export select,.v182-export button{border:1px solid #c7d8ea;border-radius:9px;padding:9px 13px;font:700 12px "Segoe UI",Arial,sans-serif;min-height:37px}
+.v182-export select{background:#fff;color:#173b69;min-width:160px}
+.v182-export button{cursor:pointer;background:#eaf2ff;color:#124681}
+.v182-export button.primary{background:#1d56ad;color:#fff}
+.v182-export button:disabled{opacity:.5;cursor:wait}
+.v182-export .v182-info{font-size:11px;color:#63748a;flex:1;min-width:210px}
+@media(max-width:680px){.v182-export{align-items:stretch;flex-direction:column}.v182-export select,.v182-export button{width:100%}}
+</style>
+<script id="rym-v182-ecar-export">
+(function(){
+'use strict';
+const esc182=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const gs=['VCARS','VCOMP','VIPCO','VINDU'];
+const fmt=x=>x?new Date(x).toLocaleString('es-PA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'Sin fecha';
+let busy=false;
+async function data182(gal){
+  const result=await req('/functions/v1/control-auto-ecarcheck-v2-manual',{method:'POST',body:JSON.stringify({action:'PANEL'})});
+  const d=result?.data;
+  if(!d?.ok)throw Error(d?.error||'No se pudo cargar el reporte.');
+  const all=(d.alertas||[]).filter(a=>a.tipo==='RESTRICCION_ECARCHECK');
+  return {rows:all.filter(a=>gal==='TODAS'||a.galera===gal).map(a=>({
+    galera:a.galera||'',empresa:a.detalle?.empresa||'',supervisora:a.detalle?.supervisora||'',
+    unidad:a.unidad||a.detalle?.unidad||'',placa:a.placa||'',motivo:a.mensaje||'',fecha:fmt(a.detalle?.consultado_at||a.requested_at)
+  })),period:d.periodo?.label||'quincena actual'};
+}
+function filename(g,ext){return 'RYM_eCarCheck_restricciones_'+g+'_'+new Date().toISOString().slice(0,10)+'.'+ext}
+function csvCell(x){return '"'+String(x??'').replace(/"/g,'""').replace(/^[=+\-@\t\r]/,'\u2019$&')+'"'}
+function exportExcel(g,rows){
+ const heads=['Galera','Empresa dueña','Supervisora','Unidad','Placa','Motivo / detalle eCarCheck','Última consulta'];
+ const content='\ufeff'+[heads,...rows.map(r=>[r.galera,r.empresa,r.supervisora,r.unidad,r.placa,r.motivo,r.fecha])].map(line=>line.map(csvCell).join(';')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
+ const link=document.createElement('a');link.href=url;link.download=filename(g,'csv');document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+function exportPdf(g,period,rows){
+ const w=window.open('','_blank');
+ if(!w)throw Error('El navegador bloqueó la ventana. Permite ventanas emergentes para guardar el PDF.');
+ const body=rows.map(r=>'<tr>'+[r.galera,r.empresa,r.supervisora,r.unidad,r.placa,r.motivo,r.fecha].map(t=>'<td>'+esc182(t)+'</td>').join('')+'</tr>').join('');
+ w.document.open();w.document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><title>'+esc182(filename(g,'pdf'))+'</title><style>@page{size:A4 landscape;margin:12mm}body{font-family:Arial,sans-serif;color:#15345c;font-size:10px}h1{font-size:18px;margin:0 0 8px}p{color:#566a80}table{border-collapse:collapse;width:100%;table-layout:fixed}th{background:#e8f0fb;text-align:left}th,td{padding:7px;border:1px solid #ccd9e7;vertical-align:top;overflow-wrap:anywhere}th:nth-child(6),td:nth-child(6){width:31%}thead{display:table-header-group}tr{break-inside:avoid}.actions{margin-bottom:15px}@media print{.actions{display:none}}</style></head><body><div class="actions"><button onclick="window.print()">Guardar como PDF / Imprimir</button></div><h1>Portal RYM · Restricciones eCarCheck</h1><p>Galera: '+esc182(g)+' · Cobertura: '+esc182(period)+' · Registros: '+rows.length+' · Generado: '+esc182(fmt(new Date().toISOString()))+'</p><table><thead><tr>'+['Galera','Empresa dueña','Supervisora','Unidad','Placa','Motivo / detalle eCarCheck','Última consulta'].map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></body></html>');w.document.close();w.focus();
+}
+async function go182(format){
+ if(busy)return;
+ const toolbar=document.querySelector('#v182Export'),gal=toolbar?.querySelector('#v182Gal')?.value||'TODAS',info=toolbar?.querySelector('.v182-info');
+ if(!toolbar)return;
+ busy=true;toolbar.querySelectorAll('button').forEach(b=>b.disabled=true);info.textContent='Preparando reporte desde eCarCheck V2…';
+ try{const d=await data182(gal);if(!d.rows.length){info.textContent='No hay restricciones registradas para esta galera.';return}
+ if(format==='excel')exportExcel(gal,d.rows);else exportPdf(gal,d.period,d.rows);
+ info.textContent=d.rows.length+' restricciones incluidas · última información almacenada, sin consultar al proveedor.';
+ }catch(e){info.textContent='Error: '+(e.message||e)}finally{busy=false;toolbar.querySelectorAll('button').forEach(b=>b.disabled=false)}
+}
+function mount182(){
+ const root=document.querySelector('.v80-validator'),section=root?.querySelector('.v86-ex');
+ if(!root||!section||root.querySelector('#v182Export'))return;
+ const toolbar=document.createElement('div');toolbar.id='v182Export';toolbar.className='v182-export';
+ toolbar.innerHTML='<label for="v182Gal">Reporte de restricciones · Galera</label><select id="v182Gal"><option value="TODAS">Todas las galeras</option>'+gs.map(g=>'<option value="'+g+'">'+g+'</option>').join('')+'</select><button id="v182PDF" class="primary" type="button">Exportar PDF</button><button id="v182Excel" type="button">Exportar Excel</button><span class="v182-info" aria-live="polite">Se exportan solo las restricciones registradas en la quincena.</span>';
+ section.parentNode.insertBefore(toolbar,section);toolbar.querySelector('#v182PDF').onclick=()=>go182('pdf');toolbar.querySelector('#v182Excel').onclick=()=>go182('excel');
+}
+new MutationObserver(mount182).observe(document.documentElement,{subtree:true,childList:true});
+mount182();
+})();
+</script>
