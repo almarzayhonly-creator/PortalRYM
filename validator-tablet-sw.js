@@ -1,6 +1,6 @@
 /* Portal RYM · Unit Validator PWA
    Cache only the dedicated shell/static identity. Portal auth/API/data always stay network-fresh. */
-const CACHE='rym-unit-validator-shell-v26';
+const CACHE='rym-unit-validator-shell-v27';
 const CORE=['/unit-validator.html','/validator-tablet.webmanifest','/assets/rym-validator-192.png','/assets/rym-validator-512.png','/css/validator-tablet-app.css?v=26','/modules/core/validator-session.js?v=26','/modules/core/unit-validator-shell.js?v=26','/modules/control-auto/validator-presentation.js?v=26','/modules/control-auto/validator-details.js?v=26','/modules/control-auto/validator-tablet-app.js?v=26'];
 
 self.addEventListener('install',event=>{
