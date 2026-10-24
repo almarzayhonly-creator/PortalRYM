@@ -8,6 +8,8 @@ const root=process.cwd(),html=fs.readFileSync(path.join(root,'index.html'),'utf8
 const start=html.indexOf('function restrictionRows111(gal)'),end=html.indexOf('async function enhanceGaleraManual(force=false){',start);
 assert.ok(start>=0&&end>start,'export functions found in validator source');
 const exportCode=html.slice(start,end);
+const enhanceEnd=html.indexOf('const obs=new MutationObserver',end),enhanceCode=html.slice(end,enhanceEnd);
+assert.ok(enhanceEnd> end,'validator enhancer found in source');
 const galleries=['VCARS','VCOMP','VIPCO','VINDU'];
 const alerts=galleries.map((galera,i)=>({tipo:'RESTRICCION_ECARCHECK',galera,unidad:'U-'+galera,placa:'ABC-'+i,empresa:'Empresa '+galera,supervisora:'Supervisora '+galera,detalle:{consultadoEn:'2026-10-24T10:30:00-05:00',boletas:{boletasPorPlaca:{cantidad:1,desglose:[{tipo:'Colisión y fuga'}]},boletasPorDocumento:{cantidad:0,desglose:[]},infraccionesEna:{cantidad:0,desglose:[]}}}}));
 const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe'});
@@ -15,7 +17,7 @@ try {
   const page=await browser.newPage({acceptDownloads:true,viewport:{width:1440,height:900}}),consoleErrors=[];page.on('pageerror',e=>consoleErrors.push(e.message));
   await page.setContent('<main class="v80-validator"><section class="v80-policy"><h2>Validador</h2></section><p>Otras opciones del validador</p></main>');
   await page.addScriptTag({content:moduleSrc});
-  await page.addScriptTag({content:`let manualPanel=${JSON.stringify({periodo:{label:'Quincena 2 · octubre 2026'},alertas:alerts})};${exportCode}drawRestrictionExport111(document.querySelector('.v80-validator'));`});
+  await page.addScriptTag({content:`let manualPanel=${JSON.stringify({periodo:{label:'Quincena 2 · octubre 2026'},alertas:alerts})},manualRun=null;function loadManualPanel(){return new Promise(()=>{})}function statusText111(){return 'loading'}${exportCode}${enhanceCode}enhanceGaleraManual();`});
   const toolbar=page.locator('#v111RestrictionExport');assert.equal(await toolbar.count(),1);assert.equal(await toolbar.locator('select option').count(),5);
   assert.equal(await toolbar.locator('button').count(),2);assert.ok(await toolbar.isVisible());
   assert.equal(await page.locator('.v80-policy').evaluate(el=>el.previousElementSibling.id),'v111RestrictionExport');
