@@ -43,6 +43,7 @@ test('exports a valid multi-page PDF with all report details', async () => {
   for(const gal of [...api.GALERAS,'TODAS']){
     const rows=api.rowsFromPanel(panel,gal),blob=api.makePdf(rows,{galera:gal,periodo:panel.periodo.label,fecha:'2026-10-24'}),pdf=Buffer.from(await blob.arrayBuffer()).toString('latin1');
     assert.match(pdf,/^%PDF-1\.4/);assert.match(pdf,/%%EOF/);assert.match(pdf,new RegExp(gal==='TODAS'?'Empresa VCARS':`Empresa ${gal}`));
+    assert.match(pdf,/Helvetica-Bold/);assert.match(pdf,/F2 6\.4 Tf/);assert.match(pdf,/Motivo detallado eCarCheck V2/);assert.doesNotMatch(pdf,/\| VCARS \|/);
     if(gal!=='TODAS')for(const other of api.GALERAS.filter(x=>x!==gal))assert.ok(!pdf.includes('Empresa '+other));
   }
   const many=Array.from({length:70},(_,i)=>({...api.rowsFromPanel(panel,'VCARS')[0],unidad:'UNIT-'+i,motivo:'Restricción de prueba detallada '+i}));
