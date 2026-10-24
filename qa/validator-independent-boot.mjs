@@ -5,6 +5,14 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_PATH||'C:/Users/almar/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+// Fail before deployment if any validator entrypoint mixes asset/cache versions.
+const expectedValidatorVersion=Number(fs.readFileSync('unit-validator.html','utf8').match(/rym-validator-build" content="unit-validator-shell-v(\d+)"/)[1]);
+const validatorAssetRef=/(?:validator-tablet-app\.css|unit-validator-shell\.js|validator-session\.js|validator-presentation\.js|validator-details\.js|validator-tablet-app\.js)\?v=(\d+)/g;
+for(const file of ['unit-validator.html','worker.js','validator-tablet-sw.js']){
+  const refs=[...fs.readFileSync(file,'utf8').matchAll(validatorAssetRef)];
+  assert.ok(refs.length>0,file+' missing versioned validator assets');
+  assert.ok(refs.every(match=>Number(match[1])===expectedValidatorVersion),file+' has stale validator asset references');
+}
 const worker=(await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('worker.js','utf8')).toString('base64'))).default;
 const server=http.createServer(async(req,res)=>{
   try{
