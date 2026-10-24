@@ -38,6 +38,8 @@ jobs:
           node qa/validator-integrated-parity.mjs
           node qa/validator-independent-boot.mjs
           node qa/validator-portal-boot.mjs
+          node --test qa/ecarcheck-restriction-export.test.cjs
+          node qa/ecarcheck-restriction-export.browser.mjs
       - name: Persist production controllers
         run: |
           python3 - <<'PY'
