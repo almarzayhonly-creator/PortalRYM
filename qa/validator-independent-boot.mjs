@@ -5,6 +5,14 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require(process.env.PLAYWRIGHT_PATH||'C:/Users/almar/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+// Fail before deployment if any validator entrypoint mixes asset/cache versions.
+const expectedValidatorVersion=Number(fs.readFileSync('unit-validator.html','utf8').match(/rym-validator-build" content="unit-validator-shell-v(\d+)"/)[1]);
+const validatorAssetRef=/(?:validator-tablet-app\.css|unit-validator-shell\.js|validator-session\.js|validator-presentation\.js|validator-details\.js|validator-tablet-app\.js)\?v=(\d+)/g;
+for(const file of ['unit-validator.html','worker.js','validator-tablet-sw.js']){
+  const refs=[...fs.readFileSync(file,'utf8').matchAll(validatorAssetRef)];
+  assert.ok(refs.length>0,file+' missing versioned validator assets');
+  assert.ok(refs.every(match=>Number(match[1])===expectedValidatorVersion),file+' has stale validator asset references');
+}
 const worker=(await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('worker.js','utf8')).toString('base64'))).default;
 const server=http.createServer(async(req,res)=>{
   try{
@@ -32,6 +40,20 @@ try{
     release();await page.locator('#portal.ready').waitFor();
     assert.equal(await page.locator('#loading').isVisible(),false);
     await context.close();console.log('PASS cached child ready before deferred shell: immediate session synchronization.');
+  }
+  // A failed inner bootstrap must not leave the installed app spinning forever.
+  {
+    const context=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:844}});
+    const page=await context.newPage();
+    await page.route('**/modules/control-auto/validator-tablet-app.js*',route=>route.abort());
+    await page.goto('http://127.0.0.1:4192/?app=validador-unidad');
+    await page.locator('.uva-loading[data-state="error"]').waitFor({timeout:16000});
+    assert.match(await page.locator('#loading').innerText(),/no pudo terminar de abrirse/i);
+    assert.equal(await page.locator('.uva-recovery-actions a').getAttribute('href'),'/?validator-host=1');
+    await page.locator('.uva-recovery-actions button').click();
+    await page.locator('.uva-loading[data-state="error"]').waitFor({timeout:16000});
+    await context.close();
+    console.log('PASS stalled inner frame: visible recovery, retry and direct entry without bypassing auth.');
   }
   for(const [name,role,extra,password,denied] of [
     ['Manuel Chavez','OPERATIVO',[],false,false],

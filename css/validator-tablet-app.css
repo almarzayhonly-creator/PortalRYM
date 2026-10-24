@@ -23,7 +23,12 @@
 .uva-stage{height:calc(100dvh - 64px);position:relative}
 .uva-stage iframe{width:100%;height:100%;border:0;display:block;opacity:0}
 .uva-stage iframe.ready{opacity:1}
-.uva-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;color:var(--uva-muted)}
+.uva-stage iframe:not(.ready){pointer-events:none}
+.uva-loading{position:absolute;z-index:2;inset:0;display:grid;place-items:center;font-size:14px;color:var(--uva-muted)}
+.rym-validator-shell .uva-loading[data-state="error"]{display:flex;flex-direction:column;justify-content:center;gap:18px;padding:24px;text-align:center;line-height:1.6}
+.uva-recovery-actions{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px}
+.uva-recovery-actions button,.uva-recovery-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 16px;border:1px solid var(--uva-border);border-radius:10px;background:#fff;color:var(--uva-navy);font:600 14px inherit;text-decoration:none;cursor:pointer}
+.uva-recovery-actions button{background:var(--uva-navy);color:#fff}
 /* Host isolation is active before any portal markup is painted. Login remains visible. */
 html.rym-unit-validator-app body{margin:0!important;background:var(--uva-bg)!important;color:var(--uva-text)!important}
 html.rym-unit-validator-app:not(.uva-authorized) .v101-shell,
