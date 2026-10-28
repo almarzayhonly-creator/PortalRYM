@@ -37,6 +37,9 @@ const detailError = ref('')
 const modalOpen = ref(false)
 const recentUnits = ref<Unit[]>([])
 
+// Control de vista / pestaña principal: 'monitoreo' | 'expediente'
+const activeMainTab = ref<'monitoreo' | 'expediente'>('monitoreo')
+
 // Control de pestaña activa en el panel de detalle contextual (Fases 7, 8 y 9)
 // null = ninguno abierto; 'panapass' | 'revisados' | 'gps' | 'control' = sistema enfocado
 const activeContextTab = ref<string | null>(null)
@@ -178,9 +181,10 @@ async function select(row: Unit) {
   searched.value = false
   modalOpen.value = true
   selectedSeed.value = row
+  activeMainTab.value = 'monitoreo'
   activeContextTab.value = null
   showFullDossier.value = false
-  expandedSecondary.value = { tecnicos: false, asignacion: false, documentacion: false }
+  expandedSecondary.value = { tecnicos: true, asignacion: false, documentacion: false }
   recentUnits.value = [row, ...recentUnits.value.filter(item => unit(item) !== unit(row))].slice(0, 5)
   await loadUnitDetail(row)
 }
@@ -1026,11 +1030,49 @@ onUnmounted(() => {
 
             <!-- CUERPO DESPLAZABLE DE LA FICHA -->
             <div class="v-ficha-body">
-              <!-- FASE 1, 4 & 5: CUATRO TARJETAS SIMPLIFICADAS Y VERIFICADAS -->
-              <section class="v-ficha-systems-section" aria-label="Estado de los cuatro sistemas">
+              <!-- NAVEGACIÓN TABULADA EJECUTIVA HUD -->
+              <div class="v-ficha-nav-tabs-bar" role="tablist">
+                <button
+                  type="button"
+                  class="v-ficha-nav-tab"
+                  :class="{ active: activeMainTab === 'monitoreo' }"
+                  role="tab"
+                  :aria-selected="activeMainTab === 'monitoreo'"
+                  @click="activeMainTab = 'monitoreo'"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                  <span>Monitoreo 4 Sistemas</span>
+                  <span class="v-tab-pill-indicator">{{ fourSystemCards.length }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="v-ficha-nav-tab"
+                  :class="{ active: activeMainTab === 'expediente' }"
+                  role="tab"
+                  :aria-selected="activeMainTab === 'expediente'"
+                  @click="activeMainTab = 'expediente'"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                  <span>Expediente del Vehículo</span>
+                  <span v-if="detail.fichaRecord" class="v-tab-pill-badge">eCarCheck</span>
+                </button>
+              </div>
+
+              <!-- CONTENIDO TAB 1: MONITOREO 4 SISTEMAS -->
+              <section v-show="activeMainTab === 'monitoreo'" class="v-ficha-systems-section" aria-label="Estado de los cuatro sistemas">
                 <div class="v-ficha-section-bar">
                   <div class="v-ficha-section-title">
-                    <span class="v-ficha-section-kicker">MONITOREO MULTISISTEMA</span>
+                    <span class="v-ficha-section-kicker">TELEMETRÍA Y SERVICIOS EN TIEMPO REAL</span>
                     <h3>Estado Operativo de los 4 Sistemas</h3>
                   </div>
 
@@ -1045,7 +1087,7 @@ onUnmounted(() => {
                   </span>
                 </div>
 
-                <!-- FASE 7: 4 TARJETAS PRINCIPALES MINIMALISTAS -->
+                <!-- FASE 7: 4 TARJETAS PRINCIPALES MINIMALISTAS HUD -->
                 <div class="v-ficha-bento-grid" data-testid="ficha-four-systems-grid">
                   <article
                     v-for="card in fourSystemCards"
@@ -1061,6 +1103,9 @@ onUnmounted(() => {
                     @keydown.enter="toggleSystemCard(card.key)"
                     @keydown.space.prevent="toggleSystemCard(card.key)"
                   >
+                    <!-- Halo de energía viva según el estado -->
+                    <div class="v-card-ambient-glow" :class="`glow-${card.tone || 'neutral'}`"></div>
+
                     <!-- Cabecera de la Tarjeta del Sistema -->
                     <div class="v-sys-card-top">
                       <div class="v-sys-card-brand">
@@ -1191,28 +1236,17 @@ onUnmounted(() => {
                 </transition>
               </section>
 
-              <!-- FASE 9: EXPEDIENTE COMPLETO BAJO DEMANDA -->
-              <section class="v-ficha-secondary-section" aria-label="Expediente de la unidad">
+              <!-- CONTENIDO TAB 2: EXPEDIENTE COMPLETO DEL VEHÍCULO -->
+              <section v-show="activeMainTab === 'expediente'" class="v-ficha-secondary-section" aria-label="Expediente de la unidad">
                 <div class="v-ficha-dossier-bar">
                   <div class="v-ficha-dossier-copy">
-                    <span class="v-ficha-section-kicker">INFORMACIÓN TÉCNICA Y DOCUMENTACIÓN</span>
+                    <span class="v-ficha-section-kicker">DATOS REGISTRALES Y ADMINISTRATIVOS</span>
                     <h3>Expediente Completo del Vehículo</h3>
                     <p>Accede a datos de motor, chasis/VIN, póliza de seguro, supervisión y cotejo eCarCheck.</p>
                   </div>
-                  <button
-                    type="button"
-                    class="v-ficha-dossier-toggle-btn"
-                    :class="{ active: showFullDossier }"
-                    :aria-expanded="showFullDossier"
-                    data-testid="btn-toggle-dossier"
-                    @click="showFullDossier = !showFullDossier"
-                  >
-                    <span>{{ showFullDossier ? 'Ocultar expediente completo' : 'Ver expediente completo' }}</span>
-                    <span class="v-sys-chevron" :class="{ open: showFullDossier }">▾</span>
-                  </button>
                 </div>
 
-                <div v-if="showFullDossier" class="v-ficha-accordions-grid" data-testid="ficha-secondary-accordions">
+                <div class="v-ficha-accordions-grid" data-testid="ficha-secondary-accordions">
                   <!-- 1. DATOS TÉCNICOS -->
                   <article class="v-ficha-accordion-card" :class="{ open: expandedSecondary.tecnicos }">
                     <button
@@ -1827,9 +1861,9 @@ onUnmounted(() => {
   position: fixed !important;
   inset: 0 !important;
   z-index: 9999 !important;
-  background: rgba(15, 23, 42, 0.62) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(10, 25, 47, 0.72) !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1842,13 +1876,19 @@ onUnmounted(() => {
   max-height: min(90vh, 920px) !important;
   background: #f8fafc !important;
   border: 1px solid rgba(226, 232, 240, 0.95) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 32px 72px rgba(15, 23, 42, 0.34), 0 8px 24px rgba(15, 23, 42, 0.14) !important;
+  border-radius: 26px !important;
+  box-shadow: 0 35px 80px -15px rgba(2, 22, 54, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.5) inset, 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
   font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
   color: #0f172a !important;
+  animation: vSheetPop 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes vSheetPop {
+  0% { transform: scale(0.96) translateY(12px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .v-ficha-fade-enter-active,
@@ -1894,43 +1934,59 @@ onUnmounted(() => {
   color: #64748b !important;
 }
 
-/* CABECERA DE LA FICHA */
+/* CABECERA VIBRANTE CON EFECTO GLASS & GRADIENTE HUD */
 .v-ficha-header {
-  background: linear-gradient(135deg, #0c2d48 0%, #0f3d5e 52%, #134e6f 100%) !important;
+  background: linear-gradient(135deg, #091b38 0%, #0d2854 48%, #0369a1 100%) !important;
   color: #ffffff !important;
   padding: 20px 26px 18px !important;
   border-bottom: 1px solid rgba(56, 189, 248, 0.22) !important;
   flex-shrink: 0 !important;
+  position: relative !important;
+  box-shadow: 0 10px 25px rgba(3, 27, 78, 0.25) !important;
+}
+
+.v-ficha-header::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.22) 0%, transparent 60%),
+              radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.18) 0%, transparent 55%) !important;
+  pointer-events: none !important;
 }
 
 .v-ficha-header-main {
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   justify-content: space-between !important;
-  gap: 20px !important;
+  gap: 18px !important;
   flex-wrap: wrap !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 .v-ficha-unit-hero {
   display: flex !important;
   align-items: center !important;
-  gap: 22px !important;
+  gap: 18px !important;
   flex-wrap: wrap !important;
 }
 
 .v-ficha-unit-badge-box {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(125, 211, 252, 0.28) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   border-radius: 16px !important;
-  padding: 10px 16px !important;
-  min-width: 140px !important;
+  padding: 8px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }
 
 .v-ficha-kicker {
   display: block !important;
   font-size: 10px !important;
   font-weight: 800 !important;
-  letter-spacing: 0.1em !important;
+  letter-spacing: 0.12em !important;
   color: #7dd3fc !important;
   text-transform: uppercase !important;
   margin-bottom: 2px !important;
@@ -1944,11 +2000,12 @@ onUnmounted(() => {
 
 .v-ficha-unit-number {
   margin: 0 !important;
-  font-size: 30px !important;
+  font-size: 28px !important;
   font-weight: 900 !important;
   line-height: 1.05 !important;
   letter-spacing: -0.03em !important;
   color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 .v-ficha-copy-chip {
@@ -1957,17 +2014,18 @@ onUnmounted(() => {
   gap: 5px !important;
   padding: 4px 9px !important;
   border-radius: 8px !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   color: #e0f2fe !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .v-ficha-copy-chip:hover {
-  background: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) scale(1.02) !important;
   color: #ffffff !important;
 }
 
@@ -1975,6 +2033,7 @@ onUnmounted(() => {
   background: #10b981 !important;
   border-color: #34d399 !important;
   color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;
 }
 
 .v-ficha-identity-meta {
@@ -2194,74 +2253,110 @@ onUnmounted(() => {
 .v-ficha-close-btn {
   width: 38px !important;
   height: 38px !important;
-  border-radius: 11px !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
   color: #ffffff !important;
   font-size: 16px !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
   cursor: pointer !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .v-ficha-close-btn:hover {
-  background: rgba(239, 68, 68, 0.85) !important;
+  background: rgba(239, 68, 68, 0.9) !important;
   border-color: rgba(248, 113, 113, 0.9) !important;
+  transform: rotate(90deg) scale(1.08) !important;
 }
 
-.v-ficha-alerts-strip {
+/* =========================================================================
+   BARRA DE PESTAÑAS TABULADAS HUD VIVA (INTERACTIVA & MODERNA)
+========================================================================== */
+.v-ficha-nav-tabs-bar {
   display: flex !important;
-  flex-wrap: wrap !important;
+  align-items: center !important;
   gap: 8px !important;
-  margin-top: 14px !important;
-  padding-top: 12px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: #eef2f6 !important;
+  padding: 5px !important;
+  border-radius: 16px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  margin-bottom: 2px !important;
 }
 
-.v-ficha-alert-chip {
+.v-ficha-nav-tab {
+  flex: 1 !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  padding: 5px 11px !important;
-  border-radius: 9px !important;
-  font-size: 12px !important;
-  background: rgba(15, 23, 42, 0.45) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  color: #f8fafc !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 18px !important;
+  border-radius: 12px !important;
+  border: none !important;
+  background: transparent !important;
+  color: #64748b !important;
+  font-family: inherit !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.v-ficha-alert-chip.sev-bad {
-  background: rgba(185, 28, 28, 0.35) !important;
-  border-color: rgba(248, 113, 113, 0.55) !important;
+.v-ficha-nav-tab svg {
+  transition: transform 0.2s ease !important;
 }
 
-.v-ficha-alert-chip.sev-warn {
-  background: rgba(180, 83, 9, 0.35) !important;
-  border-color: rgba(251, 191, 36, 0.5) !important;
+.v-ficha-nav-tab:hover {
+  color: #0f172a !important;
+  background: rgba(255, 255, 255, 0.65) !important;
 }
 
-.v-ficha-alert-dot {
-  width: 7px !important;
-  height: 7px !important;
-  border-radius: 50% !important;
-  background: #fbbf24 !important;
+.v-ficha-nav-tab:hover svg {
+  transform: scale(1.1) !important;
 }
 
-.v-ficha-alert-chip.sev-bad .v-ficha-alert-dot {
-  background: #f87171 !important;
+.v-ficha-nav-tab.active {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.v-tab-pill-indicator {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 2px 7px !important;
+  border-radius: 999px !important;
+}
+
+.v-ficha-nav-tab.active .v-tab-pill-indicator {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+.v-tab-pill-badge {
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  border: 1px solid #a7f3d0 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
 }
 
 /* CUERPO DE LA FICHA */
 .v-ficha-body {
-  padding: 22px 26px !important;
+  padding: 18px 24px !important;
   overflow-y: auto !important;
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 24px !important;
+  gap: 16px !important;
+  background: #f8fafc !important;
 }
 
 .v-ficha-section-bar {
@@ -2354,34 +2449,65 @@ onUnmounted(() => {
   animation: vSpin 1s linear infinite !important;
 }
 
-/* BENTO GRID DE LOS 4 SISTEMAS (FASE 1 & 3: Clickeable e Inteligente) */
+/* BENTO GRID DE LOS 4 SISTEMAS HUD (VIVO, INTERACTIVO & RESPONSIVE) */
 .v-ficha-bento-grid {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 14px !important;
-  align-items: start !important;
+  align-items: stretch !important;
 }
 
 .v-sys-bento-card {
   background: #ffffff !important;
   border: 1.5px solid #e2e8f0 !important;
-  border-top-width: 4px !important;
-  border-radius: 16px !important;
+  border-radius: 18px !important;
   padding: 16px !important;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
   cursor: pointer !important;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
   outline: none !important;
   position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Halos vivos de luz */
+.v-card-ambient-glow {
+  position: absolute !important;
+  top: 0; left: 0; right: 0; height: 3.5px !important;
+  background: #94a3b8 !important;
+  transition: height 0.22s ease !important;
+}
+
+.v-card-ambient-glow.glow-ok {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5) !important;
+}
+
+.v-card-ambient-glow.glow-warn {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%) !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5) !important;
+}
+
+.v-card-ambient-glow.glow-bad {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6) !important;
 }
 
 .v-sys-bento-card:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+  transform: translateY(-3px) scale(1.01) !important;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.09) !important;
   border-color: #cbd5e1 !important;
+}
+
+.v-sys-bento-card:hover .v-card-ambient-glow {
+  height: 5px !important;
+}
+
+.v-sys-bento-card:active {
+  transform: scale(0.985) !important;
 }
 
 .v-sys-bento-card:focus-visible {
@@ -2389,21 +2515,21 @@ onUnmounted(() => {
 }
 
 .v-sys-bento-card.tone-ok {
-  border-top-color: #10b981 !important;
+  border-color: #e2e8f0 !important;
 }
 .v-sys-bento-card.tone-warn {
-  border-top-color: #f59e0b !important;
+  border-color: #fef3c7 !important;
 }
 .v-sys-bento-card.tone-bad {
-  border-top-color: #ef4444 !important;
-  background: linear-gradient(180deg, rgba(254, 242, 242, 0.45) 0%, #ffffff 38%) !important;
+  border-color: #fee2e2 !important;
+  background: linear-gradient(180deg, rgba(254, 242, 242, 0.5) 0%, #ffffff 45%) !important;
 }
 .v-sys-bento-card.tone-pending,
 .v-sys-bento-card.tone-info {
-  border-top-color: #0284c7 !important;
+  border-color: #e0f2fe !important;
 }
 .v-sys-bento-card.tone-neutral {
-  border-top-color: #94a3b8 !important;
+  border-color: #f1f5f9 !important;
 }
 
 .v-sys-card-top {
@@ -2420,15 +2546,21 @@ onUnmounted(() => {
 }
 
 .v-sys-icon-box {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 10px !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 12px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
   background: #f0f9ff !important;
   color: #0284c7 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  transition: transform 0.2s ease !important;
+}
+
+.v-sys-bento-card:hover .v-sys-icon-box {
+  transform: scale(1.08) rotate(3deg) !important;
 }
 
 .v-sys-icon-box.sys-panapass {
