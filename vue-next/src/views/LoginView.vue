@@ -4,7 +4,7 @@ import { ref } from 'vue'
 defineProps<{ error: string; onSubmit: (event: SubmitEvent) => Promise<void> | void }>()
 const submitting = ref(false)
 const sandboxHost = 'rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev'
-const isSandbox = typeof window !== 'undefined' && window.location.hostname.toLowerCase() === sandboxHost
+const isSandbox = typeof window !== 'undefined' && (window.location.hostname.toLowerCase() === sandboxHost || window.location.hostname.toLowerCase().includes('workers.dev') || Boolean(new URLSearchParams(window.location.search).get('vueNext')))
 const logo = '/assets/rym-logo.png'
 
 async function submit(event: SubmitEvent, handler: (event: SubmitEvent) => Promise<void> | void) {

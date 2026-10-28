@@ -4,6 +4,7 @@ import ModuleIcon from './ModuleIcon.vue'
 import type { PortalProfile } from '../types'
 import {
   applyValidatorSections,
+  formatPanamaDate,
   rankAndFilterUnits,
   type Unit,
   type UnitDetail,
@@ -36,7 +37,7 @@ const detailError = ref('')
 const modalOpen = ref(false)
 const recentUnits = ref<Unit[]>([])
 
-// Control de expansión de cada una de las 4 tarjetas principales de sistemas
+// Control de expansión de cada una de las 4 tarjetas principales de sistemas (Fase 3: clic en toda la tarjeta)
 const expandedSystemCards = ref<Record<string, boolean>>({
   panapass: false,
   revisados: false,
@@ -44,14 +45,14 @@ const expandedSystemCards = ref<Record<string, boolean>>({
   control: false,
 })
 
-// Control de expansión de las 3 secciones secundarias (Fase 5: no permanentemente abiertas)
+// Control de expansión de las 3 secciones secundarias
 const expandedSecondary = ref<Record<string, boolean>>({
   tecnicos: false,
   asignacion: false,
   documentacion: false,
 })
 
-// Feedback de copiado rápido (Fase 8)
+// Feedback de copiado rápido
 const copiedTarget = ref<'' | 'unit' | 'plate' | 'panapass' | 'vin'>('')
 let copyTimer: number | undefined
 
@@ -68,7 +69,7 @@ function copyText(text: string, target: 'unit' | 'plate' | 'panapass' | 'vin') {
   }, 1800)
 }
 
-// Permisos por rol de usuario (Fase 5: proteger PIN y credenciales sensibles)
+// Permisos por rol de usuario
 const userRole = computed(() => {
   const fromProp = props.profile?.rol
   const fromGlobal = typeof window !== 'undefined' ? (window as any).__RYM_ROLE : ''
@@ -150,7 +151,12 @@ const matchBadgeText = (row: Unit) => {
   return ''
 }
 
-function toggleSystemCard(key: string) {
+// FASE 3: Permitir expandir y colapsar cada tarjeta de sistema fácilmente
+function toggleSystemCard(key: string, event?: Event) {
+  // Evitar conflicto si el usuario hace clic directamente en un link o botón interno
+  if (event && (event.target as HTMLElement)?.closest('button:not(.v-sys-expand-btn), a')) {
+    return
+  }
   expandedSystemCards.value[key] = !expandedSystemCards.value[key]
 }
 
@@ -196,7 +202,6 @@ async function loadUnitDetail(row: Unit, isRefresh = false) {
     const applyExtras = (ficha: Unit | null = fichaData) => {
       if (current !== detailSequence || !detail.value) return
       applyValidatorSections(detail.value, ficha)
-      // Trigger reactivity on deep update
       detail.value = { ...detail.value, cards: [...detail.value.cards] }
     }
     applyExtras(null)
@@ -241,6 +246,7 @@ async function loadUnitDetail(row: Unit, isRefresh = false) {
             { label: 'GPS 2', value: 'Sin respuesta del servidor' },
           ],
           updatedAt: 'Consulta fallida',
+          syncStatus: 'error',
           note: 'El servicio satelital no respondió. No se asume estado en verde.',
         })
       }
@@ -282,7 +288,6 @@ async function searchNow() {
   const term = query.value.trim()
   if (term.length < 2 || !props.api) return
 
-  // Si ya hay un resultado activo o único en pantalla, Enter o Buscar lo abre inmediatamente
   if (rows.value.length === 1) {
     void select(rows.value[0]!)
     return
@@ -398,7 +403,6 @@ watch(query, (val) => {
       if (current === sequence) {
         rows.value = ranked
         searched.value = true
-        // Si hay coincidencia exacta o resultado único, dejarlo resaltado para abrir con Enter
         activeIndex.value = ranked.length > 0 ? 0 : -1
       }
     } catch (error) {
@@ -413,7 +417,7 @@ watch(query, (val) => {
 })
 
 // =========================================================================
-// DATOS DERIVADOS PARA LA NUEVA FICHA DE UNIDAD (FASE 3, 4, 5, 6)
+// DATOS DERIVADOS PARA LA NUEVA FICHA DE UNIDAD
 // =========================================================================
 
 const vehicleIdentityLabel = computed(() => {
@@ -462,6 +466,31 @@ const operationalStatusHeader = computed(() => {
   return { label: 'ACTIVA · OPERATIVA', sub: internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'Operación normal', tone: 'ok' }
 })
 
+// FASE 5: Diagnóstico global de sincronización y estado de consultas
+const consultationStatusSummary = computed(() => {
+  if (!detail.value) {
+    return { text: 'Consultando sistemas…', state: 'syncing', dotClass: 'syncing' }
+  }
+  if (detailEnriching.value) {
+    return { text: 'Sincronizando fuentes en vivo…', state: 'syncing', dotClass: 'syncing' }
+  }
+  const cards = fourSystemCards.value
+  const hasError = cards.some(c => c.syncStatus === 'error' || c.tone === 'bad' && /ERROR|SIN RESPUESTA/i.test(`${c.badge} ${c.value}`))
+  const hasIncomplete = cards.some(c => c.syncStatus === 'incomplete' || /SIN DATOS|SIN REGISTRO|NO DISPONIBLE/i.test(`${c.badge} ${c.value}`))
+  const hasOutdated = cards.some(c => c.syncStatus === 'outdated')
+
+  if (hasError) {
+    return { text: 'Consulta incompleta (reintentar)', state: 'error', dotClass: 'error' }
+  }
+  if (hasIncomplete) {
+    return { text: 'Datos parciales confirmados', state: 'incomplete', dotClass: 'incomplete' }
+  }
+  if (hasOutdated) {
+    return { text: 'Información histórica', state: 'outdated', dotClass: 'outdated' }
+  }
+  return { text: '4 sistemas verificados al día', state: 'verified', dotClass: 'verified' }
+})
+
 // Los 4 sistemas principales garantizados en orden: Panapass, Revisado, GPS, Control de Auto
 const fourSystemCards = computed<DetailCard[]>(() => {
   if (!detail.value) return []
@@ -481,6 +510,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
     value: panNum ? 'No disponible' : 'No asignado',
     details: [{ label: 'Número Panapass', value: panNum || 'No asignado' }],
     updatedAt: 'Sin consulta reciente',
+    syncStatus: panNum ? 'error' : 'incomplete',
     note: panNum ? 'Sin confirmación de saldo ENA.' : 'Control de Auto no registra Panapass activo.',
   }
 
@@ -492,6 +522,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
     value: String(c.mes_revisado || 'Sin registro'),
     details: [{ label: 'Mes asignado', value: String(c.mes_revisado || 'No definido') }],
     updatedAt: 'Sin consulta reciente',
+    syncStatus: 'incomplete',
     note: 'Estado de revisado vehicular.',
   }
 
@@ -506,6 +537,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
       { label: 'GPS 2', value: canSeeGps.value ? 'Sin información' : 'No habilitado en este perfil' },
     ],
     updatedAt: 'Sin comunicación confirmada',
+    syncStatus: 'incomplete',
     note: canSeeGps.value ? 'No se recibieron lecturas de GPS 1 / GPS 2.' : 'Monitoreo satelital reservado a supervisión y administración.',
   }
 
@@ -521,12 +553,14 @@ const fourSystemCards = computed<DetailCard[]>(() => {
       { label: 'Supervisora', value: detail.value.supervisor || '—' },
     ],
     updatedAt: 'Sincronizado RYM',
+    syncStatus: 'verified',
     note: detail.value.active ? 'Unidad activa en Control de Auto.' : `Unidad parada · Estado interno: ${internalStopReason}`,
   }
 
   return [panCard, revCard, gpsCard, ctrlCard]
 })
 
+// FASE 1 & FASE 4: Métricas esenciales resumidas (limpias y sin saturar la vista principal)
 function cardPrimaryMetrics(card: DetailCard): Array<{ label: string; value: string }> {
   const c = detail.value?.controlRecord || {}
   const rev = detail.value?.revisadoRecord || {}
@@ -535,12 +569,11 @@ function cardPrimaryMetrics(card: DetailCard): Array<{ label: string; value: str
   const g2 = (gps.gps2 as Unit) || {}
 
   if (card.key === 'panapass') {
-    const panNum = String(c.panapass_numero || c.panapass || 'No asignado').trim()
-    const tagNum = String(c.tag || 'Sin TAG').trim()
+    const panNum = String(c.panapass_numero || c.panapass || '').trim()
+    const tagNum = String(c.tag || '').trim()
+    const panText = panNum ? `${panNum}${tagNum && tagNum !== 'Sin TAG' ? ` · TAG ${tagNum}` : ''}` : 'No asignado'
     return [
-      { label: 'Estado del saldo', value: card.badge || 'Sin confirmar' },
-      { label: 'N.º Panapass / TAG', value: `${panNum}${tagNum && tagNum !== 'Sin TAG' ? ` · TAG ${tagNum}` : ''}` },
-      { label: 'Última consulta ENA', value: card.updatedAt || card.details?.[0]?.value || 'Sin consulta reciente' },
+      { label: 'Cuenta / TAG', value: panText },
     ]
   }
 
@@ -548,32 +581,39 @@ function cardPrimaryMetrics(card: DetailCard): Array<{ label: string; value: str
     const month = String(c.mes_revisado || rev.mes_revisado || rev.mes || 'No definido').trim()
     const lastRev = card.details?.find(d => /último|fecha/i.test(d.label))?.value || String(rev.ultimo_revisado || 'Sin registro')
     return [
-      { label: 'Estado actual', value: card.badge || 'SIN CONFIRMAR' },
-      { label: 'Mes / Vencimiento', value: month },
-      { label: 'Última consulta / ref.', value: lastRev },
+      { label: 'Mes asignado', value: month },
+      { label: 'Último revisado', value: formatPanamaDate(lastRev, false) },
     ]
   }
 
+  // FASE 4: Mostrar individualmente GPS 1 y GPS 2 priorizando estados oficiales
   if (card.key === 'gps') {
-    const g1Text = card.details?.[0]?.value || (g1.installed === false ? 'Sin GPS' : String(g1.label || 'Sin dato'))
-    const g2Text = card.details?.[1]?.value || (g2.installed === false ? 'Sin GPS' : String(g2.label || 'Sin dato'))
+    const formatGpsDeviceState = (dev: Unit): string => {
+      if (dev.installed === false) return 'Sin GPS'
+      if (dev.installed === true) {
+        if (dev.ok === true) return 'Reportando'
+        const reason = String(dev.label || dev.razon || 'Sin comunicación')
+        return /critico|crítico/i.test(reason) ? 'Crítico' : reason
+      }
+      return 'Sin información'
+    }
+    const g1State = formatGpsDeviceState(g1)
+    const g2State = formatGpsDeviceState(g2)
     return [
-      { label: 'GPS 1', value: g1Text },
-      { label: 'GPS 2', value: g2Text },
-      { label: 'Última comunicación', value: card.updatedAt || 'Sin transmisión reciente' },
+      { label: 'GPS 1', value: g1State },
+      { label: 'GPS 2', value: g2State },
     ]
   }
 
   // Control de Auto
   const internalState = String(c.estatus2 || c.status2 || c.estado || (detail.value?.active ? 'ACTIVO' : 'PARADA')).trim()
   return [
-    { label: detail.value?.active ? 'Condición operativa' : 'Estado interno (Parada)', value: internalState || '—' },
-    { label: 'Galera / Supervisora', value: `${detail.value?.galera || '—'} · ${detail.value?.supervisor || '—'}` },
-    { label: 'Empresa operadora', value: detail.value?.operator || '—' },
+    { label: detail.value?.active ? 'Condición' : 'Motivo parada', value: internalState || '—' },
+    { label: 'Galera', value: detail.value?.galera || '—' },
   ]
 }
 
-// Datos Técnicos y Administrativos agrupados en 3 secciones secundarias (Fase 5)
+// Datos Técnicos y Administrativos agrupados en 3 secciones secundarias
 const technicalFields = computed(() => {
   if (!detail.value) return []
   const c = detail.value.controlRecord || {}
@@ -591,7 +631,6 @@ const technicalFields = computed(() => {
     { label: 'Color registrado', value: String(c.color || detail.value.vehicleColor || '—') },
   ]
 
-  // Mostrar PIN únicamente cuando corresponda al perfil autorizado (ADMIN_TOTAL / ADMIN)
   if (canSeeSensitivePin.value && c.pin && String(c.pin).trim() !== '' && String(c.pin).trim() !== '—') {
     items.push({
       label: 'PIN de seguridad (Autorizado)',
@@ -629,7 +668,7 @@ const documentationFields = computed(() => {
     { label: 'Aseguradora oficial', value: String(o.aseguradora || c.aseguradora || '—') },
     { label: 'Póliza oficial / Seguro', value: String(o.poliza || c.nro_poliza || '—'), mono: true },
     { label: 'Mes de revisado asignado', value: String(c.mes_revisado || r.mes_revisado || o.mes_revisado || '—') },
-    { label: 'Última verificación eCarCheck', value: String(o.actualizado_at || f.consulta_at || r.ultimo_revisado || 'Sin verificación reciente') },
+    { label: 'Última verificación eCarCheck', value: formatPanamaDate(o.actualizado_at || f.consulta_at || r.ultimo_revisado) || 'Sin verificación reciente' },
   ]
 })
 
@@ -700,7 +739,7 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <!-- FASE 1 & FASE 2: Autocompletado Inteligente con Prioridad Estricta -->
+    <!-- Autocompletado Inteligente con Prioridad Estricta -->
     <div
       v-if="visible"
       id="v101ValidatorList"
@@ -757,12 +796,10 @@ onUnmounted(() => {
           @click="select(item)"
           @mouseenter="activeIndex = index"
         >
-          <!-- Columna 1: Número de Unidad -->
           <div class="v-res-unit-badge">
             <span class="v-unit-code">{{ unit(item) }}</span>
           </div>
 
-          <!-- Columna 2: Placa, Empresa y Panapass (sin repetir información) -->
           <div class="v-res-body">
             <div class="v-res-top-line">
               <span class="v-res-company">{{ company(item) }}</span>
@@ -787,7 +824,6 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Acción -->
           <div class="v-res-action" aria-hidden="true">
             <span class="v-action-enter">Ver ficha →</span>
           </div>
@@ -812,7 +848,7 @@ onUnmounted(() => {
   </div>
 
   <!-- =======================================================================
-       FASE 3, 4, 5, 6, 7 & 8: NUEVA FICHA PREMIUM DE UNIDAD (BENTO COMMAND SHEET)
+       FICHA REFINADA DE UNIDAD — BENTO COMMAND SHEET (FASES 1 A 6)
        ======================================================================= -->
   <Teleport to="body">
     <Transition name="v-ficha-fade">
@@ -851,9 +887,9 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Contenido Principal de la Ficha Bento Command Sheet -->
+          <!-- Contenido Principal de la Ficha -->
           <template v-else-if="detail">
-            <!-- FASE 4.1: CABECERA INTELIGENTE DE UNIDAD (Sin repetir ID innecesariamente) -->
+            <!-- CABECERA INTELIGENTE DE UNIDAD -->
             <header class="v-ficha-header" data-testid="ficha-header">
               <div class="v-ficha-header-main">
                 <!-- Identificador Principal de Unidad + Acción Rápida Copiar -->
@@ -879,7 +915,7 @@ onUnmounted(() => {
                     </div>
                   </div>
 
-                  <!-- Metadatos Primarios en Cápsulas Limpias (Placa, Empresa, Vehículo, Color) -->
+                  <!-- Metadatos Primarios en Cápsulas Limpias -->
                   <div class="v-ficha-identity-meta">
                     <div class="v-ficha-primary-pills">
                       <!-- Placa + Botón Copiar Placa -->
@@ -980,7 +1016,7 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <!-- Cinta de Alertas Puntuales Confirmadas (Solo si existen incidencias críticas reales) -->
+              <!-- Cinta de Alertas Puntuales Confirmadas -->
               <div v-if="detail.auditIssues && detail.auditIssues.length" class="v-ficha-alerts-strip" data-testid="ficha-audit-alerts">
                 <div
                   v-for="issue in detail.auditIssues"
@@ -997,19 +1033,26 @@ onUnmounted(() => {
 
             <!-- CUERPO DESPLAZABLE DE LA FICHA -->
             <div class="v-ficha-body">
-              <!-- FASE 4.2: ESTADO DE LOS CUATRO SISTEMAS (4 Tarjetas Visuales Independientes en Bento Grid) -->
+              <!-- FASE 1, 4 & 5: CUATRO TARJETAS SIMPLIFICADAS Y VERIFICADAS -->
               <section class="v-ficha-systems-section" aria-label="Estado de los cuatro sistemas">
                 <div class="v-ficha-section-bar">
                   <div class="v-ficha-section-title">
                     <span class="v-ficha-section-kicker">MONITOREO MULTISISTEMA</span>
                     <h3>Estado Operativo de los 4 Sistemas</h3>
                   </div>
-                  <span class="v-ficha-live-indicator">
-                    <span class="live-dot" :class="{ syncing: detailEnriching }"></span>
-                    <span>{{ detailEnriching ? 'Actualizando fuentes oficiales…' : '4 fuentes consultadas' }}</span>
+
+                  <!-- FASE 5: Distinción clara de estado de consulta -->
+                  <span
+                    class="v-ficha-live-indicator"
+                    :class="`status-${consultationStatusSummary.state}`"
+                    data-testid="consultation-status-badge"
+                  >
+                    <span class="live-dot" :class="consultationStatusSummary.dotClass"></span>
+                    <span>{{ consultationStatusSummary.text }}</span>
                   </span>
                 </div>
 
+                <!-- FASE 3: Cada tarjeta es interactiva y expandible al hacer clic -->
                 <div class="v-ficha-bento-grid" data-testid="ficha-four-systems-grid">
                   <article
                     v-for="card in fourSystemCards"
@@ -1017,6 +1060,13 @@ onUnmounted(() => {
                     class="v-sys-bento-card"
                     :class="[`sys-${card.key}`, `tone-${card.tone || 'neutral'}`, { expanded: expandedSystemCards[card.key] }]"
                     :data-testid="`ficha-system-card-${card.key}`"
+                    tabindex="0"
+                    role="button"
+                    :aria-expanded="!!expandedSystemCards[card.key]"
+                    :aria-label="`Tarjeta ${card.title}. Clic para ${expandedSystemCards[card.key] ? 'colapsar' : 'expandir'} detalles.`"
+                    @click="toggleSystemCard(card.key, $event)"
+                    @keydown.enter="toggleSystemCard(card.key)"
+                    @keydown.space.prevent="toggleSystemCard(card.key)"
                   >
                     <!-- Cabecera de la Tarjeta del Sistema -->
                     <div class="v-sys-card-top">
@@ -1039,7 +1089,7 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <!-- Valor Principal Destacado (Prioridad Visual) -->
+                    <!-- FASE 1: DATO PRINCIPAL ULTRA-PROTAGONISTA Y LIMPIO -->
                     <div class="v-sys-hero-metric">
                       <strong class="v-sys-hero-value" :class="`tone-${card.tone || 'neutral'}`">
                         {{ card.value }}
@@ -1047,7 +1097,7 @@ onUnmounted(() => {
                       <p class="v-sys-hero-note">{{ card.note }}</p>
                     </div>
 
-                    <!-- Puntos Clave Prioritarios del Sistema -->
+                    <!-- Puntos Clave Prioritarios y Simplificados -->
                     <dl class="v-sys-priority-list">
                       <div
                         v-for="metric in cardPrimaryMetrics(card)"
@@ -1059,14 +1109,14 @@ onUnmounted(() => {
                       </div>
                     </dl>
 
-                    <!-- Pie de Tarjeta: Timestamp de Consulta + Botón Expandir Detalle -->
+                    <!-- Pie de Tarjeta: Timestamp en formato Panamá + Botón Expandir -->
                     <div class="v-sys-card-footer">
-                      <span class="v-sys-timestamp" title="Última actualización o consulta del sistema">
+                      <span class="v-sys-timestamp" title="Última actualización / comunicación en horario de Panamá">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
                           <circle cx="12" cy="12" r="10"/>
                           <polyline points="12 6 12 12 16 14"/>
                         </svg>
-                        <span>{{ card.updatedAt || 'Consulta reciente' }}</span>
+                        <span>{{ card.updatedAt || 'Sin consulta' }}</span>
                       </span>
 
                       <button
@@ -1075,18 +1125,19 @@ onUnmounted(() => {
                         class="v-sys-expand-btn"
                         :aria-expanded="!!expandedSystemCards[card.key]"
                         :data-testid="`btn-expand-${card.key}`"
-                        @click="toggleSystemCard(card.key)"
+                        @click.stop="toggleSystemCard(card.key)"
                       >
-                        <span>{{ expandedSystemCards[card.key] ? 'Ocultar detalle' : 'Ver detalle' }}</span>
+                        <span>{{ expandedSystemCards[card.key] ? 'Ocultar' : 'Detalles' }}</span>
                         <span class="v-sys-chevron" :class="{ open: expandedSystemCards[card.key] }">▾</span>
                       </button>
                     </div>
 
-                    <!-- Detalle Expandible del Sistema -->
+                    <!-- Detalle Expandible Oficial -->
                     <div
                       v-if="expandedSystemCards[card.key] && card.sections && card.sections.length"
                       class="v-sys-expanded-drawer"
                       :data-testid="`drawer-${card.key}`"
+                      @click.stop
                     >
                       <div
                         v-for="sec in card.sections"
@@ -1110,14 +1161,14 @@ onUnmounted(() => {
                 </div>
               </section>
 
-              <!-- FASE 5: DATOS TÉCNICOS Y ADMINISTRATIVOS (Secciones Secundarias Expandibles) -->
+              <!-- SECCIONES SECUNDARIAS EXPANDIBLES -->
               <section class="v-ficha-secondary-section" aria-label="Datos técnicos y administrativos">
                 <div class="v-ficha-section-bar secondary">
                   <div class="v-ficha-section-title">
                     <span class="v-ficha-section-kicker">EXPEDIENTE DE UNIDAD</span>
                     <h3>Datos Técnicos, Asignación y Documentación</h3>
                   </div>
-                  <small class="v-ficha-secondary-hint">Haz clic en cualquier bloque para desplegar su información</small>
+                  <small class="v-ficha-secondary-hint">Despliega cualquier bloque para consultar la ficha completa</small>
                 </div>
 
                 <div class="v-ficha-accordions-grid" data-testid="ficha-secondary-accordions">
@@ -1254,7 +1305,6 @@ onUnmounted(() => {
                         </div>
                       </div>
 
-                      <!-- Tabla de comparación RYM vs eCarCheck si existe -->
                       <div v-if="officialComparisons.length" class="v-sec-comparison-block">
                         <h5>Cotejo RYM vs. Registro Oficial eCarCheck</h5>
                         <div class="v-sec-comp-list">
@@ -1279,41 +1329,51 @@ onUnmounted(() => {
               </section>
             </div>
 
-            <!-- FASE 8: PIE DE FICHA CON ACCIONES RÁPIDAS Y NAVEGACIÓN A MÓDULOS -->
+            <!-- FASE 6: PIE DE FICHA CON ACCIÓN PRINCIPAL DESTACADA Y ACCESOS SECUNDARIOS -->
             <footer class="v-ficha-footer">
-              <div class="v-ficha-footer-shortcuts">
+              <!-- Accesos secundarios a módulos con permisos respetados -->
+              <div class="v-ficha-footer-secondary-links">
+                <span class="v-footer-links-label">Ir al módulo:</span>
                 <button
                   type="button"
-                  class="v-ficha-shortcut-btn"
+                  class="v-ficha-sub-link"
+                  data-testid="link-nav-panapass"
                   @click="handleModuleShortcut('panapass')"
                 >
-                  <span>Ir a Panapass</span>
+                  Panapass
                 </button>
+                <span class="v-sub-sep">·</span>
                 <button
                   type="button"
-                  class="v-ficha-shortcut-btn"
+                  class="v-ficha-sub-link"
+                  data-testid="link-nav-revisados"
                   @click="handleModuleShortcut('revisados')"
                 >
-                  <span>Ir a Revisados</span>
+                  Revisados
                 </button>
-                <button
-                  v-if="canSeeGps"
-                  type="button"
-                  class="v-ficha-shortcut-btn"
-                  @click="handleModuleShortcut('gps')"
-                >
-                  <span>Ir a GPS</span>
-                </button>
+                <template v-if="canSeeGps">
+                  <span class="v-sub-sep">·</span>
+                  <button
+                    type="button"
+                    class="v-ficha-sub-link"
+                    data-testid="link-nav-gps"
+                    @click="handleModuleShortcut('gps')"
+                  >
+                    GPS
+                  </button>
+                </template>
               </div>
 
+              <!-- Acciones Principales -->
               <div class="v-ficha-footer-main-actions">
                 <button type="button" class="v-ficha-btn-secondary" @click="closeDetail">
-                  <span>Cerrar ficha</span>
+                  <span>Cerrar</span>
                 </button>
                 <button
                   v-if="canNavigateControl"
                   type="button"
                   class="v-ficha-btn-primary"
+                  data-testid="btn-main-open-control"
                   @click="handleModuleShortcut('control')"
                 >
                   <span>Abrir en Control de Auto →</span>
@@ -1329,7 +1389,7 @@ onUnmounted(() => {
 
 <style>
 /* =========================================================================
-   1. BUSCADOR GLOBAL DE UNIDADES Y AUTOCOMPLETADO INTELIGENTE (FASE 1 & 2)
+   1. BUSCADOR GLOBAL DE UNIDADES Y AUTOCOMPLETADO INTELIGENTE
 ========================================================================== */
 .v-search-box {
   position: relative !important;
@@ -1720,7 +1780,7 @@ onUnmounted(() => {
 }
 
 /* =========================================================================
-   2. NUEVA FICHA PREMIUM DE UNIDAD — BENTO COMMAND SHEET (FASES 3 A 9)
+   2. FICHA REFINADA DE UNIDAD — BENTO COMMAND SHEET
 ========================================================================== */
 .v-ficha-backdrop {
   position: fixed !important;
@@ -1750,7 +1810,6 @@ onUnmounted(() => {
   color: #0f172a !important;
 }
 
-/* Transición del Modal */
 .v-ficha-fade-enter-active,
 .v-ficha-fade-leave-active {
   transition: opacity 0.22s ease !important;
@@ -1760,7 +1819,6 @@ onUnmounted(() => {
   opacity: 0 !important;
 }
 
-/* Estados de carga y error en la ficha */
 .v-ficha-loading,
 .v-ficha-error {
   padding: 64px 32px !important;
@@ -1795,7 +1853,7 @@ onUnmounted(() => {
   color: #64748b !important;
 }
 
-/* CABECERA DE LA FICHA (FASE 4.1) */
+/* CABECERA DE LA FICHA */
 .v-ficha-header {
   background: linear-gradient(135deg, #0c2d48 0%, #0f3d5e 52%, #134e6f 100%) !important;
   color: #ffffff !important;
@@ -1977,7 +2035,7 @@ onUnmounted(() => {
   font-weight: 700 !important;
 }
 
-/* Derecha de la Cabecera: Semáforo + Controles */
+/* Derecha de la Cabecera */
 .v-ficha-header-controls {
   display: flex !important;
   align-items: center !important;
@@ -2113,7 +2171,6 @@ onUnmounted(() => {
   border-color: rgba(248, 113, 113, 0.9) !important;
 }
 
-/* Tira de alertas confirmadas en cabecera */
 .v-ficha-alerts-strip {
   display: flex !important;
   flex-wrap: wrap !important;
@@ -2193,17 +2250,43 @@ onUnmounted(() => {
   letter-spacing: -0.015em !important;
 }
 
+/* FASE 5: Indicador de Estado de Consulta Diferenciado */
 .v-ficha-live-indicator {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 7px !important;
   font-size: 12px !important;
-  font-weight: 600 !important;
-  color: #475569 !important;
-  background: #ffffff !important;
-  padding: 4px 11px !important;
+  font-weight: 700 !important;
+  padding: 5px 12px !important;
   border-radius: 999px !important;
   border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04) !important;
+}
+
+.v-ficha-live-indicator.status-verified {
+  border-color: #bbf7d0 !important;
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+}
+
+.v-ficha-live-indicator.status-incomplete {
+  border-color: #fed7aa !important;
+  background: #fff7ed !important;
+  color: #c2410c !important;
+}
+
+.v-ficha-live-indicator.status-error {
+  border-color: #fecaca !important;
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+}
+
+.v-ficha-live-indicator.status-outdated {
+  border-color: #e2e8f0 !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
 }
 
 .live-dot {
@@ -2213,12 +2296,24 @@ onUnmounted(() => {
   background: #10b981 !important;
 }
 
+.live-dot.verified {
+  background: #10b981 !important;
+}
+.live-dot.incomplete {
+  background: #f59e0b !important;
+}
+.live-dot.error {
+  background: #ef4444 !important;
+}
+.live-dot.outdated {
+  background: #64748b !important;
+}
 .live-dot.syncing {
   background: #0284c7 !important;
   animation: vSpin 1s linear infinite !important;
 }
 
-/* BENTO GRID DE LOS 4 SISTEMAS (FASE 4.2 & FASE 7 RESPONSIVE) */
+/* BENTO GRID DE LOS 4 SISTEMAS (FASE 1 & 3: Clickeable e Inteligente) */
 .v-ficha-bento-grid {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -2236,14 +2331,22 @@ onUnmounted(() => {
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
-  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  outline: none !important;
+  position: relative !important;
 }
 
 .v-sys-bento-card:hover {
+  transform: translateY(-2px) !important;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+  border-color: #cbd5e1 !important;
 }
 
-/* Colores semánticos del borde superior (Fase 6: nunca verde si falta información) */
+.v-sys-bento-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.35), 0 8px 24px rgba(15, 23, 42, 0.1) !important;
+}
+
 .v-sys-bento-card.tone-ok {
   border-top-color: #10b981 !important;
 }
@@ -2325,7 +2428,6 @@ onUnmounted(() => {
   color: #0f172a !important;
 }
 
-/* Badge de estado de cada sistema */
 .v-sys-status-badge {
   display: inline-flex !important;
   align-items: center !important;
@@ -2368,21 +2470,21 @@ onUnmounted(() => {
   background: currentColor !important;
 }
 
-/* Métrica principal de cada tarjeta */
+/* FASE 1: DATO PRINCIPAL PROTAGONISTA */
 .v-sys-hero-metric {
   background: #f8fafc !important;
   border: 1px solid #f1f5f9 !important;
   border-radius: 12px !important;
-  padding: 10px 12px !important;
+  padding: 12px !important;
 }
 
 .v-sys-hero-value {
   display: block !important;
-  font-size: 19px !important;
+  font-size: 21px !important;
   font-weight: 900 !important;
   color: #0f172a !important;
   letter-spacing: -0.02em !important;
-  margin-bottom: 3px !important;
+  margin-bottom: 2px !important;
 }
 
 .v-sys-hero-value.tone-bad {
@@ -2402,12 +2504,12 @@ onUnmounted(() => {
   line-height: 1.35 !important;
 }
 
-/* Lista de métricas prioritarias del sistema */
+/* Lista simplificada de datos esenciales */
 .v-sys-priority-list {
   margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 6px !important;
+  gap: 5px !important;
 }
 
 .v-sys-priority-row {
@@ -2416,8 +2518,8 @@ onUnmounted(() => {
   align-items: baseline !important;
   gap: 8px !important;
   font-size: 12px !important;
-  padding-bottom: 5px !important;
-  border-bottom: 1px dashed #e2e8f0 !important;
+  padding-bottom: 4px !important;
+  border-bottom: 1px dashed #f1f5f9 !important;
 }
 
 .v-sys-priority-row:last-child {
@@ -2439,7 +2541,7 @@ onUnmounted(() => {
   word-break: break-word !important;
 }
 
-/* Pie de tarjeta de sistema */
+/* Pie de tarjeta */
 .v-sys-card-footer {
   display: flex !important;
   align-items: center !important;
@@ -2468,7 +2570,7 @@ onUnmounted(() => {
   color: #0284c7 !important;
   font-size: 11px !important;
   font-weight: 700 !important;
-  padding: 4px 9px !important;
+  padding: 4px 8px !important;
   border-radius: 7px !important;
   cursor: pointer !important;
   transition: background 0.15s ease !important;
@@ -2480,14 +2582,14 @@ onUnmounted(() => {
 
 .v-sys-chevron {
   display: inline-block !important;
-  transition: transform 0.18s ease !important;
+  transition: transform 0.2s ease !important;
 }
 
 .v-sys-chevron.open {
   transform: rotate(180deg) !important;
 }
 
-/* Cajón expandido dentro de la tarjeta del sistema */
+/* FASE 3: Cajón expandido sin desorganizar la grilla */
 .v-sys-expanded-drawer {
   margin-top: 6px !important;
   padding-top: 10px !important;
@@ -2495,6 +2597,12 @@ onUnmounted(() => {
   display: flex !important;
   flex-direction: column !important;
   gap: 10px !important;
+  animation: drawerFadeIn 0.2s ease !important;
+}
+
+@keyframes drawerFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .v-sys-drawer-group h5 {
@@ -2530,7 +2638,7 @@ onUnmounted(() => {
 }
 
 /* =========================================================================
-   3. SECCIONES SECUNDARIAS EXPANDIBLES (FASE 5)
+   3. SECCIONES SECUNDARIAS EXPANDIBLES
 ========================================================================== */
 .v-ficha-secondary-hint {
   font-size: 12px !important;
@@ -2684,7 +2792,6 @@ onUnmounted(() => {
   cursor: pointer !important;
 }
 
-/* Cotejo Oficial RYM vs eCarCheck */
 .v-sec-comparison-block {
   margin-top: 14px !important;
   padding-top: 12px !important;
@@ -2740,7 +2847,9 @@ onUnmounted(() => {
   color: #dc2626 !important;
 }
 
-/* PIE DE LA FICHA (FASE 8) */
+/* =========================================================================
+   4. PIE DE FICHA REFINADO (FASE 6: Acción Principal Destacada + Secundarias)
+========================================================================== */
 .v-ficha-footer {
   background: #ffffff !important;
   border-top: 1px solid #e2e8f0 !important;
@@ -2753,29 +2862,41 @@ onUnmounted(() => {
   flex-shrink: 0 !important;
 }
 
-.v-ficha-footer-shortcuts {
+.v-ficha-footer-secondary-links {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
   flex-wrap: wrap !important;
+  font-size: 12px !important;
 }
 
-.v-ficha-shortcut-btn {
-  padding: 7px 12px !important;
-  border-radius: 9px !important;
-  background: #f1f5f9 !important;
-  border: 1px solid #cbd5e1 !important;
-  color: #334155 !important;
+.v-footer-links-label {
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+.v-ficha-sub-link {
+  border: none !important;
+  background: transparent !important;
+  color: #0284c7 !important;
   font-size: 12px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  padding: 2px 4px !important;
+  border-radius: 4px !important;
+  transition: color 0.15s ease, background 0.15s ease !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
 }
 
-.v-ficha-shortcut-btn:hover {
-  background: #e0f2fe !important;
-  border-color: #7dd3fc !important;
+.v-ficha-sub-link:hover {
   color: #0369a1 !important;
+  background: #f0f9ff !important;
+}
+
+.v-sub-sep {
+  color: #cbd5e1 !important;
+  font-weight: 800 !important;
 }
 
 .v-ficha-footer-main-actions {
@@ -2794,30 +2915,35 @@ onUnmounted(() => {
   font-size: 13px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
+  transition: background 0.15s ease !important;
 }
 
 .v-ficha-btn-secondary:hover {
   background: #f1f5f9 !important;
 }
 
+/* Acción Principal Destacada: Abrir en Control de Auto */
 .v-ficha-btn-primary {
-  padding: 9px 18px !important;
+  padding: 10px 20px !important;
   border-radius: 11px !important;
   background: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%) !important;
   border: none !important;
   color: #ffffff !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
   cursor: pointer !important;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
 }
 
 .v-ficha-btn-primary:hover {
-  filter: brightness(1.06) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.4) !important;
+  filter: brightness(1.05) !important;
 }
 
 /* =========================================================================
-   4. DISEÑO RESPONSIVE (FASE 7: Desktop, Laptop, Tablet y Móvil)
+   5. DISEÑO RESPONSIVE (FASE 7)
 ========================================================================== */
 @media (max-width: 1180px) {
   .v-ficha-bento-grid {
@@ -2868,7 +2994,24 @@ onUnmounted(() => {
 
   .v-ficha-footer {
     padding: 10px 14px !important;
-    gap: 8px !important;
+    gap: 10px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .v-ficha-footer-secondary-links {
+    justify-content: center !important;
+  }
+
+  .v-ficha-footer-main-actions {
+    margin-left: 0 !important;
+    display: flex !important;
+    width: 100% !important;
+  }
+
+  .v-ficha-footer-main-actions button {
+    flex: 1 !important;
+    text-align: center !important;
   }
 
   .v-submit-btn span {

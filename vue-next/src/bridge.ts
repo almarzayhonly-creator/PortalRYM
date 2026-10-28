@@ -3,9 +3,9 @@ import type { Component } from 'vue'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import ValidatorAppView from './views/ValidatorAppView.vue'
-import { acceptHomeSummary, acceptIndicator, createDashboardState, failHomeSummary, failIndicator } from './dashboard'
+import { acceptHomeSummary, acceptIndicator, canOpen, createDashboardState, failHomeSummary, failIndicator } from './dashboard'
 import type { DashboardState } from './dashboard'
-import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalProfile } from './types'
+import type { ExecutiveIndicators, HomeSummary, ModuleAction, PanapassAuditIndicators, PortalProfile } from './types'
 import type { PanapassSnapshot } from './panapass'
 import { navigateToLegacyView } from './navigation'
 import './style.css'
@@ -18,6 +18,8 @@ declare global {
       context: () => { profile: PortalProfile | null; modules: string[] }
       hasModule: (code: string) => boolean
       call: <T = Record<string, unknown>>(name: string, body?: Record<string, unknown>) => Promise<T>
+      rpc?: <T = unknown>(name: string, body?: Record<string, unknown>) => Promise<T>
+      viewContext?: () => { today: string | null; isAdmin: boolean }
     }
     rymHasModule?: (code: string) => boolean
     v70OpenPanapass?: () => unknown
@@ -47,6 +49,7 @@ let state: DashboardState | null = null
 let methods: ModuleAction = {}
 let controlIndicatorsRequested = false
 let gpsIndicatorsRequested = false
+let panapassAuditRequested = false
 let panapassApp: ReturnType<typeof createApp> | null = null
 let panapassObserver: MutationObserver | null = null
 let panapassSequence = 0
@@ -90,32 +93,136 @@ function loadPanapassStyles(): Promise<void> {
   }
   return panapassStylesPromise
 }
+function waitForClick(selector: string, timeoutMs = 4500): Promise<boolean> {
+  return new Promise(resolve => {
+    const start = Date.now()
+    const check = () => {
+      const el = document.querySelector<HTMLElement>(selector)
+      if (el) {
+        el.click()
+        resolve(true)
+        return
+      }
+      if (Date.now() - start >= timeoutMs) {
+        resolve(false)
+        return
+      }
+      window.setTimeout(check, 60)
+    }
+    check()
+  })
+}
+
+function waitForSelectValue(selector: string, value: string, timeoutMs = 4500): Promise<boolean> {
+  return new Promise(resolve => {
+    const start = Date.now()
+    const check = () => {
+      const sel = document.querySelector<HTMLSelectElement>(selector)
+      if (sel && Array.from(sel.options).some(o => o.value === value)) {
+        sel.value = value
+        sel.dispatchEvent(new Event('change', { bubbles: true }))
+        resolve(true)
+        return
+      }
+      if (Date.now() - start >= timeoutMs) {
+        resolve(false)
+        return
+      }
+      window.setTimeout(check, 60)
+    }
+    check()
+  })
+}
+
 function currentActions(): ModuleAction {
+  const navDisposers = {
+    disposeHome,
+    disposePanapass,
+    disposeValidatorApp,
+    disposeWorkspace: () => {
+      workspaceApp?.unmount()
+      workspaceApp = null
+    }
+  }
   return {
     panapass: () => openPanapass(),
+    panapassSinActivo: async () => {
+      await navigateToLegacyView('bajas_panapass', navDisposers, state?.session.profile)
+      await waitForClick('[data-v99bt="alerts"], [data-v96bt="alerts"]')
+    },
+    panapassBajasPendientes: async () => {
+      await navigateToLegacyView('bajas_panapass', navDisposers, state?.session.profile)
+      await waitForClick('[data-v99bt="pending"], [data-v96bt="pending"]')
+    },
     revisados: () => openOperationalModule('revisados'),
+    revisadosCriticos: async () => {
+      if (typeof window.v60OpenRevisados !== 'function') {
+        await openOperationalModule('revisados')
+        return
+      }
+      disposeHome()
+      disposePanapass()
+      disposeValidatorApp()
+      workspaceApp?.unmount()
+      workspaceApp = null
+      await window.v60OpenRevisados()
+      await waitForClick('[data-v66-tab="operations"]')
+      await waitForClick('.v66-priority[data-pri="CRITICA"]')
+    },
     control: () => openOperationalModule('control'),
+    controlParadas: async () => {
+      const win = window as any
+      if (typeof win.v75ControlUnits === 'function') {
+        disposeHome()
+        disposePanapass()
+        disposeValidatorApp()
+        workspaceApp?.unmount()
+        workspaceApp = null
+        await win.v75ControlUnits()
+        await waitForSelectValue('#v154CtlState', 'PARADO')
+        return
+      }
+      if (typeof window.v70OpenControl === 'function') {
+        disposeHome()
+        disposePanapass()
+        disposeValidatorApp()
+        workspaceApp?.unmount()
+        workspaceApp = null
+        await window.v70OpenControl()
+        await waitForClick('[data-v75-control="unidades"]')
+        await waitForSelectValue('#v154CtlState', 'PARADO')
+        return
+      }
+      await openOperationalModule('control')
+    },
     gps: () => openOperationalModule('gps'),
+    gpsCriticos: async () => {
+      if (typeof window.v113OpenGps !== 'function') {
+        await openOperationalModule('gps')
+        return
+      }
+      disposeHome()
+      disposePanapass()
+      disposeValidatorApp()
+      workspaceApp?.unmount()
+      workspaceApp = null
+      await window.v113OpenGps()
+      await waitForClick('.v157-kpi[data-focus="CRITICO"], .v154-gps-kpi[data-v154-k="CRITICO"]')
+    },
     users: () => openOperationalModule('users'),
     logout: () => routeTo(logoutToLogin),
     retry: () => window.v36PortalHome?.(),
     retryIndicators: () => {
       if (!state) return
-      if (state.summary?.control && !state.controlIndicators) { state.controlState = 'loading'; state.controlError = '' }
-      if (String(state.session.profile.rol || '').toUpperCase() === 'ADMIN_TOTAL' && !state.gpsIndicators) { state.gpsState = 'loading'; state.gpsError = '' }
       const role = String(state.session.profile.rol || '').toUpperCase()
+      const hasGps = canOpen(state.session, 'gps', window.rymHasModule)
+      if (state.summary?.control && !state.controlIndicators) { state.controlState = 'loading'; state.controlError = '' }
+      if (hasGps && !state.gpsIndicators) { state.gpsState = 'loading'; state.gpsError = '' }
       void window.__RYM_VUE_NEXT_HOME_MAIN?.refreshIndicators?.(role, { control: !!state.summary?.control, gps: false })
-      if (role === 'ADMIN_TOTAL') void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
+      if (hasGps) void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
+      void refreshPanapassAudit(true)
     },
-    navigateLegacy: (moduleId: string) => navigateToLegacyView(moduleId, {
-      disposeHome,
-      disposePanapass,
-      disposeValidatorApp,
-      disposeWorkspace: () => {
-        workspaceApp?.unmount()
-        workspaceApp = null
-      }
-    }, state?.session.profile),
+    navigateLegacy: (moduleId: string) => navigateToLegacyView(moduleId, navDisposers, state?.session.profile),
   }
 }
 
@@ -254,6 +361,329 @@ export function disposePanapass(): void {
   panapassApp = null
 }
 
+function normUnit(val: unknown): string {
+  return String(val ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase()
+}
+
+function extractSinPanapassFromSummary(summary: HomeSummary | null | undefined): number | null {
+  if (!summary) return null
+  const s = summary as any
+  if (typeof s.control_sin_panapass === 'number') return s.control_sin_panapass
+  if (typeof s.panapass?.sin_panapass === 'number') return s.panapass.sin_panapass
+  if (typeof s.control?.sin_panapass === 'number') return s.control.sin_panapass
+  if (Array.isArray(summary.alerts)) {
+    for (const a of summary.alerts) {
+      const txt = `${a.title || ''} ${a.text || ''}`
+      const m = txt.match(/(\d+)\s+.*sin\s+panapass/i)
+      if (m) return Number(m[1])
+    }
+  }
+  if (typeof summary.panapass?.bajas?.alertas === 'number') {
+    return summary.panapass.bajas.alertas
+  }
+  return null
+}
+
+function extractBajasPendientesFromSummary(summary: HomeSummary | null | undefined): number | null {
+  if (!summary) return null
+  const p = summary.panapass as Record<string, any> | undefined
+  if (typeof p?.bajas?.pendientes === 'number') return Math.max(0, p.bajas.pendientes)
+  if (typeof p?.bajas_pendientes === 'number') return Math.max(0, p.bajas_pendientes)
+  if (Array.isArray(summary.alerts)) {
+    for (const a of summary.alerts) {
+      const txt = `${a.title || ''} ${a.text || ''}`
+      const m = txt.match(/(\d+)\s+bajas?\s+pendientes?/i)
+      if (m) return Number(m[1])
+    }
+  }
+  return null
+}
+
+async function refreshPanapassAudit(force = false): Promise<void> {
+  if (!state || !isHomeActive()) return
+  const summary = state.summary
+  const sinFromSummary = extractSinPanapassFromSummary(summary)
+  const bajasFromSummary = extractBajasPendientesFromSummary(summary)
+  const negSummary = typeof summary?.panapass?.negativos_hoy === 'number' ? summary.panapass.negativos_hoy : null
+  const pagSummary = typeof summary?.panapass?.pagos_hoy === 'number' ? summary.panapass.pagos_hoy : null
+
+  const api = window.__RYM_VUE_NEXT_API
+  if (!api?.rpc || !summary?.panapass) {
+    const hasPagos = (pagSummary ?? 0) > 0
+    const scenario = negSummary === null
+      ? 'UNCONFIRMED'
+      : (hasPagos ? 'PM_COMPLETED' : 'AM_CUT')
+    state.panapassAudit = {
+      loaded: true,
+      scenario,
+      negativosDetectados: negSummary,
+      negativosConPago: pagSummary ?? 0,
+      negativosPendientesReales: scenario === 'UNCONFIRMED' ? null : 0,
+      pagosPreparadosHoy: 0,
+      pagosArchivadosHoy: pagSummary ?? 0,
+      pagosEjecutadosHoy: pagSummary,
+      sinPanapassActivo: sinFromSummary,
+      bajasPendientes: bajasFromSummary,
+      fuenteEsHoy: scenario !== 'UNCONFIRMED',
+      estadoGestionLabel: scenario === 'PM_COMPLETED'
+        ? 'Gestión PM completada'
+        : scenario === 'AM_CUT'
+          ? 'Corte AM registrado'
+          : 'Pendiente de actualización',
+      ultimaConsultaAt: summary?.generated_at || null,
+    }
+    return
+  }
+
+  try {
+    const ctx = api.viewContext ? api.viewContext() : { today: null, isAdmin: false }
+    const today = ctx.today || new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Panama' }).format(new Date())
+    const [negRowsRes, pagRowsRes, hojaRowsRes, estadoRes, enaRunsRes, bajasRes] = await Promise.all([
+      api.rpc<any[]>('panapass_negativos_fecha_v2', { p_fecha: today, p_galera: null, p_supervisora_id: null }).catch(() => null),
+      api.rpc<any[]>('panapass_pagos_fecha_v2', { p_fecha: today, p_galera: null, p_supervisora: null }).catch(() => null),
+      api.rpc<any[]>('panapass_v10_pagos_hoy', {}).catch(() => null),
+      api.rpc<any[]>('panapass_v10_estado_operativo', {}).catch(() => null),
+      api.rpc<any[]>('panapass_ena_estado', {}).catch(() => null),
+      api.rpc<any>('panapass_bajas_centro_v7', {}).catch(() => null),
+    ])
+
+    if (!state || !isHomeActive()) return
+
+    const negRows = Array.isArray(negRowsRes) ? negRowsRes : null
+    const pagRows = Array.isArray(pagRowsRes) ? pagRowsRes : null
+    const hojaRows = Array.isArray(hojaRowsRes) ? hojaRowsRes : null
+    const estadoOp = Array.isArray(estadoRes) ? estadoRes[0] : (estadoRes || null)
+    const enaRuns = Array.isArray(enaRunsRes) ? enaRunsRes : null
+
+    const run6 = enaRuns?.find(r => String(r?.tipo || '').toUpperCase() === '6AM') || null
+    const run11 = enaRuns?.find(r => String(r?.tipo || '').toUpperCase() === '11AM') || null
+    const run11Estado = String(run11?.estado || '').toUpperCase()
+
+    // 1. Pagos realizados hoy (únicamente cuando estén confirmados: archivados, guardados/validados o registrados en pm_pagados)
+    const paidUnitsSet = new Set<string>()
+    let pagosArchivadosCount = pagSummary ?? 0
+    if (pagRows) {
+      const validPag = pagRows.filter(r => {
+        const monto = Number(r?.a_pagar ?? r?.monto ?? 0)
+        const st = normUnit(r?.status || r?.estado || 'CONFIRMADO')
+        return monto > 0 && st !== 'ANULADO' && st !== 'RECHAZADO' && st !== 'BORRADOR'
+      })
+      pagosArchivadosCount = validPag.length
+      for (const r of validPag) {
+        const u = normUnit(r?.unidad)
+        if (u) paidUnitsSet.add(u)
+      }
+    }
+
+    let pagosPreparadosCount = 0
+    let hojaCargadosCount = 0
+    if (hojaRows) {
+      hojaCargadosCount = hojaRows.filter(r => normUnit(r?.origen_registro) !== 'EXTRAORDINARIO').length
+      const validHoja = hojaRows.filter(r => {
+        const monto = Number(r?.a_pagar ?? 0)
+        if (monto <= 0) return false
+        const st = normUnit(r?.status || r?.estado || '')
+        // Contabilizar solamente cuando el pago esté confirmado/guardado (no borradores no confirmados)
+        if (st === 'BORRADOR' || st === 'PENDIENTE_CONFIRMAR' || st === 'RECHAZADO') return false
+        if (r?.guardado_en === false) return false
+        return true
+      })
+      pagosPreparadosCount = validHoja.length
+      for (const r of validHoja) {
+        const u = normUnit(r?.unidad)
+        if (u) paidUnitsSet.add(u)
+      }
+    }
+
+    const opPmPagados = typeof estadoOp?.pm_pagados === 'number' ? estadoOp.pm_pagados : 0
+    const pagosEjecutadosHoy = Math.max(pagosArchivadosCount, pagosPreparadosCount, opPmPagados, pagSummary ?? 0)
+
+    // 2. Fotografía histórica del corte AM (NO asumir que todas siguen negativas en la tarde)
+    let negativosDetectados: number | null = negSummary
+    if (typeof estadoOp?.am_negativos === 'number') {
+      negativosDetectados = estadoOp.am_negativos
+    } else if (negRows) {
+      const negUnits = [...new Set(negRows.map(r => normUnit(r?.unidad)).filter(Boolean))]
+      negativosDetectados = negUnits.length
+    }
+
+    // 3. Unidades sin Panapass activo y Bajas pendientes (categorías independientes)
+    let sinPan = sinFromSummary
+    if (bajasRes && Array.isArray(bajasRes.alertas)) {
+      const alertUnits = new Set(
+        bajasRes.alertas
+          .filter((x: any) => !x?.tipo || normUnit(x?.tipo) === 'PANAPASS_NO_ASIGNADO' || normUnit(x?.tipo).includes('PANAPASS'))
+          .map((x: any) => normUnit(x?.unidad || x?.id || JSON.stringify(x)))
+          .filter(Boolean)
+      )
+      sinPan = alertUnits.size
+    }
+
+    let bajasPend = bajasFromSummary
+    if (bajasRes && Array.isArray(bajasRes.pendientes)) {
+      const pendUnits = new Set(
+        bajasRes.pendientes
+          .filter((x: any) => {
+            const st = normUnit(x?.estado || x?.status || 'PENDIENTE')
+            return st !== 'COMPLETADA' && st !== 'COMPLETADO' && st !== 'FINALIZADA'
+          })
+          .map((x: any) => normUnit(x?.id || x?.unidad || JSON.stringify(x)))
+          .filter(Boolean)
+      )
+      bajasPend = pendUnits.size
+    }
+
+    // 4. Última consulta / corte confirmado
+    const ultimaConsultaAt =
+      run11?.finalizado_en ||
+      run6?.finalizado_en ||
+      bajasRes?.ultimo_corte?.capturado_en ||
+      summary?.generated_at ||
+      null
+
+    // 5. Clasificación de los Escenarios Operativos AM/PM (FASE 2 & VALIDACIÓN FINAL AM/PM)
+    // Reglas estrictas:
+    // - AM conserva los negativos (ej. 122) como dato histórico y NO los interpreta como pagos pendientes.
+    // - Errores o ausencia de datos del PM NUNCA se interpretan como gestión completada.
+    // - Cuando llega información confirmada del PM:
+    //   - Si quedan unidades pendientes reales (> 0) -> PM_PENDING (naranja/ámbar).
+    //   - Si el PM confirma que NO quedan pagos pendientes (0) -> PM_COMPLETED (verde/neutral, sin naranja).
+    let scenario: 'AM_CUT' | 'PM_COMPLETED' | 'PM_PENDING' | 'UNCONFIRMED' = 'AM_CUT'
+    let negativosPendientesReales: number | null = 0
+    let estadoGestionLabel = 'Corte AM en seguimiento'
+    let fuenteEsHoy = true
+
+    const pmRunHasError = ['ERROR', 'EXPIRADO', 'FUENTE_INCOMPLETA'].includes(run11Estado)
+    const allMainRpcsFailed = estadoOp === null && enaRuns === null && hojaRows === null && pagRows === null
+
+    if (allMainRpcsFailed || pmRunHasError || (estadoOp && estadoOp.fuente_es_hoy === false)) {
+      // Regla 8: Errores o ausencia de datos del PM nunca se interpretan como gestión completada
+      scenario = 'UNCONFIRMED'
+      fuenteEsHoy = false
+      negativosPendientesReales = null
+      estadoGestionLabel = 'Pendiente de actualización'
+    } else if (estadoOp && typeof estadoOp.pm_pendientes === 'number') {
+      const pmPendRaw = Math.max(0, Number(estadoOp.pm_pendientes))
+      const motivoPmNorm = normUnit(estadoOp.motivo_pm)
+      // Determinar si ya se obtuvo o procesó información del PM (11:05 AM)
+      const hasPmInfo =
+        run11Estado === 'LISTO' ||
+        pmPendRaw > 0 ||
+        pagosEjecutadosHoy > 0 ||
+        hojaCargadosCount > 0 ||
+        motivoPmNorm.includes('PROCESADO') ||
+        motivoPmNorm.includes('COMPLETADO') ||
+        motivoPmNorm.includes('YA EJECUTADO')
+
+      if (!hasPmInfo) {
+        // Todavía estamos en horario/etapa AM: conservar los 122 negativos como dato histórico en seguimiento
+        scenario = 'AM_CUT'
+        negativosPendientesReales = 0
+        estadoGestionLabel = 'Corte AM en seguimiento'
+      } else if (hojaRows && hojaCargadosCount > 0) {
+        const unpaidInSheet = Math.max(0, hojaCargadosCount - pagosPreparadosCount)
+        if (unpaidInSheet > 0) {
+          scenario = 'PM_PENDING'
+          negativosPendientesReales = unpaidInSheet
+          estadoGestionLabel = `${unpaidInSheet} pendientes PM`
+        } else {
+          scenario = 'PM_COMPLETED'
+          negativosPendientesReales = 0
+          estadoGestionLabel = pagosEjecutadosHoy > 0 ? 'Gestión PM completada' : 'PM sin pagos pendientes'
+        }
+      } else if (pmPendRaw > 0) {
+        if (pagosEjecutadosHoy > 0 && pmPendRaw <= opPmPagados && pagosArchivadosCount >= pmPendRaw) {
+          scenario = 'PM_COMPLETED'
+          negativosPendientesReales = 0
+          estadoGestionLabel = 'Gestión PM completada'
+        } else {
+          // Si pm_pendientes reporta el total del corte PM y ya hay pagos confirmados de esas unidades, descontar solo los confirmados
+          const remainingPm = opPmPagados > 0 && pmPendRaw > opPmPagados
+            ? pmPendRaw
+            : Math.max(0, pmPendRaw - pagosArchivadosCount)
+          if (remainingPm > 0) {
+            scenario = 'PM_PENDING'
+            negativosPendientesReales = remainingPm
+            estadoGestionLabel = `${remainingPm} pendientes PM`
+          } else {
+            scenario = 'PM_COMPLETED'
+            negativosPendientesReales = 0
+            estadoGestionLabel = 'Gestión PM completada'
+          }
+        }
+      } else {
+        // hasPmInfo === true y pmPendRaw === 0: el PM confirma que no quedan pagos pendientes
+        scenario = 'PM_COMPLETED'
+        negativosPendientesReales = 0
+        estadoGestionLabel = pagosEjecutadosHoy > 0 ? 'Gestión PM completada' : 'PM sin pagos pendientes'
+      }
+    } else {
+      // Respaldo cuando estadoOp no está disponible (ej. rol sin acceso a estadoOp, pero con acceso a runs/hoja/pagos)
+      if (hojaRows && hojaCargadosCount > 0) {
+        const unpaidInSheet = Math.max(0, hojaCargadosCount - pagosPreparadosCount)
+        if (unpaidInSheet > 0) {
+          scenario = 'PM_PENDING'
+          negativosPendientesReales = unpaidInSheet
+          estadoGestionLabel = `${unpaidInSheet} pendientes PM`
+        } else {
+          scenario = 'PM_COMPLETED'
+          negativosPendientesReales = 0
+          estadoGestionLabel = 'Gestión PM completada'
+        }
+      } else if (pagosEjecutadosHoy > 0 || run11Estado === 'LISTO') {
+        scenario = 'PM_COMPLETED'
+        negativosPendientesReales = 0
+        estadoGestionLabel = pagosEjecutadosHoy > 0 ? 'Gestión PM completada' : 'PM sin pagos pendientes'
+      } else if (negativosDetectados !== null && negativosDetectados >= 0) {
+        scenario = 'AM_CUT'
+        negativosPendientesReales = 0
+        estadoGestionLabel = 'Corte AM en seguimiento'
+      } else {
+        scenario = 'UNCONFIRMED'
+        fuenteEsHoy = false
+        negativosPendientesReales = null
+        estadoGestionLabel = 'Sin confirmar'
+      }
+    }
+
+    state.panapassAudit = {
+      loaded: true,
+      scenario,
+      negativosDetectados,
+      negativosConPago: pagosEjecutadosHoy,
+      negativosPendientesReales,
+      pagosPreparadosHoy: pagosPreparadosCount,
+      pagosArchivadosHoy: pagosArchivadosCount,
+      pagosEjecutadosHoy,
+      sinPanapassActivo: sinPan,
+      bajasPendientes: bajasPend,
+      fuenteEsHoy,
+      estadoGestionLabel,
+      ultimaConsultaAt,
+      corte6am: run6?.estado || undefined,
+      corte11am: run11?.estado || undefined,
+    }
+  } catch (err) {
+    if (!state) return
+    state.panapassAudit = {
+      loaded: true,
+      error: err instanceof Error ? err.message : 'No se pudo consultar el estado ENA',
+      scenario: 'UNCONFIRMED',
+      negativosDetectados: negSummary,
+      negativosConPago: pagSummary ?? 0,
+      negativosPendientesReales: null,
+      pagosPreparadosHoy: 0,
+      pagosArchivadosHoy: pagSummary ?? 0,
+      pagosEjecutadosHoy: pagSummary,
+      sinPanapassActivo: sinFromSummary,
+      bajasPendientes: bajasFromSummary,
+      fuenteEsHoy: false,
+      estadoGestionLabel: 'Sin confirmar',
+      ultimaConsultaAt: summary?.generated_at || null,
+    }
+  }
+}
+
 export function renderHome(summary: HomeSummary): void {
   disposeLogin()
   const root = document.querySelector<HTMLElement>('#app')
@@ -267,6 +697,7 @@ export function renderHome(summary: HomeSummary): void {
     app.mount('#rym-vue-next-home')
     controlIndicatorsRequested = false
     gpsIndicatorsRequested = false
+    panapassAuditRequested = false
   }
   Object.assign(state.session, { profile: summary.profile || state.session.profile, modules: summary.modules || state.session.modules })
   Object.assign(state, acceptHomeSummary(state, summary))
@@ -274,12 +705,22 @@ export function renderHome(summary: HomeSummary): void {
     if (!state || !document.querySelector('[data-testid="vue-next-home"]')) return
     const role = String(state.session.profile.rol || '').toUpperCase()
     const control = !!state.summary?.control && !controlIndicatorsRequested
-    const gps = role === 'ADMIN_TOTAL' && !gpsIndicatorsRequested
-    if (!control && !gps) return
-    if (control) controlIndicatorsRequested = true
-    if (gps) gpsIndicatorsRequested = true
-    void window.__RYM_VUE_NEXT_HOME_MAIN?.refreshIndicators?.(role, { control, gps: false })
-    if (gps) void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
+    const gps = canOpen(state.session, 'gps', window.rymHasModule) && !gpsIndicatorsRequested
+    if (control) {
+      controlIndicatorsRequested = true
+      void window.__RYM_VUE_NEXT_HOME_MAIN?.refreshIndicators?.(role, { control: true, gps: false })
+    }
+    if (gps) {
+      gpsIndicatorsRequested = true
+      void window.__RYM_VUE_NEXT_GPS_PRIORITY?.()
+    }
+    if (state.summary?.panapass && !panapassAuditRequested) {
+      panapassAuditRequested = true
+      void refreshPanapassAudit()
+    } else if (state.summary?.panapass) {
+      // Actualizar sinPanapass o conteos si llegó un resumen nuevo
+      void refreshPanapassAudit()
+    }
   })
 }
 
@@ -324,7 +765,7 @@ export function setGpsIndicators(data: ExecutiveIndicators): void { if (isHomeAc
 export function failControlIndicators(error: unknown): void { if (isHomeActive() && state) Object.assign(state, failIndicator(state, 'control', error)) }
 export function failGpsIndicators(error: unknown): void { if (isHomeActive() && state) Object.assign(state, failIndicator(state, 'gps', error)) }
 
-export function disposeHome(): void { app?.unmount(); app = null; state = null; controlIndicatorsRequested = false; gpsIndicatorsRequested = false }
+export function disposeHome(): void { app?.unmount(); app = null; state = null; controlIndicatorsRequested = false; gpsIndicatorsRequested = false; panapassAuditRequested = false }
 
 let viewApp: ReturnType<typeof createApp> | null = null
 const nativeViews: Record<string, () => Promise<{ default: Component }>> = {

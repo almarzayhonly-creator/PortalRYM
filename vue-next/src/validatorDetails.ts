@@ -10,6 +10,7 @@ export type DetailCard = {
   details: Array<{ label: string; value: string }>
   note: string
   updatedAt?: string
+  syncStatus?: 'verified' | 'outdated' | 'incomplete' | 'error'
   sections?: DetailSection[]
 }
 export type AuditIssue = { code: string; label: string; severity: 'bad' | 'warn' | 'info'; desc: string; fixAction?: string }
@@ -56,16 +57,69 @@ function rawObject(value: unknown): Unit {
 }
 
 // ============================================================================
-// FASE 1 & FASE 2: MOTOR DE BÚSQUEDA Y PRIORIDAD ESTRICTA DE UNIDADES
+// FASE 2: FORMATO DE FECHAS EN HORARIO DE PANAMÁ (America/Panama)
+// Ejemplo: "28 oct 2026 · 10:30 a. m."
+// Nunca mostrar cadenas ISO brutas (T...Z) al usuario.
 // ============================================================================
-// Prioridad obligatoria:
-// 1. Coincidencia exacta de unidad (Regla principal: si existe coincidencia
-//    exacta de unidad, mostrar EXCLUSIVAMENTE esa unidad).
-// 2. Coincidencia exacta de placa.
-// 3. Coincidencia exacta de Panapass.
-// 4. Coincidencias por prefijo (unidad -> placa -> Panapass).
-// 5. Coincidencias parciales relevantes en campos habilitados.
-// 6. Sugerencias aproximadas únicamente cuando no existan coincidencias 1–5.
+
+export function formatPanamaDate(rawDate: unknown, showTime = true): string {
+  if (!rawDate) return ''
+  const str = String(rawDate).trim()
+  if (!str || str === '—' || str.toLowerCase() === 'sin registro' || str.toLowerCase() === 'sin consulta reciente') {
+    return str
+  }
+
+  // Si ya viene con formato amigable, no romperlo
+  if (/\b(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\b/i.test(str) && str.includes('·')) {
+    return str
+  }
+
+  // Parsear fecha ISO o DD/MM/YYYY
+  let dt: Date | null = null
+
+  // Caso DD/MM/YYYY o DD/MM/YYYY HH:mm
+  const dmyMatch = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
+  if (dmyMatch) {
+    const [, day, month, year, h = '0', m = '0', s = '0'] = dmyMatch
+    dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(h) + 5, Number(m), Number(s))) // approx adjustment if local
+  } else {
+    const parsed = new Date(str)
+    if (!isNaN(parsed.getTime())) {
+      dt = parsed
+    }
+  }
+
+  if (!dt || isNaN(dt.getTime())) {
+    return str
+  }
+
+  try {
+    const datePart = new Intl.DateTimeFormat('es-PA', {
+      timeZone: 'America/Panama',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(dt).replace('.', '')
+
+    if (!showTime) {
+      return datePart
+    }
+
+    const timePart = new Intl.DateTimeFormat('es-PA', {
+      timeZone: 'America/Panama',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    }).format(dt).toLowerCase()
+
+    return `${datePart} · ${timePart}`
+  } catch {
+    return str
+  }
+}
+
+// ============================================================================
+// FASE 1 & FASE 2: MOTOR DE BÚSQUEDA Y PRIORIDAD ESTRICTA DE UNIDADES
 // ============================================================================
 
 export type SearchMatchTier =
@@ -118,7 +172,6 @@ export function deduplicateUnits(rows: Unit[]): Unit[] {
 
 function isApproximateUnitMatch(target: string, query: string): boolean {
   if (!target || !query || query.length < 3) return false
-  // Subsequence check or 1-character transposition/edit distance on short unit codes
   if (Math.abs(target.length - query.length) > 1) return false
   let diffs = 0
   const maxLen = Math.max(target.length, query.length)
@@ -231,17 +284,14 @@ export function rankAndFilterUnits(rawRows: Unit[], rawQuery: string, maxResults
     return tier1ExactUnit.sort(naturalUnitCompare)
   }
 
-  // Si existe una coincidencia exacta de placa, mostrar exclusivamente esa coincidencia exacta.
   if (tier2ExactPlate.length > 0) {
     return tier2ExactPlate.sort(naturalUnitCompare)
   }
 
-  // Si existe una coincidencia exacta de Panapass, mostrar exclusivamente esa coincidencia exacta.
   if (tier3ExactPanapass.length > 0) {
     return tier3ExactPanapass.sort(naturalUnitCompare)
   }
 
-  // Combinar prefijos y parciales relevantes en orden estricto de prioridad
   const combinedRelevant = [
     ...tier4PrefixUnit.sort(naturalUnitCompare),
     ...tier4PrefixPlate.sort(naturalUnitCompare),
@@ -256,7 +306,6 @@ export function rankAndFilterUnits(rawRows: Unit[], rawQuery: string, maxResults
     return combinedRelevant.slice(0, maxResults)
   }
 
-  // Sugerencias aproximadas solamente cuando no existan coincidencias exactas ni parciales directas
   return tier6Approximate.sort(naturalUnitCompare).slice(0, Math.min(5, maxResults))
 }
 
@@ -298,7 +347,7 @@ function controlSections(detail: UnitDetail, fichaResponse: Unit | null): Detail
   ])
   if (technicalRym) sections.push(technicalRym)
   const officialSection = addSection('Ficha oficial · eCarCheck', [
-    ['Última verificación', pickValue(official.actualizado_at, ficha.consulta_at)],
+    ['Última verificación', formatPanamaDate(pickValue(official.actualizado_at, ficha.consulta_at))],
     ['Resultado eCarCheck', pickValue(ficha.resultado, raw.detalleRespuesta, raw.detalle_respuesta)],
     ['Placa consultada', pickValue(raw.nroPlaca, official.placa)],
     ['Cupo oficial', pickValue(raw.cupo, official.cupo)],
@@ -359,7 +408,7 @@ function panSections(detail: UnitDetail): DetailSection[] {
     ['Otros TAGs ENA', ids],
     ['Cantidad de TAGs', c.cantidad_tags],
     ['Último resultado ENA', c.ena_ultimo_resultado],
-    ['Última consulta ENA', pickValue(account.ultima_consulta, c.ena_ultima_consulta, account.updated_at, c.ena_actualizado_at)],
+    ['Última consulta ENA', formatPanamaDate(pickValue(account.ultima_consulta, c.ena_ultima_consulta, account.updated_at, c.ena_actualizado_at))],
     ['Último error', pickValue(c.ena_ultimo_error, account.ultimo_error)],
   ])]
   for (const [i, tag] of tags.entries()) {
@@ -369,7 +418,7 @@ function panSections(detail: UnitDetail): DetailSection[] {
       ['Tipo de TAG', pickValue(tag.tipo_tag, tag.tipo)],
       ['Matrícula', pickValue(tag.matricula, tag.placa)],
       ['Saldo del TAG', tag.saldo],
-      ['Consulta del TAG', tag.consultado_at],
+      ['Consulta del TAG', formatPanamaDate(tag.consultado_at)],
     ])
     if (section) sections.push(section)
   }
@@ -377,7 +426,7 @@ function panSections(detail: UnitDetail): DetailSection[] {
     ['Estado de acceso ENA', pickValue(account.estado_acceso, c.ena_estado_acceso)],
     ['Empresa ENA', pickValue(account.ena_empresa, c.ena_empresa)],
     ['RUC ENA', pickValue(account.ena_ruc, c.ena_ruc)],
-    ['Última actualización cuenta', pickValue(account.updated_at, c.ena_actualizado_at)],
+    ['Última actualización cuenta', formatPanamaDate(pickValue(account.updated_at, c.ena_actualizado_at))],
   ])
   if (admin) sections.push(admin)
   return sections.filter((item): item is DetailSection => !!item)
@@ -388,7 +437,7 @@ function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): Detai
   const official = objectValue(f.oficial), raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta)), op = objectValue(f.operacion)
   const section = fields('Detalle de Revisado y eCarCheck', [
     ['Mes del revisado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes_revisado, r.mes)],
-    ['Fecha último revisado', pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha)],
+    ['Fecha último revisado', formatPanamaDate(pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha), false)],
     ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
     ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)],
     ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
@@ -396,7 +445,7 @@ function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): Detai
     ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
     ['Bloqueado / Boletas', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'],
     ['Observaciones eCarCheck', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
-    ['Última consulta eCarCheck', pickValue(official.actualizado_at, f.consulta_at)],
+    ['Última consulta eCarCheck', formatPanamaDate(pickValue(official.actualizado_at, f.consulta_at))],
   ])
   return section ? [section] : []
 }
@@ -410,15 +459,15 @@ function gpsSections(detail: UnitDetail): DetailSection[] {
     ['Velocidad reportada', r.velocidad != null ? `${displayValue(r.velocidad)} km/h` : null],
   ])
   const equipment = fields('Estado de GPS 1 y GPS 2', [
-    ['GPS 1', [g1.label, g1.last].filter(hasValue).join(' · ')],
-    ['GPS 2', [g2.label, g2.last].filter(hasValue).join(' · ')],
+    ['GPS 1', [g1.label, formatPanamaDate(g1.last)].filter(hasValue).join(' · ')],
+    ['GPS 2', [g2.label, formatPanamaDate(g2.last)].filter(hasValue).join(' · ')],
     ['Proveedor GPS 1', pickValue(g1.proveedor, g1.fuente)],
     ['Proveedor GPS 2', pickValue(g2.proveedor, g2.fuente)],
   ])
   const device = (title: string, source: Unit): DetailSection | null => fields(title, [
     ['Estado del equipo', source.label],
     ['Diagnóstico específico', source.razon],
-    ['Última comunicación', pickValue(source.last, source.ultima_senal)],
+    ['Última comunicación', formatPanamaDate(pickValue(source.last, source.ultima_senal))],
     ['Proveedor', pickValue(source.proveedor, source.fuente)],
     ['IMEI / ID', pickValue(source.imei, source.id)],
   ])
@@ -426,9 +475,12 @@ function gpsSections(detail: UnitDetail): DetailSection[] {
 }
 
 // ============================================================================
-// FASE 4 & FASE 6: NORMALIZACIÓN DE ESTADOS VISUALES DE LOS 4 SISTEMAS
-// Regla crítica Fase 6: Nunca mostrar verde ('ok') cuando un dato no pudo
-// consultarse o carece de respuesta confirmada.
+// FASE 4 & FASE 5: ESTADO DE CONSULTAS Y REGLAS DE NEGOCIO REALES
+// Clasificación de estado de consulta:
+// - verified: Consulta exitosa y datos al día
+// - outdated: Información antigua / histórica
+// - incomplete: Faltan fuentes o datos no configurados
+// - error: Fallo al consultar el servicio
 // ============================================================================
 
 function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): void {
@@ -439,23 +491,27 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
   const pana = detail.cards.find(card => card.key === 'panapass')
   if (pana) {
     const panNum = displayValue(pickValue(c.panapass_numero, c.numero_panapass))
-    const lastCheck = displayValue(pickValue(
+    const rawLastCheck = pickValue(
       pana.details?.find(d => /consulta/i.test(d.label))?.value,
       account.ultima_consulta,
       c.ena_ultima_consulta,
       account.updated_at,
       c.ena_actualizado_at
-    ))
-    pana.updatedAt = lastCheck || 'Sin consulta reciente'
+    )
+    const formattedCheck = formatPanamaDate(rawLastCheck)
+    pana.updatedAt = formattedCheck || 'Sin consulta reciente'
 
-    // Si no tiene Panapass o ENA no respondió, nunca usar verde ('ok')
     if (!panNum) {
       pana.tone = detail.active ? 'bad' : 'neutral'
       pana.badge = 'SIN PANAPASS'
       pana.value = 'No asignado'
+      pana.syncStatus = 'incomplete'
     } else if (/NO DISPONIBLE|SIN RESPUESTA|ERROR/i.test(`${pana.badge} ${pana.value}`)) {
       const savedSaldo = c.ena_saldo !== null && c.ena_saldo !== undefined && String(c.ena_saldo).trim() !== '' ? Number(c.ena_saldo) : null
       pana.tone = savedSaldo !== null && savedSaldo < 0 ? 'bad' : 'neutral'
+      pana.syncStatus = 'error'
+    } else {
+      pana.syncStatus = 'verified'
     }
   }
 
@@ -482,8 +538,10 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       else status = 'SIN REGISTRO'
 
       const month = displayValue(pickValue(c.mes_revisado, objectValue(fObj.unidad).mes_revisado, rev.mes_revisado, rev.mes))
-      const last = displayValue(pickValue(operation.fecha_ultimo_revisado, official.fecha_revisado, rev.ultimo_revisado, rev.fecha, 'Sin registro'))
-      const checkDate = displayValue(pickValue(official.actualizado_at, fObj.consulta_at, rev.updated_at, last))
+      const rawLast = pickValue(operation.fecha_ultimo_revisado, official.fecha_revisado, rev.ultimo_revisado, rev.fecha)
+      const last = rawLast ? formatPanamaDate(rawLast, false) : 'Sin registro'
+      const rawCheckDate = pickValue(official.actualizado_at, fObj.consulta_at, rev.updated_at, rawLast)
+      const checkDate = rawCheckDate ? formatPanamaDate(rawCheckDate) : 'Sin consulta reciente'
 
       const tone = status === 'VIGENTE'
         ? (rev.bloqueado ? 'warn' : 'ok')
@@ -501,20 +559,23 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
           { label: 'Mes / Vencimiento', value: month || 'No definido' },
           { label: 'Último revisado', value: last },
         ],
-        updatedAt: checkDate || 'Sin consulta reciente',
+        updatedAt: checkDate,
+        syncStatus: status === 'SIN REGISTRO' ? 'incomplete' : 'verified',
         note: status === 'VIGENTE'
           ? `Revisado vigente · Último registro: ${last}`
           : `Estado ${status.toLowerCase()} · Referencia: ${month || last}`,
       })
     } else if (review.badge === 'CONSULTANDO' || review.tone === 'pending') {
       review.updatedAt = 'Consultando…'
+      review.syncStatus = 'incomplete'
     } else if (/SIN REGISTRO|NO DISPONIBLE/i.test(`${review.badge} ${review.value}`)) {
       review.tone = detail.active ? 'warn' : 'neutral'
       review.updatedAt = 'Sin registro confirmado'
+      review.syncStatus = 'incomplete'
     }
   }
 
-  // 3. GPS
+  // 3. GPS (FASE 4: Reportando, Sin comunicación, Crítico, Sin información)
   const gps = detail.cards.find(card => card.key === 'gps')
   const row = objectValue(detail.gpsRecord)
   if (gps) {
@@ -523,6 +584,7 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       const complete = devices.every(item => typeof item.installed === 'boolean' && typeof item.ok === 'boolean')
       let level = upperValue(row.nivel), reason = displayValue(row.razon || row.diagnostico)
       const historic = ['CERRADO', 'CERRADA', 'CANIBALIZADO', 'CANIBALIZADA'].includes(upperValue(row.estatus_control))
+
       if (level === 'HISTORICO' || row.historico || historic) {
         level = 'SIN INFORMACIÓN'
         reason ||= 'Información GPS histórica'
@@ -532,6 +594,7 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
         level = !installed || !reporting ? 'CRÍTICO' : installed === 2 && reporting === 1 ? 'ALERTA' : 'NORMAL'
         if (installed === 1 && reporting === 1) reason = '1 GPS instalado y reportando'
       }
+
       const tone = (level === 'OK' || level === 'NORMAL')
         ? 'ok'
         : level === 'ALERTA'
@@ -539,28 +602,36 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
           : (level === 'CRITICO' || level === 'CRÍTICO')
             ? 'bad'
             : 'neutral'
-      const label = (item: Unit) => item.installed === false ? 'Sin GPS' : item.installed === true ? item.ok === true ? 'Reportando' : displayValue(item.label || 'Sin reportar') : 'Sin información'
+
+      const formatDeviceLabel = (item: Unit): string => {
+        if (item.installed === false) return 'Sin GPS'
+        if (item.installed === true) return item.ok === true ? 'Reportando' : displayValue(item.label || 'Sin comunicación')
+        return 'Sin información'
+      }
+
       const reporting = devices.filter(item => item.installed === true && item.ok === true).length
       const installed = devices.filter(item => item.installed === true).length
       const known = devices.some(item => typeof item.installed === 'boolean' || hasValue(item.label))
       const summary = !known ? 'Sin información' : installed === 0 ? '0 dispositivos instalados' : `${reporting} de ${Math.max(installed, 2)} reportando`
-      const lastComm = displayValue(pickValue(devices[0]?.last, devices[1]?.last, row.ultima_transmision, 'Sin transmisión reciente'))
+      const rawComm = pickValue(devices[0]?.last, devices[1]?.last, row.ultima_transmision)
+      const lastComm = rawComm ? formatPanamaDate(rawComm) : 'Sin transmisión reciente'
 
       Object.assign(gps, {
         tone,
         badge: level === 'OK' ? 'NORMAL' : level,
         value: summary,
         details: [
-          { label: 'GPS 1', value: `${label(devices[0]!)}${devices[0]?.last ? ` · ${displayValue(devices[0]?.last)}` : ''}` },
-          { label: 'GPS 2', value: `${label(devices[1]!)}${devices[1]?.last ? ` · ${displayValue(devices[1]?.last)}` : ''}` },
+          { label: 'GPS 1', value: `${formatDeviceLabel(devices[0]!)}${devices[0]?.last ? ` · ${formatPanamaDate(devices[0]?.last)}` : ''}` },
+          { label: 'GPS 2', value: `${formatDeviceLabel(devices[1]!)}${devices[1]?.last ? ` · ${formatPanamaDate(devices[1]?.last)}` : ''}` },
         ],
         updatedAt: lastComm,
+        syncStatus: level === 'SIN INFORMACIÓN' ? 'outdated' : (level === 'CRÍTICO' || level === 'CRITICO' ? 'incomplete' : 'verified'),
         note: reason ? `${level} · ${reason}` : `Estado satelital: ${level}`,
       })
     } else if (/NO DISPONIBLE|SIN GPS|NO VALIDADO|SIN INFORMAC/i.test(`${gps.badge} ${gps.value}`)) {
-      // Si no se pudo consultar GPS, nunca mostrar verde
       if (gps.tone === 'ok') gps.tone = 'neutral'
       gps.updatedAt = 'Sin comunicación confirmada'
+      gps.syncStatus = 'incomplete'
     }
   }
 
@@ -575,7 +646,9 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       : detail.active
         ? (upperValue(internalState) === 'ACTIVO' || upperValue(internalState) === 'ACTIVA' ? 'EN OPERACIÓN' : internalState)
         : (internalState || 'PARADA EN PATIO')
-    ctrlCard.updatedAt = displayValue(pickValue(c.updated_at, c.fecha_actualizacion, 'Sincronizado RYM'))
+    const rawUpdate = pickValue(c.updated_at, c.fecha_actualizacion)
+    ctrlCard.updatedAt = rawUpdate ? formatPanamaDate(rawUpdate) : 'Sincronizado RYM'
+    ctrlCard.syncStatus = 'verified'
   }
 }
 
@@ -589,7 +662,7 @@ export function applyValidatorSections(detail: UnitDetail, ficha: Unit | null = 
     if (card.key === 'gps') card.sections = gpsSections(detail)
   }
 
-  // 1. Detect Vehicle Color for Identity Pill
+  // Detect Vehicle Color
   const c = objectValue(detail.controlRecord)
   const f = objectValue(ficha || detail.fichaRecord)
   const u = objectValue(f.unidad)
@@ -607,7 +680,7 @@ export function applyValidatorSections(detail: UnitDetail, ficha: Unit | null = 
     detail.vehicleColor = String(detectedColor).trim()
   }
 
-  // 2. Automated Information Audit Engine (Detect real inconsistencies across 4 systems)
+  // Audit issues
   const issues: Array<{ code: string; label: string; severity: 'bad' | 'warn' | 'info'; desc: string }> = []
 
   const controlSec = detail.cards.find(x => x.key === 'control')?.sections || []

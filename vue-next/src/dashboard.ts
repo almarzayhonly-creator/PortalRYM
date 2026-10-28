@@ -1,11 +1,11 @@
-import type { ExecutiveIndicators, HomeSummary, ModuleAction, PortalSession } from './types'
+import type { ExecutiveIndicators, HomeSummary, ModuleAction, PanapassAuditIndicators, PortalSession } from './types'
 
 export type LoadState = 'loading' | 'ready' | 'stale' | 'error'
-export interface DashboardState { summary: HomeSummary | null; session: PortalSession; state: LoadState; error: string; controlIndicators: ExecutiveIndicators | null; controlState: LoadState; controlError: string; gpsIndicators: ExecutiveIndicators | null; gpsState: LoadState; gpsError: string }
+export interface DashboardState { summary: HomeSummary | null; session: PortalSession; state: LoadState; error: string; controlIndicators: ExecutiveIndicators | null; controlState: LoadState; controlError: string; gpsIndicators: ExecutiveIndicators | null; gpsState: LoadState; gpsError: string; panapassAudit?: PanapassAuditIndicators | null }
 export interface Metric { label: string; value: string | number; tone: string; detail: string }
 
 export function createDashboardState(session: PortalSession): DashboardState {
-  return { summary: null, session, state: 'loading', error: '', controlIndicators: null, controlState: 'loading', controlError: '', gpsIndicators: null, gpsState: 'loading', gpsError: '' }
+  return { summary: null, session, state: 'loading', error: '', controlIndicators: null, controlState: 'loading', controlError: '', gpsIndicators: null, gpsState: 'loading', gpsError: '', panapassAudit: null }
 }
 
 export function acceptIndicator(current: DashboardState, key: 'control' | 'gps', data: ExecutiveIndicators): DashboardState {
