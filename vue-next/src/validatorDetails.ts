@@ -29,6 +29,7 @@ export type UnitDetail = {
   controlRecord?: Unit
   revisadoRecord?: Unit
   enaAccount?: Unit
+  enaResponse?: Unit
   gpsRecord?: Unit
   fichaRecord?: Unit | null
   vehicleColor?: string
@@ -91,22 +92,48 @@ export function parseDateMetadata(rawDate: unknown, maxHoursFresh = 24): ParsedD
 
   let dt: Date | null = null
 
-  // Formato DD/MM/YYYY o DD-MM-YYYY con hora opcional
-  const dmyMatch = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
+  // 1. Formato DD/MM/YYYY o DD-MM-YYYY con hora opcional (admite coma y a.m./p.m.)
+  const dmyMatch = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([ap]\.?\s*m\.?))?)?/i)
   if (dmyMatch) {
-    const [, day, month, year, h = '0', m = '0', s = '0'] = dmyMatch
-    // Ajustar a hora local de Panamá (UTC-5)
-    dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(h) + 5, Number(m), Number(s)))
+    let [, day, month, year, h = '0', m = '0', s = '0', ampm] = dmyMatch
+    let hour = Number(h)
+    if (ampm) {
+      const isPm = ampm.toLowerCase().includes('p')
+      const isAm = ampm.toLowerCase().includes('a')
+      if (isPm && hour < 12) hour += 12
+      if (isAm && hour === 12) hour = 0
+    }
+    // Ajustar a hora local de Panamá (UTC-5): UTC = local + 5h
+    dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), hour + 5, Number(m), Number(s)))
   } else {
-    // Si viene solo YYYY-MM-DD sin hora, fijar las 05:00 UTC para que en Panamá sea 00:00 del mismo día
-    const ymdOnlyMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-    if (ymdOnlyMatch) {
-      const [, year, month, day] = ymdOnlyMatch
-      dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 5, 0, 0))
+    // 2. Formato textual en español (ej. "28 oct 2026 · 11:25 a. m." o "12 agosto 2026, 7:35 a. m.")
+    const monthsMap: Record<string, number> = {
+      ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5, jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11
+    }
+    const textMatch = str.match(/^(\d{1,2})\s+([a-záéíóúñ]{3,10})\.?\s+(\d{4})(?:[,\s·]+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([ap]\.?\s*m\.?))?)?/i)
+    if (textMatch) {
+      let [, day, mStr, year, h = '0', m = '0', s = '0', ampm] = textMatch
+      const mKey = mStr.toLowerCase().slice(0, 3).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      const monthNum = monthsMap[mKey] ?? 0
+      let hour = Number(h)
+      if (ampm) {
+        const isPm = ampm.toLowerCase().includes('p')
+        const isAm = ampm.toLowerCase().includes('a')
+        if (isPm && hour < 12) hour += 12
+        if (isAm && hour === 12) hour = 0
+      }
+      dt = new Date(Date.UTC(Number(year), monthNum, Number(day), hour + 5, Number(m), Number(s)))
     } else {
-      const parsed = new Date(str)
-      if (!isNaN(parsed.getTime())) {
-        dt = parsed
+      // 3. Formato YYYY-MM-DD sin hora
+      const ymdOnlyMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+      if (ymdOnlyMatch) {
+        const [, year, month, day] = ymdOnlyMatch
+        dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 5, 0, 0))
+      } else {
+        const parsed = new Date(str)
+        if (!isNaN(parsed.getTime())) {
+          dt = parsed
+        }
       }
     }
   }
@@ -579,14 +606,17 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
 
   // 1. PANAPASS (AUDITORÍA FASE 1 & FASE 2)
   // Separación estricta entre Estado Financiero y Vigencia de la Información.
-  // La fecha de consulta SOLO proviene de consultas reales a ENA (ultima_consulta / consultado_at),
+  // La fecha de consulta SOLO proviene de consultas reales a ENA (consultado_at / ultima_consulta),
   // NUNCA de updated_at de tablas ni de fechas de corte o vencimiento futuro.
   const pana = detail.cards.find(card => card.key === 'panapass')
   if (pana) {
     const panNum = displayValue(pickValue(c.panapass_numero, c.numero_panapass))
+    const enaRes = objectValue(detail.enaResponse)
     
     // Filtrar estrictamente: solo timestamps de consulta real a ENA
     const realEnaQueryRaw = pickValue(
+      enaRes.consultado_at,
+      enaRes.ultima_consulta,
       account.ultima_consulta,
       c.ena_ultima_consulta,
       pana.details?.find(d => /consulta/i.test(d.label))?.value
