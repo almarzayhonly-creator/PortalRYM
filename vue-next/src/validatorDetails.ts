@@ -1,19 +1,269 @@
 export type Unit = Record<string, unknown>
 export type DetailField = { label: string; value: string; reference?: string; comparison?: 'match' | 'diff' | 'missing' }
 export type DetailSection = { title: string; fields: DetailField[] }
-export type DetailCard = { key: string; title: string; tone: string; badge: string; value: string; details: Array<{ label: string; value: string }>; note: string; sections?: DetailSection[] }
-export type UnitDetail = { unit: string; plate: string; owner: string; operator: string; supervisor: string; galera: string; closed: boolean; active: boolean; status: string; overall: string; cards: DetailCard[]; controlRecord?: Unit; revisadoRecord?: Unit; enaAccount?: Unit; gpsRecord?: Unit }
-export type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<unknown>; enrich?: (detail: any) => Promise<any>; ficha?: (unit: Unit) => Promise<Unit>; gps?: (unit: Unit) => Promise<Record<string, unknown>> }
+export type DetailCard = {
+  key: string
+  title: string
+  tone: string
+  badge: string
+  value: string
+  details: Array<{ label: string; value: string }>
+  note: string
+  updatedAt?: string
+  sections?: DetailSection[]
+}
+export type AuditIssue = { code: string; label: string; severity: 'bad' | 'warn' | 'info'; desc: string; fixAction?: string }
+export type UnitDetail = {
+  unit: string
+  plate: string
+  owner: string
+  operator: string
+  supervisor: string
+  galera: string
+  closed: boolean
+  active: boolean
+  status: string
+  overall: string
+  cards: DetailCard[]
+  controlRecord?: Unit
+  revisadoRecord?: Unit
+  enaAccount?: Unit
+  gpsRecord?: Unit
+  fichaRecord?: Unit | null
+  vehicleColor?: string
+  auditIssues?: AuditIssue[]
+  healthScore?: number
+  healthBreakdown?: Array<{ name: string; score: number; max: number; status: 'ok' | 'warn' | 'bad' | 'neutral' }>
+}
+export type Api = {
+  search: (query: string) => Promise<Unit[]>
+  load: (unit: Unit) => Promise<unknown>
+  enrich?: (detail: any) => Promise<any>
+  ficha?: (unit: Unit) => Promise<Unit>
+  gps?: (unit: Unit) => Promise<Record<string, unknown>>
+}
 
 const hasValue = (value: unknown) => value !== undefined && value !== null && String(value).trim() !== '' && String(value).trim() !== '—'
 const displayValue = (value: unknown) => !hasValue(value) ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value).trim()
 const pickValue = (...values: unknown[]) => values.find(hasValue)
 function objectValue(value: unknown): Unit { return value && typeof value === 'object' && !Array.isArray(value) ? value as Unit : {} }
 const upperValue = (value: unknown) => displayValue(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()
+const compactAlnum = (value: unknown) => upperValue(value).replace(/[^A-Z0-9]/g, '')
+
 function rawObject(value: unknown): Unit {
   if (typeof value === 'string') { try { return objectValue(JSON.parse(value)) } catch { return {} } }
   return objectValue(value)
 }
+
+// ============================================================================
+// FASE 1 & FASE 2: MOTOR DE BÚSQUEDA Y PRIORIDAD ESTRICTA DE UNIDADES
+// ============================================================================
+// Prioridad obligatoria:
+// 1. Coincidencia exacta de unidad (Regla principal: si existe coincidencia
+//    exacta de unidad, mostrar EXCLUSIVAMENTE esa unidad).
+// 2. Coincidencia exacta de placa.
+// 3. Coincidencia exacta de Panapass.
+// 4. Coincidencias por prefijo (unidad -> placa -> Panapass).
+// 5. Coincidencias parciales relevantes en campos habilitados.
+// 6. Sugerencias aproximadas únicamente cuando no existan coincidencias 1–5.
+// ============================================================================
+
+export type SearchMatchTier =
+  | 'exact_unit'
+  | 'exact_plate'
+  | 'exact_panapass'
+  | 'prefix'
+  | 'partial'
+  | 'approximate'
+
+export function normalizeSearchQuery(rawQuery: unknown): string {
+  return String(rawQuery ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toUpperCase()
+}
+
+function naturalUnitCompare(a: Unit, b: Unit): number {
+  const ua = upperValue(pickValue(a.unidad, a.unit))
+  const ub = upperValue(pickValue(b.unidad, b.unit))
+  return ua.localeCompare(ub, 'es', { numeric: true, sensitivity: 'base' })
+}
+
+function scoreCompleteness(row: Unit): number {
+  let score = 0
+  if (hasValue(row.placa_unica) || hasValue(row.placa)) score += 3
+  if (hasValue(row.panapass_numero) || hasValue(row.panapass)) score += 3
+  if (hasValue(row.empresa_duena) || hasValue(row.empresa_operadora) || hasValue(row.empresa)) score += 2
+  if (hasValue(row.estatus) || hasValue(row.estado)) score += 2
+  if (hasValue(row.marca) || hasValue(row.modelo)) score += 1
+  return score
+}
+
+export function deduplicateUnits(rows: Unit[]): Unit[] {
+  const map = new Map<string, Unit>()
+  for (const raw of rows) {
+    if (!raw || typeof raw !== 'object') continue
+    const uKey = compactAlnum(pickValue(raw.unidad, raw.unit))
+    const pKey = compactAlnum(pickValue(raw.placa_unica, raw.placa, raw.placa_comercial))
+    const key = uKey || (pKey ? `PLATE:${pKey}` : '')
+    if (!key) continue
+    const existing = map.get(key)
+    if (!existing || scoreCompleteness(raw) > scoreCompleteness(existing)) {
+      map.set(key, existing ? { ...existing, ...raw } : raw)
+    }
+  }
+  return Array.from(map.values())
+}
+
+function isApproximateUnitMatch(target: string, query: string): boolean {
+  if (!target || !query || query.length < 3) return false
+  // Subsequence check or 1-character transposition/edit distance on short unit codes
+  if (Math.abs(target.length - query.length) > 1) return false
+  let diffs = 0
+  const maxLen = Math.max(target.length, query.length)
+  for (let i = 0; i < maxLen; i++) {
+    if (target[i] !== query[i]) diffs++
+    if (diffs > 1) return false
+  }
+  return diffs === 1
+}
+
+export function rankAndFilterUnits(rawRows: Unit[], rawQuery: string, maxResults = 16): Unit[] {
+  const q = normalizeSearchQuery(rawQuery)
+  const qCompact = q.replace(/[^A-Z0-9]/g, '')
+  if (!qCompact) return []
+
+  const uniqueRows = deduplicateUnits(Array.isArray(rawRows) ? rawRows : [])
+
+  const tier1ExactUnit: Unit[] = []
+  const tier2ExactPlate: Unit[] = []
+  const tier3ExactPanapass: Unit[] = []
+  const tier4PrefixUnit: Unit[] = []
+  const tier4PrefixPlate: Unit[] = []
+  const tier4PrefixPanapass: Unit[] = []
+  const tier5PartialUnit: Unit[] = []
+  const tier5PartialPlate: Unit[] = []
+  const tier5PartialPanapass: Unit[] = []
+  const tier5PartialCompany: Unit[] = []
+  const tier6Approximate: Unit[] = []
+
+  for (const row of uniqueRows) {
+    const unitNorm = upperValue(pickValue(row.unidad, row.unit))
+    const unitCompact = compactAlnum(unitNorm)
+
+    const platesNorm = [
+      upperValue(row.placa_unica),
+      upperValue(row.placa),
+      upperValue(row.placa_comercial),
+    ].filter(Boolean)
+    const platesCompact = platesNorm.map(p => p.replace(/[^A-Z0-9]/g, '')).filter(Boolean)
+
+    const panaNorm = upperValue(pickValue(row.panapass_numero, row.panapass))
+    const panaCompact = panaNorm.replace(/[^A-Z0-9]/g, '')
+
+    const companyNorm = upperValue(
+      pickValue(row.empresa_duena, row.empresa_operadora, row.empresa, row.empresa_nombre, row.razon_social)
+    )
+
+    // 1. Coincidencia exacta de unidad
+    if (unitNorm === q || (unitCompact && unitCompact === qCompact)) {
+      tier1ExactUnit.push({ ...row, _matchTier: 'exact_unit' })
+      continue
+    }
+
+    // 2. Coincidencia exacta de placa
+    if (platesNorm.includes(q) || platesCompact.includes(qCompact)) {
+      tier2ExactPlate.push({ ...row, _matchTier: 'exact_plate' })
+      continue
+    }
+
+    // 3. Coincidencia exacta de Panapass
+    if ((panaNorm && panaNorm === q) || (panaCompact && panaCompact === qCompact)) {
+      tier3ExactPanapass.push({ ...row, _matchTier: 'exact_panapass' })
+      continue
+    }
+
+    // 4. Coincidencias por prefijo (unidad -> placa -> Panapass)
+    if (unitNorm.startsWith(q) || (unitCompact && unitCompact.startsWith(qCompact))) {
+      tier4PrefixUnit.push({ ...row, _matchTier: 'prefix' })
+      continue
+    }
+    if (platesNorm.some(p => p.startsWith(q)) || platesCompact.some(p => p.startsWith(qCompact))) {
+      tier4PrefixPlate.push({ ...row, _matchTier: 'prefix' })
+      continue
+    }
+    if ((panaNorm && panaNorm.startsWith(q)) || (panaCompact && panaCompact.startsWith(qCompact))) {
+      tier4PrefixPanapass.push({ ...row, _matchTier: 'prefix' })
+      continue
+    }
+
+    // 5. Coincidencias parciales relevantes en campos habilitados (unidad, placa, Panapass, empresa)
+    if (unitNorm.includes(q) || (unitCompact && unitCompact.includes(qCompact))) {
+      tier5PartialUnit.push({ ...row, _matchTier: 'partial' })
+      continue
+    }
+    if (platesNorm.some(p => p.includes(q)) || platesCompact.some(p => p.includes(qCompact))) {
+      tier5PartialPlate.push({ ...row, _matchTier: 'partial' })
+      continue
+    }
+    if ((panaNorm && panaNorm.includes(q)) || (panaCompact && panaCompact.includes(qCompact))) {
+      tier5PartialPanapass.push({ ...row, _matchTier: 'partial' })
+      continue
+    }
+    if (q.length >= 3 && /[A-Z]/.test(q) && companyNorm && companyNorm.includes(q)) {
+      tier5PartialCompany.push({ ...row, _matchTier: 'partial' })
+      continue
+    }
+
+    // 6. Sugerencias aproximadas únicamente si no hay coincidencias exactas/prefijo/parciales
+    if (
+      isApproximateUnitMatch(unitCompact, qCompact) ||
+      platesCompact.some(p => isApproximateUnitMatch(p, qCompact))
+    ) {
+      tier6Approximate.push({ ...row, _matchTier: 'approximate' })
+    }
+  }
+
+  // REGLA PRINCIPAL OBLIGATORIA:
+  // Si existe una coincidencia exacta de unidad, mostrar EXCLUSIVAMENTE esa unidad.
+  if (tier1ExactUnit.length > 0) {
+    return tier1ExactUnit.sort(naturalUnitCompare)
+  }
+
+  // Si existe una coincidencia exacta de placa, mostrar exclusivamente esa coincidencia exacta.
+  if (tier2ExactPlate.length > 0) {
+    return tier2ExactPlate.sort(naturalUnitCompare)
+  }
+
+  // Si existe una coincidencia exacta de Panapass, mostrar exclusivamente esa coincidencia exacta.
+  if (tier3ExactPanapass.length > 0) {
+    return tier3ExactPanapass.sort(naturalUnitCompare)
+  }
+
+  // Combinar prefijos y parciales relevantes en orden estricto de prioridad
+  const combinedRelevant = [
+    ...tier4PrefixUnit.sort(naturalUnitCompare),
+    ...tier4PrefixPlate.sort(naturalUnitCompare),
+    ...tier4PrefixPanapass.sort(naturalUnitCompare),
+    ...tier5PartialUnit.sort(naturalUnitCompare),
+    ...tier5PartialPlate.sort(naturalUnitCompare),
+    ...tier5PartialPanapass.sort(naturalUnitCompare),
+    ...tier5PartialCompany.sort(naturalUnitCompare),
+  ]
+
+  if (combinedRelevant.length > 0) {
+    return combinedRelevant.slice(0, maxResults)
+  }
+
+  // Sugerencias aproximadas solamente cuando no existan coincidencias exactas ni parciales directas
+  return tier6Approximate.sort(naturalUnitCompare).slice(0, Math.min(5, maxResults))
+}
+
+// ============================================================================
+// SECCIONES EXPANDIBLES DE LOS 4 SISTEMAS + DATOS TÉCNICOS Y ADMINISTRATIVOS
+// ============================================================================
+
 function controlSections(detail: UnitDetail, fichaResponse: Unit | null): DetailSection[] {
   const control = objectValue(detail.controlRecord)
   const ficha = objectValue(fichaResponse)
@@ -26,173 +276,311 @@ function controlSections(detail: UnitDetail, fichaResponse: Unit | null): Detail
   }
   const sections: DetailSection[] = []
   const controlSection = addSection('Control de Auto · RYM', [
-    ['Póliza NetSuite', control.nro_poliza], ['Cupo / placa comercial', pickValue(control.placa_comercial, unitRecord.placa_comercial)],
-    ['Marca', pickValue(control.marca, unitRecord.marca)], ['Modelo', pickValue(control.modelo, unitRecord.modelo)],
-    ['Color', pickValue(control.color, unitRecord.color)], ['Año', pickValue(control.anio, unitRecord.anio)],
+    ['Estado operativo', detail.active ? 'ACTIVA' : (detail.closed ? 'CERRADA' : 'PARADA')],
+    ['Estado interno', pickValue(control.estatus2, control.status2, control.estado, control.estatus)],
+    ['Galera asignada', pickValue(detail.galera, control.galera)],
+    ['Empresa operadora', pickValue(detail.operator, control.empresa_operadora, control.empresa)],
+    ['Empresa propietaria', pickValue(detail.owner, control.empresa_duena)],
+    ['Supervisora', pickValue(detail.supervisor, control.supervisora)],
+    ['Póliza NetSuite', control.nro_poliza],
+    ['Cupo / placa comercial', pickValue(control.placa_comercial, unitRecord.placa_comercial)],
+    ['Estatus NetSuite', pickValue(control.estatus_netsuite, unitRecord.estatus_netsuite)],
   ])
   if (controlSection) sections.push(controlSection)
   const technicalRym = addSection('Datos técnicos RYM', [
-    ['Chasis', pickValue(control.chasis, unitRecord.chasis)], ['Motor', pickValue(control.motor, unitRecord.motor)],
-    ['Transmisión', pickValue(control.transmision, unitRecord.transmision)], ['Estatus NetSuite', pickValue(control.estatus_netsuite, unitRecord.estatus_netsuite)],
+    ['Marca', pickValue(control.marca, unitRecord.marca)],
+    ['Modelo', pickValue(control.modelo, unitRecord.modelo)],
+    ['Año', pickValue(control.anio, unitRecord.anio)],
+    ['Color', pickValue(control.color, unitRecord.color)],
+    ['Chasis / VIN', pickValue(control.chasis, control.vin, unitRecord.chasis)],
+    ['Motor', pickValue(control.motor, unitRecord.motor)],
+    ['Transmisión', pickValue(control.transmision, unitRecord.transmision)],
   ])
   if (technicalRym) sections.push(technicalRym)
   const officialSection = addSection('Ficha oficial · eCarCheck', [
-    ['Última verificación', pickValue(official.actualizado_at, ficha.consulta_at)], ['Resultado eCarCheck', pickValue(ficha.resultado, raw.detalleRespuesta, raw.detalle_respuesta)],
-    ['Placa consultada', pickValue(raw.nroPlaca, official.placa)], ['Cupo oficial', pickValue(raw.cupo, official.cupo)],
-    ['Propietario oficial', pickValue(raw.nombrePropietario, official.propietario)], ['Documento propietario', pickValue(raw.nroDocumentoPropietario, official.documento_propietario)],
-    ['VIN', pickValue(raw.nroVin, official.vin)], ['Chasis', pickValue(raw.nroChasis, official.chasis)], ['Motor', pickValue(raw.nroMotor, official.motor)],
+    ['Última verificación', pickValue(official.actualizado_at, ficha.consulta_at)],
+    ['Resultado eCarCheck', pickValue(ficha.resultado, raw.detalleRespuesta, raw.detalle_respuesta)],
+    ['Placa consultada', pickValue(raw.nroPlaca, official.placa)],
+    ['Cupo oficial', pickValue(raw.cupo, official.cupo)],
+    ['Propietario oficial', pickValue(raw.nombrePropietario, official.propietario)],
+    ['VIN', pickValue(raw.nroVin, official.vin)],
+    ['Chasis', pickValue(raw.nroChasis, official.chasis)],
+    ['Motor', pickValue(raw.nroMotor, official.motor)],
   ])
   if (officialSection) sections.push(officialSection)
-  const officialTechnical = addSection('Características oficiales', [
-    ['Marca', pickValue(raw.marcaVehiculo, raw.marcavehiculo, official.marca)], ['Modelo', pickValue(raw.modeloVehiculo, official.modelo)],
-    ['Año vehículo', pickValue(raw.anioVehiculo, official.anio)], ['Color oficial', pickValue(raw.colorVehiculo, official.color)],
-    ['Tipo de vehículo', pickValue(raw.tipoVehiculo, official.tipo_vehiculo)], ['Tipo de placa', pickValue(raw.tipoPlaca, official.tipo_placa)],
-    ['Tipo de uso', pickValue(raw.tipoUso, official.tipo_uso)], ['Estado vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)],
-    ['Transmisión', pickValue(raw.tipoTransmision, official.transmision)], ['Combustible', pickValue(raw.tipoCombustible, official.combustible)],
-    ['Cilindrada', pickValue(raw.cilindradaVehiculo, official.cilindrada)], ['Cilindros', pickValue(raw.nroCilindros, official.cilindros)],
-    ['Capacidad', raw.capacidadVehiculo != null ? `${displayValue(raw.capacidadVehiculo)} ${displayValue(raw.tipoCapacidad)}`.trim() : official.capacidad],
-    ['Puertas', pickValue(raw.nroPuertas, official.puertas)], ['Tracción', pickValue(raw.traccionMotor, official.traccion)],
-    ['Aire acondicionado', pickValue(raw.tieneAireAcondicionado, official.aire_acondicionado)], ['Pertenencia', pickValue(raw.tipoPertenencia, official.pertenencia)],
-  ])
-  if (officialTechnical) sections.push(officialTechnical)
   const legal = addSection('Seguro y restricciones', [
-    ['Hipoteca', pickValue(raw.hipoteca, official.hipoteca)], ['Aseguradora', pickValue(raw.nombreAseguradora, raw.aseguradora, official.aseguradora)],
-    ['Póliza', pickValue(raw.nroPolizaSeguro, raw.poliza, official.poliza)], ['Restricción vehicular', pickValue(raw.restriccionVehiculos, official.restriccion_vehicular)],
+    ['Hipoteca', pickValue(raw.hipoteca, official.hipoteca)],
+    ['Aseguradora', pickValue(raw.nombreAseguradora, raw.aseguradora, official.aseguradora)],
+    ['Póliza', pickValue(raw.nroPolizaSeguro, raw.poliza, official.poliza)],
+    ['Restricción vehicular', pickValue(raw.restriccionVehiculos, official.restriccion_vehicular)],
   ])
   if (legal) sections.push(legal)
-  const officialReview = addSection('Fuente oficial del revisado', [
-    ['Último revisado', pickValue(raw.fechaRevisado, official.fecha_revisado)], ['Mes revisado', pickValue(raw.mesRevisado, official.mes_revisado)],
-    ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id)], ['Último taller', pickValue(raw.ultTallerRevisado, official.ultimo_taller)],
-    ['Observaciones', pickValue(raw.observaciones, official.observaciones)],
-  ])
-  if (officialReview) sections.push(officialReview)
+
   const officialValues: Array<[string, unknown, unknown]> = [
     ['Chasis', pickValue(control.chasis, unitRecord.chasis), pickValue(raw.nroChasis, official.chasis)],
-    ['VIN', pickValue(control.vin, unitRecord.vin), pickValue(raw.nroVin, official.vin)], ['Motor', pickValue(control.motor, unitRecord.motor), pickValue(raw.nroMotor, official.motor)],
+    ['VIN', pickValue(control.vin, unitRecord.vin), pickValue(raw.nroVin, official.vin)],
+    ['Motor', pickValue(control.motor, unitRecord.motor), pickValue(raw.nroMotor, official.motor)],
     ['Placa', pickValue(control.placa_unica, unitRecord.placa_unica), pickValue(raw.nroPlaca, official.placa)],
     ['Marca', pickValue(control.marca, unitRecord.marca), pickValue(raw.marcaVehiculo, raw.marcavehiculo, official.marca)],
-    ['Modelo', pickValue(control.modelo, unitRecord.modelo), pickValue(raw.modeloVehiculo, official.modelo)], ['Año', pickValue(control.anio, unitRecord.anio), pickValue(raw.anioVehiculo, official.anio)],
+    ['Modelo', pickValue(control.modelo, unitRecord.modelo), pickValue(raw.modeloVehiculo, official.modelo)],
+    ['Año', pickValue(control.anio, unitRecord.anio), pickValue(raw.anioVehiculo, official.anio)],
     ['Color', pickValue(control.color, unitRecord.color), pickValue(raw.colorVehiculo, official.color)],
   ]
   const normalize = (item: unknown) => displayValue(item).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[\s-]+/g, '')
-  const comparisons: DetailSection = { title: 'Comparación RYM / eCarCheck', fields: officialValues.map(([label, left, right]) => {
-    const comparison = !hasValue(left) || !hasValue(right) ? 'missing' : normalize(left) === normalize(right) ? 'match' : 'diff'
-    return { label, value: hasValue(left) ? displayValue(left) : 'Sin dato', reference: hasValue(right) ? displayValue(right) : 'Sin dato', comparison }
-  }) }
+  const comparisons: DetailSection = {
+    title: 'Comparación RYM / eCarCheck',
+    fields: officialValues.map(([label, left, right]) => {
+      const comparison = !hasValue(left) || !hasValue(right) ? 'missing' : normalize(left) === normalize(right) ? 'match' : 'diff'
+      return { label, value: hasValue(left) ? displayValue(left) : 'Sin dato', reference: hasValue(right) ? displayValue(right) : 'Sin dato', comparison }
+    }),
+  }
   if (officialValues.some(([, left, right]) => hasValue(left) || hasValue(right))) sections.push(comparisons)
   return sections
 }
+
 function fields(title: string, rows: Array<[string, unknown]>): DetailSection | null {
   const values = rows.filter(([, item]) => hasValue(item)).map(([label, item]) => ({ label, value: displayValue(item) }))
   return values.length ? { title, fields: values } : null
 }
+
 function panSections(detail: UnitDetail): DetailSection[] {
   const c = objectValue(detail.controlRecord), account = objectValue(detail.enaAccount)
   const tagsRaw = c.tags_detalle
   let tags: Unit[] = Array.isArray(tagsRaw) ? tagsRaw as Unit[] : []
-  if (!tags.length && typeof tagsRaw === 'string') { try { const parsed: unknown = JSON.parse(tagsRaw); tags = Array.isArray(parsed) ? parsed as Unit[] : [] } catch { tags = [] } }
+  if (!tags.length && typeof tagsRaw === 'string') {
+    try { const parsed: unknown = JSON.parse(tagsRaw); tags = Array.isArray(parsed) ? parsed as Unit[] : [] } catch { tags = [] }
+  }
   const ids = Array.isArray(c.tags_ena) ? c.tags_ena.join(' · ') : c.tags_ena
   const sections = [fields('Panapass y TAGs', [
-    ['Número Panapass', pickValue(c.panapass_numero, c.numero_panapass)], ['Panapass display', pickValue(account.panapass_display, c.panapass_display)],
-    ['Cuenta ENA distinta', pickValue(c.cuenta_ena, c.numero_cuenta)],
-    ['TAG principal', pickValue(c.tag, 'Sin TAG registrado')], ['Otros TAGs ENA', ids], ['Cantidad de TAGs', c.cantidad_tags],
-    ['Último resultado', c.ena_ultimo_resultado], ['Último error', pickValue(c.ena_ultimo_error, account.ultimo_error)],
+    ['Número Panapass', pickValue(c.panapass_numero, c.numero_panapass)],
+    ['Panapass display', pickValue(account.panapass_display, c.panapass_display)],
+    ['Cuenta ENA', pickValue(c.cuenta_ena, c.numero_cuenta, account.ena_empresa)],
+    ['TAG principal', pickValue(c.tag, 'Sin TAG registrado')],
+    ['Otros TAGs ENA', ids],
+    ['Cantidad de TAGs', c.cantidad_tags],
+    ['Último resultado ENA', c.ena_ultimo_resultado],
+    ['Última consulta ENA', pickValue(account.ultima_consulta, c.ena_ultima_consulta, account.updated_at, c.ena_actualizado_at)],
+    ['Último error', pickValue(c.ena_ultimo_error, account.ultimo_error)],
   ])]
   for (const [i, tag] of tags.entries()) {
     const section = fields(`TAG ${displayValue(pickValue(tag.tag, tag.numero_tag, i + 1))}`, [
-      ['Estado del TAG', pickValue(tag.estado_tag, tag.estado)], ['Estado financiero', tag.estado_financiero], ['Tipo de TAG', pickValue(tag.tipo_tag, tag.tipo)],
-      ['Matrícula', pickValue(tag.matricula, tag.placa)], ['Saldo del TAG', tag.saldo], ['Tipo de vehículo', tag.tipo_vehiculo],
-      ['Corregimiento', tag.corregimiento], ['Consulta del TAG', tag.consultado_at],
+      ['Estado del TAG', pickValue(tag.estado_tag, tag.estado)],
+      ['Estado financiero', tag.estado_financiero],
+      ['Tipo de TAG', pickValue(tag.tipo_tag, tag.tipo)],
+      ['Matrícula', pickValue(tag.matricula, tag.placa)],
+      ['Saldo del TAG', tag.saldo],
+      ['Consulta del TAG', tag.consultado_at],
     ])
     if (section) sections.push(section)
   }
-  const admin = fields('Información administrativa ENA', [
-    ['Acceso ENA interno · no valida el vehículo', pickValue(account.estado_acceso, c.ena_estado_acceso)],
-    ['Último login correcto', pickValue(account.ultimo_login_ok, c.ena_ultimo_login_ok)], ['Empresa ENA', pickValue(account.ena_empresa, c.ena_empresa)],
-    ['RUC ENA', pickValue(account.ena_ruc, c.ena_ruc)], ['Email ENA', pickValue(account.ena_email, c.ena_email)],
-    ['Tipo de credencial', pickValue(account.tipo_credencial, c.tipo_credencial)], ['Fecha de actualización', pickValue(account.updated_at, c.ena_actualizado_at)],
+  const admin = fields('Información disponible de ENA', [
+    ['Estado de acceso ENA', pickValue(account.estado_acceso, c.ena_estado_acceso)],
+    ['Empresa ENA', pickValue(account.ena_empresa, c.ena_empresa)],
+    ['RUC ENA', pickValue(account.ena_ruc, c.ena_ruc)],
+    ['Última actualización cuenta', pickValue(account.updated_at, c.ena_actualizado_at)],
   ])
   if (admin) sections.push(admin)
   return sections.filter((item): item is DetailSection => !!item)
 }
+
 function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): DetailSection[] {
   const c = objectValue(detail.controlRecord), r = objectValue(detail.revisadoRecord), f = objectValue(fichaResponse)
   const official = objectValue(f.oficial), raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta)), op = objectValue(f.operacion)
-  const section = fields('Revisado', [
-    ['Mes asignado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes_revisado, r.mes)], ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
-    ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)], ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
-    ['Tipo de placa', pickValue(raw.tipoPlaca, official.tipo_placa)], ['Tipo de uso', pickValue(raw.tipoUso, official.tipo_uso)],
-    ['Estado oficial del vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)], ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
-    ['Bloqueado', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'], ['Observación', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
-    ['Último revisado', pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha)],
+  const section = fields('Detalle de Revisado y eCarCheck', [
+    ['Mes del revisado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes_revisado, r.mes)],
+    ['Fecha último revisado', pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha)],
+    ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
+    ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)],
+    ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
+    ['Estado oficial del vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)],
+    ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
+    ['Bloqueado / Boletas', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'],
+    ['Observaciones eCarCheck', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
+    ['Última consulta eCarCheck', pickValue(official.actualizado_at, f.consulta_at)],
   ])
   return section ? [section] : []
 }
+
 function gpsSections(detail: UnitDetail): DetailSection[] {
   const r = objectValue(detail.gpsRecord), g1 = objectValue(r.gps1), g2 = objectValue(r.gps2)
-  const evaluation = fields('Evaluación GPS', [['Clasificación final', r.nivel], ['Motivo', r.razon], ['Diagnóstico operativo', pickValue(r.diagnostico_operativo, r.estado_operativo)]])
-  const equipment = fields('GPS 1 y GPS 2', [['GPS 1', [g1.label, g1.last].filter(hasValue).join(' · ')], ['GPS 2', [g2.label, g2.last].filter(hasValue).join(' · ')], ['Proveedor GPS 1', pickValue(g1.proveedor, g1.fuente)], ['Proveedor GPS 2', pickValue(g2.proveedor, g2.fuente)]])
-  const device = (title: string, source: Unit): DetailSection | null => fields(title, [
-    ['Diagnóstico específico', source.razon], ['Última señal adicional', source.ultima_senal],
-    ['Proveedor', pickValue(source.proveedor, source.fuente)], ['IMEI / ID', pickValue(source.imei, source.id)],
-    ['Metadata', source.metadata && typeof source.metadata === 'object' ? JSON.stringify(source.metadata) : source.metadata],
+  const evaluation = fields('Evaluación Satelital GPS', [
+    ['Clasificación final', r.nivel],
+    ['Motivo / Alerta', r.razon],
+    ['Diagnóstico operativo', pickValue(r.diagnostico_operativo, r.estado_operativo)],
+    ['Velocidad reportada', r.velocidad != null ? `${displayValue(r.velocidad)} km/h` : null],
   ])
-  return [evaluation, equipment, device('GPS 1 · información del equipo', g1), device('GPS 2 · información del equipo', g2)].filter((item): item is DetailSection => !!item)
+  const equipment = fields('Estado de GPS 1 y GPS 2', [
+    ['GPS 1', [g1.label, g1.last].filter(hasValue).join(' · ')],
+    ['GPS 2', [g2.label, g2.last].filter(hasValue).join(' · ')],
+    ['Proveedor GPS 1', pickValue(g1.proveedor, g1.fuente)],
+    ['Proveedor GPS 2', pickValue(g2.proveedor, g2.fuente)],
+  ])
+  const device = (title: string, source: Unit): DetailSection | null => fields(title, [
+    ['Estado del equipo', source.label],
+    ['Diagnóstico específico', source.razon],
+    ['Última comunicación', pickValue(source.last, source.ultima_senal)],
+    ['Proveedor', pickValue(source.proveedor, source.fuente)],
+    ['IMEI / ID', pickValue(source.imei, source.id)],
+  ])
+  return [evaluation, equipment, device('GPS 1 · Detalle técnico', g1), device('GPS 2 · Detalle técnico', g2)].filter((item): item is DetailSection => !!item)
 }
 
-// Keep the Vue cards aligned with the independent validator's read-only status
-// presentation. The source records remain authoritative; this only formats them.
+// ============================================================================
+// FASE 4 & FASE 6: NORMALIZACIÓN DE ESTADOS VISUALES DE LOS 4 SISTEMAS
+// Regla crítica Fase 6: Nunca mostrar verde ('ok') cuando un dato no pudo
+// consultarse o carece de respuesta confirmada.
+// ============================================================================
+
 function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): void {
-  const rev = objectValue(detail.revisadoRecord), operation = objectValue(objectValue(ficha).operacion)
-  const review = detail.cards.find(card => card.key === 'revisados')
-  if (review && (Object.keys(rev).length || Object.keys(operation).length)) {
-    const source = upperValue(pickValue(rev.estado, operation.estado_revisado))
-    const legacy = [source, review.badge, review.value, ...review.details.map(item => item.value)].join(' ')
-    let status = 'PENDIENTE'
-    if (upperValue(operation.estado_revisado) === 'VENCIDO' || ['VENCIDO', 'EXPIRADO'].includes(source)) status = 'VENCIDO'
-    else if (source === 'PENDIENTE') status = Number(rev.meses_atraso) > 0 ? 'VENCIDO' : 'PENDIENTE'
-    else if (source === 'VIGENTE') status = 'VIGENTE'
-    else if (source === 'SIN_MES') status = 'SIN MES'
-    else if (/VENCID|EXPIR/.test(upperValue(legacy))) status = 'VENCIDO'
-    else if (/PENDIENT|NO VIGENTE/.test(upperValue(legacy))) status = 'PENDIENTE'
-    else if (/VIGENTE|AL DIA|OK|VALIDO/.test(upperValue(legacy))) status = 'VIGENTE'
-    const month = displayValue(pickValue(detail.controlRecord?.mes_revisado, objectValue(ficha?.unidad).mes_revisado, rev.mes_revisado, rev.mes))
-    const last = displayValue(pickValue(operation.fecha_ultimo_revisado, objectValue(ficha?.oficial).fecha_revisado, rev.ultimo_revisado, rev.fecha, 'Sin registro'))
-    Object.assign(review, {
-      tone: status === 'VIGENTE' ? (rev.bloqueado ? 'warn' : 'ok') : status === 'VENCIDO' ? 'bad' : 'warn',
-      badge: status,
-      value: ['VENCIDO', 'PENDIENTE'].includes(status) && month ? `${status} · ${month.toUpperCase()}` : status,
-      details: [{ label: 'Último revisado', value: last }],
-      note: `Último revisado · ${last}`,
-    })
+  const c = objectValue(detail.controlRecord)
+  const account = objectValue(detail.enaAccount)
+
+  // 1. PANAPASS
+  const pana = detail.cards.find(card => card.key === 'panapass')
+  if (pana) {
+    const panNum = displayValue(pickValue(c.panapass_numero, c.numero_panapass))
+    const lastCheck = displayValue(pickValue(
+      pana.details?.find(d => /consulta/i.test(d.label))?.value,
+      account.ultima_consulta,
+      c.ena_ultima_consulta,
+      account.updated_at,
+      c.ena_actualizado_at
+    ))
+    pana.updatedAt = lastCheck || 'Sin consulta reciente'
+
+    // Si no tiene Panapass o ENA no respondió, nunca usar verde ('ok')
+    if (!panNum) {
+      pana.tone = detail.active ? 'bad' : 'neutral'
+      pana.badge = 'SIN PANAPASS'
+      pana.value = 'No asignado'
+    } else if (/NO DISPONIBLE|SIN RESPUESTA|ERROR/i.test(`${pana.badge} ${pana.value}`)) {
+      const savedSaldo = c.ena_saldo !== null && c.ena_saldo !== undefined && String(c.ena_saldo).trim() !== '' ? Number(c.ena_saldo) : null
+      pana.tone = savedSaldo !== null && savedSaldo < 0 ? 'bad' : 'neutral'
+    }
   }
 
-  const gps = detail.cards.find(card => card.key === 'gps'), row = objectValue(detail.gpsRecord)
-  if (gps && Object.keys(row).length) {
-    const devices = [objectValue(row.gps1), objectValue(row.gps2)]
-    const complete = devices.every(item => typeof item.installed === 'boolean' && typeof item.ok === 'boolean')
-    let level = upperValue(row.nivel), reason = displayValue(row.razon || row.diagnostico)
-    const historic = ['CERRADO', 'CERRADA', 'CANIBALIZADO', 'CANIBALIZADA'].includes(upperValue(row.estatus_control))
-    if (level === 'HISTORICO' || row.historico || historic) { level = 'SIN INFORMACIÓN'; reason ||= 'Información GPS histórica' }
-    else if (complete) {
-      const installed = devices.filter(item => item.installed).length, reporting = devices.filter(item => item.installed && item.ok).length
-      level = !installed || !reporting ? 'CRITICO' : installed === 2 && reporting === 1 ? 'ALERTA' : 'OK'
-      if (installed === 1 && reporting === 1) reason = '1 GPS instalado y reportando'
+  // 2. REVISADO
+  const rev = objectValue(detail.revisadoRecord)
+  const fObj = objectValue(ficha)
+  const operation = objectValue(fObj.operacion)
+  const official = objectValue(fObj.oficial)
+  const review = detail.cards.find(card => card.key === 'revisados')
+  if (review) {
+    const hasRevData = Object.keys(rev).length > 0 || Object.keys(operation).length > 0 || Object.keys(official).length > 0
+    if (hasRevData) {
+      const source = upperValue(pickValue(rev.estado, operation.estado_revisado, official.estado_vehiculo))
+      const legacy = [source, review.badge, review.value, ...review.details.map(item => item.value)].join(' ')
+      let status = 'PENDIENTE'
+      if (upperValue(operation.estado_revisado) === 'VENCIDO' || ['VENCIDO', 'EXPIRADO', 'CRITICO', 'CRÍTICO'].includes(source)) status = 'VENCIDO'
+      else if (source === 'PROXIMO' || source === 'PRÓXIMO' || /PROXIM|POR VENCER/.test(upperValue(legacy))) status = 'PRÓXIMO A VENCER'
+      else if (source === 'PENDIENTE') status = Number(rev.meses_atraso) > 0 ? 'VENCIDO' : 'PENDIENTE'
+      else if (source === 'VIGENTE' || rev.emitido === true) status = 'VIGENTE'
+      else if (source === 'SIN_MES') status = 'SIN MES'
+      else if (/VENCID|EXPIR|CRITIC/.test(upperValue(legacy))) status = 'VENCIDO'
+      else if (/PENDIENT|NO VIGENTE/.test(upperValue(legacy))) status = 'PENDIENTE'
+      else if (/VIGENTE|AL DIA|VALIDO/.test(upperValue(legacy))) status = 'VIGENTE'
+      else status = 'SIN REGISTRO'
+
+      const month = displayValue(pickValue(c.mes_revisado, objectValue(fObj.unidad).mes_revisado, rev.mes_revisado, rev.mes))
+      const last = displayValue(pickValue(operation.fecha_ultimo_revisado, official.fecha_revisado, rev.ultimo_revisado, rev.fecha, 'Sin registro'))
+      const checkDate = displayValue(pickValue(official.actualizado_at, fObj.consulta_at, rev.updated_at, last))
+
+      const tone = status === 'VIGENTE'
+        ? (rev.bloqueado ? 'warn' : 'ok')
+        : status === 'VENCIDO'
+          ? 'bad'
+          : status === 'SIN REGISTRO'
+            ? (detail.active ? 'warn' : 'neutral')
+            : 'warn'
+
+      Object.assign(review, {
+        tone,
+        badge: status,
+        value: month ? `MES ${month.toUpperCase()}` : (last !== 'Sin registro' ? last : status),
+        details: [
+          { label: 'Mes / Vencimiento', value: month || 'No definido' },
+          { label: 'Último revisado', value: last },
+        ],
+        updatedAt: checkDate || 'Sin consulta reciente',
+        note: status === 'VIGENTE'
+          ? `Revisado vigente · Último registro: ${last}`
+          : `Estado ${status.toLowerCase()} · Referencia: ${month || last}`,
+      })
+    } else if (review.badge === 'CONSULTANDO' || review.tone === 'pending') {
+      review.updatedAt = 'Consultando…'
+    } else if (/SIN REGISTRO|NO DISPONIBLE/i.test(`${review.badge} ${review.value}`)) {
+      review.tone = detail.active ? 'warn' : 'neutral'
+      review.updatedAt = 'Sin registro confirmado'
     }
-    const tone = level === 'OK' ? 'ok' : level === 'ALERTA' ? 'warn' : level === 'CRITICO' ? 'bad' : 'pending'
-    const label = (item: Unit) => item.installed === false ? 'Sin GPS' : item.installed === true ? item.ok === true ? 'Reportando' : displayValue(item.label || 'Sin reportar') : 'Sin información'
-    const reporting = devices.filter(item => item.installed === true && item.ok === true).length
-    const installed = devices.filter(item => item.installed === true).length
-    const known = devices.some(item => typeof item.installed === 'boolean' || hasValue(item.label))
-    const summary = !known ? 'SIN INFORMACIÓN' : installed === 0 ? 'SIN GPS' : `${reporting} DE ${Math.max(installed, 2)} REPORTANDO`
-    Object.assign(gps, {
-      tone, badge: level, value: summary,
-      details: devices.map((item, index) => ({ label: `GPS ${index + 1}`, value: `${label(item)}${item.last ? ` · ${displayValue(item.last)}` : ''}` })),
-      note: `Criticidad GPS · ${level}${reason ? ` · ${reason}` : ''}`,
-    })
+  }
+
+  // 3. GPS
+  const gps = detail.cards.find(card => card.key === 'gps')
+  const row = objectValue(detail.gpsRecord)
+  if (gps) {
+    if (Object.keys(row).length) {
+      const devices = [objectValue(row.gps1), objectValue(row.gps2)]
+      const complete = devices.every(item => typeof item.installed === 'boolean' && typeof item.ok === 'boolean')
+      let level = upperValue(row.nivel), reason = displayValue(row.razon || row.diagnostico)
+      const historic = ['CERRADO', 'CERRADA', 'CANIBALIZADO', 'CANIBALIZADA'].includes(upperValue(row.estatus_control))
+      if (level === 'HISTORICO' || row.historico || historic) {
+        level = 'SIN INFORMACIÓN'
+        reason ||= 'Información GPS histórica'
+      } else if (complete) {
+        const installed = devices.filter(item => item.installed).length
+        const reporting = devices.filter(item => item.installed && item.ok).length
+        level = !installed || !reporting ? 'CRÍTICO' : installed === 2 && reporting === 1 ? 'ALERTA' : 'NORMAL'
+        if (installed === 1 && reporting === 1) reason = '1 GPS instalado y reportando'
+      }
+      const tone = (level === 'OK' || level === 'NORMAL')
+        ? 'ok'
+        : level === 'ALERTA'
+          ? 'warn'
+          : (level === 'CRITICO' || level === 'CRÍTICO')
+            ? 'bad'
+            : 'neutral'
+      const label = (item: Unit) => item.installed === false ? 'Sin GPS' : item.installed === true ? item.ok === true ? 'Reportando' : displayValue(item.label || 'Sin reportar') : 'Sin información'
+      const reporting = devices.filter(item => item.installed === true && item.ok === true).length
+      const installed = devices.filter(item => item.installed === true).length
+      const known = devices.some(item => typeof item.installed === 'boolean' || hasValue(item.label))
+      const summary = !known ? 'Sin información' : installed === 0 ? '0 dispositivos instalados' : `${reporting} de ${Math.max(installed, 2)} reportando`
+      const lastComm = displayValue(pickValue(devices[0]?.last, devices[1]?.last, row.ultima_transmision, 'Sin transmisión reciente'))
+
+      Object.assign(gps, {
+        tone,
+        badge: level === 'OK' ? 'NORMAL' : level,
+        value: summary,
+        details: [
+          { label: 'GPS 1', value: `${label(devices[0]!)}${devices[0]?.last ? ` · ${displayValue(devices[0]?.last)}` : ''}` },
+          { label: 'GPS 2', value: `${label(devices[1]!)}${devices[1]?.last ? ` · ${displayValue(devices[1]?.last)}` : ''}` },
+        ],
+        updatedAt: lastComm,
+        note: reason ? `${level} · ${reason}` : `Estado satelital: ${level}`,
+      })
+    } else if (/NO DISPONIBLE|SIN GPS|NO VALIDADO|SIN INFORMAC/i.test(`${gps.badge} ${gps.value}`)) {
+      // Si no se pudo consultar GPS, nunca mostrar verde
+      if (gps.tone === 'ok') gps.tone = 'neutral'
+      gps.updatedAt = 'Sin comunicación confirmada'
+    }
+  }
+
+  // 4. CONTROL DE AUTO
+  const ctrlCard = detail.cards.find(card => card.key === 'control')
+  if (ctrlCard) {
+    const internalState = displayValue(pickValue(c.estatus2, c.status2, c.estado, c.estatus, detail.status))
+    ctrlCard.tone = detail.closed ? 'neutral' : detail.active ? 'ok' : 'warn'
+    ctrlCard.badge = detail.closed ? 'CERRADA' : detail.active ? 'ACTIVA' : 'PARADA'
+    ctrlCard.value = detail.closed
+      ? 'UNIDAD CERRADA'
+      : detail.active
+        ? (upperValue(internalState) === 'ACTIVO' || upperValue(internalState) === 'ACTIVA' ? 'EN OPERACIÓN' : internalState)
+        : (internalState || 'PARADA EN PATIO')
+    ctrlCard.updatedAt = displayValue(pickValue(c.updated_at, c.fecha_actualizacion, 'Sincronizado RYM'))
   }
 }
+
 export function applyValidatorSections(detail: UnitDetail, ficha: Unit | null = null): void {
+  if (ficha) detail.fichaRecord = ficha
   applyOperationalPresentation(detail, ficha)
   for (const card of detail.cards) {
     if (card.key === 'control') card.sections = controlSections(detail, ficha)
@@ -200,5 +588,80 @@ export function applyValidatorSections(detail: UnitDetail, ficha: Unit | null = 
     if (card.key === 'revisados') card.sections = revisadoSections(detail, ficha)
     if (card.key === 'gps') card.sections = gpsSections(detail)
   }
-}
 
+  // 1. Detect Vehicle Color for Identity Pill
+  const c = objectValue(detail.controlRecord)
+  const f = objectValue(ficha || detail.fichaRecord)
+  const u = objectValue(f.unidad)
+  const o = objectValue(f.oficial)
+  const r = rawObject(pickValue(o.ultima_respuesta_exitosa, o.ultima_respuesta))
+  const detectedColor = pickValue(
+    c.color,
+    c.color_vehiculo,
+    u.color,
+    r.colorVehiculo,
+    o.color,
+    (c.marca_modelo as string)?.split(/[\s·-]+/).pop()
+  )
+  if (detectedColor) {
+    detail.vehicleColor = String(detectedColor).trim()
+  }
+
+  // 2. Automated Information Audit Engine (Detect real inconsistencies across 4 systems)
+  const issues: Array<{ code: string; label: string; severity: 'bad' | 'warn' | 'info'; desc: string }> = []
+
+  const controlSec = detail.cards.find(x => x.key === 'control')?.sections || []
+  const compSection = controlSec.find(s => s.title.includes('Comparación'))
+  if (compSection) {
+    const diffs = compSection.fields.filter(fld => fld.comparison === 'diff')
+    if (diffs.length > 0) {
+      issues.push({
+        code: 'DISCREPANCIA_OFICIAL',
+        label: `${diffs.length} Discrepancia${diffs.length > 1 ? 's' : ''} eCarCheck`,
+        severity: 'warn',
+        desc: `Cotejo oficial difiere en: ${diffs.map(d => `${d.label} (RYM: ${d.value} vs Oficial: ${d.reference})`).join(', ')}`
+      })
+    }
+  }
+
+  const revCard = detail.cards.find(x => x.key === 'revisados')
+  if (revCard && detail.active) {
+    if (revCard.badge === 'SIN REGISTRO' || revCard.value.includes('Sin registro')) {
+      issues.push({
+        code: 'REVISADO_SIN_REGISTRO',
+        label: 'Sin Inspección ATTT',
+        severity: 'warn',
+        desc: 'Unidad activa en flota sin registro de revisado en eCarCheck / ATTT.'
+      })
+    } else if (revCard.tone === 'bad' || revCard.badge === 'VENCIDO') {
+      issues.push({
+        code: 'REVISADO_VENCIDO',
+        label: 'Revisado Vencido',
+        severity: 'bad',
+        desc: 'La inspección técnica vehicular de la unidad está vencida.'
+      })
+    }
+  }
+
+  const panaCard = detail.cards.find(x => x.key === 'panapass')
+  if (panaCard && panaCard.tone === 'bad') {
+    issues.push({
+      code: 'PANAPASS_INCIDENCIA',
+      label: panaCard.badge === 'SIN PANAPASS' ? 'Sin Panapass Activo' : 'Saldo Negativo ENA',
+      severity: 'bad',
+      desc: panaCard.badge === 'SIN PANAPASS' ? 'Unidad sin número Panapass asignado en Control de Auto.' : 'Saldo negativo registrado en corredores ENA.'
+    })
+  }
+
+  const gpsCard = detail.cards.find(x => x.key === 'gps')
+  if (gpsCard && detail.active && (gpsCard.tone === 'bad' || gpsCard.badge === 'CRÍTICO' || gpsCard.badge === 'GPS CRÍTICO')) {
+    issues.push({
+      code: 'GPS_CRITICO',
+      label: 'GPS Crítico',
+      severity: 'bad',
+      desc: 'La unidad presenta alerta crítica de transmisión satelital.'
+    })
+  }
+
+  detail.auditIssues = issues
+}

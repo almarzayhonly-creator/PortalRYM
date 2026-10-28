@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ModuleIcon from '../components/ModuleIcon.vue'
 
-import { applyValidatorSections, type Unit, type UnitDetail as Detail } from '../validatorDetails'
+import { applyValidatorSections, rankAndFilterUnits, type Unit, type UnitDetail as Detail } from '../validatorDetails'
 type Api = { search: (query: string) => Promise<Unit[]>; load: (unit: Unit) => Promise<Detail>; enrich?: (detail: Detail) => Promise<Detail>; ficha?: (unit: Unit) => Promise<Unit> }
 const props = defineProps<{ api: Api; access: 'allowed' | 'denied' }>()
 const query = ref('')
@@ -39,7 +39,7 @@ async function runSearch() {
   try {
     const result = await props.api.search(term)
     if (version !== searchVersion) return
-    rows.value = Array.isArray(result) ? result : []
+    rows.value = rankAndFilterUnits(Array.isArray(result) ? result : [], term)
     searched.value = true
     if (rows.value.length === 1) await choose(rows.value[0]!)
   } catch (reason) {

@@ -2,9 +2,25 @@
 
 <html lang="es">
 <head>
+<style id="instant-vue-login-guard">
+  html.vue-next-active .login:not(.rym-living-light-login):not(.vue-next-login) {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+</style>
+<script>
+  (function() {
+    var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
+    if (isVue) {
+      document.documentElement.classList.add('vue-next-active');
+      window.__RYM_VUE_NEXT_ACTIVE = true;
+    }
+  })();
+</script>
 <script>
 (function() {
-  var isVue = window.location.search.indexOf('vueNext=1') !== -1 || window.location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev';
+  var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
   if (isVue) {
     window.__RYM_VUE_NEXT_ACTIVE = true;
     var OrigMO = window.MutationObserver;
@@ -39,7 +55,7 @@
 .login-card{width:min(500px,100%);background:#fff;padding:38px;border-radius:22px;border:1px solid var(--border);box-shadow:0 22px 60px rgba(10,27,77,.18)}
 .brand{font-weight:1000;letter-spacing:.14em;color:var(--navy);margin-bottom:10px}.login h1{margin:0 0 8px;font-size:30px}.muted{color:var(--muted)}
 form{display:grid;gap:12px;margin-top:22px}input,select{width:100%;padding:12px 14px;border:1px solid #CBD8EA;border-radius:12px;background:#fff}
-button{border:0;border-radius:12px;padding:12px 15px;background:linear-gradient(180deg,var(--blue),#1E3F92);color:#fff;font-weight:900;cursor:pointer}
+button:not([class*="nav-"]):not([class*="card-"]):not([class*="topbar-"]):not([class*="user-"]):not([class*="living-"]){border:0;border-radius:12px;padding:12px 15px;background:linear-gradient(180deg,var(--blue),#1E3F92);color:#fff;font-weight:900;cursor:pointer}
 #loginBtn{background:linear-gradient(180deg,var(--orange),#E76300)}
 .alert{background:#fff1f2;color:#b42318;padding:12px 14px;border-radius:12px;margin:12px 0}
 .success{background:#ecfdf3;color:#067647;padding:12px 14px;border-radius:12px;margin-top:12px}
@@ -804,6 +820,7 @@ body.v66-revisados .v66-daily-gal{background:#fff0d1!important;color:#734600!imp
 }
 </style>
 <!-- BUILD V80: base V78 + validador eCarCheck protegido + traspasos + Revisado Taxi -->
+
 </head>
 <body><div id="app"></div>
 <script src="/modules/core/pagos-read.js?v=1"></script>
@@ -6169,7 +6186,51 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
   function companyOwner99(ctrl,rev){return ctrl?.empresa_duena||rev?.empresa_duena||rev?.empresa||ctrl?.empresa||ctrl?.empresa_operadora||'—'}
   function companyOperator99(ctrl,rev){return ctrl?.empresa_operadora||ctrl?.empresa||rev?.empresa_operadora||rev?.empresa||ctrl?.empresa_duena||'—'}
   function companyDisplay99(ctrl,rev){return companyOwner99(ctrl,rev)||companyOperator99(ctrl,rev)||'—'}
-  async function searchValidator99(q,render=true){const term=String(q||'').trim();if(term.length<2){v106ValidatorRows=[];if(render)renderValidatorList99();return []}try{let rows=await rpc('panapass_control_auto_v3',{p_grupo:null,p_buscar:term,p_limit:8}).catch(()=>[]);if(!Array.isArray(rows)||!rows.length)rows=await rpc('panapass_unidades_detalle',{p_buscar:term,p_limit:8}).catch(()=>[]);v106ValidatorRows=Array.isArray(rows)?rows:[];if(render)renderValidatorList99();return v106ValidatorRows}catch(e){console.warn('V106 search',e);v106ValidatorRows=[];if(render)renderValidatorList99();return []}}
+  function rankValidatorUnits99(rawRows,rawQuery){
+    const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
+    const compact=v=>norm(v).replace(/[^A-Z0-9]/g,'');
+    const q=norm(rawQuery),qCompact=compact(rawQuery);
+    if(!qCompact)return [];
+    const map=new Map();
+    for(const r of (Array.isArray(rawRows)?rawRows:[])){
+      if(!r||typeof r!=='object')continue;
+      const k=compact(r.unidad||r.unit)||(compact(r.placa_unica||r.placa||r.placa_comercial)?'P:'+compact(r.placa_unica||r.placa||r.placa_comercial):'');
+      if(!k)continue;
+      map.set(k,map.has(k)?{...map.get(k),...r}:r);
+    }
+    const unique=[...map.values()];
+    const sortUnit=(a,b)=>norm(a.unidad||a.unit).localeCompare(norm(b.unidad||b.unit),'es',{numeric:true,sensitivity:'base'});
+    const t1=[],t2=[],t3=[],t4u=[],t4p=[],t4pan=[],t5u=[],t5p=[],t5pan=[],t5c=[],t6=[];
+    for(const r of unique){
+      const u=norm(r.unidad||r.unit),uc=compact(u);
+      const plates=[norm(r.placa_unica),norm(r.placa),norm(r.placa_comercial)].filter(Boolean);
+      const platesC=plates.map(compact).filter(Boolean);
+      const pan=norm(r.panapass_numero||r.panapass),panC=compact(pan);
+      const comp=norm(r.empresa_duena||r.empresa_operadora||r.empresa);
+      if(u===q||(uc&&uc===qCompact)){t1.push({...r,_matchTier:'exact_unit'});continue}
+      if(plates.includes(q)||platesC.includes(qCompact)){t2.push({...r,_matchTier:'exact_plate'});continue}
+      if((pan&&pan===q)||(panC&&panC===qCompact)){t3.push({...r,_matchTier:'exact_panapass'});continue}
+      if(u.startsWith(q)||(uc&&uc.startsWith(qCompact))){t4u.push({...r,_matchTier:'prefix'});continue}
+      if(plates.some(p=>p.startsWith(q))||platesC.some(p=>p.startsWith(qCompact))){t4p.push({...r,_matchTier:'prefix'});continue}
+      if((pan&&pan.startsWith(q))||(panC&&panC.startsWith(qCompact))){t4pan.push({...r,_matchTier:'prefix'});continue}
+      if(u.includes(q)||(uc&&uc.includes(qCompact))){t5u.push({...r,_matchTier:'partial'});continue}
+      if(plates.some(p=>p.includes(q))||platesC.some(p=>p.includes(qCompact))){t5p.push({...r,_matchTier:'partial'});continue}
+      if((pan&&pan.includes(q))||(panC&&panC.includes(qCompact))){t5pan.push({...r,_matchTier:'partial'});continue}
+      if(q.length>=3&&/[A-Z]/.test(q)&&comp&&comp.includes(q)){t5c.push({...r,_matchTier:'partial'});continue}
+      if(uc&&qCompact.length>=3&&Math.abs(uc.length-qCompact.length)<=1){
+        let diffs=0;const m=Math.max(uc.length,qCompact.length);
+        for(let i=0;i<m;i++){if(uc[i]!==qCompact[i])diffs++;if(diffs>1)break}
+        if(diffs===1)t6.push({...r,_matchTier:'approximate'});
+      }
+    }
+    if(t1.length)return t1.sort(sortUnit);
+    if(t2.length)return t2.sort(sortUnit);
+    if(t3.length)return t3.sort(sortUnit);
+    const rel=[...t4u.sort(sortUnit),...t4p.sort(sortUnit),...t4pan.sort(sortUnit),...t5u.sort(sortUnit),...t5p.sort(sortUnit),...t5pan.sort(sortUnit),...t5c.sort(sortUnit)];
+    if(rel.length)return rel.slice(0,16);
+    return t6.sort(sortUnit).slice(0,5);
+  }
+  async function searchValidator99(q,render=true){const term=String(q||'').trim();if(term.length<2){v106ValidatorRows=[];if(render)renderValidatorList99();return []}try{let rows=await rpc('panapass_control_auto_v3',{p_grupo:null,p_buscar:term,p_limit:250}).catch(()=>[]);if(!Array.isArray(rows)||!rows.length)rows=await rpc('panapass_unidades_detalle',{p_buscar:term,p_limit:250}).catch(()=>[]);v106ValidatorRows=rankValidatorUnits99(Array.isArray(rows)?rows:[],term);if(render)renderValidatorList99();return v106ValidatorRows}catch(e){console.warn('V106 search',e);v106ValidatorRows=[];if(render)renderValidatorList99();return []}}
   async function loadValidatorDetail99(seed,options={}){
     let ctrl=seed||{};const term=seed?.unidad||seed?.placa_unica||seed?.placa||seed?.placa_comercial||'';
     if(!(seed?.unidad&&seed?.panapass_numero)){
@@ -6359,7 +6420,76 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
   async function enrichValidatorDetail99(detail){
     const ctrl=detail?.controlRecord||{},pan=String(ctrl.panapass_numero||'').trim(),unit=String(detail?.unit||'').trim();
     const jobs=[];
-    jobs.push((async()=>{try{const data=await loadRevisados99(),rev=findRevisado99(data?.rows||[],ctrl);if(!rev)return;detail.revisadoRecord=rev;const card=detail.cards?.find(item=>item.key==='revisados');if(!card)return;const valid=!!rev.emitido||N99(rev.estado)==='VIGENTE',blocked=!!rev.bloqueado,count=Number(rev.cantidad_fotos??rev.total_fotos??rev.fotos_count??0),hasPhotos=rev.fotos_disponibles===true||['1','SI','TRUE','YES'].includes(N99(rev.fotos_disponibles))||count>0,photoStatus=hasPhotos?(count?`${count} foto${count===1?'':'s'}`:'Fotos disponibles'):rev.fotos_disponibles===false||['0','NO','FALSE'].includes(N99(rev.fotos_disponibles))?'Sin fotos':'Sin información';Object.assign(card,{tone:valid?(blocked?'warn':'ok'):'bad',badge:valid?'VIGENTE':(rev.ultimo_revisado||rev.fecha?'HISTÓRICO':'PENDIENTE'),value:ctrl.mes_revisado||rev.mes_revisado||(rev.ultimo_revisado?fmt99(rev.ultimo_revisado):(rev.fecha?fmt99(rev.fecha):'MES NO DEFINIDO')),details:[{label:'Último revisado',value:rev.ultimo_revisado?fmt99(rev.ultimo_revisado):'Sin registro'},{label:'Estado',value:rev.estado||(valid?'Vigente':'Pendiente')}],note:valid?'Revisado vigente.':'Requiere un Revisado vigente.'})}catch(_){}})());
+    jobs.push((async()=>{
+      try {
+        let rev = null;
+        try {
+          const data = await loadRevisados99();
+          rev = findRevisado99(data?.rows || [], ctrl);
+        } catch (_) {}
+
+        // Fallback a revisados-ficha en caso de que la unidad no esté en el snapshot global de revisados-final
+        let fichaOficial = null;
+        if (!rev || !rev.estado) {
+          try {
+            const fichaRes = await req('/functions/v1/revisados-ficha', {
+              method: 'POST',
+              body: JSON.stringify({
+                unidad: String(ctrl.unidad || unit || ''),
+                placa: String(ctrl.placa_unica || ctrl.placa || ctrl.placa_comercial || '')
+              })
+            });
+            const fd = fichaRes?.data || {};
+            if (fd.oficial && (fd.oficial.fecha_revisado || fd.oficial.estado_vehiculo || fd.oficial.actualizado_at)) {
+              fichaOficial = fd.oficial;
+              rev = rev || {};
+              rev.estado = fd.oficial.estado_vehiculo || 'VIGENTE';
+              rev.ultimo_revisado = fd.oficial.fecha_revisado;
+              rev.mes_revisado = fd.oficial.mes_revisado || ctrl.mes_revisado;
+              rev.placa = fd.oficial.placa || ctrl.placa_unica;
+              rev.emitido = true;
+            }
+          } catch (_) {}
+        }
+
+        const card = detail.cards?.find(item => item.key === 'revisados');
+        if (!rev && !fichaOficial) {
+          if (card) {
+            Object.assign(card, {
+              tone: 'warn',
+              badge: 'SIN REGISTRO',
+              value: ctrl.mes_revisado ? ('Mes ' + ctrl.mes_revisado) : 'Sin registro',
+              details: [
+                { label: 'Último revisado', value: 'Sin registro ATTT' },
+                { label: 'Estado', value: 'No registrado en eCarCheck' }
+              ],
+              note: 'No se encontró registro de inspección técnica vehicular para esta unidad.'
+            });
+          }
+          return;
+        }
+
+        detail.revisadoRecord = rev || {};
+        if (!card) return;
+        const valid = !!rev.emitido || N99(rev.estado) === 'VIGENTE';
+        const blocked = !!rev.bloqueado;
+        const count = Number(rev.cantidad_fotos ?? rev.total_fotos ?? rev.fotos_count ?? 0);
+        const hasPhotos = rev.fotos_disponibles === true || ['1','SI','TRUE','YES'].includes(N99(rev.fotos_disponibles)) || count > 0;
+        const photoStatus = hasPhotos ? (count ? `${count} foto${count === 1 ? '' : 's'}` : 'Fotos disponibles') : rev.fotos_disponibles === false || ['0','NO','FALSE'].includes(N99(rev.fotos_disponibles)) ? 'Sin fotos' : 'Sin información';
+        const lastRevDate = rev.ultimo_revisado ? fmt99(rev.ultimo_revisado) : (rev.fecha ? fmt99(rev.fecha) : (fichaOficial?.fecha_revisado ? fmt99(fichaOficial.fecha_revisado) : 'Sin registro'));
+        
+        Object.assign(card, {
+          tone: valid ? (blocked ? 'warn' : 'ok') : 'bad',
+          badge: valid ? 'VIGENTE' : (rev.ultimo_revisado || rev.fecha || fichaOficial?.fecha_revisado ? 'HISTÓRICO' : 'PENDIENTE'),
+          value: ctrl.mes_revisado || rev.mes_revisado || (lastRevDate !== 'Sin registro' ? lastRevDate : 'MES NO DEFINIDO'),
+          details: [
+            { label: 'Último revisado', value: lastRevDate },
+            { label: 'Estado', value: rev.estado || (valid ? 'Vigente' : 'Pendiente') }
+          ],
+          note: valid ? 'Revisado vigente verificado en eCarCheck / ATTT.' : 'Requiere un Revisado vigente.'
+        });
+      } catch (_) {}
+    })());
     if(pan)jobs.push((async()=>{try{const [ena,account]=await Promise.all([req('/functions/v1/ena-consulta-saldo',{method:'POST',body:JSON.stringify({panapass:Number(pan)})}),req('/rest/v1/ena_cuentas?panapass_numero=eq.'+encodeURIComponent(pan)+'&select=panapass_display,estado_acceso,tipo_credencial,ena_empresa,ena_ruc,ena_email,ultimo_login_ok,ultima_consulta,ultimo_error,updated_at&limit=1',{method:'GET'})]);const response=ena?.data?.results?.[0],card=detail.cards?.find(item=>item.key==='panapass');detail.enaAccount=Array.isArray(account?.data)?account.data[0]||{}:{};if(response&&card){let saldo=ctrl.ena_saldo;if(['OK','BUSY'].includes(response.result)){const parsed=Number(String(response?.summary?.saldo_texto||'').replace(/[^\d.-]/g,''));if(Number.isFinite(parsed))saldo=parsed}const negative=Number(saldo||0)<0;Object.assign(card,{tone:negative?'bad':'ok',badge:negative?'SALDO NEGATIVO':'AL DÍA',value:panDebtMaybe99(saldo),details:[{label:'Última consulta',value:response.ultima_consulta?fmt99(response.ultima_consulta):fmt99(new Date().toISOString())},{label:'Número Panapass',value:pan}],note:negative?'Saldo negativo: requiere atención.':'Sin saldo pendiente en ENA.'})}}catch(_){}})());
     if(detail.cards?.some(item=>item.key==='gps')&&['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase()))jobs.push((async()=>{try{const response=await req('/functions/v1/gps-rym-validator',{method:'POST',body:JSON.stringify({q:unit})}),row=(response?.data?.rows||[]).find(item=>N99(item.unidad)===N99(unit));if(!response?.data?.ok||!row)return;const card=detail.cards.find(item=>item.key==='gps'),g1=row.gps1||{},g2=row.gps2||{},missing=!g1.installed||!g2.installed,level=N99(row.nivel||''),tone=missing||level==='CRITICO'?'bad':level==='ALERTA'?'warn':g1.ok&&g2.ok?'ok':'warn',label=g=>!g?.installed?'Sin GPS':g?.ok?'Reportando':g?.label||'Sin reportar';Object.assign(card,{tone,badge:missing?'SIN GPS':level==='CRITICO'?'GPS CRÍTICO':level==='ALERTA'?'GPS ALERTA':'2 GPS OK',value:`${label(g1)} · ${label(g2)}`,details:[{label:'GPS 1',value:`${label(g1)}${g1.last?' · '+gpsDate116(g1.last):''}`},{label:'GPS 2',value:`${label(g2)}${g2.last?' · '+gpsDate116(g2.last):''}`}],note:`${row.estado_operativo||'—'} · ${row.razon||'Sin diagnóstico'}`});detail.gpsRecord=row}catch(_){}})());
     await Promise.all(jobs);const tones=detail.cards.map(card=>card.tone);detail.overall=!detail.active?'PARADA · REVISAR':tones.includes('bad')?'ACTIVA · ALERTA':tones.some(t=>['pending','warn'].includes(t))?'ACTIVA · REVISAR':'ACTIVA · TODO OK';return detail;
@@ -7906,6 +8036,9 @@ body.v99-home .v99-module .v99-mini-kpis.v126-three{grid-template-columns:repeat
       const c=memory?.data&&Date.now()-memory.at<300000?memory:(persistedMatches&&Date.now()-persisted.at<300000?persisted:null);
       if(c?.data){
         renderHome139(c.data);
+      }else if(window.__RYM_VUE_NEXT_ACTIVE && window.__RYM_VUE_NEXT_HOME_ENABLED !== false){
+        const mods=Array.isArray(state.allModules)&&state.allModules.length?state.allModules:(state.modules||[]);
+        renderHome139({ok:false,profile:state.profile,modules:mods});
       }else{
         // Navigation follows this session's authenticated grants, not persisted summaries.
         const mods=Array.isArray(state.allModules)&&state.allModules.length?state.allModules:(state.modules||[]),has=m=>mods.includes(m);
@@ -8111,15 +8244,8 @@ body.v99-home .v99-module .v99-mini-kpis.v126-three{grid-template-columns:repeat
           if(typeof phase2NormalizeModules==='function')phase2NormalizeModules();
           window.__RYM_ROUTE_V155='HOME';
           removePortalLayers();
-          try{
-            const res=await req('/functions/v1/portal-home-resumen',{method:'POST',body:'{}'});
-            if(res?.data?.ok){
-              window.__v117HomeSummary={data:res.data,at:Date.now()};
-              window.__RYM_VUE_NEXT_HOME?.render(res.data);
-              return;
-            }
-          }catch(_){}
-          window.__RYM_VUE_NEXT_HOME?.render({profile:state.profile,modules:state.modules,panapass:{negativos_hoy:0,pagos_hoy:0,monto_mes:0},revisados:{pendientes:0,criticos:0,emitidos_hoy:0,limite_hoy:33},control:{activas:0,cerradas:0,otros:0}});
+          projectActive=false;
+          await window.v36PortalHome();
           return;
         }
         if(window.__RYM_VUE_NEXT_API)window.__RYM_VUE_NEXT_API.setSession(state.profile, state.active);
@@ -9029,15 +9155,15 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
 <link rel="stylesheet" href="/css/portal-executive.css?v=143-vue-validator"/>
 <link rel="stylesheet" href="/css/rym-brand-theme.css?v=dashboard4"/>
 <script type="module">
-  const isVueNextActive = new URLSearchParams(location.search).get('vueNext')==='1' || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev';
+  const isVueNextActive = Boolean(new URLSearchParams(location.search).get('vueNext')) || (location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev'));
   if(isVueNextActive){
     const useVueHome=new URLSearchParams(location.search).get('vueHome')!=='0';
     window.__RYM_VUE_NEXT_HOME_ENABLED=useVueHome;
-    const vueFunctionAllowlist=new Set(['admin-users','validar-cobra','panapass-ena-finalize','admin-unidad-status','control-auto-auditoria','control-auto-auditoria-v112','control-auto-auditoria-validar','control-auto-cupos-attt-email','control-auto-ecarcheck-v2-manual','control-auto-editar','control-auto-resumen-supervisoras','control-auto-unidades-operativas','gps-ranking-galera','gps-rym-admin','gps-rym-validator','revisados-boletas-sync','revisados-boletas-v2','revisados-ecarcheck-consulta-admin','revisados-ecarcheck-v2-manual','revisados-ecarcheck-v2-sync','revisados-ficha','revisados-final','revisados-incidencias','revisados-reporte-diario-email','revisados-terceros']);
-    if(location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev'){
+    const vueFunctionAllowlist=new Set(['portal-home-resumen','admin-users','validar-cobra','panapass-ena-finalize','admin-unidad-status','control-auto-auditoria','control-auto-auditoria-v112','control-auto-auditoria-validar','control-auto-cupos-attt-email','control-auto-ecarcheck-v2-manual','control-auto-editar','control-auto-resumen-supervisoras','control-auto-unidades-operativas','gps-ranking-galera','gps-rym-admin','gps-rym-validator','revisados-boletas-sync','revisados-boletas-v2','revisados-ecarcheck-consulta-admin','revisados-ecarcheck-v2-manual','revisados-ecarcheck-v2-sync','revisados-ficha','revisados-final','revisados-incidencias','revisados-reporte-diario-email','revisados-terceros']);
+    if(true){
       window.__RYM_VUE_NEXT_API=Object.freeze({
         context:()=>({profile:state.profile?{...state.profile}:null,modules:[...state.modules]}),
-        hasModule:code=>typeof code==='string'&&state.modules.includes(code),rpc:async(name,body={})=>{if(!['panapass_ranking_pagos','panapass_reporte_competencia_cobrador_v2','panapass_ultima_fecha_pago','panapass_mis_supervisoras','panapass_supervisora_perfil','panapass_historial','panapass_historial_resumen','panapass_v10_estado_operativo','panapass_ena_estado','panapass_v10_verificar','panapass_v10_procesar_am','panapass_v10_procesar_pm','panapass_pagos_fecha_v2','panapass_negativos_fecha_v2','panapass_v10_pagos_hoy','panapass_pagos_hoy_editar','panapass_pagos_hoy_cargar_desde_pm','panapass_v10_validar_pagos_hoy','panapass_v10_archivar_pagos_hoy','panapass_recurrentes_entidad','panapass_reportes_estado','panapass_reporte_fondeo','panapass_reporte_no_pre_diario'].includes(name))throw new Error('Consulta no habilitada para Vue.');return rpc(name,body)},viewContext:()=>({today:state.today,isAdmin:isAdminRole()}),
+        hasModule:code=>typeof code==='string'&&state.modules.includes(code),rpc:async(name,body={})=>{if(!['panapass_ranking_pagos','panapass_reporte_competencia_cobrador_v2','panapass_ultima_fecha_pago','panapass_mis_supervisoras','panapass_supervisora_perfil','panapass_historial','panapass_historial_resumen','panapass_v10_estado_operativo','panapass_ena_estado','panapass_v10_verificar','panapass_v10_procesar_am','panapass_v10_procesar_pm','panapass_pagos_fecha_v2','panapass_negativos_fecha_v2','panapass_v10_pagos_hoy','panapass_pagos_hoy_editar','panapass_pagos_hoy_cargar_desde_pm','panapass_v10_validar_pagos_hoy','panapass_v10_archivar_pagos_hoy','panapass_recurrentes_entidad','panapass_reportes_estado','panapass_reporte_fondeo','panapass_reporte_no_pre_diario','panapass_bajas_centro_v7','panapass_control_auto_resumen'].includes(name))throw new Error('Consulta no habilitada para Vue.');return rpc(name,body)},viewContext:()=>({today:state.today,isAdmin:isAdminRole()}),
         setSession:(profile,moduleId)=>{if(profile)state.profile=profile;if(moduleId)state.active=moduleId},
         call:async(name,body={})=>{
           if(!vueFunctionAllowlist.has(name))throw new Error('Servicio no habilitado para Vue.');
@@ -9047,8 +9173,8 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
       });
     }
     window.__RYM_VUE_NEXT_ACTIVE=true;
-    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=1792777684075');
-    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=1792777684075';document.head.appendChild(css);
+    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=20261028-ficha-bento');
+    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=20261028-ficha-bento';document.head.appendChild(css);
     let opened=false;
     window.__RYM_VUE_NEXT_HOME={render:summary=>{opened=true;return pilot.renderHome(summary)},error:error=>pilot.failHome(error),isActive:pilot.isHomeActive,hasControl:pilot.hasControlSummary,setControl:pilot.setControlIndicators,errorControl:pilot.failControlIndicators,setGps:pilot.setGpsIndicators,errorGps:pilot.failGpsIndicators};
     window.__RYM_VUE_NEXT_LOGIN={render:error=>pilot.renderLogin(error||""),dispose:pilot.disposeLogin};if(window.__RYM_VUE_NEXT_API)window.__RYM_VUE_NEXT_VIEWS={mount:pilot.mountView};
