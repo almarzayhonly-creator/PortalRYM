@@ -37,13 +37,12 @@ const detailError = ref('')
 const modalOpen = ref(false)
 const recentUnits = ref<Unit[]>([])
 
-// Control de expansión de cada una de las 4 tarjetas principales de sistemas (Fase 3: clic en toda la tarjeta)
-const expandedSystemCards = ref<Record<string, boolean>>({
-  panapass: false,
-  revisados: false,
-  gps: false,
-  control: false,
-})
+// Control de pestaña activa en el panel de detalle contextual (Fases 7, 8 y 9)
+// null = ninguno abierto; 'panapass' | 'revisados' | 'gps' | 'control' = sistema enfocado
+const activeContextTab = ref<string | null>(null)
+
+// Control de apertura del Expediente Completo de la Unidad (Fase 9)
+const showFullDossier = ref(false)
 
 // Control de expansión de las 3 secciones secundarias
 const expandedSecondary = ref<Record<string, boolean>>({
@@ -151,13 +150,23 @@ const matchBadgeText = (row: Unit) => {
   return ''
 }
 
-// FASE 3: Permitir expandir y colapsar cada tarjeta de sistema fácilmente
+// FASE 8: Selección de tarjeta para panel contextual bajo demanda
+// Al seleccionar Panapass -> muestra únicamente el detalle de Panapass
+// Al seleccionar Revisados -> cambia al detalle de Revisados
+// Si ya está activo -> se cierra con suavidad
 function toggleSystemCard(key: string, event?: Event) {
-  // Evitar conflicto si el usuario hace clic directamente en un link o botón interno
   if (event && (event.target as HTMLElement)?.closest('button:not(.v-sys-expand-btn), a')) {
     return
   }
-  expandedSystemCards.value[key] = !expandedSystemCards.value[key]
+  if (activeContextTab.value === key) {
+    activeContextTab.value = null
+  } else {
+    activeContextTab.value = key
+  }
+}
+
+function closeContextDrawer() {
+  activeContextTab.value = null
 }
 
 function toggleSecondarySection(key: 'tecnicos' | 'asignacion' | 'documentacion') {
@@ -169,7 +178,8 @@ async function select(row: Unit) {
   searched.value = false
   modalOpen.value = true
   selectedSeed.value = row
-  expandedSystemCards.value = { panapass: false, revisados: false, gps: false, control: false }
+  activeContextTab.value = null
+  showFullDossier.value = false
   expandedSecondary.value = { tecnicos: false, asignacion: false, documentacion: false }
   recentUnits.value = [row, ...recentUnits.value.filter(item => unit(item) !== unit(row))].slice(0, 5)
   await loadUnitDetail(row)
@@ -560,56 +570,39 @@ const fourSystemCards = computed<DetailCard[]>(() => {
   return [panCard, revCard, gpsCard, ctrlCard]
 })
 
-// FASE 1 & FASE 4: Métricas esenciales resumidas (limpias y sin saturar la vista principal)
+// FASE 7: Tarjeta enfocada activa para el Panel Contextual
+const activeContextCard = computed<DetailCard | null>(() => {
+  if (!activeContextTab.value) return null
+  return fourSystemCards.value.find(c => c.key === activeContextTab.value) || null
+})
+
+// FASE 7: Métricas esenciales hiper-limpias para la vista minimalista (Dato principal + Dato secundario)
 function cardPrimaryMetrics(card: DetailCard): Array<{ label: string; value: string }> {
   const c = detail.value?.controlRecord || {}
   const rev = detail.value?.revisadoRecord || {}
-  const gps = detail.value?.gpsRecord || {}
-  const g1 = (gps.gps1 as Unit) || {}
-  const g2 = (gps.gps2 as Unit) || {}
 
   if (card.key === 'panapass') {
-    const panNum = String(c.panapass_numero || c.panapass || '').trim()
-    const tagNum = String(c.tag || '').trim()
-    const panText = panNum ? `${panNum}${tagNum && tagNum !== 'Sin TAG' ? ` · TAG ${tagNum}` : ''}` : 'No asignado'
-    return [
-      { label: 'Cuenta / TAG', value: panText },
-    ]
+    // La tarjeta ya muestra en grande el Saldo (ej: B/. 0.00 o B/. 26.40)
+    // El dato secundario es la fecha de consulta y su vigencia
+    return []
   }
 
   if (card.key === 'revisados') {
     const month = String(c.mes_revisado || rev.mes_revisado || rev.mes || 'No definido').trim()
-    const lastRev = card.details?.find(d => /último|fecha/i.test(d.label))?.value || String(rev.ultimo_revisado || 'Sin registro')
     return [
-      { label: 'Mes asignado', value: month },
-      { label: 'Último revisado', value: formatPanamaDate(lastRev, false) },
+      { label: 'Mes ATTT', value: month.toUpperCase() },
     ]
   }
 
-  // FASE 4: Mostrar individualmente GPS 1 y GPS 2 priorizando estados oficiales
   if (card.key === 'gps') {
-    const formatGpsDeviceState = (dev: Unit): string => {
-      if (dev.installed === false) return 'Sin GPS'
-      if (dev.installed === true) {
-        if (dev.ok === true) return 'Reportando'
-        const reason = String(dev.label || dev.razon || 'Sin comunicación')
-        return /critico|crítico/i.test(reason) ? 'Crítico' : reason
-      }
-      return 'Sin información'
-    }
-    const g1State = formatGpsDeviceState(g1)
-    const g2State = formatGpsDeviceState(g2)
-    return [
-      { label: 'GPS 1', value: g1State },
-      { label: 'GPS 2', value: g2State },
-    ]
+    // La tarjeta ya muestra en grande '2 de 2 reportando' / '1 de 2'
+    return []
   }
 
   // Control de Auto
   const internalState = String(c.estatus2 || c.status2 || c.estado || (detail.value?.active ? 'ACTIVO' : 'PARADA')).trim()
   return [
     { label: detail.value?.active ? 'Condición' : 'Motivo parada', value: internalState || '—' },
-    { label: 'Galera', value: detail.value?.galera || '—' },
   ]
 }
 
@@ -1052,18 +1045,18 @@ onUnmounted(() => {
                   </span>
                 </div>
 
-                <!-- FASE 3: Cada tarjeta es interactiva y expandible al hacer clic -->
+                <!-- FASE 7: 4 TARJETAS PRINCIPALES MINIMALISTAS -->
                 <div class="v-ficha-bento-grid" data-testid="ficha-four-systems-grid">
                   <article
                     v-for="card in fourSystemCards"
                     :key="card.key"
                     class="v-sys-bento-card"
-                    :class="[`sys-${card.key}`, `tone-${card.tone || 'neutral'}`, { expanded: expandedSystemCards[card.key] }]"
+                    :class="[`sys-${card.key}`, `tone-${card.tone || 'neutral'}`, { active: activeContextTab === card.key }]"
                     :data-testid="`ficha-system-card-${card.key}`"
                     tabindex="0"
                     role="button"
-                    :aria-expanded="!!expandedSystemCards[card.key]"
-                    :aria-label="`Tarjeta ${card.title}. Clic para ${expandedSystemCards[card.key] ? 'colapsar' : 'expandir'} detalles.`"
+                    :aria-expanded="activeContextTab === card.key"
+                    :aria-label="`Tarjeta ${card.title}. Clic para ${activeContextTab === card.key ? 'cerrar' : 'ver'} detalles completos.`"
                     @click="toggleSystemCard(card.key, $event)"
                     @keydown.enter="toggleSystemCard(card.key)"
                     @keydown.space.prevent="toggleSystemCard(card.key)"
@@ -1089,7 +1082,7 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <!-- FASE 1: DATO PRINCIPAL ULTRA-PROTAGONISTA Y LIMPIO -->
+                    <!-- FASE 7: DATO PRINCIPAL ULTRA-PROTAGONISTA Y LIMPIO -->
                     <div class="v-sys-hero-metric">
                       <strong class="v-sys-hero-value" :class="`tone-${card.tone || 'neutral'}`">
                         {{ card.value }}
@@ -1097,8 +1090,8 @@ onUnmounted(() => {
                       <p class="v-sys-hero-note">{{ card.note }}</p>
                     </div>
 
-                    <!-- Puntos Clave Prioritarios y Simplificados -->
-                    <dl class="v-sys-priority-list">
+                    <!-- Puntos Clave Secundarios (Mínimos e Hiper-legibles) -->
+                    <dl v-if="cardPrimaryMetrics(card).length" class="v-sys-priority-list">
                       <div
                         v-for="metric in cardPrimaryMetrics(card)"
                         :key="metric.label"
@@ -1109,7 +1102,7 @@ onUnmounted(() => {
                       </div>
                     </dl>
 
-                    <!-- Pie de Tarjeta: Timestamp en formato Panamá + Botón Expandir -->
+                    <!-- Pie de Tarjeta: Timestamp Auditado + Botón Ver Detalle -->
                     <div class="v-sys-card-footer">
                       <span class="v-sys-timestamp" title="Última actualización / comunicación en horario de Panamá">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
@@ -1123,55 +1116,103 @@ onUnmounted(() => {
                         v-if="card.sections && card.sections.length"
                         type="button"
                         class="v-sys-expand-btn"
-                        :aria-expanded="!!expandedSystemCards[card.key]"
+                        :class="{ active: activeContextTab === card.key }"
+                        :aria-expanded="activeContextTab === card.key"
                         :data-testid="`btn-expand-${card.key}`"
                         @click.stop="toggleSystemCard(card.key)"
                       >
-                        <span>{{ expandedSystemCards[card.key] ? 'Ocultar' : 'Detalles' }}</span>
-                        <span class="v-sys-chevron" :class="{ open: expandedSystemCards[card.key] }">▾</span>
+                        <span>{{ activeContextTab === card.key ? 'Ocultar' : 'Ver detalle' }}</span>
+                        <span class="v-sys-chevron" :class="{ open: activeContextTab === card.key }">▾</span>
                       </button>
                     </div>
+                  </article>
+                </div>
 
-                    <!-- Detalle Expandible Oficial -->
-                    <div
-                      v-if="expandedSystemCards[card.key] && card.sections && card.sections.length"
-                      class="v-sys-expanded-drawer"
-                      :data-testid="`drawer-${card.key}`"
-                      @click.stop
-                    >
+                <!-- FASE 8: PANEL CONTEXTUAL BAJO DEMANDA UNIFICADO -->
+                <!-- No deforma la grilla ni abre 4 acordeones simultáneos -->
+                <transition name="v-context-slide">
+                  <div
+                    v-if="activeContextCard && activeContextCard.sections && activeContextCard.sections.length"
+                    class="v-contextual-detail-panel"
+                    :class="`focus-${activeContextCard.key}`"
+                    :data-testid="`contextual-panel-${activeContextCard.key}`"
+                  >
+                    <div class="v-contextual-panel-header">
+                      <div class="v-contextual-panel-title">
+                        <span class="v-contextual-kicker">DETALLE OPERATIVO OFICIAL</span>
+                        <h4>{{ activeContextCard.title }} · Información Completa</h4>
+                      </div>
+                      <div class="v-contextual-panel-controls">
+                        <!-- Selector rápido entre sistemas -->
+                        <div class="v-contextual-system-pills">
+                          <button
+                            v-for="c in fourSystemCards"
+                            :key="c.key"
+                            type="button"
+                            class="v-system-pill-btn"
+                            :class="{ active: activeContextTab === c.key }"
+                            @click="activeContextTab = c.key"
+                          >
+                            {{ c.title }}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          class="v-contextual-close-btn"
+                          aria-label="Cerrar panel de detalle"
+                          @click="closeContextDrawer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="v-contextual-panel-content">
                       <div
-                        v-for="sec in card.sections"
+                        v-for="sec in activeContextCard.sections"
                         :key="sec.title"
-                        class="v-sys-drawer-group"
+                        class="v-contextual-section-block"
                       >
-                        <h5>{{ sec.title }}</h5>
-                        <div class="v-sys-drawer-fields">
+                        <h5 class="v-contextual-section-heading">{{ sec.title }}</h5>
+                        <div class="v-contextual-fields-grid">
                           <div
                             v-for="fld in sec.fields"
                             :key="fld.label"
-                            class="v-sys-drawer-field"
+                            class="v-contextual-field-item"
                           >
-                            <span>{{ fld.label }}</span>
-                            <strong>{{ fld.value }}</strong>
+                            <span class="v-contextual-field-label">{{ fld.label }}</span>
+                            <strong class="v-contextual-field-val">{{ fld.value }}</strong>
+                            <small v-if="fld.reference" class="v-contextual-field-ref">Ref: {{ fld.reference }}</small>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </article>
-                </div>
+                  </div>
+                </transition>
               </section>
 
-              <!-- SECCIONES SECUNDARIAS EXPANDIBLES -->
-              <section class="v-ficha-secondary-section" aria-label="Datos técnicos y administrativos">
-                <div class="v-ficha-section-bar secondary">
-                  <div class="v-ficha-section-title">
-                    <span class="v-ficha-section-kicker">EXPEDIENTE DE UNIDAD</span>
-                    <h3>Datos Técnicos, Asignación y Documentación</h3>
+              <!-- FASE 9: EXPEDIENTE COMPLETO BAJO DEMANDA -->
+              <section class="v-ficha-secondary-section" aria-label="Expediente de la unidad">
+                <div class="v-ficha-dossier-bar">
+                  <div class="v-ficha-dossier-copy">
+                    <span class="v-ficha-section-kicker">INFORMACIÓN TÉCNICA Y DOCUMENTACIÓN</span>
+                    <h3>Expediente Completo del Vehículo</h3>
+                    <p>Accede a datos de motor, chasis/VIN, póliza de seguro, supervisión y cotejo eCarCheck.</p>
                   </div>
-                  <small class="v-ficha-secondary-hint">Despliega cualquier bloque para consultar la ficha completa</small>
+                  <button
+                    type="button"
+                    class="v-ficha-dossier-toggle-btn"
+                    :class="{ active: showFullDossier }"
+                    :aria-expanded="showFullDossier"
+                    data-testid="btn-toggle-dossier"
+                    @click="showFullDossier = !showFullDossier"
+                  >
+                    <span>{{ showFullDossier ? 'Ocultar expediente completo' : 'Ver expediente completo' }}</span>
+                    <span class="v-sys-chevron" :class="{ open: showFullDossier }">▾</span>
+                  </button>
                 </div>
 
-                <div class="v-ficha-accordions-grid" data-testid="ficha-secondary-accordions">
+                <div v-if="showFullDossier" class="v-ficha-accordions-grid" data-testid="ficha-secondary-accordions">
                   <!-- 1. DATOS TÉCNICOS -->
                   <article class="v-ficha-accordion-card" :class="{ open: expandedSecondary.tecnicos }">
                     <button
@@ -2589,20 +2630,247 @@ onUnmounted(() => {
   transform: rotate(180deg) !important;
 }
 
-/* FASE 3: Cajón expandido sin desorganizar la grilla */
-.v-sys-expanded-drawer {
-  margin-top: 6px !important;
-  padding-top: 10px !important;
-  border-top: 1.5px solid #e2e8f0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-  animation: drawerFadeIn 0.2s ease !important;
+/* FASE 7: Tarjeta enfocada activa */
+.v-sys-bento-card.active {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.16), 0 8px 24px rgba(2, 132, 199, 0.12) !important;
+  background: #ffffff !important;
 }
 
-@keyframes drawerFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
+.v-sys-expand-btn.active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+/* FASE 8: PANEL CONTEXTUAL UNIFICADO BAJO DEMANDA */
+.v-contextual-detail-panel {
+  margin-top: 18px !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #e0e7f0 !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
+  overflow: hidden !important;
+  animation: contextSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.v-contextual-detail-panel.focus-panapass {
+  border-color: #bfdbfe !important;
+}
+.v-contextual-detail-panel.focus-revisados {
+  border-color: #bbf7d0 !important;
+}
+.v-contextual-detail-panel.focus-gps {
+  border-color: #a5f3fc !important;
+}
+.v-contextual-detail-panel.focus-control {
+  border-color: #cbd5e1 !important;
+}
+
+@keyframes contextSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.v-contextual-panel-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 16px 20px !important;
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  flex-wrap: wrap !important;
+}
+
+.v-contextual-kicker {
+  display: block !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  color: #0284c7 !important;
+  text-transform: uppercase !important;
+}
+
+.v-contextual-panel-title h4 {
+  margin: 2px 0 0 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.v-contextual-panel-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.v-contextual-system-pills {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #e2e8f0 !important;
+  padding: 3px !important;
+  border-radius: 999px !important;
+  gap: 2px !important;
+}
+
+.v-system-pill-btn {
+  border: none !important;
+  background: transparent !important;
+  color: #475569 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.v-system-pill-btn:hover {
+  color: #0f172a !important;
+}
+
+.v-system-pill-btn.active {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-contextual-close-btn {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #64748b !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.v-contextual-close-btn:hover {
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+.v-contextual-panel-content {
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  max-height: 420px !important;
+  overflow-y: auto !important;
+}
+
+.v-contextual-section-heading {
+  margin: 0 0 10px !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  color: #334155 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.v-contextual-section-heading::after {
+  content: '' !important;
+  flex: 1 !important;
+  height: 1px !important;
+  background: #e2e8f0 !important;
+}
+
+.v-contextual-fields-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.v-contextual-field-item {
+  background: #f8fafc !important;
+  border: 1px solid #edf2f7 !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.v-contextual-field-label {
+  font-size: 10.5px !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+.v-contextual-field-val {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  word-break: break-word !important;
+}
+
+.v-contextual-field-ref {
+  font-size: 10.5px !important;
+  color: #0369a1 !important;
+  font-weight: 600 !important;
+}
+
+/* FASE 9: BARRA DE EXPEDIENTE COMPLETO */
+.v-ficha-dossier-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 16px 20px !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  margin-top: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+.v-ficha-dossier-copy h3 {
+  margin: 3px 0 2px !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.v-ficha-dossier-copy p {
+  margin: 0 !important;
+  font-size: 12px !important;
+  color: #64748b !important;
+}
+
+.v-ficha-dossier-toggle-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 9px 18px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid #0284c7 !important;
+  background: #ffffff !important;
+  color: #0284c7 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.v-ficha-dossier-toggle-btn:hover {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+.v-ficha-dossier-toggle-btn.active {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+  color: #ffffff !important;
 }
 
 .v-sys-drawer-group h5 {

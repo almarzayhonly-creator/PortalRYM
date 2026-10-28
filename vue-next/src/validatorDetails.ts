@@ -57,42 +57,74 @@ function rawObject(value: unknown): Unit {
 }
 
 // ============================================================================
-// FASE 2: FORMATO DE FECHAS EN HORARIO DE PANAMÁ (America/Panama)
+// FASE 1 & FASE 2: GESTIÓN AUDITADA DE FECHAS EN HORARIO DE PANAMÁ (America/Panama)
 // Ejemplo: "28 oct 2026 · 10:30 a. m."
 // Nunca mostrar cadenas ISO brutas (T...Z) al usuario.
+// Detecta e invalida fechas futuras inconsistentes o campos de base de datos mal asignados.
 // ============================================================================
 
-export function formatPanamaDate(rawDate: unknown, showTime = true): string {
-  if (!rawDate) return ''
+export interface ParsedDateInfo {
+  raw: string
+  formatted: string
+  relative: string
+  isFuture: boolean
+  isOutdated: boolean
+  diffHours: number
+  dateObj: Date | null
+}
+
+export function parseDateMetadata(rawDate: unknown, maxHoursFresh = 24): ParsedDateInfo {
+  const emptyRes: ParsedDateInfo = {
+    raw: '',
+    formatted: '',
+    relative: '',
+    isFuture: false,
+    isOutdated: true,
+    diffHours: Infinity,
+    dateObj: null,
+  }
+  if (!rawDate) return emptyRes
   const str = String(rawDate).trim()
-  if (!str || str === '—' || str.toLowerCase() === 'sin registro' || str.toLowerCase() === 'sin consulta reciente') {
-    return str
+  if (!str || str === '—' || /sin consulta|sin registro|no disponible|fallida|consultando/i.test(str)) {
+    return { ...emptyRes, raw: str, formatted: str }
   }
 
-  // Si ya viene con formato amigable, no romperlo
-  if (/\b(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\b/i.test(str) && str.includes('·')) {
-    return str
-  }
-
-  // Parsear fecha ISO o DD/MM/YYYY
   let dt: Date | null = null
 
-  // Caso DD/MM/YYYY o DD/MM/YYYY HH:mm
+  // Formato DD/MM/YYYY o DD-MM-YYYY con hora opcional
   const dmyMatch = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
   if (dmyMatch) {
     const [, day, month, year, h = '0', m = '0', s = '0'] = dmyMatch
-    dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(h) + 5, Number(m), Number(s))) // approx adjustment if local
+    // Ajustar a hora local de Panamá (UTC-5)
+    dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(h) + 5, Number(m), Number(s)))
   } else {
-    const parsed = new Date(str)
-    if (!isNaN(parsed.getTime())) {
-      dt = parsed
+    // Si viene solo YYYY-MM-DD sin hora, fijar las 05:00 UTC para que en Panamá sea 00:00 del mismo día
+    const ymdOnlyMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (ymdOnlyMatch) {
+      const [, year, month, day] = ymdOnlyMatch
+      dt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 5, 0, 0))
+    } else {
+      const parsed = new Date(str)
+      if (!isNaN(parsed.getTime())) {
+        dt = parsed
+      }
     }
   }
 
   if (!dt || isNaN(dt.getTime())) {
-    return str
+    return { ...emptyRes, raw: str, formatted: str }
   }
 
+  const now = new Date()
+  const diffMs = now.getTime() - dt.getTime()
+  // Si la fecha está más de 5 minutos en el futuro (margen para leves desfaces de reloj de servidor)
+  const isFuture = diffMs < -300000
+  const diffHours = diffMs / (1000 * 60 * 60)
+  const isOutdated = isFuture || diffHours > maxHoursFresh
+
+  // Formatear en horario oficial de Panamá
+  let formatted = str
+  let relative = ''
   try {
     const datePart = new Intl.DateTimeFormat('es-PA', {
       timeZone: 'America/Panama',
@@ -101,10 +133,6 @@ export function formatPanamaDate(rawDate: unknown, showTime = true): string {
       year: 'numeric',
     }).format(dt).replace('.', '')
 
-    if (!showTime) {
-      return datePart
-    }
-
     const timePart = new Intl.DateTimeFormat('es-PA', {
       timeZone: 'America/Panama',
       hour: 'numeric',
@@ -112,10 +140,68 @@ export function formatPanamaDate(rawDate: unknown, showTime = true): string {
       hour12: true,
     }).format(dt).toLowerCase()
 
-    return `${datePart} · ${timePart}`
+    formatted = `${datePart} · ${timePart}`
+
+    if (isFuture) {
+      relative = 'Fecha futura inconsistente'
+    } else {
+      const diffMins = Math.floor(diffMs / 60000)
+      if (diffMins < 5) relative = 'Hace unos momentos'
+      else if (diffMins < 60) relative = `Hace ${diffMins} min`
+      else if (diffHours < 24) relative = `Hace ${Math.floor(diffHours)} h`
+      else {
+        const days = Math.floor(diffHours / 24)
+        if (days === 1) relative = 'Ayer'
+        else if (days < 7) relative = `Hace ${days} días`
+        else if (days < 30) relative = `Hace ${Math.floor(days / 7)} sem`
+        else if (days < 365) relative = `Hace ${Math.floor(days / 30)} meses`
+        else relative = `Hace ${Math.floor(days / 365)} años`
+      }
+    }
   } catch {
+    formatted = str
+  }
+
+  return {
+    raw: str,
+    formatted,
+    relative,
+    isFuture,
+    isOutdated,
+    diffHours,
+    dateObj: dt,
+  }
+}
+
+export function formatPanamaDate(rawDate: unknown, showTime = true): string {
+  if (!rawDate) return ''
+  const str = String(rawDate).trim()
+  if (!str || str === '—' || /sin registro|sin consulta|no disponible/i.test(str)) {
     return str
   }
+
+  // Si ya contiene el formato amigable de mes y separador '·', respetarlo
+  if (/\b(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\b/i.test(str) && str.includes('·')) {
+    return str
+  }
+
+  const meta = parseDateMetadata(rawDate)
+  if (!meta.dateObj) return str
+
+  if (!showTime) {
+    try {
+      return new Intl.DateTimeFormat('es-PA', {
+        timeZone: 'America/Panama',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }).format(meta.dateObj).replace('.', '')
+    } catch {
+      return str
+    }
+  }
+
+  return meta.formatted
 }
 
 // ============================================================================
@@ -408,7 +494,7 @@ function panSections(detail: UnitDetail): DetailSection[] {
     ['Otros TAGs ENA', ids],
     ['Cantidad de TAGs', c.cantidad_tags],
     ['Último resultado ENA', c.ena_ultimo_resultado],
-    ['Última consulta ENA', formatPanamaDate(pickValue(account.ultima_consulta, c.ena_ultima_consulta, account.updated_at, c.ena_actualizado_at))],
+    ['Última consulta ENA', formatPanamaDate(pickValue(account.ultima_consulta, c.ena_ultima_consulta))],
     ['Último error', pickValue(c.ena_ultimo_error, account.ultimo_error)],
   ])]
   for (const [i, tag] of tags.entries()) {
@@ -436,16 +522,16 @@ function revisadoSections(detail: UnitDetail, fichaResponse: Unit | null): Detai
   const c = objectValue(detail.controlRecord), r = objectValue(detail.revisadoRecord), f = objectValue(fichaResponse)
   const official = objectValue(f.oficial), raw = rawObject(pickValue(official.ultima_respuesta_exitosa, official.ultima_respuesta)), op = objectValue(f.operacion)
   const section = fields('Detalle de Revisado y eCarCheck', [
-    ['Mes del revisado', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes_revisado, r.mes)],
-    ['Fecha último revisado', formatPanamaDate(pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha), false)],
+    ['Mes asignado ATTT', pickValue(c.mes_revisado, objectValue(f.unidad).mes_revisado, r.mes_revisado, r.mes)],
+    ['Fecha trámite emisión', formatPanamaDate(pickValue(op.fecha_ultimo_revisado, official.fecha_revisado, raw.fechaRevisado, r.ultimo_revisado, r.fecha), false)],
     ['Año revisado', pickValue(official.anio_revisado, r.anio_revisado)],
     ['Rev ID', pickValue(raw.revId, raw.idRevisados, official.rev_id, r.rev_id)],
     ['Taller / emisor', pickValue(raw.ultTallerRevisado, official.taller, official.emisor, objectValue(f.unidad).taller_revisado)],
-    ['Estado oficial del vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)],
+    ['Estado oficial vehículo', pickValue(raw.estadoVehiculo, official.estado_vehiculo)],
     ['Emitido', r.emitido == null ? null : r.emitido ? 'Sí' : 'No'],
     ['Bloqueado / Boletas', r.bloqueado == null ? null : r.bloqueado ? 'Sí' : 'No'],
     ['Observaciones eCarCheck', pickValue(raw.observaciones, official.observacion, objectValue(f.unidad).observacion_revisado)],
-    ['Última consulta eCarCheck', formatPanamaDate(pickValue(official.actualizado_at, f.consulta_at))],
+    ['Última verificación eCarCheck', formatPanamaDate(pickValue(official.actualizado_at, f.consulta_at, r.updated_at))],
   ])
   return section ? [section] : []
 }
@@ -464,13 +550,17 @@ function gpsSections(detail: UnitDetail): DetailSection[] {
     ['Proveedor GPS 1', pickValue(g1.proveedor, g1.fuente)],
     ['Proveedor GPS 2', pickValue(g2.proveedor, g2.fuente)],
   ])
-  const device = (title: string, source: Unit): DetailSection | null => fields(title, [
-    ['Estado del equipo', source.label],
-    ['Diagnóstico específico', source.razon],
-    ['Última comunicación', formatPanamaDate(pickValue(source.last, source.ultima_senal))],
-    ['Proveedor', pickValue(source.proveedor, source.fuente)],
-    ['IMEI / ID', pickValue(source.imei, source.id)],
-  ])
+  const device = (title: string, source: Unit): DetailSection | null => {
+    const commMeta = parseDateMetadata(pickValue(source.last, source.ultima_senal))
+    return fields(title, [
+      ['Estado del equipo', source.label],
+      ['Diagnóstico específico', source.razon],
+      ['Última señal del satélite', commMeta.formatted || 'Sin transmisión'],
+      ['Antigüedad de la señal', commMeta.relative || 'Desconocida'],
+      ['Proveedor', pickValue(source.proveedor, source.fuente)],
+      ['IMEI / ID', pickValue(source.imei, source.id)],
+    ])
+  }
   return [evaluation, equipment, device('GPS 1 · Detalle técnico', g1), device('GPS 2 · Detalle técnico', g2)].filter((item): item is DetailSection => !!item)
 }
 
@@ -487,35 +577,72 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
   const c = objectValue(detail.controlRecord)
   const account = objectValue(detail.enaAccount)
 
-  // 1. PANAPASS
+  // 1. PANAPASS (AUDITORÍA FASE 1 & FASE 2)
+  // Separación estricta entre Estado Financiero y Vigencia de la Información.
+  // La fecha de consulta SOLO proviene de consultas reales a ENA (ultima_consulta / consultado_at),
+  // NUNCA de updated_at de tablas ni de fechas de corte o vencimiento futuro.
   const pana = detail.cards.find(card => card.key === 'panapass')
   if (pana) {
     const panNum = displayValue(pickValue(c.panapass_numero, c.numero_panapass))
-    const rawLastCheck = pickValue(
-      pana.details?.find(d => /consulta/i.test(d.label))?.value,
+    
+    // Filtrar estrictamente: solo timestamps de consulta real a ENA
+    const realEnaQueryRaw = pickValue(
       account.ultima_consulta,
       c.ena_ultima_consulta,
-      account.updated_at,
-      c.ena_actualizado_at
+      pana.details?.find(d => /consulta/i.test(d.label))?.value
     )
-    const formattedCheck = formatPanamaDate(rawLastCheck)
-    pana.updatedAt = formattedCheck || 'Sin consulta reciente'
+    
+    // Auditar metadata de la fecha (margen de 24h para considerarlo 'al día')
+    const queryMeta = parseDateMetadata(realEnaQueryRaw, 24)
+    
+    // Descartar fechas futuras de la consulta (inconsistencias de base de datos)
+    const validQueryDate = queryMeta.isFuture ? '' : queryMeta.formatted
+    pana.updatedAt = validQueryDate || (realEnaQueryRaw ? 'Consulta anterior' : 'Sin consulta reciente')
+
+    const savedSaldo = c.ena_saldo !== null && c.ena_saldo !== undefined && String(c.ena_saldo).trim() !== '' ? Number(c.ena_saldo) : null
+    const hasNegative = (savedSaldo !== null && savedSaldo < 0) || /NEGATIVO/i.test(pana.badge)
 
     if (!panNum) {
       pana.tone = detail.active ? 'bad' : 'neutral'
       pana.badge = 'SIN PANAPASS'
       pana.value = 'No asignado'
       pana.syncStatus = 'incomplete'
+      pana.note = 'Control de Auto no tiene Panapass activo asignado.'
     } else if (/NO DISPONIBLE|SIN RESPUESTA|ERROR/i.test(`${pana.badge} ${pana.value}`)) {
-      const savedSaldo = c.ena_saldo !== null && c.ena_saldo !== undefined && String(c.ena_saldo).trim() !== '' ? Number(c.ena_saldo) : null
-      pana.tone = savedSaldo !== null && savedSaldo < 0 ? 'bad' : 'neutral'
+      pana.tone = hasNegative ? 'bad' : 'neutral'
+      pana.badge = hasNegative ? 'SALDO NEGATIVO' : 'SIN RESPUESTA'
       pana.syncStatus = 'error'
+      pana.note = 'No se pudo conectar con ENA. Se muestra último saldo conocido.'
+    } else if (hasNegative) {
+      // Saldo negativo siempre es crítico para la operación
+      pana.tone = 'bad'
+      pana.badge = 'SALDO NEGATIVO'
+      pana.syncStatus = queryMeta.isOutdated ? 'outdated' : 'verified'
+      pana.note = queryMeta.isOutdated
+        ? `Saldo negativo registrado (${queryMeta.relative || 'anterior'}). Requiere confirmación.`
+        : 'Saldo negativo confirmado en ENA. Requiere pago inmediato.'
+    } else if (queryMeta.isOutdated || !realEnaQueryRaw) {
+      // Saldo >= 0 pero la consulta NO es de hoy -> DATO HISTÓRICO, NUNCA verde 'AL DÍA'
+      pana.tone = 'neutral'
+      pana.badge = 'ÚLTIMO SALDO'
+      pana.syncStatus = 'outdated'
+      pana.note = validQueryDate
+        ? `Último saldo registrado · ${queryMeta.relative || validQueryDate}`
+        : 'Saldo guardado histórico · Sin consulta reciente de ENA'
     } else {
+      // Saldo >= 0 y consultado hoy
+      pana.tone = 'ok'
+      pana.badge = 'AL DÍA'
       pana.syncStatus = 'verified'
+      pana.note = 'Sin saldo pendiente en ENA · Verificado hoy'
     }
   }
 
-  // 2. REVISADO
+  // 2. REVISADO (AUDITORÍA FASE 3)
+  // Distinción entre:
+  // - Fecha del trámite de emisión del revisado (ej. 7 mar 2026)
+  // - Fecha de verificación en eCarCheck / ATTT (ej. 24 oct 2026)
+  // - Vigencia oficial: sticker anual de 12 meses según reglamentación ATTT
   const rev = objectValue(detail.revisadoRecord)
   const fObj = objectValue(ficha)
   const operation = objectValue(fObj.operacion)
@@ -538,10 +665,13 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       else status = 'SIN REGISTRO'
 
       const month = displayValue(pickValue(c.mes_revisado, objectValue(fObj.unidad).mes_revisado, rev.mes_revisado, rev.mes))
-      const rawLast = pickValue(operation.fecha_ultimo_revisado, official.fecha_revisado, rev.ultimo_revisado, rev.fecha)
-      const last = rawLast ? formatPanamaDate(rawLast, false) : 'Sin registro'
-      const rawCheckDate = pickValue(official.actualizado_at, fObj.consulta_at, rev.updated_at, rawLast)
-      const checkDate = rawCheckDate ? formatPanamaDate(rawCheckDate) : 'Sin consulta reciente'
+      const rawEmissionDate = pickValue(operation.fecha_ultimo_revisado, official.fecha_revisado, rev.ultimo_revisado, rev.fecha)
+      const lastEmissionFormatted = rawEmissionDate ? formatPanamaDate(rawEmissionDate, false) : 'Sin registro'
+      
+      // Fecha de consulta real al sistema eCarCheck
+      const rawCheckDate = pickValue(official.actualizado_at, fObj.consulta_at, rev.updated_at)
+      const checkMeta = parseDateMetadata(rawCheckDate, 168) // eCarCheck es válido por semanas si no hay cambio
+      const checkDateFormatted = checkMeta.formatted || 'Sin verificación reciente'
 
       const tone = status === 'VIGENTE'
         ? (rev.bloqueado ? 'warn' : 'ok')
@@ -554,16 +684,17 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       Object.assign(review, {
         tone,
         badge: status,
-        value: month ? `MES ${month.toUpperCase()}` : (last !== 'Sin registro' ? last : status),
+        value: month ? `MES ${month.toUpperCase()}` : (lastEmissionFormatted !== 'Sin registro' ? lastEmissionFormatted : status),
         details: [
-          { label: 'Mes / Vencimiento', value: month || 'No definido' },
-          { label: 'Último revisado', value: last },
+          { label: 'Mes asignado', value: month || 'No definido' },
+          { label: 'Último trámite', value: lastEmissionFormatted },
+          { label: 'Cotejo eCarCheck', value: checkDateFormatted },
         ],
-        updatedAt: checkDate,
-        syncStatus: status === 'SIN REGISTRO' ? 'incomplete' : 'verified',
+        updatedAt: checkDateFormatted,
+        syncStatus: status === 'SIN REGISTRO' ? 'incomplete' : checkMeta.isOutdated ? 'outdated' : 'verified',
         note: status === 'VIGENTE'
-          ? `Revisado vigente · Último registro: ${last}`
-          : `Estado ${status.toLowerCase()} · Referencia: ${month || last}`,
+          ? `Revisado vigente · Trámite: ${lastEmissionFormatted}`
+          : `Estado ${status.toLowerCase()} · Referencia: ${month || lastEmissionFormatted}`,
       })
     } else if (review.badge === 'CONSULTANDO' || review.tone === 'pending') {
       review.updatedAt = 'Consultando…'
@@ -575,7 +706,11 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
     }
   }
 
-  // 3. GPS (FASE 4: Reportando, Sin comunicación, Crítico, Sin información)
+  // 3. GPS (AUDITORÍA FASE 4)
+  // Distinguir estrictamente entre:
+  // - Última transmisión / señal del satélite al vehículo
+  // - Fecha de consulta al servidor / base de datos
+  // Nunca mostrar '2 de 2 reportando' si los dispositivos no transmiten en tiempo y forma.
   const gps = detail.cards.find(card => card.key === 'gps')
   const row = objectValue(detail.gpsRecord)
   if (gps) {
@@ -613,8 +748,11 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       const installed = devices.filter(item => item.installed === true).length
       const known = devices.some(item => typeof item.installed === 'boolean' || hasValue(item.label))
       const summary = !known ? 'Sin información' : installed === 0 ? '0 dispositivos instalados' : `${reporting} de ${Math.max(installed, 2)} reportando`
+      
+      // La última señal real de los equipos físicos
       const rawComm = pickValue(devices[0]?.last, devices[1]?.last, row.ultima_transmision)
-      const lastComm = rawComm ? formatPanamaDate(rawComm) : 'Sin transmisión reciente'
+      const commMeta = parseDateMetadata(rawComm, 12) // GPS requiere señal dentro de 12h
+      const lastCommFormatted = commMeta.formatted ? `Última señal: ${commMeta.relative || commMeta.formatted}` : 'Sin transmisión reciente'
 
       Object.assign(gps, {
         tone,
@@ -624,8 +762,8 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
           { label: 'GPS 1', value: `${formatDeviceLabel(devices[0]!)}${devices[0]?.last ? ` · ${formatPanamaDate(devices[0]?.last)}` : ''}` },
           { label: 'GPS 2', value: `${formatDeviceLabel(devices[1]!)}${devices[1]?.last ? ` · ${formatPanamaDate(devices[1]?.last)}` : ''}` },
         ],
-        updatedAt: lastComm,
-        syncStatus: level === 'SIN INFORMACIÓN' ? 'outdated' : (level === 'CRÍTICO' || level === 'CRITICO' ? 'incomplete' : 'verified'),
+        updatedAt: lastCommFormatted,
+        syncStatus: level === 'SIN INFORMACIÓN' ? 'outdated' : (level === 'CRÍTICO' || level === 'CRITICO' ? 'incomplete' : commMeta.isOutdated ? 'outdated' : 'verified'),
         note: reason ? `${level} · ${reason}` : `Estado satelital: ${level}`,
       })
     } else if (/NO DISPONIBLE|SIN GPS|NO VALIDADO|SIN INFORMAC/i.test(`${gps.badge} ${gps.value}`)) {
@@ -635,7 +773,9 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
     }
   }
 
-  // 4. CONTROL DE AUTO
+  // 4. CONTROL DE AUTO (AUDITORÍA FASE 5)
+  // Mostrar estado operativo verídico (ACTIVA / PARADA / CERRADA)
+  // Fecha: última actualización de estado de la unidad en flota, no la hora del navegador.
   const ctrlCard = detail.cards.find(card => card.key === 'control')
   if (ctrlCard) {
     const internalState = displayValue(pickValue(c.estatus2, c.status2, c.estado, c.estatus, detail.status))
@@ -646,8 +786,10 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       : detail.active
         ? (upperValue(internalState) === 'ACTIVO' || upperValue(internalState) === 'ACTIVA' ? 'EN OPERACIÓN' : internalState)
         : (internalState || 'PARADA EN PATIO')
-    const rawUpdate = pickValue(c.updated_at, c.fecha_actualizacion)
-    ctrlCard.updatedAt = rawUpdate ? formatPanamaDate(rawUpdate) : 'Sincronizado RYM'
+    
+    const rawUpdate = pickValue(c.fecha_actualizacion_estado, c.fecha_estado, c.updated_at)
+    const updateMeta = parseDateMetadata(rawUpdate, 720) // Estado operativo de flota
+    ctrlCard.updatedAt = updateMeta.formatted ? `Actualizado: ${updateMeta.relative || updateMeta.formatted}` : 'Sincronizado RYM'
     ctrlCard.syncStatus = 'verified'
   }
 }
