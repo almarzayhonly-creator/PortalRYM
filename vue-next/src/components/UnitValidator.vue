@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import ModuleIcon from './ModuleIcon.vue'
 import type { PortalProfile } from '../types'
+import asignadorMap from '../asignadorMap.json'
 import {
   applyValidatorSections,
   formatPanamaDate,
@@ -55,10 +56,10 @@ const expandedSecondary = ref<Record<string, boolean>>({
 })
 
 // Feedback de copiado rápido
-const copiedTarget = ref<'' | 'unit' | 'plate' | 'panapass' | 'vin'>('')
+const copiedTarget = ref<'' | 'unit' | 'plate' | 'panapass' | 'vin' | 'whatsapp'>('')
 let copyTimer: number | undefined
 
-function copyText(text: string, target: 'unit' | 'plate' | 'panapass' | 'vin') {
+function copyText(text: string, target: 'unit' | 'plate' | 'panapass' | 'vin' | 'whatsapp') {
   const clean = String(text || '').trim()
   if (!clean || clean === '—') return
   window.clearTimeout(copyTimer)
@@ -68,7 +69,71 @@ function copyText(text: string, target: 'unit' | 'plate' | 'panapass' | 'vin') {
   }
   copyTimer = window.setTimeout(() => {
     copiedTarget.value = ''
-  }, 1800)
+  }, 2200)
+}
+
+function copyValidationToWhatsApp() {
+  if (!detail.value) return
+  const d = detail.value
+  const c = d.controlRecord || {}
+
+  // 1. Fecha de hoy formateada
+  const todayFmt = new Intl.DateTimeFormat('es-PA', {
+    timeZone: 'America/Panama',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date())
+
+  // 2. Panapass
+  const panaCard = fourSystemCards.value.find(x => x.key === 'panapass')
+  const panaEstado = panaCard ? `${panaCard.value} (${panaCard.badge})` : 'Sin datos'
+
+  // 3. Revisado
+  const revCard = fourSystemCards.value.find(x => x.key === 'revisados')
+  const revEstado = revCard ? `${revCard.value} (${revCard.badge})` : 'Sin datos'
+
+  // 4. GPS
+  const gpsCard = fourSystemCards.value.find(x => x.key === 'gps')
+  let gpsEstado = 'Sin datos'
+  if (gpsCard) {
+    const ants = gpsAntennas(gpsCard)
+    gpsEstado = `${ants.map(a => `${a.label}: ${a.text}`).join(' · ')} (${gpsCard.badge})`
+  }
+
+  // 5. Control de Auto / Estatus
+  const ctrlCard = fourSystemCards.value.find(x => x.key === 'control')
+  const ctrlEstado = ctrlCard ? `${ctrlCard.value} (${ctrlCard.badge})` : operationalStatusHeader.value.label
+
+  const opEmpresa = companyOperatorLabel.value !== '—' ? companyOperatorLabel.value : companyHeaderLabel.value
+  const duenaEmpresa = companyOwnerLabel.value !== '—' ? companyOwnerLabel.value : '—'
+
+  const message = [
+    `🚗 *VALIDACIÓN OPERATIVA RYM*`,
+    `📅 *Fecha:* ${todayFmt}`,
+    `----------------------------------------`,
+    `🔹 *Unidad:* ${d.unit}`,
+    `🔹 *Placa:* ${d.plate}`,
+    `🔹 *Vehículo:* ${vehicleIdentityLabel.value}`,
+    `🔹 *Color:* ${carColorStyle.value.name}`,
+    `🔹 *Operadora:* ${opEmpresa}`,
+    `🔹 *Empresa Dueña:* ${duenaEmpresa}`,
+    `🔹 *Galera:* ${d.galera || '—'} | *Supervisora:* ${d.supervisor || '—'}`,
+    `----------------------------------------`,
+    `📋 *ESTADO DE LOS 4 SISTEMAS:*`,
+    `💳 *Panapass:* ${panaEstado}`,
+    `📑 *Revisado ATTT:* ${revEstado}`,
+    `🛰️ *GPS:* ${gpsEstado}`,
+    `🚦 *Control de Flota:* ${ctrlEstado}`,
+    `----------------------------------------`,
+    `✅ *Diagnóstico General:* ${operationalStatusHeader.value.label} (${operationalStatusHeader.value.sub})`,
+    `_Generado desde Portal RYM - Centro de Control_`
+  ].join('\n')
+
+  copyText(message, 'whatsapp')
 }
 
 // Permisos por rol de usuario
@@ -291,6 +356,14 @@ function closeDetail() {
   }, 40)
 }
 
+function consultAnotherUnit() {
+  closeDetail()
+  window.setTimeout(() => {
+    input.value?.focus()
+    input.value?.select()
+  }, 60)
+}
+
 async function executeSearch(rawTerm: string): Promise<Unit[]> {
   if (!props.api) return []
   const rawResult = await props.api.search(rawTerm)
@@ -450,6 +523,32 @@ const vehicleIdentityLabel = computed(() => {
   return parts.join(' · ') || 'Vehículo de flota RYM'
 })
 
+const companyOperatorLabel = computed(() => {
+  if (!detail.value) return '—'
+  const c = detail.value.controlRecord || {}
+  return String(
+    c.empresa_operadora || detail.value.operator || c.empresa || '—'
+  ).trim()
+})
+
+const companyOwnerLabel = computed(() => {
+  if (!detail.value) return '—'
+  const c = detail.value.controlRecord || {}
+  const direct = String(c.empresa_duena || detail.value.owner || '').trim()
+  if (direct && direct !== '—' && direct !== 'null' && direct !== 'undefined') {
+    return direct
+  }
+  const u = String(detail.value.unit || '').trim().toUpperCase()
+  const p = String(detail.value.plate || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
+  const mapUnits = (asignadorMap as any).units || {}
+  const mapPlates = (asignadorMap as any).plates || {}
+  const fromMap = mapUnits[u] || mapPlates[p]
+  if (fromMap && String(fromMap).trim()) {
+    return String(fromMap).trim()
+  }
+  return '—'
+})
+
 const companyHeaderLabel = computed(() => {
   if (!detail.value) return '—'
   const c = detail.value.controlRecord || {}
@@ -579,6 +678,51 @@ const activeContextCard = computed<DetailCard | null>(() => {
   if (!activeContextTab.value) return null
   return fourSystemCards.value.find(c => c.key === activeContextTab.value) || null
 })
+
+// ===== Rediseño HUD: helpers visuales basados SOLO en datos reales de la tarjeta =====
+const MONTHS_ES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
+
+/** Saldo numérico del Panapass (null si no hay cifra confirmada: no se inventa nada). */
+function panapassAmount(card: DetailCard): number | null {
+  const m = String(card.value ?? '').replace(',', '.').match(/-?\d+(?:\.\d+)?/)
+  return m ? Number(m[0]) : null
+}
+
+/** Nivel de la barra de saldo: 0–100 (B/. 10 = lleno). Solo decorativo; el número real va en el chip. */
+function panapassLevelPct(card: DetailCard): number {
+  const n = panapassAmount(card)
+  if (n === null) return 0
+  return Math.max(4, Math.min(100, Math.round((Math.max(n, 0) / 10) * 100)))
+}
+
+/** Índice (0–11) del mes ATTT mostrado en la tarjeta, o -1 si no es identificable. */
+function revisadoMonthIndex(card: DetailCard): number {
+  const v = String(card.value ?? '').toUpperCase()
+  return MONTHS_ES.findIndex(m => v.includes(m))
+}
+
+/** True si la descripción ya dice lo mismo que el título (evita "Saldo Negativo ENA: Saldo negativo registrado…"). */
+function issueRepeatsLabel(issue: { label: string; desc: string }): boolean {
+  const norm = (s: string) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
+  const label = norm(issue.label)
+  const desc = norm(issue.desc)
+  if (!label || !desc) return false
+  const words = label.split(' ').filter(w => w.length > 2)
+  return words.length > 0 && words.filter(w => desc.includes(w)).length >= Math.min(2, words.length)
+}
+
+/** Antenas GPS: estado REAL por equipo (viene de gpsRecord). */
+function gpsAntennas(card: DetailCard): Array<{ label: string; on: boolean; stateClass: string; text: string }> {
+  const devs = card.gpsDevices && card.gpsDevices.length
+    ? card.gpsDevices
+    : [{ label: 'GPS 1', state: 'unknown' as const }, { label: 'GPS 2', state: 'unknown' as const }]
+  return devs.map(d => ({
+    label: d.label,
+    on: d.state === 'on',
+    stateClass: d.state, // 'on' | 'off' | 'none' | 'unknown'
+    text: d.state === 'on' ? 'Reporta' : d.state === 'off' ? 'Sin reportar' : d.state === 'none' ? 'Sin GPS' : 'Sin dato',
+  }))
+}
 
 // FASE 7: Métricas esenciales hiper-limpias para la vista minimalista (Dato principal + Dato secundario)
 function cardPrimaryMetrics(card: DetailCard): Array<{ label: string; value: string }> {
@@ -889,46 +1033,22 @@ onUnmounted(() => {
             <!-- CABECERA INTELIGENTE DE UNIDAD -->
             <header class="v-ficha-header" data-testid="ficha-header">
               <div class="v-ficha-header-main">
-                <!-- Identificador Principal de Unidad + Acción Rápida Copiar -->
+                <!-- Identificador Principal de Unidad -->
                 <div class="v-ficha-unit-hero">
                   <div class="v-ficha-unit-badge-box">
                     <span class="v-ficha-kicker">UNIDAD</span>
                     <div class="v-ficha-unit-title-row">
                       <h2 id="v-ficha-unit-title" class="v-ficha-unit-number">{{ detail.unit }}</h2>
-                      <button
-                        type="button"
-                        class="v-ficha-copy-chip"
-                        :class="{ copied: copiedTarget === 'unit' }"
-                        title="Copiar número de unidad"
-                        data-testid="btn-copy-unit"
-                        @click="copyText(detail.unit, 'unit')"
-                      >
-                        <svg v-if="copiedTarget !== 'unit'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                        </svg>
-                        <span>{{ copiedTarget === 'unit' ? '¡Copiada!' : 'Copiar unidad' }}</span>
-                      </button>
                     </div>
                   </div>
 
                   <!-- Metadatos Primarios en Cápsulas Limpias -->
                   <div class="v-ficha-identity-meta">
                     <div class="v-ficha-primary-pills">
-                      <!-- Placa + Botón Copiar Placa -->
+                      <!-- Placa -->
                       <div class="v-ficha-plate-group">
                         <span class="v-ficha-plate-label">PLACA</span>
                         <strong class="v-ficha-plate-val">{{ detail.plate }}</strong>
-                        <button
-                          type="button"
-                          class="v-ficha-plate-copy"
-                          :class="{ copied: copiedTarget === 'plate' }"
-                          title="Copiar placa"
-                          data-testid="btn-copy-plate"
-                          @click="copyText(detail.plate, 'plate')"
-                        >
-                          {{ copiedTarget === 'plate' ? '✓ Copiada' : 'Copiar' }}
-                        </button>
                       </div>
 
                       <!-- Marca, Modelo y Año -->
@@ -956,27 +1076,34 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <!-- Empresa Propietaria / Operadora y Ubicación Operativa -->
+                    <!-- Empresa Operadora, Dueña, Galera y Supervisora -->
                     <div class="v-ficha-company-row">
-                      <span class="v-ficha-company-name">
-                        <strong>{{ companyHeaderLabel }}</strong>
+                      <span class="v-ficha-info-item">
+                        <small>EMPRESA OPERADORA</small>
+                        <strong>{{ companyOperatorLabel !== '—' ? companyOperatorLabel : companyHeaderLabel }}</strong>
                       </span>
-                      <span v-if="detail.galera && detail.galera !== '—'" class="v-ficha-company-sep">·</span>
-                      <span v-if="detail.galera && detail.galera !== '—'" class="v-ficha-company-sub">
-                        Galera: <b>{{ detail.galera }}</b>
+                      <span class="v-ficha-info-item">
+                        <small>EMPRESA DUEÑA</small>
+                        <strong>{{ companyOwnerLabel !== '—' ? companyOwnerLabel : '—' }}</strong>
                       </span>
-                      <span v-if="detail.supervisor && detail.supervisor !== '—'" class="v-ficha-company-sep">·</span>
-                      <span v-if="detail.supervisor && detail.supervisor !== '—'" class="v-ficha-company-sub">
-                        Supervisora: <b>{{ detail.supervisor }}</b>
+                      <span v-if="detail.galera && detail.galera !== '—'" class="v-ficha-info-item">
+                        <small>GALERA</small>
+                        <strong>{{ detail.galera }}</strong>
+                      </span>
+                      <span v-if="detail.supervisor && detail.supervisor !== '—'" class="v-ficha-info-item">
+                        <small>SUPERVISORA</small>
+                        <strong>{{ detail.supervisor }}</strong>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Derecha: Semáforo de Estado Operativo + Actualizar Unidad + Cerrar -->
+                <!-- Derecha: Semáforo de Estado Operativo + Acción WhatsApp + Actualizar + Cerrar -->
                 <div class="v-ficha-header-controls">
                   <div class="v-ficha-op-semaphore" :class="`tone-${operationalStatusHeader.tone}`" data-testid="ficha-operational-status">
-                    <span class="v-ficha-op-dot"></span>
+                    <span class="v-ficha-op-dot">
+                      <span class="v-op-dot-ping"></span>
+                    </span>
                     <div class="v-ficha-op-text">
                       <strong>{{ operationalStatusHeader.label }}</strong>
                       <small>{{ operationalStatusHeader.sub }}</small>
@@ -986,18 +1113,16 @@ onUnmounted(() => {
                   <div class="v-ficha-action-buttons">
                     <button
                       type="button"
-                      class="v-ficha-refresh-btn"
-                      :disabled="detailEnriching"
-                      title="Actualizar datos en vivo de la unidad"
-                      data-testid="btn-refresh-unit"
-                      @click="refreshCurrentUnit"
+                      class="v-ficha-whatsapp-btn"
+                      :class="{ copied: copiedTarget === 'whatsapp' }"
+                      title="Copiar reporte completo para WhatsApp"
+                      data-testid="btn-copy-whatsapp"
+                      @click="copyValidationToWhatsApp"
                     >
-                      <svg :class="{ spinning: detailEnriching }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="15" height="15">
-                        <polyline points="23 4 23 10 17 10"/>
-                        <polyline points="1 20 1 14 7 14"/>
-                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                       </svg>
-                      <span>{{ detailEnriching ? 'Sincronizando…' : 'Actualizar' }}</span>
+                      <span>{{ copiedTarget === 'whatsapp' ? '¡Validación Copiada!' : 'Copiar a WhatsApp' }}</span>
                     </button>
 
                     <button
@@ -1022,7 +1147,7 @@ onUnmounted(() => {
                   :class="`sev-${issue.severity}`"
                 >
                   <span class="v-ficha-alert-dot"></span>
-                  <strong>{{ issue.label }}:</strong>
+                  <strong v-if="!issueRepeatsLabel(issue)">{{ issue.label }}</strong>
                   <span>{{ issue.desc }}</span>
                 </div>
               </div>
@@ -1127,48 +1252,58 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <!-- FASE 7: DATO PRINCIPAL ULTRA-PROTAGONISTA Y LIMPIO -->
-                    <div class="v-sys-hero-metric">
-                      <strong class="v-sys-hero-value" :class="`tone-${card.tone || 'neutral'}`">
+                    <!-- HERO VISUAL por sistema (sin textos duplicados) -->
+                    <div class="v-sys-hero-metric" :class="`hero-${card.key}`">
+                      <strong v-if="card.key !== 'gps'" class="v-sys-hero-value" :class="`tone-${card.tone || 'neutral'}`">
                         {{ card.value }}
                       </strong>
-                      <p class="v-sys-hero-note">{{ card.note }}</p>
+
+                      <!-- Panapass: barra de nivel de saldo -->
+                      <div v-if="card.key === 'panapass' && panapassAmount(card) !== null" class="v-level-track" aria-hidden="true">
+                        <span class="v-level-fill" :class="`tone-${card.tone || 'neutral'}`" :style="{ width: panapassLevelPct(card) + '%' }"></span>
+                      </div>
+
+                      <!-- Revisados: línea de 12 meses con el mes vigente -->
+                      <div v-else-if="card.key === 'revisados' && revisadoMonthIndex(card) >= 0" class="v-year-strip" aria-hidden="true">
+                        <span
+                          v-for="(mm, i) in MONTHS_ES"
+                          :key="mm"
+                          class="v-year-seg"
+                          :class="[{ current: i === revisadoMonthIndex(card) }, `tone-${card.tone || 'neutral'}`]"
+                          :title="mm"
+                        ></span>
+                      </div>
+
+                      <!-- GPS: antenas con barras de señal -->
+                      <div v-else-if="card.key === 'gps'" class="v-gps-antennas">
+                        <span
+                          v-for="ant in gpsAntennas(card)"
+                          :key="ant.label"
+                          class="v-gps-ant"
+                          :class="`state-${ant.stateClass}`"
+                        >
+                          <span class="v-sig-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                          <span class="v-gps-ant-label">{{ ant.label }}</span>
+                          <span class="v-gps-ant-state">{{ ant.text }}</span>
+                        </span>
+                      </div>
+
+                      <p v-if="card.key !== 'gps' && card.note" class="v-sys-hero-note">{{ card.note }}</p>
                     </div>
 
-                    <!-- Puntos Clave Secundarios (Mínimos e Hiper-legibles) -->
-                    <dl v-if="cardPrimaryMetrics(card).length" class="v-sys-priority-list">
-                      <div
-                        v-for="metric in cardPrimaryMetrics(card)"
-                        :key="metric.label"
-                        class="v-sys-priority-row"
-                      >
-                        <dt>{{ metric.label }}</dt>
-                        <dd>{{ metric.value }}</dd>
-                      </div>
-                    </dl>
-
-                    <!-- Pie de Tarjeta: Timestamp Auditado + Botón Ver Detalle -->
+                    <!-- Pie mínimo: hora relativa/auditada + indicador de expansión (toda la tarjeta es clickable) -->
                     <div class="v-sys-card-footer">
                       <span class="v-sys-timestamp" title="Última actualización / comunicación en horario de Panamá">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
+                        <span class="v-live-tick"></span>
                         <span>{{ card.updatedAt || 'Sin consulta' }}</span>
                       </span>
-
-                      <button
+                      <span
                         v-if="card.sections && card.sections.length"
-                        type="button"
-                        class="v-sys-expand-btn"
-                        :class="{ active: activeContextTab === card.key }"
-                        :aria-expanded="activeContextTab === card.key"
+                        class="v-sys-chevron-pill"
+                        :class="{ open: activeContextTab === card.key }"
                         :data-testid="`btn-expand-${card.key}`"
-                        @click.stop="toggleSystemCard(card.key)"
-                      >
-                        <span>{{ activeContextTab === card.key ? 'Ocultar' : 'Ver detalle' }}</span>
-                        <span class="v-sys-chevron" :class="{ open: activeContextTab === card.key }">▾</span>
-                      </button>
+                        aria-hidden="true"
+                      >▾</span>
                     </div>
                   </article>
                 </div>
@@ -1404,54 +1539,28 @@ onUnmounted(() => {
               </section>
             </div>
 
-            <!-- FASE 6: PIE DE FICHA CON ACCIÓN PRINCIPAL DESTACADA Y ACCESOS SECUNDARIOS -->
+            <!-- PIE DE FICHA SIMPLIFICADO: CERRAR Y CONSULTAR OTRA UNIDAD -->
             <footer class="v-ficha-footer">
-              <!-- Accesos secundarios a módulos con permisos respetados -->
-              <div class="v-ficha-footer-secondary-links">
-                <span class="v-footer-links-label">Ir al módulo:</span>
-                <button
-                  type="button"
-                  class="v-ficha-sub-link"
-                  data-testid="link-nav-panapass"
-                  @click="handleModuleShortcut('panapass')"
-                >
-                  Panapass
-                </button>
-                <span class="v-sub-sep">·</span>
-                <button
-                  type="button"
-                  class="v-ficha-sub-link"
-                  data-testid="link-nav-revisados"
-                  @click="handleModuleShortcut('revisados')"
-                >
-                  Revisados
-                </button>
-                <template v-if="canSeeGps">
-                  <span class="v-sub-sep">·</span>
-                  <button
-                    type="button"
-                    class="v-ficha-sub-link"
-                    data-testid="link-nav-gps"
-                    @click="handleModuleShortcut('gps')"
-                  >
-                    GPS
-                  </button>
-                </template>
-              </div>
-
-              <!-- Acciones Principales -->
               <div class="v-ficha-footer-main-actions">
-                <button type="button" class="v-ficha-btn-secondary" @click="closeDetail">
+                <button
+                  type="button"
+                  class="v-ficha-btn-secondary"
+                  data-testid="btn-close-modal"
+                  @click="closeDetail"
+                >
                   <span>Cerrar</span>
                 </button>
                 <button
-                  v-if="canNavigateControl"
                   type="button"
                   class="v-ficha-btn-primary"
-                  data-testid="btn-main-open-control"
-                  @click="handleModuleShortcut('control')"
+                  data-testid="btn-consultar-otra"
+                  @click="consultAnotherUnit"
                 >
-                  <span>Abrir en Control de Auto →</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <span>Consultar otra unidad</span>
                 </button>
               </div>
             </footer>
@@ -2182,26 +2291,45 @@ onUnmounted(() => {
   height: 10px !important;
   border-radius: 50% !important;
   flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+.v-op-dot-ping {
+  position: absolute !important;
+  inset: -4px !important;
+  border-radius: 50% !important;
+  border: 2px solid currentColor !important;
+  opacity: 0.8 !important;
+  animation: vBeaconPing 2s cubic-bezier(0, 0, 0.2, 1) infinite !important;
+}
+
+@keyframes vBeaconPing {
+  0% { transform: scale(0.8); opacity: 0.9; }
+  70%, 100% { transform: scale(2.2); opacity: 0; }
 }
 
 .v-ficha-op-semaphore.tone-ok .v-ficha-op-dot {
   background: #34d399 !important;
+  color: #34d399 !important;
   box-shadow: 0 0 10px rgba(52, 211, 153, 0.8) !important;
 }
 
 .v-ficha-op-semaphore.tone-warn .v-ficha-op-dot {
   background: #fbbf24 !important;
+  color: #fbbf24 !important;
   box-shadow: 0 0 10px rgba(251, 191, 36, 0.8) !important;
 }
 
 .v-ficha-op-semaphore.tone-bad .v-ficha-op-dot {
   background: #f87171 !important;
+  color: #f87171 !important;
   box-shadow: 0 0 10px rgba(248, 113, 113, 0.85) !important;
 }
 
 .v-ficha-op-semaphore.tone-info .v-ficha-op-dot,
 .v-ficha-op-semaphore.tone-neutral .v-ficha-op-dot {
   background: #38bdf8 !important;
+  color: #38bdf8 !important;
 }
 
 .v-ficha-op-text {
@@ -2224,6 +2352,35 @@ onUnmounted(() => {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
+}
+
+.v-ficha-whatsapp-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  height: 38px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+  background: #25d366 !important;
+  border: 1px solid #22c55e !important;
+  color: #ffffff !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 10px rgba(37, 211, 102, 0.35) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.v-ficha-whatsapp-btn:hover {
+  background: #20ba5a !important;
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.5) !important;
+}
+
+.v-ficha-whatsapp-btn.copied {
+  background: #059669 !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.7) !important;
 }
 
 .v-ficha-refresh-btn {
@@ -2284,6 +2441,7 @@ onUnmounted(() => {
   border-radius: 16px !important;
   border: 1.5px solid #e2e8f0 !important;
   margin-bottom: 2px !important;
+  position: relative !important;
 }
 
 .v-ficha-nav-tab {
@@ -2292,7 +2450,7 @@ onUnmounted(() => {
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  padding: 10px 18px !important;
+  padding: 11px 18px !important;
   border-radius: 12px !important;
   border: none !important;
   background: transparent !important;
@@ -2301,27 +2459,32 @@ onUnmounted(() => {
   font-size: 13.5px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative !important;
 }
 
 .v-ficha-nav-tab svg {
-  transition: transform 0.2s ease !important;
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .v-ficha-nav-tab:hover {
   color: #0f172a !important;
-  background: rgba(255, 255, 255, 0.65) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
 }
 
 .v-ficha-nav-tab:hover svg {
-  transform: scale(1.1) !important;
+  transform: scale(1.15) rotate(-5deg) !important;
 }
 
 .v-ficha-nav-tab.active {
   background: #ffffff !important;
   color: #0284c7 !important;
   font-weight: 800 !important;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.v-ficha-nav-tab.active svg {
+  color: #0284c7 !important;
 }
 
 .v-tab-pill-indicator {
@@ -2460,50 +2623,57 @@ onUnmounted(() => {
 .v-sys-bento-card {
   background: #ffffff !important;
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 18px !important;
-  padding: 16px !important;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+  border-radius: 20px !important;
+  padding: 18px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04) !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 14px !important;
   cursor: pointer !important;
-  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
   outline: none !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
-/* Halos vivos de luz */
+/* Halos vivos de luz y respiración sutil */
 .v-card-ambient-glow {
   position: absolute !important;
-  top: 0; left: 0; right: 0; height: 3.5px !important;
+  top: 0; left: 0; right: 0; height: 4px !important;
   background: #94a3b8 !important;
-  transition: height 0.22s ease !important;
+  transition: all 0.3s ease !important;
 }
 
 .v-card-ambient-glow.glow-ok {
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5) !important;
+  background: linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6) !important;
 }
 
 .v-card-ambient-glow.glow-warn {
-  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%) !important;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5) !important;
+  background: linear-gradient(90deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6) !important;
+  animation: vGlowPulse 2.4s ease-in-out infinite alternate !important;
 }
 
 .v-card-ambient-glow.glow-bad {
-  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%) !important;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6) !important;
+  background: linear-gradient(90deg, #b91c1c 0%, #ef4444 50%, #f87171 100%) !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.75) !important;
+  animation: vGlowPulse 1.8s ease-in-out infinite alternate !important;
+}
+
+@keyframes vGlowPulse {
+  0% { opacity: 0.65; box-shadow: 0 0 8px currentColor; }
+  100% { opacity: 1; box-shadow: 0 0 16px currentColor; }
 }
 
 .v-sys-bento-card:hover {
-  transform: translateY(-3px) scale(1.01) !important;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.09) !important;
+  transform: translateY(-4px) scale(1.012) !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04) !important;
   border-color: #cbd5e1 !important;
 }
 
 .v-sys-bento-card:hover .v-card-ambient-glow {
-  height: 5px !important;
+  height: 6px !important;
 }
 
 .v-sys-bento-card:active {
@@ -2515,21 +2685,33 @@ onUnmounted(() => {
 }
 
 .v-sys-bento-card.tone-ok {
-  border-color: #e2e8f0 !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  background: linear-gradient(180deg, rgba(240, 253, 244, 0.35) 0%, #ffffff 40%) !important;
+}
+.v-sys-bento-card.tone-ok:hover {
+  border-color: rgba(16, 185, 129, 0.5) !important;
 }
 .v-sys-bento-card.tone-warn {
-  border-color: #fef3c7 !important;
+  border-color: #fde68a !important;
+  background: linear-gradient(180deg, rgba(254, 252, 232, 0.5) 0%, #ffffff 40%) !important;
+}
+.v-sys-bento-card.tone-warn:hover {
+  border-color: #f59e0b !important;
 }
 .v-sys-bento-card.tone-bad {
-  border-color: #fee2e2 !important;
-  background: linear-gradient(180deg, rgba(254, 242, 242, 0.5) 0%, #ffffff 45%) !important;
+  border-color: #fecaca !important;
+  background: linear-gradient(180deg, rgba(254, 242, 242, 0.6) 0%, #ffffff 45%) !important;
+}
+.v-sys-bento-card.tone-bad:hover {
+  border-color: #ef4444 !important;
 }
 .v-sys-bento-card.tone-pending,
 .v-sys-bento-card.tone-info {
-  border-color: #e0f2fe !important;
+  border-color: #bae6fd !important;
+  background: linear-gradient(180deg, rgba(240, 249, 255, 0.5) 0%, #ffffff 40%) !important;
 }
 .v-sys-bento-card.tone-neutral {
-  border-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
 }
 
 .v-sys-card-top {
@@ -2643,38 +2825,56 @@ onUnmounted(() => {
   background: currentColor !important;
 }
 
-/* FASE 1: DATO PRINCIPAL PROTAGONISTA */
+/* FASE 1: DATO PRINCIPAL PROTAGONISTA HUD */
 .v-sys-hero-metric {
   background: #f8fafc !important;
-  border: 1px solid #f1f5f9 !important;
-  border-radius: 12px !important;
-  padding: 12px !important;
+  border: 1px solid #eef2f6 !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+}
+
+.v-sys-bento-card:hover .v-sys-hero-metric {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03) !important;
 }
 
 .v-sys-hero-value {
   display: block !important;
-  font-size: 21px !important;
+  font-size: 22px !important;
   font-weight: 900 !important;
   color: #0f172a !important;
   letter-spacing: -0.02em !important;
-  margin-bottom: 2px !important;
+  margin-bottom: 3px !important;
+  transition: transform 0.2s ease !important;
+}
+
+.v-sys-bento-card:hover .v-sys-hero-value {
+  transform: scale(1.02) !important;
+  transform-origin: left center !important;
 }
 
 .v-sys-hero-value.tone-bad {
   color: #dc2626 !important;
+  text-shadow: 0 1px 2px rgba(220, 38, 38, 0.15) !important;
 }
 .v-sys-hero-value.tone-ok {
   color: #059669 !important;
+  text-shadow: 0 1px 2px rgba(5, 150, 105, 0.15) !important;
 }
 .v-sys-hero-value.tone-warn {
   color: #d97706 !important;
+  text-shadow: 0 1px 2px rgba(217, 119, 6, 0.15) !important;
 }
 
 .v-sys-hero-note {
   margin: 0 !important;
   font-size: 11.5px !important;
   color: #64748b !important;
-  line-height: 1.35 !important;
+  line-height: 1.4 !important;
+  font-weight: 550 !important;
 }
 
 /* Lista simplificada de datos esenciales */
@@ -3353,73 +3553,633 @@ onUnmounted(() => {
 
 @media (max-width: 720px) {
   .v-ficha-backdrop {
-    padding: 8px !important;
+    padding: 0 !important;
     align-items: flex-end !important;
   }
 
   .v-ficha-sheet {
     width: 100% !important;
-    max-height: 94vh !important;
-    border-radius: 20px 20px 14px 14px !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 18px 18px 0 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
+  /* Cabecera ultra-compacta: altura contenida y visible sin recortes */
   .v-ficha-header {
-    padding: 14px 16px !important;
+    padding: max(8px, env(safe-area-inset-top)) 10px 6px !important;
+    flex-shrink: 0 !important;
   }
 
   .v-ficha-header-main {
-    gap: 12px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 5px !important;
   }
 
   .v-ficha-unit-hero {
-    gap: 12px !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
   }
 
+  /* Badge de Unidad en móvil */
   .v-ficha-unit-badge-box {
-    padding: 7px 12px !important;
-    min-width: 0 !important;
+    padding: 3px 8px !important;
+    min-width: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  .v-ficha-kicker {
+    font-size: 7.5px !important;
+    letter-spacing: 0.04em !important;
+    margin-bottom: 0 !important;
   }
 
   .v-ficha-unit-number {
-    font-size: 24px !important;
+    font-size: 18px !important;
+    line-height: 1.1 !important;
   }
 
-  .v-ficha-body {
-    padding: 14px 16px !important;
-  }
-
-  .v-ficha-bento-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .v-ficha-footer {
-    padding: 10px 14px !important;
-    gap: 10px !important;
+  .v-ficha-identity-meta {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
     flex-direction: column !important;
-    align-items: stretch !important;
+    gap: 3px !important;
+  }
+
+  .v-ficha-primary-pills {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .v-ficha-plate-group {
+    padding: 2px 6px !important;
+    gap: 3px !important;
+  }
+
+  .v-ficha-plate-label {
+    font-size: 8px !important;
+  }
+
+  .v-ficha-plate-val {
+    font-size: 11.5px !important;
+  }
+
+  .v-ficha-meta-pill {
+    padding: 2px 6px !important;
+    font-size: 10.5px !important;
+    max-width: 180px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .v-ficha-meta-pill svg {
+    display: none !important;
+  }
+
+  /* Empresa Operadora, Dueña, Galera y Supervisora: grilla compacta de 2 columnas */
+  .v-ficha-company-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2px 8px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px !important;
+    padding: 4px 6px !important;
+    margin-top: 1px !important;
+  }
+
+  .v-ficha-info-item {
+    gap: 0 !important;
+  }
+
+  .v-ficha-info-item small {
+    font-size: 7.5px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .v-ficha-info-item strong {
+    font-size: 10.5px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Controles de cabecera en móvil: Semáforo y WhatsApp + Cerrar */
+  .v-ficha-header-controls {
+    margin-left: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+
+  .v-ficha-op-semaphore {
+    flex: 1 1 auto !important;
+    padding: 3px 6px !important;
+    border-radius: 6px !important;
+    gap: 5px !important;
+  }
+
+  .v-ficha-op-dot {
+    width: 8px !important;
+    height: 8px !important;
+  }
+
+  .v-ficha-op-text strong {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  .v-ficha-op-text small {
+    font-size: 8.5px !important;
+    line-height: 1 !important;
+    display: block !important;
+  }
+
+  .v-ficha-action-buttons {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    gap: 4px !important;
+    align-items: center !important;
+  }
+
+  .v-ficha-whatsapp-btn {
+    height: 28px !important;
+    padding: 0 8px !important;
+    font-size: 10.5px !important;
+    border-radius: 6px !important;
+    gap: 3px !important;
+  }
+
+  .v-ficha-whatsapp-btn svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .v-ficha-close-btn {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+  }
+
+  /* Cinta de alertas compacta */
+  .v-ficha-alerts-strip {
+    margin-top: 4px !important;
+    gap: 3px !important;
+  }
+
+  .v-ficha-alert-chip {
+    padding: 2px 6px !important;
+    font-size: 9.5px !important;
+    gap: 4px !important;
+  }
+
+  /* Cuerpo con scroll optimizado y padding mínimo */
+  .v-ficha-body {
+    padding: 6px 8px !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+
+  .v-ficha-nav-tabs-bar {
+    gap: 2px !important;
+    padding: 2px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .v-ficha-nav-tab {
+    padding: 4px 6px !important;
+    font-size: 10.5px !important;
+    gap: 4px !important;
+  }
+
+  .v-ficha-nav-tab svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* En móvil ocultamos la barra de título larga para ahorrar 40px */
+  .v-ficha-section-bar {
+    display: none !important;
+  }
+
+  /* GRILLA 2x2 EN MÓVIL: Las 4 tarjetas caben 100% en el viewport */
+  .v-ficha-bento-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .v-sys-bento-card {
+    padding: 7px 6px 6px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    min-height: 105px !important;
+  }
+
+  .v-sys-card-top {
+    gap: 2px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .v-sys-card-brand {
+    gap: 4px !important;
+  }
+
+  .v-sys-icon-box {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 6px !important;
+  }
+
+  .v-sys-icon-box svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .v-sys-kicker {
+    font-size: 7px !important;
+    line-height: 1 !important;
+  }
+
+  .v-sys-card-name {
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .v-sys-status-badge {
+    padding: 1px 4px !important;
+    font-size: 7.5px !important;
+    gap: 2px !important;
+  }
+
+  .v-sys-hero-metric {
+    padding: 4px 6px !important;
+    border-radius: 6px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .v-sys-hero-value {
+    font-size: 13.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .v-level-track {
+    height: 3px !important;
+    margin: 3px 0 2px !important;
+  }
+
+  .v-sys-hero-note {
+    font-size: 8.5px !important;
+    line-height: 1.1 !important;
+    margin: 1px 0 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  /* GPS en móvil: barras horizontales sin ocupar tanto espacio */
+  .v-gps-antennas {
+    display: flex !important;
+    gap: 3px !important;
+  }
+
+  .v-gps-ant {
+    flex: 1 !important;
+    padding: 2px 4px !important;
+    font-size: 8px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1px !important;
+  }
+
+  .v-sig-bars {
+    height: 8px !important;
+    gap: 1px !important;
+  }
+
+  .v-sig-bars i {
+    width: 1.5px !important;
+  }
+
+  .v-gps-ant-label {
+    font-size: 7.5px !important;
+  }
+
+  .v-gps-ant-state {
+    font-size: 7.5px !important;
+  }
+
+  /* Pie de tarjeta ultra compacto */
+  .v-sys-card-footer {
+    padding-top: 3px !important;
+    margin-top: 2px !important;
+  }
+
+  .v-sys-timestamp {
+    font-size: 8px !important;
+    gap: 2px !important;
+  }
+
+  .v-sys-chevron-pill {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 9px !important;
+  }
+
+  /* Pie de la ficha: Cerrar y Consultar otra unidad */
+  .v-ficha-footer {
+    padding: 6px 10px max(6px, env(safe-area-inset-bottom)) !important;
+    gap: 6px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-shrink: 0 !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
   }
 
   .v-ficha-footer-secondary-links {
-    justify-content: center !important;
+    display: none !important;
   }
 
   .v-ficha-footer-main-actions {
     margin-left: 0 !important;
     display: flex !important;
     width: 100% !important;
+    gap: 8px !important;
   }
 
   .v-ficha-footer-main-actions button {
     flex: 1 !important;
     text-align: center !important;
+    padding: 7px 10px !important;
+    font-size: 11.5px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
   }
 
-  .v-submit-btn span {
-    display: none !important;
+  .v-ficha-footer-main-actions button svg {
+    width: 14px !important;
+    height: 14px !important;
   }
+}
 
-  .v-submit-btn {
-    padding: 0 12px !important;
-  }
+/* =========================================================================
+   REDISEÑO HUD: barras de nivel, tira anual, antenas GPS, pie mínimo
+========================================================================== */
+.v-level-track {
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: #e2e8f0 !important;
+  margin: 8px 0 6px !important;
+  overflow: hidden !important;
+}
+.v-level-fill {
+  display: block !important;
+  height: 100% !important;
+  border-radius: 999px !important;
+  background: #94a3b8 !important;
+  transform-origin: left center !important;
+  animation: vFillGrow 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.v-level-fill.tone-ok { background: linear-gradient(90deg, #10b981, #34d399) !important; }
+.v-level-fill.tone-warn { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; }
+.v-level-fill.tone-bad { background: linear-gradient(90deg, #ef4444, #f87171) !important; }
+@keyframes vFillGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.v-year-strip {
+  display: grid !important;
+  grid-template-columns: repeat(12, 1fr) !important;
+  gap: 3px !important;
+  margin: 9px 0 6px !important;
+}
+.v-year-seg {
+  height: 7px !important;
+  border-radius: 3px !important;
+  background: #e2e8f0 !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.v-year-seg.current {
+  height: 11px !important;
+  margin-top: -2px !important;
+  background: #10b981 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.55) !important;
+  animation: vSegPulse 2.2s ease-in-out infinite !important;
+}
+.v-year-seg.current.tone-warn { background: #f59e0b !important; box-shadow: 0 0 10px rgba(245, 158, 11, 0.55) !important; }
+.v-year-seg.current.tone-bad { background: #ef4444 !important; box-shadow: 0 0 10px rgba(239, 68, 68, 0.55) !important; }
+@keyframes vSegPulse { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.25); } }
+
+.v-gps-antennas {
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 0 !important;
+}
+.v-gps-ant {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 12px 8px !important;
+  border-radius: 12px !important;
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+}
+.v-gps-ant.state-on,
+.v-gps-ant.on {
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+}
+.v-gps-ant.state-off {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+.v-gps-ant.state-none,
+.v-gps-ant.state-unknown {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+}
+
+.v-sig-bars { display: inline-flex !important; align-items: flex-end !important; gap: 4px !important; height: 30px !important; }
+.v-sig-bars i {
+  display: block !important;
+  width: 6px !important;
+  border-radius: 2px !important;
+  background: currentColor !important;
+  opacity: 0.3 !important;
+  transform-origin: bottom center !important;
+}
+.v-sig-bars i:nth-child(1) { height: 9px !important; }
+.v-sig-bars i:nth-child(2) { height: 16px !important; }
+.v-sig-bars i:nth-child(3) { height: 23px !important; }
+.v-sig-bars i:nth-child(4) { height: 30px !important; }
+
+/* GPS Reportando (Verde en movimiento armónico) */
+.v-gps-ant.state-on .v-sig-bars i,
+.v-gps-ant.on .v-sig-bars i {
+  opacity: 1 !important;
+  animation: vSigWave 1.4s ease-in-out infinite !important;
+}
+.v-gps-ant.state-on .v-sig-bars i:nth-child(2),
+.v-gps-ant.on .v-sig-bars i:nth-child(2) { animation-delay: 0.15s !important; }
+.v-gps-ant.state-on .v-sig-bars i:nth-child(3),
+.v-gps-ant.on .v-sig-bars i:nth-child(3) { animation-delay: 0.3s !important; }
+.v-gps-ant.state-on .v-sig-bars i:nth-child(4),
+.v-gps-ant.on .v-sig-bars i:nth-child(4) { animation-delay: 0.45s !important; }
+
+/* GPS Sin Reportar (Rojo en movimiento/alerta viva pulsante) */
+.v-gps-ant.state-off .v-sig-bars i {
+  opacity: 0.85 !important;
+  animation: vSigWaveAlert 1.1s ease-in-out infinite alternate !important;
+}
+.v-gps-ant.state-off .v-sig-bars i:nth-child(2) { animation-delay: 0.12s !important; }
+.v-gps-ant.state-off .v-sig-bars i:nth-child(3) { animation-delay: 0.24s !important; }
+.v-gps-ant.state-off .v-sig-bars i:nth-child(4) { animation-delay: 0.36s !important; }
+
+@keyframes vSigWave {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50% { transform: scaleY(0.45); opacity: 0.45; }
+}
+
+@keyframes vSigWaveAlert {
+  0% { transform: scaleY(0.4); opacity: 0.4; }
+  100% { transform: scaleY(1); opacity: 1; filter: drop-shadow(0 0 3px rgba(220, 38, 38, 0.6)); }
+}
+
+/* Cabecera ordenada: datos etiquetados */
+.v-ficha-company-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 8px 22px !important;
+}
+.v-ficha-info-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+  min-width: 0 !important;
+}
+.v-ficha-info-item small {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  color: #7dd3fc !important;
+}
+.v-ficha-info-item strong {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+.v-op-dot-ping { inset: -3px !important; border-width: 1.5px !important; }
+@keyframes vBeaconPing {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  70%, 100% { transform: scale(1.7); opacity: 0; }
+}
+.v-ficha-op-semaphore { gap: 12px !important; padding: 8px 16px 8px 14px !important; }
+
+/* Cabecera: identidad a la izquierda, controles fijos a la derecha (no se bajan de línea) */
+.v-ficha-header-main { flex-wrap: nowrap !important; align-items: flex-start !important; }
+.v-ficha-unit-hero { flex: 1 1 auto !important; min-width: 0 !important; align-items: flex-start !important; }
+.v-ficha-identity-meta { min-width: 0 !important; }
+.v-ficha-header-controls { flex: 0 0 auto !important; margin-left: auto !important; flex-wrap: nowrap !important; }
+.v-ficha-action-buttons { flex-wrap: nowrap !important; }
+
+/* Franja de alertas confirmadas */
+.v-ficha-alerts-strip {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+.v-ficha-alert-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 12px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+.v-ficha-alert-chip strong { font-weight: 800 !important; }
+.v-ficha-alert-chip.sev-bad { background: rgba(239, 68, 68, 0.28) !important; border-color: rgba(248, 113, 113, 0.6) !important; }
+.v-ficha-alert-chip.sev-warn { background: rgba(245, 158, 11, 0.28) !important; border-color: rgba(251, 191, 36, 0.6) !important; }
+.v-ficha-alert-dot { width: 8px !important; height: 8px !important; border-radius: 50% !important; background: currentColor !important; flex-shrink: 0 !important; }
+.v-ficha-alert-chip.sev-bad .v-ficha-alert-dot { color: #fca5a5 !important; }
+.v-ficha-alert-chip.sev-warn .v-ficha-alert-dot { color: #fcd34d !important; }
+
+.v-gps-ant-state { font-size: 10.5px !important; font-weight: 700 !important; opacity: 0.95 !important; }
+.v-gps-ant.state-on .v-gps-ant-state,
+.v-gps-ant.on .v-gps-ant-state { color: #059669 !important; }
+.v-gps-ant.state-off .v-gps-ant-state { color: #dc2626 !important; font-weight: 800 !important; }
+.v-gps-ant.state-none .v-gps-ant-state,
+.v-gps-ant.state-unknown .v-gps-ant-state { color: #64748b !important; }
+
+@media (max-width: 720px) {
+  .v-ficha-header-main { flex-wrap: wrap !important; }
+  .v-ficha-header-controls { margin-left: 0 !important; width: 100% !important; justify-content: space-between !important; }
+}
+
+.v-live-tick {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  display: inline-block !important;
+  animation: vTick 2s ease-in-out infinite !important;
+}
+@keyframes vTick { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
+
+.v-sys-chevron-pill {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f0f9ff !important;
+  color: #0284c7 !important;
+  font-size: 13px !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease !important;
+}
+.v-sys-bento-card:hover .v-sys-chevron-pill { background: #e0f2fe !important; }
+.v-sys-chevron-pill.open { transform: rotate(180deg) !important; background: #0284c7 !important; color: #fff !important; }
+
+@media (hover: none) {
+  .v-sys-bento-card:hover { transform: none !important; }
+  .v-sys-bento-card { min-height: 64px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v-level-fill, .v-year-seg.current, .v-sig-bars i, .v-live-tick, .v-op-dot-ping, .v-card-ambient-glow { animation: none !important; }
 }
 </style>

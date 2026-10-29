@@ -12,6 +12,8 @@ export type DetailCard = {
   updatedAt?: string
   syncStatus?: 'verified' | 'outdated' | 'incomplete' | 'error'
   sections?: DetailSection[]
+  /** Estado real por equipo GPS (on = instalado y reportando, off = instalado sin reportar, none = sin GPS, unknown = sin dato) */
+  gpsDevices?: Array<{ label: string; state: 'on' | 'off' | 'none' | 'unknown'; last?: string }>
 }
 export type AuditIssue = { code: string; label: string; severity: 'bad' | 'warn' | 'info'; desc: string; fixAction?: string }
 export type UnitDetail = {
@@ -779,12 +781,28 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       const known = devices.some(item => typeof item.installed === 'boolean' || hasValue(item.label))
       const summary = !known ? 'Sin información' : installed === 0 ? '0 dispositivos instalados' : `${reporting} de ${Math.max(installed, 2)} reportando`
       
-      // La última señal real de los equipos físicos
-      const rawComm = pickValue(devices[0]?.last, devices[1]?.last, row.ultima_transmision)
+      // La última señal real: priorizar el equipo que SÍ está reportando (no el GPS viejo/caído)
+      const rawComm = pickValue(
+        devices.find(item => item.installed === true && item.ok === true)?.last,
+        devices[0]?.last,
+        devices[1]?.last,
+        row.ultima_transmision,
+      )
       const commMeta = parseDateMetadata(rawComm, 12) // GPS requiere señal dentro de 12h
       const lastCommFormatted = commMeta.formatted ? `Última señal: ${commMeta.relative || commMeta.formatted}` : 'Sin transmisión reciente'
 
+      const gpsDevices = devices.map((item, i) => ({
+        label: `GPS ${i + 1}`,
+        state: (item.installed === false
+          ? 'none'
+          : item.installed === true
+            ? (item.ok === true ? 'on' : 'off')
+            : 'unknown') as 'on' | 'off' | 'none' | 'unknown',
+        last: item.last ? formatPanamaDate(item.last) : undefined,
+      }))
+
       Object.assign(gps, {
+        gpsDevices,
         tone,
         badge: level === 'OK' ? 'NORMAL' : level,
         value: summary,

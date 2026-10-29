@@ -657,7 +657,7 @@ async function refreshPanapassAudit(force = false): Promise<void> {
     }
 
     // Si conciliadoRes vino del backend con datos oficiales:
-    let finalNegativosDetectados = negativosDetectados
+    let finalNegativosDetectados = negSummary !== null && negSummary > 0 ? negSummary : negativosDetectados
     let finalPagosEjecutados = pagosEjecutadosHoy
     let finalPagosMonto: number | null = null
     let finalPositivosVerificados: number | null = null
@@ -666,9 +666,12 @@ async function refreshPanapassAudit(force = false): Promise<void> {
     let finalUltimaConsultaAt = ultimaConsultaAt
 
     if (conciliado) {
-      if (typeof conciliado.negativos_am === 'number') {
+      if (typeof conciliado.negativos_am === 'number' && conciliado.negativos_am > 0) {
         finalNegativosDetectados = conciliado.negativos_am
+      } else if (negSummary !== null && negSummary > 0) {
+        finalNegativosDetectados = Math.max(negSummary, finalNegativosDetectados ?? 0)
       }
+
       if (typeof conciliado.pagos_reales_unidades === 'number') {
         finalPagosEjecutados = conciliado.pagos_reales_unidades
       }
@@ -684,9 +687,17 @@ async function refreshPanapassAudit(force = false): Promise<void> {
         if (conciliado.negativos_sin_pago_registrado > 0) {
           scenario = 'PM_PENDING'
           estadoGestionLabel = `${conciliado.negativos_sin_pago_registrado} por verificar`
-        } else {
+        } else if (finalPagosEjecutados > 0 || (finalPositivosVerificados !== null && finalPositivosVerificados > 0)) {
           scenario = 'PM_COMPLETED'
           estadoGestionLabel = 'Gestión conciliada al día'
+        } else if (finalNegativosDetectados && finalNegativosDetectados > 0) {
+          // Si el corte AM tiene negativos y no hay pagos ni positivos confirmados hoy,
+          // no marcar como completado: es un corte AM activo en seguimiento
+          scenario = 'AM_CUT'
+          estadoGestionLabel = `${finalNegativosDetectados} por revisar`
+        } else {
+          scenario = 'PM_COMPLETED'
+          estadoGestionLabel = 'Al día'
         }
       }
       if (typeof conciliado.sin_consulta_posterior === 'number') {
@@ -695,6 +706,14 @@ async function refreshPanapassAudit(force = false): Promise<void> {
       if (conciliado.ultima_consulta_saldo_at || conciliado.generated_at) {
         finalUltimaConsultaAt = conciliado.ultima_consulta_saldo_at || conciliado.generated_at
       }
+    }
+
+    // Regla de salvaguarda de corte AM: si hay negativos AM detectados y 0 pagos realizados hoy,
+    // el escenario NUNCA puede ser 'PM_COMPLETED' ("Gestión completada").
+    if ((finalNegativosDetectados ?? 0) > 0 && finalPagosEjecutados === 0 && (finalPositivosVerificados ?? 0) === 0) {
+      scenario = 'AM_CUT'
+      estadoGestionLabel = `${finalNegativosDetectados} por revisar`
+      negativosPendientesReales = finalNegativosDetectados
     }
 
     state.panapassAudit = {
