@@ -34,9 +34,30 @@ export interface ExecutiveIndicators {
   kpis?: { criticos?: number; alertas?: number; sin_gps?: number; pending?: number }
 }
 
+export interface PanapassInicioConciliadoResponse {
+  fecha?: string | null
+  generated_at?: string | null
+  source_am_at?: string | null
+  source_pm_at?: string | null
+  ultima_consulta_saldo_at?: string | null
+  negativos_am?: number | null
+  positivos_verificados?: number | null
+  negativos_verificados?: number | null
+  negativos_sin_pago_registrado?: number | null
+  negativos_con_pago_registrado?: number | null
+  positivos_sin_pago_portal?: number | null
+  sin_consulta_posterior?: number | null
+  pagos_reales_unidades?: number | null
+  pagos_reales_registros?: number | null
+  pagos_reales_monto?: number | null
+  saldo_pendiente_es_confirmado?: boolean | null
+  definiciones?: Record<string, string> | null
+}
+
 export interface PanapassAuditIndicators {
   loaded?: boolean
   error?: string
+  conciliadoData?: PanapassInicioConciliadoResponse | null
   /** Escenario operativo AM/PM: 'AM_CUT' | 'PM_COMPLETED' | 'PM_PENDING' | 'UNCONFIRMED' */
   scenario?: 'AM_CUT' | 'PM_COMPLETED' | 'PM_PENDING' | 'UNCONFIRMED'
   /** Negativos detectados en el corte AM (fotografía histórica) */
@@ -49,6 +70,10 @@ export interface PanapassAuditIndicators {
   pagosArchivadosHoy?: number
   /** Pagos reales ejecutados hoy */
   pagosEjecutadosHoy?: number | null
+  pagosRealesMonto?: number | null
+  positivosVerificados?: number | null
+  negativosSinPagoRegistrado?: number | null
+  sinConsultaPosterior?: number | null
   /** Unidades operativas que deberían tener Panapass pero no tienen uno activo */
   sinPanapassActivo?: number | null
   /** Solicitudes de baja de Panapass pendientes de gestión o confirmación */

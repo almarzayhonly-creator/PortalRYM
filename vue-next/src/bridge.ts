@@ -438,7 +438,15 @@ async function refreshPanapassAudit(force = false): Promise<void> {
   try {
     const ctx = api.viewContext ? api.viewContext() : { today: null, isAdmin: false }
     const today = ctx.today || new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Panama' }).format(new Date())
-    const [negRowsRes, pagRowsRes, hojaRowsRes, estadoRes, enaRunsRes, bajasRes] = await Promise.all([
+
+    // Consultar prioritariamente la función oficial backend panapass_inicio_conciliado_v1()
+    const conciliadoResPromise = api.rpc<any>('panapass_inicio_conciliado_v1', {}).catch(err => {
+      console.warn('RPC panapass_inicio_conciliado_v1 no disponible o error:', err)
+      return null
+    })
+
+    const [conciliadoRes, negRowsRes, pagRowsRes, hojaRowsRes, estadoRes, enaRunsRes, bajasRes] = await Promise.all([
+      conciliadoResPromise,
       api.rpc<any[]>('panapass_negativos_fecha_v2', { p_fecha: today, p_galera: null, p_supervisora_id: null }).catch(() => null),
       api.rpc<any[]>('panapass_pagos_fecha_v2', { p_fecha: today, p_galera: null, p_supervisora: null }).catch(() => null),
       api.rpc<any[]>('panapass_v10_pagos_hoy', {}).catch(() => null),
@@ -448,6 +456,8 @@ async function refreshPanapassAudit(force = false): Promise<void> {
     ])
 
     if (!state || !isHomeActive()) return
+
+    const conciliado = (conciliadoRes && typeof conciliadoRes === 'object') ? (Array.isArray(conciliadoRes) ? conciliadoRes[0] : conciliadoRes) : null
 
     const negRows = Array.isArray(negRowsRes) ? negRowsRes : null
     const pagRows = Array.isArray(pagRowsRes) ? pagRowsRes : null
@@ -646,20 +656,66 @@ async function refreshPanapassAudit(force = false): Promise<void> {
       }
     }
 
+    // Si conciliadoRes vino del backend con datos oficiales:
+    let finalNegativosDetectados = negativosDetectados
+    let finalPagosEjecutados = pagosEjecutadosHoy
+    let finalPagosMonto: number | null = null
+    let finalPositivosVerificados: number | null = null
+    let finalNegativosSinPago: number | null = null
+    let finalSinConsultaPosterior: number | null = null
+    let finalUltimaConsultaAt = ultimaConsultaAt
+
+    if (conciliado) {
+      if (typeof conciliado.negativos_am === 'number') {
+        finalNegativosDetectados = conciliado.negativos_am
+      }
+      if (typeof conciliado.pagos_reales_unidades === 'number') {
+        finalPagosEjecutados = conciliado.pagos_reales_unidades
+      }
+      if (typeof conciliado.pagos_reales_monto === 'number') {
+        finalPagosMonto = conciliado.pagos_reales_monto
+      }
+      if (typeof conciliado.positivos_verificados === 'number') {
+        finalPositivosVerificados = conciliado.positivos_verificados
+      }
+      if (typeof conciliado.negativos_sin_pago_registrado === 'number') {
+        finalNegativosSinPago = conciliado.negativos_sin_pago_registrado
+        negativosPendientesReales = conciliado.negativos_sin_pago_registrado
+        if (conciliado.negativos_sin_pago_registrado > 0) {
+          scenario = 'PM_PENDING'
+          estadoGestionLabel = `${conciliado.negativos_sin_pago_registrado} por verificar`
+        } else {
+          scenario = 'PM_COMPLETED'
+          estadoGestionLabel = 'Gestión conciliada al día'
+        }
+      }
+      if (typeof conciliado.sin_consulta_posterior === 'number') {
+        finalSinConsultaPosterior = conciliado.sin_consulta_posterior
+      }
+      if (conciliado.ultima_consulta_saldo_at || conciliado.generated_at) {
+        finalUltimaConsultaAt = conciliado.ultima_consulta_saldo_at || conciliado.generated_at
+      }
+    }
+
     state.panapassAudit = {
       loaded: true,
+      conciliadoData: conciliado,
       scenario,
-      negativosDetectados,
-      negativosConPago: pagosEjecutadosHoy,
+      negativosDetectados: finalNegativosDetectados,
+      negativosConPago: finalPagosEjecutados,
       negativosPendientesReales,
       pagosPreparadosHoy: pagosPreparadosCount,
       pagosArchivadosHoy: pagosArchivadosCount,
-      pagosEjecutadosHoy,
+      pagosEjecutadosHoy: finalPagosEjecutados,
+      pagosRealesMonto: finalPagosMonto,
+      positivosVerificados: finalPositivosVerificados,
+      negativosSinPagoRegistrado: finalNegativosSinPago,
+      sinConsultaPosterior: finalSinConsultaPosterior,
       sinPanapassActivo: sinPan,
       bajasPendientes: bajasPend,
       fuenteEsHoy,
       estadoGestionLabel,
-      ultimaConsultaAt,
+      ultimaConsultaAt: finalUltimaConsultaAt,
       corte6am: run6?.estado || undefined,
       corte11am: run11?.estado || undefined,
     }

@@ -96,13 +96,45 @@ const panapassNegativosCorte = computed<number | null>(() => {
 
 const panapassPagosHoy = computed<number | null>(() => {
   const audit = props.state.panapassAudit
-  if (!isSummaryReady.value && !audit?.loaded) return null
   if (audit?.loaded && typeof audit.pagosEjecutadosHoy === 'number') {
-    return Math.max(Number(summary.value?.panapass?.pagos_hoy ?? 0), audit.pagosEjecutadosHoy)
+    return audit.pagosEjecutadosHoy
   }
+  if (!isSummaryReady.value && !audit?.loaded) return null
   const summaryPagos = Number(summary.value?.panapass?.pagos_hoy ?? 0)
   const auditPagos = Math.max(Number(audit?.pagosArchivadosHoy ?? 0), Number(audit?.pagosPreparadosHoy ?? 0))
   return Math.max(summaryPagos, auditPagos)
+})
+
+const panapassPagosMonto = computed<number | null>(() => {
+  const audit = props.state.panapassAudit
+  if (audit?.loaded && typeof audit.pagosRealesMonto === 'number') {
+    return audit.pagosRealesMonto
+  }
+  return null
+})
+
+const panapassPositivosVerificados = computed<number | null>(() => {
+  const audit = props.state.panapassAudit
+  if (audit?.loaded && typeof audit.positivosVerificados === 'number') {
+    return audit.positivosVerificados
+  }
+  return null
+})
+
+const panapassNegativosPorVerificar = computed<number | null>(() => {
+  const audit = props.state.panapassAudit
+  if (audit?.loaded && typeof audit.negativosSinPagoRegistrado === 'number') {
+    return audit.negativosSinPagoRegistrado
+  }
+  return null
+})
+
+const panapassSinConsultaPosterior = computed<number | null>(() => {
+  const audit = props.state.panapassAudit
+  if (audit?.loaded && typeof audit.sinConsultaPosterior === 'number') {
+    return audit.sinConsultaPosterior
+  }
+  return null
 })
 
 const panapassNegativosPendientesReales = computed<number | null>(() => {
@@ -301,6 +333,21 @@ export interface LivingAlert {
 const alertsList = computed<LivingAlert[]>(() => {
   const list: LivingAlert[] = []
 
+  // ALERTA 0 — PANAPASS: NEGATIVOS POR VERIFICAR (ESTADO CONCILIADO)
+  // No alertar por corte AM ciego; alertar únicamente si hay saldo negativo verificado / sin pago registrado
+  const panaPendVerificar = panapassNegativosPorVerificar.value
+  if (canPanapass.value && panaPendVerificar !== null && panaPendVerificar > 0) {
+    list.push({
+      id: 'panapass-negativos-verificar',
+      level: 'danger',
+      codeTag: 'PANAPASS',
+      title: `${panaPendVerificar} negativos por verificar`,
+      text: 'Saldos negativos confirmados sin pago registrado',
+      module: 'Panapass',
+      action: 'panapass'
+    })
+  }
+
   // ALERTA 1 — PANAPASS: UNIDADES SIN PANAPASS ACTIVO
   if (canPanapass.value && panapassSinActivo.value !== null && panapassSinActivo.value > 0) {
     list.push({
@@ -417,81 +464,70 @@ const cards = computed(() => {
               ? `Corte AM · ${negAm}`
               : 'Al día'
 
-  const panaMetrics: CardMetricRow[] = [
-    {
-      label: scenario === 'UNCONFIRMED'
-        ? 'Estado ENA'
-        : scenario === 'AM_CUT'
-          ? 'Estado gestión AM/PM'
-          : 'Negativos pendientes reales',
-      value: panaError
-        ? 'Sin datos'
-        : panaLoading
-          ? 'Cargando…'
-          : scenario === 'UNCONFIRMED'
-            ? 'Pendiente de actualización'
-            : scenario === 'AM_CUT'
-              ? panapassEstadoGestionLabel.value
-              : scenario === 'PM_COMPLETED'
-                ? '0 (Gestión completada)'
-                : (negPendientes ?? 0),
-      tone: panaError || panaLoading
-        ? 'muted'
-        : scenario === 'PM_PENDING'
-          ? 'warning'
-          : scenario === 'PM_COMPLETED'
-            ? 'ok'
-            : 'info'
-    },
-    {
-      label: 'Negativos detectados AM',
-      value: panaError
-        ? 'Sin datos'
-        : panaLoading
-          ? 'Cargando…'
-          : negAm !== null
-            ? `${negAm} (Corte AM)`
-            : 'Sin confirmar',
-      tone: negAm === null || panaError || panaLoading ? 'muted' : undefined
-    },
-    {
-      label: 'Pagos realizados hoy',
-      value: panaError
-        ? 'Sin datos'
-        : panaLoading
-          ? 'Cargando…'
-          : pagosHoy !== null
-            ? pagosHoy
-            : 'Sin confirmar',
-      tone: panaError || panaLoading ? 'muted' : ((pagosHoy ?? 0) > 0 ? 'ok' : undefined)
-    },
-    {
+  const panaMetrics: CardMetricRow[] = []
+
+  // 1. Pagos realizados hoy (con monto si está disponible)
+  const pagosHoyLabel = pagosHoy !== null
+    ? (panapassPagosMonto.value !== null ? `${pagosHoy} (B/. ${panapassPagosMonto.value.toFixed(2)})` : pagosHoy)
+    : 'Sin confirmar'
+  panaMetrics.push({
+    label: 'Pagos realizados hoy',
+    value: panaError ? 'Sin datos' : (panaLoading ? 'Cargando…' : pagosHoyLabel),
+    tone: panaError || panaLoading ? 'muted' : ((pagosHoy ?? 0) > 0 ? 'ok' : undefined)
+  })
+
+  // 2. Negativos detectados AM (identificar que es corte histórico)
+  panaMetrics.push({
+    label: 'Negativos detectados AM',
+    value: panaError
+      ? 'Sin datos'
+      : (panaLoading ? 'Cargando…' : (negAm !== null ? `${negAm} (Corte histórico)` : 'Sin confirmar')),
+    tone: negAm === null || panaError || panaLoading ? 'muted' : undefined
+  })
+
+  // 3. Ya positivos (si viene de conciliado) o Estado gestión
+  if (panapassPositivosVerificados.value !== null) {
+    panaMetrics.push({
+      label: 'Ya positivos',
+      value: panaError ? 'Sin datos' : (panaLoading ? 'Cargando…' : `${panapassPositivosVerificados.value} (Verificados)`),
+      tone: panaError || panaLoading ? 'muted' : 'ok'
+    })
+  }
+
+  // 4. Negativos por verificar (o pendientes reales)
+  const negPorVerificarVal = panapassNegativosPorVerificar.value !== null
+    ? panapassNegativosPorVerificar.value
+    : negPendientes
+  if (negPorVerificarVal !== null) {
+    panaMetrics.push({
+      label: 'Negativos por verificar',
+      value: panaError ? 'Sin datos' : (panaLoading ? 'Cargando…' : negPorVerificarVal),
+      tone: panaError || panaLoading ? 'muted' : (negPorVerificarVal > 0 ? 'warning' : 'ok')
+    })
+  }
+
+  // 5. Sin nueva lectura (si existe en conciliado) o Sin Panapass / Bajas
+  if (panapassSinConsultaPosterior.value !== null && panapassSinConsultaPosterior.value > 0) {
+    panaMetrics.push({
+      label: 'Sin nueva lectura',
+      value: `${panapassSinConsultaPosterior.value} (Conciliación incompleta)`,
+      tone: 'warning'
+    })
+  } else if (sinPana !== null) {
+    panaMetrics.push({
       label: 'Sin Panapass activo',
-      value: panaError
-        ? 'Sin datos'
-        : panaLoading
-          ? 'Cargando…'
-          : sinPana !== null
-            ? sinPana
-            : 'Sin confirmar',
+      value: panaError ? 'Sin datos' : (panaLoading ? 'Cargando…' : sinPana),
       tone: panaError || panaLoading ? 'muted' : ((sinPana ?? 0) > 0 ? 'warning' : 'ok')
-    },
-    {
-      label: scenario === 'UNCONFIRMED' ? 'Última consulta' : 'Bajas pendientes',
-      value: panaError
-        ? 'Sin datos'
-        : panaLoading
-          ? 'Cargando…'
-          : scenario === 'UNCONFIRMED'
-            ? panapassUltimaConsultaLabel.value
-            : (bajasPend !== null ? bajasPend : 'Sin confirmar'),
-      tone: panaError || panaLoading
-        ? 'muted'
-        : scenario === 'UNCONFIRMED'
-          ? 'info'
-          : ((bajasPend ?? 0) > 0 ? 'warning' : 'ok')
-    }
-  ]
+    })
+  }
+
+  if (panaMetrics.length < 5 && bajasPend !== null) {
+    panaMetrics.push({
+      label: 'Bajas pendientes',
+      value: panaError ? 'Sin datos' : (panaLoading ? 'Cargando…' : bajasPend),
+      tone: panaError || panaLoading ? 'muted' : ((bajasPend ?? 0) > 0 ? 'warning' : 'ok')
+    })
+  }
 
   // --- 2. REVISADOS VEHICULARES (MÓDULO 2) ---
   const revLoading = !isSummaryReady.value && !isSummaryError.value
