@@ -768,11 +768,16 @@ const fourSystemCards = computed<DetailCard[]>(() => {
     note: canSeeGps.value ? 'No se recibieron lecturas de GPS 1 / GPS 2.' : 'Monitoreo satelital reservado a supervisión y administración.',
   }
 
-  const internalStopReason = String(c.estatus2 || c.status2 || c.estado || c.estatus || 'SIN DETALLE').trim().toUpperCase()
+  const internalStopReason = String(c.estatus2 || c.status2 || c.estado || c.estatus || '').trim()
   const operationalStatus = detail.value.closed ? 'CERRADA' : detail.value.active ? 'ACTIVA' : 'PARADA'
-  const displayCtrlValue = internalStopReason && internalStopReason !== '—' && internalStopReason !== operationalStatus
-    ? `${operationalStatus} · ${internalStopReason}`
-    : operationalStatus
+  const cleanOp = operationalStatus === 'ACTIVA' ? 'Activa' : operationalStatus === 'PARADA' ? 'Parada' : 'Cerrada'
+  let cleanInt = internalStopReason && internalStopReason !== '—' && internalStopReason.toUpperCase() !== 'SIN DETALLE' ? internalStopReason : ''
+  if (cleanInt) {
+    cleanInt = cleanInt.charAt(0).toUpperCase() + cleanInt.slice(1).toLowerCase()
+  } else {
+    cleanInt = cleanOp
+  }
+  const displayCtrlValue = `${cleanOp} - ${cleanInt}`
 
   const ctrlCard: DetailCard = byKey.get('control') || {
     key: 'control',

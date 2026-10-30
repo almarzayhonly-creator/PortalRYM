@@ -831,14 +831,23 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
   // Fecha: última actualización de estado de la unidad en flota, no la hora del navegador.
   const ctrlCard = detail.cards.find(card => card.key === 'control')
   if (ctrlCard) {
-    const internalState = displayValue(pickValue(c.estatus2, c.status2, c.estado, c.estatus, detail.status))
+    const rawInternal = pickValue(c.estatus2, c.status2, c.estado, c.estatus, detail.status)
+    const internalState = displayValue(rawInternal)
     const operationalStatus = detail.closed ? 'CERRADA' : detail.active ? 'ACTIVA' : 'PARADA'
     ctrlCard.tone = detail.closed ? 'neutral' : detail.active ? 'ok' : 'warn'
     ctrlCard.badge = operationalStatus
-    // Estatus de la unidad y estatus interno en vez del genérico EN OPERACIÓN
-    ctrlCard.value = internalState && internalState !== '—' && internalState.toUpperCase() !== operationalStatus
-      ? `${operationalStatus} · ${internalState}`
-      : operationalStatus
+
+    // Formato exacto requerido: "Activa - Activa" o "Parada - Chapisteria" según corresponda
+    const cleanOp = operationalStatus === 'ACTIVA' ? 'Activa' : operationalStatus === 'PARADA' ? 'Parada' : 'Cerrada'
+    let cleanInt = internalState && internalState !== '—' && internalState !== 'SIN DETALLE' ? internalState : ''
+    if (cleanInt) {
+      // Normalizar a capitalización amigable (ej: "Activa", "Chapisteria", "Taller")
+      cleanInt = cleanInt.charAt(0).toUpperCase() + cleanInt.slice(1).toLowerCase()
+    } else {
+      cleanInt = cleanOp
+    }
+
+    ctrlCard.value = `${cleanOp} - ${cleanInt}`
     
     const rawUpdate = pickValue(c.fecha_actualizacion_estado, c.fecha_estado, c.updated_at)
     const updateMeta = parseDateMetadata(rawUpdate, 720) // Estado operativo de flota

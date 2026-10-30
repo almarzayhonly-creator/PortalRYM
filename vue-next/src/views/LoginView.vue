@@ -371,6 +371,8 @@ async function submit(event: SubmitEvent, handler: (event: SubmitEvent) => Promi
 .brand-logo-pod {
   width: 72px;
   height: 72px;
+  max-width: 72px;
+  max-height: 72px;
   background: #ffffff;
   border-radius: 20px;
   padding: 8px;
@@ -378,12 +380,16 @@ async function submit(event: SubmitEvent, handler: (event: SubmitEvent) => Promi
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .brand-img {
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 .live-status-pill {
@@ -854,6 +860,8 @@ async function submit(event: SubmitEvent, handler: (event: SubmitEvent) => Promi
   .brand-logo-pod {
     width: 58px;
     height: 58px;
+    max-width: 58px;
+    max-height: 58px;
     border-radius: 16px;
     padding: 6px;
   }
