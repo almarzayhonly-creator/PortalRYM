@@ -439,43 +439,48 @@ function controlSections(detail: UnitDetail, fichaResponse: Unit | null): Detail
     return fields.length ? { title, fields } : null
   }
   const sections: DetailSection[] = []
-  const controlSection = addSection('Control de Auto · RYM', [
+
+  // 1. SISTEMA INTERNO: Control de Auto · RYM (gestión y estatus de flota)
+  const controlSection = addSection('Control de Auto · RYM (Gestión Interna)', [
     ['Estado operativo', detail.active ? 'ACTIVA' : (detail.closed ? 'CERRADA' : 'PARADA')],
     ['Estado interno', pickValue(control.estatus2, control.status2, control.estado, control.estatus)],
     ['Galera asignada', pickValue(detail.galera, control.galera)],
     ['Empresa operadora', pickValue(detail.operator, control.empresa_operadora, control.empresa)],
-    ['Empresa propietaria', pickValue(detail.owner, control.empresa_duena)],
+    ['Empresa propietaria (Dueña)', pickValue(detail.owner, control.empresa_duena)],
     ['Supervisora', pickValue(detail.supervisor, control.supervisora)],
     ['Póliza NetSuite', control.nro_poliza],
     ['Cupo / placa comercial', pickValue(control.placa_comercial, unitRecord.placa_comercial)],
     ['Estatus NetSuite', pickValue(control.estatus_netsuite, unitRecord.estatus_netsuite)],
+    ['Marca / Modelo / Año (Interno)', [control.marca, control.modelo, control.anio].filter(hasValue).join(' ') || null],
+    ['Color (Interno)', control.color],
+    ['Chasis / VIN (Interno)', pickValue(control.chasis, control.vin)],
+    ['Motor (Interno)', control.motor],
+    ['Transmisión', control.transmision],
   ])
   if (controlSection) sections.push(controlSection)
-  const technicalRym = addSection('Datos técnicos RYM', [
-    ['Marca', pickValue(control.marca, unitRecord.marca)],
-    ['Modelo', pickValue(control.modelo, unitRecord.modelo)],
-    ['Año', pickValue(control.anio, unitRecord.anio)],
-    ['Color', pickValue(control.color, unitRecord.color)],
-    ['Chasis / VIN', pickValue(control.chasis, control.vin, unitRecord.chasis)],
-    ['Motor', pickValue(control.motor, unitRecord.motor)],
-    ['Transmisión', pickValue(control.transmision, unitRecord.transmision)],
-  ])
-  if (technicalRym) sections.push(technicalRym)
-  const officialSection = addSection('Ficha oficial · eCarCheck', [
-    ['Última verificación', formatPanamaDate(pickValue(official.actualizado_at, ficha.consulta_at))],
+
+  // 2. REGISTRO OFICIAL ATTT: eCarCheck (Cotejo oficial de la ATTT de Panamá)
+  const officialSection = addSection('Ficha Oficial ATTT · eCarCheck', [
+    ['Propietario oficial ATTT', pickValue(raw.nombrePropietario, official.propietario)],
+    ['Placa oficial consultada', pickValue(raw.nroPlaca, official.placa)],
+    ['Cupo oficial ATTT', pickValue(raw.cupo, official.cupo)],
+    ['Marca oficial (ATTT)', pickValue(raw.marcaVehiculo, raw.marcavehiculo, official.marca)],
+    ['Modelo oficial (ATTT)', pickValue(raw.modeloVehiculo, official.modelo)],
+    ['Año oficial (ATTT)', pickValue(raw.anioVehiculo, official.anio)],
+    ['Color oficial (ATTT)', pickValue(raw.colorVehiculo, official.color)],
+    ['Chasis oficial (ATTT)', pickValue(raw.nroChasis, official.chasis)],
+    ['VIN oficial (ATTT)', pickValue(raw.nroVin, official.vin)],
+    ['Motor oficial (ATTT)', pickValue(raw.nroMotor, official.motor)],
     ['Resultado eCarCheck', pickValue(ficha.resultado, raw.detalleRespuesta, raw.detalle_respuesta)],
-    ['Placa consultada', pickValue(raw.nroPlaca, official.placa)],
-    ['Cupo oficial', pickValue(raw.cupo, official.cupo)],
-    ['Propietario oficial', pickValue(raw.nombrePropietario, official.propietario)],
-    ['VIN', pickValue(raw.nroVin, official.vin)],
-    ['Chasis', pickValue(raw.nroChasis, official.chasis)],
-    ['Motor', pickValue(raw.nroMotor, official.motor)],
+    ['Última verificación eCarCheck', formatPanamaDate(pickValue(official.actualizado_at, ficha.consulta_at))],
   ])
   if (officialSection) sections.push(officialSection)
-  const legal = addSection('Seguro y restricciones', [
-    ['Hipoteca', pickValue(raw.hipoteca, official.hipoteca)],
+
+  // 3. Seguro y restricciones
+  const legal = addSection('Póliza de Seguro y Restricciones Legales', [
     ['Aseguradora', pickValue(raw.nombreAseguradora, raw.aseguradora, official.aseguradora)],
-    ['Póliza', pickValue(raw.nroPolizaSeguro, raw.poliza, official.poliza)],
+    ['Póliza de seguro', pickValue(raw.nroPolizaSeguro, raw.poliza, official.poliza)],
+    ['Hipoteca', pickValue(raw.hipoteca, official.hipoteca)],
     ['Restricción vehicular', pickValue(raw.restriccionVehiculos, official.restriccion_vehicular)],
   ])
   if (legal) sections.push(legal)
@@ -827,13 +832,13 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
   const ctrlCard = detail.cards.find(card => card.key === 'control')
   if (ctrlCard) {
     const internalState = displayValue(pickValue(c.estatus2, c.status2, c.estado, c.estatus, detail.status))
+    const operationalStatus = detail.closed ? 'CERRADA' : detail.active ? 'ACTIVA' : 'PARADA'
     ctrlCard.tone = detail.closed ? 'neutral' : detail.active ? 'ok' : 'warn'
-    ctrlCard.badge = detail.closed ? 'CERRADA' : detail.active ? 'ACTIVA' : 'PARADA'
-    ctrlCard.value = detail.closed
-      ? 'UNIDAD CERRADA'
-      : detail.active
-        ? (upperValue(internalState) === 'ACTIVO' || upperValue(internalState) === 'ACTIVA' ? 'EN OPERACIÓN' : internalState)
-        : (internalState || 'PARADA EN PATIO')
+    ctrlCard.badge = operationalStatus
+    // Estatus de la unidad y estatus interno en vez del genérico EN OPERACIÓN
+    ctrlCard.value = internalState && internalState !== '—' && internalState.toUpperCase() !== operationalStatus
+      ? `${operationalStatus} · ${internalState}`
+      : operationalStatus
     
     const rawUpdate = pickValue(c.fecha_actualizacion_estado, c.fecha_estado, c.updated_at)
     const updateMeta = parseDateMetadata(rawUpdate, 720) // Estado operativo de flota

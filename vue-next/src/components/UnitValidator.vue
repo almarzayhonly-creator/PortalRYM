@@ -584,6 +584,54 @@ const operationalStatusHeader = computed(() => {
   return { label: `${total} DE ${total} AL DÍA`, sub: 'Unidad activa', tone: 'ok' }
 })
 
+// Datos oficiales eCarCheck / ATTT
+const officialOwnerLabel = computed(() => {
+  if (!detail.value) return ''
+  const f = (detail.value.fichaRecord as Unit) || {}
+  const o = (f.oficial as Unit) || {}
+  const raw = ((o.ultima_respuesta_exitosa || o.ultima_respuesta) as Record<string, unknown>) || {}
+  const owner = raw.nombrePropietario || o.propietario
+  return owner ? String(owner).trim() : ''
+})
+
+const vehicleVinLabel = computed(() => {
+  if (!detail.value) return ''
+  const c = detail.value.controlRecord || {}
+  const f = (detail.value.fichaRecord as Unit) || {}
+  const u = (f.unidad as Unit) || {}
+  const o = (f.oficial as Unit) || {}
+  const raw = ((o.ultima_respuesta_exitosa || o.ultima_respuesta) as Record<string, unknown>) || {}
+  return String(c.chasis || c.vin || u.chasis || raw.nroChasis || raw.nroVin || o.chasis || o.vin || '').trim()
+})
+
+const vehicleMotorLabel = computed(() => {
+  if (!detail.value) return ''
+  const c = detail.value.controlRecord || {}
+  const f = (detail.value.fichaRecord as Unit) || {}
+  const u = (f.unidad as Unit) || {}
+  const o = (f.oficial as Unit) || {}
+  const raw = ((o.ultima_respuesta_exitosa || o.ultima_respuesta) as Record<string, unknown>) || {}
+  return String(c.motor || u.motor || raw.nroMotor || o.motor || '').trim()
+})
+
+const vehicleCupoLabel = computed(() => {
+  if (!detail.value) return ''
+  const c = detail.value.controlRecord || {}
+  const f = (detail.value.fichaRecord as Unit) || {}
+  const u = (f.unidad as Unit) || {}
+  const o = (f.oficial as Unit) || {}
+  const raw = ((o.ultima_respuesta_exitosa || o.ultima_respuesta) as Record<string, unknown>) || {}
+  const cupo = c.placa_comercial || u.placa_comercial || raw.cupo || o.cupo
+  return (cupo && String(cupo).trim() !== '—') ? String(cupo).trim() : ''
+})
+
+const vehicleSupervisorLabel = computed(() => {
+  if (!detail.value) return ''
+  const c = detail.value.controlRecord || {}
+  const sup = detail.value.supervisor || c.supervisora
+  return (sup && String(sup).trim() !== '—') ? String(sup).trim() : ''
+})
+
 const normCompany = (s: unknown) =>
   String(s ?? '').toUpperCase().replace(/\b(S\.?\s?A\.?|INC\.?|CORP\.?)\b/g, '').replace(/[^A-Z0-9]/g, '')
 
@@ -721,12 +769,17 @@ const fourSystemCards = computed<DetailCard[]>(() => {
   }
 
   const internalStopReason = String(c.estatus2 || c.status2 || c.estado || c.estatus || 'SIN DETALLE').trim().toUpperCase()
+  const operationalStatus = detail.value.closed ? 'CERRADA' : detail.value.active ? 'ACTIVA' : 'PARADA'
+  const displayCtrlValue = internalStopReason && internalStopReason !== '—' && internalStopReason !== operationalStatus
+    ? `${operationalStatus} · ${internalStopReason}`
+    : operationalStatus
+
   const ctrlCard: DetailCard = byKey.get('control') || {
     key: 'control',
     title: 'Control de Auto',
     tone: detail.value.closed ? 'neutral' : detail.value.active ? 'ok' : 'warn',
-    badge: detail.value.closed ? 'CERRADA' : detail.value.active ? 'ACTIVA' : 'PARADA',
-    value: detail.value.closed ? 'CERRADA' : detail.value.active ? 'EN OPERACIÓN' : internalStopReason,
+    badge: operationalStatus,
+    value: displayCtrlValue,
     details: [
       { label: 'Galera', value: detail.value.galera || '—' },
       { label: 'Supervisora', value: detail.value.supervisor || '—' },
@@ -1111,13 +1164,13 @@ onUnmounted(() => {
                   <!-- Metadatos Primarios en Cápsulas Limpias -->
                   <div class="v-ficha-identity-meta">
                     <div class="v-ficha-primary-pills">
-                      <!-- Placa -->
+                      <!-- 2. Placa -->
                       <div class="v-ficha-plate-group">
                         <span class="v-ficha-plate-label">PLACA</span>
                         <strong class="v-ficha-plate-val">{{ detail.plate }}</strong>
                       </div>
 
-                      <!-- Marca, Modelo y Año -->
+                      <!-- 3. Marca, Modelo y Año -->
                       <span class="v-ficha-meta-pill vehicle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
                           <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
@@ -1127,26 +1180,51 @@ onUnmounted(() => {
                         <span>{{ vehicleIdentityLabel }}</span>
                       </span>
 
-                      <!-- Color del Vehículo -->
+                      <!-- 4. Color del Vehículo (Animado) -->
                       <span
                         v-if="detail.vehicleColor"
-                        class="v-ficha-meta-pill color-pill"
+                        class="v-ficha-meta-pill color-pill is-animated"
                         :style="{
                           backgroundColor: carColorStyle.bg,
                           color: carColorStyle.text,
                           borderColor: carColorStyle.border,
                         }"
                       >
-                        <span class="color-swatch-dot" :style="{ backgroundColor: carColorStyle.dot }"></span>
+                        <span class="color-swatch-dot is-pulsing" :style="{ backgroundColor: carColorStyle.dot }"></span>
                         <span>{{ carColorStyle.name }}</span>
                       </span>
                     </div>
 
-                    <!-- Datos internos de operación (sin repetir empresa/galera) -->
+                    <!-- Datos Registrales e Internos en orden solicitado -->
                     <div class="v-ficha-company-row">
-                      <span v-for="f in headerOpsFields" :key="f.label" class="v-ficha-info-item">
-                        <small>{{ f.label }}</small>
-                        <strong>{{ f.value }}</strong>
+                      <!-- 5. Propietario oficial de eCarCheck -->
+                      <span v-if="officialOwnerLabel" class="v-ficha-info-item">
+                        <small>PROPIETARIO OFICIAL (ECARCHECK)</small>
+                        <strong class="text-official">{{ officialOwnerLabel }}</strong>
+                      </span>
+
+                      <!-- 6. Chasis / VIN -->
+                      <span v-if="vehicleVinLabel" class="v-ficha-info-item">
+                        <small>CHASIS / VIN</small>
+                        <strong class="mono-code">{{ vehicleVinLabel }}</strong>
+                      </span>
+
+                      <!-- 7. Motor -->
+                      <span v-if="vehicleMotorLabel" class="v-ficha-info-item">
+                        <small>MOTOR</small>
+                        <strong class="mono-code">{{ vehicleMotorLabel }}</strong>
+                      </span>
+
+                      <!-- 8. Cupo si aplica -->
+                      <span v-if="vehicleCupoLabel && vehicleCupoLabel !== 'No aplica'" class="v-ficha-info-item">
+                        <small>CUPO</small>
+                        <strong>{{ vehicleCupoLabel }}</strong>
+                      </span>
+
+                      <!-- 9. Supervisora -->
+                      <span v-if="vehicleSupervisorLabel" class="v-ficha-info-item">
+                        <small>SUPERVISORA</small>
+                        <strong>{{ vehicleSupervisorLabel }}</strong>
                       </span>
                     </div>
                   </div>
@@ -2277,6 +2355,38 @@ onUnmounted(() => {
   border-radius: 50% !important;
   border: 1px solid rgba(15, 23, 42, 0.25) !important;
   flex-shrink: 0 !important;
+}
+
+.color-swatch-dot.is-pulsing {
+  animation: colorDotPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes colorDotPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+  }
+}
+
+.v-ficha-meta-pill.color-pill.is-animated {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.v-ficha-meta-pill.color-pill.is-animated:hover {
+  transform: translateY(-1px) scale(1.03) !important;
+}
+
+.mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+  letter-spacing: 0.02em !important;
+}
+
+.text-official {
+  color: #38bdf8 !important;
+  font-weight: 800 !important;
 }
 
 .v-ficha-company-row {
