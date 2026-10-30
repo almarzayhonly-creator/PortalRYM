@@ -35,6 +35,7 @@
       #rym-ena-overlay .rym-ena-card footer button{box-sizing:border-box!important;display:inline-flex!important;justify-content:center!important;align-items:center!important;flex:1 1 0!important;min-width:0!important;min-height:46px!important;padding:10px 9px!important;border-radius:11px!important;border:1px solid #afc7e7!important;background:#1854a6!important;color:#ffffff!important;font-size:12px!important;font-weight:850!important;line-height:1.25!important;text-align:center!important;white-space:normal!important;opacity:1!important;box-shadow:none!important;cursor:pointer!important}
       #rym-ena-overlay .rym-ena-card footer button:hover:not(:disabled){background:#12468d!important}
       #rym-ena-overlay .rym-ena-card footer button.rym-ena-remove{background:#f5f7fa!important;border-color:#d8e0ea!important;color:#8492a6!important;cursor:not-allowed!important}
+      #rym-ena-overlay .rym-ena-card footer button.rym-ena-remove:not(:disabled){background:#fff0f1!important;color:#a51d2a!important;border-color:#f1bec6!important;cursor:pointer!important}
       #rym-ena-overlay .rym-ena-note{margin-top:10px!important;color:#7b879a!important;font-size:11px!important;line-height:1.4!important}
       @media(max-width:480px){#rym-ena-overlay .rym-ena-card{padding:19px!important;border-radius:16px!important}#rym-ena-overlay .rym-ena-sum{font-size:36px!important}#rym-ena-overlay .rym-ena-card footer{flex-direction:column!important}#rym-ena-overlay .rym-ena-card footer button{flex:none!important;width:100%!important}}
     `;
@@ -62,7 +63,36 @@
     const st=document.createElement('p');st.className='rym-ena-state';st.textContent=valid?(positive?'✓ Ya está positiva · NO PAGAR':'Saldo todavía negativo'):'No se pudo verificar el saldo';card.appendChild(st);
     line('Fecha de consulta',when);line('Fuente','ENA · LogisticTodo');
     if(!valid)line('Detalle',String(data?.error||'Consulta fallida').slice(0,100));
-    const buttons=document.createElement('footer');const keep=document.createElement('button');keep.textContent='Conservar en la hoja';keep.type='button';const remove=document.createElement('button');remove.type='button';remove.textContent='Retirar de la hoja';remove.className='rym-ena-remove';remove.disabled=true;remove.title='Retiro individual pendiente de habilitar';buttons.append(keep,remove);card.appendChild(buttons);const note=document.createElement('p');note.className='rym-ena-note';note.textContent='Retirar una sola unidad estará disponible cuando se habilite su validación segura. Conservar no modifica pagos.';card.appendChild(note);
+    const buttons=document.createElement('footer');
+    const keep=document.createElement('button');keep.type='button';keep.textContent='Conservar en la hoja';
+    const remove=document.createElement('button');remove.type='button';remove.textContent='Retirar de la hoja';remove.className='rym-ena-remove';
+    remove.disabled=!positive;
+    remove.title=positive?'Retirar exclusivamente esta unidad':'Una unidad negativa debe permanecer en la hoja';
+    buttons.append(keep,remove);card.appendChild(buttons);
+    const note=document.createElement('p');note.className='rym-ena-note';
+    note.textContent=positive?'Se comprobará nuevamente el saldo antes de retirarla.':'Saldo negativo: esta unidad debe permanecer en Cargar Pagos.';
+    card.appendChild(note);
+    remove.onclick=async()=>{
+      if(!positive||remove.disabled)return;
+      const id=Number(tr.querySelector('[data-save-pay]')?.dataset.savePay||0);
+      if(!Number.isSafeInteger(id)||id<=0){note.textContent='No se identificó la fila. Recarga la hoja.';return}
+      if(Number(tr.querySelector('[data-pay]')?.value||0)!==0){note.textContent='La fila tiene un monto marcado. No se puede retirar.';return}
+      if(!w.confirm('¿Retirar solo '+(tr.dataset.payRowUnit||'esta unidad')+' de Cargar Pagos? No registra ningún pago.'))return;
+      remove.disabled=true;remove.textContent='Verificando…';
+      try{
+        const call=typeof w.rpc==='function'?w.rpc:null;
+        if(!call)throw Error('La conexión con el servidor no está disponible');
+        const response=await call('panapass_pm_retirar_fila_positiva',{p_id:id,p_panapass:panapass});
+        const ok=Array.isArray(response)?response[0]:response;
+        if(ok!==true)throw Error('No se retiró. La última consulta o el estado de la fila no cumplen las condiciones.');
+        const reload=d.querySelector('#pmReload');
+        dismiss();
+        if(reload)reload.click();
+        else tr.remove();
+        const msg=d.querySelector('#pmMsg');
+        if(msg){const info=d.createElement('div');info.className='success';info.textContent='Unidad retirada de Cargar Pagos sin registrar ningún pago.';msg.replaceChildren(info)}
+      }catch(error){note.textContent=String(error?.message||error);remove.disabled=false;remove.textContent='Retirar de la hoja'}
+    };
     dlg.appendChild(card);document.body.appendChild(dlg);
     const dismiss=()=>{dlg.remove();document.removeEventListener('keydown',escKey)};
     const escKey=e=>{if(e.key==='Escape')dismiss()};
