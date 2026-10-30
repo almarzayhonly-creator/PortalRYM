@@ -6239,9 +6239,12 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
     }
     if(!ctrl?.unidad&&!term)throw Error('No se encontró la unidad.');
     const revData=options.deferChecks?{rows:[]}:await loadRevisados99(),rev=findRevisado99(revData?.rows||[],ctrl);
-    const closed=N99(ctrl?.estatus)==='CERRADO'||N99(ctrl?.estatus)==='CERRADA';
-    const status2=N99(rev?.status2||ctrl?.estatus2||ctrl?.status2||ctrl?.estado||ctrl?.estatus||'SIN DETALLE');
-    const active=!closed&&N99(ctrl?.estatus)==='ACTIVO'&&['ACTIVO','CONVENIO'].includes(status2);
+    const closed=['CERRADO','CERRADA','CLOSED'].includes(N99(ctrl?.estatus));
+    const rawSt2=String(ctrl?.estatus2||ctrl?.status2||ctrl?.estado||rev?.status2||'').trim();
+    const status2=N99(rawSt2||ctrl?.estatus||'SIN DETALLE');
+    const stopKw=['PARADA','PARADO','SALUD','TALLER','CHAPISTERIA','CHAPISTERÍA','MANTENIMIENTO','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
+    const isStop=stopKw.some(k=>status2.includes(k))||stopKw.some(k=>N99(ctrl?.estatus).includes(k));
+    const active=!closed&&!isStop&&N99(ctrl?.estatus)==='ACTIVO'&&['ACTIVO','CONVENIO'].includes(status2);
     const pan=String(ctrl?.panapass_numero||'').trim(),savedSaldo=ctrl?.ena_saldo==null||ctrl?.ena_saldo===''?null:Number(ctrl.ena_saldo);
     const revValid=!!rev?.emitido||N99(rev?.estado)==='VIGENTE',revAlert=!!rev?.bloqueado;
     const owner=companyOwner99(ctrl,rev),operator=companyOperator99(ctrl,rev),supervisor=ctrl?.supervisora||rev?.supervisora||'—',galera=ctrl?.galera||rev?.galera||'—';
@@ -6310,10 +6313,12 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
 
       const revData=await loadRevisados99();
       const rev=findRevisado99(revData?.rows||[],ctrl);
-      const baseActive=N99(ctrl?.estatus)==='ACTIVO';
-      const status2=N99(rev?.status2||ctrl?.estatus2||ctrl?.status2||ctrl?.estado||ctrl?.estatus||'SIN DETALLE');
       const closed=['CERRADO','CERRADA','CLOSED'].includes(N99(ctrl?.estatus));
-      const active=baseActive&&['ACTIVO','CONVENIO'].includes(status2);
+      const rawSt2=String(ctrl?.estatus2||ctrl?.status2||ctrl?.estado||rev?.status2||'').trim();
+      const status2=N99(rawSt2||ctrl?.estatus||'SIN DETALLE');
+      const stopKw=['PARADA','PARADO','SALUD','TALLER','CHAPISTERIA','CHAPISTERÍA','MANTENIMIENTO','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
+      const isStop=stopKw.some(k=>status2.includes(k))||stopKw.some(k=>N99(ctrl?.estatus).includes(k));
+      const active=!closed&&!isStop&&N99(ctrl?.estatus)==='ACTIVO'&&['ACTIVO','CONVENIO'].includes(status2);
       const revisadoVigente=!!rev?.emitido||N99(rev?.estado)==='VIGENTE';
       const revisadoConAlerta=!!rev?.bloqueado;
       const revisadoTone=revisadoVigente?(revisadoConAlerta?'warn':'ok'):'bad';
@@ -9173,8 +9178,8 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
       });
     }
     window.__RYM_VUE_NEXT_ACTIVE=true;
-    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=1793305221537');
-    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=1793305221537';document.head.appendChild(css);
+    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=1793388417913');
+    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=1793388417913';document.head.appendChild(css);
     let opened=false;
     window.__RYM_VUE_NEXT_HOME={render:summary=>{opened=true;return pilot.renderHome(summary)},error:error=>pilot.failHome(error),isActive:pilot.isHomeActive,hasControl:pilot.hasControlSummary,setControl:pilot.setControlIndicators,errorControl:pilot.failControlIndicators,setGps:pilot.setGpsIndicators,errorGps:pilot.failGpsIndicators};
     window.__RYM_VUE_NEXT_LOGIN={render:error=>pilot.renderLogin(error||""),dispose:pilot.disposeLogin};if(window.__RYM_VUE_NEXT_API)window.__RYM_VUE_NEXT_VIEWS={mount:pilot.mountView};

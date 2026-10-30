@@ -561,10 +561,14 @@ const operationalStatusHeader = computed(() => {
   if (!detail.value) return { label: 'CONSULTANDO', sub: '', tone: 'info' }
   const c = detail.value.controlRecord || {}
   const internalRaw = String(c.estatus2 ?? c.status2 ?? c.estado ?? '').trim().toUpperCase()
+  const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'TALLER', 'CHAPISTERIA', 'CHAPISTERÍA', 'MANTENIMIENTO', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
+  const isStoppedByKeyword = stopKeywords.some(kw => internalRaw.includes(kw)) || stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
+  const isActuallyActive = detail.value.active && !isStoppedByKeyword
+
   if (detail.value.closed) {
     return { label: 'UNIDAD CERRADA', sub: internalRaw || 'Histórico', tone: 'neutral' }
   }
-  if (!detail.value.active) {
+  if (!isActuallyActive) {
     const reason = internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'EN PATIO / TALLER'
     return { label: 'UNIDAD PARADA', sub: reason, tone: 'bad' }
   }
@@ -769,7 +773,11 @@ const fourSystemCards = computed<DetailCard[]>(() => {
   }
 
   const internalStopReason = String(c.estatus2 || c.status2 || c.estado || c.estatus || '').trim()
-  const operationalStatus = detail.value.closed ? 'CERRADA' : detail.value.active ? 'ACTIVA' : 'PARADA'
+  const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'TALLER', 'CHAPISTERIA', 'CHAPISTERÍA', 'MANTENIMIENTO', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
+  const isStoppedByKeyword = stopKeywords.some(kw => internalStopReason.toUpperCase().includes(kw)) || stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
+  const isActuallyActive = detail.value.active && !isStoppedByKeyword
+
+  const operationalStatus = detail.value.closed ? 'CERRADA' : isActuallyActive ? 'ACTIVA' : 'PARADA'
   const cleanOp = operationalStatus === 'ACTIVA' ? 'Activa' : operationalStatus === 'PARADA' ? 'Parada' : 'Cerrada'
   let cleanInt = internalStopReason && internalStopReason !== '—' && internalStopReason.toUpperCase() !== 'SIN DETALLE' ? internalStopReason : ''
   if (cleanInt) {
@@ -782,7 +790,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
   const ctrlCard: DetailCard = byKey.get('control') || {
     key: 'control',
     title: 'Control de Auto',
-    tone: detail.value.closed ? 'neutral' : detail.value.active ? 'ok' : 'warn',
+    tone: detail.value.closed ? 'neutral' : isActuallyActive ? 'ok' : 'warn',
     badge: operationalStatus,
     value: displayCtrlValue,
     details: [
@@ -791,7 +799,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
     ],
     updatedAt: 'Sincronizado RYM',
     syncStatus: 'verified',
-    note: detail.value.active ? 'Unidad activa en Control de Auto.' : `Unidad parada · Estado interno: ${internalStopReason}`,
+    note: isActuallyActive ? 'Unidad activa en Control de Auto.' : `Unidad parada · Estado interno: ${internalStopReason}`,
   }
 
   return [panCard, revCard, gpsCard, ctrlCard]
