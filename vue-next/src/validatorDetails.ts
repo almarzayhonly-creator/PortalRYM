@@ -841,7 +841,7 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
     const cleanOp = operationalStatus === 'ACTIVA' ? 'Activa' : operationalStatus === 'PARADA' ? 'Parada' : 'Cerrada'
     let cleanInt = internalState && internalState !== '—' && internalState !== 'SIN DETALLE' ? internalState : ''
     if (cleanInt) {
-      // Normalizar a capitalización amigable (ej: "Activa", "Chapisteria", "Taller")
+      // Normalizar a capitalización amigable (ej: "Activa", "Chapisteria", "Salud")
       cleanInt = cleanInt.charAt(0).toUpperCase() + cleanInt.slice(1).toLowerCase()
     } else {
       cleanInt = cleanOp

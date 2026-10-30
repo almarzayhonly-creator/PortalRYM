@@ -6177,7 +6177,7 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
   let v106ValidatorTimer=null,v106ValidatorRows=[];window.__v106RevisadosCache=window.__v106RevisadosCache||null;
   function moneyMaybe99(v){return v==null||v===''?'—':`B/. ${M99(v)}`}
   function panDebtMaybe99(v){if(v==null||v==='')return '—';const n=Number(v||0);return n<0?`-B/. ${M99(Math.abs(n))}`:`B/. ${M99(n)}`}
-  function stateTone99(t){const n=N99(t);if(['ACTIVO','AL DIA','VIGENTE','OK'].includes(n))return 'ok';if(['CHAPISTERIA','LEGAL','TALLER','PENDIENTE','PENDIENTE_CONFIRMAR','OTROS'].includes(n))return 'warn';return 'warn'}
+  function stateTone99(t){const n=N99(t);if(['ACTIVO','AL DIA','VIGENTE','OK'].includes(n))return 'ok';if(['CHAPISTERIA','LEGAL','SALUD','PATIO','DEPOSITO','DEPÓSITO','PENDIENTE','PENDIENTE_CONFIRMAR','OTROS'].includes(n))return 'warn';return 'warn'}
   function validatorList99(){return document.querySelector('#v101CheckModal #v101ValidatorList')||document.querySelector('#v101ValidatorList')}
   function toggleList99(show){const box=validatorList99();if(box)box.style.display=show||document.querySelector('#v101CheckModal')?'block':'none'}
   async function loadRevisados99(){if(window.__v106RevisadosCache)return window.__v106RevisadosCache;try{const r=await req('/functions/v1/revisados-final',{method:'POST',body:'{}'});if(r?.data?.ok){window.__v106RevisadosCache=r.data;return r.data}}catch(e){console.warn('V106 revisados cache',e)}return {rows:[]}}
@@ -6242,7 +6242,7 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
     const closed=['CERRADO','CERRADA','CLOSED'].includes(N99(ctrl?.estatus));
     const rawSt2=String(ctrl?.estatus2||ctrl?.status2||ctrl?.estado||rev?.status2||'').trim();
     const status2=N99(rawSt2||ctrl?.estatus||'SIN DETALLE');
-    const stopKw=['PARADA','PARADO','SALUD','TALLER','CHAPISTERIA','CHAPISTERÍA','MANTENIMIENTO','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
+    const stopKw=['PARADA','PARADO','SALUD','CHAPISTERIA','CHAPISTERÍA','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
     const isStop=stopKw.some(k=>status2.includes(k))||stopKw.some(k=>N99(ctrl?.estatus).includes(k));
     const active=!closed&&!isStop&&N99(ctrl?.estatus)==='ACTIVO'&&['ACTIVO','CONVENIO'].includes(status2);
     const pan=String(ctrl?.panapass_numero||'').trim(),savedSaldo=ctrl?.ena_saldo==null||ctrl?.ena_saldo===''?null:Number(ctrl.ena_saldo);
@@ -6316,7 +6316,7 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
       const closed=['CERRADO','CERRADA','CLOSED'].includes(N99(ctrl?.estatus));
       const rawSt2=String(ctrl?.estatus2||ctrl?.status2||ctrl?.estado||rev?.status2||'').trim();
       const status2=N99(rawSt2||ctrl?.estatus||'SIN DETALLE');
-      const stopKw=['PARADA','PARADO','SALUD','TALLER','CHAPISTERIA','CHAPISTERÍA','MANTENIMIENTO','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
+      const stopKw=['PARADA','PARADO','SALUD','CHAPISTERIA','CHAPISTERÍA','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
       const isStop=stopKw.some(k=>status2.includes(k))||stopKw.some(k=>N99(ctrl?.estatus).includes(k));
       const active=!closed&&!isStop&&N99(ctrl?.estatus)==='ACTIVO'&&['ACTIVO','CONVENIO'].includes(status2);
       const revisadoVigente=!!rev?.emitido||N99(rev?.estado)==='VIGENTE';

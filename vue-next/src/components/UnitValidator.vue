@@ -561,7 +561,7 @@ const operationalStatusHeader = computed(() => {
   if (!detail.value) return { label: 'CONSULTANDO', sub: '', tone: 'info' }
   const c = detail.value.controlRecord || {}
   const internalRaw = String(c.estatus2 ?? c.status2 ?? c.estado ?? '').trim().toUpperCase()
-  const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'TALLER', 'CHAPISTERIA', 'CHAPISTERÍA', 'MANTENIMIENTO', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
+  const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'CHAPISTERIA', 'CHAPISTERÍA', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
   const isStoppedByKeyword = stopKeywords.some(kw => internalRaw.includes(kw)) || stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
   const isActuallyActive = detail.value.active && !isStoppedByKeyword
 
@@ -569,7 +569,7 @@ const operationalStatusHeader = computed(() => {
     return { label: 'UNIDAD CERRADA', sub: internalRaw || 'Histórico', tone: 'neutral' }
   }
   if (!isActuallyActive) {
-    const reason = internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'EN PATIO / TALLER'
+    const reason = internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'EN PATIO'
     return { label: 'UNIDAD PARADA', sub: reason, tone: 'bad' }
   }
   // Un solo mensaje coherente: cuántos de los 4 sistemas tienen incidencia
@@ -773,7 +773,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
   }
 
   const internalStopReason = String(c.estatus2 || c.status2 || c.estado || c.estatus || '').trim()
-  const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'TALLER', 'CHAPISTERIA', 'CHAPISTERÍA', 'MANTENIMIENTO', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
+  const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'CHAPISTERIA', 'CHAPISTERÍA', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
   const isStoppedByKeyword = stopKeywords.some(kw => internalStopReason.toUpperCase().includes(kw)) || stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
   const isActuallyActive = detail.value.active && !isStoppedByKeyword
 
