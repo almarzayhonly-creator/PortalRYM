@@ -568,15 +568,54 @@ const operationalStatusHeader = computed(() => {
     const reason = internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'EN PATIO / TALLER'
     return { label: 'UNIDAD PARADA', sub: reason, tone: 'bad' }
   }
-  const hasBadCard = detail.value.cards.some(card => card.tone === 'bad')
-  const hasWarnCard = detail.value.cards.some(card => card.tone === 'warn')
-  if (hasBadCard) {
-    return { label: 'ACTIVA · CON INCIDENCIA', sub: internalRaw || 'Operativa con alerta', tone: 'warn' }
+  // Un solo mensaje coherente: cuántos de los 4 sistemas tienen incidencia
+  const cards = fourSystemCards.value
+  const total = cards.length || 4
+  const bad = cards.filter(card => card.tone === 'bad').length
+  const warn = cards.filter(card => card.tone === 'warn').length
+  const issues = bad + warn
+  if (issues > 0) {
+    return {
+      label: `${issues} DE ${total} CON INCIDENCIA`,
+      sub: 'Unidad activa',
+      tone: bad > 0 ? 'bad' : 'warn',
+    }
   }
-  if (hasWarnCard) {
-    return { label: 'ACTIVA · EN SEGUIMIENTO', sub: internalRaw || 'Operativa', tone: 'info' }
+  return { label: `${total} DE ${total} AL DÍA`, sub: 'Unidad activa', tone: 'ok' }
+})
+
+const normCompany = (s: unknown) =>
+  String(s ?? '').toUpperCase().replace(/\b(S\.?\s?A\.?|INC\.?|CORP\.?)\b/g, '').replace(/[^A-Z0-9]/g, '')
+
+// Cabecera: datos internos de operación sin repetir la misma empresa varias veces
+const headerOpsFields = computed(() => {
+  if (!detail.value) return [] as { label: string; value: string }[]
+  const c = detail.value.controlRecord || {}
+  const clean = (v: unknown) => {
+    const s = String(v ?? '').trim()
+    return s && s !== '—' && s !== 'null' && s !== 'undefined' ? s : ''
   }
-  return { label: 'ACTIVA · OPERATIVA', sub: internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'Operación normal', tone: 'ok' }
+  const out: { label: string; value: string }[] = []
+  const op = clean(companyOperatorLabel.value) || clean(companyHeaderLabel.value)
+  const owner = clean(companyOwnerLabel.value)
+  if (op && owner && normCompany(op) !== normCompany(owner)) {
+    out.push({ label: 'OPERADORA', value: op }, { label: 'DUEÑA', value: owner })
+  } else if (op || owner) {
+    out.push({ label: 'EMPRESA', value: owner || op })
+  }
+  const galera = clean(detail.value.galera)
+  if (galera && ![op, owner].some(x => x && normCompany(x) === normCompany(galera))) {
+    out.push({ label: 'GALERA', value: galera })
+  }
+  const sup = clean(detail.value.supervisor)
+  if (sup) out.push({ label: 'SUPERVISORA', value: sup })
+  const estatus = clean(c.estatus2 ?? c.status2 ?? c.estatus)
+  if (estatus) out.push({ label: 'ESTATUS', value: estatus })
+  const ns = clean(c.estatus_netsuite)
+  if (ns && ns.toUpperCase() !== estatus.toUpperCase()) out.push({ label: 'NETSUITE', value: ns })
+  const pana = clean(c.panapass_numero)
+  if (pana) out.push({ label: 'PANAPASS', value: pana })
+  return out
 })
 
 // FASE 5: Diagnóstico global de sincronización y estado de consultas
@@ -601,8 +640,35 @@ const consultationStatusSummary = computed(() => {
   if (hasOutdated) {
     return { text: 'Información histórica', state: 'outdated', dotClass: 'outdated' }
   }
+  // Datos completos, pero el badge no debe decir "al día" si hay sistemas en alerta
+  const attention = cards.filter(c => c.tone === 'bad' || c.tone === 'warn').length
+  if (attention > 0) {
+    const ok = cards.length - attention
+    return {
+      text: `${ok} al día · ${attention} ${attention === 1 ? 'requiere' : 'requieren'} atención`,
+      state: 'attention',
+      dotClass: 'attention',
+    }
+  }
   return { text: '4 sistemas verificados al día', state: 'verified', dotClass: 'verified' }
 })
+
+const systemsNeedingAttention = computed(() =>
+  fourSystemCards.value.filter(c => c.tone === 'bad' || c.tone === 'warn').length,
+)
+
+// Alertas que ya se ven en su tarjeta no se repiten en la cinta del encabezado
+const CARD_MIRRORED_ISSUES = new Set(['PANAPASS_INCIDENCIA', 'GPS_CRITICO', 'REVISADO_SIN_REGISTRO', 'REVISADO_VENCIDO'])
+const headerAuditIssues = computed(() =>
+  (detail.value?.auditIssues || []).filter(issue => !CARD_MIRRORED_ISSUES.has(issue.code)),
+)
+
+const SYSTEM_KICKERS: Record<string, string> = {
+  panapass: 'PEAJES ENA',
+  revisados: 'INSPECCIÓN ATTT',
+  gps: 'SATELITAL',
+  control: 'FLOTA',
+}
 
 // Los 4 sistemas principales garantizados en orden: Panapass, Revisado, GPS, Control de Auto
 const fourSystemCards = computed<DetailCard[]>(() => {
@@ -1076,23 +1142,11 @@ onUnmounted(() => {
                       </span>
                     </div>
 
-                    <!-- Empresa Operadora, Dueña, Galera y Supervisora -->
+                    <!-- Datos internos de operación (sin repetir empresa/galera) -->
                     <div class="v-ficha-company-row">
-                      <span class="v-ficha-info-item">
-                        <small>EMPRESA OPERADORA</small>
-                        <strong>{{ companyOperatorLabel !== '—' ? companyOperatorLabel : companyHeaderLabel }}</strong>
-                      </span>
-                      <span class="v-ficha-info-item">
-                        <small>EMPRESA DUEÑA</small>
-                        <strong>{{ companyOwnerLabel !== '—' ? companyOwnerLabel : '—' }}</strong>
-                      </span>
-                      <span v-if="detail.galera && detail.galera !== '—'" class="v-ficha-info-item">
-                        <small>GALERA</small>
-                        <strong>{{ detail.galera }}</strong>
-                      </span>
-                      <span v-if="detail.supervisor && detail.supervisor !== '—'" class="v-ficha-info-item">
-                        <small>SUPERVISORA</small>
-                        <strong>{{ detail.supervisor }}</strong>
+                      <span v-for="f in headerOpsFields" :key="f.label" class="v-ficha-info-item">
+                        <small>{{ f.label }}</small>
+                        <strong>{{ f.value }}</strong>
                       </span>
                     </div>
                   </div>
@@ -1113,16 +1167,17 @@ onUnmounted(() => {
                   <div class="v-ficha-action-buttons">
                     <button
                       type="button"
-                      class="v-ficha-whatsapp-btn"
+                      class="v-ficha-whatsapp-btn icon-only"
                       :class="{ copied: copiedTarget === 'whatsapp' }"
-                      title="Copiar reporte completo para WhatsApp"
+                      :title="copiedTarget === 'whatsapp' ? '¡Copiado!' : 'Copiar reporte para WhatsApp'"
+                      :aria-label="copiedTarget === 'whatsapp' ? 'Reporte copiado' : 'Copiar reporte para WhatsApp'"
                       data-testid="btn-copy-whatsapp"
                       @click="copyValidationToWhatsApp"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                      <svg v-if="copiedTarget !== 'whatsapp'" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+                        <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.04 21.5h-.01a9.43 9.43 0 0 1-4.8-1.32l-.35-.21-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.24-9.44 9.45-9.44a9.38 9.38 0 0 1 6.68 2.77 9.38 9.38 0 0 1 2.76 6.68c0 5.21-4.24 9.44-9.45 9.44zm8.04-17.48A11.3 11.3 0 0 0 12.04.7C5.77.7.67 5.8.67 12.06c0 2 .52 3.96 1.52 5.68L.57 23.7l6.1-1.6a11.33 11.33 0 0 0 5.37 1.37h.01c6.26 0 11.36-5.1 11.36-11.36 0-3.04-1.18-5.89-3.33-8.04z"/>
                       </svg>
-                      <span>{{ copiedTarget === 'whatsapp' ? '¡Validación Copiada!' : 'Copiar a WhatsApp' }}</span>
+                      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                     </button>
 
                     <button
@@ -1139,9 +1194,9 @@ onUnmounted(() => {
               </div>
 
               <!-- Cinta de Alertas Puntuales Confirmadas -->
-              <div v-if="detail.auditIssues && detail.auditIssues.length" class="v-ficha-alerts-strip" data-testid="ficha-audit-alerts">
+              <div v-if="headerAuditIssues.length" class="v-ficha-alerts-strip" data-testid="ficha-audit-alerts">
                 <div
-                  v-for="issue in detail.auditIssues"
+                  v-for="issue in headerAuditIssues"
                   :key="issue.code"
                   class="v-ficha-alert-chip"
                   :class="`sev-${issue.severity}`"
@@ -1169,8 +1224,13 @@ onUnmounted(() => {
                     <circle cx="12" cy="12" r="3"/>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                   </svg>
-                  <span>Monitoreo 4 Sistemas</span>
-                  <span class="v-tab-pill-indicator">{{ fourSystemCards.length }}</span>
+                  <span>Sistemas</span>
+                  <span
+                    v-if="systemsNeedingAttention > 0"
+                    class="v-tab-pill-indicator is-alert"
+                    :title="`${systemsNeedingAttention} sistema(s) requieren atención`"
+                  >{{ systemsNeedingAttention }}</span>
+                  <span v-else class="v-tab-pill-indicator is-ok" title="Todos los sistemas al día">✓</span>
                 </button>
 
                 <button
@@ -1188,29 +1248,23 @@ onUnmounted(() => {
                     <line x1="16" y1="17" x2="8" y2="17"/>
                     <polyline points="10 9 9 9 8 9"/>
                   </svg>
-                  <span>Expediente del Vehículo</span>
+                  <span>Expediente</span>
                   <span v-if="detail.fichaRecord" class="v-tab-pill-badge">eCarCheck</span>
                 </button>
               </div>
 
               <!-- CONTENIDO TAB 1: MONITOREO 4 SISTEMAS -->
               <section v-show="activeMainTab === 'monitoreo'" class="v-ficha-systems-section" aria-label="Estado de los cuatro sistemas">
-                <div class="v-ficha-section-bar">
-                  <div class="v-ficha-section-title">
-                    <span class="v-ficha-section-kicker">TELEMETRÍA Y SERVICIOS EN TIEMPO REAL</span>
-                    <h3>Estado Operativo de los 4 Sistemas</h3>
-                  </div>
-
-                  <!-- FASE 5: Distinción clara de estado de consulta -->
-                  <span
-                    class="v-ficha-live-indicator"
-                    :class="`status-${consultationStatusSummary.state}`"
-                    data-testid="consultation-status-badge"
-                  >
-                    <span class="live-dot" :class="consultationStatusSummary.dotClass"></span>
-                    <span>{{ consultationStatusSummary.text }}</span>
-                  </span>
-                </div>
+                <!-- Sin barra de título: el encabezado ya resume el estado de los 4 sistemas -->
+                <span
+                  v-if="consultationStatusSummary.state === 'syncing' || consultationStatusSummary.state === 'error' || consultationStatusSummary.state === 'incomplete'"
+                  class="v-ficha-live-indicator v-ficha-live-inline"
+                  :class="`status-${consultationStatusSummary.state}`"
+                  data-testid="consultation-status-badge"
+                >
+                  <span class="live-dot" :class="consultationStatusSummary.dotClass"></span>
+                  <span>{{ consultationStatusSummary.text }}</span>
+                </span>
 
                 <!-- FASE 7: 4 TARJETAS PRINCIPALES MINIMALISTAS HUD -->
                 <div class="v-ficha-bento-grid" data-testid="ficha-four-systems-grid">
@@ -1238,9 +1292,6 @@ onUnmounted(() => {
                           <ModuleIcon :name="card.key === 'control' ? 'control' : card.key" />
                         </span>
                         <div class="v-sys-title-group">
-                          <span class="v-sys-kicker">
-                            {{ card.key === 'panapass' ? 'PEAJES & CORREDORES' : card.key === 'revisados' ? 'INSPECCIÓN ATTT' : card.key === 'gps' ? 'TELEMETRÍA SATELITAL' : 'ESTADO DE FLOTA' }}
-                          </span>
                           <h4 class="v-sys-card-name">{{ card.title }}</h4>
                         </div>
                       </div>
@@ -1303,7 +1354,10 @@ onUnmounted(() => {
                         :class="{ open: activeContextTab === card.key }"
                         :data-testid="`btn-expand-${card.key}`"
                         aria-hidden="true"
-                      >▾</span>
+                      >
+                        <span class="v-chev-label">{{ activeContextTab === card.key ? 'Ocultar' : 'Ver detalle' }}</span>
+                        <span class="v-chev-icon">▾</span>
+                      </span>
                     </div>
                   </article>
                 </div>
@@ -4161,19 +4215,69 @@ onUnmounted(() => {
 @keyframes vTick { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
 
 .v-sys-chevron-pill {
-  width: 26px !important;
+  width: auto !important;
   height: 26px !important;
-  border-radius: 50% !important;
+  padding: 0 10px !important;
+  gap: 4px !important;
+  border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   background: #f0f9ff !important;
-  color: #0284c7 !important;
-  font-size: 13px !important;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease !important;
+  color: #0369a1 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  transition: background 0.2s ease, color 0.2s ease !important;
 }
+.v-chev-icon { display: inline-block; font-size: 12px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .v-sys-bento-card:hover .v-sys-chevron-pill { background: #e0f2fe !important; }
-.v-sys-chevron-pill.open { transform: rotate(180deg) !important; background: #0284c7 !important; color: #fff !important; }
+.v-sys-chevron-pill.open { background: #0284c7 !important; color: #fff !important; }
+.v-sys-chevron-pill.open .v-chev-icon { transform: rotate(180deg); }
+
+/* Badge de consulta: datos completos pero con sistemas en alerta */
+.v-ficha-live-indicator.status-attention {
+  border-color: #fde68a !important;
+  background: #fffbeb !important;
+  color: #b45309 !important;
+}
+.live-dot.attention { background: #f59e0b !important; }
+
+/* Pestaña: contador de alertas en lugar del "4" redundante */
+.v-tab-pill-indicator.is-alert { background: #dc2626 !important; color: #fff !important; }
+.v-tab-pill-indicator.is-ok { background: #16a34a !important; color: #fff !important; }
+
+/* Kicker en una sola línea para alinear los títulos de las 4 tarjetas */
+.v-sys-kicker { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+.v-sys-card-name { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+
+/* Pie de tarjeta siempre anclado abajo: las 4 tarjetas quedan alineadas */
+.v-sys-card-footer { margin-top: auto !important; }
+
+/* WhatsApp: botón circular solo con logo */
+.v-ficha-whatsapp-btn.icon-only {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #25d366 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35) !important;
+  transition: transform 0.15s ease, box-shadow 0.2s ease !important;
+}
+.v-ficha-whatsapp-btn.icon-only:hover { transform: scale(1.08) !important; box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5) !important; }
+.v-ficha-whatsapp-btn.icon-only.copied { background: #128c7e !important; }
+
+/* Estado de consulta solo cuando hay algo que avisar (sincronizando / error) */
+.v-ficha-live-inline { align-self: flex-end !important; margin-bottom: 8px !important; }
+
+/* Pie: separación entre icono y texto del botón primario */
+.v-ficha-footer button { gap: 8px !important; }
 
 @media (hover: none) {
   .v-sys-bento-card:hover { transform: none !important; }

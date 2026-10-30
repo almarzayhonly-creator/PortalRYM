@@ -716,7 +716,7 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       Object.assign(review, {
         tone,
         badge: status,
-        value: month ? `MES ${month.toUpperCase()}` : (lastEmissionFormatted !== 'Sin registro' ? lastEmissionFormatted : status),
+        value: month ? month.toUpperCase() : (lastEmissionFormatted !== 'Sin registro' ? lastEmissionFormatted : status),
         details: [
           { label: 'Mes asignado', value: month || 'No definido' },
           { label: 'Último trámite', value: lastEmissionFormatted },
@@ -804,7 +804,7 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
       Object.assign(gps, {
         gpsDevices,
         tone,
-        badge: level === 'OK' ? 'NORMAL' : level,
+        badge: level === 'OK' ? 'NORMAL' : (level === 'ALERTA' && reporting === 1 ? 'PARCIAL 1/2' : level),
         value: summary,
         details: [
           { label: 'GPS 1', value: `${formatDeviceLabel(devices[0]!)}${devices[0]?.last ? ` · ${formatPanamaDate(devices[0]?.last)}` : ''}` },
