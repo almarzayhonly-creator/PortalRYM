@@ -145,7 +145,7 @@ async function run(role,width,height,baseline=false,options={}){
   if(baseline)await page.route('**/css/portal-executive.css*',r=>r.fulfill({contentType:'text/css',body:''}));
   const startedAt=Date.now();
   await page.goto('http://127.0.0.1:4198/'+(options.pilot?'?vueNext=1':''));
-  const loginStyle=await page.locator('.login-card').evaluate(e=>{const s=getComputedStyle(e);return [s.fontFamily,s.padding,s.backgroundColor,s.borderRadius]});
+  const loginStyle=await page.locator('.login-card, .crystal-portal-card, .login-rym-shell').first().evaluate(e=>{const s=getComputedStyle(e);return [s.fontFamily,s.padding,s.backgroundColor,s.borderRadius]});
   await page.locator('[name=usuario]').fill(reusePreviewServer?`fixture-${role}`:'fixture');await page.locator('[name=password]').fill('fixture');await page.locator('#loginBtn').click();
   if(options.mode==='panapass-main-baseline'){
     await page.locator('#v101ValidatorQ').waitFor({timeout:7000});
