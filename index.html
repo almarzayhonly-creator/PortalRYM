@@ -11,7 +11,7 @@
 </style>
 <script>
   (function() {
-    var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
+    var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
     if (isVue) {
       document.documentElement.classList.add('vue-next-active');
       window.__RYM_VUE_NEXT_ACTIVE = true;
@@ -20,7 +20,7 @@
 </script>
 <script>
 (function() {
-  var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
+  var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
   if (isVue) {
     window.__RYM_VUE_NEXT_ACTIVE = true;
     var OrigMO = window.MutationObserver;
@@ -901,10 +901,10 @@ function monthRanges(desde,hasta){
   return out;
 }
 
-const RYM_SANDBOX_HOST='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev';
+const RYM_SANDBOX_HOST='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev';
 const RYM_IS_SANDBOX=()=>location.hostname.toLowerCase()===RYM_SANDBOX_HOST;
 function assertEnvironmentProfile(profile){if(RYM_IS_SANDBOX()&&String(profile?.rol||'').trim().toUpperCase()!=='ADMIN_TOTAL')throw Error('El entorno Sandbox está reservado para el perfil ADMIN_TOTAL. Tu usuario puede entrar en Producción.')}
-function environmentChoices(){const sandbox=RYM_IS_SANDBOX();return `<nav class="rym-login-environments" aria-label="Selecciona el entorno"><span class="rym-login-env-caption">ENTORNO DE ACCESO</span><div class="rym-login-env-options"><a class="rym-login-env-option ${sandbox?'':'active'}" href="https://portal-ena-rym.almarzayhonly.workers.dev/" ${sandbox?'':'aria-current="page"'}><span class="rym-login-env-symbol production" aria-hidden="true">P</span><span class="rym-login-env-copy"><b>Producción</b><small>Portal oficial</small></span>${sandbox?'':'<span class="rym-login-env-status">ACTUAL</span>'}</a><a class="rym-login-env-option ${sandbox?'active':''}" href="https://rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev/?vueNext=1" ${sandbox?'aria-current="page"':''}><span class="rym-login-env-symbol sandbox" aria-hidden="true">S</span><span class="rym-login-env-copy"><b>Sandbox</b><small>Solo ADMIN_TOTAL</small></span>${sandbox?'<span class="rym-login-env-status">ACTUAL</span>':''}</a></div></nav>`}
+function environmentChoices(){const sandbox=RYM_IS_SANDBOX();return `<nav class="rym-login-environments" aria-label="Selecciona el entorno"><span class="rym-login-env-caption">ENTORNO DE ACCESO</span><div class="rym-login-env-options"><a class="rym-login-env-option ${sandbox?'':'active'}" href="https://portal-ena-rym.almarzayhonly.workers.dev/" ${sandbox?'':'aria-current="page"'}><span class="rym-login-env-symbol production" aria-hidden="true">P</span><span class="rym-login-env-copy"><b>Producción</b><small>Portal oficial</small></span>${sandbox?'':'<span class="rym-login-env-status">ACTUAL</span>'}</a><a class="rym-login-env-option ${sandbox?'active':''}" href="https://rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev/?vueNext=1" ${sandbox?'aria-current="page"':''}><span class="rym-login-env-symbol sandbox" aria-hidden="true">S</span><span class="rym-login-env-copy"><b>Sandbox</b><small>Solo ADMIN_TOTAL</small></span>${sandbox?'<span class="rym-login-env-status">ACTUAL</span>':''}</a></div></nav>`}
 function loginView(msg=''){
   if(window.__RYM_VUE_NEXT_LOGIN){
     window.__RYM_VUE_NEXT_LOGIN.render(msg);
@@ -9160,7 +9160,7 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
 <link rel="stylesheet" href="/css/portal-executive.css?v=143-vue-validator"/>
 <link rel="stylesheet" href="/css/rym-brand-theme.css?v=dashboard4"/>
 <script type="module">
-  const isVueNextActive = Boolean(new URLSearchParams(location.search).get('vueNext')) || (location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev'));
+  const isVueNextActive = Boolean(new URLSearchParams(location.search).get('vueNext')) || (location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev'));
   if(isVueNextActive){
     const useVueHome=new URLSearchParams(location.search).get('vueHome')!=='0';
     window.__RYM_VUE_NEXT_HOME_ENABLED=useVueHome;
