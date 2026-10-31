@@ -3,8 +3,8 @@ import { ref } from 'vue'
 
 defineProps<{ error: string; onSubmit: (event: SubmitEvent) => Promise<void> | void }>()
 const submitting = ref(false)
-const sandboxHost = 'rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev'
-const isSandbox = typeof window !== 'undefined' && (window.location.hostname.toLowerCase() === sandboxHost || window.location.hostname.toLowerCase().includes('workers.dev') || Boolean(new URLSearchParams(window.location.search).get('vueNext')))
+const sandboxHost = 'rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev'
+const isSandbox = typeof window !== 'undefined' && window.location.hostname.toLowerCase() === sandboxHost
 const logo = '/assets/rym-logo.png'
 
 async function submit(event: SubmitEvent, handler: (event: SubmitEvent) => Promise<void> | void) {
@@ -128,7 +128,7 @@ async function submit(event: SubmitEvent, handler: (event: SubmitEvent) => Promi
             </div>
             <span v-if="!isSandbox" class="env-current-indicator">ACTUAL</span>
           </a>
-          <a href="https://rym-login-preview-portal-ena-rym.almarzayhonly.workers.dev/?vueNext=1" class="env-toggle" :class="{ 'is-active': isSandbox }">
+          <a href="https://rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev/?vueNext=1" class="env-toggle" :class="{ 'is-active': isSandbox }">
             <span class="env-badge-light s-badge">S</span>
             <div class="env-text-group">
               <span class="env-name">Sandbox</span>
