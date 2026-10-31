@@ -560,16 +560,25 @@ const companyHeaderLabel = computed(() => {
 const operationalStatusHeader = computed(() => {
   if (!detail.value) return { label: 'CONSULTANDO', sub: '', tone: 'info' }
   const c = detail.value.controlRecord || {}
-  const internalRaw = String(c.estatus2 ?? c.status2 ?? c.estado ?? '').trim().toUpperCase()
+  const f = (detail.value?.fichaRecord as Unit) || {}
+  const lg = (f.logistica as Unit) || {}
+  const r = (detail.value?.revisadoRecord as Unit) || {}
+  const rawInternalVal = String(
+    c.estatus2 || c.status2 || lg.status2 || lg.estatus_interno || r.status2 || r.estatus_logistica || c.estado || ''
+  ).trim()
+  const internalRaw = rawInternalVal.toUpperCase()
   const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'CHAPISTERIA', 'CHAPISTERÍA', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
   const isStoppedByKeyword = stopKeywords.some(kw => internalRaw.includes(kw)) || stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
-  const isActuallyActive = detail.value.active && !isStoppedByKeyword
+  const isActuallyActive = detail.value.active && !isStoppedByKeyword && lg.activa !== false && r.activa !== false
 
   if (detail.value.closed) {
-    return { label: 'UNIDAD CERRADA', sub: internalRaw || 'Histórico', tone: 'neutral' }
+    return { label: 'UNIDAD CERRADA', sub: rawInternalVal || 'Histórico', tone: 'neutral' }
   }
   if (!isActuallyActive) {
-    const reason = internalRaw && internalRaw !== 'ACTIVO' ? internalRaw : 'EN PATIO'
+    let reason = rawInternalVal && internalRaw !== 'ACTIVO' ? rawInternalVal : 'EN PATIO'
+    if (reason) {
+      reason = reason.charAt(0).toUpperCase() + reason.slice(1).toLowerCase()
+    }
     return { label: 'UNIDAD PARADA', sub: reason, tone: 'bad' }
   }
   // Un solo mensaje coherente: cuántos de los 4 sistemas tienen incidencia
@@ -772,10 +781,15 @@ const fourSystemCards = computed<DetailCard[]>(() => {
     note: canSeeGps.value ? 'No se recibieron lecturas de GPS 1 / GPS 2.' : 'Monitoreo satelital reservado a supervisión y administración.',
   }
 
-  const internalStopReason = String(c.estatus2 || c.status2 || c.estado || c.estatus || '').trim()
+  const f = (detail.value?.fichaRecord as Unit) || {}
+  const lg = (f.logistica as Unit) || {}
+  const r = (detail.value?.revisadoRecord as Unit) || {}
+  const internalStopReason = String(
+    c.estatus2 || c.status2 || lg.status2 || lg.estatus_interno || r.status2 || r.estatus_logistica || c.estado || c.estatus || ''
+  ).trim()
   const stopKeywords = ['PARADA', 'PARADO', 'SALUD', 'CHAPISTERIA', 'CHAPISTERÍA', 'LEGAL', 'INACTIVO', 'INACTIVA', 'PATIO', 'DEPOSITO', 'DEPÓSITO']
   const isStoppedByKeyword = stopKeywords.some(kw => internalStopReason.toUpperCase().includes(kw)) || stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
-  const isActuallyActive = detail.value.active && !isStoppedByKeyword
+  const isActuallyActive = detail.value.active && !isStoppedByKeyword && lg.activa !== false && r.activa !== false
 
   const operationalStatus = detail.value.closed ? 'CERRADA' : isActuallyActive ? 'ACTIVA' : 'PARADA'
   const cleanOp = operationalStatus === 'ACTIVA' ? 'Activa' : operationalStatus === 'PARADA' ? 'Parada' : 'Cerrada'
@@ -799,7 +813,7 @@ const fourSystemCards = computed<DetailCard[]>(() => {
     ],
     updatedAt: 'Sincronizado RYM',
     syncStatus: 'verified',
-    note: isActuallyActive ? 'Unidad activa en Control de Auto.' : `Unidad parada · Estado interno: ${internalStopReason}`,
+    note: isActuallyActive ? 'Unidad activa en Control de Auto.' : `Unidad parada · Estado interno: ${cleanInt}`,
   }
 
   return [panCard, revCard, gpsCard, ctrlCard]

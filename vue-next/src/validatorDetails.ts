@@ -831,13 +831,46 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
   // Fecha: última actualización de estado de la unidad en flota, no la hora del navegador.
   const ctrlCard = detail.cards.find(card => card.key === 'control')
   if (ctrlCard) {
-    const rawInternal = pickValue(c.estatus2, c.status2, c.estado, c.estatus, detail.status)
+    const lg = objectValue(ficha?.logistica || (detail.fichaRecord as any)?.logistica)
+    const r = objectValue(detail.revisadoRecord)
+    const rawInternal = pickValue(
+      c.estatus2,
+      c.status2,
+      lg.status2,
+      lg.estatus_interno,
+      r.status2,
+      r.estatus_logistica,
+      c.estado,
+      c.estatus,
+      detail.status
+    )
     const internalState = displayValue(rawInternal)
-    const operationalStatus = detail.closed ? 'CERRADA' : detail.active ? 'ACTIVA' : 'PARADA'
-    ctrlCard.tone = detail.closed ? 'neutral' : detail.active ? 'ok' : 'warn'
+    const stopKeywords = [
+      'PARADA',
+      'PARADO',
+      'SALUD',
+      'CHAPISTERIA',
+      'CHAPISTERÍA',
+      'LEGAL',
+      'INACTIVO',
+      'INACTIVA',
+      'PATIO',
+      'DEPOSITO',
+      'DEPÓSITO'
+    ]
+    const isStoppedByKeyword = stopKeywords.some(kw => internalState.toUpperCase().includes(kw)) ||
+      stopKeywords.some(kw => String(c.estatus || '').toUpperCase().includes(kw))
+
+    if (isStoppedByKeyword || lg.activa === false || r.activa === false) {
+      detail.active = false
+    }
+
+    const isActuallyActive = detail.active && !isStoppedByKeyword
+    const operationalStatus = detail.closed ? 'CERRADA' : isActuallyActive ? 'ACTIVA' : 'PARADA'
+    ctrlCard.tone = detail.closed ? 'neutral' : isActuallyActive ? 'ok' : 'warn'
     ctrlCard.badge = operationalStatus
 
-    // Formato exacto requerido: "Activa - Activa" o "Parada - Chapisteria" según corresponda
+    // Formato exacto requerido: "Activa - Activa" o "Parada - Salud" según corresponda
     const cleanOp = operationalStatus === 'ACTIVA' ? 'Activa' : operationalStatus === 'PARADA' ? 'Parada' : 'Cerrada'
     let cleanInt = internalState && internalState !== '—' && internalState !== 'SIN DETALLE' ? internalState : ''
     if (cleanInt) {
@@ -848,6 +881,7 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
     }
 
     ctrlCard.value = `${cleanOp} - ${cleanInt}`
+    ctrlCard.note = isActuallyActive ? 'Unidad activa en Control de Auto.' : `Unidad parada · Estado interno: ${cleanInt}`
     
     const rawUpdate = pickValue(c.fecha_actualizacion_estado, c.fecha_estado, c.updated_at)
     const updateMeta = parseDateMetadata(rawUpdate, 720) // Estado operativo de flota

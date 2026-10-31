@@ -6435,7 +6435,7 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
 
         // Fallback a revisados-ficha en caso de que la unidad no esté en el snapshot global de revisados-final
         let fichaOficial = null;
-        if (!rev || !rev.estado) {
+        if (!rev || !rev.estado || !ctrl.status2 || !ctrl.estatus2) {
           try {
             const fichaRes = await req('/functions/v1/revisados-ficha', {
               method: 'POST',
@@ -6445,6 +6445,20 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
               })
             });
             const fd = fichaRes?.data || {};
+            if (fd.logistica) {
+              const lg = fd.logistica;
+              if (lg.status2) {
+                ctrl.status2 = lg.status2;
+                if (detail.controlRecord) detail.controlRecord.status2 = lg.status2;
+              }
+              if (lg.estatus_interno) {
+                ctrl.estatus_interno = lg.estatus_interno;
+                if (detail.controlRecord) detail.controlRecord.estatus_interno = lg.estatus_interno;
+              }
+              if (lg.activa === false) {
+                detail.active = false;
+              }
+            }
             if (fd.oficial && (fd.oficial.fecha_revisado || fd.oficial.estado_vehiculo || fd.oficial.actualizado_at)) {
               fichaOficial = fd.oficial;
               rev = rev || {};
@@ -6497,7 +6511,13 @@ body.v99-home{margin:0;background:var(--v101-bg)!important;color:var(--v101-ink)
     })());
     if(pan)jobs.push((async()=>{try{const [ena,account]=await Promise.all([req('/functions/v1/ena-consulta-saldo',{method:'POST',body:JSON.stringify({panapass:Number(pan)})}),req('/rest/v1/ena_cuentas?panapass_numero=eq.'+encodeURIComponent(pan)+'&select=panapass_display,estado_acceso,tipo_credencial,ena_empresa,ena_ruc,ena_email,ultimo_login_ok,ultima_consulta,ultimo_error,updated_at&limit=1',{method:'GET'})]);const response=ena?.data?.results?.[0],card=detail.cards?.find(item=>item.key==='panapass');detail.enaAccount=Array.isArray(account?.data)?account.data[0]||{}:{};detail.enaResponse=response;if(card){let saldo=ctrl.ena_saldo;let isLiveQuery=false;let queryDate=response?.consultado_at||response?.ultima_consulta||detail.enaAccount?.ultima_consulta||ctrl.ena_ultima_consulta||null;if(response&&['OK','BUSY'].includes(response.result)){const parsed=Number(String(response?.summary?.saldo_texto||'').replace(/[^\d.-]/g,''));if(Number.isFinite(parsed))saldo=parsed;isLiveQuery=true;queryDate=response.consultado_at||response.ultima_consulta||new Date().toISOString()}const negative=Number(saldo||0)<0;const isFresh=queryDate&&((Date.now()-new Date(queryDate).getTime())<86400000);Object.assign(card,{tone:negative?'bad':isFresh?'ok':'warn',badge:negative?'SALDO NEGATIVO':isFresh?'AL DÍA':'ÚLTIMO DATO',value:panDebtMaybe99(saldo),details:[{label:'Última consulta',value:queryDate?fmt99(queryDate):'Sin consulta previa'},{label:'Número Panapass',value:pan}],note:negative?'Saldo negativo: requiere atención.':isFresh?'Sin saldo pendiente en ENA · Al día':'Saldo registrado en consulta anterior.'})}}catch(_){}})());
     if(detail.cards?.some(item=>item.key==='gps')&&['ADMIN_TOTAL','ADMIN','GERENTE_GALERA','SUPERVISORA'].includes(String(state?.profile?.rol||'').trim().toUpperCase()))jobs.push((async()=>{try{const response=await req('/functions/v1/gps-rym-validator',{method:'POST',body:JSON.stringify({q:unit})}),row=(response?.data?.rows||[]).find(item=>N99(item.unidad)===N99(unit));if(!response?.data?.ok||!row)return;const card=detail.cards.find(item=>item.key==='gps'),g1=row.gps1||{},g2=row.gps2||{},missing=!g1.installed||!g2.installed,level=N99(row.nivel||''),tone=missing||level==='CRITICO'?'bad':level==='ALERTA'?'warn':g1.ok&&g2.ok?'ok':'warn',label=g=>!g?.installed?'Sin GPS':g?.ok?'Reportando':g?.label||'Sin reportar';Object.assign(card,{tone,badge:missing?'SIN GPS':level==='CRITICO'?'GPS CRÍTICO':level==='ALERTA'?'GPS ALERTA':'2 GPS OK',value:`${label(g1)} · ${label(g2)}`,details:[{label:'GPS 1',value:`${label(g1)}${g1.last?' · '+gpsDate116(g1.last):''}`},{label:'GPS 2',value:`${label(g2)}${g2.last?' · '+gpsDate116(g2.last):''}`}],note:`${row.estado_operativo||'—'} · ${row.razon||'Sin diagnóstico'}`});detail.gpsRecord=row}catch(_){}})());
-    await Promise.all(jobs);const tones=detail.cards.map(card=>card.tone);detail.overall=!detail.active?'PARADA · REVISAR':tones.includes('bad')?'ACTIVA · ALERTA':tones.some(t=>['pending','warn'].includes(t))?'ACTIVA · REVISAR':'ACTIVA · TODO OK';return detail;
+    await Promise.all(jobs);
+    const stopKw=['PARADA','PARADO','SALUD','CHAPISTERIA','CHAPISTERÍA','LEGAL','INACTIVO','INACTIVA','PATIO','DEPOSITO','DEPÓSITO'];
+    const curSt2 = String(ctrl.status2 || ctrl.estatus2 || ctrl.estatus_interno || '').toUpperCase();
+    if (stopKw.some(k => curSt2.includes(k))) {
+      detail.active = false;
+    }
+    const tones=detail.cards.map(card=>card.tone);detail.overall=!detail.active?'PARADA · REVISAR':tones.includes('bad')?'ACTIVA · ALERTA':tones.some(t=>['pending','warn'].includes(t))?'ACTIVA · REVISAR':'ACTIVA · TODO OK';return detail;
   }
   window.__RYM_VUE_NEXT_HOME_MAIN={searchValidator:(query)=>searchValidator99(query,false),loadValidator:(unit)=>loadValidatorDetail99(unit,{deferChecks:true}),enrichValidator:enrichValidatorDetail99,fichaValidator:async unit=>(await req('/functions/v1/revisados-ficha',{method:'POST',body:JSON.stringify({unidad:String(unit.unidad||unit.unit||''),placa:String(unit.placa_unica||unit.placa||unit.placa_comercial||'')})})).data,refreshIndicators:refreshExecutiveCards99,setActiveModule:(moduleId)=>{state.active=moduleId}};
   function card99(cls,icon,title,desc,buttonId,minis,badge='Disponible'){
@@ -9178,8 +9198,8 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
       });
     }
     window.__RYM_VUE_NEXT_ACTIVE=true;
-    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=1793388417913');
-    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=1793388417913';document.head.appendChild(css);
+    const pilot=await import('/vue-next/dist/portal-rym-vue-next.js?v=1793452921076');
+    const css=document.createElement('link');css.rel='stylesheet';css.href='/vue-next/dist/portal-rym-vue-next.css?v=1793452921076';document.head.appendChild(css);
     let opened=false;
     window.__RYM_VUE_NEXT_HOME={render:summary=>{opened=true;return pilot.renderHome(summary)},error:error=>pilot.failHome(error),isActive:pilot.isHomeActive,hasControl:pilot.hasControlSummary,setControl:pilot.setControlIndicators,errorControl:pilot.failControlIndicators,setGps:pilot.setGpsIndicators,errorGps:pilot.failGpsIndicators};
     window.__RYM_VUE_NEXT_LOGIN={render:error=>pilot.renderLogin(error||""),dispose:pilot.disposeLogin};if(window.__RYM_VUE_NEXT_API)window.__RYM_VUE_NEXT_VIEWS={mount:pilot.mountView};
