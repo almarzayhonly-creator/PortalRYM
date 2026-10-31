@@ -16,6 +16,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Guard production login against sandbox contamination
+        run: |
+          node - <<'JS'
+          const fs = require('node:fs');
+          const html = fs.readFileSync('index.html', 'utf8');
+          const config = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8').replace(/^\s*\/\/.*$/gm, ''));
+          if (config.name !== 'portal-ena-rym') throw Error('Production Worker name changed: ' + config.name);
+          if (!html.includes('function loginView(') || !html.includes('async function login(')) throw Error('Production login contract missing');
+          for (const marker of ['__RYM_VUE_NEXT_LOGIN', 'rym-login-preview-portal-ena-rym', '/vue-next/dist/portal-rym-vue-next.js', 'vue-next-active']) {
+            if (html.includes(marker)) throw Error('Sandbox login marker detected in main: ' + marker);
+          }
+          console.log('Production login and Worker identity verified');
+          JS
       - name: Verify controller syntax
         run: |
           node --check worker.js
@@ -104,5 +117,18 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx --yes wrangler@latest deploy
 
+      - name: Verify production login is not sandbox
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 3 --max-time 30 \
+            "https://portal-ena-rym.almarzayhonly.workers.dev/?production-login-contract=${GITHUB_SHA}" \
+            -o /tmp/rym-production-login.html
+          grep -Fq 'function loginView(' /tmp/rym-production-login.html
+          grep -Fq 'async function login(' /tmp/rym-production-login.html
+          if grep -Eq '__RYM_VUE_NEXT_LOGIN|rym-login-preview-portal-ena-rym|vue-next-active' /tmp/rym-production-login.html; then
+            echo 'Sandbox login leaked to production' >&2
+            exit 1
+          fi
+          echo 'Production login is isolated from sandbox'
       - name: Verify deployed Unit Validator resource hashes
         run: node qa/validator-tablet-deployed.mjs "https://portal-ena-rym.almarzayhonly.workers.dev"
