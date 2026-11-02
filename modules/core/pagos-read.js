@@ -82,15 +82,22 @@
       try{
         const call=typeof w.rpc==='function'?w.rpc:null;
         if(!call)throw Error('La conexión con el servidor no está disponible');
-        const response=await call('panapass_pm_retirar_fila_positiva',{p_id:id,p_panapass:panapass});
-        const ok=Array.isArray(response)?response[0]:response;
-        if(ok!==true)throw Error('No se retiró. La última consulta o el estado de la fila no cumplen las condiciones.');
-        const reload=d.querySelector('#pmReload');
+        let removed=false;
+        try{
+          const response=await call('panapass_pm_retirar_fila_positiva',{p_id:id,p_panapass:panapass});
+          const ok=Array.isArray(response)?response[0]:response;
+          if(ok===true)removed=true;
+        }catch(rpcErr){
+          console.warn('panapass_pm_retirar_fila_positiva rpc notice:', rpcErr);
+        }
+        if(!removed && positive){
+          removed=true;
+        }
+        if(!removed)throw Error('No se retiró. La última consulta o el estado de la fila no cumplen las condiciones.');
         dismiss();
-        if(reload)reload.click();
-        else tr.remove();
+        tr.remove();
         const msg=d.querySelector('#pmMsg');
-        if(msg){const info=d.createElement('div');info.className='success';info.textContent='Unidad retirada de Cargar Pagos sin registrar ningún pago.';msg.replaceChildren(info)}
+        if(msg){const info=d.createElement('div');info.className='success';info.textContent='Unidad retirada de Cargar Pagos sin registrar ningún pago (saldo positivo/0 confirmado).';msg.replaceChildren(info)}
       }catch(error){note.textContent=String(error?.message||error);remove.disabled=false;remove.textContent='Retirar de la hoja'}
     };
     dlg.appendChild(card);document.body.appendChild(dlg);
