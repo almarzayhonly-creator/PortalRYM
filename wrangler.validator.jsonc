@@ -1,0 +1,23 @@
+{
+  "name": "validator-tablet-app-portal-ena-rym",
+  "compatibility_date": "2026-08-27",
+  "main": "worker.js",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/",
+      "/unit-validator",
+      "/unit-validator.html",
+      "/validator-tablet-sw.js",
+      "/validator-tablet.webmanifest",
+      "/css/validator-tablet-app.css",
+      "/modules/core/unit-validator-shell.js",
+      "/modules/control-auto/validator-presentation.js",
+      "/modules/control-auto/validator-details.js",
+      "/modules/control-auto/validator-tablet-app.js",
+      "/modules/core/validator-session.js"
+    ]
+  }
+}

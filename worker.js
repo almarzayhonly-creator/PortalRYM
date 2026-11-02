@@ -1,7 +1,9 @@
 function isolatedValidatorHost(html){
   const core=html.match(/<script id="rym-v99-centro-control-js">([\s\S]*?)<\/script>/)?.[1];
   if(!core)return html; // QA fixtures already supply only the canonical validator.
-  const auth=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  const auth=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)]
+    .map(match=>match[1])
+    .find(source=>source.includes('const URL=')&&source.includes('async function cobraLive('));
   const between=(source,start,end)=>{
     const a=source?.indexOf(start),b=source?.indexOf(end,a);
     if(a==null||a<0||b<a)throw Error('Validator source anchor missing: '+start);
