@@ -11,7 +11,7 @@
 </style>
 <script>
   (function() {
-    var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
+    var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('portal-ena-rym-sandbox');
     if (isVue) {
       document.documentElement.classList.add('vue-next-active');
       window.__RYM_VUE_NEXT_ACTIVE = true;
@@ -20,7 +20,7 @@
 </script>
 <script>
 (function() {
-  var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev');
+  var isVue = Boolean(new URLSearchParams(window.location.search).get('vueNext')) || location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('portal-ena-rym-sandbox');
   if (isVue) {
     window.__RYM_VUE_NEXT_ACTIVE = true;
     var OrigMO = window.MutationObserver;
@@ -9180,7 +9180,7 @@ body.v66-revisados .v180-status-list label:hover{background:#f2f7fd!important}
 <link rel="stylesheet" href="/css/portal-executive.css?v=143-vue-validator"/>
 <link rel="stylesheet" href="/css/rym-brand-theme.css?v=dashboard4"/>
 <script type="module">
-  const isVueNextActive = Boolean(new URLSearchParams(location.search).get('vueNext')) || (location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('workers.dev'));
+  const isVueNextActive = Boolean(new URLSearchParams(location.search).get('vueNext')) || (location.hostname.toLowerCase()==='rym-login-preview-portal-ena-rym-sandbox.almarzayhonly.workers.dev' || location.hostname.includes('portal-ena-rym-sandbox'));
   if(isVueNextActive){
     const useVueHome=new URLSearchParams(location.search).get('vueHome')!=='0';
     window.__RYM_VUE_NEXT_HOME_ENABLED=useVueHome;
