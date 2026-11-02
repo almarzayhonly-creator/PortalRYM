@@ -636,8 +636,10 @@ function applyOperationalPresentation(detail: UnitDetail, ficha: Unit | null): v
     const validQueryDate = queryMeta.isFuture ? '' : queryMeta.formatted
     pana.updatedAt = validQueryDate || (realEnaQueryRaw ? 'Consulta anterior' : 'Sin consulta reciente')
 
-    const savedSaldo = c.ena_saldo !== null && c.ena_saldo !== undefined && String(c.ena_saldo).trim() !== '' ? Number(c.ena_saldo) : null
-    const hasNegative = (savedSaldo !== null && savedSaldo < 0) || /NEGATIVO/i.test(pana.badge)
+    const curValNum = (() => { const m = String(pana.value ?? '').replace(',', '.').match(/-?\d+(?:\.\d+)?/); return m ? Number(m[0]) : null; })()
+    const savedSaldo = curValNum !== null ? curValNum : (c.ena_saldo !== null && c.ena_saldo !== undefined && String(c.ena_saldo).trim() !== '' ? Number(c.ena_saldo) : null)
+    // B/. 0.00 es saldo en cero (sin deuda / no negativo); solo montos estrictamente menores a 0 son negativos
+    const hasNegative = (savedSaldo !== null && savedSaldo < 0) || (savedSaldo === null && /NEGATIVO/i.test(pana.badge))
 
     if (!panNum) {
       pana.tone = detail.active ? 'bad' : 'neutral'
