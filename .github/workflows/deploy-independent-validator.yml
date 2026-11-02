@@ -22,6 +22,10 @@ on:
       - 'vue-next/dist/portal-rym-vue-next.js'
       - 'vue-next/dist/portal-rym-vue-next-bridge.js'
       - 'scripts/build-validator-worker-assets.mjs'
+      - 'vue-next/package.json'
+      - 'vue-next/package-lock.json'
+      - 'vue-next/src/**'
+      - 'vue-next/public/**'
       - '.github/workflows/deploy-independent-validator.yml'
 
 permissions:
@@ -40,6 +44,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Build validator Vue runtime
+        working-directory: vue-next
+        run: |
+          npm ci
+          npm run build
       - name: Check Worker syntax
         run: node --input-type=module --check < worker.js
       - name: Package only validator runtime assets
