@@ -27,6 +27,13 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const validatorApp = ["validador","validator","validador-unidad","unit-validator"].includes((url.searchParams.get("app") || "").toLowerCase());
+    const validatorHost=url.hostname.toLowerCase()==="validator-tablet-app-portal-ena-rym.almarzayhonly.workers.dev";
+    if(validatorHost){
+      const dedicated=url.searchParams.get("validator-host")==="1";
+      const allowedAssets=new Set(["/unit-validator","/unit-validator.html","/validator-tablet-sw.js","/validator-tablet.webmanifest","/css/validator-tablet-app.css","/css/validator-tablet-app-legacy.css","/assets/rym-validator-192.png","/assets/rym-validator-512.png","/modules/core/unit-validator-shell.js","/modules/core/validator-session.js","/modules/control-auto/validator-presentation.js","/modules/control-auto/validator-details.js","/modules/control-auto/validator-tablet-app.js","/modules/control-auto/validator-tablet-app-legacy.js","/vue-next/dist/portal-rym-vue-next.css","/vue-next/dist/portal-rym-vue-next.js","/vue-next/dist/portal-rym-vue-next-bridge.js"]);
+      if(url.pathname==="/"&&!dedicated&&!validatorApp)return Response.redirect(new URL("/unit-validator",url),302);
+      if(url.pathname!=="/"&&!allowedAssets.has(url.pathname))return new Response("Not Found",{status:404});
+    }
 
     if ((validatorApp && url.pathname === "/") || ["/unit-validator", "/unit-validator.html"].includes(url.pathname)) {
       // Assets canonicalize .html with a redirect; fetch the canonical asset so

@@ -1,21 +1,27 @@
 name: Deploy independent unit validator
 
 on:
+  workflow_dispatch:
   push:
     branches: [codex/validator-independent-boot-fix]
     paths:
       - 'worker.js'
       - 'wrangler.validator.jsonc'
+      - 'index.html'
       - 'unit-validator.html'
       - 'validator-tablet-sw.js'
       - 'validator-tablet.webmanifest'
-      - 'css/validator-tablet-app.css'
+      - 'css/validator-tablet-app*.css'
       - 'modules/core/unit-validator-shell.js'
       - 'modules/core/validator-session.js'
       - 'modules/control-auto/validator-presentation.js'
       - 'modules/control-auto/validator-details.js'
-      - 'modules/control-auto/validator-tablet-app.js'
+      - 'modules/control-auto/validator-tablet-app*.js'
       - 'assets/rym-validator-*.png'
+      - 'vue-next/dist/portal-rym-vue-next.css'
+      - 'vue-next/dist/portal-rym-vue-next.js'
+      - 'vue-next/dist/portal-rym-vue-next-bridge.js'
+      - 'scripts/build-validator-worker-assets.mjs'
       - '.github/workflows/deploy-independent-validator.yml'
 
 permissions:
@@ -36,6 +42,8 @@ jobs:
           node-version: 24
       - name: Check Worker syntax
         run: node --input-type=module --check < worker.js
+      - name: Package only validator runtime assets
+        run: node scripts/build-validator-worker-assets.mjs
       - name: Deploy only the independent validator Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
