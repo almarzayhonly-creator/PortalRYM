@@ -3319,6 +3319,96 @@ async function phase31EnhanceSaldoButtons(v){
   }
 }
 </script>
+<style id="rym-v90-saldo-modal-css">
+/* V90: modal «Consulta de saldo» con la fuente y la hora de la lectura. */
+.ena90-when{display:block;margin-top:6px;font-size:11px;font-weight:850;color:var(--muted,#52667a)}
+.ena90-src{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-top:12px}
+.ena90-src>div{position:relative;display:grid;gap:1px;justify-items:center;padding:10px 6px 8px;border:1px solid #dce6f3;border-radius:14px;background:#f8fbff;text-align:center}
+.ena90-src small{font-size:9px;font-weight:1000;letter-spacing:.05em;text-transform:uppercase;color:#64748b}
+.ena90-src b{font-size:13px;color:#0b2a55}
+.ena90-src em{font-style:normal;font-size:14px;font-weight:1000}
+.ena90-src .pos em{color:#087a45}.ena90-src .neg em{color:#c0262d}
+.ena90-src .on{border-color:#0b4fa8;background:#eaf2ff;box-shadow:0 0 0 1px #0b4fa8 inset}
+.ena90-src .on i{position:absolute;top:-8px;right:8px;padding:1px 7px;border-radius:99px;background:#0b4fa8;color:#fff;font-size:9px;font-style:normal;font-weight:1000}
+.ena90-actions{display:grid;gap:8px;margin-top:14px}
+.ena90-actions button{min-height:42px;border-radius:12px;font:inherit;font-weight:900;cursor:pointer;box-shadow:none!important;text-shadow:none!important}
+.ena90-actions .ena90-ena{background:#eef1ff!important;color:#1f3fbf!important;border:1px solid #b9c6ff!important}
+.ena90-actions .ena90-wa{background:linear-gradient(135deg,#25d366,#128c7e)!important;color:#fff!important;border:0!important}
+.ena90-actions .ena90-wa:disabled{background:#e2e8f0!important;color:#94a3b8!important;cursor:not-allowed}
+.ena90-info{margin-top:10px;padding:9px 12px;border-radius:12px;background:#eef4ff;border:1px solid #c7d7f5;color:#1e3a8a;font-size:11.5px;font-weight:850}
+</style>
+<script id="rym-v90-saldo-modal-fuentes">
+/* V90 (17-nov-2026): modal «Consulta de saldo». Muestra el saldo de la última lectura de ENA oficial con fecha y hora (o la fuente más reciente si no hay),
+   Panapass, TAG, las fuentes del saldo, el botón «Consultar en ENA» y «Copiar WhatsApp» (bloqueado si el saldo es 0 o positivo, o si la lectura no es de hoy).
+   Solo reemplaza el DIBUJO del modal; la consulta (phase6ConsultarSaldoENA) y los datos no cambian. Para volver atrás basta quitar este bloque. */
+function ena90Parts(iso){
+  const t=Date.parse(iso);if(!Number.isFinite(t))return null;
+  const p={};
+  new Intl.DateTimeFormat('en-US',{timeZone:'America/Panama',day:'2-digit',month:'2-digit',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}).formatToParts(new Date(t)).forEach(x=>{p[x.type]=x.value});
+  return p;
+}
+function ena90Hora(iso){const p=ena90Parts(iso);return p?`${p.hour}:${p.minute} ${String(p.dayPeriod).toUpperCase()==='AM'?'a. m.':'p. m.'}`:'—'}
+function ena90FechaHora(iso){const p=ena90Parts(iso);return p?`${p.day}/${p.month}/${p.year} ${ena90Hora(iso)}`:'—'}
+function ena90Dia(iso){const p=ena90Parts(iso);return p?`${p.year}-${p.month}-${p.day}`:''}
+function ena90FuenteTxt(f){return f==='ENA_OFICIAL'?'Última lectura ENA oficial':f==='CORTE_PROVEEDOR'?'Corte del proveedor':f==='CONSULTA'?'Consulta individual':'Última lectura'}
+function ena90CorteNombre(iso){
+  const t=Date.parse(iso);if(!Number.isFinite(t))return 'Corte';
+  const h=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Panama',hour:'2-digit',hourCycle:'h23'}).format(new Date(t)));
+  return h<10?'Corte AM':'Corte PM';
+}
+async function ena90Copiar(text){
+  try{await navigator.clipboard.writeText(text);return true}catch(e){}
+  try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok}catch(e){return false}
+}
+function phase31RenderSaldo(body,ctx,r){
+  const n=Number(r?.balance),valid=r?.balance!=null&&Number.isFinite(n),display=valid?money(n):'N/D';
+  const positive=valid&&n>=0,negative=valid&&n<0;
+  const balanceClass=positive?'positive':negative?'negative':'';
+  const status=positive?'Saldo disponible':negative?'Saldo negativo':'Saldo consultado';
+  const statusClass=positive?'good':negative?'bad':'';
+  const tags=Array.isArray(r?.tags)?r.tags.filter(t=>String(t?.tag||'').trim()):[];
+  const tagText=tags.length?tags.map(t=>String(t.tag||'')).join(' · '):(ctx.tag||'Sin TAG registrado');
+  const at=r?.consultado_at||r?.ultima_consulta||'';
+  const age=Number(r?.edad_segundos||0),mins=Math.floor(age/60),secs=Math.max(0,Math.floor(age%60));
+  const stale=age>=120;
+  const freshness=stale
+    ? `⚠ Última lectura hace ${mins} min. Pulsa «Consultar en ENA» para ver el saldo real.`
+    : (r?.cached?`Última consulta hace ${mins?mins+' min':secs+' s'}`:'Actualizado ahora');
+  const fuente=String(r?.fuente||'');
+  const when=at?`<span class="ena90-when">${esc(ena90FuenteTxt(fuente))} · ${esc(ena90FechaHora(at))}</span>`:'';
+  // Fuentes del saldo (solo las que existen), con la mostrada marcada.
+  const fs=r?.fuentes||{},chips=[];
+  const add=(key,label,x)=>{if(x&&Number.isFinite(Number(x.saldo))&&x.en)chips.push({key,label,hora:ena90Hora(x.en),saldo:Number(x.saldo),on:fuente===key})};
+  add('ENA_OFICIAL','ENA oficial',fs.ena);
+  add('CORTE_PROVEEDOR',ena90CorteNombre(fs.corte?.en),fs.corte);
+  add('CONSULTA','Consulta',fs.consulta);
+  const chipsHtml=chips.length?`<div class="ena90-src" role="list" aria-label="Fuentes del saldo">${chips.map(c=>`<div role="listitem" class="${c.saldo<0?'neg':'pos'}${c.on?' on':''}"><small>${esc(c.label)}</small><b>${esc(c.hora)}</b><em>${esc(c.saldo.toFixed(2))}</em>${c.on?'<i>Mostrado</i>':''}</div>`).join('')}</div>`:'';
+  // Copiar WhatsApp solo si el saldo es negativo y la lectura es de hoy (hora de Panamá).
+  const hoy=!!at&&ena90Dia(at)===ena90Dia(new Date().toISOString());
+  const puede=negative&&hoy;
+  const motivo=!valid?'Sin saldo para copiar':positive?'La unidad ya está al día: no hay nada que avisar al operador':!hoy?'La lectura no es de hoy: consulta en ENA antes de avisar':'Copiar el mensaje para el operador';
+  const galera=ctx.galera?`<div><span>Galera</span><b>${esc(ctx.galera)}</b></div>`:'';
+  body.innerHTML=`<div class="ena10-balance ${balanceClass}"><span>Saldo actual</span><strong>${esc(display)}</strong>${when}</div><div class="ena10-status ${statusClass}">${esc(status)}</div>${chipsHtml}<div class="ena10-meta"><div><span>Unidad</span><b>${esc(ctx.unidad||'—')}</b></div><div><span>Placa</span><b>${esc(ctx.placa||'—')}</b></div><div><span>Panapass</span><b>${esc(ctx.panapass||'—')}</b></div>${galera}<div style="grid-column:1/-1"><span>TAG</span><b class="ena33-tag">${esc(tagText)}</b></div></div><div class="${stale?'ena33-stale':'ena33-fresh'}">${esc(freshness)}</div><div class="ena90-actions"><button type="button" class="ena90-ena" data-ena90-ena title="Abre la página de ENA con el número copiado; tú pulsas Consultar">Consultar en ENA</button><button type="button" class="ena90-wa" data-ena90-wa ${puede?'':'disabled'} title="${esc(motivo)}">Copiar WhatsApp</button></div><div class="ena90-info" data-ena90-info hidden></div>`;
+  const info=body.querySelector('[data-ena90-info]');
+  const bEna=body.querySelector('[data-ena90-ena]'),bWa=body.querySelector('[data-ena90-wa]');
+  if(bEna)bEna.onclick=async()=>{
+    const num=String(ctx.panapass||'').replace(/\D/g,'');
+    if(num.length<5||num.length>12)return;
+    const ok=await ena90Copiar(num);
+    window.open('https://ena.com.pa/pag/revisa-tu-saldo#rym='+num,'rym-ena-saldo');
+    if(info){info.hidden=false;info.textContent=ok?`Se copió el número ${num}${ctx.unidad?' (unidad '+ctx.unidad+')':''}. En ENA, pega el número (Ctrl+V) y pulsa «Consultar». Con la extensión RYM ENA Bridge el número ya aparece escrito.`:`En ENA escribe el número ${num}${ctx.unidad?' (unidad '+ctx.unidad+')':''} y pulsa «Consultar».`}
+  };
+  if(bWa)bWa.onclick=async()=>{
+    if(!puede)return;
+    const origen=ena90FuenteTxt(fuente).replace('Última lectura ','');
+    const msg=[`Unidad: *${ctx.unidad||'—'}*`,`Placa: *${ctx.placa||'—'}*`,`Panapass: *${ctx.panapass||'—'}*`,`💰 *SALDO: ${money(n)}*  (${origen} ${ena90FechaHora(at)})`,'','*Por favor pagar.*'].join('\n');
+    const ok=await ena90Copiar(msg);
+    bWa.textContent=ok?'Mensaje copiado ✓':'No se pudo copiar';
+    setTimeout(()=>{bWa.textContent='Copiar WhatsApp'},2200);
+  };
+}
+</script>
+
 <style id="phase35-final-qa-polish">
 /* V35 QA FINAL: alineación visual y toolbar de Negativos/Pagos. No cambia lógica de datos. */
 .phase3-filterbar.phase35-ready{
