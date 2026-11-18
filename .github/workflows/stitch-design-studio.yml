@@ -1,0 +1,54 @@
+name: Stitch design studio
+
+on:
+  workflow_dispatch:
+    inputs:
+      design_prompts:
+        description: 'Una propuesta por pantalla; separa varias con una línea que contenga ---'
+        required: true
+        type: string
+        default: |-
+          Diseña el dashboard web de Panapass para Portal RYM como un centro de operaciones premium, moderno y muy claro. Usa español, una jerarquía visual calmada, navegación lateral compacta, encabezado con rango de fechas y tarjetas de métricas accionables. Prioriza lectura rápida, accesibilidad WCAG AA, estados de carga/vacío/error y composición adaptable a tablet. Propón una idea visual innovadora pero práctica: resumen de actividad con tendencias, alertas explicables y siguiente acción sugerida, sin inventar reglas ni datos reales. Usa solo datos de demostración claramente ficticios, sin nombres ni matrículas reales. Mantén el diseño listo para implementarse en Vue con componentes pequeños y tokens reutilizables.
+          ---
+          Diseña la vista completa de Revisados de Portal RYM, integrada en el mismo sistema visual del dashboard Panapass. Debe ser una mesa de trabajo rápida para revisar registros: título y contexto, búsqueda, filtros compactos por periodo/estado, tabla legible con acciones claras, estados vacíos y una vista de detalle lateral. Diferencia con claridad coincidencias, pendientes y revisiones manuales; cualquier señal inteligente debe explicar por qué requiere atención y evitar decisiones automáticas opacas. Diseño moderno, sobrio y eficiente, responsive para tablet, accesible WCAG AA, en español y con datos demostrativos ficticios. No agregues reglas de negocio ni información real.
+permissions:
+  contents: read
+
+concurrency:
+  group: stitch-design-studio
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tools/stitch/package-lock.json
+      - name: Verify Stitch configuration
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+        run: |
+          test -n "$STITCH_API_KEY" || { echo '::error::Add STITCH_API_KEY under repository Actions secrets.'; exit 1; }
+          test -n "$STITCH_PROJECT_ID" || { echo '::error::Add STITCH_PROJECT_ID under repository Actions variables.'; exit 1; }
+      - name: Install pinned Stitch SDK
+        working-directory: tools/stitch
+        run: npm ci --ignore-scripts
+      - name: Generate screens in Stitch
+        working-directory: tools/stitch
+        env:
+          STITCH_API_KEY: ${{ secrets.STITCH_API_KEY }}
+          STITCH_PROJECT_ID: ${{ vars.STITCH_PROJECT_ID }}
+          STITCH_DESIGN_PROMPTS: ${{ inputs.design_prompts }}
+        run: node generate.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portal-rym-stitch-designs-${{ github.run_number }}
+          path: tools/stitch/.stitch/generated/
+          if-no-files-found: error
+          retention-days: 7
